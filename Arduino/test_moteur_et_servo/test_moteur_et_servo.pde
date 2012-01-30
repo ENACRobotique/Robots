@@ -1,36 +1,37 @@
-#include <Servo.h> 
-
-Servo servoDir;  // create servo object to control a servo 
+#include <Servo.h>
 
 // input
-int potPinDir = A0; // analog
-int butPinMot = 2; // gpio
+const int butPinMot = 2; // gpio
+const int potPinDir = A0; // analog
 
 // output
-int motorPinPwm = 3;  // pwm
-int motorPinDir = 4;  // gpio
-int servoPinDir = 5;  // servo(pwm)
+Servo servoDir;  // create servo object to control a servo
+const int servoPinDir = 5;  // servo(pwm)     // Timer1A
+const int motorPinDir = 4;  // gpio
+const int motorPinPwm = 6;  // pwm            // Timer1B
+
+// Rq. Timer0 is used for millis/micros
 
 void setup()  {
   // debug
-  Serial.begin(9600); 
+  Serial.begin(9600);
 
   // input
   pinMode(butPinMot, INPUT);
 
   // output
   pinMode(motorPinDir, OUTPUT);
-  servoDir.attach(servoPinDir);  // attaches the servo on pin 9 to the servo object
+  servoDir.attach(servoPinDir);    // attaches the servo on pin servoPinDir to the servo object
 }
 
 // input
-//  val = analogRead(analogPin);            // reads the value of the potentiometer (value between 0 and 1023) 
-//  digitalRead(gpioPin)==LOW | HIGH
+//    analogRead(analogPin)==0 -> 1023
+//    digitalRead(gpioPin)==LOW | HIGH
 
 // output
-//  digitalWrite(gpioPin, LOW | HIGH);
-//  servoDir.write(0 -> 180);
-//  analogWrite(pwmPin, 0 -> 255);
+//    digitalWrite(gpioPin, LOW | HIGH);
+//    servoObj.write(0 -> 180);
+//    analogWrite(pwmPin, 0 -> 255);
 
 void loop()  {
   // direction
@@ -42,7 +43,7 @@ void loop()  {
   Serial.print(dir);
   Serial.print("\r\n");
 
-  servoDir.write(dir);                  // sets the servo position according to the scaled value 
+  servoDir.write(dir);                  // sets the servo position according to the scaled value
 
   // vitesse
   digitalWrite(motorPinDir, HIGH);  // go forward

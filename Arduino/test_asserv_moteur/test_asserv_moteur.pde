@@ -40,7 +40,7 @@ void setup() {
 
 // output
 //    digitalWrite(gpioPin, LOW | HIGH);
-//    servoDir.write(0 -> 180);
+//    servoObj.write(0 -> 180);
 //    analogWrite(pwmPin, 0 -> 255);
 
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
