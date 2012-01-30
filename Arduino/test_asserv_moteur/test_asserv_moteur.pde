@@ -1,16 +1,22 @@
-#include <WProgram.h>
-#include <Servo.h>
+#include <Servo.h>  // shipped with arduino-core
+#include <MsTimer2.h>   // get this library at http://arduino.cc/playground/Main/MsTimer2
 
-Servo servoDir;    // create servo object to control a servo
+#include "sharp_2d120x.h"
 
 // input
-int butPinMot = 2; // gpio
-int optPinDis = A1;    // analog
+const int butPinMot = 2; // gpio
+const int optPinDis = A1;    // analog
 
 // output
-int motorPinPwm = 3;    // pwm
-int motorPinDir = 4;    // gpio
-int servoPinDir = 5;    // servo(pwm)
+Servo servoDir;    // create servo object to control a servo
+const int servoPinDir = 5;    // servo(pwm)     Timer1A
+const int motorPinDir = 4;    // gpio
+const int motorPinPwm = 6;    // pwm            Timer1B
+
+// periodic task
+void periodic();    // Timer2
+
+// Rq. Timer0 is used for millis/micros
 
 void setup() {
     // debug
@@ -21,7 +27,11 @@ void setup() {
 
     // output
     pinMode(motorPinDir, OUTPUT);
-    servoDir.attach(servoPinDir);    // attaches the servo on pin 9 to the servo object
+    servoDir.attach(servoPinDir);    // attaches the servo on pin servoPinDir to the servo object
+
+    // periodic task
+    MsTimer2::set(30, periodic);    // 30ms periodic task
+    MsTimer2::start();
 }
 
 // input
@@ -35,79 +45,84 @@ void setup() {
 
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 
-uint16_t _raw2dist[] = {
-#if 0
-//    <<7
-    21367, 14718, 11208, 9038, 7564, 6497, 5689, 5056,
-    4547, 4128, 3778, 3481, 3225, 3003, 2809, 2636,
-    2483, 2346, 2222, 2110, 2008, 1915, 1830, 1751,
-    1678, 1611, 1548, 1490, 1435, 1384, 1336, 1292,
-    1249, 1209, 1172, 1136, 1102, 1070, 1039, 1010,
-    983, 956, 931, 907, 884, 862, 841, 821,
-    801, 782, 765, 747, 731, 714, 699, 684,
-    670, 656, 642, 629, 616, 604, 592, 581,
-    570, 559, 548, 538, 528, 519, 509, 500,
-    491, 483, 474, 466, 458, 450, 443, 435,
-    428, 421, 414, 408, 401, 395, 388
-#else
-//    <<4
-    2671, 1840, 1401, 1130, 945, 812, 711, 632,
-    568, 516, 472, 435, 403, 375, 351, 330,
-    310, 293, 278, 264, 251, 239, 229, 219,
-    210, 201, 194, 186, 179, 173, 167, 161,
-    156, 151, 146, 142, 138, 134, 130, 126,
-    123, 120, 116, 113, 111, 108, 105, 103,
-    100, 98, 96, 93, 91, 89, 87, 85,
-    84, 82, 80, 79, 77, 76, 74, 73,
-    71, 70, 69, 67, 66, 65, 64, 63,
-    61, 60, 59, 58, 57, 56, 55, 54,
-    54, 53, 52, 51, 50, 49, 49
-#endif
-};
+int update=0;
 
+unsigned int dist;
+unsigned int last_dist=0;
+int I=0;
+int tmp, D, eps;
 
-inline int raw2dist(int m) {    // returns centimeters<<4
-    // m is from 0 to 1023
+#define DTAB_BITS 2
+unsigned int dtab_i=0, dtab_sum=0;
+unsigned int dtab[1<<DTAB_BITS]={0};
 
-    // yes, it should be "7-(m&7)" instead of "8-(m&7)" but then, it would be "/7" instead of ">>3" and it sucks
-    return ( _raw2dist[m>>3]*(8-(m&7)) + _raw2dist[(m>>3)+1]*(m&7) )>>3;
-}
+void periodic() {
+// get distance from Sharp sensor
+    // this is just a mean to avoid the noises/spikes on the sensor data (FIXME: use a kalman filter?)
+    dtab_sum-=dtab[dtab_i];
+    dtab[dtab_i]=analogRead(optPinDis);
+    dtab_sum+=dtab[dtab_i];
+    dtab_i=(dtab_i+1)&((1<<DTAB_BITS)-1);
 
-void loop() {
-    // distance
-    int dist=analogRead(optPinDis);
-    static int I=0;
-    long tmp;
+    dist=dtab_sum>>DTAB_BITS;   // get mean of all the terms of the array
 
-Serial.print("dist = ");
-Serial.print(dist);
-Serial.print("\t, ");
-    dist=raw2dist(dist);
-Serial.print((float)dist/16.0);
-Serial.print("\r\n");
+    dist=raw2dist(dist);    // get distance in centimeters<<4
 
-    tmp = dist-(20<<4);  // epsilon
-    I = CLAMP(-(64<<4), I+tmp, 64<<4);
+// compute epsilon
+    tmp = dist-(20<<4); // the set point is 20 centimeters
+    eps=tmp;
 
-Serial.print("I = ");
-Serial.print((float)I/16.0);
-Serial.print("\r\n");
+// compute integral term by successive sums
+    I = CLAMP(-(64<<4), I+tmp, 64<<4);  // clamp the integral term to limit overrun (TODO: find good limits)
 
-    tmp = -4*(tmp + 0*(I>>5));   // Kp*(epsilon + Ki*I) (>>5 is dt)
+// compute derivative term
+    D = (dist - last_dist)<<5;  // <<5 is ~1/dt (dt is ~30ms)
+    last_dist = dist;
 
-Serial.print("s = ");
-Serial.print((tmp>>4)+47);
-Serial.print("\r\n");
+// Ziegler-Nichols: Ku~=18, Tu~=1s
+
+//    tmp = -11*tmp + -((22*I)>>5) + -2*D;  // PID: Kp*epsilon + Ki*I + Kd*D (>>5 is ~dt)
+//    tmp = -8*tmp + -((10*I)>>5);          // PI:  Kp*epsilon + Ki*I (>>5 is ~dt)
+    tmp = -9*tmp;                           // P:   Kp*epsilon
 
     servoDir.write(CLAMP(0, (tmp>>4)+47, 47*2));    // sets the servo position (47 is ~neutral)
 
-    // vitesse
+// set speed
     digitalWrite(motorPinDir, HIGH);    // direction: forward
     if(digitalRead(butPinMot)==HIGH)
-        analogWrite(motorPinPwm, 100);    // go
+        analogWrite(motorPinPwm, 160);    // go
     else
         analogWrite(motorPinPwm, 0);    // stop
 
-    delay(30);  // 33,3...Hz
+    update=1;   // tell main task the data has been updated
+}
+
+void loop() {
+    static int times = 0;
+
+    if(update) {
+        // to be sure we have consistent data from the same run
+        unsigned int _dist=dist;
+        int _I=I;
+        long _tmp=tmp, _D=D, _eps=eps;
+
+        if(--times<=0) {
+            Serial.print("dist\teps\tI\tD\ts\r\n");
+            times=20;
+        }
+
+        Serial.print((float)_dist/16.0); // dist
+        Serial.print("\t");
+        Serial.print((float)_eps/16.0); // eps
+        Serial.print("\t");
+        Serial.print((float)_I/16.0);    // I
+        Serial.print("\t");
+        Serial.print((float)_D/16.0);    // D
+        Serial.print("\t");
+        Serial.print((_tmp>>4)+47);      // s
+        Serial.print("\r\n");
+
+        update=0;
+    }
 }
 
