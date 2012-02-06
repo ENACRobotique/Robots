@@ -7,5 +7,6 @@ ARDUINO_PORT           = /dev/ttyACM0
 AVRDUDE_ARD_BAUDRATE   = 115200
 AVRDUDE_ARD_PROGRAMMER = arduino
 
-include /usr/share/arduino/Arduino.mk
+#include /usr/share/arduino/Arduino.mk
+include ../arduino/Arduino.mk
 
