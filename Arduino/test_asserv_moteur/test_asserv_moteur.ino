@@ -52,19 +52,32 @@ unsigned int last_dist=0;
 int I=0;
 int tmp, D, eps;
 
+#if 0
+// mean
 #define DTAB_BITS 2
 unsigned int dtab_i=0, dtab_sum=0;
 unsigned int dtab[1<<DTAB_BITS]={0};
+#else
+// low-pass filter (from http://www.edn.com/contents/images/6335310.pdf)
+#define FILTER_SHIFT 2
+unsigned int filter_reg = 0;
+#endif
 
 void periodic() {
 // get distance from Sharp sensor
     // this is just a mean to avoid the noises/spikes on the sensor data (FIXME: use a kalman filter?)
+#if 0
     dtab_sum-=dtab[dtab_i];
     dtab[dtab_i]=analogRead(optPinDis);
     dtab_sum+=dtab[dtab_i];
     dtab_i=(dtab_i+1)&((1<<DTAB_BITS)-1);
 
     dist=dtab_sum>>DTAB_BITS;   // get mean of all the terms of the array
+#else
+    filter_reg = filter_reg - (filter_reg>>FILTER_SHIFT) + analogRead(optPinDis);
+
+    dist = filter_reg>>FILTER_SHIFT;
+#endif
 
     dist=raw2dist(dist);    // get distance in centimeters<<4
 
@@ -83,7 +96,8 @@ void periodic() {
 
 //    tmp = -11*tmp + -((22*I)>>5) + -2*D;  // PID: Kp*epsilon + Ki*I + Kd*D (>>5 is ~dt)
 //    tmp = -8*tmp + -((10*I)>>5);          // PI:  Kp*epsilon + Ki*I (>>5 is ~dt)
-    tmp = -9*tmp;                           // P:   Kp*epsilon
+//    tmp = -9*tmp;                         // P:   Kp*epsilon
+    tmp = -6*tmp;                           // P:   Kp*epsilon
 
     servoDir.write(CLAMP(0, (tmp>>4)+47, 47*2));    // sets the servo position (47 is ~neutral)
 
