@@ -45,12 +45,11 @@ void setup() {
 
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 
-int update=0;
+int update=0, eps;
 
 unsigned int dist;
 unsigned int last_dist=0;
-int I=0;
-int tmp, D, eps;
+int I=0, tmp, D;
 
 // low-pass filter (from http://www.edn.com/contents/images/6335310.pdf)
 #define FILTER_SHIFT 2
@@ -95,13 +94,13 @@ void periodic() {
 }
 
 void loop() {
-    static int times = 0;
-
     if(update) {
         // to be sure we have consistent data from the same run
         unsigned int _dist=dist;
-        int _I=I;
-        long _tmp=tmp, _D=D, _eps=eps;
+        int _I=I, _tmp=tmp, _D=D, _eps=eps;
+
+#if 0   // pretty print data
+        static int times = 0;
 
         if(--times<=0) {
             Serial.print("dist\teps\tI\tD\ts\r\n");
@@ -118,6 +117,20 @@ void loop() {
         Serial.print("\t");
         Serial.print((_tmp>>4)+45);      // s
         Serial.print("\r\n");
+#else   // print data (don't miss any measurement)
+        Serial.print(millis()); // t
+        Serial.print(",");
+        Serial.print(_dist); // dist
+        Serial.print(",");
+        Serial.print(_eps); // eps
+        Serial.print(",");
+        Serial.print(_I);    // I
+        Serial.print(",");
+        Serial.print(_D);    // D
+        Serial.print(",");
+        Serial.print((_tmp>>4)+45);      // s
+        Serial.print("\r\n");
+#endif
 
         update=0;
     }
