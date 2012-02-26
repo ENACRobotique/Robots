@@ -52,32 +52,15 @@ unsigned int last_dist=0;
 int I=0;
 int tmp, D, eps;
 
-#if 0
-// mean
-#define DTAB_BITS 2
-unsigned int dtab_i=0, dtab_sum=0;
-unsigned int dtab[1<<DTAB_BITS]={0};
-#else
 // low-pass filter (from http://www.edn.com/contents/images/6335310.pdf)
 #define FILTER_SHIFT 2
 unsigned int filter_reg = 0;
-#endif
 
 void periodic() {
 // get distance from Sharp sensor
-    // this is just a mean to avoid the noises/spikes on the sensor data (FIXME: use a kalman filter?)
-#if 0
-    dtab_sum-=dtab[dtab_i];
-    dtab[dtab_i]=analogRead(optPinDis);
-    dtab_sum+=dtab[dtab_i];
-    dtab_i=(dtab_i+1)&((1<<DTAB_BITS)-1);
-
-    dist=dtab_sum>>DTAB_BITS;   // get mean of all the terms of the array
-#else
+    // get raw data and apply a low-pass filter
     filter_reg = filter_reg - (filter_reg>>FILTER_SHIFT) + analogRead(optPinDis);
-
     dist = filter_reg>>FILTER_SHIFT;
-#endif
 
     dist=raw2dist(dist);    // get distance in centimeters<<4
 
