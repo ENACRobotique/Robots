@@ -3,6 +3,11 @@
 
 #include "sharp_2d120x.h"
 
+#ifdef DEBUG
+#undef DEBUG
+#endif
+//#define DEBUG
+
 // input
 const int butPinMot = 2; // gpio
 const int optPinDis = A1;    // analog
@@ -19,8 +24,10 @@ void periodic();    // Timer2
 // Rq. Timer0 is used for millis/micros
 
 void setup() {
+#ifdef DEBUG
     // debug
     Serial.begin(9600);
+#endif
 
     // input
     pinMode(butPinMot, INPUT);
@@ -45,7 +52,9 @@ void setup() {
 
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 
+#ifdef DEBUG
 int update=0, eps;
+#endif
 
 unsigned int dist;
 unsigned int last_dist=0;
@@ -65,7 +74,9 @@ void periodic() {
 
 // compute epsilon
     tmp = dist-(20<<4); // the set point is 20 centimeters
+#ifdef DEBUG
     eps=tmp;
+#endif
 
 // compute integral term by successive sums
     I = CLAMP(-(64<<4), I+tmp, 64<<4);  // clamp the integral term to limit overrun (TODO: find good limits)
@@ -90,10 +101,13 @@ void periodic() {
     else
         analogWrite(motorPinPwm, 0);    // stop
 
+#ifdef DEBUG
     update=1;   // tell main task the data has been updated
+#endif
 }
 
 void loop() {
+#ifdef DEBUG
     if(update) {
         // to be sure we have consistent data from the same run
         unsigned int _dist=dist;
@@ -134,5 +148,6 @@ void loop() {
 
         update=0;
     }
+#endif
 }
 
