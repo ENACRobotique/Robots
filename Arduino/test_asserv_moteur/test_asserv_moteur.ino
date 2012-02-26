@@ -1,7 +1,7 @@
 #include <Servo.h>  // shipped with arduino-core
 #include <MsTimer2.h>   // get this library at http://arduino.cc/playground/Main/MsTimer2
 
-#include "sharp_2d120x.h"
+#include "sharp_2d120x.h"   // raw2dist
 
 #ifdef DEBUG
 #undef DEBUG
@@ -70,7 +70,8 @@ void periodic() {
     filter_reg = filter_reg - (filter_reg>>FILTER_SHIFT) + analogRead(optPinDis);
     dist = filter_reg>>FILTER_SHIFT;
 
-    dist=raw2dist(dist);    // get distance in centimeters<<4
+    // convert raw data to centimeters<<4 (cf sharp_2d120x.c/h)
+    dist=raw2dist(dist);
 
 // compute epsilon
     tmp = dist-(20<<4); // the set point is 20 centimeters
@@ -86,7 +87,6 @@ void periodic() {
     last_dist = dist;
 
 // Ziegler-Nichols: Ku~=18, Tu~=1s
-
 //    tmp = -11*tmp + -((22*I)>>5) + -2*D;  // PID: Kp*epsilon + Ki*I + Kd*D (>>5 is ~dt)
 //    tmp = -8*tmp + -((10*I)>>5);          // PI:  Kp*epsilon + Ki*I (>>5 is ~dt)
 //    tmp = -9*tmp;                         // P:   Kp*epsilon
@@ -109,7 +109,7 @@ void periodic() {
 void loop() {
 #ifdef DEBUG
     if(update) {
-        // to be sure we have consistent data from the same run
+        // copy the variables to be sure we have consistent data from the same run
         unsigned int _dist=dist;
         int _I=I, _tmp=tmp, _D=D, _eps=eps;
 
@@ -125,7 +125,7 @@ void loop() {
         Serial.print("\t");
         Serial.print((float)_eps/16.0); // eps
         Serial.print("\t");
-        Serial.print((float)_I/16.0);    // I
+        Serial.print((float)_I/512.0);    // I
         Serial.print("\t");
         Serial.print((float)_D/16.0);    // D
         Serial.print("\t");
