@@ -90,7 +90,8 @@ void periodic() {
 //    tmp = -11*tmp + -((22*I)>>5) + -2*D;  // PID: Kp*epsilon + Ki*I + Kd*D (>>5 is ~dt)
 //    tmp = -8*tmp + -((10*I)>>5);          // PI:  Kp*epsilon + Ki*I (>>5 is ~dt)
 //    tmp = -9*tmp;                         // P:   Kp*epsilon
-    tmp = -6*tmp;                           // P:   Kp*epsilon
+
+    tmp = -8*tmp;                           // P:   Kp*epsilon
 
     servoDir.write(CLAMP(0, (tmp>>4)+45, 45*2));    // sets the servo position (45 is ~neutral)
 
