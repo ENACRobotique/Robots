@@ -82,7 +82,7 @@ void periodic() {
 //    tmp = -9*tmp;                         // P:   Kp*epsilon
     tmp = -6*tmp;                           // P:   Kp*epsilon
 
-    servoDir.write(CLAMP(0, (tmp>>4)+47, 47*2));    // sets the servo position (47 is ~neutral)
+    servoDir.write(CLAMP(0, (tmp>>4)+45, 45*2));    // sets the servo position (45 is ~neutral)
 
 // set speed
     digitalWrite(motorPinDir, HIGH);    // direction: forward
@@ -116,7 +116,7 @@ void loop() {
         Serial.print("\t");
         Serial.print((float)_D/16.0);    // D
         Serial.print("\t");
-        Serial.print((_tmp>>4)+47);      // s
+        Serial.print((_tmp>>4)+45);      // s
         Serial.print("\r\n");
 
         update=0;
