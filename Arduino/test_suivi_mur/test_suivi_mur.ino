@@ -9,13 +9,12 @@
 //#define DEBUG
 
 // input
-const int butPinMot = 2; // gpio
 const int optPinDis = A1;    // analog
 
 // output
 Servo servoDir;    // create servo object to control a servo
 const int servoPinDir = 5;    // servo(pwm)     Timer1A
-const int motorPinDir = 4;    // gpio
+const int motorPinDir = 3;    // gpio
 const int motorPinPwm = 6;    // pwm            Timer1B
 
 // periodic task
@@ -30,7 +29,6 @@ void setup() {
 #endif
 
     // input
-    pinMode(butPinMot, INPUT);
 
     // output
     pinMode(motorPinDir, OUTPUT);
@@ -97,10 +95,7 @@ void periodic() {
 
 // set speed
     digitalWrite(motorPinDir, HIGH);    // direction: forward
-    if(digitalRead(butPinMot)==HIGH)
-        analogWrite(motorPinPwm, 160);    // go
-    else
-        analogWrite(motorPinPwm, 0);    // stop
+    analogWrite(motorPinPwm, 160);    // go
 
 #ifdef DEBUG
     update=1;   // tell main task the data has been updated

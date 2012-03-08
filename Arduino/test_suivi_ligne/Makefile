@@ -1,6 +1,6 @@
 ARDUINO_DIR            = /usr/share/arduino
-TARGET                 = test_moteur_et_servo
-ARDUINO_LIBS           = Servo
+TARGET                 = test_suivi_ligne
+ARDUINO_LIBS           = Servo MsTimer2
 MCU                    = atmega328p
 F_CPU                  = 16000000
 ARDUINO_PORT           = /dev/ttyACM0

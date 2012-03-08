@@ -1,5 +1,5 @@
 ARDUINO_DIR            = /usr/share/arduino
-TARGET                 = test_asserv_moteur
+TARGET                 = test_suivi_mur
 ARDUINO_LIBS           = Servo MsTimer2
 MCU                    = atmega328p
 F_CPU                  = 16000000
@@ -8,5 +8,5 @@ AVRDUDE_ARD_BAUDRATE   = 115200
 AVRDUDE_ARD_PROGRAMMER = arduino
 
 #include /usr/share/arduino/Arduino.mk
-include ../arduino/Arduino.mk
+include Arduino.mk
 
