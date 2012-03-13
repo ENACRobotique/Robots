@@ -11,13 +11,13 @@ extern "C" {
 //#define DEBUG
 
 // input
-const int ligPinLft = 1;    // gpio
-const int ligPinRgt = 2;    // gpio
+const int ligPinLft = 2;    // gpio
+const int ligPinRgt = 3;    // gpio
 
 // output
 Servo servoDir;    // create servo object to control a servo
 const int servoPinDir = 5;    // servo(pwm)     Timer1A
-const int motorPinDir = 3;    // gpio
+const int motorPinDir = 7;    // gpio
 const int motorPinPwm = 6;    // pwm            Timer1B
 
 // periodic task

@@ -14,7 +14,7 @@ const int optPinDis = A1;    // analog
 // output
 Servo servoDir;    // create servo object to control a servo
 const int servoPinDir = 5;    // servo(pwm)     Timer1A
-const int motorPinDir = 3;    // gpio
+const int motorPinDir = 7;    // gpio
 const int motorPinPwm = 6;    // pwm            Timer1B
 
 // periodic task
@@ -89,6 +89,7 @@ void periodic() {
 //    tmp = -8*tmp + -((10*I)>>5);          // PI:  Kp*epsilon + Ki*I (>>5 is ~dt)
 //    tmp = -9*tmp;                         // P:   Kp*epsilon
 
+//  - pour mur à droite, + pour mur à gauche
     tmp = -8*tmp;                           // P:   Kp*epsilon
 
     servoDir.write(CLAMP(0, (tmp>>4)+45, 45*2));    // sets the servo position (45 is ~neutral)
