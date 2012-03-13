@@ -68,17 +68,14 @@ unsigned int update=0, _pos_c, _nb_calc;
 void periodic() {
     int speed=50, angle=0;
     bool ligLft, ligRgt;
-    ePosition pos_t;
-    static ePosition pos_c, pos_p=pLOST;
+    static ePosition pos_c=pLOST;
 
 // read sensors data (HIGH => on the line, LOW => on the blue)
     ligLft = digitalRead(ligPinLft);
     ligRgt = digitalRead(ligPinRgt);
 
 // position estimation
-    pos_t=pos_c;
-    pos_c=(ePosition)pos_next[POS(pos_p)][ligLft][ligRgt];
-    pos_p=pos_t;
+    pos_c=(ePosition)pos_next[POS(pos_c)][ligLft][ligRgt];
 
     switch(POS(pos_c)) {
     case pLOST:
