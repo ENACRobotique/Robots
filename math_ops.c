@@ -2,6 +2,14 @@
 
 #include "math_ops.h"
 
+inline ERROR normVec(sVec_t *v, sNum_t *n) {
+    RET_IF_NOT_(v && n, ERR_BADPAR);
+
+    *n = sqrt(v->x*v->x + v->y*v->y);
+
+    return 0;
+}
+
 inline ERROR convPts2Vec(sPt_t *a, sPt_t *b, sVec_t *ab) {
     RET_IF_NOT_(a && b && ab, ERR_BADPAR);
 
@@ -53,7 +61,8 @@ ERROR convVecPt2Line(sVec_t *v, sPt_t *p, int norm, sLin_t *l) {
         l->b = -v->x;
     }
     else {
-        sNum_t n = sqrt(v->x*v->x + v->y*v->y);
+        sNum_t n;
+        normVec(v, &n);
 
         l->a = v->y/n;
         l->b = -v->x/n;
