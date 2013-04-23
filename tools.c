@@ -171,6 +171,10 @@ void get_links() {
                     lnk[A(i)][A(j)] = ok;
                     lnk[A(j)][B(i)] = ok;
                 }
+                else if(nb == 1) {
+                    lnk[A(i)][A(j)] = ok;
+                    lnk[A(j)][A(i)] = ok;
+                }
                 else {
                     lnk[A(i)][A(j)] = ok;
                     lnk[B(j)][B(i)] = ok;
