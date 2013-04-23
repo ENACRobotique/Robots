@@ -1,21 +1,25 @@
 #include <math.h>
+#include <stdio.h>
 #include "math_ops.h"
 
 #include "tools.h"
 
-#define A(i) ((i)<<1)
-#define B(i) (((i)<<1)+1)
+#define CHECK_LIMITS
 
 // array of physical obstacles (256B)
 sObs_t obs[N] = {
-    {{10., 10.}, 0.},  // start point (current position)
+    {{30., 30.}, 0.},  // start point (current position)
     {{90., 20.}, 20.},
     {{110., 60.}, 20.},
-//    {{120., 30.}, 10.},
-//    {{110., 40.}, 15.},
-    {{210., 10.}, 0.}, // end point (goal)
-    {{110., 83.}, 5.}   // check_arc test
+    {{120., 30.}, 10.},
+    {{110., 40.}, 15.},
+    {{210., 30.}, 0.}, // end point (goal)
+    {{127., 16.}, 40.},
+    {{127., 80.}, 50.},
+    {{110., 83.}, 5.},   // check_arc test
+    {{140., 70.}, 10.}   // check_arc test
 };
+
 // tangents between physical obstacles (17kiB)
 sTgts_t tgts[N][N] = {{{{{0}}}}};
 // halfmatrix of 2Nx2N links between logical obstacles (1kiB)
@@ -24,7 +28,6 @@ sLnk_t lnk[2*N][2*N] = {{0}};
 uint8_t get_tangents(uint8_t _o1, uint8_t _o2) {
     sVec_t o1o2, t, n;
     sNum_t st, ct;
-    uint8_t nb;
     sTgts_t *out = &tgts[_o1][_o2], *out_s = &tgts[_o2][_o1];
     sObs_t *o1 = &obs[_o1];
     sObs_t *o2 = &obs[_o2];
@@ -55,33 +58,6 @@ uint8_t get_tangents(uint8_t _o1, uint8_t _o2) {
     n.x = -t.y;
     n.y = t.x;
 
-    if(out->d < o1->r + o2->r + 4*LOW_THR || o1->r < LOW_THR || o2->r < LOW_THR) {
-        nb = 2;
-    }
-    else {
-        nb = 4;
-
-        // 2 internal tangents
-        st = (o1->r + o2->r)/out->d;
-        ct = sqrt(1 - st*st);
-
-        out->s3.p1.x = o1->c.x - o1->r*(-st*t.x + ct*n.x);
-        out->s3.p1.y = o1->c.y - o1->r*(-st*t.y + ct*n.y);
-            out_s->s4.p2 = out->s3.p1;
-
-        out->s4.p1.x = o1->c.x - o1->r*(-st*t.x - ct*n.x);
-        out->s4.p1.y = o1->c.y - o1->r*(-st*t.y - ct*n.y);
-            out_s->s3.p2 = out->s4.p1;
-
-        out->s3.p2.x = o2->c.x + o2->r*(-st*t.x + ct*n.x);
-        out->s3.p2.y = o2->c.y + o2->r*(-st*t.y + ct*n.y);
-            out_s->s4.p1 = out->s3.p2;
-
-        out->s4.p2.x = o2->c.x + o2->r*(-st*t.x - ct*n.x);
-        out->s4.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
-            out_s->s3.p1 = out->s4.p2;
-    }
-
     // 2 external tangents
     st = (o2->r - o1->r)/out->d;
     ct = sqrt(1 - st*st);
@@ -102,12 +78,69 @@ uint8_t get_tangents(uint8_t _o1, uint8_t _o2) {
     out->s2.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
         out_s->s1.p1 = out->s2.p2;
 
-    return nb;
+    if(out->d < o1->r + o2->r + 4*LOW_THR) {
+        return 2;
+    }
+    else if(o1->r < LOW_THR) {
+        out->s3 = out->s1;
+        out->s4 = out->s2;
+            out_s->s4 = out_s->s1;
+            out_s->s3 = out_s->s2;
+
+        return 2;
+    }
+    else if(o2->r < LOW_THR) {
+        out->s4 = out->s1;
+        out->s3 = out->s2;
+            out_s->s3 = out_s->s1;
+            out_s->s4 = out_s->s2;
+
+        return 2;
+    }
+    else {
+        // 2 internal tangents
+        st = (o1->r + o2->r)/out->d;
+        ct = sqrt(1 - st*st);
+
+        out->s3.p1.x = o1->c.x - o1->r*(-st*t.x + ct*n.x);
+        out->s3.p1.y = o1->c.y - o1->r*(-st*t.y + ct*n.y);
+            out_s->s4.p2 = out->s3.p1;
+
+        out->s4.p1.x = o1->c.x - o1->r*(-st*t.x - ct*n.x);
+        out->s4.p1.y = o1->c.y - o1->r*(-st*t.y - ct*n.y);
+            out_s->s3.p2 = out->s4.p1;
+
+        out->s3.p2.x = o2->c.x + o2->r*(-st*t.x + ct*n.x);
+        out->s3.p2.y = o2->c.y + o2->r*(-st*t.y + ct*n.y);
+            out_s->s4.p1 = out->s3.p2;
+
+        out->s4.p2.x = o2->c.x + o2->r*(-st*t.x - ct*n.x);
+        out->s4.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
+            out_s->s3.p1 = out->s4.p2;
+
+        return 4;
+    }
+
+    return 0;
+}
+
+inline sSeg_t *tgt(uint8_t o1, uint8_t o2) {
+    if(DIR(o1)) {
+        return DIR(o2) ? &tgts[O(o1)][O(o2)].s2 : &tgts[O(o1)][O(o2)].s3;
+    }
+    else {
+        return DIR(o2) ? &tgts[O(o1)][O(o2)].s4 : &tgts[O(o1)][O(o2)].s1;
+    }
 }
 
 uint8_t check_segment(uint8_t o1, uint8_t o2, sSeg_t *s) {
     int i;
     sNum_t d;
+
+#ifdef CHECK_LIMITS
+    if(OUT(s->p1.x, s->p1.y) || OUT(s->p2.x, s->p2.y))
+        return 0;
+#endif
 
     for(i = 0; i < N; i++) {
         if(i == o1 || i == o2 || obs[i].r < LOW_THR)
@@ -132,7 +165,7 @@ void get_links() {
             nb = get_tangents(i, j);
 
             printf("  %u common tangents\n", nb);
-            printf("  dist %.2f\n", tgts[i][j].d);
+            printf("  dist %.2f\n", DIST(i, j));
 
             switch(nb) {
             case 4:
@@ -187,23 +220,31 @@ void get_links() {
     }
 }
 
-uint8_t check_arc(uint8_t o1, sPt_t *p1, uint8_t o2, uint8_t o3, sPt_t *p3, uint8_t dir) {
+uint8_t check_arc(uint8_t o1, uint8_t o2, uint8_t o3) {
     int i;
     sVec_t v1, v3;
     sLin_t l1, l3;
     sNum_t sc1, sc3, cross;
+    sPt_t p2_1, p2_3;
 
-    convPts2Vec(&obs[o2].c, p1, &v1);
-    convVecPt2Line(&v1, &obs[o2].c, 0, &l1);
+    // get data from parameters
+    p2_1 = tgt(o1, o2)->p2;
+    p2_3 = tgt(o2, o3)->p1;
 
-    convPts2Vec(&obs[o2].c, p3, &v3);
-    convVecPt2Line(&v3, &obs[o2].c, 0, &l3);
+    // calcs equations of the 2 lines
+    convPts2Vec(&obs[O(o2)].c, &p2_1, &v1);
+    convVecPt2Line(&v1, &obs[O(o2)].c, 0, &l1);
+
+    convPts2Vec(&obs[O(o2)].c, &p2_3, &v3);
+    convVecPt2Line(&v3, &obs[O(o2)].c, 0, &l3);
 
     crossVecs(&v1, &v3, &cross);
 
-    if(!dir) {  // clock wise
+    // TODO check limits
+
+    if(!DIR(o2)) {  // clock wise
         for(i = 0; i < N; i++) {
-            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR)
+            if(i == O(o1) || i == O(o2) || i == O(o3) || obs[i].r < LOW_THR)
                 continue;
 
             sc1 = l1.a*obs[i].c.x + l1.b*obs[i].c.y + l1.c;
@@ -218,13 +259,13 @@ uint8_t check_arc(uint8_t o1, sPt_t *p1, uint8_t o2, uint8_t o3, sPt_t *p3, uint
                     continue;
             }
 
-            if(tgts[i][o2].d < obs[i].r + obs[o2].r + LOW_THR)
+            if(DIST(i, O(o2)) < obs[i].r + obs[O(o2)].r + LOW_THR)
                 return 0;
         }
     }
     else {  // counter clock wise
         for(i = 0; i < N; i++) {
-            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR)
+            if(i == O(o1) || i == O(o2) || i == O(o3) || obs[i].r < LOW_THR)
                 continue;
 
             sc1 = l1.a*obs[i].c.x + l1.b*obs[i].c.y + l1.c;
@@ -239,7 +280,7 @@ uint8_t check_arc(uint8_t o1, sPt_t *p1, uint8_t o2, uint8_t o3, sPt_t *p3, uint
                     continue;
             }
 
-            if(tgts[i][o2].d < obs[i].r + obs[o2].r + LOW_THR)
+            if(DIST(i, O(o2)) < obs[i].r + obs[O(o2)].r + LOW_THR)
                 return 0;
         }
     }
@@ -247,29 +288,33 @@ uint8_t check_arc(uint8_t o1, sPt_t *p1, uint8_t o2, uint8_t o3, sPt_t *p3, uint
     return 1;
 }
 
-sNum_t arc_len(sPt_t *p1, uint8_t o2, sPt_t *p3, uint8_t dir) {
+sNum_t arc_len(uint8_t o1, uint8_t o2, uint8_t o3) {
     sVec_t v1, v3;
-    sNum_t d, c, t;
+    sNum_t d, c;
+    sPt_t p2_1, p2_3;
 
-    convPts2Vec(&obs[o2].c, p1, &v1);
-    convPts2Vec(&obs[o2].c, p3, &v3);
+    p2_1 = tgt(o1, o2)->p2;
+    p2_3 = tgt(o2, o3)->p1;
+
+    convPts2Vec(&obs[O(o2)].c, &p2_1, &v1);
+    convPts2Vec(&obs[O(o2)].c, &p2_3, &v3);
 
     dotVecs(&v1, &v3, &d);
     crossVecs(&v1, &v3, &c);
 
-    t = acos(d/(obs[o2].r*obs[o2].r));
+    d = acos(d/(obs[O(o2)].r*obs[O(o2)].r));
 
-    if(!dir) {  // clock wise
+    if(!DIR(o2)) {  // clock wise
         if(c > 0) {
-            t += M_PI;
+            d += M_PI;
         }
     }
     else {  // counter clock wise
         if(c < 0) {
-            t += M_PI;
+            d += M_PI;
         }
     }
 
-    return t*obs[o2].r;
+    return d*obs[O(o2)].r;
 }
 
