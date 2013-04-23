@@ -14,6 +14,12 @@ ERROR main(int argc, char *argv[]) {
     // entry point
     printf("N=%u\n", N);    // number of elements
 
+    printf("sizeof(obs) =%uB\n", sizeof(obs));
+    printf("sizeof(tgts)=%uB\n", sizeof(tgts));
+    printf("sizeof(lnk) =%uB\n", sizeof(lnk));
+
+    printf("\n");
+
     // fill
     get_links();
 
