@@ -161,17 +161,17 @@ void fill_tgts_lnk() {
 
             switch(nb) {
             case 4:
-                ok = check_segment(i, j, &tgts[i][j].s4);
+                ok = check_segment(i, &tgts[i][j].s4, j);
 
                 lnk[A(i)][B(j)] = ok;
                 lnk[A(j)][B(i)] = ok;
             case 3:
-                ok = check_segment(i, j, &tgts[i][j].s3);
+                ok = check_segment(i, &tgts[i][j].s3, j);
 
                 lnk[B(i)][A(j)] = ok;
                 lnk[B(j)][A(i)] = ok;
             case 2:
-                ok = check_segment(i, j, &tgts[i][j].s2);
+                ok = check_segment(i, &tgts[i][j].s2, j);
 
                 if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
                     lnk[A(i)][B(j)] = ok;
@@ -186,7 +186,7 @@ void fill_tgts_lnk() {
                     lnk[A(j)][A(i)] = ok;
                 }
             case 1:
-                ok = check_segment(i, j, &tgts[i][j].s1);
+                ok = check_segment(i, &tgts[i][j].s1, j);
 
                 if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
                     lnk[A(i)][A(j)] = ok;
@@ -212,31 +212,26 @@ void fill_tgts_lnk() {
     }
 }
 
-uint8_t check_arc(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
+uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iObs_t o3) {
     iObs_t i;
     sVec_t v1, v3;
     sLin_t l1, l3;
     sNum_t sc1, sc3, cross;
-    sPt_t p2_1, p2_3;
 
-    // get data from parameters
-    p2_1 = tgt(o1, o2)->p2;
-    p2_3 = tgt(o2, o3)->p1;
+    // calc equations of the 2 lines
+    convPts2Vec(&obs[o2].c, p2_1, &v1);
+    convVecPt2Line(&v1, &obs[o2].c, 0, &l1);
 
-    // calcs equations of the 2 lines
-    convPts2Vec(&obs[O(o2)].c, &p2_1, &v1);
-    convVecPt2Line(&v1, &obs[O(o2)].c, 0, &l1);
-
-    convPts2Vec(&obs[O(o2)].c, &p2_3, &v3);
-    convVecPt2Line(&v3, &obs[O(o2)].c, 0, &l3);
+    convPts2Vec(&obs[o2].c, p2_3, &v3);
+    convVecPt2Line(&v3, &obs[o2].c, 0, &l3);
 
     crossVecs(&v1, &v3, &cross);
 
     // TODO check limits
 
-    if(!DIR(o2)) {  // clock wise
+    if(!dir) {  // clock wise
         for(i = 0; i < N; i++) {
-            if(i == O(o1) || i == O(o2) || i == O(o3) || obs[i].r < LOW_THR)
+            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR)
                 continue;
 
             sc1 = l1.a*obs[i].c.x + l1.b*obs[i].c.y + l1.c;
@@ -251,13 +246,13 @@ uint8_t check_arc(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
                     continue;
             }
 
-            if(DIST(i, O(o2)) < obs[i].r + obs[O(o2)].r + LOW_THR)
+            if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
                 return 0;
         }
     }
     else {  // counter clock wise
         for(i = 0; i < N; i++) {
-            if(i == O(o1) || i == O(o2) || i == O(o3) || obs[i].r < LOW_THR)
+            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR)
                 continue;
 
             sc1 = l1.a*obs[i].c.x + l1.b*obs[i].c.y + l1.c;
@@ -272,7 +267,7 @@ uint8_t check_arc(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
                     continue;
             }
 
-            if(DIST(i, O(o2)) < obs[i].r + obs[O(o2)].r + LOW_THR)
+            if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
                 return 0;
         }
     }
@@ -280,23 +275,22 @@ uint8_t check_arc(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
     return 1;
 }
 
-sNum_t arc_len(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
+sNum_t o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
     sVec_t v1, v3;
     sNum_t d, c;
-    sPt_t p2_1, p2_3;
 
-    p2_1 = tgt(o1, o2)->p2;
-    p2_3 = tgt(o2, o3)->p1;
+    if(obs[o2].r < LOW_THR)
+        return 0.;
 
-    convPts2Vec(&obs[O(o2)].c, &p2_1, &v1);
-    convPts2Vec(&obs[O(o2)].c, &p2_3, &v3);
+    convPts2Vec(&obs[O(o2)].c, p2_1, &v1);
+    convPts2Vec(&obs[O(o2)].c, p2_3, &v3);
 
     dotVecs(&v1, &v3, &d);
     crossVecs(&v1, &v3, &c);
 
-    d = acos(d/(obs[O(o2)].r*obs[O(o2)].r));
+    d = acos(d/(obs[o2].r*obs[o2].r));
 
-    if(!DIR(o2)) {  // clock wise
+    if(!dir) {  // clock wise
         if(c > 0) {
             d += M_PI;
         }
@@ -307,6 +301,6 @@ sNum_t arc_len(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
         }
     }
 
-    return d*obs[O(o2)].r;
+    return d*obs[o2].r;
 }
 

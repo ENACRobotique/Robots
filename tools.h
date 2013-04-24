@@ -77,20 +77,26 @@ extern sLnk_t lnk[2*N][2*N]; // halfmatrix of 2Nx2N links between logical obstac
 
 // ==== function prototypes ====
 
+void    fill_tgts_lnk   ();
+
+// functions on objects (0:N-1)
+uint8_t o_check_segment (iObs_t o1, sSeg_t *s, iObs_t o2);
+uint8_t o_check_arc     (iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iObs_t o3);
+sNum_t  o_arc_len       (sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3);
+
+// functions on directed objects (0:N-1)
 static inline sSeg_t *tgt(iABObs_t o1, iABObs_t o2) {
     if(DIR(o1))
         return DIR(o2) ? &tgts[O(o1)][O(o2)].s2 : &tgts[O(o1)][O(o2)].s3;
     else
         return DIR(o2) ? &tgts[O(o1)][O(o2)].s4 : &tgts[O(o1)][O(o2)].s1;
 }
-
-void                fill_tgts_lnk   ();
-uint8_t             check_arc       (iABObs_t o1, iABObs_t o2, iABObs_t o3);
-sNum_t              arc_len         (iABObs_t o1, iABObs_t o2, iABObs_t o3);
-
-// pseudo-private functions
-uint8_t             check_segment   (iObs_t o1, iObs_t o2, sSeg_t *s);
-// TODO make check_arc & arc_len pseudo-private functions and check_segment high level function
+static inline uint8_t check_arc(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
+    return o_check_arc(O(o1), &tgt(o1, o2)->p2, O(o2), DIR(o2), &tgt(o2, o3)->p1, O(o3));
+}
+static inline sNum_t arc_len(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
+    return o_arc_len(&tgt(o1, o2)->p2, O(o2), DIR(o2), &tgt(o2, o3)->p1);
+}
 
 #endif
 
