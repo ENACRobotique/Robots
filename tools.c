@@ -25,7 +25,7 @@ sTgts_t tgts[N][N] = {{{{{0}}}}};
 // halfmatrix of 2Nx2N links between logical obstacles (1kiB)
 sLnk_t lnk[2*N][2*N] = {{0}};
 
-uint8_t get_tangents(uint8_t _o1, uint8_t _o2) {
+static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o2
     sVec_t o1o2, t, n;
     sNum_t st, ct;
     sTgts_t *out = &tgts[_o1][_o2], *out_s = &tgts[_o2][_o1];
@@ -124,21 +124,12 @@ uint8_t get_tangents(uint8_t _o1, uint8_t _o2) {
     return 0;
 }
 
-inline sSeg_t *tgt(uint8_t o1, uint8_t o2) {
-    if(DIR(o1)) {
-        return DIR(o2) ? &tgts[O(o1)][O(o2)].s2 : &tgts[O(o1)][O(o2)].s3;
-    }
-    else {
-        return DIR(o2) ? &tgts[O(o1)][O(o2)].s4 : &tgts[O(o1)][O(o2)].s1;
-    }
-}
-
-uint8_t check_segment(uint8_t o1, uint8_t o2, sSeg_t *s) {
-    int i;
+uint8_t check_segment(iObs_t o1, iObs_t o2, sSeg_t *s) {
+    iObs_t i;
     sNum_t d;
 
 #ifdef CHECK_LIMITS
-    if(OUT(s->p1.x, s->p1.y) || OUT(s->p2.x, s->p2.y))
+    if(/*OUT(s->p1.x, s->p1.y) || */OUT(s->p2.x, s->p2.y))
         return 0;
 #endif
 
@@ -155,14 +146,15 @@ uint8_t check_segment(uint8_t o1, uint8_t o2, sSeg_t *s) {
     return 1;
 }
 
-void get_links() {
-    uint8_t i, j, ok, nb;
+void fill_tgts_lnk() {
+    iObs_t i, j;
+    uint8_t ok, nb;
 
     for(i=0; i<N; i++) {
         for(j=i+1; j<N; j++) {
             printf("step: obstacles %u and %u\n", i, j);
 
-            nb = get_tangents(i, j);
+            nb = fill_tgts(i, j);
 
             printf("  %u common tangents\n", nb);
             printf("  dist %.2f\n", DIST(i, j));
@@ -204,7 +196,7 @@ void get_links() {
                     lnk[A(i)][A(j)] = ok;
                     lnk[A(j)][B(i)] = ok;
                 }
-                else if(nb == 1) {
+                else if(nb == 1) {  // point/point case
                     lnk[A(i)][A(j)] = ok;
                     lnk[A(j)][A(i)] = ok;
                 }
@@ -220,8 +212,8 @@ void get_links() {
     }
 }
 
-uint8_t check_arc(uint8_t o1, uint8_t o2, uint8_t o3) {
-    int i;
+uint8_t check_arc(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
+    iObs_t i;
     sVec_t v1, v3;
     sLin_t l1, l3;
     sNum_t sc1, sc3, cross;
@@ -288,7 +280,7 @@ uint8_t check_arc(uint8_t o1, uint8_t o2, uint8_t o3) {
     return 1;
 }
 
-sNum_t arc_len(uint8_t o1, uint8_t o2, uint8_t o3) {
+sNum_t arc_len(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
     sVec_t v1, v3;
     sNum_t d, c;
     sPt_t p2_1, p2_3;

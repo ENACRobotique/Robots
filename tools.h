@@ -16,16 +16,8 @@
  *      b:counter-clockwise
  */
 
-#define LOW_THR (0.01)
+#define LOW_THR ((sNum_t)0.01)
 
-// between 0:2N-1
-#define A(i) ((i)<<1)
-#define B(i) (((i)<<1)+1)
-// direction of a number in 0:2N-1
-#define DIR(i) ((i)&1)
-
-// between 0:N-1
-#define O(i) ((i)>>1)
 
 #define R_SECU (20.)
 
@@ -43,7 +35,7 @@ typedef struct {
     sPt_t c;    // center of obstacle
     sNum_t r;   // radius
 
-    uint8_t moved;  // flag
+    uint8_t moved;  // flag, TODO
 } sObs_t;   // sizeof(sObs_t)=16
 
 // a set of common tangents between two obstacles (from o1 to o2)
@@ -59,6 +51,20 @@ typedef struct {
 // a tangent possibility between two obstacles (4 per pair of physical pobstacles)
 typedef uint8_t sLnk_t; // sizeof(sLnk_t)=1
 
+// an index of obstacle between 0:N-1
+typedef int8_t iObs_t;
+// an index of obstacle between 0:2N-1
+typedef int8_t iABObs_t;
+
+// between 0:2N-1
+#define A(i) ((iABObs_t)( ((iObs_t)(i))<<1 ))
+#define B(i) ((iABObs_t)( (((iObs_t)(i))<<1)+1 ))
+// direction of a number in 0:2N-1
+#define DIR(i) (((iABObs_t)(i))&1)
+
+// between 0:N-1
+#define O(i) ((iObs_t)( ((iABObs_t)(i))>>1 ))
+
 // ==== global matrices ====
 
 // number of physical obstacles (16)
@@ -67,16 +73,24 @@ extern sObs_t obs[N]; // array of physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // tangents between physical obstacles (17kiB)
 extern sLnk_t lnk[2*N][2*N]; // halfmatrix of 2Nx2N links between logical obstacles (1kiB)
 // NxN distances between obstacles
-#define DIST(i, j) (tgts[i][j].d)
+#define DIST(i, j) (tgts[(iObs_t)(i)][(iObs_t)(j)].d)
 
 // ==== function prototypes ====
 
-uint8_t get_tangents(uint8_t _o1, uint8_t _o2);
-inline sSeg_t *tgt(uint8_t o1, uint8_t o2);
-uint8_t check_segment(uint8_t o1, uint8_t o2, sSeg_t *s);
-void get_links();
-uint8_t check_arc(uint8_t o1, uint8_t o2, uint8_t o3);
-sNum_t arc_len(uint8_t o1, uint8_t o2, uint8_t o3);
+static inline sSeg_t *tgt(iABObs_t o1, iABObs_t o2) {
+    if(DIR(o1))
+        return DIR(o2) ? &tgts[O(o1)][O(o2)].s2 : &tgts[O(o1)][O(o2)].s3;
+    else
+        return DIR(o2) ? &tgts[O(o1)][O(o2)].s4 : &tgts[O(o1)][O(o2)].s1;
+}
+
+void                fill_tgts_lnk   ();
+uint8_t             check_arc       (iABObs_t o1, iABObs_t o2, iABObs_t o3);
+sNum_t              arc_len         (iABObs_t o1, iABObs_t o2, iABObs_t o3);
+
+// pseudo-private functions
+uint8_t             check_segment   (iObs_t o1, iObs_t o2, sSeg_t *s);
+// TODO make check_arc & arc_len pseudo-private functions and check_segment high level function
 
 #endif
 

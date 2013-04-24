@@ -1,5 +1,5 @@
 CC   = gcc
-SRCS = main.c tools.c math_ops.c
+SRCS = main.c tools.c math_ops.c a_star.c
 OBJ  = $(SRCS:.c=.o)
 BIN  = tangents_test
 CFLAGS = -Wall -Werror -g
