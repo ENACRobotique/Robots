@@ -18,13 +18,13 @@
 
 #define LOW_THR ((sNum_t)0.01)
 
+#define R_SECU (5.)
+#define R_ROBOT (20.)
 
-#define R_SECU (20.)
-
-#define X_MIN (R_SECU + 5.)
-#define X_MAX (300. - (R_SECU + 5.))
-#define Y_MIN (R_SECU + 5.) 
-#define Y_MAX (200. - (R_SECU + 5.)) 
+#define X_MIN (R_ROBOT)
+#define X_MAX (300. - R_ROBOT)
+#define Y_MIN (R_ROBOT) 
+#define Y_MAX (200. - R_ROBOT) 
 
 #define OUT(x, y) ((x) > X_MAX || (x) < X_MIN || (y) > Y_MAX || (y) < Y_MIN)
 
@@ -68,7 +68,7 @@ typedef int8_t iABObs_t;
 // ==== global matrices ====
 
 // number of physical obstacles (16)
-#define N (5)
+#define N (15)
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
 extern sLnk_t lnk[2*N][2*N]; // 2Nx2N links between logical obstacles (1kiB)

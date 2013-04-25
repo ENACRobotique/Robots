@@ -28,11 +28,11 @@ ERROR main(int argc, char *argv[]) {
     // show
     printf("possible links matrix:\n  ");
     for(i=0; i<2*N; i++) {
-        printf(" %u%c", (i>>1), obs[i>>1].r?(i&1?'b':'a'):' ');
+        printf(" %u%c", (i>>1)%10, obs[i>>1].r?(i&1?'b':'a'):' ');
     }
     printf("\n");
     for(i=0; i<2*N; i++) {
-        printf("%u%c", (i>>1), obs[i>>1].r?(i&1?'b':'a'):' ');
+        printf("%u%c", (i>>1)%10, obs[i>>1].r?(i&1?'b':'a'):' ');
         for(j=0; j<2*N; j++) {
             printf("%c%c ", j?',':' ', lnk[i][j]?'1':' ');
         }
@@ -50,7 +50,7 @@ ERROR main(int argc, char *argv[]) {
         }
     }
 
-    // builds trajectory for robot
+    // builds A* trajectory for robot
     printf("trajectory data:\n");
     if(path) {
         p = path;
@@ -64,7 +64,7 @@ ERROR main(int argc, char *argv[]) {
         }
     }
 
-    // builds arbitrary trajectory
+    // builds arbitrary trajectory for robot
     printf("arbitrary trajectory data:\n");
     iABObs_t p2[] = {A(0), B(1), A(2), B(3), A(4), NOELT};
     p = p2;
