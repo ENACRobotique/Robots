@@ -1,7 +1,7 @@
 #ifndef _PARAMS_H
 #define _PARAMS_H
 
-#define SHIFT (14)
+#define SHIFT (8)
 #define SHIFT_PID (8)
 #define dSHIFT ((double)(1<<SHIFT))
 #define iROUND(d) ((int)( (d)+0.5 )) // the +0.5 is here to get a round instead of a floor when casting to int
@@ -19,9 +19,6 @@
 
 #define WDIAM (9.95)  // wheel diameter (cm)
 #define RDIAM (25.9)  // robot diameter (inter-wheels distance) (cm)
-#define INIT_X (10.) // initial position, X (cm)
-#define INIT_Y (170.) // initial position, Y (cm)
-#define INIT_THETA (0.*PI/180.) // (rad)
 
 #define SpP (0.02)  // seconds per sampling period
 #define IpR (10125.) // increments per revolution
@@ -37,7 +34,7 @@
 #define iDpS2IpP(o) iROUND(DpS2IpP(o))  // (IpP)
 #define isDpS2IpP(o) isROUND(DpS2IpP(o))  // (IpP<<SHIFT)
 
-// millimeters to increments
+// centimeters to increments
 #define D2I(d) ((d)*IpR/DpR)
 #define iD2I(d) iROUND(D2I(d))  // (I)
 #define isD2I(d) isROUND(D2I(d)) // (I<<SHIFT)
