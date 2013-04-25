@@ -2,6 +2,8 @@
 
 #include "a_star.h"
 
+//#define AS_DEBUG
+
 struct {
     iABObs_t next;   // in openset
     iABObs_t prev;   // in path
@@ -35,10 +37,11 @@ iABObs_t *a_star(iABObs_t start, iABObs_t goal) {
     _aselts[os_start].openset = 1;
 
     while(os_start != NOELT) {
-
         // get the element with the lowest f_score
         current = os_start;
-
+#ifdef AS_DEBUG
+printf("current %u%c\n", O(current), DIR(current)?'b':'a');
+#endif
         if(current == goal) {
             // reconstruct path
             _path[2*N] = NOELT;
@@ -61,12 +64,22 @@ iABObs_t *a_star(iABObs_t start, iABObs_t goal) {
             // keep only valid neighbors
             if(!lnk[current][neighbor])
                 continue;
+#ifdef AS_DEBUG
+printf("  neighbor %u%c\n", O(neighbor), DIR(neighbor)?'b':'a');
+#endif
 
             // compute g_score of neighbor
             if(_aselts[current].prev != NOELT) {
-                if(!check_arc(_aselts[current].prev, current, neighbor))
+                if(!check_arc(_aselts[current].prev, current, neighbor)) {
+#ifdef AS_DEBUG
+printf("    bad arc\n");
+#endif
                     continue;
+                }
 
+#ifdef AS_DEBUG
+printf("    arc_len(%u%c, %u%c, %u%c)\n", O(_aselts[current].prev),DIR(_aselts[current].prev)?'b':'a', O(current), DIR(current)?'b':'a', O(neighbor), DIR(neighbor)?'b':'a');
+#endif
                 tmp_g_score = arc_len(_aselts[current].prev, current, neighbor);
             }
             else {  // no previous element (starting point case)
@@ -74,10 +87,19 @@ iABObs_t *a_star(iABObs_t start, iABObs_t goal) {
             }
             seg = tgt(current, neighbor);
             distPt2Pt(&seg->p1, &seg->p2, &d);
+#ifdef AS_DEBUG
+printf("    tmp_g_score = %.2f + %.2f + %.2f", _aselts[current].g_score, tmp_g_score, d);
+#endif
             tmp_g_score += _aselts[current].g_score + d;
+#ifdef AS_DEBUG
+printf(" = %.2f\n", tmp_g_score);
+#endif
 
             // if already evaluated and worse cost, continue
             if(_aselts[neighbor].closedset && tmp_g_score >= _aselts[neighbor].g_score) {
+#ifdef AS_DEBUG
+printf("    worse than before\n");
+#endif
                 continue;
             }
 
@@ -96,8 +118,19 @@ iABObs_t *a_star(iABObs_t start, iABObs_t goal) {
                         os_start = neighbor;
 
                     _aselts[neighbor].openset = 1;
+#ifdef AS_DEBUG
+printf("    adding to openset\n");
+#endif
                 }
+#ifdef AS_DEBUG
+else
+printf("    updating in openset\n");
+#endif
             }
+#ifdef AS_DEBUG
+else
+printf("    nothing...\n");
+#endif
         }
     }
 

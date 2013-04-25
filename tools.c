@@ -7,18 +7,28 @@
 #define CHECK_LIMITS
 
 // array of physical obstacles (256B)
+#if 0
 sObs_t obs[N] = {
     {{30., 30.}, 0.},  // start point (current position)
     {{90., 20.}, 20.},
     {{110., 60.}, 20.},
     {{120., 30.}, 10.},
     {{110., 40.}, 15.},
-    {{210., 30.}, 0.}, // end point (goal)
     {{127., 16.}, 40.},
     {{127., 80.}, 50.},
-    {{110., 83.}, 5.},   // check_arc test
-    {{140., 70.}, 10.}   // check_arc test
+    {{110., 83.}, 5.},
+    {{140., 70.}, 10.},
+    {{210., 30.}, 0.} // end point (goal)
 };
+#else
+sObs_t obs[] = {
+    {{30., 100.}, 0.},
+    {{100., 90.}, 30.},
+    {{240., 140.}, 20.},
+    {{180., 60.}, 30.},
+    {{250., 30.}, 0.}
+};
+#endif
 
 // tangents between physical obstacles (17kiB)
 sTgts_t tgts[N][N] = {{{{{0}}}}};
@@ -104,19 +114,19 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
 
         out->s3.p1.x = o1->c.x - o1->r*(-st*t.x + ct*n.x);
         out->s3.p1.y = o1->c.y - o1->r*(-st*t.y + ct*n.y);
-            out_s->s4.p2 = out->s3.p1;
+            out_s->s3.p2 = out->s3.p1;
 
         out->s4.p1.x = o1->c.x - o1->r*(-st*t.x - ct*n.x);
         out->s4.p1.y = o1->c.y - o1->r*(-st*t.y - ct*n.y);
-            out_s->s3.p2 = out->s4.p1;
+            out_s->s4.p2 = out->s4.p1;
 
         out->s3.p2.x = o2->c.x + o2->r*(-st*t.x + ct*n.x);
         out->s3.p2.y = o2->c.y + o2->r*(-st*t.y + ct*n.y);
-            out_s->s4.p1 = out->s3.p2;
+            out_s->s3.p1 = out->s3.p2;
 
         out->s4.p2.x = o2->c.x + o2->r*(-st*t.x - ct*n.x);
         out->s4.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
-            out_s->s3.p1 = out->s4.p2;
+            out_s->s4.p1 = out->s4.p2;
 
         return 4;
     }
@@ -124,12 +134,12 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
     return 0;
 }
 
-uint8_t check_segment(iObs_t o1, iObs_t o2, sSeg_t *s) {
+uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
     iObs_t i;
     sNum_t d;
 
 #ifdef CHECK_LIMITS
-    if(/*OUT(s->p1.x, s->p1.y) || */OUT(s->p2.x, s->p2.y))
+    if(OUT(s->p1.x, s->p1.y) || OUT(s->p2.x, s->p2.y))
         return 0;
 #endif
 
@@ -146,19 +156,23 @@ uint8_t check_segment(iObs_t o1, iObs_t o2, sSeg_t *s) {
     return 1;
 }
 
+//#define FILL_DEBUG
 void fill_tgts_lnk() {
     iObs_t i, j;
     uint8_t ok, nb;
 
     for(i=0; i<N; i++) {
         for(j=i+1; j<N; j++) {
-            printf("step: obstacles %u and %u\n", i, j);
+#ifdef FILL_DEBUG
+printf("step: obstacles %u and %u\n", i, j);
+#endif
 
             nb = fill_tgts(i, j);
 
-            printf("  %u common tangents\n", nb);
-            printf("  dist %.2f\n", DIST(i, j));
-
+#ifdef FILL_DEBUG
+printf("  %u common tangents\n", nb);
+printf("  dist %.2f\n", DIST(i, j));
+#endif
             switch(nb) {
             case 4:
                 ok = check_segment(i, &tgts[i][j].s4, j);
@@ -282,8 +296,8 @@ sNum_t o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
     if(obs[o2].r < LOW_THR)
         return 0.;
 
-    convPts2Vec(&obs[O(o2)].c, p2_1, &v1);
-    convPts2Vec(&obs[O(o2)].c, p2_3, &v3);
+    convPts2Vec(&obs[o2].c, p2_1, &v1);
+    convPts2Vec(&obs[o2].c, p2_3, &v3);
 
     dotVecs(&v1, &v3, &d);
     crossVecs(&v1, &v3, &c);
