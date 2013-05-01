@@ -9,11 +9,24 @@
 #define MIN(a, b) ((a)>(b)?(b):(a))
 #define MAX(a, b) ((a)>(b)?(a):(b))
 
-#define GAIN_ADAPT
 //#define FIXED_SEED 1
 //#define FIXED_INPUT_PROBLEM
-#define WARN_JUMP
+#define Z_CRIT 18
+
 #define NELDERMEAD
+#ifdef NELDERMEAD
+#   define NM_DEBUG
+#endif
+
+//#define GRADIENT
+#ifdef GRADIENT
+#   define GR_GAIN_ADAPT
+
+#   define GR_DEBUG
+#   ifdef GR_DEBUG
+#       define GR_WARN_JUMP
+#   endif
+#endif
 
 typedef struct {
 // distances aux balises (m)
@@ -90,14 +103,14 @@ float uni_rand(float min, float max) {
     return min + ((max-min)*(float)rand())/(float)RAND_MAX;
 }
 
-void simu_perception(float x, float y, sPerception *p) {
-    if(!p)
+void simu_perception(sPt_t *x, sPerception *p) {
+    if(!x || !p)
         return;
 
     // distances
-    p->d1 = sqrt(SQR(x - glob_params.B1.x) + SQR(y - glob_params.B1.y));
-    p->d2 = sqrt(SQR(x - glob_params.B2.x) + SQR(y - glob_params.B2.y));
-    p->d3 = sqrt(SQR(x - glob_params.B3.x) + SQR(y - glob_params.B3.y));
+    p->d1 = sqrt(SQR(x->x - glob_params.B1.x) + SQR(x->y - glob_params.B1.y));
+    p->d2 = sqrt(SQR(x->x - glob_params.B2.x) + SQR(x->y - glob_params.B2.y));
+    p->d3 = sqrt(SQR(x->x - glob_params.B3.x) + SQR(x->y - glob_params.B3.y));
 
     // angles
     p->a12 = acos((SQR(p->d1) + SQR(p->d2) - SQR(glob_params.D12))/(2*p->d1*p->d2));   // (rad)
@@ -147,10 +160,17 @@ void bruite_perception(sPerception *p) {
     p->a31 += uni_rand(-p->u_a31, p->u_a31);
 }
 
-float critere(float x, float y, sPerception *p) {
+unsigned int nb_cri=0;
+
+float critere(sPt_t *x, sPerception *p) {
     sPerception simu_p;
 
-    simu_perception(x, y, &simu_p);
+    if(!x || !p)
+        return 0.;
+
+    nb_cri++;
+
+    simu_perception(x, &simu_p);
 
     return (
         SQR(simu_p.d1 - p->d1)/SQR(p->u_d1) +
@@ -164,41 +184,44 @@ float critere(float x, float y, sPerception *p) {
 }
 
 #ifdef NELDERMEAD
-sPt_t neldermead(sPt_t center, float range, sPerception *p) {
+void neldermead(sPt_t *x0, float range, sPerception *p) {
     sPt_t xb, xr, xe, xc, x[3];
     int i, j, i_max, i_MAX, i_MIN;
     float z[3], z_xr, z_xe, z_xc, alpha=1., gamma=2., rho=-0.5, sigma=0.5;
 
-    #define Z_CRIT (18)
-
     for(j=0; j<3; j++) {
-        x[j].x = center.x + range*cos(120.*(float)j*M_PI/180.);
-        x[j].y = center.y + range*sin(120.*(float)j*M_PI/180.);
-        z[j] = critere(x[j].x, x[j].y, p);
+        x[j].x = x0->x + range*cos(120.*(float)j*M_PI/180.);
+        x[j].y = x0->y + range*sin(120.*(float)j*M_PI/180.);
+        z[j] = critere(&x[j], p);
 
-        if(z[j] < Z_CRIT)
-            return x[j];
+#ifdef NM_DEBUG
+        printf("x[%u]=(%.2f, %.2f, %.2f)\n", j, x[j].x, x[j].y, z[j]);
+#endif
+
+        if(z[j] < Z_CRIT) {
+#ifdef NM_DEBUG
+            printf("=> ret x[%u]\n", j);
+#endif
+            *x0 = x[j];
+            return;
+        }
     }
 
-    for(i=0; i<1000; i++) {
-        for(j=0; j<3; j++)
-            printf("x[%u]=(%.2f, %.2f, %.2f)\n", j, x[j].x, x[j].y, z[j]);
-
+    for(i=0; i<20; i++) {
 // tri
-        i_max = 0;
         i_MAX = 0;
         i_MIN = 0;
         for(j=1; j<3; j++) {
             if(z[j] < z[i_MIN])
                 i_MIN = j;
-            if(z[j] > z[i_MAX]) {
-                i_max = i_MAX;
+
+            if(z[j] > z[i_MAX])
                 i_MAX = j;
-            }
-            else if(z[j] > z[i_max])
-                i_max = j;
         }
-        printf("i_MIN = %u\ni_max = %u\ni_MAX = %u\n", i_MIN, i_max, i_MAX);
+        i_max = 3 - i_MIN - i_MAX;
+#ifdef NM_DEBUG
+        printf("   i_MIN = %u i_max = %u i_MAX = %u\n", i_MIN, i_max, i_MAX);
+#endif
 
 // barycentre
         xb.x = 0;
@@ -209,190 +232,262 @@ sPt_t neldermead(sPt_t center, float range, sPerception *p) {
                 xb.y += x[j].y/2.;
             }
         }
-
-        printf("xb=(%.2f, %.2f)\n", xb.x, xb.y);
+#ifdef NM_DEBUG
+        printf("   xb=(%.2f, %.2f)\n", xb.x, xb.y);
+#endif
 
 // calcul point réflechi
         xr.x = xb.x + alpha*(xb.x - x[i_MAX].x);
         xr.y = xb.y + alpha*(xb.y - x[i_MAX].y);
-        z_xr = critere(xr.x, xr.y, p);
+        z_xr = critere(&xr, p);
+#ifdef NM_DEBUG
+        printf("   xr=(%.2f, %.2f, %.2f)\n", xr.x, xr.y, z_xr);
+#endif
+        if(z_xr < Z_CRIT) {
+#ifdef NM_DEBUG
+            printf("=> ret xr\n");
+#endif
+            *x0 = xr;
+            return;
+        }
 
-        printf("xr=(%.2f, %.2f, %.2f)\n", xr.x, xr.y, z_xr);
-        if(z_xr < Z_CRIT)
-            return xr;
-
-// actualisation simplexe
-        // reflexion
+// reflexion
         if(z[i_MIN] <= z_xr && z_xr < z[i_max]) {
+#ifdef NM_DEBUG
+        printf("=> x[%u] = xr\n", i_MAX);
+#endif
             x[i_MAX] = xr;
             z[i_MAX] = z_xr;
             continue;
         }
 
-        // expansion
+// expansion
         if(z_xr < z[i_MIN]) {
             xe.x = xb.x + gamma*(xb.x - x[i_MAX].x);
             xe.y = xb.y + gamma*(xb.y - x[i_MAX].y);
-            z_xe = critere(xe.x, xe.y, p);
-
-            printf("xe=(%.2f, %.2f, %.2f)\n", xe.x, xe.y, z_xe);
-            if(z_xe < Z_CRIT)
-                return xe;
+            z_xe = critere(&xe, p);
+#ifdef NM_DEBUG
+            printf("   xe=(%.2f, %.2f, %.2f)\n", xe.x, xe.y, z_xe);
+#endif
+            if(z_xe < Z_CRIT) {
+#ifdef NM_DEBUG
+                printf("=> ret xe\n");
+#endif
+                *x0 = xe;
+                return;
+            }
 
             if(z_xe < z_xr) {
+#ifdef NM_DEBUG
+                printf("=> x[%u] = xe\n", i_MAX);
+#endif
                 x[i_MAX] = xe;
                 z[i_MAX] = z_xe;
             }
             else {
+#ifdef NM_DEBUG
+                printf("=> x[%u] = xr\n", i_MAX);
+#endif
                 x[i_MAX] = xr;
                 z[i_MAX] = z_xr;
             }
             continue;
         }
 
-        // contraction
+// contraction
         xc.x = xb.x + rho*(xb.x - x[i_MAX].x);
         xc.y = xb.y + rho*(xb.y - x[i_MAX].y);
-        z_xc = critere(xc.x, xc.y, p);
-
+        z_xc = critere(&xc, p);
+#ifdef NM_DEBUG
         printf("xc=(%.2f, %.2f, %.2f)\n", xc.x, xc.y, z_xc);
-        if(z_xc < Z_CRIT)
-            return xc;
+#endif
+        if(z_xc < Z_CRIT) {
+#ifdef NM_DEBUG
+            printf("=> ret xc\n");
+#endif
+            *x0 = xc;
+            return;
+        }
 
         if(z_xc < z_xr) {
+#ifdef NM_DEBUG
+            printf("=> x[%u] = xc\n", i_MAX);
+#endif
             x[i_MAX] = xc;
             z[i_MAX] = z_xc;
             continue;
         }
 
-        // reduction
+// reduction
         for(j=0; j<3; j++) {
             if(j == i_MIN)
                 continue;
 
             x[j].x = x[i_MIN].x + sigma*(x[j].x - x[i_MIN].x);
             x[j].y = x[i_MIN].y + sigma*(x[j].y - x[i_MIN].y);
-            z[j] = critere(x[j].x, x[j].y, p);
-            if(z[j] < Z_CRIT)
-                return x[j];
+            z[j] = critere(&x[j], p);
+#ifdef NM_DEBUG
+            printf("=> x[%u] = (%.2f, %.2f, %.2f)\n", j, x[j].x, x[j].y, z[j]);
+#endif
+            if(z[j] < Z_CRIT) {
+#ifdef NM_DEBUG
+                printf("=> ret x[%u]\n", j);
+#endif
+                *x0 = x[j];
+                return;
+            }
         }
     }
 
-    x[0].x = x[0].y = 0;
-    return x[0];
+// too much iterations
+    x0->x = x0->y = -1;
 }
 #endif
 
-int main() {
-    float x0, y0, x, y, z, step, alpha, tmp;
-#if defined(GAIN_ADAPT)
-    float z_old, x_old, y_old;
+#ifdef GRADIENT
+void gradient(sPt_t *x0, sPerception *p) {
+    sPt_t tmp;
+    float z, step, alpha, nG;
+#if defined(GR_GAIN_ADAPT)
+    sPt_t x_old;
+    float z_old;
 #endif
-#if defined(WARN_JUMP)
+#if defined(GR_WARN_JUMP)
     float z_prev;
 #endif
     sVec_t G;
-    sPerception p;
     int i;
-#ifdef NELDERMEAD
-    sPt_t res, c;
+
+    // let's go
+    step = 1e-3;
+    alpha = 1e-7;
+
+    for(i=0; i<1000; i++) {
+        z = critere(x0, p);
+
+#ifdef GR_GAIN_ADAPT
+        if(!i || z <= z_old) {
+#   ifdef GR_DEBUG
+            printf("###ok    (%f <= %f)### ", z, z_old);
+#   endif
+            alpha *= 1.2;
+            x_old = *x0;
+            z_old = z;
+        }
+        else {
+#   ifdef GR_DEBUG
+            printf("###failed (%f > %f)### ", z, z_old);
+#   endif
+            alpha *= 0.5;
+            *x0 = x_old;
+            z = z_old;
+        }
 #endif
+
+        // compute gradient
+        tmp.x = x0->x + step; tmp.y = x0->y;   G.x = (critere(&tmp, p) - z)/step;
+        tmp.x = x0->x; tmp.y = x0->y + step;   G.y = (critere(&tmp, p) - z)/step;
+        nG = sqrt(SQR(G.x) + SQR(G.y));
+
+#ifdef GR_DEBUG
+        printf("IT%03u: en %.3fm, %.3fm: %03.0f, %f, dir %.2f°", i, x0->x, x0->y, z, nG, 180.*atan2(-G.y, -G.x)/M_PI);
+#   ifdef GR_GAIN_ADAPT
+        printf(", alpha %e", alpha);
+#   endif
+#   ifdef GR_WARN_JUMP
+        if(i && z > z_prev)
+            printf(", /!\\ bad step /!\\");
+        z_prev = z;
+#   endif
+        printf("\n");
+#endif
+
+        if(z < Z_CRIT)//nG < 2e3)
+            break;
+
+        x0->x -= alpha*G.x;
+        x0->y -= alpha*G.y;
+    }
+
+#ifdef GR_DEBUG
+    printf("%u itérations\n", i);
+#endif
+}
+#endif
+
+int main(int argc, char *argv[]) {
+    sPt_t x0 /* reference */, x /* start point */, tmp;
+    sPerception p;
+#if !defined(FIXED_INPUT_PROBLEM)
+    float dir;
+#endif
+//    int i;
 
     // entry point
     init_globals();
 
     // builds the noisy perception data
 #ifdef FIXED_INPUT_PROBLEM
-    x0 = 1.5;
-    y0 = 0.5;
-#else
-    x0 = 2.8;
-    y0 = 0.8;
-#endif
-    simu_perception(x0, y0, &p);
+    x0.x = 1.5;
+    x0.y = 0.5;
+
+    simu_perception(&x0, &p);
     estim_incertitude(&p);
-#ifdef FIXED_INPUT_PROBLEM
+
     p.d1 = 1.60459;
     p.d2 = 2.27835;
     p.d3 = 1.60727;
     p.a12 = 1.1214;
     p.a23 = 2.04323;
     p.a31 = 3.11656;
-#else
-    bruite_perception(&p);
-#endif
 
-    // add some bias to the start point
-#ifdef FIXED_INPUT_PROBLEM
-    x = 1.519;
-    y = 0.48867;
+    x.x = 1.519;
+    x.y = 0.48867;
 #else
-    tmp = uni_rand(-M_PI, M_PI);
-    x = x0 + 0.02*cos(tmp);
-    y = y0 + 0.02*sin(tmp);
-    printf("tmp=%.1f°\n", tmp*180./M_PI);
+    if(argc == 3) {
+        printf("Using starting point from arguments:\n");
+        x0.x = strtof(argv[1], NULL);
+        x0.y = strtof(argv[2], NULL);
+    }
+    else {
+        x0.x = 2.8;
+        x0.y = 0.8;
+    }
+    printf("x0(%.2f, %.2f)\n", x0.x, x0.y);
+
+    simu_perception(&x0, &p);
+    estim_incertitude(&p);
+    bruite_perception(&p);
+
+//    printf("u_d1=%.3fm, u_d2=%.3fm, u_d3=%.3fm\n", p.u_d1, p.u_d2, p.u_d3);
+//    printf("u_a12=%.2f°, u_a23=%.2f°, u_a31=%.2f°\n", p.u_a12*180./M_PI, p.u_a23*180./M_PI, p.u_a31*180./M_PI);
+
+    // add some random bias to the start point
+    dir = uni_rand(-M_PI, M_PI);
+    x.x = x0.x + 0.02*cos(dir);
+    x.y = x0.y + 0.02*sin(dir);
+    printf("err dir=%.1f°\n", dir*180./M_PI);
 #endif
 
 #ifdef NELDERMEAD
-    c.x = x;
-    c.y = y;
-    res = neldermead(c, 0.05, &p);
+    tmp = x;
+    nb_cri = 0;
 
-    printf("res=(%.2f, %.2f) (erreur de %.6fm)\n", res.x, res.y, sqrt(SQR(res.y-y0) + SQR(res.x-x0)));
+    neldermead(&tmp, 0.05, &p);
 
-    return 0;
+    printf("%u calculs du critère\n", nb_cri);
+    printf("nm_res=(%.2f, %.2f) (erreur de %.6fm)\n", tmp.x, tmp.y, sqrt(SQR(tmp.y - x0.y) + SQR(tmp.x - x0.x)));
 #endif
 
-    // gradient descent
-    step = 1e-3;
-    alpha = 1e-7;
-    printf("u_d1=%.3fm, u_d2=%.3fm, u_d3=%.3fm\n", p.u_d1, p.u_d2, p.u_d3);
-    printf("u_a12=%.2f°, u_a23=%.2f°, u_a31=%.2f°\n", p.u_a12*180./M_PI, p.u_a23*180./M_PI, p.u_a31*180./M_PI);
+#ifdef GRADIENT
+    tmp = x;
+    nb_cri = 0;
 
-    for(i=0; i<1000; i++) {
-        z = critere(x, y, &p);
+    gradient(&tmp, &p);
 
-#ifdef GAIN_ADAPT
-        if(!i || z <= z_old) {
-printf("###ok    (%f <= %f)### ", z, z_old);
-            alpha *= 1.2;
-            x_old = x;
-            y_old = y;
-            z_old = z;
-        }
-        else {
-printf("###failed (%f > %f)### ", z, z_old);
-            alpha *= 0.5;
-            x = x_old;
-            y = y_old;
-            z = z_old;
-        }
+    printf("%u calculs du critère\n", nb_cri);
+    printf("gr_res=(%.2f, %.2f) (erreur de %.6fm)\n", tmp.x, tmp.y, sqrt(SQR(tmp.y - x0.y) + SQR(tmp.x - x0.x)));
 #endif
-
-        G.x = (critere(x + step, y, &p) - z)/step;
-        G.y = (critere(x, y + step, &p) - z)/step;
-        tmp = sqrt(SQR(G.x) + SQR(G.y));
-
-        printf("IT%03u: en %.3fm, %.3fm: %03.0f, %f, dir %.2f°", i, x, y, z, tmp, 180.*atan2(-G.y, -G.x)/M_PI);
-#ifdef GAIN_ADAPT
-        printf(", alpha %e", alpha);
-#endif
-#ifdef WARN_JUMP
-        if(i && z > z_prev)
-            printf(", /!\\ bad step /!\\");
-        z_prev = z;
-#endif
-        printf("\n");
-
-        if(z < 15)//tmp < 2e3)
-            break;
-
-        x -= alpha*G.x;
-        y -= alpha*G.y;
-    }
-
-    printf("%u itérations\n", i);
-    printf("p(%.6fm, %.6fm) (erreur de %.6fm)\n", x, y, sqrt(SQR(y-y0) + SQR(x-x0)));
 
 //    for(i=0; i<100; i++)
 //        printf("f(%f,0.5)=%f\n", 1+(float)i/100., critere(1+(float)i/100., 0.5, &p));
