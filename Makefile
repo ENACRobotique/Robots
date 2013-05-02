@@ -1,5 +1,5 @@
 CC   = gcc
-SRCS = main.c
+SRCS = main.c params.c tools.c perception.c optim.c neldermead.c gradient.c
 OBJ  = $(SRCS:.c=.o)
 BIN  = pos_test
 CFLAGS = -Wall -Werror -g
