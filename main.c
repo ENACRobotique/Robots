@@ -11,11 +11,12 @@
 
 //#define FIXED_SEED 1
 //#define FIXED_INPUT_PROBLEM
+#define STATS_MAP
 #define Z_CRIT 18
 
 #define NELDERMEAD
 #ifdef NELDERMEAD
-#   define NM_DEBUG
+//#   define NM_DEBUG
 #endif
 
 //#define GRADIENT
@@ -416,18 +417,56 @@ void gradient(sPt_t *x0, sPerception *p) {
 #endif
 
 int main(int argc, char *argv[]) {
-    sPt_t x0 /* reference */, x /* start point */, tmp;
+    sPt_t x0 /* reference */, x /* start point */;
     sPerception p;
 #if !defined(FIXED_INPUT_PROBLEM)
     float dir;
 #endif
-//    int i;
+#ifdef STATS_MAP
+    FILE *flog;
+    int i;
+    float m;
+#else
+    sPt_t tmp;
+#endif
 
     // entry point
     init_globals();
 
     // builds the noisy perception data
-#ifdef FIXED_INPUT_PROBLEM
+#ifdef STATS_MAP
+    flog = fopen("out.csv", "wb+");
+    if(!flog)
+        return 1;
+
+    for(x0.x=0.05; x0.x<=2.95; x0.x+=0.05) {
+        for(x0.y=0.05; x0.y<=1.95; x0.y+=0.05) {
+            m = 0;
+            nb_cri = 0;
+
+            for(i=0; i<50; i++) {
+                simu_perception(&x0, &p);
+                estim_incertitude(&p);
+                bruite_perception(&p);
+
+                dir = uni_rand(-M_PI, M_PI);
+                x.x = x0.x + 0.02*cos(dir);
+                x.y = x0.y + 0.02*sin(dir);
+
+                neldermead(&x, 0.05, &p);
+
+                m += sqrt(SQR(x.y - x0.y) + SQR(x.x - x0.x));
+            }
+
+            fprintf(flog, "%.2f;%.2f;%.2f;%.4f\n", x0.x, x0.y, (float)nb_cri/(float)i, m/(float)i);
+        }
+    }
+
+    fclose(flog);
+
+    return 0;
+#else
+#   ifdef FIXED_INPUT_PROBLEM
     x0.x = 1.5;
     x0.y = 0.5;
 
@@ -443,7 +482,7 @@ int main(int argc, char *argv[]) {
 
     x.x = 1.519;
     x.y = 0.48867;
-#else
+#   else
     if(argc == 3) {
         printf("Using starting point from arguments:\n");
         x0.x = strtof(argv[1], NULL);
@@ -467,9 +506,9 @@ int main(int argc, char *argv[]) {
     x.x = x0.x + 0.02*cos(dir);
     x.y = x0.y + 0.02*sin(dir);
     printf("err dir=%.1f°\n", dir*180./M_PI);
-#endif
+#   endif   // FIXED_INPUT_PROBLEM
 
-#ifdef NELDERMEAD
+#   ifdef NELDERMEAD
     tmp = x;
     nb_cri = 0;
 
@@ -477,9 +516,9 @@ int main(int argc, char *argv[]) {
 
     printf("%u calculs du critère\n", nb_cri);
     printf("nm_res=(%.2f, %.2f) (erreur de %.6fm)\n", tmp.x, tmp.y, sqrt(SQR(tmp.y - x0.y) + SQR(tmp.x - x0.x)));
-#endif
+#   endif   // NELDERMEAD
 
-#ifdef GRADIENT
+#   ifdef GRADIENT
     tmp = x;
     nb_cri = 0;
 
@@ -487,7 +526,8 @@ int main(int argc, char *argv[]) {
 
     printf("%u calculs du critère\n", nb_cri);
     printf("gr_res=(%.2f, %.2f) (erreur de %.6fm)\n", tmp.x, tmp.y, sqrt(SQR(tmp.y - x0.y) + SQR(tmp.x - x0.x)));
-#endif
+#   endif   // GRADIENT
+#endif // STATS_MAP
 
 //    for(i=0; i<100; i++)
 //        printf("f(%f,0.5)=%f\n", 1+(float)i/100., critere(1+(float)i/100., 0.5, &p));
