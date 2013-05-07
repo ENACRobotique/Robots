@@ -125,7 +125,7 @@ int main(void) {
 
   gpio_init_all();  // use fast GPIOs
 
-  pwm_init(0, 1024);  // 29.3kHz update rate => not audible
+//  pwm_init(0, 1024);  // 29.3kHz update rate => not audible
 
 // sortie LED
   gpio_output(1, 24);

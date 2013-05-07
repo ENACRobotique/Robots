@@ -1,7 +1,9 @@
 <!DOCTYPE CrossStudio_for_ARM_Session_File>
 <session>
  <Bookmarks/>
- <Breakpoints/>
+ <Breakpoints>
+  <BreakpointListItem line="222" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="2" counter="0" isFunctionBreakpoint="false" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" expression="" />
+ </Breakpoints>
  <ExecutionProfileWindow/>
  <Memory1>
   <MemoryWindow autoEvaluate="0" addressText="&amp;tab_" numColumns="8" sizeText="sizeof(tab_)" dataSize="4" radix="11" name="Executable_1" addressSpace="" />
@@ -16,9 +18,9 @@
   <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="Executable_1" addressSpace="" />
  </Memory4>
  <Project>
-  <ProjectSessionItem path="Executable_1" name="unnamed" />
-  <ProjectSessionItem path="Executable_1;Executable_1" name="unnamed" />
-  <ProjectSessionItem path="Executable_1;Executable_1;Source Files" name="unnamed" />
+  <ProjectSessionItem path="lpcprojects2" name="unnamed" />
+  <ProjectSessionItem path="lpcprojects2;lpc_asserv" name="unnamed" />
+  <ProjectSessionItem path="lpcprojects2;lpc_asserv;Source Files" name="unnamed" />
  </Project>
  <Register1>
   <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="Executable_1" />
@@ -38,9 +40,9 @@
  </TraceWindow>
  <Watch1>
   <Watches active="1" update="Never" >
-   <Watchpoint linenumber="108" radix="16" name="x" expression="x" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
-   <Watchpoint linenumber="108" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
    <Watchpoint linenumber="88" radix="16" name="step_traj" expression="step_traj" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="112" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="112" radix="16" name="x" expression="x" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
   </Watches>
  </Watch1>
  <Watch2>
@@ -53,12 +55,7 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" y="301" path="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" left="0" selected="1" name="unnamed" top="275" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/params.h" y="21" path="/home/robot/Documents/CrossWorks Projects/params.h" left="0" selected="0" name="unnamed" top="0" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/trigo.h" y="8" path="/home/robot/Documents/CrossWorks Projects/trigo.h" left="0" selected="0" name="unnamed" top="0" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/sys_time.c" y="73" path="/home/robot/Documents/CrossWorks Projects/sys_time.c" left="0" selected="0" name="unnamed" top="62" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/controller.c" y="28" path="/home/robot/Documents/CrossWorks Projects/controller.c" left="0" selected="0" name="unnamed" top="9" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/pid.c" y="31" path="/home/robot/Documents/CrossWorks Projects/pid.c" left="0" selected="0" name="unnamed" top="24" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_asserv/main.c" y="133" path="/home/robot/Documents/CrossWorks Projects/lpc_asserv/main.c" left="0" selected="1" name="unnamed" top="127" />
  </Files>
  <ARMCrossStudioWindow activeProject="Executable_1" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 
@@ -69,5 +66,5 @@
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
 
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
-" fileDialogInitialDirectory="/home/ludo6431/Documents/CrossWorks Projects" fileDialogDefaultFilter="*.h" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
+" fileDialogInitialDirectory="/home/robot/Documents/CrossWorks Projects/Executable_1" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
 </session>
