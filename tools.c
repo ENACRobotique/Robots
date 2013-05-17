@@ -23,32 +23,32 @@ sObs_t obs[N] = {
 #else
 sObs_t obs[] = {
 // départ
-    {{30., 100.}, 0.},
+    {{30., 100.}, 0., 1, 1},
 // gateau
-    {{150., 200.}, R_ROBOT+50.},
+    {{150., 200.}, R_ROBOT+50., 1, 1},
 // verres bleus
-    {{90., 55.}, R_ROBOT+4.},
-    {{90., 105.}, R_ROBOT+4.},
-    {{105., 80.}, R_ROBOT+4.},
-    {{135., 80.}, R_ROBOT+4.},
-    {{120., 55.}, R_ROBOT+4.},
-    {{120., 105.}, R_ROBOT+4.},
+    {{90., 55.}, 8., 1, 1},
+    {{90., 105.}, 8., 1, 1},
+    {{105., 80.}, R_ROBOT+4., 1, 0},
+    {{135., 80.}, R_ROBOT+4., 1, 0},
+    {{120., 55.}, R_ROBOT+4., 1, 0},
+    {{120., 105.}, R_ROBOT+4., 1, 0},
 // verres rouges
-    {{300.-90., 55.}, R_ROBOT+4.},
-    {{300.-90., 105.}, R_ROBOT+4.},
-    {{300.-105., 80.}, R_ROBOT+4.},
-    {{300.-135., 80.}, R_ROBOT+4.},
-    {{300.-120., 55.}, R_ROBOT+4.},
-    {{300.-120., 105.}, R_ROBOT+4.},
+    {{300.-90., 55.}, 8., 1, 1},
+    {{300.-90., 105.}, 8., 1, 1},
+    {{300.-105., 80.}, R_ROBOT+4., 1, 0},
+    {{300.-135., 80.}, R_ROBOT+4., 1, 0},
+    {{300.-120., 55.}, R_ROBOT+4., 1, 0},
+    {{300.-120., 105.}, R_ROBOT+4., 1, 0},
 // arrivée
-    {{250., 50.}, 0.}
+    {{250., 50.}, 0., 1, 1}
 };
 #endif
 
 // tangents between physical obstacles (17kiB)
-sTgts_t tgts[N][N] = {{{{{0}}}}};
+sTgts_t tgts[N][N];
 // halfmatrix of 2Nx2N links between logical obstacles (1kiB)
-sLnk_t lnk[2*N][2*N] = {{0}};
+sLnk_t lnk[2*N][2*N];
 
 static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o2
     sVec_t o1o2, t, n;
@@ -61,6 +61,9 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
 
     normVec(&o1o2, &out->d);
         out_s->d = out->d;
+
+    if(!o1->active || !o2->active)
+        return 0;
 
     if(out->d < 2*LOW_THR) {
         return 0;
@@ -146,7 +149,7 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
         return 4;
     }
 
-    return 0;
+    return 0;   // makes the compiler happy
 }
 
 uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
@@ -159,7 +162,7 @@ uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
 #endif
 
     for(i = 0; i < N; i++) {
-        if(i == o1 || i == o2 || obs[i].r < LOW_THR)
+        if(i == o1 || i == o2 || obs[i].r < LOW_THR || !obs[i].active)
             continue;
 
         sqdistPt2Seg(&obs[i].c, s, &d, NULL);
@@ -199,8 +202,21 @@ printf("  dist %.2f\n", DIST(i, j));
 
                 lnk[B(i)][A(j)] = ok;
                 lnk[B(j)][A(i)] = ok;
+
+                if(nb == 3) {
+                    lnk[A(i)][B(j)] = 0;
+                    lnk[A(j)][B(i)] = 0;
+                }
             case 2:
                 ok = check_segment(i, &tgts[i][j].s2, j);
+
+                if(nb == 2) {
+                    lnk[A(i)][B(j)] = 0;
+                    lnk[A(j)][B(i)] = 0;
+
+                    lnk[B(i)][A(j)] = 0;
+                    lnk[B(j)][A(i)] = 0;
+                }
 
                 if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
                     lnk[A(i)][B(j)] = ok;
@@ -216,6 +232,17 @@ printf("  dist %.2f\n", DIST(i, j));
                 }
             case 1:
                 ok = check_segment(i, &tgts[i][j].s1, j);
+
+                if(nb == 1) {
+                    lnk[A(i)][B(j)] = 0;
+                    lnk[A(j)][B(i)] = 0;
+
+                    lnk[B(i)][A(j)] = 0;
+                    lnk[B(j)][A(i)] = 0;
+
+                    lnk[B(i)][B(j)] = 0;
+                    lnk[A(j)][A(i)] = 0;
+                }
 
                 if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
                     lnk[A(i)][A(j)] = ok;
@@ -233,8 +260,20 @@ printf("  dist %.2f\n", DIST(i, j));
                     lnk[A(i)][A(j)] = ok;
                     lnk[B(j)][B(i)] = ok;
                 }
+                break;
             default:
             case 0:
+                lnk[A(i)][B(j)] = 0;
+                lnk[A(j)][B(i)] = 0;
+
+                lnk[B(i)][A(j)] = 0;
+                lnk[B(j)][A(i)] = 0;
+
+                lnk[B(i)][B(j)] = 0;
+                lnk[A(j)][A(i)] = 0;
+
+                lnk[A(i)][A(j)] = 0;
+                lnk[B(j)][B(i)] = 0;
                 break;
             }
         }
@@ -260,7 +299,7 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
 
     if(!dir) {  // clock wise
         for(i = 0; i < N; i++) {
-            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR)
+            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR || !obs[i].active)
                 continue;
 
             sc1 = l1.a*obs[i].c.x + l1.b*obs[i].c.y + l1.c;
@@ -281,7 +320,7 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
     }
     else {  // counter clock wise
         for(i = 0; i < N; i++) {
-            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR)
+            if(i == o1 || i == o2 || i == o3 || obs[i].r < LOW_THR || !obs[i].active)
                 continue;
 
             sc1 = l1.a*obs[i].c.x + l1.b*obs[i].c.y + l1.c;
@@ -333,3 +372,6 @@ sNum_t o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
     return d*obs[o2].r;
 }
 
+void active_obs(iObs_t index){obs[index].active = 1;}
+
+void unactive_obs(iObs_t index){obs[index].active = 0;}

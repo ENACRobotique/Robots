@@ -1,7 +1,7 @@
 CC   = gcc
-SRCS = main.c tools.c math_ops.c a_star.c
+SRCS = main_test_astar.c tools.c math_ops.c a_star.c
 OBJ  = $(SRCS:.c=.o)
-BIN  = tangents_test
+BIN  = main_test_astar
 CFLAGS = -Wall -Werror -g
 LIBS = -lm
 RM = rm -f
@@ -9,7 +9,7 @@ DEPEND = .depend
 
 .PHONY: all clean depend
 
-all: tangents_test
+all: $(BIN)
 
 clean:
 	${RM} $(OBJ) $(BIN)

@@ -21,10 +21,17 @@
 #define R_SECU (5.)
 #define R_ROBOT (20.)
 
-#define X_MIN (R_ROBOT)
-#define X_MAX (300. - R_ROBOT)
-#define Y_MIN (R_ROBOT) 
-#define Y_MAX (200. - R_ROBOT) 
+#if 0
+#   define X_MIN (R_ROBOT)
+#   define X_MAX (300. - R_ROBOT)
+#   define Y_MIN (R_ROBOT)
+#   define Y_MAX (200. - R_ROBOT)
+#else
+#   define X_MIN (0.)
+#   define X_MAX (300.)
+#   define Y_MIN (0.)
+#   define Y_MAX (200.)
+#endif
 
 #define OUT(x, y) ((x) > X_MAX || (x) < X_MIN || (y) > Y_MAX || (y) < Y_MIN)
 
@@ -35,7 +42,8 @@ typedef struct {
     sPt_t c;    // center of obstacle
     sNum_t r;   // radius
 
-    uint8_t moved;  // flag, TODO
+    uint8_t moved:4;
+    uint8_t active:4;
 } sObs_t;   // sizeof(sObs_t)=16
 
 // a set of common tangents between two obstacles (from o1 to o2)

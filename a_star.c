@@ -1,26 +1,31 @@
 #include "math_ops.h"
-
+#include <stdlib.h>
 #include "a_star.h"
 
 //#define AS_DEBUG
 
 struct {
-    iABObs_t next;   // in openset
-    iABObs_t prev;   // in path
-
     sNum_t g_score;
     sNum_t f_score;
+
+    sNum_t seg_len;
+    sNum_t arc_len;
+
+    iABObs_t next;   // in openset
+    iABObs_t prev;   // in path
 
     uint8_t closedset:4;  // boolean
     uint8_t openset:4;  // boolean
 } _aselts[N*2];
 
-iABObs_t *a_star(iABObs_t start, iABObs_t goal) {
+void a_star(iABObs_t start, iABObs_t goal, sPath_t *path) {
     iABObs_t os_start, current, prev, curr;
     int i, neighbor;
-    sNum_t tmp_g_score, d;
+    sNum_t tmp_g_score, s_l, a_l;
     sSeg_t *seg;
-    static iABObs_t _path[2*N+1];
+
+    if(!path)
+        return;
 
     os_start = start;
 
@@ -43,15 +48,28 @@ iABObs_t *a_star(iABObs_t start, iABObs_t goal) {
 printf("current %u%c\n", O(current), DIR(current)?'b':'a');
 #endif
         if(current == goal) {
-            // reconstruct path
-            _path[2*N] = NOELT;
-            for(i = 2*N-1; i>=0 && current!=NOELT; i--) {
-                _path[i] = current;
+            for (i = 0, curr = current; curr != start; i++, curr = _aselts[curr].prev); // oh putaing!
+            path->path_len = i;
+            path->path = (sTrajEl_t*) malloc ( path->path_len * sizeof(sTrajEl_t));
+            if(!path->path)
+                break;
+
+            path->dist = _aselts[goal].g_score;
+
+            for (i = path->path_len-1; i >= 0; i--) {
+                seg = tgt(_aselts[current].prev, current);
+                path->path[i].p1 = seg->p1;
+                path->path[i].p2 = seg->p2;
+                path->path[i].obs = obs[O(current)];
+                path->path[i].sid = i;
+                if(i)
+                    path->path[i-1].arc_len = _aselts[current].arc_len;
+                path->path[i].seg_len = _aselts[current].seg_len;
 
                 current = _aselts[current].prev;
             }
-
-            return &_path[i+1];
+            
+            return;
         }
 
         // remove current from openset
@@ -62,7 +80,7 @@ printf("current %u%c\n", O(current), DIR(current)?'b':'a');
 
         for(neighbor = 0; neighbor < 2*N; neighbor++) {
             // keep only valid neighbors
-            if(!lnk[current][neighbor])
+            if(!lnk[current][neighbor] || !obs[O(neighbor)].active)
                 continue;
 #ifdef AS_DEBUG
 printf("  neighbor %u%c\n", O(neighbor), DIR(neighbor)?'b':'a');
@@ -80,17 +98,18 @@ printf("    bad arc\n");
 #ifdef AS_DEBUG
 printf("    arc_len(%u%c, %u%c, %u%c)\n", O(_aselts[current].prev),DIR(_aselts[current].prev)?'b':'a', O(current), DIR(current)?'b':'a', O(neighbor), DIR(neighbor)?'b':'a');
 #endif
-                tmp_g_score = arc_len(_aselts[current].prev, current, neighbor);
+                tmp_g_score = a_l = arc_len(_aselts[current].prev, current, neighbor);
             }
             else {  // no previous element (starting point case)
-                tmp_g_score = 0;
+                tmp_g_score = 0.;
+                a_l = 0.;
             }
             seg = tgt(current, neighbor);
-            distPt2Pt(&seg->p1, &seg->p2, &d);
+            distPt2Pt(&seg->p1, &seg->p2, &s_l);
 #ifdef AS_DEBUG
-printf("    tmp_g_score = %.2f + %.2f + %.2f", _aselts[current].g_score, tmp_g_score, d);
+printf("    tmp_g_score = %.2f + %.2f + %.2f", _aselts[current].g_score, tmp_g_score, s_l);
 #endif
-            tmp_g_score += _aselts[current].g_score + d;
+            tmp_g_score += _aselts[current].g_score + s_l;
 #ifdef AS_DEBUG
 printf(" = %.2f\n", tmp_g_score);
 #endif
@@ -107,6 +126,9 @@ printf("    worse than before\n");
                 _aselts[neighbor].prev = current;
                 _aselts[neighbor].g_score = tmp_g_score;
                 _aselts[neighbor].f_score = _aselts[neighbor].g_score + DIST(O(neighbor), O(goal));
+                _aselts[neighbor].arc_len = a_l;
+                _aselts[neighbor].seg_len = s_l;
+                
                 if(!_aselts[neighbor].openset) {
                     prev = NOELT;
                     for(curr = os_start; curr!=NOELT && _aselts[curr].f_score < _aselts[neighbor].f_score; prev = curr, curr = _aselts[curr].next);
@@ -120,6 +142,7 @@ printf("    worse than before\n");
                     _aselts[neighbor].openset = 1;
 #ifdef AS_DEBUG
 printf("    adding to openset\n");
+
 #endif
                 }
 #ifdef AS_DEBUG
@@ -134,6 +157,9 @@ printf("    nothing...\n");
         }
     }
 
-    return NULL;
+    // no solution
+    path->path_len = 0;
+    path->dist = 0.;
+    path->path = NULL;
 }
 

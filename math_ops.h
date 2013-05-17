@@ -23,6 +23,10 @@ static inline void dumpPt(sPt_t *p, char *name) {
     printf("%s(%.2f,%.2f)\n", name, p->x, p->y);
 }
 
+static inline void dumpSeg(sSeg_t *s, char *name) {
+    printf("%s(%.2f,%.2f -> %.2f,%.2f)\n", name, s->p1.x, s->p1.y, s->p2.x, s->p2.y);
+}
+
 static inline void dumpNum(sNum_t n, char *name) {
     printf("%s=%.2f\n", name, n);
 }
