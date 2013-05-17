@@ -10,6 +10,7 @@
 #include "sys_time.h"
 #include "params.h"
 #include "trigo.h"
+#include "i2c0.h"
 
 #ifndef BIT
 #define BIT(b) (1<<(b))
@@ -47,85 +48,121 @@ void _isr_right() { // irq14
   EXTINT = BIT(0);
 }
 
-// trajectory definitions
-struct {
+typedef struct {
+// segment
     int p1_x;
     int p1_y;
     int p2_x;
     int p2_y;
+    int seg_len;  // length of the segment trajectory in increments
+// circle
     int c_x;
     int c_y;
     int r;
-} traj[] = {
-#if 0
-  {isD2I(30.00), isD2I(100.00), isD2I(83.56), isD2I(64.91), isD2I(100.00), isD2I(90.00), isD2I(30.00)},
-  {isD2I(100.00), isD2I(60.00), isD2I(180.00), isD2I(60.00), isD2I(180.00), isD2I(30.00), isD2I(30.00)},
-  {isD2I(192.86), isD2I(57.11), isD2I(250.00), isD2I(30.00), isD2I(250.00), isD2I(30.00), isD2I(0.00)}
-#elif 0
-  {isD2I(30.00), isD2I(100.00), isD2I(83.56), isD2I(64.91), isD2I(100.00), isD2I(90.00), isD2I(30.00)},
-  {isD2I(119.00), isD2I(66.79), isD2I(227.33), isD2I(155.48), isD2I(240.00), isD2I(140.00), isD2I(20.00)},
-  {isD2I(247.86), isD2I(121.61), isD2I(168.22), isD2I(87.59), isD2I(180.00), isD2I(60.00), isD2I(30.00)},
-  {isD2I(180.00), isD2I(30.00), isD2I(250.00), isD2I(30.00), isD2I(250.00), isD2I(30.00), isD2I(0.00)}
-#elif 0
-// bord mur evit verres
-  {isD2I(30.00), isD2I(100.00), isD2I(70.21), isD2I(41.42), isD2I(90.00), isD2I(55.00), isD2I(24.00)},
-  {isD2I(90.00), isD2I(31.00), isD2I(120.00), isD2I(31.00), isD2I(120.00), isD2I(55.00), isD2I(24.00)},
-  {isD2I(120.00), isD2I(31.00), isD2I(180.00), isD2I(31.00), isD2I(180.00), isD2I(55.00), isD2I(24.00)},
-  {isD2I(180.00), isD2I(31.00), isD2I(210.00), isD2I(31.00), isD2I(210.00), isD2I(55.00), isD2I(24.00)},
-  {isD2I(221.79), isD2I(34.09), isD2I(250.00), isD2I(50.00), isD2I(250.00), isD2I(50.00), isD2I(0.00)}
-#else
-// zigzag verres
-  {isD2I(30.00), isD2I(100.00), isD2I(78.64), isD2I(126.14), isD2I(90.00), isD2I(105.00), isD2I(24.00)},
-  {isD2I(113.77), isD2I(101.71), isD2I(111.23), isD2I(83.29), isD2I(135.00), isD2I(80.00), isD2I(24.00)},
-  {isD2I(158.77), isD2I(83.29), isD2I(156.23), isD2I(101.71), isD2I(180.00), isD2I(105.00), isD2I(24.00)},
-  {isD2I(201.85), isD2I(95.07), isD2I(188.15), isD2I(64.93), isD2I(210.00), isD2I(55.00), isD2I(24.00)},
-  {isD2I(210.00), isD2I(79.00), isD2I(180.00), isD2I(79.00), isD2I(180.00), isD2I(55.00), isD2I(24.00)},
-  {isD2I(160.80), isD2I(69.40), isD2I(139.20), isD2I(40.60), isD2I(120.00), isD2I(55.00), isD2I(24.00)},
-  {isD2I(98.15), isD2I(64.93), isD2I(111.85), isD2I(95.07), isD2I(90.00), isD2I(105.00), isD2I(24.00)},
-  {isD2I(78.64), isD2I(126.14), isD2I(30.00), isD2I(100.00), isD2I(30.00), isD2I(100.00), isD2I(0.00)}
-#endif
-};
-int step_traj = 0, step_rotdir;
+    int arc_len;  // length of the circle trajectory in increments
+    int arc_sp_max; // max_speed on the circle
+} sTrajEl_t;
+sTrajEl_t *traj = NULL;
+int step_traj = 0, step_rotdir, num_steps;
 
+
+int x, y, theta;
+int gx, gy; // goal
+int d_consigne = isRpS2IpP(0.5);
+int _mul_l = 1<<SHIFT, _mul_r = 1<<SHIFT;
 enum {
   S_WAIT,
-  S_RUN_TRAJ
-} state = S_RUN_TRAJ;
+  S_RUN_TRAJ // TODO S_INIT_TRAJ to consume less cpu resource in i2c handler
+} state = S_WAIT;
 
+void run_traj(sTrajEl_t *t, int nb, int angle) {
+  int i;
+
+  traj = t;
+  step_traj = 0;
+  num_steps = nb;
+
+  for(i=0; i<nb; i++)
+    traj[i].arc_sp_max = SQRT(1.5*1.5*(double)traj[i].r);
+
+  x = traj[0].p1_x; // (I<<SHIFT)
+  y = traj[0].p1_y;
+  theta = angle;
+
+  // speed
+  d_consigne = isRpS2IpP(1);
+  _mul_l = 1<<SHIFT;
+  _mul_r = 1<<SHIFT;
+
+  // current goal
+  gx = traj[0].p2_x;
+  gy = traj[0].p2_y;
+
+  state = S_RUN_TRAJ;
+}
+
+sTrajEl_t traj_blue[] = {
+  {isD2I(7.50), isD2I(100.00), isD2I(88.75), isD2I(112.90), isD2I(82.26), isD2I(90.00), isD2I(105.00), isD2I(8.00), isD2I(16.43)},
+  {isD2I(97.58), isD2I(102.44), isD2I(82.42), isD2I(57.56), isD2I(47.37), isD2I(90.00), isD2I(55.00), isD2I(8.00), isD2I(38.89)},
+  {isD2I(93.66), isD2I(62.11), isD2I(20.00), isD2I(100.00), isD2I(82.83), isD2I(20.00), isD2I(100.00), isD2I(0.00), isD2I(0.00)},
+/*  {isD2I(7.50), isD2I(100.00), isD2I(88.75), isD2I(112.90), isD2I(82.26), isD2I(90.00), isD2I(105.00), isD2I(8.00), isD2I(13.83), 0},
+  {isD2I(98.00), isD2I(105.00), isD2I(98.00), isD2I(55.00), isD2I(50.00), isD2I(90.00), isD2I(55.00), isD2I(8.00), isD2I(17.91), 0},
+  {isD2I(85.05), isD2I(48.72), isD2I(20.00), isD2I(100.00), isD2I(82.83), isD2I(20.00), isD2I(100.00), isD2I(0.00), isD2I(0.00), 0}*/
+};
+sTrajEl_t traj_red[] = {
+  {isD2I(292.50), isD2I(100.00), isD2I(211.25), isD2I(112.90), isD2I(82.26), isD2I(210.00), isD2I(105.00), isD2I(8.00), isD2I(13.83), 0},
+  {isD2I(202.00), isD2I(105.00), isD2I(202.00), isD2I(55.00), isD2I(50.00), isD2I(210.00), isD2I(55.00), isD2I(8.00), isD2I(17.91), 0},
+  {isD2I(214.95), isD2I(48.72), isD2I(280.00), isD2I(100.00), isD2I(82.83), isD2I(280.00), isD2I(100.00), isD2I(0.00), isD2I(0.00), 0}
+};
+
+void i2chnd(struct i2c_transaction *t, void *userp) {
+  if(t->len_r) {
+    switch(t->buf[0]) {
+    case 1: // go blue
+      run_traj(traj_blue, sizeof(traj_blue)/sizeof(*traj_blue), iROUND(0.*PI/180.*D2I(RDIAM)*dSHIFT));
+
+      break;
+    case 2: // go red
+      run_traj(traj_red, sizeof(traj_red)/sizeof(*traj_red), iROUND(180.*PI/180.*D2I(RDIAM)*dSHIFT));
+
+      break;
+    case 3: // set desired speed
+      d_consigne = (t->buf[1]*isRpS2IpP(1.5))>>8;
+
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+// stats
+int nb_l = 0, nb_c = 0;
+int m_l, m_c;
+unsigned int start_us;
+// DEBUG
 void mybreak_i() {
   static int i = 0;
   i++;
 }
 
-int nb_l = 0, nb_c = 0;
-int m_l, m_c;
-unsigned int start_us;
-
 int main(void) {
   unsigned int prevAsserv=0, prevLed=0;
   int ticks_l, ticks_r;
-  int consigne_l = 0, _consigne_l;
-  int consigne_r = 0, _consigne_r;
-  int consigne = isRpS2IpP(1);
-  long long tmp;
+  int consigne = d_consigne;
+  int consigne_l = 0;
+  int consigne_r = 0;
+  long long tmp, dtime, dist_lim;
 
-  int x, y, theta, ct, st, n_x, n_y;
-  int gx, gy; // goal
+  int ct, st, n_x, n_y, i;
   int v, alpha;
-  unsigned long long sqdist, prev_sqdist = 0;
-
-  x = traj[0].p1_x; // (I<<SHIFT)
-  y = traj[0].p1_y;
-  theta = iROUND(0.*PI/180.*D2I(RDIAM)*dSHIFT);
-
-  gx = traj[0].p2_x;
-  gy = traj[0].p2_y;
-  _consigne_l = consigne;
-  _consigne_r = consigne;
+  unsigned long long sqdist, prev_sqdist = 0, dist;
 
   gpio_init_all();  // use fast GPIOs
 
-//  pwm_init(0, 1024);  // 29.3kHz update rate => not audible
+  pwm_init(0, 1024);  // 29.3kHz update rate => not audible
+
+  i2c0_init(400000, 0x44, i2chnd, NULL);
 
 // sortie LED
   gpio_output(1, 24);
@@ -178,12 +215,10 @@ int main(void) {
       v = (ticks_r + ticks_l)>>1; // (IpP<<SHIFT)
       theta += ticks_r - ticks_l; // (rad.I<<SHIFT)
       // get theta's principal angle value
-      if(theta > isRPI) {
+      if(theta > isRPI)
         theta -= (isRPI<<1);
-      }
-      else if(theta < -isRPI) {
+      else if(theta < -isRPI)
         theta += (isRPI<<1);
-      }
       ct = COS(theta/iD2I(RDIAM));
       st = SIN(theta/iD2I(RDIAM));
 
@@ -200,7 +235,27 @@ int main(void) {
       case S_RUN_TRAJ:
         // squared distance to the next goal
         sqdist = (SQR(gy - y) + SQR(gx - x))>>SHIFT;
-        if(sqdist < lsROUND(D2I(1.5)*D2I(1.5))) { // we are near the goal
+
+        //consigne = isRpS2IpP(0.5);
+//        dist_lim = ((long long)SQR(v)*5/(long long)AMAX)>>(SHIFT+2);
+        dist_lim = ((long long)SQR(v)*8/(long long)AMAX)>>(SHIFT+1);
+
+        if(step_traj&1) { // portion de cercle
+          consigne = min(traj[step_traj>>1].arc_sp_max, d_consigne);
+          // TODO
+        }
+        else { // portion de segment
+          consigne = d_consigne;
+          int dbg_consigne;
+          for(i = step_traj>>1, dist = SQRT(sqdist); i < num_steps && dist < dist_lim; ++i, dist += traj[i].seg_len + traj[i-1].arc_len) {
+            dtime = abs((((long long)v - (long long)traj[i].arc_sp_max)*8/(long long)AMAX)>>1);
+            dbg_consigne = (int)( ((long long)dist<<SHIFT)/(long long)dtime );
+            if(dbg_consigne < consigne)
+              consigne = dbg_consigne;
+          }
+        }
+
+        if(sqdist < lsROUND(D2I(1)*D2I(1))) { // we are near the goal
           if(!(step_traj&1) && traj[step_traj>>1].r < isD2I(1)) { // no next step
             step_traj = 0;
             consigne_l = 0;
@@ -217,21 +272,22 @@ int main(void) {
               step_rotdir = ((long long)traj[step_traj>>1].p1_x - traj[step_traj>>1].p2_x)*((long long)traj[step_traj>>1].c_y - traj[step_traj>>1].p2_y) - ((long long)traj[step_traj>>1].p1_y - traj[step_traj>>1].p2_y)*((long long)traj[step_traj>>1].c_x - traj[step_traj>>1].p2_x) > 0;
               if(step_rotdir) { // clockwise
                 // set speed a priori
-                _consigne_l = (long long)consigne*(traj[step_traj>>1].r + isD2I(RDIAM/2.))/traj[step_traj>>1].r;
-                _consigne_r = (long long)consigne*(traj[step_traj>>1].r - isD2I(RDIAM/2.))/traj[step_traj>>1].r;
+                _mul_l = ((long long)(traj[step_traj>>1].r + isD2I(RDIAM/2.))<<SHIFT)/traj[step_traj>>1].r;
+                _mul_r = ((long long)(traj[step_traj>>1].r - isD2I(RDIAM/2.))<<SHIFT)/traj[step_traj>>1].r;
               }
               else {  // counterclockwise
                 // set speed a priori
-                _consigne_l = (long long)consigne*(traj[step_traj>>1].r - isD2I(RDIAM/2.))/traj[step_traj>>1].r;
-                _consigne_r = (long long)consigne*(traj[step_traj>>1].r + isD2I(RDIAM/2.))/traj[step_traj>>1].r;
+                _mul_l = ((long long)(traj[step_traj>>1].r - isD2I(RDIAM/2.))<<SHIFT)/traj[step_traj>>1].r;
+                _mul_r = ((long long)(traj[step_traj>>1].r + isD2I(RDIAM/2.))<<SHIFT)/traj[step_traj>>1].r;
               }
             }
             else {
               gx = traj[step_traj>>1].p2_x;
               gy = traj[step_traj>>1].p2_y;
 
-              _consigne_l = consigne; // set speed a priori
-              _consigne_r = consigne; // set speed a priori
+              // set speed a priori
+              _mul_l = 1<<SHIFT;
+              _mul_r = 1<<SHIFT;
             }
           }
 
@@ -280,8 +336,8 @@ int main(void) {
         }
 
         // update set point of each motor
-        consigne_l = _consigne_l - tmp; // (IpP<<SHIFT)
-        consigne_r = _consigne_r + tmp;
+        consigne_l = (((long long)_mul_l*(long long)consigne)>>SHIFT) - tmp; // (IpP<<SHIFT)
+        consigne_r = (((long long)_mul_r*(long long)consigne)>>SHIFT) + tmp;
         break;
       }
     }

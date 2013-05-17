@@ -1,9 +1,5 @@
 #include <targets/LPC2000.h>
 
-#ifndef luMIN
-#define luMIN(a, b) ((a)>(b)?(b):(a))
-#endif
-
 #include "pid.h"
 #include "pwm.h"
 #include "motor.h"
@@ -23,9 +19,6 @@ void motor_controller_init() {
   motor_init(&motGauche, 4 /* P0.8 */, 1, 22);
   motor_init(&motDroit,  6 /* P0.9 */, 1, 23);
 }
-
-#define AMAX 35
-#define VMAX iDpS2IpP(60)  // 60cm/s max
 
 void motor_controller_update(int sPL, int pVL, int sPR, int pVR) {
   int value;
