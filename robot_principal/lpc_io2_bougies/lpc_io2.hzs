@@ -42,9 +42,9 @@
  </TraceWindow>
  <Watch1>
   <Watches active="1" update="Never" >
-   <Watchpoint linenumber="88" radix="16" name="step_traj" expression="step_traj" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
-   <Watchpoint linenumber="112" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
    <Watchpoint linenumber="112" radix="16" name="x" expression="x" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="112" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="88" radix="16" name="step_traj" expression="step_traj" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
   </Watches>
  </Watch1>
  <Watch2>
@@ -57,9 +57,7 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_io2_bougies/main.c" y="39" path="/home/robot/Documents/CrossWorks Projects/lpc_io2_bougies/main.c" left="0" selected="1" name="unnamed" top="23" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_lib/i2c0.c" y="29" path="/home/robot/Documents/CrossWorks Projects/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="9" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_lib/sys_time.c" y="70" path="/home/robot/Documents/CrossWorks Projects/lpc_lib/sys_time.c" left="0" selected="0" name="unnamed" top="56" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" y="0" path="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" left="0" selected="1" name="unnamed" top="0" />
  </Files>
  <ARMCrossStudioWindow activeProject="lpc_io2_bougies" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 
@@ -70,5 +68,5 @@
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
 
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
-" fileDialogInitialDirectory="/home/robot/Documents/CrossWorks Projects/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
+" fileDialogInitialDirectory="/home/robot/github/arch-lpc2148/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Debug" />
 </session>

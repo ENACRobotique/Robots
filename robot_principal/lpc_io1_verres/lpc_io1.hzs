@@ -26,7 +26,7 @@
   <ProjectSessionItem path="lpc_io1_verres" name="unnamed" />
   <ProjectSessionItem path="lpc_io1_verres;lpc_io1_verres" name="unnamed" />
   <ProjectSessionItem path="lpc_io1_verres;lpc_io1_verres;Source Files" name="unnamed" />
-  <ProjectSessionItem path="lpc_io1_verres;lpc_io1_verres;Source Files;lowlevel" name="unnamed" />
+  <ProjectSessionItem path="lpc_io1_verres;lpc_io1_verres;Source Files;lpc_lib" name="unnamed" />
  </Project>
  <Register1>
   <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="Executable_1" />
@@ -67,8 +67,10 @@
  <Files>
   <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_lib/i2c0.h" y="45" path="/home/robot/Documents/CrossWorks Projects/lpc_lib/i2c0.h" left="0" selected="0" name="unnamed" top="8" />
   <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_lib/i2c0.c" y="105" path="/home/robot/Documents/CrossWorks Projects/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="83" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="2" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_io1_verres/main.c" y="40" path="/home/robot/Documents/CrossWorks Projects/lpc_io1_verres/main.c" left="0" selected="1" name="unnamed" top="24" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_io1_verres/main.c" y="40" path="/home/robot/Documents/CrossWorks Projects/lpc_io1_verres/main.c" left="0" selected="0" name="unnamed" top="24" />
   <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_io1_verres/params.h" y="0" path="/home/robot/Documents/CrossWorks Projects/lpc_io1_verres/params.h" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_lib/eint.c" y="0" path="/home/robot/Documents/CrossWorks Projects/lpc_lib/eint.c" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_io1_verres/main.c" y="5" path="/home/robot/github/robot_principal/lpc_io1_verres/main.c" left="0" selected="1" name="unnamed" top="0" />
  </Files>
  <ARMCrossStudioWindow activeProject="lpc_io1_verres" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 
@@ -79,5 +81,5 @@
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
 
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
-" fileDialogInitialDirectory="/home/robot/Documents/CrossWorks Projects/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
+" fileDialogInitialDirectory="/home/robot/github/arch-lpc2148/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Debug" />
 </session>
