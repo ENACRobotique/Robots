@@ -1,0 +1,72 @@
+<!DOCTYPE CrossStudio_for_ARM_Session_File>
+<session>
+ <Bookmarks/>
+ <Breakpoints>
+  <BreakpointListItem line="222" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="4" counter="0" isFunctionBreakpoint="false" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" expression="" />
+ </Breakpoints>
+ <ExecutionProfileWindow/>
+ <Memory1>
+  <MemoryWindow autoEvaluate="0" addressText="&amp;tab_" numColumns="8" sizeText="sizeof(tab_)" dataSize="4" radix="11" name="lpc_asserv" addressSpace="" />
+ </Memory1>
+ <Memory2>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_asserv" addressSpace="" />
+ </Memory2>
+ <Memory3>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_asserv" addressSpace="" />
+ </Memory3>
+ <Memory4>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_asserv" addressSpace="" />
+ </Memory4>
+ <Project>
+  <ProjectSessionItem path="lpc_asserv" name="unnamed" />
+  <ProjectSessionItem path="lpc_asserv;lpc_asserv" name="unnamed" />
+  <ProjectSessionItem path="lpc_asserv;lpc_asserv;Source Files" name="unnamed" />
+  <ProjectSessionItem path="lpc_asserv;lpc_asserv;Source Files;lowlevel" name="unnamed" />
+ </Project>
+ <Register1>
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_asserv" />
+ </Register1>
+ <Register2>
+  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_asserv" />
+ </Register2>
+ <Register3>
+  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_asserv" />
+ </Register3>
+ <Register4>
+  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_asserv" />
+ </Register4>
+ <TargetWindow programAction="" uploadFileType="" programLoadAddress="" programSize="" uploadFileName="" uploadMemoryInterface="" programFileName="" uploadStartAddress="" programFileType="" uploadSize="" programMemoryInterface="" />
+ <TraceWindow>
+  <Trace enabled="Yes" />
+ </TraceWindow>
+ <Watch1>
+  <Watches active="1" update="Never" >
+   <Watchpoint linenumber="112" radix="16" name="x" expression="x" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="112" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="88" radix="16" name="step_traj" expression="step_traj" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+  </Watches>
+ </Watch1>
+ <Watch2>
+  <Watches active="0" update="Never" />
+ </Watch2>
+ <Watch3>
+  <Watches active="0" update="Never" />
+ </Watch3>
+ <Watch4>
+  <Watches active="0" update="Never" />
+ </Watch4>
+ <Files>
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_asserv/main.c" y="148" path="/home/robot/Documents/CrossWorks Projects/lpc_asserv/main.c" left="0" selected="1" name="unnamed" top="243" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/Documents/CrossWorks Projects/lpc_lib/sys_time.c" y="70" path="/home/robot/Documents/CrossWorks Projects/lpc_lib/sys_time.c" left="0" selected="0" name="unnamed" top="59" />
+ </Files>
+ <ARMCrossStudioWindow activeProject="lpc_asserv" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_write.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_set_irq.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
+" fileDialogInitialDirectory="/home/robot/Documents/CrossWorks Projects/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Debug" />
+</session>
