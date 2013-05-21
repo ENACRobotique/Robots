@@ -1,0 +1,15 @@
+#ifndef _PARAMS_H
+#define _PARAMS_H
+
+#define SHIFT (8)
+#define dSHIFT ((double)(1<<SHIFT))
+#define iROUND(d) ((int)( (d)+0.5 )) // the +0.5 is here to get a round instead of a floor when casting to int
+#define isROUND(d) iROUND((d)*dSHIFT)
+#define lROUND(d) ((long long)( (d)+0.5 )) // the +0.5 is here to get a round instead of a floor when casting to int
+#define lsROUND(d) lROUND((d)*dSHIFT)
+
+#define PI (3.141592654)
+#define sPI (PI*dSHIFT)
+#define isPI (iROUND(sPI))  // (rad<<SHIFT)
+
+#endif
