@@ -1,1 +1,1 @@
-../Arduino/arduino/Arduino.mk
+../arch-atmega328p/arduino/Arduino.mk
