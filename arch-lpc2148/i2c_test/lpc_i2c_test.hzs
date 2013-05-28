@@ -1,0 +1,65 @@
+<!DOCTYPE CrossStudio_for_ARM_Session_File>
+<session>
+ <Bookmarks/>
+ <Breakpoints/>
+ <ExecutionProfileWindow/>
+ <Memory1>
+  <MemoryWindow autoEvaluate="0" addressText="&amp;tab_" numColumns="8" sizeText="sizeof(tab_)" dataSize="4" radix="11" name="lpc_i2c_test" addressSpace="" />
+ </Memory1>
+ <Memory2>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_i2c_test" addressSpace="" />
+ </Memory2>
+ <Memory3>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_i2c_test" addressSpace="" />
+ </Memory3>
+ <Memory4>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_i2c_test" addressSpace="" />
+ </Memory4>
+ <Project>
+  <ProjectSessionItem path="lpc_i2c_test" name="unnamed" />
+  <ProjectSessionItem path="lpc_i2c_test;lpc_i2c_test" name="unnamed" />
+  <ProjectSessionItem path="lpc_i2c_test;lpc_i2c_test;Source Files" name="unnamed" />
+ </Project>
+ <Register1>
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+ </Register1>
+ <Register2>
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+ </Register2>
+ <Register3>
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+ </Register3>
+ <Register4>
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+ </Register4>
+ <TargetWindow programAction="" uploadFileType="" programLoadAddress="" programSize="" uploadFileName="" uploadMemoryInterface="" programFileName="" uploadStartAddress="" programFileType="" uploadSize="" programMemoryInterface="" />
+ <TraceWindow>
+  <Trace enabled="Yes" />
+ </TraceWindow>
+ <Watch1>
+  <Watches active="1" update="Never" />
+ </Watch1>
+ <Watch2>
+  <Watches active="0" update="Never" />
+ </Watch2>
+ <Watch3>
+  <Watches active="0" update="Never" />
+ </Watch3>
+ <Watch4>
+  <Watches active="0" update="Never" />
+ </Watch4>
+ <Files>
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/i2c_test/main.c" y="106" path="/home/robot/github/arch-lpc2148/i2c_test/main.c" left="0" selected="1" name="unnamed" top="99" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" y="6" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="0" />
+ </Files>
+ <ARMCrossStudioWindow activeProject="lpc_i2c_test" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_write.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_set_irq.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
+
+/home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
+" fileDialogInitialDirectory="/home/robot/github/arch-lpc2148/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
+</session>
