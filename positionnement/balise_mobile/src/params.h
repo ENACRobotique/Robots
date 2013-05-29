@@ -8,7 +8,7 @@
 #ifndef PARAMS_H_
 #define PARAMS_H_
 
-#include "messages.h"
+#include "network_cfg.h"
 
 typedef enum{
     CHANNEL,
@@ -16,9 +16,12 @@ typedef enum{
     GAME
 } mainState;
 
-#define MYADDR ADDR_MOBILE_2
+#define MYADDRX ( ADDRX_MOBILE_2 | SUBNETX )
+#define MYADDRI NULL
 
 #define SYNC_TOL 8 //in µs. max desync tolerated
+
+#define SB_INC_MSG_BUF_SIZE 4
 
 #define DEBUG
 

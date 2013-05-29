@@ -33,11 +33,7 @@ extern "C" {
  * the last entry MUST be {0,0,0}
  *
  */
-typedef struct{
-    uint16_t dest;
-    E_IFACE ifaceFrom;
-    E_IFACE ifaceTo;
-}rTableEntry;
+
 
 //interface identifiers
 typedef enum{
@@ -50,6 +46,11 @@ typedef enum{
     IFACE_COUNT
 }E_IFACE;
 
+typedef struct{
+    uint16_t dest;
+    E_IFACE ifaceFrom;
+    E_IFACE ifaceTo;
+}rTableEntry;
 
 #define XBEE_MAX_SIZE 100
 

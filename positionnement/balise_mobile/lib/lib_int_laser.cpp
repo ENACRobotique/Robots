@@ -10,7 +10,6 @@ pour arduino UNO
 #include "lib_time.h"
 #include "tools.h"
 #include "../src/params.h"
-#include "lib_comm.h"
 
 //globales
 bufStruct buf0={{0},0,0,0,0,0,0,0};
@@ -151,14 +150,6 @@ plStruct periodicLaser(bufStruct *bs){
                     ret.sureness=laser_period;
                     ret.precision=0; //in µs TODO
 
-#ifdef DEBUG_LASER
-                    debugMsg dpkt{ADDR_DEBUG, MYADDR, E_DEBUG,(ADDR_DEBUG+MYADDR+E_DEBUG),
-                                  time,
-                                  bs->intNb,
-                                  "locked, go to tracking"
-                    };
-                    Serial.write((unsigned char*)&dpkt, sizeof(debugMsg));
-#endif
                 }
                 //else, "delay" laserPeriod/2
                 else {
@@ -194,14 +185,6 @@ plStruct periodicLaser(bufStruct *bs){
                     ret.deltaT=0;
 
                     bs->stage=0;
-#ifdef DEBUG_LASER
-                    debugMsg dpkt{ADDR_DEBUG, MYADDR, E_DEBUG,(ADDR_DEBUG+MYADDR+E_DEBUG),
-                                  time,
-                                  bs->intNb,
-                                  "go to acquisition"
-                    };
-                    Serial.write((unsigned char*)&dpkt, sizeof(debugMsg));
-#endif
 
                 }
                 break;

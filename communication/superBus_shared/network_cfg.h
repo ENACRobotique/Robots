@@ -9,7 +9,7 @@
 #define NETWORK_CFG_H_
 
 #include "messages.h"
-#include "params.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,8 +20,8 @@ extern "C" {
 
 //masks
     #define SUBNET_MASK (0xffff<<DEVICE_ADDR_SIZE)  //on a 16-bits adress
-    #define ADDRI_MASK  (0xff)      //on a 16-bits adress, xbee devices
-    #define ADDRX_MASK  (0xff)      //on a 16-bits adress, i2c devices
+    #define ADDRI_MASK  (255)      //on a 16-bits adress, xbee devices
+    #define ADDRX_MASK  (255)      //on a 16-bits adress, i2c devices
 
 //subnet adresses
     #define SUBNETX         (1<<DEVICE_ADDR_SIZE)
@@ -29,14 +29,14 @@ extern "C" {
 
 
 //xbee adresses
-    #define ADDRX_MAIN      (0x01 | SUBNETX)
-    #define ADDRX_FIX       (0x02 | SUBNETX)
-    #define ADDRX_MOBILE_1  (0x04 | SUBNETX)
-    #define ADDRX_MOBILE_2  (0x08 | SUBNETX)
-    #define ADDRX_SECOND    (0x10 | SUBNETX)
-    #define ADDRX_DEBUG     (0x20 | SUBNETX)
-    #define ADDRX_REMOTE_IA (0x40 | SUBNETX)
-    #define ADDRX_BROADCAST (0xff | SUBNETX)
+    #define ADDRX_MAIN      (1 | SUBNETX)
+    #define ADDRX_FIX       (2 | SUBNETX)
+    #define ADDRX_MOBILE_1  (4 | SUBNETX)
+    #define ADDRX_MOBILE_2  (8 | SUBNETX)
+    #define ADDRX_SECOND    (16 | SUBNETX)
+    #define ADDRX_DEBUG     (32 | SUBNETX)
+    #define ADDRX_REMOTE_IA (64 | SUBNETX)
+    #define ADDRX_BROADCAST (255 | SUBNETX)
 
 //I2C adresses
     //subnet MAIN

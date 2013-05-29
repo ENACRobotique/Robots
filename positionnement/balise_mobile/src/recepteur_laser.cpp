@@ -6,10 +6,11 @@
 
 #include "lib_int_laser.h"
 #include "lib_time.h"
-#include "lib_xbee_arduino.h"
+#include "lib_Xbee_arduino.h"
 #include "messages.h"
-#include "lib_comm.h"
+#include "lib_superBus.h"
 #include "params.h"
+
 
 
 
@@ -41,23 +42,7 @@ void setup() {
   delay(200);
 
 
-#ifdef DEBUG
-  debugMsg pkt={
-          ADDR_DEBUG,
-          MYADDR,
-          E_DEBUG,
-          (ADDR_DEBUG+MYADDR+E_DEBUG),
-          MYADDR,
-          0,
-          " : demarrage mobile"
-  };
-  Serial.write((unsigned char*)&pkt, sizeof(debugMsg));
-#endif
 }
-
-
-
-
 
 void loop() {
     unsigned int sizeIncoming=0;
@@ -73,10 +58,10 @@ void loop() {
 
 
 //MESSAGE HANDLING
-    if ( (lus=rxXbee(&incMsg))!=-1 )
+    if ( (lus=Xbee_receive(&incMsg))!=-1 )
     {   //reading
 
-        if ( (MYADDR & incMsg.header.destAddr) ){ //check destination address
+        if ( ( MYADDRX & incMsg.header.destAddr) ){ //check destination address
             switch (incMsg.header.type) {
                 case E_PERIOD :
                         laser_period=incMsg.payload.period;
@@ -94,18 +79,16 @@ void loop() {
                               }
                           }
                           if (nbSync>=3){//yeah, I know, but fuck you, I have my reason (ensures that the syncOK messages are correctly received)
-                              outMsg.header.destAddr=ADDR_MAIN;
-                              outMsg.header.srcAddr=MYADDR;
+                              outMsg.header.destAddr=ADDRX_MAIN;
+                              outMsg.header.srcAddr=MYADDRX;
                               outMsg.header.type=E_SYNC_OK;
                               outMsg.header.size=0;
-                              setSum(&outMsg);
-                              txXbee(outMsg);
                           }
                         }
                         break;
                 case E_SYNC_OK :
                         //if we receive a syncOk from the main, switch to "game" state
-                        if (incMsg.header.srcAddr & ADDR_MAIN){
+                        if ( (incMsg.header.srcAddr == ADDRX_MAIN) || incMsg.header.srcAddr == ADDRI_MAIN_TURRET){
                           state=GAME;
                         }
 break;
@@ -135,8 +118,8 @@ break;
             break;
         case GAME :
           if (laserStruct0.deltaT || laserStruct1.deltaT){ //if there is a new value, sends it to the main
-              outMsg.header.destAddr=ADDR_MAIN;
-              outMsg.header.srcAddr=MYADDR;
+              outMsg.header.destAddr=ADDRX_MAIN;
+              outMsg.header.srcAddr=MYADDRX;
               outMsg.header.type=E_MEASURE;
               outMsg.header.size=sizeof(sMesPayload);
               if (laserStruct0.thickness > laserStruct1.thickness) {
@@ -153,8 +136,6 @@ break;
                   outMsg.payload.measure.precision=laserStruct1.precision;
                   outMsg.payload.measure.sureness=laserStruct1.sureness;
                 }
-          setSum(&outMsg);
-          txXbee(outMsg);
           }
           break;
         default : break;
