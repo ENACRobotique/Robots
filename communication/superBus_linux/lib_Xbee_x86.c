@@ -5,7 +5,7 @@
  *      Author: quentin
  */
 
-#include "lib_xbee_x86.h"
+#include "lib_Xbee_x86.h"
 #include "messages.h"
 
 #include <stdio.h>
@@ -20,7 +20,7 @@
 int Xbee_serial_port;
 
 
-/* Initialize the serial port deisgnated by devStr
+/* Initialize the serial port designated by devStr
  * Arguments :
  *  devStr : string containing the location of the device/file
  *

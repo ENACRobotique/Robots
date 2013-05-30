@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>debug_receiver</name>
+	<name>superBus_sniffer</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -25,9 +25,20 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/message_shared</name>
+			<name>lib/superBus_linux</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/message_shared</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/superBus_linux</locationURI>
+		</link>
+		<link>
+			<name>lib/superBus_shared</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/superBus_shared</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-3-PROJECT_LOC%7D/git_robot_enac/communication</value>
+		</variable>
+	</variableList>
 </projectDescription>

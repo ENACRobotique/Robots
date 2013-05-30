@@ -10,18 +10,20 @@
 #include <time.h>
 
 #include "messages.h"
-#include "lib_xbee_x86.h"
+#include "network_cfg.h"
+#include "lib_Xbee_x86.h"
 
 int bool=42;
 unsigned char srcMask=0xFF, dstMask=0xFF;
 char dType[E_TYPE_COUNT], rawDisplay=0;
+int snetOnly=1; //display only message which destination is within our subnetwork
 
 void exitHandler(int rien){
     char car;
     int i;
     int menuloop=1;
     do{
-        printf("\nwaiting your orders:\n m: edit destination address mask (current %x)\n M: edit source address mask (current %x)\n t: add one visible type\n r: remove one visible type\n R: remove all visible types\n d: display current parameters\n h: display raw hexa received when not checksummed\n c: close this menu\n q: quit the program\n",dstMask, srcMask);
+        printf("\nwaiting your orders:\n m: edit destination address mask (current %x)\n M: edit source address mask (current %x)\n t: add one visible type\n r: remove one visible type\n R: remove all visible types\n d: display current parameters\n s: display only message which destination is in the debugger subnetwork\n c: close this menu\n q: quit the program\n",dstMask, srcMask);
         car=getchar();
         while(getchar()!='\n');
         switch (car ){
@@ -63,9 +65,9 @@ void exitHandler(int rien){
             printf("type displayed: none \n");
             memset(dType,0,sizeof(dType));
             break;
-        case 'h':
-            rawDisplay^=1;
-            printf("raw hex display : %s\npress return",((rawDisplay>0)?("enabled"):("disabled")) );
+        case 's':
+            snetOnly^=1;
+            printf("subnet only : %s\n\tRemark : only messages transmitted within the Xbee network of this debugger are visible, even if \"subnet only\" is disabled\n\npress return",((snetOnly>0)?("enabled"):("disabled")) );
             getchar();
             break;
         case 'd':
@@ -118,7 +120,7 @@ int main(int argc, char *argv[]){
     while ( bool ){
         prevClock=clock();
         if ( (bytesCount=Xbee_receive(&inMsg)) ){
-            if ( (inMsg.header.destAddr & dstMask) || (inMsg.header.srcAddr & srcMask) ) {
+            if (  (!snetOnly || (inMsg.header.destAddr&SUBNET_MASK) ) && ((inMsg.header.destAddr & dstMask) || (inMsg.header.srcAddr & srcMask)) ) {
                 switch (inMsg.header.type){
                 case E_SWITCH_CHANNEL:
                         if (dType[E_PERIOD] ){
