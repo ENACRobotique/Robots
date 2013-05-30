@@ -70,7 +70,7 @@ void _i2c0_isr() { // SI bit is set in I2C0CONSET => state change
     if(p.idx_buf < trans->len_w)
       I2C0DAT = trans->buf[p.idx_buf++];
     else { // no more bytes to transmit
-      if(trans->type = I2CTransTxRx) {
+      if(trans->type == I2CTransTxRx) {
         trans->len_w = 0;
         p.idx_buf = 0;
         p.status = I2CDevStartRequested;
