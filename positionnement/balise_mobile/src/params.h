@@ -16,8 +16,8 @@ typedef enum{
     GAME
 } mainState;
 
-#define MYADDRX ( ADDRX_MOBILE_2 | SUBNETX )
-#define MYADDRI NULL
+#define MYADDRX (ADDRX_MOBILE_2|SUBNETX)
+#define MYADDRI 0
 
 #define SYNC_TOL 8 //in µs. max desync tolerated
 

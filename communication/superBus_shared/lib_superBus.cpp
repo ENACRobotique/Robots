@@ -8,33 +8,39 @@
 
 
 #include "lib_superBus.h"
+#include "lib_checksum.h"
+#include "network_cfg.h"
+#include "params.h"
+
+#include <string.h>
+
 
 #ifdef ARCH_328P_ARDUINO
     #include "lib_Xbee_arduino.h"
-#elif defined(ARCH_X88_WILLNOTWORKBECAUSECPP)
+#elif defined(ARCH_X86_WILLNOTWORKBECAUSECPP)
     #include "lib_Xbee_x86.h"
 #else
 pleaseDefineTheArchitectureSymbol youBloodyBastard;
 #endif
 
-sMsg msgBuf[SB_INC_BUF_SIZE];
+sMsg msgBuf[SB_INC_MSG_BUF_SIZE];
 int iFirst=0,iLast=0; //index of the first and the last message written in the buffer
 
 
 /*
  * Handles the sending of a message over the SuperBus network
- *
- * Remark : if the destination is the node himself, the message is put in the msgBuf buffer, and the indexes are updated accordingly
- *
+ * For user's use only, the message was previously NOT in the network
  */
 int sb_send(sMsg *msg){
-    int i;
-    E_IFACE interface=IF_UNKNOWN;
+	//checksum and stuff
+	setSum(msg);
 
-
+	//actual sending
+	sb_forward(msg,IF_LOCAL);
 
     return 0;
 }
+
 
 
 /*
@@ -50,29 +56,29 @@ int sb_routine(){
     sMsg temp;
 
     //if Xbee receive
-    if (Xbee_receive(&temp)){
-        sb_send(&tmp);
-    }
-    //and if I2C receive TODO : "or" or "and"?
+    if (Xbee_receive(&temp)) sb_forward(&temp,IF_XBEE);
+    //TODO if (i2c_receive...)
 
-    //routing
-        //if for self, put in buffer
 
-    return 0;
+    return (iFirst-iLast)%SB_INC_MSG_BUF_SIZE;
 }
 
 /*
- * pop the oldest message unread in the incoming message buffer
+ * pops the oldest message unread in the incoming message buffer
  * Argument :
  *  msg : pointer to the memory area where the last message will be written
  * Return value :
  *  nb of bytes written
  */
 int sb_receive(sMsg *msg){
-    //pop oldest message put in incoming buffer
 
+	if (iFirst==iLast) return 0;
 
-    return 0;
+    //pop the oldest message of incoming buffer and updates index
+	memcpy(msg, &(msgBuf[iFirst]), msgBuf[iFirst].header.size + sizeof(sGenericHeader));
+	iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
+
+    return (msg->header.size + sizeof(sGenericHeader));
 }
 
 
@@ -80,20 +86,64 @@ int sb_receive(sMsg *msg){
  * Handles the routing of a message
  * Argument :
  *  msg : pointer to the message to send
- * Return value : interface identifier, IF_UNKNOWN if unknown
- *
+ * Return value : subnet to send the message on
  */
-E_IFACE sb_route(sMsg *msg,E_IFACE from){
-    int i=0;
-    do {
+E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
+	int i=0;
 
-        }while (rTable[i].destSubnet!=0);
-    return IF_UNKNOWN;
+	// if this message if for us
+	if (msg->header.destAddr==MYADDRI || msg->header.destAddr==MYADDRX) return IF_LOCAL;
+
+
+	// if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
+	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
+		if (ifFrom!=IF_I2C ) return IF_I2C;
+		else return IF_DROP;
+	}
+
+	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRX&SUBNET_MASK) ){
+		if (ifFrom!=IF_XBEE ) return IF_XBEE;
+		else return IF_DROP;
+	}
+
+	// else, sweep the table until you reach the matching subnetwork or the end
+	while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
+		if ( rTable[i].destSubnet == (msg->header.destAddr&SUBNET_MASK) ) return rTable[i].ifTo;
+		i++;
+	}
+	//if you reach the end, send to default destination
+	return rTable[i].ifTo;
 }
 
 
 
 
+/*
+ * Handles the forwarding of a message over the SuperBus network
+ *
+ *
+ */
+int sb_forward(sMsg *msg, E_IFACE ifFrom){
+	switch (sb_route(msg, ifFrom)){
+	case IF_XBEE :
+		return Xbee_send(*msg);
+		break;
+	case IF_I2C :
+		//return i2c_send(msg)
+		break;
+	case IF_DROP :
+		return 0;
+		break;
+	case IF_LOCAL :
+		iLast=(iLast+1)%SB_INC_MSG_BUF_SIZE;
+		if (iFirst==iLast) iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //drop oldest message if buffer is full
+		msgBuf[iLast]=*msg;
+		return (msgBuf[iLast].header.size + sizeof(sGenericHeader));
+		break;
+	default : return 0;
+	}
+	return 0;
+}
 
 
 

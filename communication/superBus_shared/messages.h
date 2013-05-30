@@ -15,42 +15,12 @@ extern "C" {
 
 #include <stdint.h>
 
-
-/* routing table entry
- * the routing of a message "msg", with destination address "destAddr", coming from the interface "interface" is the following :
- * while(we are not at the end of the routing table){
- *      if (interface==ifaceFrom){
- *          if (destAddr==dest || destAddr&SUBNETMASK==dest){
- *              send to ifaceTo;
- *              return;
- *              }
- *          }
- *      go to next routing table entry
- * }
- * perform default action
- *
- * /!\ the order of the entries is important : most specific first, less specific last
- * the last entry MUST be {0,0,0}
+/* sb_Adress : on 16 bytes,
+ * cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
  *
  */
+typedef uint16_t sb_Adress;
 
-
-//interface identifiers
-typedef enum{
-    IF_XBEE,
-    IF_I2C,
-    IF_SELF,
-    IF_UNKNOWN,
-    IF_DISCARD,
-
-    IFACE_COUNT
-}E_IFACE;
-
-typedef struct{
-    uint16_t dest;
-    E_IFACE ifaceFrom;
-    E_IFACE ifaceTo;
-}rTableEntry;
 
 #define XBEE_MAX_SIZE 100
 
@@ -72,10 +42,9 @@ typedef enum{
 char *eType2str(E_TYPE elem);
 
 
-
 typedef struct {
-    uint16_t destAddr;
-    uint16_t srcAddr;
+    sb_Adress destAddr;
+    sb_Adress srcAddr;
     uint8_t size;       //size of the payload
     uint8_t type;       //type of the message
     uint8_t checksumHead;

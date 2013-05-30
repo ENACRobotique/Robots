@@ -75,7 +75,7 @@ uint8_t calcSumHead(sGenericHeader *pt){
  *
  * Remark : header must be without offset between his bytes
  */
-uint8_t cbChecksumPload(sMsg msg){
+uint8_t checksumPload(sMsg msg){
     int i;
     uint8_t sum=0;
     for (i=0;i<msg.header.size;i++){

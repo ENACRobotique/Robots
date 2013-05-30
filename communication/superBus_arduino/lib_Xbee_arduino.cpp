@@ -67,11 +67,12 @@ void setupXbee(){
  * return value : nb of bytes written in pRet, 0 on error (bad checksum) or non-detection of start sequence
  * pointer return : message and type in a structure
  * requires : Serial initialisation
+ *
+ * Remark : after a call to Xbee_receive, the memory area designated by pRet may be modified even if no valid message was received
  */
 int Xbee_receive(sMsg *pRet){
     static uint8_t i;
     static uint8_t smallBuf[CBUFF_SIZE]={0};
-    char lu;
     int count=0;
     int j;
     //Serial.read()==-1 <=> no data available, count to limit the time spend in the loop in case of spam, checksum to get out of the loop if it is correct AND the sender address id OK (if sender=0 it means it has been reset to 0 after reading the message)
@@ -87,17 +88,23 @@ int Xbee_receive(sMsg *pRet){
     if (count<=MAX_READ_BYTES && cbChecksumHead(smallBuf,CBUFF_SIZE,(i-1)&(CBUFF_SIZE-1)) && smallBuf[(i-3)&3] ){
 
         count=sizeof(sGenericHeader);
-        //TODO : do we copy the message before checking payload checksum, or after (in that case, we must copy it one more time in memory if we don't want to corrupt any previous message stored at the location pointed by return pointer) ?
 
         //we copy the header in the return structure
         for (j=0;j<sizeof(sGenericHeader);j++){
             ((uint8_t *)(&(pRet->header)))[j]=smallBuf[(i-sizeof(sGenericHeader)+j)&(CBUFF_SIZE-1)];
         }
 
+        //clear the "header buffer"
+        memset(smallBuf,0,sizeof(smallBuf));
+
         //we read the rest of the data in this message (given by the "size" field of the header) and write the in the return structure
         count+=Serial.readBytes((char *)(&(pRet->payload)),pRet->header.size);
-        memset(smallBuf,0,sizeof(smallBuf));
-        return count;
+
+
+
+        //checksum it, if ok then return count, else return 0
+        if(checksumPload(*pRet)) return count;
+        else return 0;
     }
 
     return 0;

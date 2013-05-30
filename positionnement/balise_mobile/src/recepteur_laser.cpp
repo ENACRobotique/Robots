@@ -45,11 +45,10 @@ void setup() {
 }
 
 void loop() {
-    unsigned int sizeIncoming=0;
     static char nbSync=0;
     static unsigned long lastLaserDetect=0;
-    sMsg incMsg,outMsg;
-    int lus;
+    sMsg inMsg,outMsg;
+    int rxB; // size (bytes) of message available to read
 
 
 
@@ -58,47 +57,45 @@ void loop() {
 
 
 //MESSAGE HANDLING
-    if ( (lus=Xbee_receive(&incMsg))!=-1 )
-    {   //reading
+    //network routine and test if message for this node
+    if (sb_routine()){
+    	rxB=sb_receive(&inMsg);
+#ifdef deprecated
+    	switch (inMsg.header.type){
+    	case E_PERIOD :
+    		laser_period=inMsg.payload.period;
+    		break;
+    	case E_SYNC_EXPECTED_TIME :
+			if (state==SYNC){
 
-        if ( ( MYADDRX & incMsg.header.destAddr) ){ //check destination address
-            switch (incMsg.header.type) {
-                case E_PERIOD :
-                        laser_period=incMsg.payload.period;
-                        break;
-                case E_SYNC_EXPECTED_TIME : //updates the expected time
-                        if (state==SYNC){
+				if (nbSync<3){
+					if ( abs((l2gMicros(lastLaserDetect)-inMsg.payload.syncTime))<SYNC_TOL ){
+						nbSync++;
+					}
+					else {
+						setMicrosOffset(lastLaserDetect-inMsg.payload.syncTime);
+						nbSync=0; //TODO : man, i'm no sure about this one. I is highly unprobable that we receive 3 times a laser in sync with our TXed time. On the other hand, we will miss some message (or unsync)
+					}
+				}
+				if (nbSync>=3){//yeah, I know, but fuck you, I have my reason (ensures that the syncOK messages are correctly received)
+					outMsg.header.destAddr=ADDRX_MAIN;
+					outMsg.header.srcAddr=MYADDRX;
+					outMsg.header.type=E_SYNC_OK;
+					outMsg.header.size=0;
+				}
+			}
+			break;
+    	case E_SYNC_OK :
+    		//if we receive a syncOk from the main, switch to "game" state
+			if ( (inMsg.header.srcAddr == ADDRX_MAIN) || inMsg.header.srcAddr == ADDRI_MAIN_TURRET){
+			  state=GAME;
+			}
+    		break;
+		default : break;
 
-                          if (nbSync<3){
-                              if ( abs((l2gMicros(lastLaserDetect)-incMsg.payload.syncTime))<SYNC_TOL ){
-                                  nbSync++;
-                              }
-                              else {
-                                  setMicrosOffset(lastLaserDetect-incMsg.payload.syncTime);
-                                  nbSync=0; //TODO : man, i'm no sure about this one. I is highly unprobable that we receive 3 times a laser in sync with our TXed time. On the other hand, we will miss some message (or unsync)
-                              }
-                          }
-                          if (nbSync>=3){//yeah, I know, but fuck you, I have my reason (ensures that the syncOK messages are correctly received)
-                              outMsg.header.destAddr=ADDRX_MAIN;
-                              outMsg.header.srcAddr=MYADDRX;
-                              outMsg.header.type=E_SYNC_OK;
-                              outMsg.header.size=0;
-                          }
-                        }
-                        break;
-                case E_SYNC_OK :
-                        //if we receive a syncOk from the main, switch to "game" state
-                        if ( (incMsg.header.srcAddr == ADDRX_MAIN) || incMsg.header.srcAddr == ADDRI_MAIN_TURRET){
-                          state=GAME;
-                        }
-break;
-                default : break;
-            }
-        }
-//        else { //discard message : do nothing
-//        }
+    	}
+#endif
     }
-
 
 
 //MUST ALWAYS BE DONE (any state)
@@ -111,45 +108,78 @@ break;
         else lastLaserDetect=laserStruct1.date;
     }
 
-//STATE MACHINE for non-"received message" handling functions
+    //update the laser period
+    if (rxB && inMsg.header.type==E_PERIOD ){
+    	laser_period=inMsg.payload.period;
+    	rxB=0;
+    }
+
+    //blink
+    if((time - time_prev_led)>=500) {
+      time_prev_led= time;
+      digitalWrite(PIN_DBG_LED,debug_led^=1);
+    }
+
+//STATE MACHINE
     switch (state){
         case SYNC:
-            //here, we are waiting for a sync_ok message, action dealt in the rxed message handling par
-            break;
+        	if (rxB){
+        		switch (inMsg.header.type) {
+        		case E_SYNC_EXPECTED_TIME :
+					if (nbSync<3){
+						if ( abs((l2gMicros(lastLaserDetect)-inMsg.payload.syncTime))<SYNC_TOL ){
+							nbSync++;
+						}
+						else {
+							setMicrosOffset(lastLaserDetect-inMsg.payload.syncTime);
+							nbSync=0; //TODO : man, i'm no sure about this one. I is highly unprobable that we receive 3 times a laser in sync with our TXed time. On the other hand, we will miss some message (or unsync)
+						}
+					}
+					if (nbSync>=3){//yeah, I know, but fuck you, I have my reason (ensures that the syncOK messages are correctly received)
+						outMsg.header.destAddr=ADDRX_MAIN;
+						outMsg.header.srcAddr=MYADDRX;
+						outMsg.header.type=E_SYNC_OK;
+						outMsg.header.size=0;
+						sb_send(&outMsg);
+					}
+					rxB=0;
+					break;
+        		case E_SYNC_OK :
+        			//switch to game state if the sync_ok signal was send by the main
+        			if ( (inMsg.header.srcAddr == ADDRX_MAIN) || inMsg.header.srcAddr == ADDRI_MAIN_TURRET){
+					  state=GAME;
+					}
+        			rxB=0;
+        			break;
+        		default : break;
+        		}
+			}
+        	break;
+
+
         case GAME :
-          if (laserStruct0.deltaT || laserStruct1.deltaT){ //if there is a new value, sends it to the main
-              outMsg.header.destAddr=ADDRX_MAIN;
-              outMsg.header.srcAddr=MYADDRX;
-              outMsg.header.type=E_MEASURE;
-              outMsg.header.size=sizeof(sMesPayload);
-              if (laserStruct0.thickness > laserStruct1.thickness) {
-                  //pkt.dist=laser2dist(laserStruct1.deltaT);
-                  outMsg.payload.measure.value=laserStruct0.deltaT;
-                  outMsg.payload.measure.date=laserStruct0.date;
-                  outMsg.payload.measure.precision=laserStruct0.precision;
-                  outMsg.payload.measure.sureness=laserStruct0.sureness;
-              }
-              else {
-                  //pkt.dist=laser2dist(laserStruct1.deltaT);
-                  outMsg.payload.measure.value=laserStruct1.deltaT;
-                  outMsg.payload.measure.date=laserStruct1.date;
-                  outMsg.payload.measure.precision=laserStruct1.precision;
-                  outMsg.payload.measure.sureness=laserStruct1.sureness;
-                }
+        	if (laserStruct0.deltaT || laserStruct1.deltaT){ //if there is a new value, sends it to the main
+				outMsg.header.destAddr=ADDRX_MAIN;
+				outMsg.header.srcAddr=MYADDRX;
+				outMsg.header.type=E_MEASURE;
+				outMsg.header.size=sizeof(sMesPayload);
+				if (laserStruct0.thickness > laserStruct1.thickness) {
+					outMsg.payload.measure.value=laserStruct0.deltaT;
+					outMsg.payload.measure.date=laserStruct0.date;
+					outMsg.payload.measure.precision=laserStruct0.precision;
+					outMsg.payload.measure.sureness=laserStruct0.sureness;
+				}
+				else {
+					outMsg.payload.measure.value=laserStruct1.deltaT;
+					outMsg.payload.measure.date=laserStruct1.date;
+					outMsg.payload.measure.precision=laserStruct1.precision;
+					outMsg.payload.measure.sureness=laserStruct1.sureness;
+				}
+				sb_send(&outMsg);
           }
           break;
         default : break;
 
     }
-
-
-      if((time - time_prev_led)>=500) {
-        time_prev_led= time;
-        digitalWrite(PIN_DBG_LED,debug_led^=1);
-      }
-
-
 }
-
-
 

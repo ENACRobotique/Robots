@@ -24,6 +24,7 @@
 int sb_send(sMsg *msg);
 int sb_routine();
 int sb_receive(sMsg *msg);
-int sb_route(sMsg *msg,E_IFACE);
+E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom);
+int sb_forward(sMsg *msg, E_IFACE ifFrom);
 
 #endif /* LIB_SUPERBUS_H_ */
