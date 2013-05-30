@@ -96,7 +96,7 @@
 							<builder buildPath="${workspace_loc:/arduinoUno_core}/Debug" id="de.innot.avreclipse.target.builder.winavr.lib.debug.1090584047" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.lib.debug"/>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.lib.debug.1885242553" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.lib.debug">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.1741878640" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
-								<option id="de.innot.avreclipse.asm.option.include.paths.677767656" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+								<option id="de.innot.avreclipse.asm.option.include.paths.677767656" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/usr/lib/gcc/avr/4.7.2/include}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/lib/avr/include"/>
 								</option>
@@ -112,7 +112,6 @@
 								<option id="de.innot.avreclipse.compiler.option.language.ubitfields.1476655200" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.compiler.option.language.ubitfields" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.incpath.982502993" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/usr/lib/gcc/avr/4.7.2/include}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/lib/avr/include"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1054439787" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
@@ -127,7 +126,6 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.language.ubitfields.128554982" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.cppcompiler.option.language.ubitfields" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.238429507" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/usr/lib/gcc/avr/4.7.2/include}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/lib/avr/include"/>
 								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.2003446088" superClass="de.innot.avreclipse.cppcompiler.input"/>
@@ -153,6 +151,7 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="328P_16MHz"/>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/arduinoUno_core"/>
 		</configuration>

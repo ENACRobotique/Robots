@@ -30,9 +30,6 @@ void setup() {
   laserIntInit(1);
   Serial.begin(111111);
 
-  setupXbee();
-
-
   pinMode(PIN_DBG_LED,OUTPUT);
   pinMode(PIN_RST_XBEE,OUTPUT);
 
@@ -41,6 +38,7 @@ void setup() {
   digitalWrite(PIN_RST_XBEE,LOW);
   delay(200);
 
+  sb_printDbg(ADDRX_DEBUG,"mobile starting",-12,13);
 
 }
 

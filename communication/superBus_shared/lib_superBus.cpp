@@ -147,6 +147,23 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 
 
 
+int sb_printDbg(sb_Adress dest,char * str,int32_t i, uint32_t u){
+	sMsg tmp;
+	tmp.header.destAddr=dest;
+	tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;
+	tmp.header.type=E_DEBUG;
+	tmp.header.size=sizeof(sDebugPayload);
+	tmp.payload.debug.i=i;
+	tmp.payload.debug.u=u;
+	strncpy((char *)&(tmp.payload.debug.msg),str,32);
+	tmp.payload.debug.msg[31]=0; //strncpy does no ensure the null-termination
+
+	sb_send(&tmp);
+
+	return 0;
+}
+
+
 
 
 

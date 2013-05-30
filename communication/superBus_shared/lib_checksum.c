@@ -22,7 +22,7 @@
 uint8_t checksumHead(sGenericHeader *pt){
     int i;
     uint8_t sum=0;
-    for (i=0;i<sizeof(sGenericHeader)-2;i++){
+    for (i=0;i<sizeof(sGenericHeader)-1;i++){
         sum+=((uint8_t *)pt)[i];
     }
     return !(sum);
@@ -44,7 +44,7 @@ uint8_t checksumHead(sGenericHeader *pt){
 uint8_t cbChecksumHead(uint8_t *pt,uint8_t size, uint8_t lastB){
     int i;
     uint8_t sum=0;
-    for (i=0;i<sizeof(sGenericHeader)-2;i++){
+    for (i=1;i<sizeof(sGenericHeader);i++){
         sum+=pt[(lastB-i)&(size-1) ];
     }
     return !(sum);
@@ -60,10 +60,10 @@ uint8_t cbChecksumHead(uint8_t *pt,uint8_t size, uint8_t lastB){
 uint8_t calcSumHead(sGenericHeader *pt){
     int i;
     uint8_t sum=0;
-    for (i=0;i<sizeof(sGenericHeader)-3;i++){
+    for (i=0;i<sizeof(sGenericHeader)-2;i++){
         sum+=((uint8_t *)pt)[i];
     }
-    return ~sum;
+    return (~sum)+1;
 }
 
 
@@ -79,7 +79,7 @@ uint8_t checksumPload(sMsg msg){
     int i;
     uint8_t sum=0;
     for (i=0;i<msg.header.size;i++){
-        sum+=((uint8_t *)&(msg.payload))[i];
+        sum+=msg.payload.raw[i];
     }
     return !(msg.header.checksumPload+sum);
 }
@@ -93,7 +93,7 @@ uint8_t calcSumPload(uPayload *pt,int size){
     int i;
     uint8_t sum=0;
     for (i=0;i<size;i++){
-        sum+=((uint8_t *)pt)[i];
+        sum+=pt->raw[i];
     }
     return ~sum;
 }

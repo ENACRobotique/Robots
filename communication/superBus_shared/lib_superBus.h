@@ -10,7 +10,6 @@
 
 #include "messages.h"
 #include "network_cfg.h"
-#include "params.h"
 
 
 /*
@@ -26,5 +25,6 @@ int sb_routine();
 int sb_receive(sMsg *msg);
 E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
+int sb_printDbg(sb_Adress dest,char * str,int32_t i, uint32_t u);
 
 #endif /* LIB_SUPERBUS_H_ */

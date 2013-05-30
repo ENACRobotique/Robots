@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
@@ -98,7 +99,7 @@ void exitHandler(int rien){
 int main(int argc, char *argv[]){
     sMsg inMsg;
     double bytesCount;
-    clock_t prevClock,currentClock;
+    struct timeval prevClock,currentClock;
     double elapsed;
     double byteRate;
 
@@ -106,7 +107,7 @@ int main(int argc, char *argv[]){
     memset(dType,1,sizeof(dType));
 
     if(argc!=2){
-        printf("XBee sniffer & positioning system network analyser\nMade by Quentin VEY for the ENAC robotic club, 2013\n\nusage: %s ttyport (ex: /dev/ttyUSB0)\n", argv[0]);
+        printf("XBee sniffer & superBus network analyser\nMade by Quentin VEY for the ENAC robotic club, 2013\n\nusage: %s ttyport (ex: /dev/ttyUSB0)\n", argv[0]);
         return(1);
      }
         
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]){
 
 
     while ( bool ){
-        prevClock=clock();
+        gettimeofday(&prevClock, NULL);
         if ( (bytesCount=Xbee_receive(&inMsg)) ){
             if (  (!snetOnly || (inMsg.header.destAddr&SUBNET_MASK) ) && ((inMsg.header.destAddr & dstMask) || (inMsg.header.srcAddr & srcMask)) ) {
                 switch (inMsg.header.type){
@@ -134,7 +135,7 @@ int main(int argc, char *argv[]){
                         break;
                 case E_DEBUG:
                         if (dType[E_DEBUG] ){
-                            printf("%4x -> %4x DEBUG %s ,%u , %d",inMsg.header.srcAddr,inMsg.header.destAddr, inMsg.payload.debug.msg,inMsg.payload.debug.u, inMsg.payload.debug.i);
+                            printf("%4x -> %4x DEBUG %s ,%d , %u",inMsg.header.srcAddr,inMsg.header.destAddr, inMsg.payload.debug.msg,inMsg.payload.debug.i, inMsg.payload.debug.u);
                         }
                         break;
                 case E_DEBUG_ADDR:
@@ -167,10 +168,10 @@ int main(int argc, char *argv[]){
                         break;
                 }
             }
-            currentClock=clock();
-            elapsed = ((double) (currentClock - prevClock) * 1000) / CLOCKS_PER_SEC;
+            gettimeofday(&currentClock, NULL);
+            elapsed = currentClock.tv_sec - prevClock.tv_sec + ((double) (currentClock.tv_usec - prevClock.tv_usec) )/ 1000000.;
             byteRate=bytesCount/elapsed;
-            printf("\033[128D\033[50C%f Ko/s\n",byteRate);
+            printf("\033[128D\033[50C%f o/s  ,%u\n",byteRate,clock());
         }
     }
     if(prevH) prevH(15);

@@ -6,16 +6,19 @@
  */
 
 #include "lib_Xbee_x86.h"
+#include "lib_checksum.h"
 #include "messages.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <unistd.h>
 
 int Xbee_serial_port;
 
@@ -38,7 +41,7 @@ void Xbee_initSerial(char * devStr){
         exit(-1);
     }
 
-    printf("Port serie numero %d bien ouvert.\n", Xbee_serial_port);
+
 
     //chargement des données
     tcgetattr(Xbee_serial_port, &options);
@@ -70,33 +73,42 @@ void Xbee_deInitSerial(){
 #define CBUFF_SIZE 8        //MUST be a power of 2
 #define MAX_READ_BYTES 100  //nb of bytes to read before we leave this function (to avoid blocking)
 
+
+
+/*
+ *
+ * /!\ Blocking function
+ *
+ */
 int Xbee_receive(sMsg *pRet){
-    static uint8_t i;
+    static uint8_t i=0;
     static uint8_t smallBuf[CBUFF_SIZE]={0};
     int count=0;
     int j;
+
+
     //read(...)=0 <=> no data available, <0 <=> error | count to limit the time spend in the loop in case of spam, checksum to get out of the loop if it is correct AND the sender address id OK (if sender=0 it means it has been reset to 0 after reading the message)
     while( read(Xbee_serial_port,&(smallBuf[i]),1)>0 \
             && count<=MAX_READ_BYTES \
-            &&  ( cbChecksumHead(smallBuf,CBUFF_SIZE,(i-1)&(CBUFF_SIZE-1)) || !( smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8&smallBuf[(i-4)&(CBUFF_SIZE-1)] ) ) ) {
+            &&  ( !cbChecksumHead(smallBuf,CBUFF_SIZE,(i)&(CBUFF_SIZE-1)) || !( (smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8) | smallBuf[(i-4)&(CBUFF_SIZE-1)] ) ) ) {
         i=(i+1)&(CBUFF_SIZE-1);                                          // &7 <~> %8, but better behaviour with negative in our case (and MUCH faster)
         count++;
     }
 
 
-    if (count<=MAX_READ_BYTES && cbChecksumHead(smallBuf,CBUFF_SIZE,(i-1)&(CBUFF_SIZE-1)) && smallBuf[(i-3)&3] ){
+    if (count<=MAX_READ_BYTES && cbChecksumHead(smallBuf,CBUFF_SIZE,(i)&(CBUFF_SIZE-1)) &&  ( (smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8) | smallBuf[(i-4)&(CBUFF_SIZE-1)] )  ){
 
         count=sizeof(sGenericHeader);
 
-        //TODO : do we copy the message before checking payload checksum, or after (in that case, we must copy it one more time in memory if we don't want to corrupt any previous message stored at the location pointed by return pointer) ?
-
         //we copy the header in the return structure
         for (j=0;j<sizeof(sGenericHeader);j++){
-            ((uint8_t *)(&(pRet->header)))[j]=smallBuf[(i-sizeof(sGenericHeader)+j)&(CBUFF_SIZE-1)];
+            ((uint8_t *)(&(pRet->header)))[j]=smallBuf[(i-sizeof(sGenericHeader)+j+1)&(CBUFF_SIZE-1)];
         }
 
         //we read the rest of the data in this message (given by the "size" field of the header) and write the in the return structure
-        count+=read(Xbee_serial_port,(char *)(&(pRet->payload)),pRet->header.size);//Serial.readBytes((char *)(&(pRet->payload)),pRet->header.size);
+        do{
+        	count+=read(Xbee_serial_port,((char*)pRet) + count,pRet->header.size + sizeof(sGenericHeader) - count);//Serial.readBytes((char *)(&(pRet->payload)),pRet->header.size);
+        }while(count < pRet->header.size + sizeof(sGenericHeader));
 
         memset(smallBuf,0,sizeof(smallBuf));
         return count;
@@ -106,6 +118,7 @@ int Xbee_receive(sMsg *pRet){
 }
 
 int Xbee_send(sMsg msg){
+	//TODO
 
 return 0;
 }

@@ -10,5 +10,5 @@ avrtarget/de.innot.avreclipse.configuration.lib.debug.511393024.883608017/Extend
 avrtarget/de.innot.avreclipse.configuration.lib.debug.511393024.883608017/MCUType=atmega328p
 avrtarget/de.innot.avreclipse.configuration.lib.debug.511393024.883608017/UseEEPROM=false
 avrtarget/de.innot.avreclipse.configuration.lib.debug.511393024.883608017/UseExtendedRAMforHeap=true
-avrtarget/perConfig=false
+avrtarget/perConfig=true
 eclipse.preferences.version=1
