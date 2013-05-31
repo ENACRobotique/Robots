@@ -15,7 +15,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.1115602665" name="Debug" parent="de.innot.avreclipse.configuration.app.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.1115602665" name="Debug" parent="de.innot.avreclipse.configuration.app.debug" postannouncebuildStep="hack to force the generation of the .hex file when eclipse linked folders are used" postbuildStep="-avr-objcopy -R .eeprom -O ihex balise_principal.elf balise_principal.hex ">
 					<folderInfo id="de.innot.avreclipse.configuration.app.debug.1115602665." name="/" resourcePath="">
 						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.37638816" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug">
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.787315243" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug" value="true" valueType="boolean"/>
@@ -30,6 +30,12 @@
 								<option id="de.innot.avreclipse.asm.option.include.paths.34638740" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/message_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1532470331" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
@@ -38,17 +44,19 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.1005954129" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.incpath.1748207674" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/message_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.1996153898" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.shortenums.1338121004" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.compiler.option.optimize.shortenums" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.1814190435" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.uchar.547146486" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.compiler.option.language.uchar" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.ubitfields.2695092" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.compiler.option.language.ubitfields" value="false" valueType="boolean"/>
-								<option id="de.innot.avreclipse.compiler.option.def.812882903" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+								<option id="de.innot.avreclipse.compiler.option.def.812882903" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1424897586" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
@@ -57,11 +65,13 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.debug.level.1688360266" name="Generate Debugging Info" superClass="de.innot.avreclipse.cppcompiler.option.debug.level"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.991289286" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.1734469084" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/message_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.other.1679019648" name="Other Optimization Flags" superClass="de.innot.avreclipse.cppcompiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.1089240171" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
@@ -98,8 +108,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="arduinolib|lib|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="arduinolib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="arduinolib"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
@@ -131,21 +140,45 @@
 							<builder buildPath="${workspace_loc:/balise principal}/Release" id="de.innot.avreclipse.target.builder.winavr.app.release.645092225" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.release"/>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.release.680475313" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.release">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.1935880732" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level" value="de.innot.avreclipse.assembler.option.debug.level.none" valueType="enumerated"/>
+								<option id="de.innot.avreclipse.asm.option.include.paths.2130592053" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1371501102" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.218697330" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release">
 								<option id="de.innot.avreclipse.compiler.option.debug.level.1467415945" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level" value="de.innot.avreclipse.compiler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.1360705745" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
-								<option id="de.innot.avreclipse.compiler.option.def.1324146228" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+								<option id="de.innot.avreclipse.compiler.option.def.1324146228" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
+								</option>
+								<option id="de.innot.avreclipse.compiler.option.incpath.750482645" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1230665008" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.1468780842" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release">
 								<option id="de.innot.avreclipse.cppcompiler.option.debug.level.401339924" name="Generate Debugging Info" superClass="de.innot.avreclipse.cppcompiler.option.debug.level" value="de.innot.avreclipse.cppcompiler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.1477636091" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
-								<option id="de.innot.avreclipse.cppcompiler.option.def.978305665" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
+								<option id="de.innot.avreclipse.cppcompiler.option.def.978305665" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
+								</option>
+								<option id="de.innot.avreclipse.cppcompiler.option.incpath.1549962381" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.6482795" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
@@ -166,7 +199,6 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="arduinolib|lib|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="arduinolib"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
@@ -190,16 +222,17 @@
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1115602665;de.innot.avreclipse.configuration.app.debug.1115602665.;de.innot.avreclipse.tool.cppcompiler.app.debug.1134785497;de.innot.avreclipse.cppcompiler.input.470363792">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
+			<autodiscovery enabled="false" problemReportingEnabled="false" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1115602665;de.innot.avreclipse.configuration.app.debug.1115602665.;de.innot.avreclipse.tool.compiler.winavr.app.debug.289172235;de.innot.avreclipse.compiler.winavr.input.1424897586">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.1619598339;de.innot.avreclipse.configuration.app.release.1619598339.;de.innot.avreclipse.tool.compiler.winavr.app.release.218697330;de.innot.avreclipse.compiler.winavr.input.1230665008">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.1619598339;de.innot.avreclipse.configuration.app.release.1619598339.;de.innot.avreclipse.tool.cppcompiler.app.release.1468780842;de.innot.avreclipse.cppcompiler.input.6482795">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.1619598339;de.innot.avreclipse.configuration.app.release.1619598339.;de.innot.avreclipse.tool.compiler.winavr.app.release.218697330;de.innot.avreclipse.compiler.winavr.input.1230665008">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
-		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

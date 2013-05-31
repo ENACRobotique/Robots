@@ -3,6 +3,7 @@
 	<name>balise_principal</name>
 	<comment></comment>
 	<projects>
+		<project>arduinoUno_core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -27,9 +28,19 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>lib/message_shared</name>
+			<name>arduinolib/Wire</name>
 			<type>2</type>
-			<location>/home/quentin/Dropbox/Club Robot ENAC/Coupe 2013/Systeme position/Info/EclipseWS_balises_mobiles/message_shared</location>
+			<locationURI>PARENT-2-PROJECT_LOC/arch-arduino/libraries/Wire</locationURI>
+		</link>
+		<link>
+			<name>lib/superBus_arduino</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/superBus_arduino</locationURI>
+		</link>
+		<link>
+			<name>lib/superBus_shared</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/superBus_shared</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

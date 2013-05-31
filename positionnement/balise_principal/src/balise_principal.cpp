@@ -8,18 +8,18 @@
 #include "lib_domitille.h"
 
 
-#include "lib_xbee_arduino.h"
-#include "params.h"
-#include "Arduino.h"
 
+#include "Arduino.h"
 #include "Wire.h"
-#include "i2ccomm.h"
 #include "inttypes.h"
 
-extern "C"{
-    #include "messages.h"
-    #include "lib_comm.h"
-}
+#include "i2ccomm.h"
+#include "messages.h"
+#include "network_cfg.h"
+#include "params.h"
+#include "lib_superBus.h"
+
+
 uint32_t mesTab[2]={0,0};
 
 
@@ -47,21 +47,6 @@ void setup(){
 
     domi_init(2);
 
-#ifdef DEBUG
-    debugMsg pkt={
-          ADDR_DEBUG,
-          MYADDR,
-          E_DEBUG,
-          (ADDR_DEBUG+MYADDR+E_DEBUG),
-          668,
-          0,
-          "demarrage tourelle"
-    };
-    Serial.write((unsigned char*)&pkt, sizeof(debugMsg));
-#endif
-
-
-
 }
 
 
@@ -69,124 +54,113 @@ static int state=GAME,debug_led=0;
 char syncOKbool=0;
 
 void loop(){
-    uMsg incMsg;
+    sMsg inMsg,outMsg;
 
-    unsigned int sizeIncoming=0;
+    int rxB=0;
     static unsigned long time_prev_led=0,time_prev_period=millis(),prev_TR=0;
+    sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
     unsigned long time=millis();
 
 
-    //periodically send the period in broadcast
-    if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
-        time_prev_period += ROT_PERIOD_BCAST;
-        periodMsg pkt={
-                ADDR_BROADCAST,
-                MYADDR,
-                E_PERIOD,
-                (ADDR_BROADCAST+MYADDR+E_PERIOD)%255,
-                domi_meanPeriod()
-        };
-    Serial.write((unsigned char*)&pkt,sizeof(periodMsg));
-    }
 
 
-    //reading an eventual incoming message
-    if ( readXbee(&incMsg)!=-1 ){
 
-        //check if destination says it is for us and checksum
-        if ((MYADDR & incMsg.header.destAddr) ){
-          switch(incMsg.header.type){
+///////// must always be done, any state
 
-              //if the sync has succeed for one node
-              case E_SYNC_OK :{
-                          syncOKbool|=incMsg.syncOk.srcAddr;
-                            #ifdef DEBUG
-                                  debugMsg pkt={ ADDR_DEBUG, MYADDR, E_DEBUG,
-                                            (ADDR_DEBUG+MYADDR+E_DEBUG),0,0,"sync received from"};
-                                  pkt.i=incMsg.syncOk.srcAddr;
-                                  Serial.write((unsigned char*)&pkt, sizeof(debugMsg));
-                            #endif
-                          if (syncOKbool==(ADDR_MOBILE_1)){// | ADDR_MOBILE_2)){ //FIXME change if more beacon to sync
-                              syncOkMsg msg={ ADDR_BROADCAST, MYADDR, E_SYNC_OK,
-                                        (ADDR_BROADCAST+MYADDR+E_SYNC_OK)};
-                              Serial.write((unsigned char*)&msg, sizeof(syncOkMsg));
-                              state=GAME;
-                          }
-                          break;
-              }
-              case E_MEASURE :{
-                                if (incMsg.measure.srcAddr==ADDR_MOBILE_1) {
-                                    static unsigned long last1[10]={0};
-                                    static int i1=0;
-                                    int i=0;
-                                    unsigned long max=0;
+	//network routine
+	if ((rxB=sb_routine())){
+		sb_receive(&inMsg);
+	}
 
-                                    i1=(i1+1)%10;
-                                    last1[i1]=incMsg.measure.measure;
-                                    for (i=0;i<10;i++){
-                                        if(last1[i]>max) max=last1[i];
-                                    }
-                                    mesTab[0]=max;
-                                }
-                                else if (incMsg.measure.srcAddr==ADDR_MOBILE_2) {
-                                    static unsigned long last2[10]={0,0,0,0,0,0,42,0,0,0};
-                                    static int i2=0;
-                                    int i=0;
-                                    unsigned long max=0;
-
-                                    i2=(i2+1)%10;
-                                    last2[i2]=incMsg.measure.measure;
-                                    for (i=0;i<10;i++){
-                                        if(last2[i]>max) max=last2[i];
-                                    }
-                                    mesTab[1]=max;
-                                }
-
-                                break;
-              }
-              default :
-                          break;
+    //blinking
+    if((time - time_prev_led)>=500) {
+            time_prev_led += 500;
+            digitalWrite(PIN_DBG_LED,debug_led^=1);
           }
-        }
+
+    //period broadcast
+    if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
+    	outMsg.header.destAddr=ADDRX_BROADCAST;
+    	outMsg.header.srcAddr=MYADDRX;
+    	outMsg.header.type=E_PERIOD;
+    	outMsg.header.size=sizeof(outMsg.payload.period);
+    	outMsg.payload.period=domi_meanPeriod();
+        time_prev_period += ROT_PERIOD_BCAST;
+        sb_send(&outMsg);
     }
 
+    //some message handling
+    if (rxB){
+    	switch (inMsg.header.type){
+    	case E_SYNC_OK :
+    		//write in syncOkbool that the sender is in sync
+    		syncOKbool|=(inMsg.header.srcAddr&DEVICEX_MASK);
+    		//if everybody is in sync, send a global "SYNC_OK"
+    		if (syncOKbool==(ADDRX_MOBILE_1)){//FIXME | ADDRX_MOBILE_2 | ADDRX_SECOND
+				outMsg.header.srcAddr=ADDRX_MAIN;
+				outMsg.header.destAddr=ADDRX_BROADCAST;
+				outMsg.header.type=E_SYNC_OK;
+				outMsg.header.size=0;
+				sb_send(&outMsg);
+				state=GAME;
+    		}
+    		break;
+    	default : break;
+    	}
+    }
 
+/////////state machine
       switch (state){
-          case SYNC:{
+          case SYNC:
                   //if nouveau tour, envoyer les expected pour le dernier tour
                   if(prev_TR!=last_TR){
-                      //expected for balise 1
-                      syncDataMsg pkt={
-                              ADDR_MOBILE_1,
-                              ADDR_MAIN,
-                              E_SYNC_EXPECTED_TIME,
-                              (ADDR_MOBILE_1+ADDR_MAIN+E_SYNC_EXPECTED_TIME),
-                              ((TR_period*PHASE_INIT_MOBILE_1)>>9)+prev_TR
-                      };
-                      //if the destination's syncOK has not been received
-                      if (!(syncOKbool & ADDR_MOBILE_1)) Serial.write((unsigned char*)&pkt,sizeof(syncDataMsg));
-//                      if (!(syncOKbool & ADDR_MOBILE_2)){  FIXME
-//                          pkt.destAddr=ADDR_MOBILE_2;
-//                          pkt.checksum=checksum((unsigned char*)&pkt);
-//                          pkt.time=((TR_period*PHASE_INIT_MOBILE_2)>>9)+prev_TR;
-//                          Serial.write((unsigned char*)&pkt,sizeof(syncDataMsg));
+                	  //send to the laser receiver the expected time they should have seen the laser in order to synchronize the clocks
+                      if (!(syncOKbool & (ADDRX_MOBILE_1&DEVICEX_MASK))){
+						  //expected for balise 1
+						  outMsg.header.srcAddr=MYADDRX;
+						  outMsg.header.destAddr=ADDRX_MOBILE_1;
+						  outMsg.header.type=E_SYNC_EXPECTED_TIME;
+						  outMsg.header.size=sizeof(outMsg.payload.syncTime);
+						  outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_1)>>9)+prev_TR;
+						  sb_send(&outMsg);
+                      }
+//FIXME                      if (!(syncOKbool & (ADDRX_MOBILE_2&DEVICE_MASK))){
+//						  //expected for balise 2
+//						  outMsg.header.srcAddr=MYADDRX;
+//						  outMsg.header.destAddr=ADDRX_MOBILE_2;
+//						  outMsg.header.type=E_SYNC_EXPECTED_TIME;
+//						  outMsg.header.size=sizeof(outMsg.payload.syncTime);
+//						  outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_2)>>9)+prev_TR;
+//						  sb_send(&outMsg);
 //                      }
                       prev_TR=last_TR;
                   }
+                  break;
+          case GAME :
+        	  	  if (rxB){
+        	  		  switch (inMsg.header.type){
+        	  		  case E_MEASURE :
+        	  			  switch (inMsg.header.srcAddr){
+        	  			  case ADDRX_MOBILE_1 :
+        	  				  last1=inMsg.payload.measure;
+        	  				  break;
+        	  			  case ADDRX_MOBILE_2 :
+        	  				  last2=inMsg.payload.measure;
+        	  				  break;
+        	  			  case ADDRX_SECOND :
+							  lastS=inMsg.payload.measure;
+							  break;
+        	  			  default : break;
+        	  			  }
+        	  			  rxB=0;
+        	  			  break;
 
+        	  		  default : break;
+        	  		  }
+        	  	  }
                   break;
-          }
-          case GAME :{
-                  break;
-          }
           default : break;
 
-      }
-
-
-      if((time - time_prev_led)>=500) {
-        time_prev_led += 500;
-        digitalWrite(PIN_DBG_LED,debug_led^=1);
       }
 
 

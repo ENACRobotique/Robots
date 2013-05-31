@@ -15,11 +15,18 @@
 extern "C" {
 #endif
 
+#ifndef BIT
+#define BIT(a) (1<<(a))
+#endif
+
+
 
 #define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits adress. Must equal the larger size of the adresse in the different subnetworks
 
 //masks
     #define SUBNET_MASK (0xffff<<DEVICE_ADDR_SIZE)  //on a 16-bits adress
+	#define DEVICEX_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
+	#define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define ADDRI_MASK  (0xff)      //on a 16-bits adress, xbee devices
     #define ADDRX_MASK  (0xff)      //on a 16-bits adress, i2c devices
 
@@ -29,13 +36,13 @@ extern "C" {
 
 
 //xbee adresses
-    #define ADDRX_MAIN      (0x01 | SUBNETX)
-    #define ADDRX_FIX       (0x02 | SUBNETX)
-    #define ADDRX_MOBILE_1  (0x04 | SUBNETX)
-    #define ADDRX_MOBILE_2  (0x08 | SUBNETX)
-    #define ADDRX_SECOND    (0x10 | SUBNETX)
-    #define ADDRX_DEBUG     (0x20 | SUBNETX)
-    #define ADDRX_REMOTE_IA (0x40 | SUBNETX)
+    #define ADDRX_MAIN      ( BIT(1) | SUBNETX)
+    #define ADDRX_FIX       ( BIT(2) | SUBNETX)
+    #define ADDRX_MOBILE_1  ( BIT(3) | SUBNETX)
+    #define ADDRX_MOBILE_2  ( BIT(4) | SUBNETX)
+    #define ADDRX_SECOND    ( BIT(5) | SUBNETX)
+    #define ADDRX_DEBUG     ( BIT(6) | SUBNETX)
+    #define ADDRX_REMOTE_IA ( BIT(7) | SUBNETX)
     #define ADDRX_BROADCAST (0xff | SUBNETX)
 
 //I2C adresses

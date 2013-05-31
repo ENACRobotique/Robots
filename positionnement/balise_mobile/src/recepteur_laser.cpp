@@ -39,7 +39,6 @@ void setup() {
   delay(200);
 
   sb_printDbg(ADDRX_DEBUG,"mobile starting",-12,13);
-
 }
 
 void loop() {
@@ -54,10 +53,7 @@ void loop() {
     time = millis();
 
 
-//MESSAGE HANDLING
-    //network routine and test if message for this node
-    if (sb_routine()){
-    	rxB=sb_receive(&inMsg);
+
 #ifdef deprecated
     	switch (inMsg.header.type){
     	case E_PERIOD :
@@ -93,10 +89,14 @@ void loop() {
 
     	}
 #endif
-    }
 
 
 //MUST ALWAYS BE DONE (any state)
+
+	//network routine and test if message for this node
+	if (sb_routine()){
+		rxB=sb_receive(&inMsg);
+	}
     //reading the eventual data from the lasers
     laserStruct0=periodicLaser(&buf0);
     laserStruct1=periodicLaser(&buf1);

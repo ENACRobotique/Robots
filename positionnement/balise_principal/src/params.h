@@ -19,7 +19,7 @@ typedef enum{
 //network config
 #define MYADDRX (SUBNETX | ADDRX_MAIN )
 #define MYADDRI (SUBNETI_MAIN | ADDRI_MAIN_TURRET)
-#define SB_INC_BUF_SIZE 4
+#define SB_INC_MSG_BUF_SIZE 4
 
 
 
