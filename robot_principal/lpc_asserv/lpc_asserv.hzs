@@ -1,12 +1,10 @@
 <!DOCTYPE CrossStudio_for_ARM_Session_File>
 <session>
  <Bookmarks/>
- <Breakpoints>
-  <BreakpointListItem line="222" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="4" counter="0" isFunctionBreakpoint="false" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" expression="" />
- </Breakpoints>
+ <Breakpoints/>
  <ExecutionProfileWindow/>
  <Memory1>
-  <MemoryWindow autoEvaluate="0" addressText="&amp;tab_" numColumns="8" sizeText="sizeof(tab_)" dataSize="4" radix="11" name="lpc_asserv" addressSpace="" />
+  <MemoryWindow autoEvaluate="0" addressText="&amp;dist" numColumns="8" sizeText="sizeof(dist)" dataSize="4" radix="11" name="lpc_asserv" addressSpace="" />
  </Memory1>
  <Memory2>
   <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_asserv" addressSpace="" />
@@ -40,9 +38,13 @@
  </TraceWindow>
  <Watch1>
   <Watches active="1" update="Never" >
-   <Watchpoint linenumber="88" radix="16" name="step_traj" expression="step_traj" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
-   <Watchpoint linenumber="112" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
-   <Watchpoint linenumber="112" radix="16" name="x" expression="x" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="0" radix="-1" name="curr_traj" expression="curr_traj" filename="" />
+   <Watchpoint linenumber="0" radix="-1" name="curr_traj_step" expression="curr_traj_step" filename="" />
+   <Watchpoint linenumber="0" radix="-1" name="x" expression="x" filename="" />
+   <Watchpoint linenumber="0" radix="-1" name="y" expression="y" filename="" />
+   <Watchpoint linenumber="0" radix="16" name="gx" expression="gx" filename="" />
+   <Watchpoint linenumber="0" radix="-1" name="gy" expression="gy" filename="" />
+   <Watchpoint linenumber="0" radix="-1" name="state" expression="state" filename="" />
   </Watches>
  </Watch1>
  <Watch2>
@@ -55,7 +57,12 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_asserv/main.c" y="0" path="/home/robot/github/robot_principal/lpc_asserv/main.c" left="0" selected="1" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_asserv/main.c" y="250" path="/home/robot/github/robot_principal/lpc_asserv/main.c" left="0" selected="1" name="unnamed" top="235" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" y="31" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" left="0" selected="0" name="unnamed" top="18" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" y="4" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/sys_time.c" y="63" path="/home/robot/github/arch-lpc2148/lpc_lib/sys_time.c" left="0" selected="0" name="unnamed" top="57" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_asserv/controller.h" y="3" path="/home/robot/github/robot_principal/lpc_asserv/controller.h" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_asserv/params.h" y="0" path="/home/robot/github/robot_principal/lpc_asserv/params.h" left="0" selected="0" name="unnamed" top="0" />
  </Files>
  <ARMCrossStudioWindow activeProject="lpc_asserv" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 
