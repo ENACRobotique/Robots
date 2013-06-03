@@ -24,16 +24,16 @@ enum I2CTransStatus {
 };
 
 #ifndef I2C_BUF_LEN
-#define I2C_BUF_LEN 32
+#define I2C_BUF_LEN 64
 #endif
 
 struct i2c_transaction {
+  uint8_t buf[I2C_BUF_LEN];
   enum I2CTransType type;
   volatile enum I2CTransStatus status;
   uint8_t slave_addr;
   uint8_t len_r;
   uint8_t len_w;
-  uint8_t buf[I2C_BUF_LEN];
   void *userp;
 };
 
