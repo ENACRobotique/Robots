@@ -41,10 +41,10 @@
 									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/i386-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/lib/gcc/i486-linux-gnu/4.7/include/"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_linux}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/src}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1691077459" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_LINUX_x86"/>
@@ -63,10 +63,10 @@
 									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/i386-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/lib/gcc/i486-linux-gnu/4.7/include/"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_linux}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/src}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.779306888" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -113,10 +113,10 @@
 									<listOptionValue builtIn="false" value="/usr/include/i386-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/lib/gcc/i486-linux-gnu/4.7/include/"/>
 									<listOptionValue builtIn="false" value="&quot;/home/quentin/Dropbox/Club Robot ENAC/Coupe 2013/Systeme position/Info/EclipseWS_balises_mobiles/message_shared&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_linux}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/src}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.281260060" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -132,10 +132,10 @@
 									<listOptionValue builtIn="false" value="/usr/include/i386-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/lib/gcc/i486-linux-gnu/4.7/include/"/>
 									<listOptionValue builtIn="false" value="&quot;/home/quentin/Dropbox/Club Robot ENAC/Coupe 2013/Systeme position/Info/EclipseWS_balises_mobiles/message_shared&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_linux}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/lib/superBus_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_sniffer/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/lib/superBus_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/superBus_linux_XBeeSniffer/src}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1059449898" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -153,13 +153,8 @@
 		<project id="bla.cdt.managedbuild.target.gnu.exe.730063286" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/debug_receiver"/>
-		</configuration>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/debug_receiver"/>
-		</configuration>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/superBus_linux_XBeeSniffer"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
