@@ -25,7 +25,7 @@ pleaseDefineTheArchitectureSymbol youBloodyBastard;
 
 sMsg msgBuf[SB_INC_MSG_BUF_SIZE];
 int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
-
+int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 
 /*
  * Handles the sending of a message over the SuperBus network
@@ -62,7 +62,7 @@ int sb_routine(){
     //TODO if (i2c_receive...)
 
 
-    return (iNext+SB_INC_MSG_BUF_SIZE-iFirst)%SB_INC_MSG_BUF_SIZE;
+    return nbMsg;
 }
 
 /*
@@ -74,11 +74,12 @@ int sb_routine(){
  */
 int sb_receive(sMsg *msg){
 
-	if ( iFirst==iNext) return 0;
+	if ( iFirst==iNext && !nbMsg) return 0;
 
     //pop the oldest message of incoming buffer and updates index
 	memcpy(msg, &(msgBuf[iFirst]), msgBuf[iFirst].header.size + sizeof(sGenericHeader));
 	iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
+	nbMsg--;
 
     return (msg->header.size + sizeof(sGenericHeader));
 }
@@ -144,10 +145,14 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 		break;
 	case IF_LOCAL :
 
-		if (iFirst==iNext) iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
+		if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
+			iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
+			nbMsg--;
+		}
 
 		memcpy(&(msgBuf[iNext]),msg, msg->header.size+sizeof(sGenericHeader));
 		iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
+		nbMsg++;
 
 		return (msgBuf[(iNext+SB_INC_MSG_BUF_SIZE-1)%SB_INC_MSG_BUF_SIZE].header.size + sizeof(sGenericHeader));//compliant with the C % (modulo)
 		break;
