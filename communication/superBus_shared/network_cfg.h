@@ -68,19 +68,23 @@ typedef enum{
 
 /* routing table entry
  * the routing of a message "msg", with destination address "destAddr", coming from the interface "interface" is the following :
+ * if (the destination is on one of our subnetworks){
+ * 		if (the message has not already been red on the latter subnet){
+ * 			send message on the appropriate subnet;
+ * 			return;
+ * 			}
+ * 		}
+ *
  * while(we are not at the end of the routing table){
- *      if (interface==ifaceFrom){
- *          if (destAddr==dest || destAddr&SUBNETMASK==dest){
- *              send to ifaceTo;
- *              return;
- *              }
- *          }
+ *      if (destination's subnet==routing table entry subnet){
+ *      	send to ifTo;
+ *      	return
+ *      }
  *      go to next routing table entry
  * }
- * perform default action
+ * perform default action (send to default)
  *
- * /!\ the order of the entries is important : most specific first, less specific last
- * the last entry MUST be {0x42&(~SUBNET_MASK),default interface}
+ * /!\ the last entry MUST be {0x42&(~SUBNET_MASK),default interface}
  */
 typedef struct{
     sb_Adress destSubnet;

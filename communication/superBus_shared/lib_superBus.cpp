@@ -24,12 +24,12 @@ pleaseDefineTheArchitectureSymbol youBloodyBastard;
 #endif
 
 sMsg msgBuf[SB_INC_MSG_BUF_SIZE];
-int iFirst=0,iLast=0; //index of the first and the last message written in the buffer
+int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
 
 
 /*
  * Handles the sending of a message over the SuperBus network
- * For user's use only, the message was previously NOT in the network
+ * For user's use only, the message was previously NOT "in the network"
  */
 int sb_send(sMsg *msg){
 	//checksum and stuff
@@ -49,7 +49,7 @@ int sb_send(sMsg *msg){
  * Non blocking function
  * Arguments : none
  * Return value :
- *  number of message available for this node
+ *  number of message available for this node (to get via sb_receive)
  *
  */
 int sb_routine(){
@@ -62,7 +62,7 @@ int sb_routine(){
     //TODO if (i2c_receive...)
 
 
-    return (iFirst-iLast)%SB_INC_MSG_BUF_SIZE;
+    return (iNext+SB_INC_MSG_BUF_SIZE-iFirst)%SB_INC_MSG_BUF_SIZE;
 }
 
 /*
@@ -74,7 +74,7 @@ int sb_routine(){
  */
 int sb_receive(sMsg *msg){
 
-	if (iFirst==iLast) return 0;
+	if ( iFirst==iNext) return 0;
 
     //pop the oldest message of incoming buffer and updates index
 	memcpy(msg, &(msgBuf[iFirst]), msgBuf[iFirst].header.size + sizeof(sGenericHeader));
@@ -88,7 +88,9 @@ int sb_receive(sMsg *msg){
  * Handles the routing of a message
  * Argument :
  *  msg : pointer to the message to send
- * Return value : subnet to send the message on
+ * Return value : interface to send the message to
+ *
+ * Remark : routing tables are defined in network_cfg.h & network_cfg.cpp
  */
 E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
 	int i=0;
@@ -122,8 +124,12 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
 
 /*
  * Handles the forwarding of a message over the SuperBus network
+ * Arguments :
+ * 	msg : pointer to the message to send
+ * 	ifFrom : interface (physical or virtual) on which the message has been received
+ * Return value : number of bytes written/send
  *
- *
+ * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
 	switch (sb_route(msg, ifFrom)){
@@ -137,11 +143,13 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 		return 0;
 		break;
 	case IF_LOCAL :
-		iLast=(iLast+1)%SB_INC_MSG_BUF_SIZE;
-		if (iFirst==iLast) iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
 
-		memcpy(&(msgBuf[iLast]),msg, msg->header.size+sizeof(sGenericHeader));
-		return (msgBuf[iLast].header.size + sizeof(sGenericHeader));
+		if (iFirst==iNext) iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
+
+		memcpy(&(msgBuf[iNext]),msg, msg->header.size+sizeof(sGenericHeader));
+		iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
+
+		return (msgBuf[(iNext+SB_INC_MSG_BUF_SIZE-1)%SB_INC_MSG_BUF_SIZE].header.size + sizeof(sGenericHeader));//compliant with the C % (modulo)
 		break;
 	default : return 0;
 	}
