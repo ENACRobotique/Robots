@@ -81,7 +81,10 @@ uint8_t checksumPload(sMsg msg){
     for (i=0;i<msg.header.size;i++){
         sum+=msg.payload.raw[i];
     }
-    return !(msg.header.checksumPload+sum);
+    sum+=msg.header.checksumPload;
+    return !sum;
+    //WATCH OUT : for an unknown reason, the following line DOES NOT have the same behaviour as the two previous lines
+    //return !(msg.header.checksumPload+sum);
 }
 
 /*
@@ -93,9 +96,9 @@ uint8_t calcSumPload(uPayload *pt,int size){
     int i;
     uint8_t sum=0;
     for (i=0;i<size;i++){
-        sum+=pt->raw[i];
+        sum+=((uint8_t *)pt)[i];
     }
-    return ~sum;
+    return (~sum)+1;
 }
 
 void setSum(sMsg *msg){

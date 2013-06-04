@@ -8,6 +8,7 @@
 #include "messages.h"
 #include "lib_checksum.h"
 #include "Arduino.h"
+#include "lib_superBus.h"
 
 //#define DEBUG_XBEE
 
@@ -71,36 +72,36 @@ void setupXbee(){
  * Remark : after a call to Xbee_receive, the memory area designated by pRet may be modified even if no valid message was received
  */
 int Xbee_receive(sMsg *pRet){
-    static uint8_t i;
+    static uint8_t i=0;
     static uint8_t smallBuf[CBUFF_SIZE]={0};
     int count=0;
     int j;
-    //Serial.read()==-1 <=> no data available, count to limit the time spend in the loop in case of spam, checksum to get out of the loop if it is correct AND the sender address id OK (if sender=0 it means it has been reset to 0 after reading the message)
+    //count to limit the time spend in the loop in case of spam, checksum to get out of the loop if it is correct AND the sender address id OK (if sender=0 it means it has been reset to 0 after reading the message)
     while( Serial.available() \
             && count<=MAX_READ_BYTES \
-            &&  ( cbChecksumHead(smallBuf,CBUFF_SIZE,(i-1)&(CBUFF_SIZE-1)) || !( smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8&smallBuf[(i-4)&(CBUFF_SIZE-1)] ) ) ) {
+            &&  ( !cbChecksumHead(smallBuf,CBUFF_SIZE,(i-1)&(CBUFF_SIZE-1)) || !( smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8 | smallBuf[(i-4)&(CBUFF_SIZE-1)] ) ) ) {
         smallBuf[i]=Serial.read();
         i=(i+1)&(CBUFF_SIZE-1);                                          // &7 <~> %8, but better behaviour with negative in our case (and MUCH faster)
         count++;
     }
-
-
-    if (count<=MAX_READ_BYTES && cbChecksumHead(smallBuf,CBUFF_SIZE,(i-1)&(CBUFF_SIZE-1)) && smallBuf[(i-3)&3] ){
-
+    if (cbChecksumHead(smallBuf,CBUFF_SIZE,(i-1)&(CBUFF_SIZE-1)) && ( smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8 | smallBuf[(i-4)&(CBUFF_SIZE-1)] ) ){
         count=sizeof(sGenericHeader);
 
         //we copy the header in the return structure
         for (j=0;j<sizeof(sGenericHeader);j++){
-            ((uint8_t *)(&(pRet->header)))[j]=smallBuf[(i-sizeof(sGenericHeader)+j)&(CBUFF_SIZE-1)];
+        	((uint8_t *)(&(pRet->header)))[j]=smallBuf[(i-sizeof(sGenericHeader)+j)&(CBUFF_SIZE-1)];
         }
 
         //clear the "header buffer"
         memset(smallBuf,0,sizeof(smallBuf));
 
         //we read the rest of the data in this message (given by the "size" field of the header) and write the in the return structure
-        count+=Serial.readBytes((char *)(&(pRet->payload)),pRet->header.size);
-
-
+        while(count < pRet->header.size+sizeof(sGenericHeader)){
+        	if (Serial.available()){
+        		count++;
+        		pRet->payload.raw[count-sizeof(sGenericHeader)]=Serial.read();
+        	}
+        }
 
         //checksum it, if ok then return count, else return 0
         if(checksumPload(*pRet)) return count;

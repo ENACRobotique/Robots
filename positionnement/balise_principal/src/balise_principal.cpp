@@ -47,6 +47,8 @@ void setup(){
 
     domi_init(2);
 
+    sb_printDbg(ADDRX_DEBUG,"start turret",0,0);
+
 }
 
 

@@ -56,7 +56,9 @@ int sb_routine(){
     sMsg temp;
 
     //if Xbee receive
-    if (Xbee_receive(&temp)) sb_forward(&temp,IF_XBEE);
+    if (Xbee_receive(&temp)) {
+    	sb_forward(&temp,IF_XBEE);
+    }
     //TODO if (i2c_receive...)
 
 
@@ -92,7 +94,7 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
 	int i=0;
 
 	// if this message if for us
-	if (msg->header.destAddr==MYADDRI || msg->header.destAddr==MYADDRX) return IF_LOCAL;
+	if (msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) return IF_LOCAL;
 
 
 	// if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
@@ -136,8 +138,9 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 		break;
 	case IF_LOCAL :
 		iLast=(iLast+1)%SB_INC_MSG_BUF_SIZE;
-		if (iFirst==iLast) iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //drop oldest message if buffer is full
-		msgBuf[iLast]=*msg;
+		if (iFirst==iLast) iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
+
+		memcpy(&(msgBuf[iLast]),msg, msg->header.size+sizeof(sGenericHeader));
 		return (msgBuf[iLast].header.size + sizeof(sGenericHeader));
 		break;
 	default : return 0;
@@ -156,7 +159,7 @@ int sb_printDbg(sb_Adress dest,char * str,int32_t i, uint32_t u){
 	tmp.payload.debug.i=i;
 	tmp.payload.debug.u=u;
 	strncpy((char *)&(tmp.payload.debug.msg),str,32);
-	tmp.payload.debug.msg[31]=0; //strncpy does no ensure the null-termination
+	tmp.payload.debug.msg[31]=0; //strncpy does no ensure the null-termination, so we force it
 
 	sb_send(&tmp);
 

@@ -106,12 +106,13 @@ int Xbee_receive(sMsg *pRet){
         }
 
         //we read the rest of the data in this message (given by the "size" field of the header) and write the in the return structure
-        do{
-        	count+=read(Xbee_serial_port,((char*)pRet) + count,pRet->header.size + sizeof(sGenericHeader) - count);//Serial.readBytes((char *)(&(pRet->payload)),pRet->header.size);
-        }while(count < pRet->header.size + sizeof(sGenericHeader));
+        while(count < pRet->header.size + sizeof(sGenericHeader)){
+        	count+=read(Xbee_serial_port,((char*)pRet) + count,pRet->header.size + sizeof(sGenericHeader) - count);
+        }
 
         memset(smallBuf,0,sizeof(smallBuf));
-        return count;
+        if (checksumPload(*pRet)) return count;
+        else return 0;
     }
 
     return 0;

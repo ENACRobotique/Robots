@@ -181,8 +181,8 @@ int main(int argc, char *argv[]){
             }
             gettimeofday(&currentClock, NULL);
             elapsed = currentClock.tv_sec - prevClock.tv_sec + ((double) (currentClock.tv_usec - prevClock.tv_usec) )/ 1000000.;
-            byteRate = bytesCount/elapsed;
-            printf("\033[128D\033[50C%f o/s  ,%lu\n",byteRate,clock());
+            byteRate=bytesCount/elapsed;
+            printf("\033[128D\033[60C| %f o/s\n",byteRate);
         }
     }
     // never reached

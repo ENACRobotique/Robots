@@ -38,7 +38,7 @@ void setup() {
   digitalWrite(PIN_RST_XBEE,LOW);
   delay(200);
 
-  sb_printDbg(ADDRX_DEBUG,"mobile starting",-12,13);
+  sb_printDbg(ADDRX_DEBUG,"mobile starting",-16,13);
 }
 
 void loop() {
@@ -96,6 +96,7 @@ void loop() {
 	//network routine and test if message for this node
 	if (sb_routine()){
 		rxB=sb_receive(&inMsg);
+		sb_printDbg(ADDRX_DEBUG,"rxB",rxB,0);
 	}
     //reading the eventual data from the lasers
     laserStruct0=periodicLaser(&buf0);
@@ -110,6 +111,7 @@ void loop() {
     if (rxB && inMsg.header.type==E_PERIOD ){
     	laser_period=inMsg.payload.period;
     	rxB=0;
+    	sb_printDbg(ADDRX_DEBUG,"period received",0,inMsg.payload.period);
     }
 
     //blink
