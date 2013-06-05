@@ -8,7 +8,7 @@
 #include "messages.h"
 #include "lib_checksum.h"
 #include "Arduino.h"
-#include "lib_superBus.h"
+#include "lib_Xbee_arduino.h"
 
 //#define DEBUG_XBEE
 
@@ -96,10 +96,11 @@ int Xbee_receive(sMsg *pRet){
         memset(smallBuf,0,sizeof(smallBuf));
 
         //we read the rest of the data in this message (given by the "size" field of the header) and write the in the return structure
+        //TODO add timeout
         while(count < pRet->header.size+sizeof(sGenericHeader)){
         	if (Serial.available()){
-        		count++;
         		pRet->payload.raw[count-sizeof(sGenericHeader)]=Serial.read();
+        		count++;
         	}
         }
 

@@ -20,10 +20,10 @@
 #elif defined(ARCH_X86_WILLNOTWORKBECAUSECPP)
     #include "lib_Xbee_x86.h"
 #else
-pleaseDefineTheArchitectureSymbol youBloodyBastard;
+#error please Define The Architecture Symbol you Bloody Bastard
 #endif
 
-sMsg msgBuf[SB_INC_MSG_BUF_SIZE];
+sMsg msgBuf[SB_INC_MSG_BUF_SIZE]={{{0}}};
 int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
 int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 
@@ -106,7 +106,7 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
 		else return IF_DROP;
 	}
 
-	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRX&SUBNET_MASK) ){
+	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
 		if (ifFrom!=IF_XBEE ) return IF_XBEE;
 		else return IF_DROP;
 	}

@@ -3,7 +3,6 @@
 	<name>balise_mobile</name>
 	<comment></comment>
 	<projects>
-		<project>arduinoUno_core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

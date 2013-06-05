@@ -10,8 +10,17 @@
 
 #include "messages.h"
 
+#ifdef __cplusplus
+extern "C" { //to enable use in both C projects an C++ projects
+#endif
+
 void setupXbee();
 int Xbee_receive(sMsg *pRet);
 int Xbee_send(sMsg msg);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* LIB_XBEE_H_ */

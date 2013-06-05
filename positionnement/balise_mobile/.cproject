@@ -20,7 +20,7 @@
 						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.1918336072" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug" unusedChildren="de.innot.avreclipse.tool.size.winavr.app.debug;de.innot.avreclipse.tool.avrdude.app.debug;de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug;de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug">
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1144304010" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug" value="true" valueType="boolean"/>
 							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.app.debug.545255022" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.debug"/>
-							<builder buildPath="${workspace_loc:/balise_mobile}/Debug" id="de.innot.avreclipse.target.builder.winavr.app.debug.665826842" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.debug">
+							<builder buildPath="${workspace_loc:/balise_mobile}/Debug" id="de.innot.avreclipse.target.builder.winavr.app.debug.665826842" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" parallelBuildOn="false" stopOnErr="false" superClass="de.innot.avreclipse.target.builder.winavr.app.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
@@ -62,9 +62,7 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.language.uchar.1732914484" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.cppcompiler.option.language.uchar" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.language.ubitfields.396097719" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.cppcompiler.option.language.ubitfields" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.other.667669369" name="Other Optimization Flags" superClass="de.innot.avreclipse.cppcompiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
-								<option id="de.innot.avreclipse.cppcompiler.option.def.1438646188" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
-								</option>
+								<option id="de.innot.avreclipse.cppcompiler.option.def.1438646188" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def"/>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.854051068" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.1641941100" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug"/>

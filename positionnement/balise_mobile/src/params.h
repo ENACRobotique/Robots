@@ -23,6 +23,8 @@ typedef enum{
 
 #define SB_INC_MSG_BUF_SIZE 4
 
+#define ARCH_328P_ARDUINO
+
 #define DEBUG
 
 #endif /* PARAMS_H_ */
