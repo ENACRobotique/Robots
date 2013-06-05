@@ -22,7 +22,7 @@ extern "C" {
 typedef uint16_t sb_Adress;
 
 
-#define XBEE_MAX_SIZE 100
+#define SB_MAX_PDU 100
 
 //message types
 typedef enum{
@@ -31,10 +31,8 @@ typedef enum{
     E_SYNC_OK,              //synced
     E_PERIOD,               //period measurement
     E_MEASURE,              //laser delta-time measurement
-    E_DATA,                 //generic data payload
+    E_DATA,                 //arbitrary data payload
     E_DEBUG,                //general debug
-    E_DEBUG_ADDR,           //adress related debug
-    E_RAW,
 
     E_TYPE_COUNT
 }E_TYPE;
@@ -66,7 +64,8 @@ typedef struct __attribute__((__packed__)) {
 
 
 typedef union{
-    uint8_t raw[XBEE_MAX_SIZE-sizeof(sGenericHeader)];
+    uint8_t raw[SB_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
+    uint8_t data[SB_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
     uint32_t syncTime;
     uint8_t channel;
     uint32_t period;

@@ -46,8 +46,9 @@ void setup(){
     Wire.onRequest(&requestHandler);
 
     domi_init(2);
-
+#ifdef DEBUG
     sb_printDbg(ADDRX_DEBUG,"start turret",0,0);
+#endif
 
 }
 

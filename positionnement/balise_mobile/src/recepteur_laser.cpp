@@ -10,6 +10,7 @@
 #include "messages.h"
 #include "lib_superBus.h"
 #include "params.h"
+#include "network_cfg.h"
 
 
 
@@ -37,15 +38,16 @@ void setup() {
   delay(100);
   digitalWrite(PIN_RST_XBEE,LOW);
   delay(200);
-
+#ifdef DEBUG
   sb_printDbg(ADDRX_DEBUG,"mobile starting",-16,13);
+#endif
 }
 
 void loop() {
     static char nbSync=0;
     static unsigned long lastLaserDetect=0;
     sMsg inMsg,outMsg;
-    int rxB; // size (bytes) of message available to read
+    int rxB=0; // size (bytes) of message available to read
 
 
 
@@ -96,7 +98,6 @@ void loop() {
 	//network routine and test if message for this node
 	if (sb_routine()){
 		rxB=sb_receive(&inMsg);
-		sb_printDbg(ADDRX_DEBUG,"rxB",rxB,0);
 	}
     //reading the eventual data from the lasers
     laserStruct0=periodicLaser(&buf0);
@@ -111,7 +112,9 @@ void loop() {
     if (rxB && inMsg.header.type==E_PERIOD ){
     	laser_period=inMsg.payload.period;
     	rxB=0;
+#ifdef DEBUG
     	sb_printDbg(ADDRX_DEBUG,"period received",0,inMsg.payload.period);
+#endif
     }
 
     //blink

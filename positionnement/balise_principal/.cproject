@@ -56,9 +56,7 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.1814190435" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.uchar.547146486" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.compiler.option.language.uchar" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.ubitfields.2695092" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.compiler.option.language.ubitfields" value="false" valueType="boolean"/>
-								<option id="de.innot.avreclipse.compiler.option.def.812882903" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
-								</option>
+								<option id="de.innot.avreclipse.compiler.option.def.812882903" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1424897586" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.1134785497" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug">
@@ -80,7 +78,6 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.language.uchar.1713835376" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.cppcompiler.option.language.uchar" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.def.1510832320" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__cplusplus"/>
-									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
 								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.470363792" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>

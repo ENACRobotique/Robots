@@ -11,6 +11,10 @@
 #include "messages.h"
 #include "network_cfg.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /*
  * all the following functions requires that the project contains a "params.h"  file defining the following :
@@ -26,5 +30,9 @@ int sb_receive(sMsg *msg);
 E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
 int sb_printDbg(sb_Adress dest,char * str,int32_t i, uint32_t u);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIB_SUPERBUS_H_ */
