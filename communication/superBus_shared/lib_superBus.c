@@ -16,7 +16,12 @@
 
 
 #ifdef ARCH_328P_ARDUINO
-    #include "lib_Xbee_arduino.h"
+    #if MYADDRX !=0
+        #include "Xbee/lib_Xbee_arduino.h"
+    #endif
+    #if MYADDRI!=0
+        #include "I2C/lib_I2C_arduino.h"
+    #endif
 #elif defined(ARCH_X86_LINUX)
     #include "lib_Xbee_x86.h"
 #else

@@ -6,7 +6,6 @@
 
 #include "lib_int_laser.h"
 #include "lib_time.h"
-#include "lib_Xbee_arduino.h"
 #include "messages.h"
 #include "lib_superBus.h"
 #include "params.h"

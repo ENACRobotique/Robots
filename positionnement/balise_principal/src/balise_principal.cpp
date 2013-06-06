@@ -13,7 +13,6 @@
 #include "Wire.h"
 #include "inttypes.h"
 
-#include "i2ccomm.h"
 #include "messages.h"
 #include "network_cfg.h"
 #include "params.h"
@@ -42,8 +41,7 @@ void setup(){
     while(Serial.read() != -1); //flush the buffer for any incorrect bytes
 
 
-    Wire.begin(8);
-    Wire.onRequest(&requestHandler);
+    Wire.begin( (MYADDRI&DEVICEI_MASK)>>1);
 
     domi_init(2);
 #ifdef DEBUG
