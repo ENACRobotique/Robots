@@ -43,7 +43,7 @@ extern "C" {
     #define ADDRX_SECOND    ( BIT(4) | SUBNETX)
     #define ADDRX_DEBUG     ( BIT(5) | SUBNETX)
     #define ADDRX_REMOTE_IA ( BIT(6) | SUBNETX)
-    #define ADDRX_BROADCAST (0xff | SUBNETX)
+    #define ADDRX_BROADCAST ( 0xff   | SUBNETX)
 
 //I2C adresses
     //subnet MAIN

@@ -47,6 +47,7 @@ int I2C_receive(sMsg *pRet){
  * Return value :
  *  number of bytes writen (0 if error)
  */
+//FIXME doit prendre en compte une adresse de destinataire
 int I2C_send(sMsg *msg){
     int count=0;
 

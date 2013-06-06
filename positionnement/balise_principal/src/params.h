@@ -17,8 +17,8 @@ typedef enum{
 } mainState;
 
 //network config
-#define MYADDRX (SUBNETX | ADDRX_MAIN )
-#define MYADDRI (SUBNETI_MAIN | ADDRI_MAIN_TURRET)
+#define MYADDRX ADDRX_MAIN
+#define MYADDRI ADDRI_MAIN_TURRET
 #define SB_INC_MSG_BUF_SIZE 4
 #define ARCH_328P_ARDUINO
 

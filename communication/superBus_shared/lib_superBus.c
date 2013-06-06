@@ -41,9 +41,7 @@ int sb_send(sMsg *msg){
 	setSum(msg);
 
 	//actual sending
-	sb_forward(msg,IF_LOCAL);
-
-    return 0;
+	return sb_forward(msg,IF_LOCAL);
 }
 
 
@@ -106,8 +104,10 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
 	int i=0;
 
 	// if this message if for us
-	if (msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) return IF_LOCAL;
-
+	if ( ifFrom!=IF_LOCAL && (
+	        msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
+	            return IF_LOCAL;
+	}
 #if MYADDRI!=0
 	// if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
 	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
@@ -116,14 +116,14 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
 	}
 #endif
 #if MYADDRX!=0
-	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
+	if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
 		if (ifFrom!=IF_XBEE ) return IF_XBEE;
 		else return IF_DROP;
 	}
 #endif
 	// else, sweep the table until you reach the matching subnetwork or the end
 	while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
-		if ( rTable[i].destSubnet == (msg->header.destAddr&SUBNET_MASK) ) return rTable[i].ifTo;
+		if ( rTable[i].destSubnet == (msg->header.destAddr & SUBNET_MASK) ) return rTable[i].ifTo;
 		i++;
 	}
 	//if you reach the end, send to default destination
@@ -142,6 +142,7 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
  *
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
+//FIXME nexthop address
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
 	switch (sb_route(msg, ifFrom)){
 #if MYADDRX!=0
@@ -151,7 +152,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 #endif
 #if MYADDRI!=0
 	case IF_I2C :
-		//return i2c_send(msg)
+		return I2C_send(msg);
 		break;
 #endif
 	case IF_DROP :

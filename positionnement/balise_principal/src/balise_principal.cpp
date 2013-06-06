@@ -17,6 +17,7 @@
 #include "network_cfg.h"
 #include "params.h"
 #include "lib_superBus.h"
+#include "lib_checksum.h"
 
 
 uint32_t mesTab[2]={0,0};

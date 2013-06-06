@@ -15,7 +15,8 @@
 
 #if ( MYADDRX == ADDRX_MAIN && MYADDRI == ADDRI_MAIN_TURRET)
 sRTableEntry rTable[]={
-        {0,0,0}
+        {SUBNETX,IF_XBEE},
+        {0x42&(~SUBNET_MASK),IF_XBEE}
 };
 #elif ( MYADDRX == ADDRX_MOBILE_1)
 
