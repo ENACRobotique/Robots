@@ -24,4 +24,8 @@ sRTableEntry rTable[]={
         {0x42&(~SUBNET_MASK),IF_DROP}
 };
 
+#elif (MYADDRX == ADDRX_DEBUG)
+sRTableEntry rTable[]={
+        {0x42&(~SUBNET_MASK),IF_DROP}
+};
 #endif

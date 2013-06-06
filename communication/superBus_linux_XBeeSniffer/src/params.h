@@ -12,5 +12,7 @@
 
 #define MYADDRX ( ADDRX_DEBUG | SUBNETX )
 #define MYADDRI 0
+#define SB_INC_MSG_BUF_SIZE 4
+#define ARCH_X86_LINUX
 
 #endif /* PARAMS_H_ */

@@ -149,11 +149,6 @@ int main(int argc, char *argv[]){
                             printf("%4x -> %4x DEBUG %s ,%d , %u",inMsg.header.srcAddr,inMsg.header.destAddr, inMsg.payload.debug.msg,inMsg.payload.debug.i, inMsg.payload.debug.u);
                         }
                         break;
-                case E_DEBUG_ADDR:
-                        if (dType[E_DEBUG_ADDR] ){
-                            printf("%4x -> %4x DEBUG_ADDR %s ,%u , %d",inMsg.header.srcAddr,inMsg.header.destAddr,inMsg.payload.debug.msg,inMsg.payload.debug.u, inMsg.payload.debug.i);
-                        }
-                        break;
                 case E_MEASURE:
                         if (dType[E_MEASURE] ){
                             printf("%4x -> %4x MEASURE: %u at %u",inMsg.header.srcAddr,inMsg.header.destAddr, inMsg.payload.measure.value, inMsg.payload.measure.date);
@@ -169,8 +164,8 @@ int main(int argc, char *argv[]){
                             printf("%4x -> %4x sync_expected_time:%u",inMsg.header.srcAddr,inMsg.header.destAddr,inMsg.payload.syncTime);
                         }
                         break;
-                case E_RAW:
-                        if (dType[E_RAW] ){
+                case E_DATA:
+                        if (dType[E_DATA] ){
                             printf("%4x -> %4x RAW",inMsg.header.srcAddr,inMsg.header.destAddr);
                         }
                         break;

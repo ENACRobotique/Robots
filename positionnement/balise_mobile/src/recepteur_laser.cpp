@@ -17,7 +17,7 @@
 
 
 int debug_led=1;
-unsigned long time, time_prev_led=0, time_prev_laser=0;
+unsigned long time=0, time_prev_led=0, time_prev_laser=0;
 int state=GAME;
 plStruct laserStruct0,laserStruct1;
 unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
@@ -38,6 +38,7 @@ void setup() {
   delay(100);
   digitalWrite(PIN_RST_XBEE,LOW);
   delay(200);
+
 #ifdef DEBUG
   sb_printDbg(ADDRX_DEBUG,"mobile starting",-16,13);
 #endif
@@ -46,51 +47,10 @@ void setup() {
 void loop() {
     static char nbSync=0;
     static unsigned long lastLaserDetect=0;
-    sMsg inMsg,outMsg;
+    sMsg inMsg={{0}},outMsg={{0}};
     int rxB=0; // size (bytes) of message available to read
-
-
-
-
     time = millis();
 
-
-
-#ifdef deprecated
-    	switch (inMsg.header.type){
-    	case E_PERIOD :
-    		laser_period=inMsg.payload.period;
-    		break;
-    	case E_SYNC_EXPECTED_TIME :
-			if (state==SYNC){
-
-				if (nbSync<3){
-					if ( abs((l2gMicros(lastLaserDetect)-inMsg.payload.syncTime))<SYNC_TOL ){
-						nbSync++;
-					}
-					else {
-						setMicrosOffset(lastLaserDetect-inMsg.payload.syncTime);
-						nbSync=0; //TODO : man, i'm no sure about this one. I is highly unprobable that we receive 3 times a laser in sync with our TXed time. On the other hand, we will miss some message (or unsync)
-					}
-				}
-				if (nbSync>=3){//yeah, I know, but fuck you, I have my reason (ensures that the syncOK messages are correctly received)
-					outMsg.header.destAddr=ADDRX_MAIN;
-					outMsg.header.srcAddr=MYADDRX;
-					outMsg.header.type=E_SYNC_OK;
-					outMsg.header.size=0;
-				}
-			}
-			break;
-    	case E_SYNC_OK :
-    		//if we receive a syncOk from the main, switch to "game" state
-			if ( (inMsg.header.srcAddr == ADDRX_MAIN) || inMsg.header.srcAddr == ADDRI_MAIN_TURRET){
-			  state=GAME;
-			}
-    		break;
-		default : break;
-
-    	}
-#endif
 
 
 //MUST ALWAYS BE DONE (any state)

@@ -17,7 +17,7 @@
 
 #ifdef ARCH_328P_ARDUINO
     #include "lib_Xbee_arduino.h"
-#elif defined(ARCH_X86_WILLNOTWORKBECAUSECPP)
+#elif defined(ARCH_X86_LINUX)
     #include "lib_Xbee_x86.h"
 #else
 #error please Define The Architecture Symbol you Bloody Bastard
@@ -55,12 +55,16 @@ int sb_send(sMsg *msg){
 int sb_routine(){
     sMsg temp;
 
-    //if Xbee receive
+#if (MYADDRX)!=0
     if (Xbee_receive(&temp)) {
     	sb_forward(&temp,IF_XBEE);
     }
-    //TODO if (i2c_receive...)
-
+#endif
+#if (MYADDRI)!=0
+    if (I2C_receive(&temp)) {
+            sb_forward(&temp,IF_I2C);
+        }
+#endif
 
     return nbMsg;
 }
