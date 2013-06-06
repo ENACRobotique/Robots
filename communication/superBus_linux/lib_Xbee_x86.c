@@ -111,14 +111,14 @@ int Xbee_receive(sMsg *pRet){
         }
 
         memset(smallBuf,0,sizeof(smallBuf));
-        if (checksumPload(*pRet)) return count;
+        if (checksumPload(pRet)) return count;
         else return 0;
     }
 
     return 0;
 }
 
-int Xbee_send(sMsg msg){
+int Xbee_send(sMsg *msg){
 	//TODO
 
 return 0;

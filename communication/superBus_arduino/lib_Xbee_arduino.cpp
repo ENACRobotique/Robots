@@ -105,7 +105,7 @@ int Xbee_receive(sMsg *pRet){
         }
 
         //checksum it, if ok then return count, else return 0
-        if(checksumPload(*pRet)) return count;
+        if(checksumPload(pRet)) return count;
         else return 0;
     }
 
@@ -121,6 +121,6 @@ int Xbee_receive(sMsg *pRet){
  * Return value :
  *  number of bytes writen (0 if error)
  */
-int Xbee_send(sMsg msg){
-    return  Serial.write((uint8_t *)&msg,msg.header.size+sizeof(sGenericHeader));
+int Xbee_send(sMsg *msg){
+    return  Serial.write((uint8_t *)msg,msg->header.size+sizeof(sGenericHeader));
 }

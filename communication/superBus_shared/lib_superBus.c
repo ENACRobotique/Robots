@@ -103,18 +103,19 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
 	// if this message if for us
 	if (msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) return IF_LOCAL;
 
-
+#if MYADDRI!=0
 	// if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
 	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
 		if (ifFrom!=IF_I2C ) return IF_I2C;
 		else return IF_DROP;
 	}
-
+#endif
+#if MYADDRX!=0
 	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
 		if (ifFrom!=IF_XBEE ) return IF_XBEE;
 		else return IF_DROP;
 	}
-
+#endif
 	// else, sweep the table until you reach the matching subnetwork or the end
 	while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
 		if ( rTable[i].destSubnet == (msg->header.destAddr&SUBNET_MASK) ) return rTable[i].ifTo;
@@ -138,12 +139,16 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
  */
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
 	switch (sb_route(msg, ifFrom)){
+#if MYADDRX!=0
 	case IF_XBEE :
-		return Xbee_send(*msg);
+		return Xbee_send(msg);
 		break;
+#endif
+#if MYADDRI!=0
 	case IF_I2C :
 		//return i2c_send(msg)
 		break;
+#endif
 	case IF_DROP :
 		return 0;
 		break;

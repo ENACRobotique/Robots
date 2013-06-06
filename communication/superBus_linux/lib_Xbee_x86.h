@@ -13,6 +13,6 @@
 void Xbee_initSerial(char * devStr);
 void Xbee_deInitSerial();
 int Xbee_receive(sMsg *pRet);
-int Xbee_send(sMsg msg);
+int Xbee_send(sMsg *msg);
 
 #endif /* LIB_XBEE_X86_H_ */

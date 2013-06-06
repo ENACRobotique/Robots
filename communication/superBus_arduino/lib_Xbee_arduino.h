@@ -16,7 +16,7 @@ extern "C" { //to enable use in both C projects an C++ projects
 
 void setupXbee();
 int Xbee_receive(sMsg *pRet);
-int Xbee_send(sMsg msg);
+int Xbee_send(sMsg *msg);
 
 #ifdef __cplusplus
 }

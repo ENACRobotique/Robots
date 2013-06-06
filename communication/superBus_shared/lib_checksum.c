@@ -75,13 +75,13 @@ uint8_t calcSumHead(sGenericHeader *pt){
  *
  * Remark : header must be without offset between his bytes
  */
-uint8_t checksumPload(sMsg msg){
+uint8_t checksumPload(sMsg *msg){
     int i;
     uint8_t sum=0;
-    for (i=0;i<msg.header.size;i++){
-        sum+=msg.payload.raw[i];
+    for (i=0;i<msg->header.size;i++){
+        sum+=msg->payload.raw[i];
     }
-    sum+=msg.header.checksumPload;
+    sum+=msg->header.checksumPload;
     return !sum;
     //WATCH OUT : for an unknown reason, the following line DOES NOT have the same behaviour as the two previous lines
     //return !(msg.header.checksumPload+sum);
