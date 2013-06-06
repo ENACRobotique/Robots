@@ -23,9 +23,7 @@ enum I2CTransStatus {
   I2CTransDone
 };
 
-#ifndef I2C_BUF_LEN
 #define I2C_BUF_LEN 64
-#endif
 
 struct i2c_transaction {
   uint8_t buf[I2C_BUF_LEN];
@@ -37,9 +35,7 @@ struct i2c_transaction {
   void *userp;
 };
 
-#ifndef I2C_TRANSACTION_QUEUE_LEN
-#define I2C_TRANSACTION_QUEUE_LEN 8
-#endif
+#define I2C_TRANSACTION_QUEUE_LEN (4)
 
 typedef void (*i2c_handler)(struct i2c_transaction *t, void *userp);
 

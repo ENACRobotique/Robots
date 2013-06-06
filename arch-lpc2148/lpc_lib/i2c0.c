@@ -35,6 +35,7 @@ struct {
 } debug_tab[128];
 #endif
 
+// TODO reflect failure cases to the state of the transaction
 void _i2c0_isr() { // SI bit is set in I2C0CONSET => state change
   struct i2c_transaction *trans = p.trans[p.trans_extract_idx];
 
@@ -138,7 +139,7 @@ void _i2c0_isr() { // SI bit is set in I2C0CONSET => state change
   case 0x60: // [SR] own slave_addr+W received, ACK transmitted
   case 0x68: // [SR] arbitration lost, slave_addr+W received, ACK transmitted
     I2C0CONSET = BIT(2 /*AA*/);  // send AA
-    p.trans_sla.slave_addr = p.own_addr;
+    p.trans_sla.slave_addr = p.own_addr; // TODO use transaction buffer gave by user instead of a local one (avoids a copy...)
     p.trans_sla.status = I2CTransRunning;
     p.trans_sla.type = I2CTransRx;
     p.status = I2CDevBusy;
