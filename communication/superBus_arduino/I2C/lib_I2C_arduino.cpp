@@ -27,11 +27,13 @@ int I2C_receive(sMsg *pRet){
     //reading the header
     while (i<sizeof(sGenericHeader) && Wire.available()){
         ((uint8_t *)pRet)[i]=Wire.read();
+        i++;
     }
 
     //reading the rest of the message, according to the size written in header
     while (i<sizeof(sGenericHeader)+pRet->header.size && Wire.available()){
             ((uint8_t *)pRet)[i]=Wire.read();
+            i++;
     }
 
     if (checksumHead( &(pRet->header )) && checksumPload(pRet)) return i;
