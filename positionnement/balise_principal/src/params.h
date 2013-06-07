@@ -33,6 +33,9 @@ typedef enum{
 
 #define ROT_PERIOD_BCAST 5000 //in ms
 
+#define MAX_ROUTINE_CALL 50 //
+#define MAX_ROUTINE_TIME 5  //in ms
+
 #define DEBUG
 
 //#define DEBUG_PRINT

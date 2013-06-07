@@ -58,9 +58,12 @@ char syncOKbool=0;
 void loop(){
     sMsg inMsg,outMsg;
 
-    int rxB=0;
+    int rxB=0; //received bytes (size of inMsg when a message has been received)
+    int nbRoutine=0; //number of call to sb_routine during this loop
     static unsigned long time_prev_led=0,time_prev_period=millis(),prev_TR=0;
     sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
+
+
     unsigned long time=millis();
 
 
@@ -70,9 +73,11 @@ void loop(){
 ///////// must always be done, any state
 
 	//network routine
-	if ((rxB=sb_routine())){
-		sb_receive(&inMsg);
-	}
+    while (sb_routine() && nbRoutine<MAX_ROUTINE_CALL && (time-millis())<MAX_ROUTINE_TIME) nbRoutine++;
+    //eventual receiving
+    rxB=sb_receive(&inMsg);
+
+    time=millis();
 
     //blinking
     if((time - time_prev_led)>=500) {

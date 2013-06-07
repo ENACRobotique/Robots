@@ -55,9 +55,9 @@ void loop() {
 //MUST ALWAYS BE DONE (any state)
 
 	//network routine and test if message for this node
-	if (sb_routine()){
-		rxB=sb_receive(&inMsg);
-	}
+    sb_routine();
+	rxB=sb_receive(&inMsg);
+
     //reading the eventual data from the lasers
     laserStruct0=periodicLaser(&buf0);
     laserStruct1=periodicLaser(&buf1);

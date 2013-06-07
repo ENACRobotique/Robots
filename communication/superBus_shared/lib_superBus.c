@@ -52,24 +52,25 @@ int sb_send(sMsg *msg){
  * Non blocking function
  * Arguments : none
  * Return value :
- *  number of message available for this node (to get via sb_receive)
+ *  number of bytes handled
  *
  */
 int sb_routine(){
     sMsg temp;
+    int count=0;
 
 #if (MYADDRX)!=0
     if (Xbee_receive(&temp)) {
-    	sb_forward(&temp,IF_XBEE);
+    	count+=sb_forward(&temp,IF_XBEE);
     }
 #endif
 #if (MYADDRI)!=0
     if (I2C_receive(&temp)) {
-            sb_forward(&temp,IF_I2C);
-        }
+        count+=sb_forward(&temp,IF_I2C);
+    }
 #endif
 
-    return nbMsg;
+    return count;
 }
 
 /*
