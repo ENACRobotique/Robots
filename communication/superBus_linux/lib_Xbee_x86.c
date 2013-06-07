@@ -85,16 +85,21 @@ int Xbee_receive(sMsg *pRet){
     static uint8_t smallBuf[CBUFF_SIZE]={0};
     int count=0;
     int j;
+    int ret;
 
 
     //read(...)=0 <=> no data available, <0 <=> error | count to limit the time spend in the loop in case of spam, checksum to get out of the loop if it is correct AND the sender address id OK (if sender=0 it means it has been reset to 0 after reading the message)
-    while( read(Xbee_serial_port,&(smallBuf[i]),1)>0 \
+    while( (ret=read(Xbee_serial_port,&(smallBuf[i]),1))>0 \
             && count<=MAX_READ_BYTES \
             &&  ( !cbChecksumHead(smallBuf,CBUFF_SIZE,(i)&(CBUFF_SIZE-1)) || !( (smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8) | smallBuf[(i-4)&(CBUFF_SIZE-1)] ) ) ) {
         i=(i+1)&(CBUFF_SIZE-1);                                          // &7 <~> %8, but better behaviour with negative in our case (and MUCH faster)
         count++;
     }
 
+    if (ret==-1){
+        perror("serial port reading");
+        exit(-1);
+    }
 
     if (count<=MAX_READ_BYTES && cbChecksumHead(smallBuf,CBUFF_SIZE,(i)&(CBUFF_SIZE-1)) &&  ( (smallBuf[(i-5)&(CBUFF_SIZE-1)]<<8) | smallBuf[(i-4)&(CBUFF_SIZE-1)] )  ){
 
@@ -119,7 +124,11 @@ int Xbee_receive(sMsg *pRet){
 }
 
 int Xbee_send(sMsg *msg){
-	//TODO
+    int ret;
+	if ((ret=write(Xbee_serial_port,msg,sizeof(sGenericHeader)+msg->header.size))==-1){
+	    perror("serial port writing");
+	    exit(-1);
+	}
 
-return 0;
+	return ret;
 }
