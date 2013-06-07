@@ -20,7 +20,7 @@ extern "C" { //to enable use in both C projects an C++ projects
  */
 
 int I2C_receive(sMsg *pRet);
-int I2C_send(sMsg *msg);
+int I2C_send(sMsg *msg,sb_Address firstDest);
 
 #ifdef __cplusplus
 }

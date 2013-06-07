@@ -96,38 +96,58 @@ int sb_receive(sMsg *msg){
  * Handles the routing of a message
  * Argument :
  *  msg : pointer to the message to send
- * Return value : interface to send the message to
+ * Return value : structure defining the next hop to send the message to
  *
  * Remark : routing tables are defined in network_cfg.h & network_cfg.cpp
  */
-E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
+sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
 	int i=0;
+	sRouteInfo routeInfo;
 
 	// if this message if for us
 	if ( ifFrom!=IF_LOCAL && (
 	        msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
-	            return IF_LOCAL;
+	    routeInfo.ifTo=IF_LOCAL;
+	    routeInfo.nextHop=msg->header.destAddr;
+        return routeInfo;
 	}
 #if MYADDRI!=0
 	// if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
 	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
-		if (ifFrom!=IF_I2C ) return IF_I2C;
-		else return IF_DROP;
+		if (ifFrom!=IF_I2C ) {
+		    routeInfo.ifTo=IF_I2C;
+		    routeInfo.nextHop=msg->header.destAddr;
+		    return routeInfo;
+		}
+		else {
+		    routeInfo.ifTo=IF_DROP;
+		    return routeInfo;
+		}
 	}
 #endif
 #if MYADDRX!=0
 	if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
-		if (ifFrom!=IF_XBEE ) return IF_XBEE;
-		else return IF_DROP;
+		if (ifFrom!=IF_XBEE ) {
+            routeInfo.ifTo=IF_XBEE;
+            routeInfo.nextHop=msg->header.destAddr;
+		    return routeInfo;
+		}
+		else {
+            routeInfo.ifTo=IF_DROP;
+            return routeInfo;
+        }
 	}
 #endif
+
 	// else, sweep the table until you reach the matching subnetwork or the end
 	while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
-		if ( rTable[i].destSubnet == (msg->header.destAddr & SUBNET_MASK) ) return rTable[i].ifTo;
+		if ( rTable[i].destSubnet == (msg->header.destAddr & SUBNET_MASK) ) {
+		    return rTable[i].nextHop;
+		}
 		i++;
 	}
 	//if you reach the end, send to default destination
-	return rTable[i].ifTo;
+	return rTable[i].nextHop;
 }
 
 
@@ -144,7 +164,8 @@ E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom){
  */
 //FIXME nexthop address
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
-	switch (sb_route(msg, ifFrom)){
+    sRouteInfo routeInfo=sb_route(msg, ifFrom);
+	switch (routeInfo.ifTo){
 #if MYADDRX!=0
 	case IF_XBEE :
 		return Xbee_send(msg);
@@ -152,7 +173,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 #endif
 #if MYADDRI!=0
 	case IF_I2C :
-		return I2C_send(msg);
+		return I2C_send(msg,routeInfo.nextHop);
 		break;
 #endif
 	case IF_DROP :
@@ -178,7 +199,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 
 
 
-int sb_printDbg(sb_Adress dest,char * str,int32_t i, uint32_t u){
+int sb_printDbg(sb_Address dest,char * str,int32_t i, uint32_t u){
 	sMsg tmp;
 	tmp.header.destAddr=dest;
 	tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;

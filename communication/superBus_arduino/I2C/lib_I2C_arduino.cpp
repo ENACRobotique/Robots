@@ -44,14 +44,14 @@ int I2C_receive(sMsg *pRet){
  * Size & checksum of msg must be set before calling txXbee
  * Argument :
  *  msg : message to send (thank captain obvious!)
+ *  firstDest : destination ON THE SENDER'S I2C BUS (in case of routing, may differ from msg->header.destAddr )
  * Return value :
  *  number of bytes writen (0 if error)
  */
-//FIXME doit prendre en compte une adresse de destinataire
-int I2C_send(sMsg *msg){
+int I2C_send(sMsg *msg, sb_Address firstDest){
     int count=0;
 
-    Wire.beginTransmission( (int)(msg->header.destAddr & DEVICEI_MASK)>>1 );
+    Wire.beginTransmission( (int)(firstDest & DEVICEI_MASK)>>1 );
     count=Wire.write((uint8_t *)msg,msg->header.size+sizeof(sGenericHeader));
     Wire.endTransmission();
 

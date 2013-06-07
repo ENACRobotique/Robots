@@ -15,11 +15,11 @@ extern "C" {
 
 #include <stdint.h>
 
-/* sb_Adress : on 16 bytes,
+/* sb_Address : on 16 bytes,
  * cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
  *
  */
-typedef uint16_t sb_Adress;
+typedef uint16_t sb_Address;
 
 
 #define SB_MAX_PDU 100
@@ -41,8 +41,8 @@ char *eType2str(E_TYPE elem);
 
 
 typedef struct {
-    sb_Adress destAddr;
-    sb_Adress srcAddr;
+    sb_Address destAddr;
+    sb_Address srcAddr;
     uint8_t size;       //size of the payload
     uint8_t type;       //type of the message
     uint8_t checksumHead;

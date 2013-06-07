@@ -27,9 +27,9 @@ extern "C" {
 int sb_send(sMsg *msg);
 int sb_routine();
 int sb_receive(sMsg *msg);
-E_IFACE sb_route(sMsg *msg,E_IFACE ifFrom);
+sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
-int sb_printDbg(sb_Adress dest,char * str,int32_t i, uint32_t u);
+int sb_printDbg(sb_Address dest,char * str,int32_t i, uint32_t u);
 
 #ifdef __cplusplus
 }

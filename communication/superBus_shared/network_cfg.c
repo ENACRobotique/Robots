@@ -15,18 +15,19 @@
 
 #if ( MYADDRX == ADDRX_MAIN && MYADDRI == ADDRI_MAIN_TURRET)
 sRTableEntry rTable[]={
-        {SUBNETX,IF_XBEE},
-        {0x42&(~SUBNET_MASK),IF_XBEE}
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif ( MYADDRX == ADDRX_MOBILE_1)
-
+sRTableEntry rTable[]={
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
 #elif  (MYADDRX == ADDRX_MOBILE_2)
 sRTableEntry rTable[]={
-        {0x42&(~SUBNET_MASK),IF_DROP}
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 
 #elif (MYADDRX == ADDRX_DEBUG)
 sRTableEntry rTable[]={
-        {0x42&(~SUBNET_MASK),IF_DROP}
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #endif

@@ -84,12 +84,20 @@ typedef enum{
  * }
  * perform default action (send to default)
  *
- * /!\ the last entry MUST be {0x42&(~SUBNET_MASK),default interface}
+ * /!\ the last entry MUST be {0x42&(~SUBNET_MASK),default interface,default address}
  */
-typedef struct{
-    sb_Adress destSubnet;
+
+typedef struct {
     E_IFACE ifTo;
+    sb_Address nextHop;
+}sRouteInfo;
+
+typedef struct{
+    sb_Address destSubnet;
+    sRouteInfo nextHop;
 }sRTableEntry;
+
+
 
 
 extern sRTableEntry rTable[];
