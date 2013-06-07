@@ -30,6 +30,9 @@ int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
 int sb_printDbg(sb_Address dest,char * str,int32_t i, uint32_t u);
+#if defined(ARCH_X86_LINUX)
+int sb_printfDbg(sb_Address dest, char *format, ...);
+#endif
 
 #ifdef __cplusplus
 }

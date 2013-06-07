@@ -23,6 +23,8 @@
         #include "I2C/lib_I2C_arduino.h"
     #endif
 #elif defined(ARCH_X86_LINUX)
+    #include <stdarg.h>
+
     #include "lib_Xbee_x86.h"
 #else
 #error please Define The Architecture Symbol you Bloody Bastard
@@ -216,16 +218,34 @@ int sb_printDbg(sb_Address dest,char * str,int32_t i, uint32_t u){
 	return 0;
 }
 
+// TODO remove the current sDebugPayload structure and change the way the E_DEBUG messages are interpreted
+// TODO make sb_printDbg produce a string instead of a string+int+uint to keep the same message type E_DEBUG
 
+#if defined(ARCH_X86_LINUX) && 0
+// FIXME never built & tested
+int sb_printfDbg(sb_Address dest, char *format, ...){
+    sMsg tmp;
+    va_list ap;
+    int ret;
 
+    tmp.header.destAddr=dest;
+    tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;
+    tmp.header.type=E_DEBUG;
 
+    va_start(ap, format);
+    ret = vsnprintf(tmp.payload.raw, SB_MAX_PDU-sizeof(sGenericHeader), format, ap);
+    va_end(ap);
 
+    if(ret <= 0){
+        return ret;
+    }
+    else if(ret+1 > SB_MAX_PDU-sizeof(sGenericHeader)){
+        return -1;
+    }
 
+    tmp.header.size = ret+1; // with the trailing NULL character
 
-
-
-
-
-
-
+    return sb_send(&tmp);
+}
+#endif
 
