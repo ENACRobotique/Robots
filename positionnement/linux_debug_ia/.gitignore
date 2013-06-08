@@ -1,0 +1,4 @@
+*~
+*.o
+.depend
+pos_test
