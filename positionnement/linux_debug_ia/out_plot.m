@@ -4,16 +4,25 @@ clc;
 
 A = dlmread('out.csv', ';');
 
-X = reshape(A(:, 1), 39, 59);
-Y = reshape(A(:, 2), 39, 59);
-Z = reshape(A(:, 3), 39, 59);
-I = reshape(A(:, 4), 39, 59);
+sr = A(1,2);
+sc = A(1,1);
 
-figure; surf(X, Y, Z);
-figure; surf(X, Y, min(I, .05));
+A(2,:) = [];
+A(1,:) = [];
 
-Z = conv2(Z, ones(4,4)/100, 'same');
-I = conv2(I, ones(4,4)/100, 'same');
+X = reshape(A(:, 1), sr, sc);
+Y = reshape(A(:, 2), sr, sc);
+NbCri = reshape(A(:, 3), sr, sc);
+MeanU = reshape(A(:, 4), sr, sc);
+MaxU = reshape(A(:, 5), sr, sc);
+StdDev = reshape(A(:, 6), sr, sc);
 
-figure; surf(X, Y, Z); title('filtered');
-figure; surf(X, Y, I); title('filtered');
+figure; surf(X, Y, NbCri); title('Number of criteria evaluation');
+figure; surf(X, Y, min(MeanU, .05)); title('Mean uncertainty saturated to .05');
+figure; surf(X, Y, min(MaxU, .05)); title('Max uncertainty saturated to .05');
+figure; surf(X, Y, StdDev./MeanU); title('Standard Deviation (%)');
+
+NbCri = conv2(NbCri, ones(4,4)/100, 'same');
+
+figure; surf(X, Y, NbCri); title('Number of criteria evaluation (filtered)');
+

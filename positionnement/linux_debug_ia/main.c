@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
 #endif
 #ifdef STATS_MAP
     FILE *flog;
-    int i;
-    float m;
+    int i, j, k;
+    float s1, s2, M, tmp;
 #else
     sPt_t tmp;
 #endif
@@ -52,26 +52,44 @@ int main(int argc, char *argv[]) {
     if(!flog)
         return 1;
 
-    for(x0.x=0.05; x0.x<=2.95; x0.x+=0.05) {
-        for(x0.y=0.05; x0.y<=1.95; x0.y+=0.05) {
-            m = 0;
+    // (pts/m)
+    #define DENSITY (30)
+    // (m)
+    #define ERR (0.06)
+
+    fprintf(flog, "%u;%u;;;;\n", DENSITY*2+1, DENSITY*3+1);
+    fprintf(flog, "\"x\";\"y\";\"mean nb_cri\";\"mean uncertainty\";\"max uncertainty\";\"sample stddev\"\n");
+
+    for(i = 0; i <= DENSITY*2; i++) {
+        x0.y = (float)i/(float)DENSITY;
+        for(j = 0; j <= DENSITY*3; j++) {
+            x0.x = (float)j/(float)DENSITY;
+
+            s1 = 0.;
+            s2 = 0.;
             nb_cri = 0;
 
-            for(i=0; i<50; i++) {
+            for(k = 0; k < 100; k++) {
                 simu_perception(&x0, &p);
                 estim_incertitude(&p);
                 bruite_perception(&p);
 
                 dir = uni_rand(-M_PI, M_PI);
-                x.x = x0.x + 0.02*cos(dir);
-                x.y = x0.y + 0.02*sin(dir);
+                x.x = x0.x + ERR*cos(dir);
+                x.y = x0.y + ERR*sin(dir);
 
                 neldermead(&x, 0.05, &p);
 
-                m += sqrt(SQR(x.y - x0.y) + SQR(x.x - x0.x));
+                tmp = sqrt(SQR(x.y - x0.y) + SQR(x.x - x0.x));
+
+                if(!k || tmp > M)
+                    M = tmp;
+
+                s1 += tmp;
+                s2 += SQR(tmp);
             }
 
-            fprintf(flog, "%.2f;%.2f;%.2f;%.4f\n", x0.x, x0.y, (float)nb_cri/(float)i, m/(float)i);
+            fprintf(flog, "%.3f;%.3f;%.2f;%.4f;%.4f;%.5f\n", x0.x, x0.y, (float)nb_cri/(float)k, s1/(float)k, M, sqrt( ((float)k*s2 - SQR(s1)) / ((float)k*((float)k-1)) ));
         }
     }
 
