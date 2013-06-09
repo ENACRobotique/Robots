@@ -31,7 +31,7 @@ typedef enum{
 #define PHASE_INIT_MOBILE_1 0 //in TR<<9 (ex. 45° = 45/360 tr = 0.125 tr = 64 tr<<64)
 #define PHASE_INIT_MOBILE_2 0 //in tr<<9
 
-#define ROT_PERIOD_BCAST 5000 //in ms
+#define ROT_PERIOD_BCAST 1000 //in ms
 
 #define MAX_ROUTINE_CALL 50 //
 #define MAX_ROUTINE_TIME 5  //in ms

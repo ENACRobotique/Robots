@@ -67,7 +67,7 @@ void laserIntHand1(){
 
 //returns the delta-T in µs and the time at which it was measured
 ldStruct laserDetect(bufStruct *bs){
-	unsigned long prevCall, t = micros();//mymicros();  // call mymicros() asap
+	unsigned long prevCall, t = micros();
 	unsigned long bufTemp[8], d1, d2;
 	int i=8, ilast=0, nb;
 
@@ -124,10 +124,14 @@ ldStruct laserDetect(bufStruct *bs){
 
 }
 
-
-
-plStruct periodicLaser(bufStruct *bs){
-    plStruct ret={0,0,0};
+/* Function co call periodically to poll if any new laser value
+ * Argument :
+ *  bs : pointer to the buffer structure to test
+ *  pRet : pointer to the return structure. This latter is not modified if there is no new value
+ * Return value : 1 if something new has been detected and written, 0 otherwise
+ *
+ */
+int periodicLaser(bufStruct *bs,plStruct *pRet){
     unsigned long int time=micros();
     ldStruct measure;
 
@@ -144,11 +148,13 @@ plStruct periodicLaser(bufStruct *bs){
                     bs->prevTime=time;
                     bs->nextTime=time+laser_period- (bs->lat>>1);
 
-                    ret.deltaT=measure.deltaT;
-                    ret.date=measure.date;
-                    ret.thickness=measure.thickness;
-                    ret.sureness=laser_period;
-                    ret.precision=0; //in µs TODO
+                    pRet->deltaT=measure.deltaT;
+                    pRet->date=measure.date;
+                    pRet->thickness=measure.thickness;
+                    pRet->sureness=laser_period;
+                    pRet->precision=4; //in µs TODO
+
+                    return 1;
 
                 }
                 //else, "delay" laserPeriod/2
@@ -156,6 +162,7 @@ plStruct periodicLaser(bufStruct *bs){
                     //set the nextime and prevtime
                     bs->prevTime=time;
                     bs->nextTime=time+ ((3*laser_period)>>3); // NOT a period submultiple
+                    return 0;
                 }
                 break;
             }
@@ -164,17 +171,19 @@ plStruct periodicLaser(bufStruct *bs){
                 measure=laserDetect(bs);
                 //if correct, decrease lat (unused), sets the delay to go to 2
                 if (measure.deltaT!=0){
-                    ret.deltaT=measure.deltaT;
-                    ret.date=measure.date;
-                    ret.thickness=measure.thickness;
-                    ret.sureness=time-bs->prevTime+(bs->lat>>1); //sureness = difference between the expected time and the measured time
-                    ret.precision=4; //in µs TODO
+                    pRet->deltaT=measure.deltaT;
+                    pRet->date=measure.date;
+                    pRet->thickness=measure.thickness;
+                    pRet->sureness=time-bs->prevTime+(bs->lat>>1); //sureness = difference between the expected time and the measured time
+                    pRet->precision=4; //in µs TODO
 
                     bs->lat=LAT_INIT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN);
                     bs->prevTime=time;
                     bs->nextTime=measure.date+laser_period-(bs->lat>>1);
 
                     bs->stage=2;
+
+                    return 1;
                 }
                 //else, go to acquisition
                 else {
@@ -182,9 +191,9 @@ plStruct periodicLaser(bufStruct *bs){
                     bs->prevTime=time;
                     bs->nextTime=measure.date+laser_period-(bs->lat>>1);
 
-                    ret.deltaT=0;
-
                     bs->stage=0;
+
+                    return 0;
 
                 }
                 break;
@@ -199,14 +208,14 @@ plStruct periodicLaser(bufStruct *bs){
 
                 //return to stage 1
                 bs->stage=1;
+
+                return 0;
                 break;
             }
             default : break;
-
         }
     }
-
-return ret;
+return 0;
 }
 
 

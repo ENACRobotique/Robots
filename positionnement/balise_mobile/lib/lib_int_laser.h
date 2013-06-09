@@ -65,7 +65,7 @@ void laserIntHand1();
 ldStruct laserDetect(bufStruct *bs);
 
 //function to call periodically, ensures acquisition and tracking of our laser beam
-plStruct periodicLaser(bufStruct *bs);
+int periodicLaser(bufStruct *bs,plStruct *pRet);
 
 //float laser2dist(unsigned long delta);
 

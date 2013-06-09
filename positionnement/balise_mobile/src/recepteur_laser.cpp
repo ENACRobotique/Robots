@@ -13,13 +13,15 @@
 
 
 
-
-
+char nbSync=0;
+unsigned long lastLaserDetect=0,lastLaserDetectMicros=0;
 int debug_led=1;
-unsigned long time=0, time_prev_led=0, time_prev_laser=0;
+unsigned long time_prev_led=0, time_prev_laser=0;
 int state=GAME;
-plStruct laserStruct0,laserStruct1;
+plStruct laserStruct0={0},laserStruct1={0};
 unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
+
+
 
 
 
@@ -39,16 +41,19 @@ void setup() {
   delay(200);
 
 #ifdef DEBUG
-  sb_printDbg(ADDRX_DEBUG,"mobile starting",-16,13);
+  sb_printDbg(ADDRX_DEBUG,"mobile starting",-17,13);
 #endif
+
 }
 
 void loop() {
-    static char nbSync=0;
-    static unsigned long lastLaserDetect=0;
+
+
     sMsg inMsg={{0}},outMsg={{0}};
+    plStruct laserStruct2Send={0};
     int rxB=0; // size (bytes) of message available to read
-    time = millis();
+    int las0=0,las1=0; // boolean, saying if laser 0 or 1 have received something in this loop
+    unsigned long time = millis(),timeMicros=micros();
 
 
 
@@ -59,12 +64,65 @@ void loop() {
 	rxB=sb_receive(&inMsg);
 
     //reading the eventual data from the lasers
-    laserStruct0=periodicLaser(&buf0);
-    laserStruct1=periodicLaser(&buf1);
+    las0=periodicLaser(&buf0,&laserStruct0);
+    las1=periodicLaser(&buf1,&laserStruct1);
 
-    if (laserStruct0.date || laserStruct1.date){ //if there is a new value
-        if (laserStruct0.thickness > laserStruct1.thickness) lastLaserDetect=laserStruct0.date;
-        else lastLaserDetect=laserStruct1.date;
+    //previous data pocessing
+    //if some laser has been detected on 0
+    if (las0){
+        if ( (laserStruct0.date-lastLaserDetect)> (laser_period>>1) ) { //more than half the period after the last laser detected
+            lastLaserDetect=laserStruct0.date;
+            lastLaserDetectMicros=micros();
+        }
+        else if ((laserStruct0.date-lastLaserDetect)< (laser_period>>6)){ //if it is the second detection of the same turn that have already been recorded in lastLaserDetecd
+            //test thickness and write lastLaseDetect and laserStruct2Send
+            if (laserStruct0.thickness > laserStruct1.thickness){ //"returns" the value with the biggest thickness
+                memcpy(&laserStruct2Send,&laserStruct0,sizeof(plStruct));
+                lastLaserDetect=laserStruct0.date;
+            }
+            else {
+                memcpy(&laserStruct2Send,&laserStruct1,sizeof(plStruct));
+                lastLaserDetect=laserStruct1.date;
+            }
+            //reset everything
+            memset(&laserStruct0,0,sizeof(plStruct));
+            memset(&laserStruct1,0,sizeof(plStruct));
+        }
+    }
+    //if some laser has been detected on 1
+    if (las1){
+        //more than half the period after the last laser detected
+        if ( (laserStruct1.date-lastLaserDetect)> (laser_period>>1)) {
+            lastLaserDetect=laserStruct0.date;
+            lastLaserDetectMicros=micros();
+        }
+        //if it is the second detection of the same turn that have already been recorded in lastLaserDetecd
+        else if ((laserStruct1.date-lastLaserDetect)< (laser_period>>6)){
+            //test thickness and write lastLaseDetect and laserStruct2Send
+            if (laserStruct0.thickness > laserStruct1.thickness){
+                //"returns" the value with the biggest thickness
+                memcpy(&laserStruct2Send,&laserStruct0,sizeof(plStruct));
+                lastLaserDetect=laserStruct0.date;
+            }
+            else {
+                memcpy(&laserStruct2Send,&laserStruct1,sizeof(plStruct));
+                lastLaserDetect=laserStruct1.date;
+            }
+            //reset everything
+            memset(&laserStruct0,0,sizeof(plStruct));
+            memset(&laserStruct1,0,sizeof(plStruct));
+        }
+    }
+    //if we do not expect the second laser detection anymore
+    if ( (!las0 && !las1) && (timeMicros-lastLaserDetectMicros)> (laser_period>>6) && (laserStruct0.date || laserStruct1.date) ){
+        //writes laserStruct2Send
+        if (laserStruct0.thickness > laserStruct1.thickness){ //"returns" the value with the biggest thickness
+            memcpy(&laserStruct2Send,&laserStruct0,sizeof(plStruct));
+        }
+        else memcpy(&laserStruct2Send,&laserStruct1,sizeof(plStruct));
+        //reset everything
+        memset(&laserStruct0,0,sizeof(plStruct));
+        memset(&laserStruct1,0,sizeof(plStruct));
     }
 
     //update the laser period
@@ -93,7 +151,7 @@ void loop() {
 							nbSync++;
 						}
 						else {
-							setMicrosOffset(lastLaserDetect-inMsg.payload.syncTime);
+							setMicrosOffset(lastLaserDetect-inMsg.payload.syncTime);//FIXME : to correct
 							nbSync=0; //TODO : man, i'm no sure about this one. I is highly unprobable that we receive 3 times a laser in sync with our TXed time. On the other hand, we will miss some message (or unsync)
 						}
 					}
@@ -120,23 +178,16 @@ void loop() {
 
 
         case GAME :
-        	if (laserStruct0.deltaT || laserStruct1.deltaT){ //if there is a new value, sends it to the main
+        	if ( laserStruct2Send.date ) { //if there is some data to send
 				outMsg.header.destAddr=ADDRX_MAIN;
 				outMsg.header.srcAddr=MYADDRX;
 				outMsg.header.type=E_MEASURE;
 				outMsg.header.size=sizeof(sMesPayload);
-				if (laserStruct0.thickness > laserStruct1.thickness) {
-					outMsg.payload.measure.value=laserStruct0.deltaT;
-					outMsg.payload.measure.date=laserStruct0.date;
-					outMsg.payload.measure.precision=laserStruct0.precision;
-					outMsg.payload.measure.sureness=laserStruct0.sureness;
-				}
-				else {
-					outMsg.payload.measure.value=laserStruct1.deltaT;
-					outMsg.payload.measure.date=laserStruct1.date;
-					outMsg.payload.measure.precision=laserStruct1.precision;
-					outMsg.payload.measure.sureness=laserStruct1.sureness;
-				}
+
+                outMsg.payload.measure.value=laserStruct2Send.deltaT;
+                outMsg.payload.measure.date=laserStruct2Send.date;
+                outMsg.payload.measure.precision=laserStruct2Send.precision;
+                outMsg.payload.measure.sureness=laserStruct2Send.sureness;
 				sb_send(&outMsg);
           }
           break;
