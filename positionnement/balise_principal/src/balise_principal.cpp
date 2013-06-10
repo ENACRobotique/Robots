@@ -80,11 +80,12 @@ void loop(){
     time=millis();
 
     //blinking
+#ifdef BLINK_1S
     if((time - time_prev_led)>=500) {
             time_prev_led += 500;
             digitalWrite(PIN_DBG_LED,debug_led^=1);
           }
-
+#endif
     //period broadcast
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
     	outMsg.header.destAddr=ADDRX_BROADCAST;
