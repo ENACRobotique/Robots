@@ -5,15 +5,13 @@
  *      Author: quentin
  */
 
-
-
 #include "lib_superBus.h"
 #include "lib_checksum.h"
 #include "network_cfg.h"
 #include "params.h"
 
 #include <string.h>
-
+//#include <stdarg.h>
 
 #ifdef ARCH_328P_ARDUINO
     #if MYADDRX !=0
@@ -26,6 +24,8 @@
     #include <stdarg.h>
 
     #include "lib_Xbee_x86.h"
+#elif defined(ARCH_LPC21XX)
+    #include "lib_I2C_lpc21xx.h"
 #else
 #error please Define The Architecture Symbol you Bloody Bastard
 #endif
@@ -33,6 +33,33 @@
 sMsg msgBuf[SB_INC_MSG_BUF_SIZE]={{{0}}};
 int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
 int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
+
+/*
+ * Handles the initialization of the superBus interfaces
+ */
+int sb_init(){
+    // FIXME use macros defined in params.h
+
+#if MYADDRX!=0
+#   ifdef ARCH_X86_LINUX
+    Xbee_initSerial("/dev/ttyUSB0");
+#   endif
+
+#   ifdef ARCH_328P_ARDUINO
+    Xbee_init();
+#   endif
+#endif
+
+#if MYADDRI!=0
+#   if defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX)
+    I2C_init(400000UL);
+#   endif
+#endif
+
+    return 0;
+}
+
+// TODO sb_deinit
 
 /*
  * Handles the sending of a message over the SuperBus network
@@ -45,8 +72,6 @@ int sb_send(sMsg *msg){
 	//actual sending
 	return sb_forward(msg,IF_LOCAL);
 }
-
-
 
 /*
  * SuperBus Routine, handles receiving messages, routing/forwarding them, putting the ones for this node in a buffer
@@ -193,7 +218,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 		iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
 		nbMsg++;
 
-		return (msgBuf[(iNext+SB_INC_MSG_BUF_SIZE-1)%SB_INC_MSG_BUF_SIZE].header.size + sizeof(sGenericHeader));//compliant with the C % (modulo)
+		return (msg->header.size + sizeof(sGenericHeader));
 		break;
 	default : return 0;
 	}
@@ -201,9 +226,9 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 }
 
 
-
-int sb_printDbg(sb_Address dest,char * str,int32_t i, uint32_t u){
+int sb_printDbg(sb_Address dest,const char * str,int32_t i, uint32_t u){
 	sMsg tmp;
+
 	tmp.header.destAddr=dest;
 	tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;
 	tmp.header.type=E_DEBUG;
@@ -248,4 +273,3 @@ int sb_printfDbg(sb_Address dest, char *format, ...){
     return sb_send(&tmp);
 }
 #endif
-

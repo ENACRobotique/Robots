@@ -7,7 +7,16 @@
 
 #include "lib_domitille.h"
 
+int freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
 
+int usedDataRam () {
+  extern int __heap_start, __data_start;
+  return (int) &__heap_start - (int) &__data_start;
+}
 
 #include "Arduino.h"
 #include "Wire.h"
@@ -19,21 +28,16 @@
 #include "lib_superBus.h"
 #include "lib_checksum.h"
 
+#include "lib_I2C_arduino.h"
 
 uint32_t mesTab[2]={0,0};
 
-
-
 void setup(){
-    Serial.begin(111111);
+    sb_init();
 
     pinMode(PIN_DBG_LED,OUTPUT);
     pinMode(PIN_RST_XBEE,OUTPUT);
-
-
-
     //setupXbee();
-
     digitalWrite(PIN_RST_XBEE,HIGH);
     delay(100);
     digitalWrite(PIN_RST_XBEE,LOW);
@@ -41,39 +45,33 @@ void setup(){
 
     while(Serial.read() != -1); //flush the buffer for any incorrect bytes
 
-
-    Wire.begin( (MYADDRI&DEVICEI_MASK)>>1);
-
     domi_init(2);
 #ifdef DEBUG
-    sb_printDbg(ADDRX_DEBUG,"start turret",0,0);
+    sb_printDbg(ADDRX_DEBUG,"start turret",freeRam(),usedDataRam());
 #endif
 
-}
 
+//    sb_printDbg(ADDRI_MAIN_CANDLE, "bla", -1, ~0);
+}
 
 static int state=GAME,debug_led=0;
 char syncOKbool=0;
+sMsg inMsg,outMsg;
+sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
 
 void loop(){
-    sMsg inMsg,outMsg;
-
     int rxB=0; //received bytes (size of inMsg when a message has been received)
     int nbRoutine=0; //number of call to sb_routine during this loop
-    static unsigned long time_prev_led=0,time_prev_period=millis(),prev_TR=0;
-    sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
-
+    static unsigned long time_prev_led=0,time_prev_period=0,prev_TR=0;
 
     unsigned long time=millis();
-
-
-
-
 
 ///////// must always be done, any state
 
 	//network routine
-    while (sb_routine() && nbRoutine<MAX_ROUTINE_CALL && (time-millis())<MAX_ROUTINE_TIME) nbRoutine++;
+    while (sb_routine() && nbRoutine<MAX_ROUTINE_CALL && (millis()-time)<MAX_ROUTINE_TIME) {
+    	nbRoutine++;
+    }
     //eventual receiving
     rxB=sb_receive(&inMsg);
 
@@ -82,18 +80,19 @@ void loop(){
     //blinking
 #ifdef BLINK_1S
     if((time - time_prev_led)>=500) {
-            time_prev_led += 500;
-            digitalWrite(PIN_DBG_LED,debug_led^=1);
-          }
-#endif
+    	time_prev_led = millis();
+    	digitalWrite(PIN_DBG_LED,debug_led^=1);
+    }
+
     //period broadcast
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
-    	outMsg.header.destAddr=ADDRX_BROADCAST;
+        time_prev_period = millis();
+
+        outMsg.header.destAddr=ADDRX_BROADCAST;
     	outMsg.header.srcAddr=MYADDRX;
     	outMsg.header.type=E_PERIOD;
     	outMsg.header.size=sizeof(outMsg.payload.period);
     	outMsg.payload.period=domi_meanPeriod();
-        time_prev_period += ROT_PERIOD_BCAST;
         sb_send(&outMsg);
     }
 
@@ -117,7 +116,7 @@ void loop(){
     	}
     }
 
-/////////state machine
+///////state machine
       switch (state){
           case SYNC:
                   //if nouveau tour, envoyer les expected pour le dernier tour

@@ -58,8 +58,9 @@ void setupXbee(){
     while (Serial.available())  Serial.read();
 }
 
-
-
+void Xbee_init(){
+	Serial.begin(111111);
+}
 
 #define CBUFF_SIZE 8        //MUST be a power of 2
 #define MAX_READ_BYTES 100  //nb of bytes to read before we leave this function (to avoid blocking)

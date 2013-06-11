@@ -13,11 +13,16 @@
  * MYADDRI : address of the i2c interface of ne node
  */
 
-#if ( MYADDRX == ADDRX_MAIN && MYADDRI == ADDRI_MAIN_TURRET)
+#if (MYADDRX == ADDRX_MAIN || MYADDRI == ADDRI_MAIN_TURRET)
 sRTableEntry rTable[]={
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
-#elif ( MYADDRX == ADDRX_MOBILE_1)
+#elif (MYADDRX == 0 && MYADDRI == ADDRI_MAIN_CANDLE)
+sRTableEntry rTable[]={
+        {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRX == ADDRX_MOBILE_1)
 sRTableEntry rTable[]={
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
@@ -25,8 +30,12 @@ sRTableEntry rTable[]={
 sRTableEntry rTable[]={
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
-
 #elif (MYADDRX == ADDRX_DEBUG)
+sRTableEntry rTable[]={
+        {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN}},
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRX == 0 && MYADDRI == ADDRI_MAIN_TURRET) //for tests purposes only
 sRTableEntry rTable[]={
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };

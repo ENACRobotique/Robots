@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>balise_principal</name>
+	<name>I2C_MULTIMASTER</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -31,7 +31,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/balise principal}/Debug</value>
+					<value>${workspace_loc:/I2C_MULTIMASTER/Debug}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>
@@ -83,19 +83,19 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>arduinolib/Wire</name>
+			<name>arduinoLib/Wire</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/arch-arduino/libraries/Wire</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/libraries/Wire</locationURI>
 		</link>
 		<link>
 			<name>lib/superBus_arduino</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/superBus_arduino</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/communication/superBus_arduino</locationURI>
 		</link>
 		<link>
 			<name>lib/superBus_shared</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/superBus_shared</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/communication/superBus_shared</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

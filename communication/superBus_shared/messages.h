@@ -12,7 +12,6 @@
 extern "C" {
 #endif
 
-
 #include <stdint.h>
 
 /* sb_Address : on 16 bytes,
@@ -22,7 +21,7 @@ extern "C" {
 typedef uint16_t sb_Address;
 
 
-#define SB_MAX_PDU 100
+#define SB_MAX_PDU 64
 
 //message types
 typedef enum{

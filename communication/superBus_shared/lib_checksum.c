@@ -5,11 +5,7 @@
  *      Author: quentin
  */
 
-#include "stdint.h"
 #include "lib_checksum.h"
-
-#include "messages.h"
-
 
 /* Computes the checksum
  * Argument :
@@ -41,7 +37,7 @@ uint8_t checksumHead(sGenericHeader *pt){
  *  header must be  without offset between his bytes
  *  /!\ size MUST be a power of 2
  */
-uint8_t cbChecksumHead(uint8_t *pt,uint8_t size, uint8_t lastB){
+uint8_t cbChecksumHead(uint8_t *pt, uint8_t size, uint8_t lastB){
     int i;
     uint8_t sum=0;
     for (i=1;i<sizeof(sGenericHeader);i++){
@@ -83,8 +79,6 @@ uint8_t checksumPload(sMsg *msg){
     }
     sum+=msg->header.checksumPload;
     return !sum;
-    //WATCH OUT : for an unknown reason, the following line DOES NOT have the same behaviour as the two previous lines
-    //return !(msg.header.checksumPload+sum);
 }
 
 /*
@@ -92,11 +86,11 @@ uint8_t checksumPload(sMsg *msg){
  * Argument :
  *  size : size (in bytes) of the payload to checksum
  */
-uint8_t calcSumPload(uPayload *pt,int size){
+uint8_t calcSumPload(uPayload *pt, int size){
     int i;
     uint8_t sum=0;
     for (i=0;i<size;i++){
-        sum+=((uint8_t *)pt)[i];
+        sum+=pt->raw[i];
     }
     return (~sum)+1;
 }

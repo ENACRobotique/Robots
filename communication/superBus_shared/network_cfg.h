@@ -47,10 +47,10 @@ extern "C" {
 
 //I2C adresses
     //subnet MAIN
-    #define ADDRI_MAIN_TURRET   (1 | SUBNETI_MAIN)
-    #define ADDRI_MAIN_PROP     (2 | SUBNETI_MAIN)
-    #define ADDRI_MAIN_GLASS    (3 | SUBNETI_MAIN)
-    #define ADDRI_MAIN_CANDLE   (4 | SUBNETI_MAIN)
+    #define ADDRI_MAIN_TURRET   (2 | SUBNETI_MAIN)
+    #define ADDRI_MAIN_PROP     (4 | SUBNETI_MAIN)
+    #define ADDRI_MAIN_GLASS    (6 | SUBNETI_MAIN)
+    #define ADDRI_MAIN_CANDLE   (8 | SUBNETI_MAIN)
 
 
 

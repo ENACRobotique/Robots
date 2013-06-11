@@ -3,8 +3,8 @@
 
 #include "network_cfg.h"
 
-#define MYADDRX 0
 #define MYADDRI ADDRI_MAIN_CANDLE
+#define MYADDRX 0
 #define SB_INC_MSG_BUF_SIZE 4
 #define ARCH_LPC21XX
 

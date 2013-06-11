@@ -12,15 +12,9 @@
 extern "C" { //to enable use in both C projects an C++ projects
 #endif
 
-
-/*
- *
- * /!\ requires a Wire.begin(my_address_I2C)
- *
- */
-
+void I2C_init(unsigned long speed);
 int I2C_receive(sMsg *pRet);
-int I2C_send(sMsg *msg,sb_Address firstDest);
+int I2C_send(const sMsg *msg,sb_Address firstDest);
 
 #ifdef __cplusplus
 }

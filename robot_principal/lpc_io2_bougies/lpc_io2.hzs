@@ -23,18 +23,20 @@
   <ProjectSessionItem path="lpc_io2_bougies" name="unnamed" />
   <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies" name="unnamed" />
   <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies;Source Files" name="unnamed" />
+  <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies;Source Files;lpc_lib" name="unnamed" />
+  <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies;Source Files;superBus" name="unnamed" />
  </Project>
  <Register1>
   <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
  </Register1>
  <Register2>
-  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
+  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
  </Register2>
  <Register3>
-  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
+  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
  </Register3>
  <Register4>
-  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
+  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
  </Register4>
  <TargetWindow programAction="" uploadFileType="" programLoadAddress="" programSize="" uploadFileName="" uploadMemoryInterface="" programFileName="" uploadStartAddress="" programFileType="" uploadSize="" programMemoryInterface="" />
  <TraceWindow>
@@ -42,9 +44,9 @@
  </TraceWindow>
  <Watch1>
   <Watches active="1" update="Never" >
-   <Watchpoint linenumber="88" radix="16" name="step_traj" expression="step_traj" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
-   <Watchpoint linenumber="112" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
    <Watchpoint linenumber="112" radix="16" name="x" expression="x" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="112" radix="-1" name="y" expression="y" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
+   <Watchpoint linenumber="88" radix="16" name="step_traj" expression="step_traj" filename="/home/robot/Documents/CrossWorks Projects/Executable_1/main.c" />
   </Watches>
  </Watch1>
  <Watch2>
@@ -57,7 +59,9 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" y="88" path="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" left="0" selected="1" name="unnamed" top="98" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" y="0" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" y="0" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" y="0" path="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" left="0" selected="1" name="unnamed" top="63" />
  </Files>
  <ARMCrossStudioWindow activeProject="lpc_io2_bougies" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 
@@ -68,5 +72,5 @@
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
 
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
-" fileDialogInitialDirectory="/home/robot/github/arch-lpc2148/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
+" fileDialogInitialDirectory="/home/robot/github/communication/superBus_lpc21xx" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
 </session>
