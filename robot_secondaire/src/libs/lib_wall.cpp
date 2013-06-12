@@ -7,7 +7,7 @@
 
 
 
-#include "Servo/Servo.h"
+#include "Servo.h"
 #include "lib_move.h"
 #include "lib_wall.h"
 #include "sharp_2d120x.h"

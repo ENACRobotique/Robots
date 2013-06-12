@@ -9,7 +9,7 @@
 #define LIB_RADAR_H_
 
 #include "Arduino.h"
-#include "Servo/Servo.h"
+#include "Servo.h"
 #include "lib_us.h"
 
 //defines

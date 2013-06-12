@@ -27,8 +27,11 @@
 							<builder buildPath="${workspace_loc:/secondaire}/Debug" id="de.innot.avreclipse.target.builder.winavr.app.debug.804504100" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.debug"/>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.1186067431" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.1544189702" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
-								<option id="de.innot.avreclipse.asm.option.include.paths.533687415" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+								<option id="de.innot.avreclipse.asm.option.include.paths.533687415" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/src/libs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Servo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Wire}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.360166437" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
@@ -37,9 +40,10 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.1853988152" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.incpath.199558093" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinoLibs}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinoLibs/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/src/libs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Servo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Wire}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.shortenums.2002336452" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.compiler.option.optimize.shortenums" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.308883965" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
@@ -53,8 +57,10 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.1646557480" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.1793940174" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinoLibs}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/src/libs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Servo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Wire}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.1322887223" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.1536243709" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -84,6 +90,50 @@
 							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.1146235059" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug"/>
 							<tool id="de.innot.avreclipse.tool.size.winavr.app.debug.141138636" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.debug"/>
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.2067162363" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="de.innot.avreclipse.configuration.app.debug.1664818209.1975584423" name="/" resourcePath="arduinoLibs">
+						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.501518424" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug" unusedChildren="">
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.108534352.178785928" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.108534352"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.1767853750.738202193" name="Generate HEX file for EEPROM" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.1767853750"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.1654772844.993635651" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.1654772844"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1622055823.674498434" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1622055823"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.1775436596.726861995" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.1775436596"/>
+							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.app.debug" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.debug"/>
+							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.349409651" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug.1186067431">
+								<option id="de.innot.avreclipse.asm.option.include.paths.482721685" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/src/libs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Servo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Wire}&quot;"/>
+								</option>
+								<inputType id="de.innot.avreclipse.tool.assembler.input.1036138077" superClass="de.innot.avreclipse.tool.assembler.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1062222364" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1541845811">
+								<option id="de.innot.avreclipse.compiler.option.incpath.2025910069" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/src/libs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Servo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Wire}&quot;"/>
+								</option>
+								<inputType id="de.innot.avreclipse.compiler.winavr.input.1428384274" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.2085549083" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug.1325395030">
+								<option id="de.innot.avreclipse.cppcompiler.option.incpath.1919475455" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/src/libs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Servo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/secondaire/arduinoLibs/Wire}&quot;"/>
+								</option>
+								<inputType id="de.innot.avreclipse.cppcompiler.input.45739656" superClass="de.innot.avreclipse.cppcompiler.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.587745368" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug.1700168301"/>
+							<tool id="de.innot.avreclipse.tool.cpplinker.app.debug.823850889" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug.283335218"/>
+							<tool id="de.innot.avreclipse.tool.archiver.winavr.base.1483648206" name="AVR Archiver" superClass="de.innot.avreclipse.tool.archiver.winavr.base.186208073"/>
+							<tool id="de.innot.avreclipse.tool.objdump.winavr.app.debug.669917411" name="AVR Create Extended Listing" superClass="de.innot.avreclipse.tool.objdump.winavr.app.debug.1391043404"/>
+							<tool id="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.989122999" name="AVR Create Flash image" superClass="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.1987114416"/>
+							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.1965519728" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.1146235059"/>
+							<tool id="de.innot.avreclipse.tool.size.winavr.app.debug.1929275000" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.debug.141138636"/>
+							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.270078100" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug.2067162363"/>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
