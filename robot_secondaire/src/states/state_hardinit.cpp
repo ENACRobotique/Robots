@@ -44,6 +44,8 @@ void initHard(sState *prev){
     pinMode(PIN_ARM_RIGHT,OUTPUT);
     armServoLeft.attach(PIN_ARM_LEFT);
     armServoLeft.write(ARM_LEFT_UP);
+    armServoRight.attach(PIN_ARM_RIGHT);
+    armServoRight.write(ARM_RIGHT_UP);
 
 
     //wall
