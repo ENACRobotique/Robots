@@ -23,7 +23,7 @@ enum I2CTransStatus {
   I2CTransDone
 };
 
-#define I2C_BUF_LEN 64
+#define I2C_BUF_LEN (64)
 
 struct i2c_transaction {
   uint8_t buf[I2C_BUF_LEN];
@@ -32,8 +32,11 @@ struct i2c_transaction {
   uint8_t slave_addr;
   uint8_t len_r;
   uint8_t len_w;
+  uint8_t nb_retry;
   void *userp;
 };
+
+#define I2C_MAX_NB_RETRY (4)
 
 #define I2C_TRANSACTION_QUEUE_LEN (4)
 

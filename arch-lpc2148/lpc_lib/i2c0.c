@@ -87,15 +87,19 @@ void _i2c0_isr() { // SI bit is set in I2C0CONSET => state change
     break;
 
   // error cases
-  case 0x20: // [MT] slave_addr+W transmitted, /ACK received
-// FIXME #################### might be necessary to multi-master capability
-    I2C0CONSET = BIT(4 /*STO*/) | BIT(2 /*AA*/);
-    I2cNextTransaction();
-    I2cEndOfTransaction();
-    break;
   case 0x30: // [MT] data byte transmitted ; /ACK received
+  case 0x20: // [MT] slave_addr+W transmitted, /ACK received
     I2C0CONSET = BIT(4 /*STO*/) | BIT(2 /*AA*/);
-    I2cNextTransaction();
+
+    if(trans->nb_retry > I2C_MAX_NB_RETRY) {
+      trans->status = I2CTransFailed;
+      I2cNextTransaction();
+    }
+    else {
+      trans->nb_retry++;
+      trans->status = I2CTransPending;
+    }
+
     I2cEndOfTransaction();
     break;
   case 0x48: // [MR] slave_addr+R transmitted, /ACK received
@@ -283,6 +287,7 @@ int i2c0_submit(struct i2c_transaction* t) {
     return 1;  /* queue full */
   }
   t->status = I2CTransPending;
+  t->nb_retry = 0;
 
   ctl_global_interrupts_disable();
   p.trans[p.trans_insert_idx] = t;

@@ -10,6 +10,7 @@
 
 #include "messages.h"
 
+void setupXbee();
 void Xbee_initSerial(char * devStr);
 void Xbee_deInitSerial();
 int Xbee_receive(sMsg *pRet);

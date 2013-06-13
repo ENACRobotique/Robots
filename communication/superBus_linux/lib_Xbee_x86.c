@@ -5,10 +5,6 @@
  *      Author: quentin
  */
 
-#include "lib_Xbee_x86.h"
-#include "lib_checksum.h"
-#include "messages.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -19,8 +15,71 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <errno.h>
+#include <sys/select.h>
+
+#include "lib_Xbee_x86.h"
+#include "lib_checksum.h"
+#include "messages.h"
 
 int Xbee_serial_port;
+
+#define delay(d) usleep((d)*1000)
+#define Serialprint(s) write(Xbee_serial_port, (s), strlen(s))
+#define Serialprintln(s) do { write(Xbee_serial_port, (s), strlen(s)); write(Xbee_serial_port, "\n", 1); } while(0)
+
+void setupXbee(){
+#if 0
+    //flush
+    delay(1000);
+//    while (Serial.available()){ //flush
+//        Serial.read();
+//    }
+    Serialprint("+++");
+    delay(1000);
+    //network cfg
+    //each node is an end device, with end device association disabled (factory config)
+    //Serial.print("ATCE0,A10");
+
+
+    //networkID
+    Serialprintln("ATID 34AC");
+    delay(10);
+
+    //default channel
+    Serialprintln("ATCH E"); //channel 14
+    delay(10);
+
+    //packetisation
+    Serialprintln("ATRO A");
+    delay(10);
+
+    //cmd mode timeout
+    Serialprintln("ATCT 64"); //100*100ms
+    delay(10);
+
+    //cmd mode guard time
+    Serialprintln("ATGT 1f4"); //500ms
+    delay(10);
+
+
+    //writes the settings to hard memory
+    Serialprintln("ATWR");
+    delay(10);
+
+    //soft reboot
+    Serialprintln("ATFR");
+    delay(500);
+
+    //flush
+    char buf[32];
+    while (read(Xbee_serial_port, buf, sizeof(buf)) > 0);
+#endif
+}
+
+#undef delay
+#undef Serialprint
+#undef Serialprintln
 
 
 /* Initialize the serial port designated by devStr
@@ -41,12 +100,10 @@ void Xbee_initSerial(char * devStr){
         exit(-1);
     }
 
-
-
     //chargement des données
     tcgetattr(Xbee_serial_port, &options);
     //B115200 bauds
-    cfsetospeed(&options, B115200);
+    cfsetospeed(&options, B57600);
     options.c_cflag |= (CLOCAL | CREAD);//programme propriétaire du port
     //structure en 8N1 !!
     options.c_cflag &= ~PARENB; //pas de parité
@@ -57,7 +114,6 @@ void Xbee_initSerial(char * devStr){
     printf("Port serie ouvert\n");
 
     fcntl(Xbee_serial_port,F_SETFL,10);//mode bloquant pour la fonction read() si aucun caractere dispo, programme attend
-
 }
 
 
@@ -75,6 +131,8 @@ void Xbee_deInitSerial(){
 
 
 
+
+
 /*
  *
  * /!\ Blocking function
@@ -87,6 +145,16 @@ int Xbee_receive(sMsg *pRet){
     int j;
     int ret;
 
+
+    fd_set s;
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 1*1000;
+
+    FD_ZERO(&s);
+    FD_SET(Xbee_serial_port, &s);
+    if(select(Xbee_serial_port+1, &s, NULL, NULL, &tv) <= 0)
+        return 0; // nothing to read or error
 
     //read(...)=0 <=> no data available, <0 <=> error | count to limit the time spend in the loop in case of spam, checksum to get out of the loop if it is correct AND the sender address id OK (if sender=0 it means it has been reset to 0 after reading the message)
     while( (ret=read(Xbee_serial_port,&(smallBuf[i]),1))>0 \
@@ -125,10 +193,23 @@ int Xbee_receive(sMsg *pRet){
 
 int Xbee_send(sMsg *msg){
     int ret;
-	if ((ret=write(Xbee_serial_port,msg,sizeof(sGenericHeader)+msg->header.size))==-1){
-	    perror("serial port writing");
-	    exit(-1);
-	}
+    int sent = 0;
+    int len = sizeof(sGenericHeader) + msg->header.size;
 
-	return ret;
+    uint8_t *p = (uint8_t *)msg;
+
+    do {
+        ret = write(Xbee_serial_port, p + sent, len - sent);
+        if(ret > 0) {
+            sent += ret;
+        }
+    } while(ret > 0 && sent < len);
+
+    if(ret < 0) {
+        perror("serial port writing");
+        exit(-1);
+    }
+
+    return sent;
 }
+

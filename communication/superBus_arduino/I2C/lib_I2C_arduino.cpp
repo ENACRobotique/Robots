@@ -71,7 +71,8 @@ int I2C_send(const sMsg *msg, sb_Address firstDest){
 
     Wire.beginTransmission( (int)(firstDest & DEVICEI_MASK)>>1 );
     count=Wire.write((const uint8_t *)msg,msg->header.size+sizeof(sGenericHeader));
-    Wire.endTransmission();
+    if(Wire.endTransmission())
+    	return -1;
 
     return count;
 }

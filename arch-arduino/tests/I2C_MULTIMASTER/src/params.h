@@ -18,10 +18,9 @@ typedef enum{
 
 //network config
 #define MYADDRI ADDRI_MAIN_TURRET
-#define MYADDRX 0
+#define MYADDRX ADDRX_MAIN
 #define SB_INC_MSG_BUF_SIZE 4
 #define ARCH_328P_ARDUINO
-
 
 
 

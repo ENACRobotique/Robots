@@ -11,7 +11,8 @@
 #include "sys_time.h"
 #include "params.h"
 #include "trigo.h"
-#include "i2c0.h"
+
+#include "lib_superBus.h"
 
 #ifndef BIT
 #define BIT(b) (1<<(b))
@@ -61,23 +62,6 @@ void _isr_right() { // irq14
 #define TRAJ_MAX_SIZE (16)
 
 typedef struct {
-// segment
-  float p1_x;
-  float p1_y;
-  float p2_x;
-  float p2_y;
-  float seg_len;
-// circle
-  float c_x;
-  float c_y;
-  float c_r;
-  float arc_len;
-// trajectory data
-  uint16_t tid; // trajectory identifier
-  uint16_t sid; // step identifier
-} sTrajElRaw_t;
-
-typedef struct {
   union {
     struct { // data converted to fixed point (and in increments or in increments per period)
 // segment
@@ -97,28 +81,14 @@ typedef struct {
   };
   uint8_t is_ok;
 } sTrajEl_t;
-volatile sTrajEl_t traj[2][TRAJ_MAX_SIZE];
+sTrajEl_t traj[2][TRAJ_MAX_SIZE];
 volatile int curr_traj = 0; // current followed trajectory (0:1)
 int curr_traj_step; // current step of the current trajectory (0:curr_traj_insert_sid*2-1)
 volatile int curr_traj_insert_sid = 0; // index at which data will be inserted in the current trajectory
 volatile int next_traj_insert_sid = 0; // index at which data will be inserted in the next trajectory
 volatile uint16_t curr_tid, next_tid; // current and next trajectory identifiers
 
-void traj_copy(volatile sTrajElRaw_t *dst, volatile sTrajElRaw_t *src) {
-  dst->p1_x = src->p1_x;
-  dst->p1_y = src->p1_y;
-  dst->p2_x = src->p2_x;
-  dst->p2_y = src->p2_y;
-  dst->seg_len = src->seg_len;
-  dst->c_x = src->c_x;
-  dst->c_y = src->c_y;
-  dst->c_r = src->c_r;
-  dst->arc_len = src->arc_len;
-  dst->tid = src->tid;
-  dst->sid = src->sid;
-}
-
-void traj_conv(volatile sTrajEl_t *t) {
+void traj_conv(sTrajEl_t *t) {
   if(!t->is_ok) {
     t->is_ok = 1;
 
@@ -132,13 +102,13 @@ void traj_conv(volatile sTrajEl_t *t) {
     t->c_r = isD2I(t->raw.c_r);
     t->arc_len = isD2I(t->raw.arc_len);
 
-    t->arc_sp_max = SQRT(1.5*1.5*(double)t->c_r);
+    t->arc_sp_max = SQRT(1.3*1.3*(double)t->c_r);
   }
 }
 
 int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
 int gx, gy; // goal (I<<SHIFT)
-int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
+int d_consigne = isDpS2IpP(15. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
 enum {
   S_WAIT, // no action asked (we are stopped)
@@ -146,122 +116,13 @@ enum {
   S_RUN_TRAJ // we are following a trajectory
 } state = S_WAIT; // state of the trajectory follow
 
-//#define TRAJ_DEBUG
-#ifdef TRAJ_DEBUG
-unsigned int i_debug_tab_traj = 0;
-struct {
-  unsigned long t;
-  sTrajElRaw_t traj;
-  int error;
-  int len_r;
-} debug_tab_traj[16];
-#endif
-
-void i2chnd(struct i2c_transaction *t, void *userp) {
-  int error = 0;
-
-  if(t->len_r) {
-    switch(t->buf[0]) {
-    case 1:{ // new trajectory step received
-      sTrajElRaw_t *te = (sTrajElRaw_t *)(&t->buf[4]);
-
-#ifdef TRAJ_DEBUG
-      if(i_debug_tab_traj < sizeof(debug_tab_traj)/sizeof(*debug_tab_traj)) {
-        debug_tab_traj[i_debug_tab_traj].t = millis();
-        debug_tab_traj[i_debug_tab_traj].len_r = t->len_r;
-        traj_copy(&debug_tab_traj[i_debug_tab_traj].traj, te);
-      }
-#endif
-
-      if( curr_traj_insert_sid > 0 && te->tid == curr_tid ) { // we are currently following a trajectory and we got some new steps to add to this trajectory
-        if( curr_traj_insert_sid < TRAJ_MAX_SIZE ) {
-          if( te->sid == curr_traj_insert_sid ) {
-            traj_copy(&traj[curr_traj][curr_traj_insert_sid].raw, te);
-            traj[curr_traj][curr_traj_insert_sid].is_ok = 0;
-            curr_traj_insert_sid++;
-
-            state = S_RUN_TRAJ;
-          }
-          else {
-            error = 1; // TODO error: bad step => invalidate all trajectory and ask new one
-          }
-        }
-        else {
-          error = 2; // TODO error: too much trajectory steps received
-        }
-      }
-      else if( next_traj_insert_sid > 0 && te->tid == next_tid ) { // we already got some new steps but we stil didn't switch to those (next_tid is valid)
-        if( next_traj_insert_sid < TRAJ_MAX_SIZE ) {
-          if( te->sid == next_traj_insert_sid ) {
-            traj_copy(&traj[!curr_traj][next_traj_insert_sid].raw, te);
-            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
-            next_traj_insert_sid++;
-
-            state = S_CHG_TRAJ;
-          }
-          else {
-            error = 3; // TODO error: bad step => invalidate all trajectory and ask new one
-          }
-        }
-        else {
-          error = 4; // TODO error: too much trajectory steps received
-        }
-      }
-      else { // we are receiving the first step of a new trajectory
-        if( te->sid == 0 ) {
-          next_traj_insert_sid = 0;
-          next_tid = te->tid;
-          traj_copy(&traj[!curr_traj][next_traj_insert_sid].raw, te);
-          traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
-          next_traj_insert_sid++;
-
-          state = S_CHG_TRAJ;
-        }
-        else {
-          error = 5; // TODO error: bad step => invalidate all trajectory and ask new one
-        }
-      }
-
-      if( t->len_r != sizeof(sTrajElRaw_t) + 4 ) {
-        error |= BIT(7);
-      }
-
-      if( error ) {
-        mybreak_i();
-      }
-
-#ifdef TRAJ_DEBUG
-      if(i_debug_tab_traj < sizeof(debug_tab_traj)/sizeof(*debug_tab_traj)) {
-        debug_tab_traj[i_debug_tab_traj].error = error;
-        i_debug_tab_traj++;
-      }
-#endif
-
-      break;
-    }
-
-    case 3: // set desired speed
-      d_consigne = isDpS2IpP(*(float *)(&t->buf[4]));
-      break;
-
-    case 4: // set position
-      x = isD2I(*(float *)(&t->buf[4])); // (I<<SHIFT)
-      y = isD2I(*(float *)(&t->buf[8])); // (I<<SHIFT)
-      theta = isROUND( D2I(RDIAM)*(*(float *)(&t->buf[12])) ); // (rad.I<<SHIFT)
-      break;
-
-    // TODO case get position (send position periodically with uncertainty to the fixed beacons for better position estimation)
-
-    default:
-      break;
-    }
-  }
-}
-
+//#define TIME_STATS
+#ifdef TIME_STATS
 // stats
 int nb_l = 0, nb_c = 0;
 int m_l, m_c;
 unsigned int start_us;
+#endif
 
 int main(void) {
   unsigned int prevAsserv=0, prevLed=0;
@@ -270,21 +131,26 @@ int main(void) {
   int consigne_l = 0;
   int consigne_r = 0;
   long long tmp, dtime;
+  sMsg msg;
 
   int ct, st, n_x, n_y, i;
   int v, alpha, dist, dist_tmp, dist_lim;
 
   int step_rotdir;
+  int ret;
 
   gpio_init_all();  // use fast GPIOs
 
   pwm_init(0, 1024);  // 29.3kHz update rate => not audible
 
-  i2c0_init(400000, 0x44, i2chnd, NULL);
+  sb_init();
 
 // sortie LED
   gpio_output(1, 24);
-  gpio_write(1, 24, 0); // LED on
+  gpio_write(1, 24, 0); // green LED on
+
+  gpio_output(0, 31);
+  gpio_write(0, 31, 0); // orange LED on
 
 // entrées quadrature
   gpio_input(1, 16);  // gauche
@@ -301,9 +167,103 @@ int main(void) {
 
   ctl_global_interrupts_enable();
 
+  ret = sb_printDbg(ADDRX_DEBUG, "start prop", 0, 0);
+//  ret = sb_printDbg(ADDRX_REMOTE_IA, "start prop", 0, 0);
+
 // main loop
   while(1) {
     sys_time_update();
+    sb_routine();
+
+    if(sb_receive(&msg) > 0) {
+      switch(msg.header.type){
+      case E_DATA: // beacon
+        gpio_write(0, 31, msg.payload.raw[0]);
+
+//        sb_printfDbg(ADDRX_REMOTE_IA, "got led flash (%i)", msg.payload.raw[0]);
+
+        break;
+      case E_TRAJ:{
+        sTrajElRaw_t *te = &msg.payload.traj;
+        int error = 0;
+
+//        sb_printfDbg(ADDRX_REMOTE_IA, "got traj step (t%hu, s%hu)", te->tid, te->sid);
+
+        if( curr_traj_insert_sid > 0 && te->tid == curr_tid ) { // we are currently following a trajectory and we got some new steps to add to this trajectory
+          if( curr_traj_insert_sid < TRAJ_MAX_SIZE ) {
+            if( te->sid == curr_traj_insert_sid ) {
+              memcpy(&traj[curr_traj][curr_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
+              traj[curr_traj][curr_traj_insert_sid].is_ok = 0;
+              curr_traj_insert_sid++;
+
+              state = S_RUN_TRAJ;
+            }
+            else {
+              error = 1; // TODO error: bad step => invalidate all trajectory and ask new one
+            }
+          }
+          else {
+            error = 2; // TODO error: too much trajectory steps received
+          }
+        }
+        else if( next_traj_insert_sid > 0 && te->tid == next_tid ) { // we already got some new steps but we stil didn't switch to those (next_tid is valid)
+          if( next_traj_insert_sid < TRAJ_MAX_SIZE ) {
+            if( te->sid == next_traj_insert_sid ) {
+              memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
+              traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
+              next_traj_insert_sid++;
+
+              state = S_CHG_TRAJ;
+            }
+            else {
+              error = 3; // TODO error: bad step => invalidate all trajectory and ask new one
+            }
+          }
+          else {
+            error = 4; // TODO error: too much trajectory steps received
+          }
+        }
+        else { // we are receiving the first step of a new trajectory
+          if( te->sid == 0 ) {
+            next_traj_insert_sid = 0;
+            next_tid = te->tid;
+            memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
+            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
+            next_traj_insert_sid++;
+
+            state = S_CHG_TRAJ;
+          }
+          else {
+            error = 5; // TODO error: bad step => invalidate all trajectory and ask new one
+          }
+        }
+
+//        sb_printDbg(ADDRX_REMOTE_IA, "got traj step, error=", error, 0);
+
+        if( error ) {
+          mybreak_i();
+        }
+        break;
+      }
+      case E_POS:
+        if(msg.payload.pos.id == 0) { // prim robot
+          x = isD2I(msg.payload.pos.x); // (I<<SHIFT)
+          y = isD2I(msg.payload.pos.y); // (I<<SHIFT)
+          theta = isROUND( D2I(RDIAM)*msg.payload.pos.theta ); // (rad.I<<SHIFT)
+
+          sb_printDbg(ADDRX_REMOTE_IA, "got pos", 0, 0);
+        }
+        break;
+    //case 3: // set desired speed
+      //d_consigne = isDpS2IpP(*(float *)(&t->buf[4]));
+      //break;
+    // TODO case get position (send position periodically with uncertainty to the fixed beacons for better position estimation)
+
+      default:
+        sb_printDbg(ADDRX_REMOTE_IA, "got unhandled msg", 0, 0);
+        break;
+      }
+    }
 
     if(millis() - prevAsserv >= 20) { // each 20 milliseconds
       prevAsserv = millis();
@@ -318,7 +278,9 @@ int main(void) {
         continue;
       }
 
+#ifdef TIME_STATS
       start_us = micros();
+#endif
 
       // get current number of ticks per sampling period
       ctl_global_interrupts_disable();  // prevent _ticks_? to be modified by an interruption caused by an increment
@@ -353,18 +315,13 @@ int main(void) {
         break;
 
       case S_CHG_TRAJ:
-        ctl_global_interrupts_disable(); // critical section
-
-          // current trajectory
-          curr_traj = !curr_traj;
-          curr_tid = next_tid;
-          curr_traj_insert_sid = next_traj_insert_sid;
-          next_traj_insert_sid = 0;
-          // current state
-          state = S_RUN_TRAJ;
-
-        ctl_global_interrupts_enable();
-
+        // current trajectory
+        curr_traj = !curr_traj;
+        curr_tid = next_tid;
+        curr_traj_insert_sid = next_traj_insert_sid;
+        next_traj_insert_sid = 0;
+        // current state
+        state = S_RUN_TRAJ;
         curr_traj_step = 0;
 
         // speed
@@ -459,9 +416,11 @@ int main(void) {
 
           tmp>>=1;  // gain
 
+#ifdef TIME_STATS
           // time stats... result 160µs!
           m_c = (m_c*nb_c + ((micros() - start_us)<<8))/(nb_c+1);
           nb_c++;
+#endif
         }
         else {  // straight line
           // TODO use same method as in circle follow
@@ -480,14 +439,16 @@ int main(void) {
 
           tmp>>=4; // gain
 
+#ifdef TIME_STATS
           // time stats... result 257µs!
           m_l = (m_l*nb_l + ((micros() - start_us)<<8))/(nb_l+1);
           nb_l++;
+#endif
         }
 
-        if(abs(tmp) > consigne) { // very high compensation term
-          mybreak_i();
-        }
+//        if(abs(tmp) > consigne) { // very high compensation term
+//          mybreak_i();
+//        }
 
         // update set point of each motor
         consigne_l = (((long long)_mul_l*(long long)consigne)>>SHIFT) - tmp; // (IpP<<SHIFT)
@@ -504,3 +465,4 @@ int main(void) {
 
   return 0;
 }
+

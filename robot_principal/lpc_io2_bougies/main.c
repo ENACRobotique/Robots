@@ -37,9 +37,16 @@ void mybreak_i() {
   i++;
 }
 
+uint8_t traj_extract_idx = 0;
+sTrajElRaw_t traj_blue[] = {
+  {7.50, 100.00, 88.75, 112.90, 82.26, 90.00, 105.00, 8.00, 16.43, 0, 0},
+  {97.58, 102.44, 82.42, 57.56, 47.37, 90.00, 55.00, 8.00, 38.89, 0, 1},
+  {93.66, 62.11, 20.00, 100.00, 82.83, 25.00, 95.00, 0.00, 0.00, 0, 2}
+};
+
 int main(void) {
   unsigned int prevLed = 0, prevI2C = 0;
-  sMsg tmp;
+  sMsg msg;
   int ret;
 
   gpio_init_all();  // use fast GPIOs
@@ -59,30 +66,19 @@ int main(void) {
   ctl_global_interrupts_enable();
 
 // send position update
-/*  if(t_asserv.status == I2CTransSuccess) {
-    t_asserv.type = I2CTransTx;
-    t_asserv.slave_addr = 0x44;
-    t_asserv.len_r = 0;
-    t_asserv.len_w = 4+3*sizeof(float);
-    t_asserv.buf[0] = 4; // set position
-    *(float *)&t_asserv.buf[4] = traj_blue[0].p1_x; // (cm)
-    *(float *)&t_asserv.buf[8] = traj_blue[0].p1_y; // (cm)
-    *(float *)&t_asserv.buf[12] = 0.; // (rad)
-    t_asserv.status = I2CTransPending;
-    i2c0_submit(&t_asserv);
-  }
-
-  tmp.header.destAddr = ADDRI_MAIN_PROP;
-  tmp.header.size = 4+3+sizeof(float);
-  tmp.header.type = E_DEBUG;
-  tmp.payload.raw[0] = 4; // set position
-  *(float *)&t_asserv.buf[4] = traj_blue[0].p1_x; // (cm)
-  *(float *)&t_asserv.buf[8] = traj_blue[0].p1_y; // (cm)
-  *(float *)&t_asserv.buf[12] = 0.; // (rad)
-  sb_send(&tmp);
-*/
-
   sb_printDbg(ADDRX_DEBUG, "start candle", 0, 0);
+
+  while(millis() < 500);
+
+  msg.header.srcAddr = MYADDRI;
+  msg.header.destAddr = ADDRI_MAIN_PROP;
+  msg.header.type = E_POS;
+  msg.header.size = sizeof(sPosPayload);
+  msg.payload.pos.x = traj_blue[0].p1_x;
+  msg.payload.pos.y = traj_blue[0].p1_y;
+  msg.payload.pos.theta = 0.;
+  msg.payload.pos.id = 0; // primaire
+  sb_send(&msg);
 
 // main loop
   while(1) {
@@ -90,45 +86,16 @@ int main(void) {
 
     sb_routine();
 
-    if(sb_receive(&tmp) > 0){
-      gpio_write(0, 31, 1);//tmp.payload.raw[0]);
-
-      tmp.header.srcAddr = MYADDRI;
-      tmp.header.destAddr = ADDRX_DEBUG;//ADDRX_DEBUG;
-      tmp.header.size = 13;
-      tmp.header.type = E_DEBUG;
-      strcpy(tmp.payload.debug.msg, "Hello world!"),
-      ret = sb_send(&tmp);
-    }
-
-/*    if(millis() - prevI2C >= 100) {
-      prevI2C = millis();
-
-      if(t_tourelle.status == I2CTransSuccess) {
-        t_tourelle.type = I2CTransTx;
-        t_tourelle.slave_addr = 8<<1;
-        t_tourelle.len_r = 12;
-        t_tourelle.len_w = 0;
-
-        i2c0_submit(&t_tourelle);
-      }
-    }
-
-    if(
-      traj_extract_idx < sizeof(traj_blue)/sizeof(*traj_blue) &&
-      t_asserv.status == I2CTransSuccess
-    ) {
-      t_asserv.type = I2CTransTx;
-      t_asserv.slave_addr = 0x44;
-      t_asserv.len_r = 0;
-      t_asserv.len_w = 4+sizeof(sTrajElRaw_t);
-      t_asserv.buf[0] = 1; // run_traj blue
-      memcpy(&t_asserv.buf[4], &traj_blue[traj_extract_idx], sizeof(sTrajElRaw_t));
-      t_asserv.status = I2CTransPending;
-      i2c0_submit(&t_asserv);
+    if( traj_extract_idx < sizeof(traj_blue)/sizeof(*traj_blue) ) {
+      msg.header.srcAddr = MYADDRI;
+      msg.header.destAddr = ADDRI_MAIN_PROP;
+      msg.header.type = E_TRAJ;
+      msg.header.size = sizeof(sTrajElRaw_t);
+      memcpy(&msg.payload.traj, &traj_blue[traj_extract_idx], sizeof(sTrajElRaw_t));
+      while(sb_send(&msg) < 0);
 
       traj_extract_idx++;
-    }*/
+    }
 
     if(millis() - prevLed >= 250) {
       prevLed = millis();

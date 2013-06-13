@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "messages.h"
 #include "lib_superBus.h"
@@ -35,16 +36,11 @@ int main(/*int argc, char *argv[]*/) {
 
     printf("Debug console\n");
 
-    prevH = signal(SIGINT,sigHandler);
+    prevH = signal(SIGINT, sigHandler);
 
     sb_init();
 
     printf("ctrl+C to see the menu\n");
-
-    inMsg.header.destAddr = ADDRI_MAIN_CANDLE;
-    inMsg.header.type = E_DEBUG;
-    inMsg.header.size = 13;
-    sb_send(&inMsg);
 
     while(1) {
         sb_routine();

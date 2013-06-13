@@ -24,7 +24,6 @@
   <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies" name="unnamed" />
   <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies;Source Files" name="unnamed" />
   <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies;Source Files;lpc_lib" name="unnamed" />
-  <ProjectSessionItem path="lpc_io2_bougies;lpc_io2_bougies;Source Files;superBus" name="unnamed" />
  </Project>
  <Register1>
   <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_io2_bougies" />
@@ -59,9 +58,13 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" y="0" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="0" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" y="0" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" left="0" selected="0" name="unnamed" top="0" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" y="0" path="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" left="0" selected="1" name="unnamed" top="63" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" y="17" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="78" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" y="25" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.h" left="0" selected="0" name="unnamed" top="15" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" y="58" path="/home/robot/github/robot_principal/lpc_io2_bougies/main.c" left="0" selected="1" name="unnamed" top="49" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/communication/superBus_shared/lib_superBus.c" y="44" path="/home/robot/github/communication/superBus_shared/lib_superBus.c" left="0" selected="0" name="unnamed" top="30" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/communication/superBus_shared/lib_superBus.h" y="0" path="/home/robot/github/communication/superBus_shared/lib_superBus.h" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c.h" y="16" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c.h" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/sys_time.c" y="63" path="/home/robot/github/arch-lpc2148/lpc_lib/sys_time.c" left="0" selected="0" name="unnamed" top="49" />
  </Files>
  <ARMCrossStudioWindow activeProject="lpc_io2_bougies" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 

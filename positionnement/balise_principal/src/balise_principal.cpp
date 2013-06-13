@@ -8,14 +8,14 @@
 #include "lib_domitille.h"
 
 int freeRam () {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+    extern int __heap_start, *__brkval;
+    int v;
+    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
 int usedDataRam () {
-  extern int __heap_start, __data_start;
-  return (int) &__heap_start - (int) &__data_start;
+    extern int __heap_start, __data_start;
+    return (int) &__heap_start - (int) &__data_start;
 }
 
 #include "Arduino.h"
@@ -46,12 +46,10 @@ void setup(){
     while(Serial.read() != -1); //flush the buffer for any incorrect bytes
 
     domi_init(2);
+
 #ifdef DEBUG
     sb_printDbg(ADDRX_DEBUG,"start turret",freeRam(),usedDataRam());
 #endif
-
-
-//    sb_printDbg(ADDRI_MAIN_CANDLE, "bla", -1, ~0);
 }
 
 static int state=GAME,debug_led=0;
@@ -68,9 +66,9 @@ void loop(){
 
 ///////// must always be done, any state
 
-	//network routine
+    //network routine
     while (sb_routine() && nbRoutine<MAX_ROUTINE_CALL && (millis()-time)<MAX_ROUTINE_TIME) {
-    	nbRoutine++;
+        nbRoutine++;
     }
     //eventual receiving
     rxB=sb_receive(&inMsg);
@@ -80,40 +78,40 @@ void loop(){
     //blinking
 #ifdef BLINK_1S
     if((time - time_prev_led)>=500) {
-    	time_prev_led = millis();
-    	digitalWrite(PIN_DBG_LED,debug_led^=1);
+        time_prev_led = millis();
+        digitalWrite(PIN_DBG_LED,debug_led^=1);
     }
-
+#endif
     //period broadcast
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
         time_prev_period = millis();
 
         outMsg.header.destAddr=ADDRX_BROADCAST;
-    	outMsg.header.srcAddr=MYADDRX;
-    	outMsg.header.type=E_PERIOD;
-    	outMsg.header.size=sizeof(outMsg.payload.period);
-    	outMsg.payload.period=domi_meanPeriod();
+        outMsg.header.srcAddr=MYADDRX;
+        outMsg.header.type=E_PERIOD;
+        outMsg.header.size=sizeof(outMsg.payload.period);
+        outMsg.payload.period=domi_meanPeriod();
         sb_send(&outMsg);
     }
 
     //some message handling
     if (rxB){
-    	switch (inMsg.header.type){
-    	case E_SYNC_OK :
-    		//write in syncOkbool that the sender is in sync
-    		syncOKbool|=(inMsg.header.srcAddr&DEVICEX_MASK);
-    		//if everybody is in sync, send a global "SYNC_OK"
-    		if (syncOKbool==(ADDRX_MOBILE_1)){//FIXME | ADDRX_MOBILE_2 | ADDRX_SECOND
-				outMsg.header.srcAddr=ADDRX_MAIN;
-				outMsg.header.destAddr=ADDRX_BROADCAST;
-				outMsg.header.type=E_SYNC_OK;
-				outMsg.header.size=0;
-				sb_send(&outMsg);
-				state=GAME;
-    		}
-    		break;
-    	default : break;
-    	}
+        switch (inMsg.header.type){
+        case E_SYNC_OK :
+            //write in syncOkbool that the sender is in sync
+            syncOKbool|=(inMsg.header.srcAddr&DEVICEX_MASK);
+            //if everybody is in sync, send a global "SYNC_OK"
+            if (syncOKbool==(ADDRX_MOBILE_1)){//FIXME | ADDRX_MOBILE_2 | ADDRX_SECOND
+                outMsg.header.srcAddr=ADDRX_MAIN;
+                outMsg.header.destAddr=ADDRX_BROADCAST;
+                outMsg.header.type=E_SYNC_OK;
+                outMsg.header.size=0;
+                sb_send(&outMsg);
+                state=GAME;
+            }
+            break;
+        default : break;
+        }
     }
 
 ///////state machine
@@ -121,54 +119,52 @@ void loop(){
           case SYNC:
                   //if nouveau tour, envoyer les expected pour le dernier tour
                   if(prev_TR!=last_TR){
-                	  //send to the laser receiver the expected time they should have seen the laser in order to synchronize the clocks
+                      //send to the laser receiver the expected time they should have seen the laser in order to synchronize the clocks
                       if (!(syncOKbool & (ADDRX_MOBILE_1&DEVICEX_MASK))){
-						  //expected for balise 1
-						  outMsg.header.srcAddr=MYADDRX;
-						  outMsg.header.destAddr=ADDRX_MOBILE_1;
-						  outMsg.header.type=E_SYNC_EXPECTED_TIME;
-						  outMsg.header.size=sizeof(outMsg.payload.syncTime);
-						  outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_1)>>9)+prev_TR;
-						  sb_send(&outMsg);
+                          //expected for balise 1
+                          outMsg.header.srcAddr=MYADDRX;
+                          outMsg.header.destAddr=ADDRX_MOBILE_1;
+                          outMsg.header.type=E_SYNC_EXPECTED_TIME;
+                          outMsg.header.size=sizeof(outMsg.payload.syncTime);
+                          outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_1)>>9)+prev_TR;
+                          sb_send(&outMsg);
                       }
 //FIXME                      if (!(syncOKbool & (ADDRX_MOBILE_2&DEVICE_MASK))){
-//						  //expected for balise 2
-//						  outMsg.header.srcAddr=MYADDRX;
-//						  outMsg.header.destAddr=ADDRX_MOBILE_2;
-//						  outMsg.header.type=E_SYNC_EXPECTED_TIME;
-//						  outMsg.header.size=sizeof(outMsg.payload.syncTime);
-//						  outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_2)>>9)+prev_TR;
-//						  sb_send(&outMsg);
+//                          //expected for balise 2
+//                          outMsg.header.srcAddr=MYADDRX;
+//                          outMsg.header.destAddr=ADDRX_MOBILE_2;
+//                          outMsg.header.type=E_SYNC_EXPECTED_TIME;
+//                          outMsg.header.size=sizeof(outMsg.payload.syncTime);
+//                          outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_2)>>9)+prev_TR;
+//                          sb_send(&outMsg);
 //                      }
                       prev_TR=last_TR;
                   }
                   break;
           case GAME :
-        	  	  if (rxB){
-        	  		  switch (inMsg.header.type){
-        	  		  case E_MEASURE :
-        	  			  switch (inMsg.header.srcAddr){
-        	  			  case ADDRX_MOBILE_1 :
-        	  				  last1=inMsg.payload.measure;
-        	  				  break;
-        	  			  case ADDRX_MOBILE_2 :
-        	  				  last2=inMsg.payload.measure;
-        	  				  break;
-        	  			  case ADDRX_SECOND :
-							  lastS=inMsg.payload.measure;
-							  break;
-        	  			  default : break;
-        	  			  }
-        	  			  rxB=0;
-        	  			  break;
+                  if (rxB){
+                      switch (inMsg.header.type){
+                      case E_MEASURE :
+                          switch (inMsg.header.srcAddr){
+                          case ADDRX_MOBILE_1 :
+                              last1=inMsg.payload.measure;
+                              break;
+                          case ADDRX_MOBILE_2 :
+                              last2=inMsg.payload.measure;
+                              break;
+                          case ADDRX_SECOND :
+                            lastS=inMsg.payload.measure;
+                            break;
+                          default : break;
+                          }
+                          rxB=0;
+                          break;
 
-        	  		  default : break;
-        	  		  }
-        	  	  }
+                      default : break;
+                      }
+                  }
                   break;
           default : break;
-
       }
-
-
 }
+

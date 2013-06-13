@@ -17,7 +17,12 @@
 sRTableEntry rTable[]={
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
-#elif (MYADDRX == 0 && MYADDRI == ADDRI_MAIN_CANDLE)
+#elif (MYADDRI == ADDRI_MAIN_CANDLE)
+sRTableEntry rTable[]={
+        {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRI == ADDRI_MAIN_PROP)
 sRTableEntry rTable[]={
         {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
@@ -28,6 +33,11 @@ sRTableEntry rTable[]={
 };
 #elif  (MYADDRX == ADDRX_MOBILE_2)
 sRTableEntry rTable[]={
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRX == ADDRX_REMOTE_IA)
+sRTableEntry rTable[]={
+        {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN}},
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRX == ADDRX_DEBUG)

@@ -11,7 +11,6 @@
 #include "params.h"
 
 #include <string.h>
-//#include <stdarg.h>
 
 #ifdef ARCH_328P_ARDUINO
     #if MYADDRX !=0
@@ -25,6 +24,8 @@
 
     #include "lib_Xbee_x86.h"
 #elif defined(ARCH_LPC21XX)
+    #include <stdarg.h>
+
     #include "lib_I2C_lpc21xx.h"
 #else
 #error please Define The Architecture Symbol you Bloody Bastard
@@ -66,11 +67,11 @@ int sb_init(){
  * For user's use only, the message was previously NOT "in the network"
  */
 int sb_send(sMsg *msg){
-	//checksum and stuff
-	setSum(msg);
+    //checksum and stuff
+    setSum(msg);
 
-	//actual sending
-	return sb_forward(msg,IF_LOCAL);
+    //actual sending
+    return sb_forward(msg,IF_LOCAL);
 }
 
 /*
@@ -88,7 +89,7 @@ int sb_routine(){
 
 #if (MYADDRX)!=0
     if (Xbee_receive(&temp)) {
-    	count+=sb_forward(&temp,IF_XBEE);
+        count+=sb_forward(&temp,IF_XBEE);
     }
 #endif
 #if (MYADDRI)!=0
@@ -109,12 +110,12 @@ int sb_routine(){
  */
 int sb_receive(sMsg *msg){
 
-	if ( iFirst==iNext && !nbMsg) return 0;
+    if ( iFirst==iNext && !nbMsg) return 0;
 
     //pop the oldest message of incoming buffer and updates index
-	memcpy(msg, &(msgBuf[iFirst]), msgBuf[iFirst].header.size + sizeof(sGenericHeader));
-	iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
-	nbMsg--;
+    memcpy(msg, &(msgBuf[iFirst]), msgBuf[iFirst].header.size + sizeof(sGenericHeader));
+    iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
+    nbMsg--;
 
     return (msg->header.size + sizeof(sGenericHeader));
 }
@@ -129,53 +130,53 @@ int sb_receive(sMsg *msg){
  * Remark : routing tables are defined in network_cfg.h & network_cfg.cpp
  */
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
-	int i=0;
-	sRouteInfo routeInfo;
+    int i=0;
+    sRouteInfo routeInfo;
 
-	// if this message if for us
-	if ( ifFrom!=IF_LOCAL && (
-	        msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
-	    routeInfo.ifTo=IF_LOCAL;
-	    routeInfo.nextHop=msg->header.destAddr;
+    // if this message if for us
+    if ( ifFrom!=IF_LOCAL && (
+            msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
+        routeInfo.ifTo=IF_LOCAL;
+        routeInfo.nextHop=msg->header.destAddr;
         return routeInfo;
-	}
+    }
 #if MYADDRI!=0
-	// if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
-	if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
-		if (ifFrom!=IF_I2C ) {
-		    routeInfo.ifTo=IF_I2C;
-		    routeInfo.nextHop=msg->header.destAddr;
-		    return routeInfo;
-		}
-		else {
-		    routeInfo.ifTo=IF_DROP;
-		    return routeInfo;
-		}
-	}
-#endif
-#if MYADDRX!=0
-	if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
-		if (ifFrom!=IF_XBEE ) {
-            routeInfo.ifTo=IF_XBEE;
+    // if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
+    if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
+        if (ifFrom!=IF_I2C ) {
+            routeInfo.ifTo=IF_I2C;
             routeInfo.nextHop=msg->header.destAddr;
-		    return routeInfo;
-		}
-		else {
+            return routeInfo;
+        }
+        else {
             routeInfo.ifTo=IF_DROP;
             return routeInfo;
         }
-	}
+    }
+#endif
+#if MYADDRX!=0
+    if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
+        if (ifFrom!=IF_XBEE ) {
+            routeInfo.ifTo=IF_XBEE;
+            routeInfo.nextHop=msg->header.destAddr;
+            return routeInfo;
+        }
+        else {
+            routeInfo.ifTo=IF_DROP;
+            return routeInfo;
+        }
+    }
 #endif
 
-	// else, sweep the table until you reach the matching subnetwork or the end
-	while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
-		if ( rTable[i].destSubnet == (msg->header.destAddr & SUBNET_MASK) ) {
-		    return rTable[i].nextHop;
-		}
-		i++;
-	}
-	//if you reach the end, send to default destination
-	return rTable[i].nextHop;
+    // else, sweep the table until you reach the matching subnetwork or the end
+    while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
+        if ( rTable[i].destSubnet == (msg->header.destAddr & SUBNET_MASK) ) {
+            return rTable[i].nextHop;
+        }
+        i++;
+    }
+    //if you reach the end, send to default destination
+    return rTable[i].nextHop;
 }
 
 
@@ -184,8 +185,8 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
 /*
  * Handles the forwarding of a message over the SuperBus network
  * Arguments :
- * 	msg : pointer to the message to send
- * 	ifFrom : interface (physical or virtual) on which the message has been received
+ *     msg : pointer to the message to send
+ *     ifFrom : interface (physical or virtual) on which the message has been received
  * Return value : number of bytes written/send
  *
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
@@ -193,78 +194,78 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
 //FIXME nexthop address
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
     sRouteInfo routeInfo=sb_route(msg, ifFrom);
-	switch (routeInfo.ifTo){
+    switch (routeInfo.ifTo){
 #if MYADDRX!=0
-	case IF_XBEE :
-		return Xbee_send(msg);
-		break;
+    case IF_XBEE :
+        return Xbee_send(msg);
+        break;
 #endif
 #if MYADDRI!=0
-	case IF_I2C :
-		return I2C_send(msg,routeInfo.nextHop);
-		break;
+    case IF_I2C :
+        return I2C_send(msg, routeInfo.nextHop);
+        break;
 #endif
-	case IF_DROP :
-		return 0;
-		break;
-	case IF_LOCAL :
+    case IF_DROP :
+        return 0;
+        break;
+    case IF_LOCAL :
 
-		if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
-			iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
-			nbMsg--;
-		}
+                // TODO, tell sender, message can't be sent and do not drop oldest message
+        if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
+            iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
+            nbMsg--;
+        }
 
-		memcpy(&(msgBuf[iNext]),msg, msg->header.size+sizeof(sGenericHeader));
-		iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
-		nbMsg++;
+        memcpy(&msgBuf[iNext],msg, msg->header.size+sizeof(sGenericHeader));
+        iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
+        nbMsg++;
 
-		return (msg->header.size + sizeof(sGenericHeader));
-		break;
-	default : return 0;
-	}
-	return 0;
+        return (msg->header.size + sizeof(sGenericHeader));
+        break;
+    default : return 0;
+    }
+    return 0;
 }
 
+int sb_printDbg(sb_Address dest, const char * str, int32_t i, uint32_t u){
+    sMsg tmp;
 
-int sb_printDbg(sb_Address dest,const char * str,int32_t i, uint32_t u){
-	sMsg tmp;
+    tmp.header.destAddr=dest;
+    tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;
+    tmp.header.type=E_DEBUG;
+    tmp.header.size=sizeof(sDebugPayload);
+    tmp.payload.debug.i=i;
+    tmp.payload.debug.u=u;
+    strncpy((char *)tmp.payload.debug.msg, str, 32);
+    tmp.payload.debug.msg[31]=0; //strncpy does no ensure the null-termination, so we force it
 
-	tmp.header.destAddr=dest;
-	tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;
-	tmp.header.type=E_DEBUG;
-	tmp.header.size=sizeof(sDebugPayload);
-	tmp.payload.debug.i=i;
-	tmp.payload.debug.u=u;
-	strncpy((char *)&(tmp.payload.debug.msg),str,32);
-	tmp.payload.debug.msg[31]=0; //strncpy does no ensure the null-termination, so we force it
-
-	sb_send(&tmp);
-
-	return 0;
+    return sb_send(&tmp);
 }
 
 // TODO remove the current sDebugPayload structure and change the way the E_DEBUG messages are interpreted
 // TODO make sb_printDbg produce a string instead of a string+int+uint to keep the same message type E_DEBUG
 
-#if defined(ARCH_X86_LINUX) && 0
-// FIXME never built & tested
+#if defined(ARCH_X86_LINUX) || defined(ARCH_LPC21XX)
+#include <stdarg.h>
+#include <stdio.h>
+
 int sb_printfDbg(sb_Address dest, char *format, ...){
     sMsg tmp;
     va_list ap;
     int ret;
 
     tmp.header.destAddr=dest;
-    tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;
-    tmp.header.type=E_DEBUG;
+    tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) );
+    tmp.header.type=E_DATA;
 
     va_start(ap, format);
-    ret = vsnprintf(tmp.payload.raw, SB_MAX_PDU-sizeof(sGenericHeader), format, ap);
+    ret = vsnprintf((char *)tmp.payload.raw, SB_MAX_PDU-sizeof(sGenericHeader), format, ap);
     va_end(ap);
 
     if(ret <= 0){
         return ret;
     }
-    else if(ret+1 > SB_MAX_PDU-sizeof(sGenericHeader)){
+    else if(ret >= SB_MAX_PDU-sizeof(sGenericHeader)){
         return -1;
     }
 
