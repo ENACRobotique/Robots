@@ -25,10 +25,10 @@ void initTrajBlue(sState *prev) {
     uint16_t tab[RAD_NB_PTS];
     int i;
     for (i=0;i<RAD_NB_PTS;i++){
-        tab[i]=20;
+        tab[i]=15;
     }
     for (i=1;i<6;i++){
-            tab[i]=40;
+            tab[i]=RADAR_SAFETY_DST;
         }
     radarSetLim(tab);
 #ifdef DEBUG
@@ -67,9 +67,8 @@ void deinitTrajBlue(sState *next){
 trajElem start_blue[]={
         {0,0,100}, //to wait until the servo is in the good position
         {100,0,3000}, //avant 29cm
-        //{100,0,1000}, //avancée de 11cm
         {0,45,500},
-        {100,45,1000},
+        {100,45,750},
         {0,0,500},
         {100,0,750},
         {0,90,500},
@@ -101,10 +100,10 @@ void initTrajRed(sState *prev) {
     uint16_t tab[RAD_NB_PTS];
     int i;
     for (i=0;i<RAD_NB_PTS;i++){
-        tab[i]=20;
+        tab[i]=15;
     }
     for (i=6;i<RAD_NB_PTS;i++){
-            tab[i]=40;
+            tab[i]=RADAR_SAFETY_DST;
         }
     radarSetLim(tab);
 #ifdef DEBUG
@@ -141,13 +140,13 @@ void deinitTrajRed(sState *next){
 
 trajElem start_red[]={
         {0,0,100}, //to wait until the servo is in the good position
-        {100,0,2800}, //avant, 29cm
-        {0,-45,1000},
+        {100,0,2800},
+        {0,-45,250},
         {50,-45,2000},
-        {0,0,500},
-        {100,0,750},
-        {0,90,500},
-        {100,90,1000},
+        {0,0,250},
+        {100,0,500},
+        {0,90,250},
+        {100,90,800},
         {0,0,100},
         {0,0,0}
 };
@@ -174,13 +173,13 @@ void initTrajRedFinal(sState *prev) {
     uint16_t tab[RAD_NB_PTS];
     int i;
     for (i=0;i<=4;i++){
-        tab[i]=40;
+        tab[i]=RADAR_SAFETY_DST;
     }
     for (i=10;i<=11;i++){
-            tab[i]=40;
+            tab[i]=RADAR_SAFETY_DST;
         }
     for (i=4;i<10;i++){
-            tab[i]=40;
+            tab[i]=15;
         }
     radarSetLim(tab);
 #ifdef DEBUG
@@ -216,11 +215,11 @@ void deinitTrajRedFinal(sState *next){
 
 trajElem final_red[]={
         {0,0,100}, //to wait until the servo is in the good position
-        //{100,0,2900}, //avant, 29cm
-        {-100,45,500},
-        {-100,0,15000},
+        {-100,45,650},
+        {-100,0,6000},
+        {-100,-2,10000},
         {-100,-45,850},
-        {-100,0,14000},
+        {-100,-5,10000},
         {0,0,100},
         {0,0,0}
 };
@@ -248,13 +247,13 @@ void initTrajBlueFinal(sState *prev) {
     uint16_t tab[RAD_NB_PTS];
     int i;
     for (i=0;i<=4;i++){
-        tab[i]=40;
+        tab[i]=RADAR_SAFETY_DST;
     }
     for (i=10;i<=11;i++){
-            tab[i]=40;
+            tab[i]=RADAR_SAFETY_DST;
         }
     for (i=4;i<10;i++){
-            tab[i]=40;
+            tab[i]=15;
         }
     radarSetLim(tab);
 #ifdef DEBUG
@@ -289,13 +288,19 @@ void deinitTrajBlueFinal(sState *next){
 }
 
 trajElem final_blue[]={
+//        {0,0,100}, //to wait until the servo is in the good position
+//        {-100,-45,1000},
+//        {-100,0,15000},
+//        {-100,45,500},
+//        {-100,0,14000},
+//        {0,0,0}
         {0,0,100}, //to wait until the servo is in the good position
-        //{100,0,2900}, //avant, 29cm
-        {-100,-45,1000},
-        {-100,0,15000},
-        {-100,45,500},
-        {-100,0,14000},
+        {-100,-45,1600},
+        {-100,0,10000},
+        {-100,45,1000},
+        {-100,-2,16000},
         {0,0,0}
+
 };
 
 sState *testTrajBlueFinal(){

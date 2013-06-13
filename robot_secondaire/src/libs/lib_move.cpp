@@ -5,7 +5,7 @@
  *      Author: quentin
  */
 #include "Arduino.h"
-#include "Servo.h"
+#include "Servo/Servo.h"
 #include "lib_move.h"
 
 //globals

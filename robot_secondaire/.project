@@ -25,16 +25,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>de.innot.avreclipse.core.avrnature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>arduinoLibs/Servo</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/arch-arduino/libraries/Servo</locationURI>
-		</link>
-		<link>
-			<name>arduinoLibs/Wire</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/arch-arduino/libraries/Wire</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>

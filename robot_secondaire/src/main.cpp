@@ -44,6 +44,7 @@ void setup(){
 
 
 void loop(){
+
 #ifdef DEBUG
     static unsigned long prevBlink=millis();
     static char ledState=0;

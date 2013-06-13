@@ -10,7 +10,7 @@
 
 #include "Arduino.h"
 
-#include "Wire.h"
+#include "Wire/Wire.h"
 
 
 // functions to range using I²C ultrasons

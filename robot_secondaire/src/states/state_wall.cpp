@@ -23,7 +23,7 @@ void initWallLeft(sState *prev) {
         tab[i]=15;
     }
     for (i=5;i<=7;i++){
-        tab[i]=50;
+        tab[i]=RADAR_SAFETY_DST;
     }
     radarSetLim(tab);
 
@@ -102,7 +102,7 @@ sState * testWallLeft(){
 }
 
 sState sWallLeft={
-        BIT(E_MOTOR) | BIT(E_RADAR),
+        BIT(E_MOTOR) | BIT(E_RADAR) | BIT(E_WALL),
         &initWallLeft,
         &deinitWallLeft,
         &testWallLeft
@@ -120,7 +120,7 @@ void initWallRight(sState *prev) {
         tab[i]=15;
     }
     for (i=7;i<=9;i++){
-        tab[i]=50;
+        tab[i]=RADAR_SAFETY_DST;
     }
     radarSetLim(tab);
 
@@ -199,7 +199,7 @@ sState * testWallRight(){
 }
 
 sState sWallRight={
-        BIT(E_MOTOR) | BIT(E_RADAR),
+        BIT(E_MOTOR) | BIT(E_RADAR) | BIT(E_WALL),
         &initWallRight,
         &deinitWallRight,
         &testWallRight

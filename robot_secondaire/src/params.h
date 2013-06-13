@@ -9,8 +9,7 @@
 #define DEFS_H_
 
 /* includes ************************************************/
-
-#include "Servo.h"
+#include "Servo/Servo.h"
 
 /* endincludes *********************************************/
 
@@ -63,8 +62,8 @@
 
 #define UPPERCUT
 
-#define RADAR_SAFETY_TIME 1000//in ms
-#define RADAR_SAFETY_DST 50 //in cm
+#define RADAR_SAFETY_TIME 500//in ms
+#define RADAR_SAFETY_DST 20 //in cm
 
 #define DEBUG
 
