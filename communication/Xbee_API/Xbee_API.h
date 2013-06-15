@@ -10,8 +10,9 @@
 
 /*
  * /!\ important remark :
- *  unless otherwise specified, values are little-endian
- *  "_be" suffix means a big-endian value
+ *  unless otherwise specified, variable endianess is unspecified
+ *  "_be" suffix means "big-endian" for any value which should be understood by the Xbee (e.g. parameters of AT cmd parameters).
+ *  "_be" does not apply on higher-level data.
  */
 #ifndef XBEE_API_H_
 #define XBEE_API_H_
@@ -58,17 +59,27 @@ typedef union{
     uint8_t modemStatus;
     sATResponse ATResponse;
     sATCmd ATCmd;
-}uAPIDSpecificData;
+}uAPISpecificData;
+
+typedef struct {
+    uint8_t APID;           // API identifier
+    uAPISpecificData data;
+}sAPISpecificStruct;
 
 typedef struct{
     uint8_t startB;             // 0x7E
     uint16_t length_be;         // length (big endian) of "data" field
-    uint8_t APID;               // API identifier
-    uAPIDSpecificData data;
+    sAPISpecificStruct frameData;
     uint8_t checksum;
 }sGenericXbeeFrame;
 
 /////////////// Xbee specific defines and flags
+    //// Special
+    #define XBEE_FRAME_START    0x7E
+    #define XBEE_ESCAPE_CHAR    0x7D
+    #define XBEE_ESCAPE_MASK    0x20
+    #define XBEE_XON            0x11
+    #define XBEE_XOFF           0x13
 
     //// TX option flags
     #define XBEE_TX_O_NOACK     0x01
@@ -125,9 +136,13 @@ int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, void* data, uint1
  */
 int XbeeTxStatus(sTXStatus *status);
 
-int XbeeATCmd(char cmd[2],int val);
+int XbeeATCmd(char cmd[2],int val_be);
 
-int XbeeGetFrame(sGenericXbeeFrame *frame);
+int XbeeWriteFrame(uint8_t apid, uint16_t size, uint8_t *data_be);
+
+int XbeeReadFrame(sAPISpecificStruct *str);
+int XbeeWriteByteEscaped(uint8_t byte);
+int XbeeReadByteEscaped(uint8_t *byte);
 
 
 #endif /* XBEE_API_H_ */
