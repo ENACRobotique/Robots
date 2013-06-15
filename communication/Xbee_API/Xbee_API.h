@@ -29,49 +29,49 @@
 typedef uint16_t XbeeAddr16_t;  // 16-bit addresses
 typedef uint64_t XbeeAddr64_t;  // 64-bit addresses
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
     uint8_t frameID;            // for acknowledgment purposes
     uint8_t status;
-}sTXStatus;
+}spTXStatus;
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
     uint16_t lSrcAddr;          // LINK (layer 2) source address
     uint8_t rssi;
     uint8_t options;
     uint8_t payload[100];
-}sRX16Data;
+}spRX16Data;
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
     uint8_t     frameID;            // for acknowledgment purposes
     uint16_t    cmd_be;             // ascii big endian command. ex : for "DL", we MUST have cmb_be = ('D'<<8) | 'L'
-    uint8_t     parameter_be[16];   // hexadecimal parameter value (if any) of the AT cmd. Value must be written big-endian.
-}sATCmd;
+    uint32_t     parameter_be;    // hexadecimal parameter value (if any) of the AT cmd. Value must be written big-endian.
+}spATCmd;
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
     uint8_t     frameID;            // for acknowledgment purposes
     uint16_t    cmd_be;             // ascii Command. ex : for "DL", we MUST have cmb_be = ( 'D'<<8 ) | 'L'
     uint8_t     status;
     uint8_t     value_be[16];        // hexa value returned (if any) by the AT cmd. Value must be written big-endian.
-}sATResponse;
+}spATResponse;
 
-typedef union{
-    sRX16Data RXdata;
+typedef union __attribute__((__packed__)){
+    spRX16Data RXdata;
     uint8_t modemStatus;
-    sATResponse ATResponse;
-    sATCmd ATCmd;
-}uAPISpecificData;
+    spATResponse ATResponse;
+    spATCmd ATCmd;
+}upAPISpecificData;
 
-typedef struct {
+typedef struct __attribute__((__packed__)){
     uint8_t APID;           // API identifier
-    uAPISpecificData data;
-}sAPISpecificStruct;
+    upAPISpecificData data;
+}spAPISpecificStruct;
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
     uint8_t startB;             // 0x7E
     uint16_t length_be;         // length (big endian) of "data" field
-    sAPISpecificStruct frameData;
+    spAPISpecificStruct frameData;
     uint8_t checksum;
-}sGenericXbeeFrame;
+}spGenericXbeeFrame;
 
 /////////////// Xbee specific defines and flags
     //// Special
@@ -103,6 +103,9 @@ typedef struct{
     #define XBEE_MODEM_S_COORDREAL      5   // Coordinator realignment
     #define XBEE_MODEM_S_COORDSTART     6   // Coordinator started
 
+    //// AT cmd options
+    #define XBEE_ATCMD_GET      0
+    #define XBEE_ATCMD_SET      1
     //// AT response status
     #define XBEE_ATR_S_OK
     #define XBEE_ATR_S_ERROR
@@ -113,7 +116,7 @@ typedef struct{
     //// API Identifiers
     #define XBEE_APID_MODEM_S           0x8A    // Modem status
     #define XBEE_APID_ATCMD             0x08    // AT command immediately applied
-    #define XBEE_APID_ATCMD_QUEUE       0x09    // AT command applied after "AC" command only
+    #define XBEE_APID_ATCMD_QUEUE       0x09    // AT command applied after "AC" command only XXX not implemented
     #define XBEE_APID_ATRESPONSE        0x88    // response to an AT cmd
     #define XBEE_APID_REMOTE_ATCMD      0x17    // remote AT command XXX not implemented
     #define XBEE_APID_REMOTE_ETRESPONSE 0x97    // response to remote AT command XXX not implemented
@@ -134,13 +137,12 @@ int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, void* data, uint1
  * Return value : nb of bytes red from serial port, 0 if error
  * status written in *status
  */
-int XbeeTxStatus(sTXStatus *status);
+int XbeeGetTxStatus(spTXStatus *status);
 
-int XbeeATCmd(char cmd[2],int val_be);
+int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option,uint32_t parameter);
 
 int XbeeWriteFrame(uint8_t apid, uint16_t size, uint8_t *data_be);
-
-int XbeeReadFrame(sAPISpecificStruct *str);
+int XbeeReadFrame(spAPISpecificStruct *str);
 int XbeeWriteByteEscaped(uint8_t byte);
 int XbeeReadByteEscaped(uint8_t *byte);
 

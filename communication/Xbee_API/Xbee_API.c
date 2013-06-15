@@ -20,11 +20,43 @@ int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, void* data, uint1
  * Return value : nb of bytes red from serial port, 0 if error
  * status written in *status
  */
-int XbeeTxStatus(sTXStatus *status){
+int XbeeGetTxStatus(spTXStatus *status){
     return 0;
 }
 
-int XbeeATCmd(char cmd[2],int val){
+/* XbeeATCmd : sends an AT command
+ * Arguments :
+ *  cmd : string naming the command
+ *  frameID : for acknowledgment purposes. 0 means no acknowledgment.
+ *  option : XBEE_ATCMD_SET xor XBEE_ATCMD_GET.
+ *  parameters : parameter (may be optional). Ignored if XBEE_ATCMD_GET
+ * Return value : TODO
+ *
+ * Remark : does not perform check on size and consistency of parameter
+ * /!\ refer to XBEE doc for available commands
+ */
+int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter){
+    int i;
+    spAPISpecificStruct sCmd;
+
+    // sets API specific ID
+    sCmd.APID=XBEE_APID_ATCMD;
+
+    //0 means no answer
+    sCmd.data.ATCmd.frameID=frameID;
+
+    // converts the command to big endian
+    sCmd.data.ATCmd.cmd_be=(cmd[0]<<8)|cmd[1];
+
+    if (option == XBEE_ATCMD_SET){
+        // converts the parameter to big endian
+        for (i=0;i<4;i++){
+            (uint8_t*)(&sCmd.data.ATCmd.parameter_be)[i]=(parameter>>(8*(3-i)))&0xff;
+        }
+    }
+
+    XbeeWriteFrame(8,sCmd);
+
     return 0;
 }
 
@@ -34,7 +66,7 @@ int XbeeATCmd(char cmd[2],int val){
  *  size : size of data to send (memory area pointed to by data_be), INCLUDING API command identifier
  *  str_be : api-specific structure to send (/!\ data to be understood by Xbee module MUST be big-endian, unspecified for the rest)
  */
-int XbeeWriteFrame(uint16_t size, sAPISpecificStruct str_be){
+int XbeeWriteFrame(uint16_t size, spAPISpecificStruct str_be){
     uint8_t checksum=0;
     int count=0;
 
@@ -72,7 +104,7 @@ int XbeeWriteFrame(uint16_t size, sAPISpecificStruct str_be){
  * Return value :
  *  size of the frame written in *frame, 0 if no frame available after timeout or bad checksum
  */
-int XbeeReadFrame(sAPISpecificStruct *str){
+int XbeeReadFrame(spAPISpecificStruct *str){
     int i=0;
     uint8_t *rawFrame=str;
     uint16_t size=0;
