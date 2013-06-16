@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "Xbee_API_linux_drivers.h"
+#include "drivers/Xbee_API_linux_drivers.h"
 
 #ifndef BIT
 #define BIT(a) (1<<(a))

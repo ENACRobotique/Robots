@@ -10,7 +10,7 @@
 
 
 #ifdef ARCH_X86_LINUX
-#include "Xbee_API_linux_drivers.h"
+#include "drivers/Xbee_API_linux_drivers.h"
 #include <stdio.h>
 #else
 #error will not compile, check architecture define and driver library
@@ -123,8 +123,10 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     while (readByte!=XBEE_FRAME_START && testTimeout(XBEE_WAITFRAME_TIMEOUT)){
         lus=serialRead(&readByte);
     }
-    if (readByte!=XBEE_FRAME_START) {//FIXME !lus) {
+    if (readByte!=XBEE_FRAME_START) {
+#if (defined(DEBUG) && defined(ARCH_X86_LINUX))
         printf("timeout readFrame\n");
+#endif
         return 0;
     }
     testTimeout(0); //restes the timeout

@@ -25,14 +25,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>lib/Xbee_API</name>
+			<name>lib/Xbee_API_sources</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/git_robot_enac/communication/Xbee_API</locationURI>
-		</link>
-		<link>
-			<name>lib/Xbee_API_linux_driver</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Xbee_API_linux_driver</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Xbee_API_sources</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
