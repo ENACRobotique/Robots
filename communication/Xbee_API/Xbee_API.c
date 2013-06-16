@@ -6,8 +6,16 @@
  */
 
 #include "Xbee_API.h"
-#include "defaultSerialForXbee.h"
 #include "params.h"
+
+
+#ifdef ARCH_X86_LINUX
+#include "Xbee_API_linux_driver/Xbee_API_linux_drivers.h"
+#include <stdio.h>
+#else
+#error will not compile, check architecture define and driver library
+#endif
+
 
 /* Xbee TX request for 16bits addresses
  * Return value : nb of bytes written to serial port, 0 if error
@@ -46,16 +54,17 @@ int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter){
     sCmd.data.ATCmd.frameID=frameID;
 
     // converts the command to big endian
-    sCmd.data.ATCmd.cmd_be=(cmd[0]<<8)|cmd[1];
+    sCmd.data.ATCmd.cmd[0]=cmd[0];
+    sCmd.data.ATCmd.cmd[1]=cmd[1];
 
     if (option == XBEE_ATCMD_SET){
         // converts the parameter to big endian
         for (i=0;i<4;i++){
-            (uint8_t*)(&sCmd.data.ATCmd.parameter_be)[i]=(parameter>>(8*(3-i)))&0xff;
+            ((uint8_t*)(&sCmd.data.ATCmd.parameter_be))[i]=(parameter>>(8*(3-i)))&0xff;
         }
+        XbeeWriteFrame(8,sCmd);
     }
-
-    XbeeWriteFrame(8,sCmd);
+    else XbeeWriteFrame(4,sCmd);
 
     return 0;
 }
@@ -75,27 +84,26 @@ int XbeeWriteFrame(uint16_t size, spAPISpecificStruct str_be){
 
     // write size in the right order (big-endian)
     if (!XbeeWriteByteEscaped((uint8_t)(size>>8))) return 0;
-    if (!XbeeWriteByteEscaped((uint8_t)(size|0xff))) return 0;
+    if (!XbeeWriteByteEscaped((uint8_t)(size&0xff))) return 0;
 
-    // writes the API command ID (outside the next loop because unaligned)
+    // writes the API command ID
     if (!XbeeWriteByteEscaped(str_be.APID)) return 0;
     checksum+=str_be.APID;
 
     // writes the rest of the frame and compute checksum
     while (count!=(size-1)){
-        if (!XbeeWriteByteEscaped((uint8_t)(str_be.data)[count])) return 0;
-        checksum+=(uint8_t)(str_be.data)[count];
+        if (!XbeeWriteByteEscaped(str_be.data.raw[count])) return 0;
+        checksum+=str_be.data.raw[count];
         count++;
     }
-
-    // compute and write the checksum
+    // final compute and write the checksum
     if (!XbeeWriteByteEscaped(0xff-checksum)) return 0;
 
     return (count+4);
 }
 
-#define XBEE_WAITFRAME_TIMEOUT  500    // in microsecond
-#define XBEE_READBYTE_TIMEOUT   100     // in microsecond, XXX unused
+#define XBEE_WAITFRAME_TIMEOUT  10000000    // in microsecond
+#define XBEE_READBYTE_TIMEOUT   1000     // in microsecond, XXX unused
 
 /* XbeeReadFrame : reads a frame on the serial link, escapes the characters that have to bo escaped,
  * perform the checksum and if everything is correct return the number of bytes of the Frame Data correctly red.
@@ -105,8 +113,7 @@ int XbeeWriteFrame(uint16_t size, spAPISpecificStruct str_be){
  *  size of the frame written in *frame, 0 if no frame available after timeout or bad checksum
  */
 int XbeeReadFrame(spAPISpecificStruct *str){
-    int i=0;
-    uint8_t *rawFrame=str;
+    uint8_t *rawFrame=(uint8_t*)str;
     uint16_t size=0;
     int count=0;
     uint8_t checksum=0;
@@ -116,7 +123,10 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     while (readByte!=XBEE_FRAME_START && testTimeout(XBEE_WAITFRAME_TIMEOUT)){
         serialRead(&readByte);
     }
-    if (readByte!=XBEE_FRAME_START) return 0;
+    if (readByte!=XBEE_FRAME_START) {
+        printf("timeout readFrame\n");
+        return 0;
+    }
 
 
 //XXX hypothesis : serial data are read faster by hardware than by this code
@@ -150,7 +160,7 @@ int XbeeWriteByteEscaped(uint8_t byte){
         if (serialWrite(XBEE_ESCAPE_CHAR) && serialWrite( byte^XBEE_ESCAPE_MASK )) return 1;
         return 0;
     }
-    if (serialWrite(byte)) return 1;
+    else if (serialWrite(byte)) return 1;
     return 0;
 }
 

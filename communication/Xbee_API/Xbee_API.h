@@ -17,7 +17,12 @@
 #ifndef XBEE_API_H_
 #define XBEE_API_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
+#include "Xbee_API_linux_driver/Xbee_API_linux_drivers.h"
 
 #ifndef BIT
 #define BIT(a) (1<<(a))
@@ -43,13 +48,13 @@ typedef struct __attribute__((__packed__)){
 
 typedef struct __attribute__((__packed__)){
     uint8_t     frameID;            // for acknowledgment purposes
-    uint16_t    cmd_be;             // ascii big endian command. ex : for "DL", we MUST have cmb_be = ('D'<<8) | 'L'
-    uint32_t     parameter_be;    // hexadecimal parameter value (if any) of the AT cmd. Value must be written big-endian.
+    uint8_t     cmd[2];             // ascii big endian command. ex : for "DL", we MUST have cmb_be = ('D'<<8) | 'L'
+    uint32_t    parameter_be;    // hexadecimal parameter value (if any) of the AT cmd. Value must be written big-endian.
 }spATCmd;
 
 typedef struct __attribute__((__packed__)){
     uint8_t     frameID;            // for acknowledgment purposes
-    uint16_t    cmd_be;             // ascii Command. ex : for "DL", we MUST have cmb_be = ( 'D'<<8 ) | 'L'
+    uint8_t     cmd[2];             // ascii Command. ex : for "DL", we MUST have cmb_be = ( 'D'<<8 ) | 'L'
     uint8_t     status;
     uint8_t     value_be[16];        // hexa value returned (if any) by the AT cmd. Value must be written big-endian.
 }spATResponse;
@@ -59,6 +64,7 @@ typedef union __attribute__((__packed__)){
     uint8_t modemStatus;
     spATResponse ATResponse;
     spATCmd ATCmd;
+    uint8_t raw[100];
 }upAPISpecificData;
 
 typedef struct __attribute__((__packed__)){
@@ -139,12 +145,15 @@ int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, void* data, uint1
  */
 int XbeeGetTxStatus(spTXStatus *status);
 
-int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option,uint32_t parameter);
+int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter);
 
-int XbeeWriteFrame(uint8_t apid, uint16_t size, uint8_t *data_be);
+int XbeeWriteFrame(uint16_t size, spAPISpecificStruct str_be);
 int XbeeReadFrame(spAPISpecificStruct *str);
 int XbeeWriteByteEscaped(uint8_t byte);
 int XbeeReadByteEscaped(uint8_t *byte);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* XBEE_API_H_ */
