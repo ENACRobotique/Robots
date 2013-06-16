@@ -10,7 +10,7 @@
 
 
 #ifdef ARCH_X86_LINUX
-#include "Xbee_API_linux_driver/Xbee_API_linux_drivers.h"
+#include "Xbee_API_linux_drivers.h"
 #include <stdio.h>
 #else
 #error will not compile, check architecture define and driver library
@@ -102,8 +102,7 @@ int XbeeWriteFrame(uint16_t size, spAPISpecificStruct str_be){
     return (count+4);
 }
 
-#define XBEE_WAITFRAME_TIMEOUT  10000000    // in microsecond
-#define XBEE_READBYTE_TIMEOUT   1000     // in microsecond, XXX unused
+
 
 /* XbeeReadFrame : reads a frame on the serial link, escapes the characters that have to bo escaped,
  * perform the checksum and if everything is correct return the number of bytes of the Frame Data correctly red.
@@ -118,34 +117,43 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     int count=0;
     uint8_t checksum=0;
     uint8_t readByte=0,readByte1=0;
+    int lus;
 
     //waiting for a frame start byte
     while (readByte!=XBEE_FRAME_START && testTimeout(XBEE_WAITFRAME_TIMEOUT)){
-        serialRead(&readByte);
+        lus=serialRead(&readByte);
     }
-    if (readByte!=XBEE_FRAME_START) {
+    if (readByte!=XBEE_FRAME_START) {//FIXME !lus) {
         printf("timeout readFrame\n");
         return 0;
     }
+    testTimeout(0); //restes the timeout
 
+    //reading size of message (with timeout)
+    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT));
+    if (!lus) return 0;
+    testTimeout(0);
+    while (!(lus=XbeeReadByteEscaped(&readByte1)) && testTimeout(XBEE_READBYTE_TIMEOUT));
+    if (!lus) return 0;
+    testTimeout(0);
 
-//XXX hypothesis : serial data are read faster by hardware than by this code
-
-    //reading size of message
-    XbeeReadByteEscaped(&readByte);
-    XbeeReadByteEscaped(&readByte1);
     size= (readByte<<8) | readByte1 ; //endianness-proof
 
     //read size bytes
     while (count != size){
-        XbeeReadByteEscaped(&rawFrame[count]);
+        while (!(lus=XbeeReadByteEscaped(&rawFrame[count])) && testTimeout(XBEE_READBYTE_TIMEOUT));
+        if (!lus) return 0;
+        testTimeout(0);
         checksum+=rawFrame[count];
         count++;
     }
 
     //checksum (read byte ,add , test and return)
-    XbeeReadByteEscaped(&readByte);
+    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT));
+    if (!lus) return 0;
+    testTimeout(0);
     checksum+=readByte;
+
     if (checksum == 0xff) return count;
     return 0;
 }
