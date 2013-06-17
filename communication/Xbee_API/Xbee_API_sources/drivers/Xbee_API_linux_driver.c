@@ -27,7 +27,7 @@ int serialInit(int speed, void *device){
     struct termios options;
     char *devStr=device;
 
-    printf("opening of:%s: at 57600 bd\n",devStr);
+    printf("opening of:%s: at 115200 bd\n",devStr);
     Xbee_serial_port = open(devStr, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);//lecture et ecriture | pas controlling terminal | ne pas attendre DCD
 
     //cas d'erreur d'ouverture
@@ -44,7 +44,7 @@ int serialInit(int speed, void *device){
     options.c_cflag |= (CLOCAL | CREAD);//programme propriétaire du port
     //structure en 8N1 !!
     options.c_cflag &= ~PARENB; //pas de parité
-    options.c_cflag &= ~CSTOPB; // 1 bit de stop
+    options.c_cflag |= CSTOPB; // 2 bit de stop
     options.c_cflag &= ~CSIZE; //option a 0
     options.c_cflag |= CS8; //8 bits
     tcsetattr(Xbee_serial_port, TCSANOW, &options); //enregistrement des valeurs de configuration

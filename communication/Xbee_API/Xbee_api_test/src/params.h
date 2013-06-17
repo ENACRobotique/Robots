@@ -13,7 +13,7 @@
 
 #define ARCH_X86_LINUX
 #define XBEE_WAITFRAME_TIMEOUT  1000000    // in microsecond
-#define XBEE_READBYTE_TIMEOUT   0      // in microsecond
+#define XBEE_READBYTE_TIMEOUT   5000      // in microsecond
 
 
 #define DEBUG

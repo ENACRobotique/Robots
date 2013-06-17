@@ -18,10 +18,45 @@
 
 
 /* Xbee TX request for 16bits addresses
- * Return value : nb of bytes written to serial port, 0 if error
+ * Arguments :
+ *  to : address of the destination Xbee
+ *  options :  XBEE_TX_O_BCAST xor XBEE_TX_O_NOACK
+ *  frameID : for ack purposes (not used if NOACK or BCAST).
+ *  data : pointer to the data to send over Xbee.
+ *  datasize : size that should be read at data.
+ * Return value : 0 if error, nb of bytes written on serial link (including start, size and checksum, but exluding escaping char)
+ *
  */
-int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, void* data, uint16_t datasize){
-    return 0;
+int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
+    spAPISpecificStruct stru={0};
+    uint8_t *addrPtr;
+
+    //writes API cmd ID
+    stru.APID=XBEE_APID_TX16;
+
+    //Writes destination  and frameID according to option selected
+    if (options&XBEE_TX_O_BCAST){
+        stru.data.TX16Data.lDstAddr_be=0xffff;
+        stru.data.TX16Data.options=XBEE_TX_O_BCAST;
+        stru.data.TX16Data.frameID=0;
+    }
+    else {
+        stru.data.TX16Data.options=options;
+
+        if (options==XBEE_TX_O_NOACK) stru.data.TX16Data.frameID=0;
+        else stru.data.TX16Data.frameID=frameID;
+
+        //endianess-proof address writing
+        addrPtr=(uint8_t*)(&stru.data.TX16Data.lDstAddr_be);
+        addrPtr[0]=(to>>8);
+        addrPtr[1]=(to&7);
+    }
+
+    //payload writing : to optimize speed, play with pointer to avoid useless copy
+    stru.data.TX16Data.pPayload=data;
+
+
+    return XbeeWriteFrame(&stru,dataSize+5);
 }
 
 /* Xbee TX status reading
@@ -38,7 +73,7 @@ int XbeeGetTxStatus(spTXStatus *status){
  *  frameID : for acknowledgment purposes. 0 means no acknowledgment.
  *  option : XBEE_ATCMD_SET xor XBEE_ATCMD_GET.
  *  parameters : parameter (may be optional). Ignored if XBEE_ATCMD_GET
- * Return value : TODO
+ * Return value : nb of bytes written on serial link (including start, size and checksum, but exluding escaping char)
  *
  * Remark : does not perform check on size and consistency of parameter
  * /!\ refer to XBEE doc for available commands
@@ -62,20 +97,18 @@ int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter){
         for (i=0;i<4;i++){
             ((uint8_t*)(&sCmd.data.ATCmd.parameter_be))[i]=(parameter>>(8*(3-i)))&0xff;
         }
-        XbeeWriteFrame(8,sCmd);
+        return XbeeWriteFrame(&sCmd,8);
     }
-    else XbeeWriteFrame(4,sCmd);
-
-    return 0;
+    else return XbeeWriteFrame(&sCmd,4);
 }
 
 /* XbeeWriteFrame : writes a specific frame one the serial link, for the Xbee.
- * Return value : nb of bytes actually written on the serial link, or 0 if error
+ * Return value : nb of bytes written on the serial link (Excluding escaping caracter 0x7D), or 0 if error
  * parameters :
- *  size : size of data to send (memory area pointed to by data_be), INCLUDING API command identifier
+ *  size : size of data to send (memory area pointed to by str_be), INCLUDING API command identifier
  *  str_be : api-specific structure to send (/!\ data to be understood by Xbee module MUST be big-endian, unspecified for the rest)
  */
-int XbeeWriteFrame(uint16_t size, spAPISpecificStruct str_be){
+int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size){
     uint8_t checksum=0;
     int count=0;
 
@@ -87,13 +120,13 @@ int XbeeWriteFrame(uint16_t size, spAPISpecificStruct str_be){
     if (!XbeeWriteByteEscaped((uint8_t)(size&0xff))) return 0;
 
     // writes the API command ID
-    if (!XbeeWriteByteEscaped(str_be.APID)) return 0;
-    checksum+=str_be.APID;
+    if (!XbeeWriteByteEscaped(str_be->APID)) return 0;
+    checksum+=str_be->APID;
 
     // writes the rest of the frame and compute checksum
     while (count!=(size-1)){
-        if (!XbeeWriteByteEscaped(str_be.data.raw[count])) return 0;
-        checksum+=str_be.data.raw[count];
+        if (!XbeeWriteByteEscaped(str_be->data.raw[count])) return 0;
+        checksum+=str_be->data.raw[count];
         count++;
     }
     // final compute and write the checksum
@@ -129,7 +162,7 @@ int XbeeReadFrame(spAPISpecificStruct *str){
 #endif
         return 0;
     }
-    testTimeout(0); //restes the timeout
+    testTimeout(0); //resets the timeout
 
     //reading size of message (with timeout)
     while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT));

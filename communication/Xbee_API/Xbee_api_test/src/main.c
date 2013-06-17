@@ -10,12 +10,9 @@
 
 int main(int argc, char *argv[]){
     spAPISpecificStruct stru;
-    int i=0;
-    uint8_t byte;
+    int i=1;
 
     serialInit(0,argv[1]);
-
-    while(testTimeout(0)) printf("test\n");
 
     //wait until the first frame is received (modem satus 0 : hardware reset)
     do{
