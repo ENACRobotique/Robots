@@ -23,7 +23,7 @@ int Xbee_serial_port;
 /* Expected behavior of serialInit :
  *  Initializes the serial communication
  */
-int serialInit(int speed, void *device){
+int serialInit(uint32_t speed, void *device){
     struct termios options;
     char *devStr=device;
 
@@ -116,7 +116,7 @@ int serialNRead(uint8_t *data,int size){
  *  3 - first call after the end of the timer : return 0.
  *  next call : goto 1.
  */
-int testTimeout(int micros){
+int testTimeout(uint32_t delay){
     static int bool=0;
     static struct timeval prevClock;
     struct timeval currentClock;
@@ -126,7 +126,7 @@ int testTimeout(int micros){
     }
     if (bool){
         gettimeofday(&currentClock,NULL);
-        if ( (currentClock.tv_sec-prevClock.tv_sec)>=(micros/1000000) && (currentClock.tv_usec-prevClock.tv_usec) >= (micros%1000000)){
+        if ( (currentClock.tv_sec-prevClock.tv_sec)>=(delay/1000000) && (currentClock.tv_usec-prevClock.tv_usec) >= (delay%1000000)){
             bool=0;
         }
     }

@@ -17,7 +17,7 @@ extern "C" {
 /* Expected behavior of serialInit :
  *  Initializes the serial communication
  */
-int serialInit(int speed, void *device);
+int serialInit(uint32_t speed, void *device);
 
 /* Expected behavior of serialDeInit :
  *  DeInitializes the serial communication
@@ -56,7 +56,7 @@ int serialNRead(uint8_t *data,int size);
  *  3 - first call after the end of the timer : return 0.
  *  next call : goto 1.
  */
-int testTimeout(int micros);
+int testTimeout(uint32_t delay);
 
 #ifdef __cplusplus
 }

@@ -1,10 +1,30 @@
 /*
  * Xbee_API.h
  *
- * This library shall enable the
- *
  *  Created on: 14 juin 2013
  *      Author: quentin
+ *
+ *      This library was created to use XBee devices with API mode 2 (with escaped characters).
+ *      Though some libraries already exists for Arduino, they uses a lot of C++ functionalities and
+ *      Arduino-specific funtions.
+ *      In this one, I tried to be as architecture-independant as possible, and I used only C language.
+ *      In consequence, this library can be used on any device, which can be programmed in C (microcontroller,
+ *      PC...) and owns a serial (UART) link.
+ *
+ *      Because of this portability, there are a few things to do if you want to use it :
+ *          1)  Your project must have a "params.h" file, visible from Xbee_API.h, which contains :
+ *              #define ARCH_XXX                           // According to the #ifdef at the beginning of XBee_API.c
+ *              #define XBEE_WAITFRAME_TIMEOUT  1000000    // in microsecond
+ *              #define XBEE_READBYTE_TIMEOUT   5000       // in microsecond
+ *          2)  If needed, you will have to write some "serial drivers". These are  Xbee_API_XXX_drivers.h and
+ *              Xbee_API_XXX_drivers.c files in "drivers" folder, implementing the functions described in
+ *              "defaultSerialForXbee.h"
+ *          3)  Finally, you will have to modify "Xbee_API.c" to match your files. The simplest is to add :
+ *                  "
+ *                  #ifdef ARCH_XXX                             // the one of param.h
+ *                  #include "drivers/Xbee_API_XXX_drivers.h"   //the one you juste wrote
+ *                  "
+ *                  Then replace the first #ifdef ARCH_YYY of the previous list by #elif defined(ARCH_YYY)
  */
 
 

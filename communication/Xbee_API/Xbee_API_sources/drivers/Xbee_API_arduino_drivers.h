@@ -1,12 +1,12 @@
 /*
- * defaultSerialForXbee.h
+ * Xbee_API_arduino_drivers.h
  *
- *  Created on: 14 juin 2013
+ *  Created on: 17 juin 2013
  *      Author: quentin
  */
 
-#ifndef DEFAULTSERIALFORXBEE_H_
-#define DEFAULTSERIALFORXBEE_H_
+#ifndef XBEE_API_ARDUINO_DRIVERS_H_
+#define XBEE_API_ARDUINO_DRIVERS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +17,7 @@ extern "C" {
 /* Expected behavior of serialInit :
  *  Initializes the serial communication
  */
-int serialInit(int speed, void *device);
+int serialInit(uint32_t speed, void *device);
 
 /* Expected behavior of serialDeInit :
  *  DeInitializes the serial communication
@@ -62,4 +62,4 @@ int testTimeout(uint32_t delay);
 }
 #endif
 
-#endif /* DEFAULTSERIALFORXBEE_H_ */
+#endif /* XBEE_API_ARDUINO_DRIVERS_H_ */
