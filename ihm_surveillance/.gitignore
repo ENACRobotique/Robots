@@ -1,4 +1,5 @@
-/console
+/cli
 /.depend
 *.o
 *~
+

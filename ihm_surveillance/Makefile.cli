@@ -1,15 +1,13 @@
-CSRCS   = superBus_console.c
+CSRCS   = cli.c
 CFLAGS  = -Wall -Werror -g
 LDFLAGS = 
-BIN     = console
+BIN     = cli
 
 # external ressources
-COMM    = ..
+COMM    = ../communication
 CFLAGS  += -I. -I$(COMM)/superBus_shared -I$(COMM)/superBus_linux
 CSRCS   += $(COMM)/superBus_shared/lib_checksum.c \
-           $(COMM)/superBus_shared/lib_superBus.c \
            $(COMM)/superBus_shared/messages.c \
-           $(COMM)/superBus_shared/network_cfg.c \
            $(COMM)/superBus_linux/lib_Xbee_x86.c
 
 # /!\ If you're not sure, do not edit past this line!
