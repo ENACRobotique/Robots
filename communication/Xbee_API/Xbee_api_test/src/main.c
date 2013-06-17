@@ -5,37 +5,54 @@
  *      Author: quentin
  */
 
-#include "Xbee_API.h"
 #include <stdio.h>
+#include <string.h>
+
+#include "params.h"
+#include "Xbee_API.h"
 
 int main(int argc, char *argv[]){
-    spAPISpecificStruct stru;
-    int i=1;
+    spAPISpecificStruct struIn,struOut;
+    int send=0,statused=0,acked=0,diff=0;
+    char str[32];
 
     serialInit(0,argv[1]);
-
+    printf("waiting for reset\n");
     //wait until the first frame is received (modem satus 0 : hardware reset)
     do{
-        XbeeReadFrame(&stru);
-    }while(stru.APID!=0x8a || stru.data.modemStatus!=XBEE_MODEM_S_HARDRST);
+        XbeeReadFrame(&struIn);
+    }while(struIn.APID!=0x8a || struIn.data.modemStatus!=XBEE_MODEM_S_HARDRST);
+
+    XbeeATCmd("MY", 42, XBEE_ATCMD_SET, MYADDRI);
+
+        //waits for command acknowledgement
+        do {
+            XbeeReadFrame(&struIn);
+        }while (struIn.APID!=XBEE_APID_ATRESPONSE || struIn.data.ATResponse.frameID!=42);
+
+    sprintf(str,"ping");
+    // send first ping
+    XbeeTx16(0x1234,0,0x88,str,strlen(str));
+    diff++;
+    send++;
 
     while(1){
-        XbeeATCmd("AP",0x42,XBEE_ATCMD_GET,0);
-        printf("\ncmd send\n");
-
-        while (!XbeeReadFrame(&stru)) printf("waiting\n");
-        printf("frame received, %d\n",i);
-        i++;
+        while (XbeeReadFrame(&struIn));
+        if (struIn.APID==XBEE_APID_TXS){
+            statused++;
+            if (struIn.data.TXStatus.status==XBEE_TX_S_SUCCESS){
+                acked++;
+                diff--;
+            }
+        }
+        else {
+            XbeeTx16(0x1234,0,0x88,str,strlen(str));
+            diff++;
+            send++;
+        }
 
     }
 
-    printf("APID : %x\n",stru.APID);
-    printf("Frame ID  : %x\n",stru.data.ATResponse.frameID);
-    printf("AT cmd : %c%c\n",stru.data.ATResponse.cmd[0],stru.data.ATResponse.cmd[1]);
-    printf("val : 0x");
-    for (i=0;i<16;i++) printf("%x",stru.data.ATResponse.value_be[i]);
-    printf("\n");
-    printf("fin programme \n");
 
     serialDeInit();
     return 0;

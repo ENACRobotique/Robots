@@ -14,6 +14,7 @@
  *      Because of this portability, there are a few things to do if you want to use it :
  *          1)  Your project must have a "params.h" file, visible from Xbee_API.h, which contains :
  *              #define ARCH_XXX                           // According to the #ifdef at the beginning of XBee_API.c
+ *              #define LITTLE_ENDIAN or BIG_ENDIAN
  *              #define XBEE_WAITFRAME_TIMEOUT  1000000    // in microsecond
  *              #define XBEE_READBYTE_TIMEOUT   5000       // in microsecond
  *          2)  If needed, you will have to write some "serial drivers". These are  Xbee_API_XXX_drivers.h and
@@ -41,10 +42,15 @@
 #error will not compile, check architecture define and driver library
 #endif
 
+#if (defined(BIG_ENDIAN) && defined(LITTLE_ENDIAN))
+#error bi-endianess not supported
+#elif (!defined(BIG_ENDIAN) && !defined(LITTLE_ENDIAN))
+#error endianess MUST be defined
+#endif
 
 /* Xbee TX request for 16bits addresses
  * Arguments :
- *  to : address of the destination Xbee
+ *  to_h : address of the destination Xbee, Host endianess
  *  options :  XBEE_TX_O_BCAST xor XBEE_TX_O_NOACK
  *  frameID : for ack purposes (not used if NOACK or BCAST).
  *  data : pointer to the data to send over Xbee.
@@ -52,7 +58,7 @@
  * Return value : 0 if error, nb of bytes written on serial link (including start, size and checksum, but exluding escaping char)
  *
  */
-int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
+int XbeeTx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
     spAPISpecificStruct stru={0};
     uint8_t *addrPtr;
 
@@ -72,9 +78,7 @@ int XbeeTx16(XbeeAddr16_t to,uint8_t options, uint8_t frameID, const void* data,
         else stru.data.TX16Data.frameID=frameID;
 
         //endianess-proof address writing
-        addrPtr=(uint8_t*)(&stru.data.TX16Data.lDstAddr_be);
-        addrPtr[0]=(to>>8);
-        addrPtr[1]=(to&7);
+        stru.data.TX16Data.lDstAddr_be=hbe2_swap(to_h);
     }
 
     //payload writing : to optimize speed, play with pointer to avoid useless copy
@@ -97,13 +101,13 @@ int XbeeGetTxStatus(spTXStatus *status){
  *  cmd : string naming the command
  *  frameID : for acknowledgment purposes. 0 means no acknowledgment.
  *  option : XBEE_ATCMD_SET xor XBEE_ATCMD_GET.
- *  parameters : parameter (may be optional). Ignored if XBEE_ATCMD_GET
+ *  parameter_h : parameter (may be optional). Ignored if XBEE_ATCMD_GET
  * Return value : nb of bytes written on serial link (including start, size and checksum, but exluding escaping char)
  *
  * Remark : does not perform check on size and consistency of parameter
  * /!\ refer to XBEE doc for available commands
  */
-int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter){
+int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h){
     int i;
     spAPISpecificStruct sCmd;
 
@@ -113,15 +117,14 @@ int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter){
     //0 means no answer
     sCmd.data.ATCmd.frameID=frameID;
 
-    // converts the command to big endian
+    // Writes the command
     sCmd.data.ATCmd.cmd[0]=cmd[0];
     sCmd.data.ATCmd.cmd[1]=cmd[1];
 
     if (option == XBEE_ATCMD_SET){
         // converts the parameter to big endian
-        for (i=0;i<4;i++){
-            ((uint8_t*)(&sCmd.data.ATCmd.parameter_be))[i]=(parameter>>(8*(3-i)))&0xff;
-        }
+        sCmd.data.ATCmd.parameter_be=hbe4_swap(parameter_h);
+
         return XbeeWriteFrame(&sCmd,8);
     }
     else return XbeeWriteFrame(&sCmd,4);
@@ -133,7 +136,7 @@ int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter){
  *  size : size of data to send (memory area pointed to by str_be), INCLUDING API command identifier
  *  str_be : api-specific structure to send (/!\ data to be understood by Xbee module MUST be big-endian, unspecified for the rest)
  */
-int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size){
+int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
     uint8_t checksum=0;
     int count=0;
 
@@ -141,15 +144,15 @@ int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size){
     if (!serialWrite(XBEE_FRAME_START)) return 0;
 
     // write size in the right order (big-endian)
-    if (!XbeeWriteByteEscaped((uint8_t)(size>>8))) return 0;
-    if (!XbeeWriteByteEscaped((uint8_t)(size&0xff))) return 0;
+    if (!XbeeWriteByteEscaped((uint8_t)(size_h>>8))) return 0;
+    if (!XbeeWriteByteEscaped((uint8_t)(size_h&0xff))) return 0;
 
     // writes the API command ID
     if (!XbeeWriteByteEscaped(str_be->APID)) return 0;
     checksum+=str_be->APID;
 
     // writes the rest of the frame and compute checksum
-    while (count!=(size-1)){
+    while (count!=(size_h-1)){
         if (!XbeeWriteByteEscaped(str_be->data.raw[count])) return 0;
         checksum+=str_be->data.raw[count];
         count++;

@@ -8,7 +8,11 @@
 #ifndef PARAMS_H_
 #define PARAMS_H_
 
+#define MYADDRI 0x1234
+
+
 #define ARCH_328P_ARDUINO
+#define LITTLE_ENDIAN
 #define XBEE_WAITFRAME_TIMEOUT  1000000    // in microsecond
 #define XBEE_READBYTE_TIMEOUT   5000       // in microsecond
 
