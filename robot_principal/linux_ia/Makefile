@@ -1,20 +1,21 @@
-SRCS    = a_star.c math_ops.c tools.c main_debug_ia.c
+CSRCS   = a_star.c math_ops.c tools.c main_debug_ia.c
 CFLAGS  = -Wall -g
-LDFLAGS = -lm
+LDFLAGS = 
 BIN     = debug_ia
 
 # external ressources
 COMM    = ../../communication
-CFLAGS  += -I. -I${COMM}/superBus_shared -I${COMM}/superBus_linux
-SRCS    += ${COMM}/superBus_shared/lib_checksum.c \
-           ${COMM}/superBus_shared/lib_superBus.c \
-           ${COMM}/superBus_shared/messages.c \
-           ${COMM}/superBus_shared/network_cfg.c \
-           ${COMM}/superBus_linux/lib_Xbee_x86.c
+CFLAGS  += -I. -I$(COMM)/superBus_shared -I$(COMM)/superBus_linux
+CSRCS   += $(COMM)/superBus_shared/lib_checksum.c \
+           $(COMM)/superBus_shared/lib_superBus.c \
+           $(COMM)/superBus_shared/messages.c \
+           $(COMM)/superBus_shared/network_cfg.c \
+           $(COMM)/superBus_linux/lib_Xbee_x86.c
+LDFLAGS += -lm
 
-# /!\ If you're not sure, do not edit past this line /!\
+# /!\ If you're not sure, do not edit past this line!
 CC      = gcc
-OBJ     = $(SRCS:.c=.o)
+COBJS   = $(CSRCS:.c=.o)
 RM      = rm -f
 DEPEND  = .depend
 
@@ -23,23 +24,23 @@ DEPEND  = .depend
 all: $(BIN)
 
 clean:
-	@${RM} $(OBJ) $(BIN)
 	@echo RM
+	@$(RM) $(COBJS) $(BIN)
 
-$(BIN): $(OBJ)
-	@$(CC) $(OBJ) -o $(BIN) $(LDFLAGS)
+$(BIN): $(COBJS)
 	@echo LD $@
+	@$(CC) $(COBJS) -o $(BIN) $(LDFLAGS)
 
 %.o: %.c
-	@$(CC) -c $< -o $@ $(CFLAGS)
 	@echo CC $<
+	@$(CC) -c $< -o $@ $(CFLAGS)
 
 # auto dependencies
 depend: $(DEPEND)
 
-$(DEPEND): $(SRCS)
-	@$(CC) $(CFLAGS) -MM $^ > ./$(DEPEND)
+$(DEPEND): $(CSRCS)
 	@echo CC $(DEPEND)
+	@$(CC) $(CFLAGS) -MM $^ > ./$(DEPEND)
 
 -include $(DEPEND)
 

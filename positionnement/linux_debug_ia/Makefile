@@ -1,30 +1,39 @@
-CC   = gcc
-SRCS = main.c params.c tools.c perception.c optim.c neldermead.c gradient.c
-OBJ  = $(SRCS:.c=.o)
-BIN  = pos_test
-CFLAGS = -Wall -Werror -g
-LIBS = -lm
-RM = rm -f
-DEPEND = .depend
+CSRCS   = main.c params.c tools.c perception.c optim.c neldermead.c gradient.c
+CFLAGS  = -Wall -g
+LDFLAGS = 
+BIN     = pos_test
+
+# external ressources
+LDFLAGS += -lm
+
+# /!\ If you're not sure, do not edit past this line!
+CC      = gcc
+COBJS   = $(CSRCS:.c=.o)
+RM      = rm -f
+DEPEND  = .depend
 
 .PHONY: all clean depend
 
 all: $(BIN)
 
 clean:
-	${RM} $(OBJ) $(BIN)
+	@echo RM
+	@$(RM) $(COBJS) $(BIN)
 
-$(BIN): $(OBJ)
-	$(CC) $(OBJ) -o $(BIN) $(LIBS)
+$(BIN): $(COBJS)
+	@echo LD $@
+	@$(CC) $(COBJS) -o $(BIN) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) -c $< -o $@ $(CFLAGS)
+	@echo CC $<
+	@$(CC) -c $< -o $@ $(CFLAGS)
 
 # auto dependencies
 depend: $(DEPEND)
 
-$(DEPEND): $(SRCS)
-	$(CC) $(CFLAGS) -MM $^ > ./$(DEPEND)
+$(DEPEND): $(CSRCS)
+	@echo CC $(DEPEND)
+	@$(CC) $(CFLAGS) -MM $^ > ./$(DEPEND)
 
 -include $(DEPEND)
 
