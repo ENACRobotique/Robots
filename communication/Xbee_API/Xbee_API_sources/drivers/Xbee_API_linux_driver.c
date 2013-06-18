@@ -73,7 +73,10 @@ int serialWrite(uint8_t byte){
 #ifdef DEBUG_PRINT_HEX
     printf("%x ",byte);
 #endif
-    return write(Xbee_serial_port, &byte, 1);
+    int i;
+    i=write(Xbee_serial_port, &byte, 1);
+    fflush(NULL);
+    return i;
 }
 
 /* Expected behavior of serialWrite
@@ -81,7 +84,10 @@ int serialWrite(uint8_t byte){
  *  Returns number of bytes written
  */
 int serialNWrite(const uint8_t *data,int size){
-    return write(Xbee_serial_port, data, size);
+    int i;
+    i=write(Xbee_serial_port, data, size);
+    fflush(NULL);
+    return i;
 }
 
 /* Expected behavior of serialRead

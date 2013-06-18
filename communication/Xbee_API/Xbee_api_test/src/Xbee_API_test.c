@@ -39,17 +39,18 @@ int main(int argc, char *argv[]){
     //writes config
     XbeeATCmd("WR", 32, XBEE_ATCMD_SET, 0);
     //waits for command acknowledgement
-        do {
-            XbeeReadFrame(&struIn);
-        }while (struIn.APID!=XBEE_APID_ATRESPONSE || struIn.data.ATResponse.frameID!=32);
-        printf("Write acked\n");
+    do {
+        XbeeReadFrame(&struIn);
+    }while (struIn.APID!=XBEE_APID_ATRESPONSE || struIn.data.ATResponse.frameID!=32);
+    printf("Write acked\n");
 
 
-    sprintf(str,"ping");
+
+
     // send first ping
-//    XbeeTx16(0x1234,0,0x88,str,strlen(str));
-//    diff++;
-//    send++;
+    send++;
+    diff++;
+    XbeeTx16(0x1234,0,0x88,&send,1);
 
 
     gettimeofday(&prevClock,NULL);
@@ -65,25 +66,28 @@ int main(int argc, char *argv[]){
                     diff--;
                     printf("and acked");
                 }
+                printf("\033[128D\033[50C| send : %d, diffAcked :%d, diffStat : %d\n",send,diff,send-statused);
             }
             else {
                 printf(":%s:\n",struIn.data.RX16Data.payload);
-                diff++;
-                send++;
-            }
-            printf("\033[128D\033[50C| send : %d, diffAcked :%d, diffStat : %d\n",send,diff,send-statused);
-        }
 
-        gettimeofday(&currentClock,NULL);
-        if ((currentClock.tv_usec-prevClock.tv_usec)>1000000){
-            gettimeofday(&prevClock,NULL);
-            if (XbeeTx16(0x1234,0,0x88,str,strlen(str))){
-                printf("Frame TX required\n");
                 diff++;
                 send++;
+                XbeeTx16(0x1234,0,0x88,&send,1);
             }
-            else printf("Frame TX error\n");
+
         }
+        memset(&struIn,0,sizeof(struIn));
+//        gettimeofday(&currentClock,NULL);
+//        if ((currentClock.tv_usec-prevClock.tv_usec)>1000000){
+//            gettimeofday(&prevClock,NULL);
+//            if (XbeeTx16(0x1234,0,0x88,str,strlen(str))){
+//                printf("Frame TX required\n");
+//                diff++;
+//                send++;
+//            }
+//            else printf("Frame TX error\n");
+//        }
 
     }
 
