@@ -49,8 +49,8 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/i2c_test/main.c" y="106" path="/home/robot/github/arch-lpc2148/i2c_test/main.c" left="0" selected="1" name="unnamed" top="99" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" y="6" path="/home/robot/github/arch-lpc2148/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc21xx/i2c_test/main.c" y="106" path="/home/robot/github/arch-lpc21xx/i2c_test/main.c" left="0" selected="1" name="unnamed" top="99" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc21xx/lpc_lib/i2c0.c" y="6" path="/home/robot/github/arch-lpc21xx/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="0" />
  </Files>
  <ARMCrossStudioWindow activeProject="lpc_i2c_test" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 
@@ -61,5 +61,5 @@
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
 
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
-" fileDialogInitialDirectory="/home/robot/github/arch-lpc2148/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
+" fileDialogInitialDirectory="/home/robot/github/arch-lpc21xx/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
 </session>

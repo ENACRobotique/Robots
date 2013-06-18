@@ -20,24 +20,24 @@
   <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" name="lpc_hli2c_test" addressSpace="" />
  </Memory4>
  <Project>
-  <ProjectSessionItem path="lpc_sbi2c_test" name="unnamed" />
-  <ProjectSessionItem path="lpc_sbi2c_test;lpc_sbi2c_test" name="unnamed" />
-  <ProjectSessionItem path="lpc_sbi2c_test;lpc_sbi2c_test;Source Files" name="unnamed" />
+  <ProjectSessionItem path="lpc_hli2c_test" name="unnamed" />
+  <ProjectSessionItem path="lpc_hli2c_test;lpc_hli2c_test" name="unnamed" />
+  <ProjectSessionItem path="lpc_hli2c_test;lpc_hli2c_test;Source Files" name="unnamed" />
  </Project>
  <Register1>
-  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="PWM;GPIO;FIO" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
   <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="CPU - Current Context;CPU" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_hli2c_test" />
  </Register1>
  <Register2>
-  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
   <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="CPU - Current Context;CPU" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_hli2c_test" />
  </Register2>
  <Register3>
-  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
   <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="CPU - Current Context;CPU" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_hli2c_test" />
  </Register3>
  <Register4>
-  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
+  <RegisterWindow openNodes="" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_i2c_test" />
   <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" hiddenNodes="" unsignedNodes="" visibleGroups="CPU - Current Context;CPU" decimalNodes="" octalNodes="" asciiNodes="" name="lpc_hli2c_test" />
  </Register4>
  <TargetWindow programAction="" uploadFileType="" programLoadAddress="" programSize="" uploadFileName="" uploadMemoryInterface="" programFileName="" uploadStartAddress="" programFileType="" uploadSize="" programMemoryInterface="" />
@@ -57,12 +57,13 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/sbi2c_test/main.c" y="85" path="/home/robot/github/arch-lpc2148/sbi2c_test/main.c" left="0" selected="1" name="unnamed" top="38" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/communication/superBus_shared/lib_superBus.c" y="43" path="/home/robot/github/communication/superBus_shared/lib_superBus.c" left="0" selected="0" name="unnamed" top="24" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/communication/superBus_lpc21xx/lib_I2C_lpc21xx.c" y="12" path="/home/robot/github/communication/superBus_lpc21xx/lib_I2C_lpc21xx.c" left="0" selected="0" name="unnamed" top="0" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc2148/lpc_lib/sys_time.c" y="68" path="/home/robot/github/arch-lpc2148/lpc_lib/sys_time.c" left="0" selected="0" name="unnamed" top="54" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc21xx/lpc_lib/i2c0.c" y="26" path="/home/robot/github/arch-lpc21xx/lpc_lib/i2c0.c" left="0" selected="0" name="unnamed" top="9" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc21xx/lpc_lib/i2c.c" y="85" path="/home/robot/github/arch-lpc21xx/lpc_lib/i2c.c" left="0" selected="0" name="unnamed" top="71" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc21xx/lpc_lib/i2c.h" y="0" path="/home/robot/github/arch-lpc21xx/lpc_lib/i2c.h" left="0" selected="0" name="unnamed" top="0" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc21xx/lpc_lib/i2c0.h" y="0" path="/home/robot/github/arch-lpc21xx/lpc_lib/i2c0.h" left="0" selected="0" name="unnamed" top="51" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Latin1" x="0" debugPath="/home/robot/github/arch-lpc21xx/hli2c_test/main.c" y="0" path="/home/robot/github/arch-lpc21xx/hli2c_test/main.c" left="0" selected="1" name="unnamed" top="21" />
  </Files>
- <ARMCrossStudioWindow activeProject="lpc_sbi2c_test" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
+ <ARMCrossStudioWindow activeProject="lpc_hli2c_test" autoConnectTarget="Olimex ARM-USB-TINY" debugSearchFileMap="/home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_read.s
 
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libarm/libarm_dcc_write.s
 
@@ -71,5 +72,5 @@
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__float64_cmp.s
 
 /home/products/build/crossworks/arm/crossworks_v2/shared/target/libm_fast/arm/__int32_to_float64.s
-" fileDialogInitialDirectory="/home/robot/github/communication/superBus_lpc21xx" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
+" fileDialogInitialDirectory="/home/robot/github/arch-lpc21xx/lpc_lib" fileDialogDefaultFilter="*.c" autoConnectCapabilities="388479" debugSearchPath="" buildConfiguration="ARM Flash Release" />
 </session>
