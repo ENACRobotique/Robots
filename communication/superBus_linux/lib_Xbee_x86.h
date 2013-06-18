@@ -10,6 +10,8 @@
 
 #include "messages.h"
 
+extern int Xbee_serial_port;
+
 void setupXbee();
 void Xbee_initSerial(char * devStr);
 void Xbee_deInitSerial();
