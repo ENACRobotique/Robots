@@ -70,7 +70,7 @@ typedef struct __attribute__((__packed__)){
     uint8_t frameID;
     uint16_t lDstAddr_be;          // LINK (layer 2) destination address
     uint8_t options;
-    const uint8_t *pPayload;
+    uint8_t pPayload[100];                               //optimization?  const uint8_t *pPayload;
 }spTX16Data;
 
 typedef struct __attribute__((__packed__)){

@@ -33,6 +33,8 @@
 #include "Xbee_API.h"
 #include "params.h"
 
+#include <string.h>
+
 #ifdef ARCH_328P_ARDUINO
 #include "drivers/Xbee_API_arduino_drivers.h"
 #elif defined(ARCH_X86_LINUX)
@@ -80,8 +82,9 @@ int XbeeTx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* dat
         stru.data.TX16Data.lDstAddr_be=hbe2_swap(to_h);
     }
 
-    //payload writing : to optimize speed, play with pointer to avoid useless copy
-    stru.data.TX16Data.pPayload=data;
+    //payload writing : optimization possible, play with pointer to avoid useless copy
+    //but will require to have a smart XbeeWriteFrame (or sending done here)
+    memcpy(stru.data.TX16Data.pPayload,data,dataSize);
 
 
     return XbeeWriteFrame(&stru,dataSize+5);
