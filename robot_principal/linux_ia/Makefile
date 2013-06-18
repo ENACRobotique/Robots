@@ -24,23 +24,23 @@ DEPEND  = .depend
 all: $(BIN)
 
 clean:
-	@echo RM
+	@echo RM '*.o' $(BIN)
 	@$(RM) $(COBJS) $(BIN)
 
 $(BIN): $(COBJS)
-	@echo LD $@
-	@$(CC) $(COBJS) -o $(BIN) $(LDFLAGS)
+	@echo LD -o $@
+	@$(CC) $^ -o $@ $(LDFLAGS)
 
 %.o: %.c
-	@echo CC $<
+	@echo CC -o $@
 	@$(CC) -c $< -o $@ $(CFLAGS)
 
 # auto dependencies
 depend: $(DEPEND)
 
 $(DEPEND): $(CSRCS)
-	@echo CC $(DEPEND)
-	@$(CC) $(CFLAGS) -MM $^ > ./$(DEPEND)
+	@echo DEP -o $@
+	@$(CC) $(CFLAGS) -MM $^ > ./$@
 
 -include $(DEPEND)
 
