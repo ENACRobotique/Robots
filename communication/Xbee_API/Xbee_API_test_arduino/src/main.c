@@ -21,9 +21,9 @@ int led=0;
 void setup(){
 
     pinMode(13,OUTPUT);
+    digitalWrite(13,LOW);
 
     serialInit(111111,0);
-    delay(10); //useful?
     XbeeATCmd("MY", 42, XBEE_ATCMD_SET, MYADDRI);
 
     //waits for command acknowledgement
@@ -31,32 +31,42 @@ void setup(){
         XbeeReadFrame(&struIn);
     }while (struIn.APID!=XBEE_APID_ATRESPONSE || struIn.data.ATResponse.frameID!=42);
 
+    //writes config
+    XbeeATCmd("WR", 0, XBEE_ATCMD_SET, MYADDRI);
+
+    XbeeTx16(0x5678,XBEE_TX_O_NOACK,0,"hello world",12);
 }
 
 void loop(){
     char string[32];
+    int recBytes;
     //receive Frame
-    while (!XbeeReadFrame(&struIn));
+    recBytes=XbeeReadFrame(&struIn);
 
     //if msg received respond pong
-    if (struIn.APID==XBEE_APID_RX16){
-        sprintf(string,"pong %d %d",diff,send-statused);
-        XbeeTx16(hbe2_swap(struIn.data.RX16Data.lSrcAddr_be),0,0x55,string,strlen(string));
-        send++;
-        diff++;
-    }
-    //if ack, decrement
-    else if (struIn.APID == XBEE_APID_TXS){
-        if (struIn.data.TXStatus.status == XBEE_TX_S_SUCCESS){
-            acked++;
-            diff--;
+    if(recBytes){
+        if (struIn.APID==XBEE_APID_RX16){
+            sprintf(string,"pong %d %d",diff,send-statused);
+            XbeeTx16(hbe2_swap(struIn.data.RX16Data.lSrcAddr_be),0,0x55,string,strlen(string));
+            send++;
+            diff++;
         }
-        statused++;
+        //if ack, decrement
+        else if (struIn.APID == XBEE_APID_TXS){
+            if (struIn.data.TXStatus.status == XBEE_TX_S_SUCCESS){
+                acked++;
+                diff--;
+            }
+            statused++;
+        }
+
+        led^=1;
+        digitalWrite(13,led);
     }
 
     if ((millis()-prevLed) > 500){
-        led^=1;
-        digitalWrite(13,led);
+        prevLed=millis();
+
     }
 
 }

@@ -93,6 +93,7 @@
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.530211983.1949452328" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.530211983"/>
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1628873863.194192548" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1628873863"/>
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.1160046369.1019588032" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.1160046369"/>
+							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.app.debug" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.debug"/>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.1092907564" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug.1782858450">
 								<inputType id="de.innot.avreclipse.tool.assembler.input.125022744" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
