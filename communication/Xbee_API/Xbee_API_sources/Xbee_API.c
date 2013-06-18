@@ -60,7 +60,6 @@
  */
 int XbeeTx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
     spAPISpecificStruct stru={0};
-    uint8_t *addrPtr;
 
     //writes API cmd ID
     stru.APID=XBEE_APID_TX16;
@@ -108,7 +107,6 @@ int XbeeGetTxStatus(spTXStatus *status){
  * /!\ refer to XBEE doc for available commands
  */
 int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h){
-    int i;
     spAPISpecificStruct sCmd;
 
     // sets API specific ID
@@ -153,8 +151,8 @@ int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
 
     // writes the rest of the frame and compute checksum
     while (count!=(size_h-1)){
-        if (!XbeeWriteByteEscaped(str_be->data.raw[count])) return 0;
         checksum+=str_be->data.raw[count];
+        if (!XbeeWriteByteEscaped(str_be->data.raw[count])) return 0;
         count++;
     }
     // final compute and write the checksum
@@ -185,9 +183,6 @@ int XbeeReadFrame(spAPISpecificStruct *str){
         lus=serialRead(&readByte);
     }
     if (readByte!=XBEE_FRAME_START) {
-#if (defined(DEBUG) && defined(ARCH_X86_LINUX))
-        printf("timeout readFrame\n");
-#endif
         return 0;
     }
     testTimeout(0); //resets the timeout

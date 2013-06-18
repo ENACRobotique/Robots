@@ -17,6 +17,7 @@
 #include <errno.h>
 
 #include "Xbee_API_linux_drivers.h"
+#include "params.h"
 
 int Xbee_serial_port;
 
@@ -69,7 +70,9 @@ int serialDeInit(){
  *  Returns 1 if success, 0 otherwise
  */
 int serialWrite(uint8_t byte){
+#ifdef DEBUG_PRINT_HEX
     printf("%x ",byte);
+#endif
     return write(Xbee_serial_port, &byte, 1);
 }
 
@@ -96,7 +99,9 @@ int serialRead(uint8_t *byte){
             exit(-1);
         }
     }
+#ifdef DEBUG_PRINT_HEX
     else if (i) printf("%x ",*byte);
+#endif
     return i;
 
 }
