@@ -129,6 +129,8 @@ int serialNRead(uint8_t *data,int size){
  *  3 - first call after the end of the timer : return 0.
  *  next call : goto 1.
  *  testTimeout(0) MUST reset the timer : force next call to be in state 1
+ *
+ *  /!\ DO NOT NEST /!\
  */
 int testTimeout(uint32_t delay){
     static int bool=0;
