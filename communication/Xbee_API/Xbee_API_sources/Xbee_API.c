@@ -171,7 +171,10 @@ int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
  * Arguments :
  *  *frame : pointer to the memory area in which the frame shall be written
  * Return value :
- *  size of the frame written in *frame, 0 if no frame available after timeout or bad checksum
+ *  size of the frame written in *frame if correct,
+ *  0 if no frame available after frame timeout
+ *  -1 if bad checksum
+ *  -2 if byte timeout (but start character detected)
  */
 int XbeeReadFrame(spAPISpecificStruct *str){
     uint8_t *rawFrame=(uint8_t*)str;
@@ -192,10 +195,10 @@ int XbeeReadFrame(spAPISpecificStruct *str){
 
     //reading size of message (with timeout)
     while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT));
-    if (!lus) return 0;
+    if (!lus) return -2;
     testTimeout(0);
     while (!(lus=XbeeReadByteEscaped(&readByte1)) && testTimeout(XBEE_READBYTE_TIMEOUT));
-    if (!lus) return 0;
+    if (!lus) return -2;
     testTimeout(0);
 
     size= (readByte<<8) | readByte1 ; //endianness-proof
@@ -203,7 +206,7 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     //read size bytes
     while (count != size){
         while (!(lus=XbeeReadByteEscaped(&rawFrame[count])) && testTimeout(XBEE_READBYTE_TIMEOUT));
-        if (!lus) return 0;
+        if (!lus) return -2;
         testTimeout(0);
         checksum+=rawFrame[count];
         count++;
@@ -211,12 +214,12 @@ int XbeeReadFrame(spAPISpecificStruct *str){
 
     //checksum (read byte ,add , test and return)
     while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT));
-    if (!lus) return 0;
+    if (!lus) return -2;
     testTimeout(0);
     checksum+=readByte;
 
     if (checksum == 0xff) return count;
-    return 0;
+    return -1;
 }
 
 

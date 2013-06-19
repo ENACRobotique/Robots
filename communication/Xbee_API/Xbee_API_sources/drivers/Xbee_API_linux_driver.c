@@ -43,11 +43,13 @@ int serialInit(uint32_t speed, void *device){
     //B115200 bauds
     cfsetospeed(&options, B115200);
     options.c_cflag |= (CLOCAL | CREAD);//programme propriétaire du port
-    //structure en 8N1 !!
     options.c_cflag &= ~PARENB; //pas de parité
     options.c_cflag |= CSTOPB; // 2 bit de stop
     options.c_cflag &= ~CSIZE; //option a 0
     options.c_cflag |= CS8; //8 bits
+
+    options.c_iflag |= IXON;    //enable flow control
+    options.c_iflag |= IXOFF;   //enable flow control
     tcsetattr(Xbee_serial_port, TCSANOW, &options); //enregistrement des valeurs de configuration
     printf("Port serie ouvert\n");
 
