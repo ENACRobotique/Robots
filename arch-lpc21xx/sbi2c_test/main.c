@@ -57,7 +57,6 @@ int main(void) {
 
   sMsg msg;
 
-  msg.header.srcAddr = MYADDRI;
   msg.header.destAddr = ADDRI_MAIN_TURRET;
   msg.header.type = E_DEBUG;
   msg.header.size = 5;

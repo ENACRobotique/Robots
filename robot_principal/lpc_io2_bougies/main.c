@@ -70,7 +70,6 @@ int main(void) {
 
   while(millis() < 500);
 
-  msg.header.srcAddr = MYADDRI;
   msg.header.destAddr = ADDRI_MAIN_PROP;
   msg.header.type = E_POS;
   msg.header.size = sizeof(sPosPayload);
@@ -87,7 +86,6 @@ int main(void) {
     sb_routine();
 
     if( traj_extract_idx < sizeof(traj_blue)/sizeof(*traj_blue) ) {
-      msg.header.srcAddr = MYADDRI;
       msg.header.destAddr = ADDRI_MAIN_PROP;
       msg.header.type = E_TRAJ;
       msg.header.size = sizeof(sTrajElRaw_t);

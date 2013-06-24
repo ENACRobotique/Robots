@@ -157,7 +157,6 @@ void loop() {
 					}
 					if (nbSync>=3){//yeah, I know, but fuck you, I have my reason (ensures that the syncOK messages are correctly received)
 						outMsg.header.destAddr=ADDRX_MAIN;
-						outMsg.header.srcAddr=MYADDRX;
 						outMsg.header.type=E_SYNC_OK;
 						outMsg.header.size=0;
 						sb_send(&outMsg);
@@ -180,7 +179,6 @@ void loop() {
         case GAME :
         	if ( laserStruct2Send.date ) { //if there is some data to send
 				outMsg.header.destAddr=ADDRX_MAIN;
-				outMsg.header.srcAddr=MYADDRX;
 				outMsg.header.type=E_MEASURE;
 				outMsg.header.size=sizeof(sMesPayload);
 

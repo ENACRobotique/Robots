@@ -87,7 +87,6 @@ void loop(){
         time_prev_period = millis();
 
         outMsg.header.destAddr=ADDRX_BROADCAST;
-        outMsg.header.srcAddr=MYADDRX;
         outMsg.header.type=E_PERIOD;
         outMsg.header.size=sizeof(outMsg.payload.period);
         outMsg.payload.period=domi_meanPeriod();
@@ -102,7 +101,6 @@ void loop(){
             syncOKbool|=(inMsg.header.srcAddr&DEVICEX_MASK);
             //if everybody is in sync, send a global "SYNC_OK"
             if (syncOKbool==(ADDRX_MOBILE_1)){//FIXME | ADDRX_MOBILE_2 | ADDRX_SECOND
-                outMsg.header.srcAddr=ADDRX_MAIN;
                 outMsg.header.destAddr=ADDRX_BROADCAST;
                 outMsg.header.type=E_SYNC_OK;
                 outMsg.header.size=0;
@@ -122,7 +120,6 @@ void loop(){
                       //send to the laser receiver the expected time they should have seen the laser in order to synchronize the clocks
                       if (!(syncOKbool & (ADDRX_MOBILE_1&DEVICEX_MASK))){
                           //expected for balise 1
-                          outMsg.header.srcAddr=MYADDRX;
                           outMsg.header.destAddr=ADDRX_MOBILE_1;
                           outMsg.header.type=E_SYNC_EXPECTED_TIME;
                           outMsg.header.size=sizeof(outMsg.payload.syncTime);
@@ -131,7 +128,6 @@ void loop(){
                       }
 //FIXME                      if (!(syncOKbool & (ADDRX_MOBILE_2&DEVICE_MASK))){
 //                          //expected for balise 2
-//                          outMsg.header.srcAddr=MYADDRX;
 //                          outMsg.header.destAddr=ADDRX_MOBILE_2;
 //                          outMsg.header.type=E_SYNC_EXPECTED_TIME;
 //                          outMsg.header.size=sizeof(outMsg.payload.syncTime);

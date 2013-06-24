@@ -67,11 +67,15 @@ int sb_init(){
  * For user's use only, the message was previously NOT "in the network"
  */
 int sb_send(sMsg *msg){
-    //checksum and stuff
+    // sets source address
+    msg->srcAddr = MYADDRX?:MYADDRI;
+
+    // sets checksum
     setSum(msg);
 
-    //actual sending
-    return sb_forward(msg,IF_LOCAL);
+    // actual sending
+    return sb_forward(msg, IF_LOCAL);
+}
 }
 
 /*
@@ -231,7 +235,6 @@ int sb_printDbg(sb_Address dest, const char * str, int32_t i, uint32_t u){
     sMsg tmp;
 
     tmp.header.destAddr=dest;
-    tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) ) ;
     tmp.header.type=E_DEBUG;
     tmp.header.size=sizeof(sDebugPayload);
     tmp.payload.debug.i=i;
@@ -255,7 +258,6 @@ int sb_printfDbg(sb_Address dest, char *format, ...){
     int ret;
 
     tmp.header.destAddr=dest;
-    tmp.header.srcAddr=( (MYADDRX)==0?(MYADDRI):(MYADDRX) );
     tmp.header.type=E_DATA;
 
     va_start(ap, format);

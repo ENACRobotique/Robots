@@ -117,7 +117,6 @@ int main(/*int argc, char *argv[]*/) {
             if(TV_DIFF_S(&prevClock, &currentClock) > 0.02) {
                 prevClock = currentClock;
 
-                msg.header.srcAddr = MYADDRX;
                 msg.header.destAddr = ADDRI_MAIN_PROP;
                 msg.header.type = E_DATA;
                 msg.header.size = 40;
@@ -136,7 +135,6 @@ int main(/*int argc, char *argv[]*/) {
                 if(send_pos) {
                     send_pos = 0;
 
-                    msg.header.srcAddr = MYADDRX;
                     msg.header.destAddr = ADDRI_MAIN_PROP;
                     msg.header.type = E_POS;
                     msg.header.size = sizeof(sPosPayload);
@@ -149,7 +147,6 @@ int main(/*int argc, char *argv[]*/) {
                     printf("sent%i pos\n", ret);
                 }
                 else if(traj_extract_idx < sizeof(traj_blue)/sizeof(*traj_blue)) {
-                    msg.header.srcAddr = MYADDRX;
                     msg.header.destAddr = ADDRI_MAIN_PROP;
                     msg.header.type = E_TRAJ;
                     msg.header.size = sizeof(sTrajElRaw_t);
