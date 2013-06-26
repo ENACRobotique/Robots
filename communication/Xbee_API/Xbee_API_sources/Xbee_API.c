@@ -129,6 +129,8 @@ int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h)
         return XbeeWriteFrame(&sCmd,8);
     }
     else return XbeeWriteFrame(&sCmd,4);
+
+    //TODO : add wait until satuts
 }
 
 /* XbeeWriteFrame : writes a specific frame one the serial link, for the Xbee.

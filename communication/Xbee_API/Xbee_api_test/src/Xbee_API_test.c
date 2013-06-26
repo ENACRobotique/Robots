@@ -15,7 +15,7 @@
 int main(int argc, char *argv[]){
     spAPISpecificStruct struIn,struOut;
     struct timeval prevClock,currentClock;
-    int send=0,statused=0,acked=0,diff=0;
+    int send=0,statused=0,acked=0,diff=0, received=0;
     int readB;
     char str[32];
 
@@ -47,47 +47,22 @@ int main(int argc, char *argv[]){
 
 
 
-    // send first ping
-    send++;
-    diff++;
-    XbeeTx16(0x1234,0,0x88,&send,1);
-
-
-    gettimeofday(&prevClock,NULL);
     while(1){
 
         //waiting until we read a frame
         if (XbeeReadFrame(&struIn)){
             if (struIn.APID==XBEE_APID_TXS){
-                statused++;
-                printf("frame statused ");
-                if (struIn.data.TXStatus.status==XBEE_TX_S_SUCCESS){
-                    acked++;
-                    diff--;
-                    printf("and acked");
-                }
-                printf("\033[128D\033[50C| send : %d, diffAcked :%d, diffStat : %d\n",send,diff,send-statused);
             }
-            else {
-                printf(":%s:\n",struIn.data.RX16Data.payload);
+            else if (struIn.APID==XBEE_APID_RX16){
 
-                diff++;
-                send++;
+                printf(":%6s: %d\n",struIn.data.RX16Data.payload,send);
+
                 XbeeTx16(0x1234,0,0x88,&send,1);
+                send++;
             }
 
         }
         memset(&struIn,0,sizeof(struIn));
-//        gettimeofday(&currentClock,NULL);
-//        if ((currentClock.tv_usec-prevClock.tv_usec)>1000000){
-//            gettimeofday(&prevClock,NULL);
-//            if (XbeeTx16(0x1234,0,0x88,str,strlen(str))){
-//                printf("Frame TX required\n");
-//                diff++;
-//                send++;
-//            }
-//            else printf("Frame TX error\n");
-//        }
 
     }
 
