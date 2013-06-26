@@ -35,17 +35,11 @@
 
 #include <string.h>
 
-#ifdef ARCH_328P_ARDUINO
-#include "drivers/Xbee_API_arduino_drivers.h"
-#elif defined(ARCH_X86_LINUX)
-#include "drivers/Xbee_API_linux_drivers.h"
-#include <stdio.h>
-#else
-#error will not compile, check architecture define and driver library
-#endif
+
+
 
 #if (defined(BIG_ENDIAN) && defined(LITTLE_ENDIAN))
-#error bi-endianess not supported
+#error bi-endianess or esle not supported
 #elif (!defined(BIG_ENDIAN) && !defined(LITTLE_ENDIAN))
 #error endianess MUST be defined
 #endif

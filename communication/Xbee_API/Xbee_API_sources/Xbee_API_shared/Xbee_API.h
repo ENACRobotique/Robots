@@ -47,8 +47,17 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "drivers/Xbee_API_linux_drivers.h"
 #include "params.h"
+
+#ifdef ARCH_328P_ARDUINO
+#include "../Xbee_API_arduino/Xbee_API_arduino_drivers.h"
+#elif defined(ARCH_X86_LINUX)
+#include "../Xbee_API_linux/Xbee_API_linux_drivers.h"
+#include <stdio.h>
+#else
+#error will not compile, check architecture define and driver library
+#endif
+
 
 
 /////////////// Macros
@@ -187,6 +196,7 @@ int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size);
 int XbeeReadFrame(spAPISpecificStruct *str);
 int XbeeWriteByteEscaped(uint8_t byte);
 int XbeeReadByteEscaped(uint8_t *byte);
+
 
 /*
  * Swaps from Big-endian to host endianess or from host to big

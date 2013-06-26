@@ -32,7 +32,8 @@
 								<option id="gnu.c.compiler.option.include.paths.1603889081" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_sources}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.misc.other.270158200" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -g" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1571632157" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -48,7 +49,8 @@
 								<option id="gnu.both.asm.option.include.paths.532526923" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_sources}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1100527455" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -95,6 +97,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_linux_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_sources}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.72915656" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -112,6 +116,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_linux_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_sources}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_api_test/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.569393126" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>

@@ -31,6 +31,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_sources}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.141738792" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
@@ -39,9 +41,10 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.781805123" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.incpath.2045824920" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_sources}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.1704937715" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.shortenums.586386892" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.compiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -55,9 +58,10 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.481872630" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.13370034" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_sources}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.1955979308" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.1385963706" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -87,33 +91,6 @@
 							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.673121043" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug"/>
 							<tool command="-avr-size" commandLinePattern="${COMMAND} ${FLAGS} ${INPUTS}" errorParsers="" id="de.innot.avreclipse.tool.size.winavr.app.debug.1198670186" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.debug"/>
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.1531253156" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
-						</toolChain>
-					</folderInfo>
-					<folderInfo id="de.innot.avreclipse.configuration.app.debug.1345368998.1247623717" name="/" resourcePath="lib/Xbee_API_sources">
-						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.1449890825" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug" unusedChildren="">
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1946786371.1990087251" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1946786371"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.98473451.153012963" name="Generate HEX file for EEPROM" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.98473451"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.530211983.1949452328" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.530211983"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1628873863.194192548" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1628873863"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.1160046369.1019588032" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.1160046369"/>
-							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.app.debug" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.debug"/>
-							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.1092907564" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug.1782858450">
-								<inputType id="de.innot.avreclipse.tool.assembler.input.125022744" superClass="de.innot.avreclipse.tool.assembler.input"/>
-							</tool>
-							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.194253041" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.607250961">
-								<inputType id="de.innot.avreclipse.compiler.winavr.input.1000015206" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
-							</tool>
-							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.1878109750" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug.348292390">
-								<inputType id="de.innot.avreclipse.cppcompiler.input.2127866486" superClass="de.innot.avreclipse.cppcompiler.input"/>
-							</tool>
-							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.1926849026" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug.705904593"/>
-							<tool id="de.innot.avreclipse.tool.cpplinker.app.debug.991353594" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug.111787630"/>
-							<tool id="de.innot.avreclipse.tool.archiver.winavr.base.847306870" name="AVR Archiver" superClass="de.innot.avreclipse.tool.archiver.winavr.base.405515360"/>
-							<tool id="de.innot.avreclipse.tool.objdump.winavr.app.debug.202069479" name="AVR Create Extended Listing" superClass="de.innot.avreclipse.tool.objdump.winavr.app.debug.1294355151"/>
-							<tool id="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.1555196315" name="AVR Create Flash image" superClass="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.662476020"/>
-							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.283675133" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.673121043"/>
-							<tool id="de.innot.avreclipse.tool.size.winavr.app.debug.1566033564" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.debug.1198670186"/>
-							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.1513382041" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug.1531253156"/>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
@@ -153,6 +130,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_sources}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.2022466237" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
@@ -164,6 +143,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_sources}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.2051654350" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.shortenums.1359876965" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.compiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -180,6 +161,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_sources}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Xbee_API_test_arduino/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.44821287" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.1189197984" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>
