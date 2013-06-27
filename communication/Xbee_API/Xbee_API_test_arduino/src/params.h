@@ -17,4 +17,7 @@
 #define XBEE_WAITFRAME_TIMEOUT  10    // in microsecond
 #define XBEE_READBYTE_TIMEOUT   5000000       // in microsecond
 
+//#define BURST
+#define SIMPLEPING
+
 #endif /* PARAMS_H_ */

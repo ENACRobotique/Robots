@@ -78,20 +78,41 @@ void setup(){
 
 
 
+int burstCount=0;
+unsigned long burstLast=0;
+
 void loop(){
     char string[64]={0};
     int recBytes=0;
 
+
+#ifdef SIMPLEPING   //simple ping reply
     if (XbeeReadFrame(&struIn)>0){
         if (struIn.APID==XBEE_APID_RX16){
-            XbeeTx16(0x1234,0,0,"pong",5);
+            XbeeTx16(0x1234,0,0,"pong",35);
         }
     }
+#endif
 
-    if ((millis()-prevLed) > 500){
-        prevLed=millis();
-        led^=1;
-        digitalWrite(13,led);
+#ifdef BURST   //burst  ping reply
+
+    if (XbeeReadFrame(&struIn)>0){
+        if (struIn.APID==XBEE_APID_RX16){
+            burstLast=millis();
+            burstCount++;
+            digitalWrite(13,1);
+        }
     }
+    //after the burst
+    if ((millis()-burstLast)>2000){
+        XbeeTx16(0x1234,0,0,&burstCount,sizeof(burstCount));
+        burstCount=0;
+    }
+#endif
+//    if ((millis()-prevLed) > 500){
+//        prevLed=millis();
+//        led^=1;
+//        digitalWrite(13,led);
+//    }
 
 }

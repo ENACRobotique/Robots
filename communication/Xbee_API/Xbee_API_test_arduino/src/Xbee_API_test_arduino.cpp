@@ -102,11 +102,12 @@ void setup(){
     Wire.beginTransmission(0x02);
     Wire.println("end init");
     Wire.endTransmission();
-
+#ifdef SIMPLEPING
     //send frame
-    XbeeTx16(0x5678,0,42,"ping",5);
+    XbeeTx16(0x9999,0,42,"ping",5);
     stopWatch=micros();
     send++;
+#endif
 }
 
 
@@ -115,41 +116,46 @@ void loop(){
     char string[64]={0};
     int recBytes=0;
 
+#ifdef SIMPLEPING  //simple ping sender
     if (send<NB_TEST){
 
         //read status
-//        do {
-            recBytes=XbeeReadFrame(&struIn);
+        recBytes=XbeeReadFrame(&struIn);
 
-            if (recBytes > 0){
-                if (struIn.APID==XBEE_APID_TXS){
-                    statused++;
-                    if (struIn.data.TXStatus.status==XBEE_TX_S_SUCCESS) {
-                        acked++;
-                    }
+        if (recBytes > 0){
+            if (struIn.APID==XBEE_APID_TXS){
+                statused++;
+                if (struIn.data.TXStatus.status==XBEE_TX_S_SUCCESS) {
+                    acked++;
                 }
-                else if (struIn.APID==XBEE_APID_RX16){
-                    mes=micros()-stopWatch;
-                    mean=(mean*(send-1)+mes)/send;
-
-                    //print dbg
+                else {
                     Wire.beginTransmission(0x02);
-                    spf(string,"%d send, ping : %lu | %lu",send,mes,mean);
-                    Wire.write((uint8_t *)string,strlen(string));
-                    Wire.println("");
+                    Wire.println("not acked !");
                     Wire.endTransmission();
-
-
-                    //start timer & send frame
-                    stopWatch=micros();
-                    XbeeTx16(0x5678,0,42,"ping",5);
-                    send++;
                 }
             }
-            else if (recBytes==-1){
-                badCS++;
+            else if (struIn.APID==XBEE_APID_RX16){
+                mes=micros()-stopWatch;
+                mean=(mean*(send-1)+mes)/send;
+
+                //print dbg
+                Wire.beginTransmission(0x02);
+                sprintf(string,"%lu send, ping : %lu | %lu",send,mes,mean);
+                Wire.write((uint8_t *)string,strlen(string));
+                Wire.println("");
+                Wire.println(mes);
+                Wire.endTransmission();
+
+
+                //start timer & send frame
+                stopWatch=micros();
+                XbeeTx16(0x9999,0,0,"ping",35);
+                send++;
             }
-//        } while(recBytes==0);
+        }
+        else if (recBytes==-1){
+            badCS++;
+        }
 
         memset(&struIn,0,sizeof(&struIn));
 
@@ -171,7 +177,42 @@ void loop(){
 
         send++;
     }
+#endif
 
+#ifdef BURST   //burst ping sender
+
+    for (send=0;send<10;send++){
+        XbeeTx16(0x9999,0,0,"ping",5);
+    }
+    //read status
+    while (!(recBytes=XbeeReadFrame(&struIn)));
+
+    if (recBytes > 0){
+        if (struIn.APID==XBEE_APID_RX16){
+            //print dbg
+            Wire.beginTransmission(0x02);
+            spf(string,"%d send, received : %d",send,struIn.data.RX16Data.payload);
+            Wire.write((uint8_t *)string,strlen(string));
+            Wire.println("");
+            Wire.endTransmission();
+        }
+        else {
+            Wire.beginTransmission(0x02);
+            Wire.println("???");
+            Wire.endTransmission();
+        }
+    }
+    else if (recBytes==-1){
+        //print dbg
+       Wire.beginTransmission(0x02);
+       Wire.println("Wrong Xbee frame CS");
+       Wire.endTransmission();
+    }
+
+    memset(&struIn,0,sizeof(&struIn));
+
+
+#endif
     if ((millis()-prevLed) > 500){
         prevLed=millis();
         led^=1;
