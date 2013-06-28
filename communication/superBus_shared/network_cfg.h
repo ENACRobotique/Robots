@@ -60,8 +60,10 @@ extern "C" {
 typedef enum{
 	IF_XBEE,
 	IF_I2C,
+	IF_UART,
 	IF_LOCAL, 	//virtal interface, describing local node. A message send to "self" should be popped out and "given" to the node trought the sb_receive() api
 	IF_DROP,	//virtual interface, equivalent to /dev/null in linux
+
 
 	IF_COUNT
 }E_IFACE;

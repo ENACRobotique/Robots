@@ -11,7 +11,9 @@ params.h description :
 In addition to your personal project parameters, the params.h file MUST contain the following :
     #define MYADDRX (device's Xbee address)         //if MYADDRX==0, Xbee interface will not be used (do so if the device is not equipped with XBee) 
     #define MYADDRI (device's I2C address)          //if MYADDRI==0, I2C interface will not be used (do so if the device is not equipped with I2C)
+    #define MYADDRU (device's UART address)         //if MYADDRU==0, UART interface will not be used (do so if the device is not equipped with UART)
     #define SB_INC_MSG_BUF_SIZE (device's incoming message buffer size)
+    #define SB_WAIT_SND_FAIL    (time in µs)        // time before considering a frame send on Xbee as failed if not statused
     #define ARCH_(device's architecture)                   
 
 

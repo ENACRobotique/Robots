@@ -19,8 +19,14 @@ typedef enum{
 //network config
 #define MYADDRX ADDRX_MAIN
 #define MYADDRI ADDRI_MAIN_TURRET
+#define MYADDRU 0
+
 #define SB_INC_MSG_BUF_SIZE 4
+#define SB_WAIT_SND_FAIL    50000
 #define ARCH_328P_ARDUINO
+#define LITTLE_ENDIAN
+#define XBEE_WAITFRAME_TIMEOUT 10
+#define XBEE_READBYTE_TIMEOUT 10000
 
 
 

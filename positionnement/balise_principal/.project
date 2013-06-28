@@ -88,6 +88,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/arch-arduino/libraries/Wire</locationURI>
 		</link>
 		<link>
+			<name>lib/Xbee_API_arduino</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/Xbee_API/Xbee_API_sources/Xbee_API_arduino</locationURI>
+		</link>
+		<link>
+			<name>lib/Xbee_API_shared</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/Xbee_API/Xbee_API_sources/Xbee_API_shared</locationURI>
+		</link>
+		<link>
 			<name>lib/superBus_arduino</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/communication/superBus_arduino</locationURI>

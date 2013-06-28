@@ -7,6 +7,7 @@
 
 #include "lib_superBus.h"
 #include "lib_checksum.h"
+#include "Xbee4sb.h"
 #include "network_cfg.h"
 #include "params.h"
 
@@ -14,7 +15,7 @@
 
 #ifdef ARCH_328P_ARDUINO
     #if MYADDRX !=0
-        #include "Xbee/lib_Xbee_arduino.h"
+        #include "UART/lib_UART_arduino.h"
     #endif
     #if MYADDRI!=0
         #include "I2C/lib_I2C_arduino.h"
@@ -41,13 +42,13 @@ int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case
 int sb_init(){
     // FIXME use macros defined in params.h
 
-#if MYADDRX!=0
+#if MYADDRU!=0
 #   ifdef ARCH_X86_LINUX
-    Xbee_initSerial("/dev/ttyUSB0");
+    UART_initSerial("/dev/ttyUSB0");
 #   endif
 
 #   ifdef ARCH_328P_ARDUINO
-    Xbee_init();
+    UART_init();
 #   endif
 #endif
 
@@ -56,6 +57,7 @@ int sb_init(){
     I2C_init(400000UL);
 #   endif
 #endif
+
 
     return 0;
 }
@@ -68,7 +70,7 @@ int sb_init(){
  */
 int sb_send(sMsg *msg){
     // sets source address
-    msg->srcAddr = MYADDRX?:MYADDRI;
+    msg->header.srcAddr = (MYADDRX?:MYADDRI)?:MYADDRU;
 
     // sets checksum
     setSum(msg);
@@ -76,7 +78,7 @@ int sb_send(sMsg *msg){
     // actual sending
     return sb_forward(msg, IF_LOCAL);
 }
-}
+
 
 /*
  * SuperBus Routine, handles receiving messages, routing/forwarding them, putting the ones for this node in a buffer
@@ -172,6 +174,19 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
     }
 #endif
 
+#if MYADDRU!=0
+    if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRU & SUBNET_MASK) ){
+        if (ifFrom!=IF_UART ) {
+            routeInfo.ifTo=IF_UART;
+            routeInfo.nextHop=msg->header.destAddr;
+            return routeInfo;
+        }
+        else {
+            routeInfo.ifTo=IF_DROP;
+            return routeInfo;
+        }
+    }
+#endif
     // else, sweep the table until you reach the matching subnetwork or the end
     while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
         if ( rTable[i].destSubnet == (msg->header.destAddr & SUBNET_MASK) ) {
@@ -201,12 +216,17 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
     switch (routeInfo.ifTo){
 #if MYADDRX!=0
     case IF_XBEE :
-        return Xbee_send(msg);
+        return Xbee_send(msg, routeInfo.nextHop);
         break;
 #endif
 #if MYADDRI!=0
     case IF_I2C :
         return I2C_send(msg, routeInfo.nextHop);
+        break;
+#endif
+#if MYADDRU!=0
+    case IF_UART :
+        return UART_send(msg, routeInfo.nextHop);
         break;
 #endif
     case IF_DROP :

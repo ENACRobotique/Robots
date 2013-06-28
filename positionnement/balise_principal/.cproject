@@ -36,6 +36,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino/I2C}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1532470331" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
@@ -51,6 +53,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino/I2C}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.1996153898" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.shortenums.1338121004" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.compiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -72,6 +76,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino/I2C}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.other.1679019648" name="Other Optimization Flags" superClass="de.innot.avreclipse.cppcompiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.1089240171" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
@@ -147,6 +153,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino/I2C}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1371501102" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
@@ -164,6 +172,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino/I2C}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1230665008" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
@@ -181,6 +191,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/superBus_arduino/I2C}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.6482795" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
