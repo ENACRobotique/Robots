@@ -25,8 +25,10 @@
     #endif
 #elif defined(ARCH_X86_LINUX)
     #include <stdarg.h>
+    #if MYADDRX !=0
+        #include "Xbee_API.h"
+    #endif
 
-    #include "lib_Xbee_x86.h"
 #elif defined(ARCH_LPC21XX)
     #include <stdarg.h>
 
@@ -51,7 +53,7 @@ int sb_init(){
 #   endif
 
 #   ifdef ARCH_328P_ARDUINO
-    UART_init();
+    UART_init(111111);
 #   endif
 #endif
 
@@ -61,7 +63,9 @@ int sb_init(){
 #   endif
 #endif
 
-
+#if MYADDRX!=0
+    Xbee_init();
+#endif
     return 0;
 }
 
@@ -106,7 +110,11 @@ int sb_routine(){
         count+=sb_forward(&temp,IF_I2C);
     }
 #endif
-
+#if (MYADDRU)!=0
+    if (UART_receive(&temp)) {
+        count+=sb_forward(&temp,IF_UART);
+    }
+#endif
     return count;
 }
 
@@ -144,7 +152,7 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
 
     // if this message if for us
     if ( ifFrom!=IF_LOCAL && (
-            msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
+            msg->header.destAddr==MYADDRU || msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
         routeInfo.ifTo=IF_LOCAL;
         routeInfo.nextHop=msg->header.destAddr;
         return routeInfo;

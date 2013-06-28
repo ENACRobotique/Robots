@@ -46,9 +46,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_arduino}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.1414716848" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.shortenums.1763703089" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.compiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -65,9 +65,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_arduino}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.997930857" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.163064956" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -151,6 +151,32 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.187373115" name="lib_superBus.c" rcbsApplicability="disable" resourcePath="lib/superBus_shared/lib_superBus.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1231593371.2007575372">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1231593371.2007575372" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1231593371">
+							<option id="de.innot.avreclipse.compiler.option.incpath.578436563" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.1624849220" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1771481887" name="Xbee4sb.c" rcbsApplicability="disable" resourcePath="lib/superBus_shared/Xbee4sb.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1231593371.27017064">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1231593371.27017064" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1231593371">
+							<option id="de.innot.avreclipse.compiler.option.incpath.1443312720" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.480635002" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="message_shared|arduinolib|lib|src" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 						<entry excluding="superBus_arduino/I2C/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="lib"/>
@@ -306,6 +332,28 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.release.1499254070" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.release.1235330753"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.release.1124467053.559589932" name="lib_superBus.c" rcbsApplicability="disable" resourcePath="lib/superBus_shared/lib_superBus.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.release.50723091.1424593468">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.50723091.1424593468" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release.50723091">
+							<option id="de.innot.avreclipse.compiler.option.incpath.1867116372" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/arduinolib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.1536373935" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.release.1124467053.1593360706" name="Xbee4sb.c" rcbsApplicability="disable" resourcePath="lib/superBus_shared/Xbee4sb.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.release.50723091.1424900678">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.50723091.1424900678" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release.50723091">
+							<option id="de.innot.avreclipse.compiler.option.incpath.1434560975" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/arduinolib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.21861661" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="arduinolib|lib|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="arduinolib"/>
@@ -487,6 +535,32 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.2074627687" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug.1578098470"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.706830745" name="lib_superBus.c" rcbsApplicability="disable" resourcePath="lib/superBus_shared/lib_superBus.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.387467124.770784033">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.387467124.770784033" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.387467124">
+							<option id="de.innot.avreclipse.compiler.option.incpath.756383533" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.151211693" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.155832825" name="Xbee4sb.c" rcbsApplicability="disable" resourcePath="lib/superBus_shared/Xbee4sb.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.387467124.70834882">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.387467124.70834882" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.387467124">
+							<option id="de.innot.avreclipse.compiler.option.incpath.606152934" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_arduino}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/superBus_shared}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Xbee_API_shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.1353102110" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="message_shared|arduinolib|lib|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib"/>
