@@ -179,39 +179,40 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     uint8_t checksum=0;
     uint8_t readByte=0,readByte1=0;
     int lus;
+    uint32_t stopWatch;
 
     //waiting for a frame start byte
-    while (readByte!=XBEE_FRAME_START && testTimeout(XBEE_WAITFRAME_TIMEOUT)){
+    while (readByte!=XBEE_FRAME_START && testTimeout(XBEE_WAITFRAME_TIMEOUT, &stopWatch)){
         lus=serialRead(&readByte);
     }
     if (readByte!=XBEE_FRAME_START) {
         return 0;
     }
-    testTimeout(0); //resets the timeout
+    stopWatch=0; //resets the timeout
 
     //reading size of message (with timeout)
-    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT));
+    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
     if (!lus) return -2;
-    testTimeout(0);
-    while (!(lus=XbeeReadByteEscaped(&readByte1)) && testTimeout(XBEE_READBYTE_TIMEOUT));
+    stopWatch=0; //resets the timeout
+    while (!(lus=XbeeReadByteEscaped(&readByte1)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
     if (!lus) return -2;
-    testTimeout(0);
+    stopWatch=0; //resets the timeout
 
     size= (readByte<<8) | readByte1 ; //endianness-proof
 
     //read size bytes
     while (count != size){
-        while (!(lus=XbeeReadByteEscaped(&rawFrame[count])) && testTimeout(XBEE_READBYTE_TIMEOUT));
+        while (!(lus=XbeeReadByteEscaped(&rawFrame[count])) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
         if (!lus) return -2;
-        testTimeout(0);
+        stopWatch=0; //resets the timeout
         checksum+=rawFrame[count];
         count++;
     }
 
     //checksum (read byte ,add , test and return)
-    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT));
+    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
     if (!lus) return -2;
-    testTimeout(0);
+    stopWatch=0; //resets the timeout
     checksum+=readByte;
 
     if (checksum == 0xff) return count;

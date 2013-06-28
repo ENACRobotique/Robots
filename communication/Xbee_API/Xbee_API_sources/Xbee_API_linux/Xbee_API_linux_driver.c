@@ -130,23 +130,30 @@ int serialNRead(uint8_t *data,int size){
  *  next call : goto 1.
  *  testTimeout(0) MUST reset the timer : force next call to be in state 1
  *
- *  /!\ DO NOT NEST /!\
+ *  store is a pointer to a storing value, to enable nesting
+ *
+ *  /!\ watch out "store" for nesting /!\
+ *  store must me initialized at 0
+ *  and reinitialized at 0 before reuse
  */
-int testTimeout(uint32_t delay){
-    static int bool=0;
-    static struct timeval prevClock;
+int testTimeout(uint32_t delay, uint32_t *store){
     struct timeval currentClock;
-    if (!bool){
-        gettimeofday(&prevClock,NULL);
-        bool=1;
+    if (!delay) {
+        *store=0;
+        return 0;
     }
-    if (bool){
+    if (!(*store)){
         gettimeofday(&currentClock,NULL);
-        if ( (currentClock.tv_sec-prevClock.tv_sec)>=(delay/1000000) && (currentClock.tv_usec-prevClock.tv_usec) >= (delay%1000000)){
-            bool=0;
-        }
+        *store=currentClock.tv_sec*1000 + currentClock.tv_usec;
+        return 1;
     }
-    return bool;
-
+    if (*store){
+        gettimeofday(&currentClock,NULL);
+        if ( (currentClock.tv_sec*1000 + currentClock.tv_usec) - *store >= delay){
+            return 0;
+        }
+        else return 1;
+    }
+    return 0;
 }
 

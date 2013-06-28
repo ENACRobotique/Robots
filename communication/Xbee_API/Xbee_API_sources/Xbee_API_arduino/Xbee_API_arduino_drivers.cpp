@@ -74,21 +74,26 @@ int serialNRead(uint8_t *data,int size){
  *  next call : goto 1.
  *  testTimeout(0) MUST reset the timer : force next call to be in state 1
  *
- *  /!\ DO NOT NEST /!\
+ *
+ *  store is a pointer to a storing value, to enable nesting
+ *
+ *  /!\ watch out "store" for nesting /!\
  */
-int testTimeout(uint32_t delay){
-    static int boolean=0;
-    static unsigned long prevTimeMicros;
-    if (!boolean){
-        prevTimeMicros=micros();
-        boolean=1;
+int testTimeout(uint32_t delay, uint32_t *store){
+    if (delay==0) {
+        *store=0;
+        return 0;
     }
-    if (boolean){
-        if ( (micros()-prevTimeMicros) >= delay ){
-            boolean=0;
+    if (!*store){
+        *store=micros();
+        return 1;
+    }
+    if (*store){
+        if ( (micros()-*store) >= delay ){
+            return 1;
         }
     }
-    return boolean;
+    return 0;
 
 }
 
