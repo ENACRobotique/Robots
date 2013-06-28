@@ -14,11 +14,14 @@
 #include <string.h>
 
 #ifdef ARCH_328P_ARDUINO
-    #if MYADDRX !=0
+    #if MYADDRU !=0
         #include "UART/lib_UART_arduino.h"
     #endif
     #if MYADDRI!=0
         #include "I2C/lib_I2C_arduino.h"
+    #endif
+    #if MYADDRX !=0
+        #include "Xbee_API.h"
     #endif
 #elif defined(ARCH_X86_LINUX)
     #include <stdarg.h>
