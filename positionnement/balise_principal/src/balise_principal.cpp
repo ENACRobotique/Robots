@@ -28,8 +28,6 @@ int usedDataRam () {
 #include "lib_superBus.h"
 #include "lib_checksum.h"
 
-#include "lib_I2C_arduino.h"
-
 uint32_t mesTab[2]={0,0};
 
 void setup(){
@@ -52,7 +50,10 @@ void setup(){
 #endif
 }
 
-static int state=GAME,debug_led=0;
+int state=GAME;
+#ifdef BLINK_1S
+int debug_led=0;
+#endif
 char syncOKbool=0;
 sMsg inMsg,outMsg;
 sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
@@ -60,7 +61,10 @@ sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
 void loop(){
     int rxB=0; //received bytes (size of inMsg when a message has been received)
     int nbRoutine=0; //number of call to sb_routine during this loop
-    static unsigned long time_prev_led=0,time_prev_period=0,prev_TR=0;
+    static unsigned long time_prev_period=0,prev_TR=0;
+#ifdef BLINK_1S
+    static unsigned long time_prev_led=0;
+#endif
 
     unsigned long time=millis();
 

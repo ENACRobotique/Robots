@@ -3,6 +3,7 @@
 	<name>balise_principal</name>
 	<comment></comment>
 	<projects>
+		<project>arduinoUno_core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
