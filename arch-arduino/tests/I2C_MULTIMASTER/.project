@@ -3,6 +3,7 @@
 	<name>I2C_MULTIMASTER</name>
 	<comment></comment>
 	<projects>
+		<project>arduinoUno_core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -83,9 +84,19 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>arduinoLib/Wire</name>
+			<name>arduinolib/Wire</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/libraries/Wire</locationURI>
+			<location>/home/ludo6431/robotique_enac/arch-arduino/libraries/Wire</location>
+		</link>
+		<link>
+			<name>lib/Xbee_API_arduino</name>
+			<type>2</type>
+			<location>/home/ludo6431/robotique_enac/communication/Xbee_API/Xbee_API_sources/Xbee_API_arduino</location>
+		</link>
+		<link>
+			<name>lib/Xbee_API_shared</name>
+			<type>2</type>
+			<location>/home/ludo6431/robotique_enac/communication/Xbee_API/Xbee_API_sources/Xbee_API_shared</location>
 		</link>
 		<link>
 			<name>lib/superBus_arduino</name>
