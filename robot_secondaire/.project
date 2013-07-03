@@ -3,6 +3,7 @@
 	<name>secondaire</name>
 	<comment></comment>
 	<projects>
+		<project>arduinoUno_core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -25,4 +26,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>de.innot.avreclipse.core.avrnature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>arduinolib/Servo</name>
+			<type>2</type>
+			<location>/home/ludo6431/robotique_enac/arch-arduino/libraries/Servo</location>
+		</link>
+		<link>
+			<name>arduinolib/Wire</name>
+			<type>2</type>
+			<location>/home/ludo6431/robotique_enac/arch-arduino/libraries/Wire</location>
+		</link>
+	</linkedResources>
 </projectDescription>

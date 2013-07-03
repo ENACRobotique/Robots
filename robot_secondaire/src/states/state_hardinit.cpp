@@ -3,7 +3,7 @@
 #include "state_types.h"
 #include "../params.h"
 #include "Arduino.h"
-#include "Wire/Wire.h"
+#include "Wire.h"
 
 #include "state_funny.h"
 #include "state_wall.h"

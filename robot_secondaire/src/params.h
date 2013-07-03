@@ -9,7 +9,7 @@
 #define DEFS_H_
 
 /* includes ************************************************/
-#include "Servo/Servo.h"
+#include "Servo.h"
 
 /* endincludes *********************************************/
 
