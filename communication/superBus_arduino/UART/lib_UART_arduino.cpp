@@ -31,8 +31,8 @@ void UART_init(unsigned long speed){
 int UART_receive(sMsg *pRet){
     static uint8_t i=0;
     static uint8_t smallBuf[CBUFF_SIZE]={0};
-    int count=0;
-    int j;
+    unsigned int count=0;
+    unsigned int j;
     //count to limit the time spend in the loop in case of spam, checksum to get out of the loop if it is correct AND the sender address id OK (if sender=0 it means it has been reset to 0 after reading the message)
     while( Serial.available() \
             && count<=MAX_READ_BYTES \
