@@ -30,12 +30,12 @@
 		<link>
 			<name>arduinolib/Servo</name>
 			<type>2</type>
-			<location>/home/ludo6431/robotique_enac/arch-arduino/libraries/Servo</location>
+			<locationURI>PARENT-1-PROJECT_LOC/arch-arduino/libraries/Servo</locationURI>
 		</link>
 		<link>
 			<name>arduinolib/Wire</name>
 			<type>2</type>
-			<location>/home/ludo6431/robotique_enac/arch-arduino/libraries/Wire</location>
+			<locationURI>PARENT-1-PROJECT_LOC/arch-arduino/libraries/Wire</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
