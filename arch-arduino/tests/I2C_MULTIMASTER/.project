@@ -84,6 +84,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>arduinolib</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>arduinolib/Wire</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/libraries/Wire</locationURI>
