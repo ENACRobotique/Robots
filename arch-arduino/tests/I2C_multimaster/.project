@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>I2C_MULTIMASTER</name>
+	<name>test_I2C_multimaster</name>
 	<comment></comment>
 	<projects>
 		<project>arduinoUno_core</project>
@@ -91,27 +91,37 @@
 		<link>
 			<name>arduinolib/Wire</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/libraries/Wire</locationURI>
+			<locationURI>PARENT-1-copy_PARENT1/libraries/Wire</locationURI>
 		</link>
 		<link>
 			<name>lib/Xbee_API_arduino</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/communication/Xbee_API/Xbee_API_sources/Xbee_API_arduino</locationURI>
+			<locationURI>PARENT-2-copy_PARENT1/communication/Xbee_API/Xbee_API_sources/Xbee_API_arduino</locationURI>
 		</link>
 		<link>
 			<name>lib/Xbee_API_shared</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/communication/Xbee_API/Xbee_API_sources/Xbee_API_shared</locationURI>
+			<locationURI>PARENT-2-copy_PARENT1/communication/Xbee_API/Xbee_API_sources/Xbee_API_shared</locationURI>
 		</link>
 		<link>
 			<name>lib/superBus_arduino</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/communication/superBus_arduino</locationURI>
+			<locationURI>PARENT-2-copy_PARENT1/communication/superBus_arduino</locationURI>
 		</link>
 		<link>
 			<name>lib/superBus_shared</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/communication/superBus_shared</locationURI>
+			<locationURI>PARENT-2-copy_PARENT1/communication/superBus_shared</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D/robotique_enac/arch-arduino</value>
+		</variable>
+		<variable>
+			<name>copy_PARENT1</name>
+			<value>$%7BPARENT-1-copy_PARENT%7D</value>
+		</variable>
+	</variableList>
 </projectDescription>

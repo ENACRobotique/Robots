@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>secondaire</name>
+	<name>robot_secondaire</name>
 	<comment></comment>
 	<projects>
 		<project>arduinoUno_core</project>
