@@ -34,5 +34,10 @@
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Xbee_API_sources/Xbee_API_shared</locationURI>
 		</link>
+		<link>
+			<name>lib/superBus_shared</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PARENT_LOC/superBus_shared</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
