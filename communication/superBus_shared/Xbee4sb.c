@@ -7,6 +7,7 @@
 
 #include "Xbee_API.h"
 #include "string.h"
+#include "network_cfg.h"
 
 
 void setupXbee(){
@@ -69,7 +70,7 @@ int Xbee_send(sMsg *msg, uint16_t nexthop){
 
     do {
         byteRead=XbeeReadFrame(&stru);
-    } while( !byteRead && !(stru.APID==XBEE_APID_TXS && stru.data.ATResponse.frameID==42) && testTimeout(SB_WAIT_SND_FAIL,&sw));
+    } while( !byteRead && !(stru.APID==XBEE_APID_TXS && stru.data.ATResponse.frameID==42) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.ATResponse.frameID!=42) return 0;
 
