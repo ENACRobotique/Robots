@@ -36,14 +36,14 @@ extern "C" {
 
 
 //xbee adresses
-    #define ADDRX_MAIN      ( BIT(0) | SUBNETX)
-    #define ADDRX_FIX       ( BIT(1) | SUBNETX)
-    #define ADDRX_MOBILE_1  ( BIT(2) | SUBNETX)
-    #define ADDRX_MOBILE_2  ( BIT(3) | SUBNETX)
-    #define ADDRX_SECOND    ( BIT(4) | SUBNETX)
-    #define ADDRX_DEBUG     ( BIT(5) | SUBNETX)
-    #define ADDRX_REMOTE_IA ( BIT(6) | SUBNETX)
-    #define ADDRX_BROADCAST ( 0xff   | SUBNETX)
+    #define ADDRX_MAIN      ( BIT(0) | SUBNETX )
+    #define ADDRX_FIX       ( BIT(1) | SUBNETX )
+    #define ADDRX_MOBILE_1  ( BIT(2) | SUBNETX )
+    #define ADDRX_MOBILE_2  ( BIT(3) | SUBNETX )
+    #define ADDRX_SECOND    ( BIT(4) | SUBNETX )
+    #define ADDRX_DEBUG     ( BIT(5) | SUBNETX )
+    #define ADDRX_REMOTE_IA ( BIT(6) | SUBNETX )
+    #define ADDRX_BROADCAST ( 0xff   | SUBNETX )
 
 //I2C adresses
     //subnet MAIN

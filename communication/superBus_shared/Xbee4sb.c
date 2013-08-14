@@ -9,6 +9,7 @@
 #include "string.h"
 #include "network_cfg.h"
 
+#define SB_WAIT_XBEE_SND_FAIL 100000
 
 void setupXbee(){
 // TODO writes Xbee module config here (AT command)
@@ -59,24 +60,28 @@ int Xbee_receive(sMsg *pRet){
  *  msg : message to send (thanks captain obvious!)
  *  nextHop : adress of the nex hop for this message
  * Return value :
- *  number of bytes of the message send (0 if error)
+ *  number of bytes of the message send
+ *  <0 if error :
+ *      -1 if error on sending frame to Xbee
+ *      -2 if error on receiving the status frame
+ *      -3 if sending not successful (e.g. no ack)
  */
 int Xbee_send(sMsg *msg, uint16_t nexthop){
-    spAPISpecificStruct stru;
+    spAPISpecificStruct stru={0};
     uint32_t sw=0; //stopwatch
     int byteRead=0;
 
-    if (!XbeeTx16(nexthop,0,12,msg,msg->header.size+sizeof(sGenericHeader))) return 0;
+    if (!XbeeTx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader))) return -1;
 
     do {
         byteRead=XbeeReadFrame(&stru);
-    } while( !byteRead && !(stru.APID==XBEE_APID_TXS && stru.data.ATResponse.frameID==42) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+    } while( !(stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
-    if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.ATResponse.frameID!=42) return 0;
+    if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -2;
 
     else {
-        if (stru.data.ATResponse.status==XBEE_TX_S_SUCCESS) return msg->header.size+sizeof(sGenericHeader);
-        else return 0;
+        if (stru.data.TXStatus.status==XBEE_TX_S_SUCCESS) return msg->header.size+sizeof(sGenericHeader);
+        else return -3;
     }
 
 }
