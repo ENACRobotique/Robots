@@ -16,7 +16,7 @@
 					<folderInfo id="de.innot.avreclipse.configuration.lib.debug.511393024.883608017." name="/" resourcePath="">
 						<toolChain id="de.innot.avreclipse.toolchain.winavr.lib.debug.1108370231" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.lib.debug">
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.lib.debug.575524162" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.lib.debug"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.lib.debug.770473312" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.lib.debug"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.lib.debug.770473312" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.lib.debug" value="true" valueType="boolean"/>
 							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.lib.debug.530437136" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.lib.debug"/>
 							<builder buildPath="${workspace_loc:/arduinoUno_core}/Debug" id="de.innot.avreclipse.target.builder.winavr.lib.debug.1090584047" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.lib.debug"/>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.lib.debug.1885242553" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.lib.debug">

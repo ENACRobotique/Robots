@@ -129,6 +129,7 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/balise_mobile"/>
 		</configuration>
+		<configuration configurationName="328P_16MHz"/>
 		<configuration configurationName="328P_16MHZ"/>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/balise_mobile"/>
