@@ -203,7 +203,7 @@ int XbeeReadByteEscaped(uint8_t *byte);
  * Only for big and little endian
  */
 static inline uint16_t hbe2_swap(uint16_t bytes){
-    #ifdef LITTLE_ENDIAN
+    #ifdef ARCH_LITTLE_ENDIAN
         return (bytes>>8 | bytes <<8);
     #else
         return bytes;
@@ -215,7 +215,7 @@ static inline uint16_t hbe2_swap(uint16_t bytes){
  * Only for big and little endian
  */
 static inline uint32_t hbe4_swap(uint32_t bytes){
-    #ifdef LITTLE_ENDIAN
+    #ifdef ARCH_LITTLE_ENDIAN
         return ( (bytes >> 24) | ((bytes & 0x00ff0000) >> 8) | ((bytes & 0x0000ff00) <<8) | (bytes << 24) );
     #else
         return bytes;

@@ -13,11 +13,8 @@
 #include "Xbee_API.h"
 
 int main(int argc, char *argv[]){
-    spAPISpecificStruct struIn,struOut;
-    struct timeval prevClock,currentClock;
-    int send=0,statused=0,acked=0,diff=0, received=0;
-    int readB;
-    char str[32];
+    spAPISpecificStruct struIn;
+    int send=0;
 
     serialInit(0,argv[1]);
     printf("waiting for reset\n");

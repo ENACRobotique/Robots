@@ -14,7 +14,7 @@
  *      Because of this portability, there are a few things to do if you want to use it :
  *          1)  Your project must have a "params.h" file, visible from Xbee_API.h, which contains :
  *              #define ARCH_XXX                           // According to the #ifdef at the beginning of XBee_API.c
- *              #define LITTLE_ENDIAN or BIG_ENDIAN
+ *              #define ARCH_LITTLE_ENDIAN or ARCH_BIG_ENDIAN
  *              #define XBEE_WAITFRAME_TIMEOUT  1000000    // in microsecond
  *              #define XBEE_READBYTE_TIMEOUT   5000       // in microsecond
  *          2)  If needed, you will have to write some "serial drivers". These are  Xbee_API_XXX_drivers.h and
@@ -38,9 +38,9 @@
 
 
 
-#if (defined(BIG_ENDIAN) && defined(LITTLE_ENDIAN))
+#if (defined(ARCH_BIG_ENDIAN) && defined(ARCH_LITTLE_ENDIAN))
 #error bi-endianess or esle not supported
-#elif (!defined(BIG_ENDIAN) && !defined(LITTLE_ENDIAN))
+#elif (!defined(ARCH_BIG_ENDIAN) && !defined(ARCH_LITTLE_ENDIAN))
 #error endianess MUST be defined
 #endif
 
