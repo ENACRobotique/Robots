@@ -1,1 +1,17 @@
-Code des robots du Club Robotique de l'ENAC.
+Directory tree:
+/*                          Files of the ENAC's Robotic Club
+    /static/*               All-time libraries
+        /core/*             Low-level libraries                   ##ARCH-CLASS##
+        /communication/*    Communication-related libraries
+            /superBus/*     Middle-level area network library     ##ARCH-CLASS##
+            /Xbee_API/*     Low-level XBee library                ##ARCH-CLASS##
+        /localization/*     Projects / Systems for localization
+    /backup/*               Projects / Systems kept for later usage
+    /*                      Projects / Systems of the year
+
+Note: ##ARCH-CLASS## folders have a fixed sub-tree organization:
+    /tools/*                Tools related to the following files
+    /shared/*               Files needed in at least 2 of the next architecture
+    /linux/*                x86-elf executables for linux
+    /arduino/*              avr-hex executables with arduino lib for ATmega*8
+    /lpc21xx/*              arm-hex executables with lpc_lib for lpc21xx

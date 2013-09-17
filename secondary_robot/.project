@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Xbee_API_test_arduino</name>
+	<name>robot_secondaire</name>
 	<comment></comment>
 	<projects>
+		<project>arduinoUno_core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -27,19 +28,19 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>lib/Wire</name>
+			<name>arduinolib</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/arch-arduino/libraries/Wire</locationURI>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>lib/Xbee_API_arduino</name>
+			<name>arduinolib/Servo</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Xbee_API_sources/Xbee_API_arduino</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/static/core/arduino/libraries/Servo</locationURI>
 		</link>
 		<link>
-			<name>lib/Xbee_API_shared</name>
+			<name>arduinolib/Wire</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Xbee_API_sources/Xbee_API_shared</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/static/core/arduino/libraries/Wire</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
