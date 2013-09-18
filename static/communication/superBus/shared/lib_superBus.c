@@ -82,6 +82,8 @@ int sb_send(sMsg *msg){
     // sets checksum
     setSum(msg);
 
+
+
     // actual sending
     return sb_forward(msg, IF_LOCAL);
 }
@@ -217,7 +219,9 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
  * Arguments :
  *     msg : pointer to the message to send
  *     ifFrom : interface (physical or virtual) on which the message has been received
- * Return value : number of bytes written/send
+ * Return value :
+ *      number of bytes written/send
+ *      -1 if error
  *
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
@@ -225,7 +229,7 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
     sRouteInfo routeInfo=sb_route(msg, ifFrom);
     switch (routeInfo.ifTo){
-#if MYADDRX!=0
+#if MYADDRX !=0
     case IF_XBEE :
         return Xbee_send(msg, routeInfo.nextHop);
         break;
@@ -235,7 +239,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
         return I2C_send(msg, routeInfo.nextHop);
         break;
 #endif
-#if MYADDRU!=0
+#if MYADDRU !=0
     case IF_UART :
         return UART_send(msg, routeInfo.nextHop);
         break;
@@ -257,7 +261,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 
         return (msg->header.size + sizeof(sGenericHeader));
         break;
-    default : return 0;
+    default : return -1;
     }
     return 0;
 }

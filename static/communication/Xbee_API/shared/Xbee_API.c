@@ -179,7 +179,7 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     uint8_t checksum=0;
     uint8_t readByte=0,readByte1=0;
     int lus;
-    uint32_t stopWatch;
+    uint32_t stopWatch=0;
 
     //waiting for a frame start byte
     while (readByte!=XBEE_FRAME_START && testTimeout(XBEE_WAITFRAME_TIMEOUT, &stopWatch)){
