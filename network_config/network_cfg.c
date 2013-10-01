@@ -6,7 +6,7 @@
  */
 
 #include "network_cfg.h"
-#include "params.h"
+#include "node_cfg.h"
 
 /*Remark : requires a "params.h" in the project, containing :
  * MYADDRX : adress of the xbee interface of the node

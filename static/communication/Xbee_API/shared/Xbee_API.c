@@ -31,7 +31,7 @@
  */
 
 #include "Xbee_API.h"
-#include "params.h"
+#include "node_cfg.h"
 
 #include <string.h>
 

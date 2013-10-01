@@ -13,15 +13,15 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "network_cfg.h"
+#include "message_header.h"
 
-/* sb_Address : on 16 bytes,
- * cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
+/* sb_Address : cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
  *
  */
-typedef uint16_t sb_Address;
 
 
-#define SB_MAX_PDU 64
+#define SB_MAX_PDU 64 //max size of a message
 
 //message types
 typedef enum{
@@ -39,15 +39,6 @@ typedef enum{
 }E_TYPE;
 
 char *eType2str(E_TYPE elem);
-
-typedef struct {
-    sb_Address destAddr;
-    sb_Address srcAddr;
-    uint8_t size;       //size of the payload
-    uint8_t type;       //type of the message
-    uint8_t checksumHead;
-    uint8_t checksumPload;
-}sGenericHeader;
 
 typedef struct __attribute__((__packed__)){
     uint32_t value;        //laser measured delta-time

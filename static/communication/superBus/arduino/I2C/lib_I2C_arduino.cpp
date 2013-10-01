@@ -9,7 +9,7 @@
 #include "network_cfg.h"
 #include "lib_checksum.h"
 #include "lib_I2C_arduino.h"
-#include "params.h"
+#include "node_cfg.h"
 #include "lib_superBus.h"
 #include "Arduino.h"
 

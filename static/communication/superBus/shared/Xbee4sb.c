@@ -8,6 +8,7 @@
 #include "Xbee_API.h"
 #include "string.h"
 #include "network_cfg.h"
+#include "messages.h"
 
 #define SB_WAIT_XBEE_SND_FAIL 100000
 

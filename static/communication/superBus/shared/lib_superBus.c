@@ -9,7 +9,7 @@
 #include "lib_checksum.h"
 #include "Xbee4sb.h"
 #include "network_cfg.h"
-#include "params.h"
+#include "node_cfg.h"
 
 #include <string.h>
 

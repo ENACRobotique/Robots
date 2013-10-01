@@ -8,8 +8,9 @@
 #ifndef NETWORK_CFG_H_
 #define NETWORK_CFG_H_
 
-#include "messages.h"
 
+#include <stdint.h>
+#include "message_header.h"
 
 #ifdef __cplusplus
 extern "C" {
