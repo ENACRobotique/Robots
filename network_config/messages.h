@@ -26,6 +26,7 @@ extern "C" {
 //message types
 typedef enum{
     E_DEBUG,                //general debug
+    E_DEBUG_SIGNALLING,      //
     E_DATA,                 //arbitrary data payload
     E_SWITCH_CHANNEL,       //switch channel message
     E_SYNC_EXPECTED_TIME,   //sync expected time (send from the turret to the receiver)
@@ -52,7 +53,7 @@ typedef struct __attribute__((__packed__)) {
     uint32_t u;
     int32_t i;
     uint8_t msg[32];
-} sDebugPayload; //debug message
+} sDebugPayload_old; //debug message
 
 typedef struct {
 // segment
@@ -87,11 +88,12 @@ typedef struct {
 typedef union{
     uint8_t raw[SB_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
     uint8_t data[SB_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
+    uint8_t debug[SB_MAX_PDU-sizeof(sGenericHeader)];    //arbitrary data, actual size given by the "size" field of the header
     uint32_t syncTime;
     uint8_t channel;
     uint32_t period;
     sMesPayload measure;
-    sDebugPayload debug;
+//    sDebugPayload debug;
     sTrajElRaw_t traj;
     sPosPayload pos;
 }uPayload;

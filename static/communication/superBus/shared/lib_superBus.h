@@ -32,10 +32,10 @@ int sb_routine();
 int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
-int sb_printDbg(sb_Address dest,const char * str,int32_t i, uint32_t u);
-#if defined(ARCH_X86_LINUX) || defined(ARCH_LPC21XX)
-int sb_printfDbg(sb_Address dest, char *format, ...);
-#endif
+int sb_printDbg(const char * str);
+int sb_printfDbg(char *format, ...);
+void sb_debugAddrSignal(sMsg * msg);
+
 
 #ifdef __cplusplus
 }
