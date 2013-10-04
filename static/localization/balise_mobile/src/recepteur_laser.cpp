@@ -40,9 +40,7 @@ void setup() {
   digitalWrite(PIN_RST_XBEE,LOW);
   delay(200);
 
-#ifdef DEBUG
-  sb_printDbg(ADDRX_DEBUG,"mobile starting",-17,13);
-#endif
+
 
 }
 
@@ -129,9 +127,7 @@ void loop() {
     if (rxB && inMsg.header.type==E_PERIOD ){
     	laser_period=inMsg.payload.period;
     	rxB=0;
-#ifdef DEBUG
-    	sb_printDbg(ADDRX_DEBUG,"period received",0,inMsg.payload.period);
-#endif
+
     }
 
     //blink

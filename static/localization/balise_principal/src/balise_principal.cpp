@@ -45,9 +45,7 @@ void setup(){
 
     domi_init(2);
 
-#ifdef DEBUG
-    sb_printDbg(ADDRX_DEBUG,"start turret",freeRam(),usedDataRam());
-#endif
+
 }
 
 int state=GAME;
