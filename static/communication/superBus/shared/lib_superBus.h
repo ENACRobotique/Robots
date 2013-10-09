@@ -32,9 +32,7 @@ int sb_routine();
 int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
-int sb_printDbg(const char * str);
-int sb_printfDbg(char *format, ...);
-void sb_debugAddrSignal(sMsg * msg);
+
 
 
 #ifdef __cplusplus

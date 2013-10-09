@@ -13,8 +13,7 @@
 #include "tools.h"
 
 #include <string.h>
-#include <stdarg.h>
-#include <stdio.h>
+
 
 #ifdef ARCH_328P_ARDUINO
     #if MYADDRU !=0
@@ -40,11 +39,12 @@
 #error please Define The Architecture Symbol you Bloody Bastard
 #endif
 
+
+//incoming message buffer, indexes to parse it and total number of messages. (used in sb_forward and in sb_receive)
 sMsg msgBuf[SB_INC_MSG_BUF_SIZE]={{{0}}};
 int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
 int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 
-sb_Address debug_addr=ADDRX_DEBUG;
 
 
 /*
@@ -75,7 +75,7 @@ int sb_init(){
     return 0;
 }
 
-// TODO sb_deinit
+// TODO sb_deinit (mouais...)
 
 /*
  * Handles the sending of a message over the SuperBus network
@@ -255,7 +255,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
         break;
     case IF_LOCAL :
 
-                // TODO, tell sender, message can't be sent and do not drop oldest message
+        // TODO, tell sender, message can't be sent and do not drop oldest message
         if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
             iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
             nbMsg--;
@@ -272,61 +272,6 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
     return 0;
 }
 
-/* sb_printDbg : sends a fixed string in a message to the address debug_addr.
- * Arguments :
- *  str : pointer to the string to send
- * Return value :
- *  number of bytes written/send
- *  -1 if error
- *
- * Remark : this will blindly shorten the string if the latter was too big.
- */
-int sb_printDbg(const char * str){
-    sMsg tmp;
-
-    tmp.header.destAddr=debug_addr;
-    tmp.header.type=E_DEBUG;
-    tmp.header.size=MIN(strlen(str)+1 , SB_MAX_PDU-sizeof(sGenericHeader));
-    strncpy((char *)tmp.payload.data , str , SB_MAX_PDU-sizeof(sGenericHeader)-1);
-    tmp.payload.debug[tmp.header.size-1]=0; //strncpy does no ensure the null-termination, so we force it
-
-    return sb_send(&tmp);
-}
-
-/* sb_printfDbg : sends a string in a message to the address debug_addr unsing a printf-like formatting.
- * Arguments :
- *  format : see printf documentation
- * Return value :
- *  number of bytes written/send
- *  -1 if error
- *
- * Remark : this will blindly shorten the string if the latter was too big.
- */
-int sb_printfDbg(char *format, ...){
-
-    uint8_t string[SB_MAX_PDU-sizeof(sGenericHeader)];
-
-    va_list ap;
-
-    va_start(ap, format);
-    vsnprintf((char *)string, SB_MAX_PDU-sizeof(sGenericHeader), format, ap);
-    va_end(ap);
-
-    return sb_printDbg(string);
-}
 
 
-/* sb_debugAddrSignal : modifies the local debug address. This should be used on receiving a signalling message of type E_DEBUG_SIGNALLING
- * Arguments :
- *  msg : pointer to the received message
- * Return value : none
- */
-void sb_debugAddrSignal(sMsg * msg){
 
-    if (msg->header.type==E_DEBUG_SIGNALLING) {
-         debug_addr=msg->header.srcAddr;
-    }
-
-}
-
-//TODO : attach mechanism to some messages
