@@ -26,13 +26,16 @@ extern "C" {
  * ARCH_xxxx : architecture of the node
  */
 
+//function pointeur type for attach function
+typedef void(*pfvpm)(sMsg*);
+
 int sb_init();
 int sb_send(sMsg *msg);
 int sb_routine();
 int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
-
+int sb_attach(E_TYPE type,pfvpm ptr);
 
 
 #ifdef __cplusplus

@@ -13,6 +13,7 @@
 #include "tools.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 
 #ifdef ARCH_328P_ARDUINO
@@ -45,7 +46,15 @@ sMsg msgBuf[SB_INC_MSG_BUF_SIZE]={{{0}}};
 int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
 int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 
+//sb_attach structure
+typedef struct sAttachdef{
+    E_TYPE type;
+    pfvpm func;
+    struct sAttachdef *next;
+} sAttach;
 
+//sb_attach first element
+sAttach *firstAttach=NULL;
 
 /*
  * Handles the initialization of the superBus interfaces
@@ -75,7 +84,7 @@ int sb_init(){
     return 0;
 }
 
-// TODO sb_deinit (mouais...)
+// TODO sb_deinit
 
 /*
  * Handles the sending of a message over the SuperBus network
@@ -134,8 +143,22 @@ int sb_routine(){
  *  nb of bytes written
  */
 int sb_receive(sMsg *msg){
+    sAttach *elem=firstAttach;
 
+    //if no message available
     if ( iFirst==iNext && !nbMsg) return 0;
+
+    //checks if there are any functions attached to the type of the incoming message.
+    //if so, run it silently an removes old message.
+    while ( elem->next != NULL ){
+       if ( elem->type == msgBuf[iFirst].header.type ) {
+           elem->func(&msgBuf[iFirst]);
+           iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
+           nbMsg--;
+           return 0;
+       }
+       else elem=elem->next;
+    }
 
     //pop the oldest message of incoming buffer and updates index
     memcpy(msg, &(msgBuf[iFirst]), msgBuf[iFirst].header.size + sizeof(sGenericHeader));
@@ -272,6 +295,77 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
     return 0;
 }
 
+/* sb_attach(E_TYPE type,pfvpm ptr);
+ * Arguments :
+ *      type : type of the message to attach to.
+ *      ptr : pointeur to the function to attach.
+ * Return value :
+ *      0 if assignment correct
+ *      -1 if wrong type
+ *      -2 if type has already been assigned. (in this case, the previous attachment remains unmodified. see sb_deattach).
+ *      -3 if memory allocation fails.
+ *  Set an automatic call to function upon reception of a message of type "type".
+ *  Warning : after a call to sb_attach, any message of type "type" received by this node WILL NOT be given to the user (won't pop with sb_receive)
+ */
+int sb_attach(E_TYPE type,pfvpm ptr){
+    sAttach *elem=firstAttach;
+
+    //checks if the type is correct (should be within the E_TYPE enum range)
+    if (type>=E_TYPE_COUNT) return -1;
+
+    // TODO check if enough free space before allocating
+    //looking for already existing occurence of this type while searching for the last element of the chain
+    while ( elem->next != NULL ){
+        if ( elem->type == type ) return -2;
+        else elem=elem->next;
+    }
+
+    //if the end of the chain has been reached, create new entry
+    if ( (elem->next = (sAttach *)malloc(sizeof(sAttach))) == NULL ) return -3;
+
+    elem=elem->next;
+    elem->next=NULL;
+    elem->type=type;
+    elem->func=ptr;
+
+    return 0;
+}
 
 
+/* sb_deattach(E_TYPE type);
+ * Arguments :
+ *      type : type of the message to remove the attachement from.
+ * Return value :
+ *      0 if everything went fine
+ *      -1 if wrong type
+ *      -2 if type not found (not previously attached, or already de-attached)
+ *      -3 if memory free fails
+ *  Unset an automatic call to function upon reception of a message of type "type".
+ *  Warning : after a call to sb_attach, any message of type "type" received by this node WILL be given to the user (won't pop with sb_receive)
+ */
+int sb_deattach(E_TYPE type){
+    sAttach *elem=firstAttach,*nextElem;
 
+    //checks if the type is correct (should be within the E_TYPE enum range)
+    if (type>=E_TYPE_COUNT) return -1;
+
+    //looking for already existing occurence of this type
+    //first element
+    if (elem->type==type){
+        firstAttach=elem->next;
+        free(elem);
+    }
+
+    //rest of the chain
+    while ( elem->next != NULL ){
+        if ( elem->next->type == type ) {
+            nextElem=elem->next->next;
+            free(elem->next);
+            elem->next=nextElem;
+            return 0;
+        }
+        else elem=elem->next;
+    }
+
+    return -2;
+}
