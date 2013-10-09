@@ -8,7 +8,7 @@
 #include "network_cfg.h"
 #include "node_cfg.h"
 
-/*Remark : requires a "params.h" in the project, containing :
+/*Remark : requires a "node.cfg.h" in the project, containing :
  * MYADDRX : adress of the xbee interface of the node
  * MYADDRI : address of the i2c interface of ne node
  */

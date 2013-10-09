@@ -14,6 +14,7 @@
  */
 typedef uint16_t sb_Address;
 
+
 typedef struct {
     sb_Address destAddr;
     sb_Address srcAddr;
@@ -22,6 +23,8 @@ typedef struct {
     uint8_t checksumHead;
     uint8_t checksumPload;
 }sGenericHeader;
+
+
 
 #endif /* MESSAGE_HEADER_H_ */
 
