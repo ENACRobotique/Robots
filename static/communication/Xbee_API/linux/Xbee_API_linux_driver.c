@@ -73,11 +73,11 @@ int serialDeInit(){
  */
 int serialWrite(uint8_t byte){
 #ifdef DEBUG_PRINT_HEX
-    printf("%x ",byte);
+    printf("w%x ",byte);
 #endif
     int i;
     i=write(Xbee_serial_port, &byte, 1);
-    fflush(NULL);
+    fflush(NULL); //flushes all stream
     return i;
 }
 
@@ -108,7 +108,10 @@ int serialRead(uint8_t *byte){
         }
     }
 #ifdef DEBUG_PRINT_HEX
-    else if (i) printf("%x ",*byte);
+    else if (i) {
+        printf("r%x ",*byte);
+        fflush(stdout);
+    }
 #endif
     return i;
 
@@ -134,7 +137,7 @@ int serialNRead(uint8_t *data,int size){
  *
  *  /!\ watch out "store" for nesting /!\
  *  store must me initialized at 0
- *  and reinitialized at 0 before reuse
+ *  and reinitialized at 0 before re-use
  */
 int testTimeout(uint32_t delay, uint32_t *store){
     struct timeval currentClock;
@@ -144,12 +147,12 @@ int testTimeout(uint32_t delay, uint32_t *store){
     }
     if (!(*store)){
         gettimeofday(&currentClock,NULL);
-        *store=currentClock.tv_sec*1000 + currentClock.tv_usec;
+        *store=currentClock.tv_sec*1000000 + currentClock.tv_usec;
         return 1;
     }
     if (*store){
         gettimeofday(&currentClock,NULL);
-        if ( (currentClock.tv_sec*1000 + currentClock.tv_usec) - *store >= delay){
+        if ( (int)((currentClock.tv_sec*1000000 + currentClock.tv_usec) - *store) - (int)delay > 0 ){
             return 0;
         }
         else return 1;

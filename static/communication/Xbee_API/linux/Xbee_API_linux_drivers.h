@@ -14,6 +14,9 @@ extern "C" {
 
 #include <stdint.h>
 
+//#define DEBUG_PRINT_HEX
+
+
 /* Expected behavior of serialInit :
  *  Initializes the serial communication
  */
@@ -66,5 +69,6 @@ int testTimeout(uint32_t delay, uint32_t *store);
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif /* XBEE_API_LINUX_DRIVERS_H_ */
