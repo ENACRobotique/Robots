@@ -12,7 +12,9 @@
 extern "C" { //to enable use in both C projects an C++ projects
 #endif
 
-void setupXbee();
+#include "messages.h"
+
+int setupXbee();
 void Xbee_init();
 int Xbee_receive(sMsg *pRet);
 int Xbee_send(sMsg *msg, uint16_t nexthop);

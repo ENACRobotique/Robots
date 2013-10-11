@@ -6,25 +6,63 @@
  */
 
 #include "Xbee_API.h"
-#include "string.h"
+#include "Xbee4sb.h"
 #include "network_cfg.h"
 #include "messages.h"
+#include "node_cfg.h"
 
-#define SB_WAIT_XBEE_SND_FAIL 100000
-
-void setupXbee(){
-// TODO writes Xbee module config here (AT command)
+#include <string.h>
 
 
+/* setupXbee :
+ *  Sets the parameters of the Xbee
+ * Return value :
+ *      1 if ok
+ *      -1 if error
+ *      -2 if config frame to statused
+ *      -3 if error for wrong command/parameter or ERROR
+ *
+ */
+int setupXbee(){
+    int byteRead=0;
+    spAPISpecificStruct stru;
+    uint32_t sw=0;
+
+    // TODO writes Xbee module config here (AT command)
+
+    //writes node's address on the xbee
+    XbeeATCmd("MY",12,XBEE_ATCMD_SET,MYADDRX);
+
+    //waits for acknowledgement
+    do {
+        byteRead=XbeeReadFrame(&stru);
+    } while( !(stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+
+    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
+    else if (stru.data.ATResponse.status!=0) return -3;
+
+
+    return 1;
 }
 
 
 void Xbee_init(){
+    int byteRead=0;
+    uint8_t garbage;
+
+    //init the serial link
 #ifdef ARCH_X86_LINUX
     serialInit(0,"/dev/ttyUSB0");
 #elif defined(ARCH_328P_ARDUINO)
     serialInit(111111,0);
+#else 
+#error "no arch defined for Xbee4sb.c, or arch no available (yet)
 #endif
+
+    //clear in buffer from remaining bytes
+    while (serialRead(&garbage));
+
+
 }
 
 
