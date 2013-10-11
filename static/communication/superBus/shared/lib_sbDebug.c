@@ -9,6 +9,7 @@
 #define LIB_SBDEBUG_C_
 
 #include "lib_superBus.h"
+#include "lib_sbDebug.h"
 #include "messages.h"
 #include "tools.h"
 
