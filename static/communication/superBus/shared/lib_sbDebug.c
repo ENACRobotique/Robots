@@ -88,7 +88,7 @@ int sb_debugSignalling(sb_Address dest){
     msg.header.destAddr=dest;
     msg.header.type=E_DEBUG_SIGNALLING;
     msg.header.size=0;
-    sb_send(&msg);
+    return sb_send(&msg);
 
 }
 

@@ -257,8 +257,8 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
  *     msg : pointer to the message to send
  *     ifFrom : interface (physical or virtual) on which the message has been received
  * Return value :
- *     number of bytes written/send
- *     -1 if error
+ *     >0 : number of bytes written/send
+ *     <0 if error
  *
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
