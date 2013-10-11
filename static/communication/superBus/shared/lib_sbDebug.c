@@ -18,7 +18,7 @@
 
 
 //debug address
-sb_Address debug_addr=ADDRX_DEBUG;
+sb_Address debug_addr;//=ADDRX_DEBUG;
 
 
 /* sb_printDbg : sends a fixed string in a message to the address debug_addr.
@@ -75,6 +75,20 @@ void sb_debugAddrSignal(sMsg * msg){
     if (msg->header.type==E_DEBUG_SIGNALLING) {
          debug_addr=msg->header.srcAddr;
     }
+}
+
+/* sb_debugSignalling : sends the new debug address to dest. MUST be issued ONLY by the debugger.
+ * Arguments :
+ *  dest : address of the node whitch we want up update
+ * Return value : like sb_send.
+ */
+int sb_debugSignalling(sb_Address dest){
+    sMsg msg;
+    msg.header.destAddr=dest;
+    msg.header.type=E_DEBUG_SIGNALLING;
+    msg.header.size=0;
+    sb_send(&msg);
+
 }
 
 #endif /* LIB_SBDEBUG_C_ */

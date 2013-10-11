@@ -14,5 +14,6 @@
 int sb_printDbg(const char * str);
 int sb_printfDbg(char *format, ...);
 void sb_debugAddrSignal(sMsg * msg);
+int sb_debugSignalling(sb_Address dest);
 
 #endif /* LIB_SBDEBUG_H_ */

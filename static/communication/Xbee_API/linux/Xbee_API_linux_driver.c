@@ -17,7 +17,7 @@
 #include <errno.h>
 
 #include "Xbee_API_linux_drivers.h"
-#include "params.h"
+#include "node_cfg.h"
 
 int Xbee_serial_port;
 

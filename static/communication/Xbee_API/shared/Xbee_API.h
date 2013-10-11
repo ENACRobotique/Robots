@@ -47,7 +47,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "params.h"
+#include "node_cfg.h"
 
 #ifdef ARCH_328P_ARDUINO
 #include "../arduino/Xbee_API_arduino_drivers.h"

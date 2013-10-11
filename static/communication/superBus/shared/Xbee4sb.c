@@ -21,7 +21,7 @@ void setupXbee(){
 
 void Xbee_init(){
 #ifdef ARCH_X86_LINUX
-    serialInit(0,/dev/ttyUSB0);
+    serialInit(0,"/dev/ttyUSB0");
 #elif defined(ARCH_328P_ARDUINO)
     serialInit(111111,0);
 #endif

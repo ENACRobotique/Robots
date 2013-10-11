@@ -87,8 +87,15 @@ int sb_init(){
 // TODO sb_deinit
 
 /*
- * Handles the sending of a message over the SuperBus network
+ * sb_send : handles the sending of a message over the SuperBus network
  * For user's use only, the message was previously NOT "in the network"
+ * Arguments :
+ *      msg : pointer to the message to send.
+ * Return Value :
+ *      see sb_forward :
+ *          -1 if error
+ *          nb of bytes written is correct
+ *
  */
 int sb_send(sMsg *msg){
     // sets source address
@@ -138,9 +145,9 @@ int sb_routine(){
 /*
  * pops the oldest message unread in the incoming message buffer
  * Argument :
- *  msg : pointer to the memory area where the last message will be written
+ *      msg : pointer to the memory area where the last message will be written
  * Return value :
- *  nb of bytes written
+ *      nb of bytes written
  */
 int sb_receive(sMsg *msg){
     sAttach *elem=firstAttach;
@@ -172,8 +179,9 @@ int sb_receive(sMsg *msg){
 /*
  * Handles the routing of a message
  * Argument :
- *  msg : pointer to the message to send
- * Return value : structure defining the next hop to send the message to
+ *      msg : pointer to the message to send
+ * Return value :
+ *      structure defining the next hop to send the message to
  *
  * Remark : routing tables are defined in network_cfg.h & network_cfg.cpp
  */
@@ -249,8 +257,8 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
  *     msg : pointer to the message to send
  *     ifFrom : interface (physical or virtual) on which the message has been received
  * Return value :
- *      number of bytes written/send
- *      -1 if error
+ *     number of bytes written/send
+ *     -1 if error
  *
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
