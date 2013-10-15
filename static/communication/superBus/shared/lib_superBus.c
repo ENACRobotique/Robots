@@ -157,7 +157,7 @@ int sb_receive(sMsg *msg){
 
     //checks if there are any functions attached to the type of the incoming message.
     //if so, run it silently an removes old message.
-    while ( elem->next != NULL ){
+    while ( elem!=NULL && elem->next != NULL ){
        if ( elem->type == msgBuf[iFirst].header.type ) {
            elem->func(&msgBuf[iFirst]);
            iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
