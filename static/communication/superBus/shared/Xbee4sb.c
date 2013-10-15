@@ -47,7 +47,6 @@ int setupXbee(){
 
 
 void Xbee_init(){
-    int byteRead=0;
     uint8_t garbage;
 
     //init the serial link
@@ -56,7 +55,7 @@ void Xbee_init(){
 #elif defined(ARCH_328P_ARDUINO)
     serialInit(111111,0);
 #else 
-#error "no arch defined for Xbee4sb.c, or arch no available (yet)
+#error "no arch defined for Xbee4sb.c, or arch no available (yet)"
 #endif
 
     //clear in buffer from remaining bytes

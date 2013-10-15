@@ -10,10 +10,18 @@
 
 #include "messages.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int sb_printDbg(const char * str);
 int sb_printfDbg(char *format, ...);
 void sb_debugAddrSignal(sMsg * msg);
 int sb_debugSignalling(sb_Address dest);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIB_SBDEBUG_H_ */
