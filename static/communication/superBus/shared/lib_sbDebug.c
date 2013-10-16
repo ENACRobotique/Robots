@@ -12,7 +12,6 @@
 #include "lib_sbDebug.h"
 #include "messages.h"
 #include "network_cfg.h"
-#include "tools.h"
 
 #include <stdarg.h>
 #include <stdio.h>

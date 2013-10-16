@@ -10,7 +10,6 @@
 #include "Xbee4sb.h"
 #include "network_cfg.h"
 #include "node_cfg.h"
-#include "tools.h"
 
 #include <string.h>
 #include <stdlib.h>

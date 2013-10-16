@@ -14,6 +14,15 @@
 extern "C" {
 #endif
 
+//useful macro
+#ifndef MIN
+#define MIN(m, n) (m)>(n)?(n):(m)
+#endif
+#ifndef MAX
+#define MAX(m, n) (m)<(n)?(n):(m)
+#endif
+
+
 int sb_printDbg(const char * str);
 int sb_printfDbg(char *format, ...);
 void sb_debugUpdateAddr(sMsg * msg);
