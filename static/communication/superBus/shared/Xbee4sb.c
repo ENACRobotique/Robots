@@ -42,6 +42,13 @@ int setupXbee(){
     else if (stru.data.ATResponse.status!=0) return -3;
 
 
+    //saves changes in non-volatile memory
+    XbeeATCmd("WR",13,XBEE_ATCMD_SET,MYADDRX);
+    do {
+        byteRead=XbeeReadFrame(&stru);
+    } while( !(stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==13) );
+    if (stru.data.ATResponse.status!=0) return -3;
+
     return 1;
 }
 
@@ -60,6 +67,9 @@ void Xbee_init(){
 
     //clear in buffer from remaining bytes
     while (serialRead(&garbage));
+
+    //setup Xbee
+    setupXbee();
 
 
 }
@@ -118,9 +128,11 @@ int Xbee_send(sMsg *msg, uint16_t nexthop){
     if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -2;
 
     else {
-        if (stru.data.TXStatus.status==XBEE_TX_S_SUCCESS) return msg->header.size+sizeof(sGenericHeader);
+        if (stru.data.TXStatus.status==XBEE_TX_S_SUCCESS) return (msg->header.size+sizeof(sGenericHeader));
         else return -3;
     }
+
+
 
 }
 

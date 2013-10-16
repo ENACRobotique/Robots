@@ -93,8 +93,8 @@ int sb_init(){
  *      msg : pointer to the message to send.
  * Return Value :
  *      see sb_forward :
- *          -1 if error
- *          nb of bytes written is correct
+ *          <0 if error
+ *          >0 : nb of bytes written is correct
  *
  */
 int sb_send(sMsg *msg){
@@ -156,10 +156,12 @@ int sb_receive(sMsg *msg){
     if ( iFirst==iNext && !nbMsg) return 0;
 
     //checks if there are any functions attached to the type of the incoming message.
-    //if so, run it silently an removes old message.
-    while ( elem!=NULL && elem->next != NULL ){
+    //if so, run it silently an removes message.
+    while ( elem!=NULL ){
        if ( elem->type == msgBuf[iFirst].header.type ) {
+           //call attached function
            elem->func(&msgBuf[iFirst]);
+           //removes this message
            iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
            nbMsg--;
            return 0;
@@ -316,25 +318,32 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
  *  Warning : after a call to sb_attach, any message of type "type" received by this node WILL NOT be given to the user (won't pop with sb_receive)
  */
 int sb_attach(E_TYPE type,pfvpm ptr){
-    sAttach *elem=firstAttach;
+    sAttach *elem=firstAttach, *prev, *new;
 
     //checks if the type is correct (should be within the E_TYPE enum range)
     if (type>=E_TYPE_COUNT) return -1;
 
     // TODO check if enough free space before allocating
     //looking for already existing occurence of this type while searching for the last element of the chain
-    while ( elem->next != NULL ){
+    while ( elem!=NULL){
         if ( elem->type == type ) return -2;
-        else elem=elem->next;
+        else {
+            prev=elem;
+            elem=elem->next;
+        }
     }
 
-    //if the end of the chain has been reached, create new entry
-    if ( (elem->next = (sAttach *)malloc(sizeof(sAttach))) == NULL ) return -3;
+    //create new entry
+    if ( (new = (sAttach *)malloc(sizeof(sAttach))) == NULL ) return -3;
 
-    elem=elem->next;
-    elem->next=NULL;
-    elem->type=type;
-    elem->func=ptr;
+    //updates anchor
+    if ( firstAttach==NULL) firstAttach=new;
+    else prev->next=new;
+
+    new->next=NULL;
+    new->type=type;
+    new->func=ptr;
+
 
     return 0;
 }

@@ -16,8 +16,8 @@ extern "C" {
 
 int sb_printDbg(const char * str);
 int sb_printfDbg(char *format, ...);
-void sb_debugAddrSignal(sMsg * msg);
-int sb_debugSignalling(sb_Address dest);
+void sb_debugUpdateAddr(sMsg * msg);
+int sb_debugSendAddr(sb_Address dest);
 
 
 #ifdef __cplusplus

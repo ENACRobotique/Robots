@@ -11,6 +11,7 @@
 #include "lib_superBus.h"
 #include "lib_sbDebug.h"
 #include "messages.h"
+#include "network_cfg.h"
 #include "tools.h"
 
 #include <stdarg.h>
@@ -19,7 +20,7 @@
 
 
 //debug address
-sb_Address debug_addr;//=ADDRX_DEBUG;
+sb_Address debug_addr=ADDR_DEBUG_DFLT;
 
 
 /* sb_printDbg : sends a fixed string in a message to the address debug_addr.
@@ -71,11 +72,12 @@ int sb_printfDbg(char *format, ...){
  *  msg : pointer to the received message
  * Return value : none
  */
-void sb_debugAddrSignal(sMsg * msg){
+void sb_debugUpdateAddr(sMsg * msg){
 
     if (msg->header.type==E_DEBUG_SIGNALLING) {
          debug_addr=msg->header.srcAddr;
     }
+    sb_printfDbg("dbgaddr updtated to %hx\n",msg->header.srcAddr);
 }
 
 /* sb_debugSignalling : sends the new debug address to dest. MUST be issued ONLY by the debugger.
@@ -83,7 +85,7 @@ void sb_debugAddrSignal(sMsg * msg){
  *  dest : address of the node whitch we want up update
  * Return value : like sb_send.
  */
-int sb_debugSignalling(sb_Address dest){
+int sb_debugSendAddr(sb_Address dest){
     sMsg msg;
     msg.header.destAddr=dest;
     msg.header.type=E_DEBUG_SIGNALLING;
