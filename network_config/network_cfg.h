@@ -53,6 +53,9 @@ extern "C" {
     #define ADDRI_MAIN_GLASS    (6 | SUBNETI_MAIN)
     #define ADDRI_MAIN_CANDLE   (8 | SUBNETI_MAIN)
 
+//default debug address :
+    #define ADDR_DEBUG_DFLT ADDRX_DEBUG
+
 
 
 /* Interface enum
