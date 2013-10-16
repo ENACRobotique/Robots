@@ -36,14 +36,20 @@
 
     #include "lib_I2C_lpc21xx.h"
 #else
-#error please Define The Architecture Symbol you Bloody Bastard
+#error "please Define The Architecture Symbol, You Bloody Bastard"
 #endif
 
 
-//incoming message buffer, indexes to parse it and total number of messages. (used in sb_forward and in sb_receive)
-sMsg msgBuf[SB_INC_MSG_BUF_SIZE]={{{0}}};
+
+//incoming message buffer, indexes to parse it and total number of messages.
+//Warning : central buffer where most of the incoming messages will be stacked
+sMsgIf msgIfBuf[SB_INC_MSG_BUF_SIZE]={{{{0}}}};
 int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
 int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
+
+//local message to transmit via sb_receive()
+sMsg localMsg;
+int localReceived=0; //indicates wether a message is available for local or not
 
 //sb_attach structure
 typedef struct sAttachdef{
@@ -54,6 +60,8 @@ typedef struct sAttachdef{
 
 //sb_attach first element
 sAttach *firstAttach=NULL;
+
+
 
 /*
  * Handles the initialization of the superBus interfaces
@@ -83,7 +91,7 @@ int sb_init(){
     return 0;
 }
 
-// TODO sb_deinit
+// todo sb_deinit
 
 /*
  * sb_send : handles the sending of a message over the SuperBus network
@@ -103,15 +111,14 @@ int sb_send(sMsg *msg){
     // sets checksum
     setSum(msg);
 
-
-
     // actual sending
     return sb_forward(msg, IF_LOCAL);
 }
 
 
 /*
- * SuperBus Routine, handles receiving messages, routing/forwarding them, putting the ones for this node in a buffer
+ * SuperBus Routine, handles receiving messages, routing/forwarding them, putting them in a buffer
+ * receives several messages at a time
  * Handles one message at the time, SHOULD be called in a rather fast loop
  * Non blocking function
  * Arguments : none
@@ -120,17 +127,23 @@ int sb_send(sMsg *msg){
  *
  */
 int sb_routine(){
-    sMsg temp;
+    sMsgIf temp;
     int count=0;
 
 #if (MYADDRX)!=0
-    if (Xbee_receive(&temp)) {
-        count+=sb_forward(&temp,IF_XBEE);
+    if (Xbee_receive(&temp.msg)) {
+        temp.iFace=IF_XBEE;
+        sb_pushInBufLast(&temp);
+        // TODO : optimize this (sb_pushInBuf directly in Xbee_receive())
+//        count+=sb_forward(&temp.msg,IF_XBEE);
     }
 #endif
 #if (MYADDRI)!=0
-    if (I2C_receive(&temp)) {
-        count+=sb_forward(&temp,IF_I2C);
+    if (I2C_receive(&temp.msg)) {
+        temp.iFace=IF_I2C;
+        sb_pushInBufLast(&temp);
+        // TODO : optimize this (sb_pushInBuf directly in I2C_receive())
+//        count+=sb_forward(&temp.msg,IF_I2C);
     }
 #endif
 #if (MYADDRU)!=0
@@ -138,6 +151,14 @@ int sb_routine(){
         count+=sb_forward(&temp,IF_UART);
     }
 #endif
+
+
+
+    //handles stored messages
+    if (sb_popInBuf(&temp)){
+        count+=sb_forward(&temp.msg,temp.iFace);
+    }
+
     return count;
 }
 
@@ -152,27 +173,25 @@ int sb_receive(sMsg *msg){
     sAttach *elem=firstAttach;
 
     //if no message available
-    if ( iFirst==iNext && !nbMsg) return 0;
+    if ( !localReceived) return 0;
+
+
 
     //checks if there are any functions attached to the type of the incoming message.
     //if so, run it silently an removes message.
     while ( elem!=NULL ){
-       if ( elem->type == msgBuf[iFirst].header.type ) {
+       if ( elem->type == localMsg.header.type ) {
            //call attached function
-           elem->func(&msgBuf[iFirst]);
-           //removes this message
-           iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
-           nbMsg--;
+           elem->func(&localMsg);
+           localReceived--;
            return 0;
        }
        else elem=elem->next;
     }
 
-    //pop the oldest message of incoming buffer and updates index
-    memcpy(msg, &(msgBuf[iFirst]), msgBuf[iFirst].header.size + sizeof(sGenericHeader));
-    iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
-    nbMsg--;
-
+    //if no function is attached to this type
+    localReceived--;
+    memcpy(msg,&localMsg,sizeof(sMsg));
     return (msg->header.size + sizeof(sGenericHeader));
 }
 
@@ -263,7 +282,6 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
  *
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
-//FIXME nexthop address
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
     sRouteInfo routeInfo=sb_route(msg, ifFrom);
     switch (routeInfo.ifTo){
@@ -287,15 +305,8 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
         break;
     case IF_LOCAL :
 
-        // TODO, tell sender, message can't be sent and do not drop oldest message
-        if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
-            iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
-            nbMsg--;
-        }
-
-        memcpy(&msgBuf[iNext],msg, msg->header.size+sizeof(sGenericHeader));
-        iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
-        nbMsg++;
+        memcpy(&localMsg,msg,sizeof(sMsg));
+        localReceived=1;
 
         return (msg->header.size + sizeof(sGenericHeader));
         break;
@@ -384,4 +395,73 @@ int sb_deattach(E_TYPE type){
     }
 
     return -2;
+}
+
+/* sb_insertInBuf : insert a message at the last postion in the incoming message buffer
+ * Argument :
+ *      pstru : pointer to the structure including the message to store
+ * Return value :
+ *      1
+ *      -1 on error (buffer full)
+ * WARNING : will drop msg if the buffer is full
+ */
+int sb_pushInBufLast(sMsgIf *pstru){
+
+    if (nbMsg==SB_INC_MSG_BUF_SIZE) return -1;
+
+// Uncomment the following lines to change the behavior (drop oldest instead of latest message)
+// REMARK : also checks for the use of sb_gatInBufLast
+//    if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
+//        iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
+//        nbMsg--;
+//    }
+
+    memcpy(&msgIfBuf[iNext].msg,pstru, pstru->msg.header.size+sizeof(sGenericHeader));
+    iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
+    nbMsg++;
+    return 1;
+}
+
+/* sb_insertInBuf : returns a pointer to the memory area of the central buffer where it should be written and updates the pointers as if the message was written
+ * Argument :
+ *      none
+ * Return value :
+ *      pointer to the memory area where the next message/interface structure should be written
+ *      NULL (buffer full)
+ * WARNING : may return NULL
+ * WARNING : will updates indexes if there is space, so any call to this function MUST result in a message written at the return value (unless return valu==NULL)
+ */
+sMsgIf * sb_getInBufLast(){
+    sMsgIf *tmp;
+    if (nbMsg==SB_INC_MSG_BUF_SIZE) return NULL;
+
+// Uncomment the following lines to change the behavior (drop oldest instead of latest message)
+//    if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
+//        iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
+//        nbMsg--;
+//    }
+
+    tmp=&msgIfBuf[iNext];
+    iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
+    nbMsg++;
+    return tmp;
+}
+
+/* sb_popInBuf : pops the oldest message/interface structure out of the incoming message buffer
+ * Argument :
+ *      pstru : pointer to the memory area where the message/interface structure will be written.
+ * Return value :
+ *      1 on succes
+ *      0 if buffer empty
+ */
+int sb_popInBuf(sMsgIf * pstru){
+
+    if (nbMsg==0) return 0;
+
+    //pop the oldest message of incoming buffer and updates index
+    memcpy(pstru, &(msgIfBuf[iFirst]), msgIfBuf[iFirst].msg.header.size + sizeof(sGenericHeader));
+    iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
+    nbMsg--;
+
+    return 1;
 }

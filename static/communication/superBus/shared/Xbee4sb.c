@@ -91,7 +91,7 @@ int Xbee_receive(sMsg *pRet){
     //computes real size of payload
     size-=sizeof(stru.APID)+sizeof(stru.data.RX16Data.lSrcAddr_be)+sizeof(stru.data.RX16Data.options)+sizeof(stru.data.RX16Data.rssi);
 
-    // if wrong type, retrun 0;
+    // if wrong type, return 0;
     if (stru.APID!=XBEE_APID_RX16) return 0;
 
     //oterwise (something red && good type), return size of frame red

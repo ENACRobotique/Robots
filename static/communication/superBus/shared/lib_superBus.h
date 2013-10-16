@@ -17,7 +17,7 @@ extern "C" {
 
 
 /*
- * all the following functions requires that the project contains a "params.h"  file defining the following :
+ * all the following functions requires that the project contains a "node_cfg.h"  file defining the following :
  * MYADDRX : the current node Xbee adress
  * MYADDRI : the current node I2C adress
  * MYADDRU : the current node UART adress
@@ -29,6 +29,12 @@ extern "C" {
 //function pointeur type for attach function
 typedef void(*pfvpm)(sMsg*);
 
+//incoming message & IF structure
+typedef struct {
+    sMsg msg;       //message
+    E_IFACE iFace;  //interface where it has been received
+} sMsgIf;
+
 int sb_init();
 int sb_send(sMsg *msg);
 int sb_routine();
@@ -36,7 +42,9 @@ int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
 int sb_attach(E_TYPE type,pfvpm ptr);
-
+int sb_pushInBufLast(sMsgIf * msg);
+sMsgIf * sb_getInBufLast();
+int sb_popInBuf(sMsgIf * msg);
 
 #ifdef __cplusplus
 }
