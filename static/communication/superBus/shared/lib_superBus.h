@@ -42,9 +42,10 @@ int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
 int sb_attach(E_TYPE type,pfvpm ptr);
-int sb_pushInBufLast(sMsgIf * msg);
+int sb_pushInBufLast(sMsg *msg, E_IFACE iFace);
 sMsgIf * sb_getInBufLast();
 int sb_popInBuf(sMsgIf * msg);
+sMsgIf *sb_getInBufFirst();
 
 #ifdef __cplusplus
 }

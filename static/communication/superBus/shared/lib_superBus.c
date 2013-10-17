@@ -128,35 +128,35 @@ int sb_send(sMsg *msg){
  */
 int sb_routine(){
     sMsgIf temp;
+    sMsgIf *pTmp=NULL;
     int count=0;
 
 #if (MYADDRX)!=0
     if (Xbee_receive(&temp.msg)) {
-        temp.iFace=IF_XBEE;
-        sb_pushInBufLast(&temp);
+        sb_pushInBufLast(&temp.msg,IF_XBEE);
         // TODO : optimize this (sb_pushInBuf directly in Xbee_receive())
 //        count+=sb_forward(&temp.msg,IF_XBEE);
     }
 #endif
 #if (MYADDRI)!=0
     if (I2C_receive(&temp.msg)) {
-        temp.iFace=IF_I2C;
-        sb_pushInBufLast(&temp);
+        sb_pushInBufLast(&temp.msg,IF_I2C);
         // TODO : optimize this (sb_pushInBuf directly in I2C_receive())
 //        count+=sb_forward(&temp.msg,IF_I2C);
     }
 #endif
 #if (MYADDRU)!=0
     if (UART_receive(&temp)) {
-        count+=sb_forward(&temp,IF_UART);
+        sb_pushInBufLast(&temp.msg,IF_UART);
+//        count+=sb_forward(&temp,IF_UART);
     }
 #endif
 
 
 
     //handles stored messages
-    if (sb_popInBuf(&temp)){
-        count+=sb_forward(&temp.msg,temp.iFace);
+    if ( (pTmp=sb_getInBufFirst()) != NULL){
+        count+=sb_forward(&(pTmp->msg),pTmp->iFace);
     }
 
     return count;
@@ -399,13 +399,14 @@ int sb_deattach(E_TYPE type){
 
 /* sb_insertInBuf : insert a message at the last postion in the incoming message buffer
  * Argument :
- *      pstru : pointer to the structure including the message to store
+ *      msg : pointer to the  message to store
+ *      iFace : interface on which the messahe has been received
  * Return value :
  *      1
  *      -1 on error (buffer full)
  * WARNING : will drop msg if the buffer is full
  */
-int sb_pushInBufLast(sMsgIf *pstru){
+int sb_pushInBufLast(sMsg *msg, E_IFACE iFace){
 
     if (nbMsg==SB_INC_MSG_BUF_SIZE) return -1;
 
@@ -416,7 +417,8 @@ int sb_pushInBufLast(sMsgIf *pstru){
 //        nbMsg--;
 //    }
 
-    memcpy(&msgIfBuf[iNext].msg,pstru, pstru->msg.header.size+sizeof(sGenericHeader));
+    memcpy(&msgIfBuf[iNext].msg,msg, msg->header.size+sizeof(sGenericHeader));
+    msgIfBuf[iNext].iFace=iFace;
     iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
     nbMsg++;
     return 1;
@@ -464,4 +466,27 @@ int sb_popInBuf(sMsgIf * pstru){
     nbMsg--;
 
     return 1;
+}
+
+/* sb_getInBufFirst : returns the address of the oldest message/interface structure in of the incoming message buffer and "frees" this memory area
+ * Argument :
+ *      none
+ * Return value :
+ *      pointer to the oldest message/interface
+ *      NULL if buffer empty
+ * WARNING : may return NULL
+ * WARNING : will updates indexes (unless return val==NULL), so any call to this function MUST result in handling the message  at the return value
+
+ */
+sMsgIf *sb_getInBufFirst(){
+    sMsgIf *tmp;
+
+    if (nbMsg==0) return NULL;
+
+    //get the oldest message of incoming buffer and updates index
+    tmp=&msgIfBuf[iFirst];
+    iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
+    nbMsg--;
+
+    return tmp;
 }
