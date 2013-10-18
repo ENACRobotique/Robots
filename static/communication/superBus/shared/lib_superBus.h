@@ -26,6 +26,10 @@ extern "C" {
  * ARCH_xxxx : architecture of the node
  */
 
+#ifndef MAX
+#define MAX(m, n) (m)<(n)?(n):(m)
+#endif
+
 //function pointeur type for attach function
 typedef void(*pfvpm)(sMsg*);
 
@@ -43,9 +47,10 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
 int sb_attach(E_TYPE type,pfvpm ptr);
 int sb_pushInBufLast(sMsg *msg, E_IFACE iFace);
-sMsgIf * sb_getInBufLast();
+sMsgIf * sb_getAllocInBufLast();
 int sb_popInBuf(sMsgIf * msg);
 sMsgIf *sb_getInBufFirst();
+void sb_freeInBufFirst();
 
 #ifdef __cplusplus
 }

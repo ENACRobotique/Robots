@@ -10,6 +10,7 @@
 #include "Xbee4sb.h"
 #include "network_cfg.h"
 #include "node_cfg.h"
+#include "mutex/mutex.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -408,45 +409,38 @@ int sb_deattach(E_TYPE type){
  * WARNING : will drop msg if the buffer is full
  */
 int sb_pushInBufLast(sMsg *msg, E_IFACE iFace){
+    int iTmp;
 
+    mutexLock();
     if (nbMsg==SB_INC_MSG_BUF_SIZE) return -1;
-
-// Uncomment the following lines to change the behavior (drop oldest instead of latest message)
-// REMARK : also checks for the use of sb_gatInBufLast
-//    if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
-//        iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
-//        nbMsg--;
-//    }
-
-    memcpy(&msgIfBuf[iNext].msg,msg, msg->header.size+sizeof(sGenericHeader));
     msgIfBuf[iNext].iFace=iFace;
     iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
     nbMsg++;
+    mutexUnlock();
+
+    memcpy(&msgIfBuf[iTmp].msg,msg, msg->header.size+sizeof(sGenericHeader));
     return 1;
 }
 
-/* sb_insertInBuf : returns a pointer to the memory area of the central buffer where it should be written and updates the pointers as if the message was written
+/* sb_getAllocInBufLast() : returns a pointer to the memory area of the central buffer where it should be written and updates the pointers as if the message was written
  * Argument :
  *      none
  * Return value :
  *      pointer to the memory area where the next message/interface structure should be written
  *      NULL (buffer full)
  * WARNING : may return NULL
- * WARNING : will updates indexes if there is space, so any call to this function MUST result in a message written at the return value (unless return valu==NULL)
+ * WARNING : will updates indexes if there is space, so any call to this function MUST result in a message written at the return value (unless return val==NULL)
  */
-sMsgIf * sb_getInBufLast(){
+sMsgIf * sb_getAllocInBufLast(){
     sMsgIf *tmp;
+
+    mutexLock();
     if (nbMsg==SB_INC_MSG_BUF_SIZE) return NULL;
-
-// Uncomment the following lines to change the behavior (drop oldest instead of latest message)
-//    if (iFirst==iNext && nbMsg==SB_INC_MSG_BUF_SIZE) {
-//        iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE; //"drop" oldest message if buffer is full
-//        nbMsg--;
-//    }
-
     tmp=&msgIfBuf[iNext];
     iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
     nbMsg++;
+    mutexUnlock();
+
     return tmp;
 }
 
@@ -458,36 +452,48 @@ sMsgIf * sb_getInBufLast(){
  *      0 if buffer empty
  */
 int sb_popInBuf(sMsgIf * pstru){
+    int iTmp;
 
+    mutexLock();
     if (nbMsg==0) return 0;
-
     //pop the oldest message of incoming buffer and updates index
-    memcpy(pstru, &(msgIfBuf[iFirst]), msgIfBuf[iFirst].msg.header.size + sizeof(sGenericHeader));
+    iTmp=iFirst;
     iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
     nbMsg--;
+    mutexUnlock();
+
+    memcpy(pstru, &(msgIfBuf[iTmp]), msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader));
 
     return 1;
 }
 
-/* sb_getInBufFirst : returns the address of the oldest message/interface structure in of the incoming message buffer and "frees" this memory area
+/* sb_getInBufFirst : returns the address of the oldest message/interface structure in of the incoming message buffer
  * Argument :
  *      none
  * Return value :
  *      pointer to the oldest message/interface
  *      NULL if buffer empty
  * WARNING : may return NULL
- * WARNING : will updates indexes (unless return val==NULL), so any call to this function MUST result in handling the message  at the return value
-
+ * WARNING : it is mandatory to call sb_freeInBufFirst() after treatment
  */
 sMsgIf *sb_getInBufFirst(){
-    sMsgIf *tmp;
 
     if (nbMsg==0) return NULL;
+    return &msgIfBuf[iFirst];
+}
 
-    //get the oldest message of incoming buffer and updates index
-    tmp=&msgIfBuf[iFirst];
+/* sb_getInBufFirst : Updates the indexes after a call to sb_getInBufFirst()
+ *  Argument
+ *      none
+ * Return value :
+ *      none
+ * WARNING : it is mandatory to call sb_freeInBufFirst() after treatment.
+ * WARNING : DO NOT call if the previous sb_getInBufFirst() returned NULL
+ */
+void sb_freeInBufFirst(){
+
     iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;
-    nbMsg--;
+    nbMsg=MAX(nbMsg-1,0);
 
-    return tmp;
+    return;
 }
