@@ -37,7 +37,7 @@ int setupXbee(){
     //waits for acknowledgement
     do {
         byteRead=XbeeReadFrame(&stru);
-    } while( !(stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
     else if (stru.data.ATResponse.status!=0) return -3;

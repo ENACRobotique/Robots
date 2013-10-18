@@ -29,6 +29,9 @@ extern "C" {
 #ifndef MAX
 #define MAX(m, n) (m)<(n)?(n):(m)
 #endif
+#ifndef MIN
+#define MIN(m, n) (m)>(n)?(n):(m)
+#endif
 
 //function pointeur type for attach function
 typedef void(*pfvpm)(sMsg*);
