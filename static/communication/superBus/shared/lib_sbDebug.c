@@ -19,7 +19,7 @@
 
 
 //debug address
-sb_Address debug_addr=ADDR_DEBUG_DFLT;
+volatile sb_Address debug_addr=ADDR_DEBUG_DFLT;
 
 
 /* sb_printDbg : sends a fixed string in a message to the address debug_addr.
@@ -33,6 +33,9 @@ sb_Address debug_addr=ADDR_DEBUG_DFLT;
  */
 int sb_printDbg(const char * str){
     sMsg tmp;
+
+    //do not send anything if the debug address is not defined
+    if (debug_addr==0) return -1;
 
     tmp.header.destAddr=debug_addr;
     tmp.header.type=E_DEBUG;
@@ -75,8 +78,8 @@ void sb_debugUpdateAddr(sMsg * msg){
 
     if (msg->header.type==E_DEBUG_SIGNALLING) {
          debug_addr=msg->header.srcAddr;
+         sb_printfDbg("dbgaddr updtated to %hx\n",msg->header.srcAddr);
     }
-    sb_printfDbg("dbgaddr updtated to %hx\n",msg->header.srcAddr);
 }
 
 /* sb_debugSignalling : sends the new debug address to dest. MUST be issued ONLY by the debugger.
