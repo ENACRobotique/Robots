@@ -18,8 +18,6 @@ typedef enum{
 
 
 
-#define XBEE_WAITFRAME_TIMEOUT 10
-#define XBEE_READBYTE_TIMEOUT 10000
 
 
 
