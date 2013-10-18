@@ -20,7 +20,7 @@ void receiveEvent(int i){
     sMsgIf *tmp;
     int j;
 
-    tmp=sb_getInBufLast();
+    tmp=sb_getAllocInBufLast();
 
     //if there is no space, trash the incoming message
     if ( tmp==NULL ){
