@@ -14,7 +14,7 @@
 #define MYADDRU 0
 
 #define SB_INC_MSG_BUF_SIZE 4
-#define SB_WAIT_SND_FAIL    50000
+#define SB_WAIT_XBEE_SND_FAIL    50000
 #define ARCH_328P_ARDUINO
 #define ARCH_LITTLE_ENDIAN
 
