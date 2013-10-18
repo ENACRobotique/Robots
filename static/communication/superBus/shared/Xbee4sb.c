@@ -10,6 +10,7 @@
 #include "network_cfg.h"
 #include "messages.h"
 #include "node_cfg.h"
+#include "lib_superBus.h"
 
 #include <string.h>
 
@@ -123,6 +124,11 @@ int Xbee_send(sMsg *msg, uint16_t nexthop){
 
     do {
         byteRead=XbeeReadFrame(&stru);
+
+        if ( byteRead && stru.APID==XBEE_APID_RX16){
+            sb_pushInBufLast((sMsg*)&(stru.data.RX16Data.payload),IF_XBEE);
+            byteRead=0;
+        }
     } while( !(stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -2;

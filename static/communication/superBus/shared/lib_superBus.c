@@ -49,7 +49,7 @@ int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case
 
 //local message to transmit via sb_receive()
 sMsg localMsg;
-int localReceived=0; //indicates wether a message is available for local or not
+int localReceived=0; //indicates whether a message is available for local or not
 
 //sb_attach structure
 typedef struct sAttachdef{
@@ -168,6 +168,7 @@ int sb_routine(){
  *      msg : pointer to the memory area where the last message will be written
  * Return value :
  *      nb of bytes written
+ *      0 if nothing is available
  */
 int sb_receive(sMsg *msg){
     sAttach *elem=firstAttach;
