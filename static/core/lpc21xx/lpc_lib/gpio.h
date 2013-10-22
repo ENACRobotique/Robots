@@ -5,75 +5,75 @@
 #define BIT(b) (1<<(b))
 #endif
 
-#include <targets/LPC2000.h>
+#include <lpc214x.h>
 
 static inline void gpio_init_all() {
-  SCS = BIT(0) | BIT(1); // Port0&1 GPIOs are fast ones
+  SCB_SCS = BIT(0) | BIT(1); // Port0&1 GPIOs are fast ones
 
-//  FIO0MASK = 0xFFFFFFFF;
-//  FIO1MASK = 0xFFFFFFFF;
+//  GPIO0_FIOMASK = 0xFFFFFFFF;
+//  GPIO1_FIOMASK = 0xFFFFFFFF;
 }
 
 static inline void gpio_output(int bank, int pin) {
   if(bank==0) {
-//    FIO0MASK &= ~BIT(pin);
-    FIO0DIR |= BIT(pin);
+//    GPIO0_FIOMASK &= ~BIT(pin);
+    GPIO0_FIODIR |= BIT(pin);
   }
   else {
-    //FIO1MASK &= ~BIT(pin);
-    FIO1DIR |= BIT(pin);
+    //GPIO1_FIOMASK &= ~BIT(pin);
+    GPIO1_FIODIR |= BIT(pin);
   }
 }
 
 static inline void gpio_input(int bank, int pin) {
   if(bank==0) {
-    //FIO0MASK &= ~BIT(pin);
-    FIO0DIR &= ~BIT(pin);
+    //GPIO0_FIOMASK &= ~BIT(pin);
+    GPIO0_FIODIR &= ~BIT(pin);
   }
   else {
-    //FIO1MASK &= ~BIT(pin);
-    FIO1DIR &= ~BIT(pin);
+    //GPIO1_FIOMASK &= ~BIT(pin);
+    GPIO1_FIODIR &= ~BIT(pin);
   }
 }
 
 static inline int gpio_read(int bank, int pin) {
   if(bank==0) {
-    FIO0MASK = ~BIT(pin);
-    return (FIO0PIN&BIT(pin))!=0;
+    GPIO0_FIOMASK = ~BIT(pin);
+    return (GPIO0_FIOPIN&BIT(pin))!=0;
   }
   else {
-    FIO1MASK = ~BIT(pin);
-    return (FIO1PIN&BIT(pin))!=0;
+    GPIO1_FIOMASK = ~BIT(pin);
+    return (GPIO1_FIOPIN&BIT(pin))!=0;
   }
 }
 
 static inline void gpio_write(int bank, int pin, int val) {
   if(bank==0) {
-    FIO0MASK = ~BIT(pin);
-    FIO0PIN = (val!=0)<<pin;
+    GPIO0_FIOMASK = ~BIT(pin);
+    GPIO0_FIOPIN = (val!=0)<<pin;
 /*    if(val)
-      FIO0PIN |= BIT(pin);
+      GPIO0_FIOPIN |= BIT(pin);
     else
-      FIO0PIN &= ~BIT(pin);*/
+      GPIO0_FIOPIN &= ~BIT(pin);*/
   }
   else {
-    FIO1MASK = ~BIT(pin);
-    FIO1PIN = (val!=0)<<pin;
+    GPIO1_FIOMASK = ~BIT(pin);
+    GPIO1_FIOPIN = (val!=0)<<pin;
 /*    if(val)
-      FIO1PIN |= BIT(pin);
+      GPIO1_FIOPIN |= BIT(pin);
     else
-      FIO1PIN &= ~BIT(pin);*/
+      GPIO1_FIOPIN &= ~BIT(pin);*/
   }
 }
 
 static inline void gpio_toggle(int bank, int pin) {
   if(bank==0) {
-    FIO0MASK = ~BIT(pin);
-    FIO0PIN ^= BIT(pin);
+    GPIO0_FIOMASK = ~BIT(pin);
+    GPIO0_FIOPIN ^= BIT(pin);
   }
   else {
-    FIO1MASK = ~BIT(pin);
-    FIO1PIN ^= BIT(pin);
+    GPIO1_FIOMASK = ~BIT(pin);
+    GPIO1_FIOPIN ^= BIT(pin);
   }
 }
 
