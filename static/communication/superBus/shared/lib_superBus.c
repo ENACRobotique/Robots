@@ -287,20 +287,33 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
  */
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
     sRouteInfo routeInfo=sb_route(msg, ifFrom);
+    int retVal=0,retries=0;
     switch (routeInfo.ifTo){
 #if MYADDRX !=0
     case IF_XBEE :
-        return Xbee_send(msg, routeInfo.nextHop);
+        while (retVal<=0 && retries<SB_MAX_RETRIES){
+            retVal=Xbee_send(msg, routeInfo.nextHop);
+            retries++;
+        }
+        return retVal;
         break;
 #endif
 #if MYADDRI!=0
     case IF_I2C :
-        return I2C_send(msg, routeInfo.nextHop);
+        while (retVal<=0 && retries<SB_MAX_RETRIES){
+            retVal=I2C_send(msg, routeInfo.nextHop);
+            retries++;
+        }
+        return retVal;
         break;
 #endif
 #if MYADDRU !=0
     case IF_UART :
-        return UART_send(msg, routeInfo.nextHop);
+        while (retVal<=0 && retries<SB_MAX_RETRIES){
+            retVal=UART_send(msg, routeInfo.nextHop);
+            retries++;
+        }
+        return retVal;
         break;
 #endif
     case IF_DROP :
@@ -413,7 +426,10 @@ int sb_pushInBufLast(sMsg *msg, E_IFACE iFace){
     int iTmp;
 
     mutexLock();
-    if (nbMsg==SB_INC_MSG_BUF_SIZE) return -1;
+    if (nbMsg==SB_INC_MSG_BUF_SIZE) {
+        mutexUnlock();
+        return -1;
+    }
     iTmp=iNext;
     iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
     nbMsg++;
@@ -437,11 +453,15 @@ sMsgIf * sb_getAllocInBufLast(){
     sMsgIf *tmp;
 
     mutexLock();
-    if (nbMsg==SB_INC_MSG_BUF_SIZE) return NULL;
+    if (nbMsg==SB_INC_MSG_BUF_SIZE) {
+        mutexUnlock();              //hum hum...
+        return NULL;
+    }
     tmp=&(msgIfBuf[iNext]);
     iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
     nbMsg++;
     mutexUnlock();
+
 
     return tmp;
 }
@@ -457,7 +477,10 @@ int sb_popInBuf(sMsgIf * pstru){
     int iTmp;
 
     mutexLock();
-    if (nbMsg==0) return 0;
+    if (nbMsg==0) {
+        mutexUnlock();
+        return 0;
+    }
     //pop the oldest message of incoming buffer and updates index
     iTmp=iFirst;
     iFirst=(iFirst+1)%SB_INC_MSG_BUF_SIZE;

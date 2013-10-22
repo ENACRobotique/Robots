@@ -60,7 +60,7 @@ int I2C_receive(sMsg *pRet){
  *  msg : message to send (thank captain obvious!)
  *  firstDest : destination ON THE SENDER'S I2C BUS (in case of routing, may differ from msg->header.destAddr )
  * Return value :
- *  number of bytes writen (0 if error)
+ *  number of bytes writen (-1 if error)
  */
 int I2C_send(const sMsg *msg, sb_Address firstDest){
     int count=0;
