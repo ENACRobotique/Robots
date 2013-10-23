@@ -89,6 +89,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>arduinolib/MemoryFree</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/MemoryFree</locationURI>
+		</link>
+		<link>
 			<name>arduinolib/Wire</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/Wire</locationURI>

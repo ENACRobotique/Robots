@@ -35,8 +35,8 @@ typedef enum{
 
 #define DEBUG
 
-//#define BLINK_1S    //blink every second (incompatible with every turn)
-#define BLINK_1TR   //blink every turn (incompatible with every second)
+#define BLINK_1S    //blink every second (incompatible with every turn)
+//#define BLINK_1TR   //blink every turn (incompatible with every second)
 
 //#define DEBUG_PRINT
 

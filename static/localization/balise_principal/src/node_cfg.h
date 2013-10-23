@@ -8,6 +8,8 @@
 #ifndef NODE_CFG_H_
 #define NODE_CFG_H_
 
+#include "network_cfg.h"
+
 //network config
 #define MYADDRX ADDRX_MAIN
 #define MYADDRI ADDRI_MAIN_TURRET
@@ -22,5 +24,7 @@
 #define XBEE_WAITFRAME_TIMEOUT 10
 #define XBEE_READBYTE_TIMEOUT 10000
 
+#undef  ADDR_DEBUG_DFLT
+#define ADDR_DEBUG_DFLT ADDRX_DEBUG
 
 #endif /* NODE_CFG_H_ */
