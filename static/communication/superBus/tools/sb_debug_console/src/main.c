@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "lib_superBus.h"
 #include "lib_sbDebug.h"
@@ -37,6 +38,7 @@ int main(){
 
     //main loop
     while (!quit){
+        usleep(500);
 
         sb_routine();
 
