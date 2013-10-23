@@ -57,6 +57,10 @@ int setupXbee(){
 void Xbee_init(){
     uint8_t garbage;
 
+    //waits for the Xbee to totally start
+    uint32_t sw=0;
+    while( testTimeout(10000000,&sw));
+
     //init the serial link
 #ifdef ARCH_X86_LINUX
     serialInit(0,"/dev/ttyUSB0");
