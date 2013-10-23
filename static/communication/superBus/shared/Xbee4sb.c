@@ -10,6 +10,7 @@
 #include "network_cfg.h"
 #include "messages.h"
 #include "node_cfg.h"
+#include "lib_superBus.h"
 
 #include <string.h>
 
@@ -36,7 +37,7 @@ int setupXbee(){
     //waits for acknowledgement
     do {
         byteRead=XbeeReadFrame(&stru);
-    } while( !(stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
     else if (stru.data.ATResponse.status!=0) return -3;
@@ -91,7 +92,7 @@ int Xbee_receive(sMsg *pRet){
     //computes real size of payload
     size-=sizeof(stru.APID)+sizeof(stru.data.RX16Data.lSrcAddr_be)+sizeof(stru.data.RX16Data.options)+sizeof(stru.data.RX16Data.rssi);
 
-    // if wrong type, retrun 0;
+    // if wrong type, return 0;
     if (stru.APID!=XBEE_APID_RX16) return 0;
 
     //oterwise (something red && good type), return size of frame red
@@ -123,6 +124,11 @@ int Xbee_send(sMsg *msg, uint16_t nexthop){
 
     do {
         byteRead=XbeeReadFrame(&stru);
+
+        if ( byteRead && stru.APID==XBEE_APID_RX16){
+            sb_pushInBufLast((sMsg*)&(stru.data.RX16Data.payload),IF_XBEE);
+            byteRead=0;
+        }
     } while( !(stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -2;
