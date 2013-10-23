@@ -12,6 +12,8 @@
 #include "node_cfg.h"
 #include "mutex/mutex.h"
 
+E_TYPE toto;
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -133,21 +135,24 @@ int sb_routine(){
     int count=0;
 
 #if (MYADDRX)!=0
-    if (Xbee_receive(&temp.msg)) {
+    if ( (count=Xbee_receive(&temp.msg)) > 0 ) {
         sb_pushInBufLast(&temp.msg,IF_XBEE);
         // TODO : optimize this (sb_pushInBuf directly in Xbee_receive())
 //        count+=sb_forward(&temp.msg,IF_XBEE);
     }
+    else if (count<0) return count;
+    count=0;
+
 #endif
 #if (MYADDRI)!=0
-    if (I2C_receive(&temp.msg)) {
+    if (I2C_receive(&temp.msg)>0) {
         sb_pushInBufLast(&temp.msg,IF_I2C);
         // TODO : optimize this (sb_pushInBuf directly in I2C_receive())
 //        count+=sb_forward(&temp.msg,IF_I2C);
     }
 #endif
 #if (MYADDRU)!=0
-    if (UART_receive(&temp)) {
+    if (UART_receive(&temp)>0) {
         sb_pushInBufLast(&temp.msg,IF_UART);
 //        count+=sb_forward(&temp,IF_UART);
     }
@@ -182,8 +187,6 @@ int sb_receive(sMsg *msg){
 
     //if no message available
     if ( !localReceived) return 0;
-
-
 
     //checks if there are any functions attached to the type of the incoming message.
     //if so, run it silently an removes message.
@@ -328,7 +331,6 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
 
         memcpy(&localMsg,msg,sizeof(sMsg));
         localReceived=1;
-
         return (msg->header.size + sizeof(sGenericHeader));
         break;
     default : return -1;
