@@ -20,7 +20,6 @@ void receiveEvent(int i){
     sMsgIf *tmp;
     int j;
 
-    noInterrupts();
 
     tmp=sb_getAllocInBufLast();
 
@@ -29,7 +28,6 @@ void receiveEvent(int i){
         for (j=0;j<i;j++){
             Wire.read();
         }
-        interrupts();
         return;
     }
     //else, put message in incoming message buffer
@@ -37,7 +35,6 @@ void receiveEvent(int i){
         Wire.readBytes((char*)&(tmp->msg),i);
         tmp->iFace=IF_I2C;
     }
-    interrupts();
 }
 
 /*

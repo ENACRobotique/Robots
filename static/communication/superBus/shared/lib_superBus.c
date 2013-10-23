@@ -158,7 +158,7 @@ int sb_routine(){
     //handles stored messages
     if ( (pTmp=sb_getInBufFirst()) != NULL){
         //checks checksum of message before forwarding
-        if ( checksumHead(&pTmp->msg.header)==0 && checksumPload(&pTmp->msg)==0){
+        if ( checksumHead(&pTmp->msg.header)==0 || checksumPload(&pTmp->msg)==0){
             sb_freeInBufFirst();
             return -1;
         }
