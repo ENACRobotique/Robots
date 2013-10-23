@@ -67,12 +67,23 @@ int I2C_receive(sMsg *pRet){
  *  number of bytes writen (-1 if error)
  */
 int I2C_send(const sMsg *msg, sb_Address firstDest){
+
+    //these two variables are here to ensure that enough time was spent between the current sending of data and the previous one
+    static unsigned long prevSend=0,delay=0;
     int count=0;
+
+    //we wait to let enough time to an arduino receiver to receive the message
+    while( (micros()-prevSend)<delay );
 
     Wire.beginTransmission( (int)(firstDest & DEVICEI_MASK)>>1 );
     count=Wire.write((const uint8_t *)msg,msg->header.size+sizeof(sGenericHeader));
-    if(Wire.endTransmission())
-    	return -1;
 
+    prevSend=micros();
+    delay=((msg->header.size+sizeof(sGenericHeader)+2)*37);//in µs, based on experimental measurement, 2.4 ms required for 66 Bytes (header+Pload+I2C address)
+
+
+    if( Wire.endTransmission() ){
+    	return -1;
+    }
     return count;
 }

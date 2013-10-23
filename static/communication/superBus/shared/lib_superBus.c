@@ -49,7 +49,7 @@ int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffe
 int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 
 //local message to transmit via sb_receive()
-sMsg localMsg={0};
+sMsg localMsg={{0}};
 int localReceived=0; //indicates whether a message is available for local or not
 
 //sb_attach structure
@@ -157,6 +157,11 @@ int sb_routine(){
 
     //handles stored messages
     if ( (pTmp=sb_getInBufFirst()) != NULL){
+        //checks checksum of message before forwarding
+        if ( checksumHead(&pTmp->msg.header)==0 && checksumPload(&pTmp->msg)==0){
+            sb_freeInBufFirst();
+            return -1;
+        }
         count+=sb_forward(&(pTmp->msg),pTmp->iFace);
         sb_freeInBufFirst();
     }
@@ -487,7 +492,7 @@ int sb_popInBuf(sMsgIf * pstru){
     nbMsg--;
     mutexUnlock();
 
-    memcpy(pstru, &(msgIfBuf[iTmp]), msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader));
+    memcpy(pstru, &(msgIfBuf[iTmp]), MIN(msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader),sizeof(sMsg)));
 
     return 1;
 }
@@ -504,7 +509,7 @@ int sb_popInBuf(sMsgIf * pstru){
 sMsgIf *sb_getInBufFirst(){
 
     if (nbMsg==0) return NULL;
-    return &msgIfBuf[iFirst];
+    return &(msgIfBuf[iFirst]);
 }
 
 /* sb_getInBufFirst : Updates the indexes after a call to sb_getInBufFirst()
