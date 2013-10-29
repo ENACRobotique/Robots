@@ -31,7 +31,7 @@ int setupXbee(){
 
     // TODO writes Xbee module config here (AT command)
 
-    //writes node's address on the xbee
+//writes node's address on the xbee
     XbeeATCmd("MY",12,XBEE_ATCMD_SET,MYADDRX);
 
     //waits for acknowledgement
@@ -41,6 +41,40 @@ int setupXbee(){
 
     if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
     else if (stru.data.ATResponse.status!=0) return -3;
+
+//writes CE parameter on the xbee to match peer-to-peer use
+    XbeeATCmd("CE",12,XBEE_ATCMD_SET,0);
+
+    //waits for acknowledgement
+    do {
+        byteRead=XbeeReadFrame(&stru);
+    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+
+    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
+    else if (stru.data.ATResponse.status!=0) return -3;
+
+//writes A1 parameter on the xbee to match peer-to-peer use
+    XbeeATCmd("A1",12,XBEE_ATCMD_SET,0);
+
+    //waits for acknowledgement
+    do {
+        byteRead=XbeeReadFrame(&stru);
+    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+
+    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
+        else if (stru.data.ATResponse.status!=0) return -3;
+
+
+    //writes A1 parameter on the xbee to match peer-to-peer use
+        XbeeATCmd("MM",12,XBEE_ATCMD_SET,2);
+
+        //waits for acknowledgement
+        do {
+            byteRead=XbeeReadFrame(&stru);
+        } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+
+        if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
+            else if (stru.data.ATResponse.status!=0) return -3;
 
 
     //saves changes in non-volatile memory
@@ -91,7 +125,7 @@ int Xbee_receive(sMsg *pRet){
     spAPISpecificStruct stru;
     int size=0;
     //read one frame. If nothing red, return 0
-    if ((size=XbeeReadFrame(&stru))<=0) return 0;
+    if ((size=XbeeReadFrame(&stru))<=0) return size;
 
     //computes real size of payload
     size-=sizeof(stru.APID)+sizeof(stru.data.RX16Data.lSrcAddr_be)+sizeof(stru.data.RX16Data.options)+sizeof(stru.data.RX16Data.rssi);

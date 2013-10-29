@@ -111,6 +111,8 @@ int sb_send(sMsg *msg){
     // sets source address
     msg->header.srcAddr = (MYADDRX?:MYADDRI)?:MYADDRU;
 
+    if ( (msg->header.size + sizeof(sGenericHeader)) > SB_MAX_PDU) return -1;
+
     // sets checksum
     setSum(msg);
 
