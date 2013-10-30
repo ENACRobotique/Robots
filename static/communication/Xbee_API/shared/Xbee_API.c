@@ -35,7 +35,9 @@
 
 #include <string.h>
 
-
+#ifndef MIN
+#define MIN(m, n) (m)>(n)?(n):(m)
+#endif
 
 
 #if (defined(ARCH_BIG_ENDIAN) && defined(ARCH_LITTLE_ENDIAN))
@@ -78,7 +80,7 @@ int XbeeTx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* dat
 
     //payload writing : optimization possible, play with pointer to avoid useless copy
     //but will require to have a smart XbeeWriteFrame (or sending done here)
-    memcpy(stru.data.TX16Data.pPayload,data,dataSize);
+    memcpy(stru.data.TX16Data.pPayload,data,MIN(dataSize,100));
 
 
     return XbeeWriteFrame(&stru,dataSize+5);
@@ -170,7 +172,7 @@ int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
  *  size of the frame written in *frame if correct,
  *  0 if no frame available after frame timeout
  *  -1 if bad checksum
- *  -2 if byte timeout (but start character detected)
+ *  -2 if byte timeout (but start character detected) or byte error (escaping bytes)
  */
 int XbeeReadFrame(spAPISpecificStruct *str){
     uint8_t *rawFrame=(uint8_t*)str;
@@ -191,11 +193,11 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     stopWatch=0; //resets the timeout
 
     //reading size of message (with timeout)
-    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-    if (!lus) return -2;
+    while ( !(lus=XbeeReadByteEscaped(&readByte))  && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
+    if (lus <= 0) return -2;
     stopWatch=0; //resets the timeout
     while (!(lus=XbeeReadByteEscaped(&readByte1)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-    if (!lus) return -2;
+    if (lus <= 0) return -2;
     stopWatch=0; //resets the timeout
 
     size= (readByte<<8) | readByte1 ; //endianness-proof
@@ -203,7 +205,7 @@ int XbeeReadFrame(spAPISpecificStruct *str){
     //read size bytes
     while (count != size){
         while (!(lus=XbeeReadByteEscaped(&rawFrame[count])) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-        if (!lus) return -2;
+        if ( lus <= 0) return -2;
         stopWatch=0; //resets the timeout
         checksum+=rawFrame[count];
         count++;
@@ -211,7 +213,7 @@ int XbeeReadFrame(spAPISpecificStruct *str){
 
     //checksum (read byte ,add , test and return)
     while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-    if (!lus) return -2;
+    if ( lus <= 0) return -2;
     stopWatch=0; //resets the timeout
     checksum+=readByte;
 
@@ -235,14 +237,22 @@ int XbeeWriteByteEscaped(uint8_t byte){
 
 /* XbeeWriteByteEscaped : writes one byte on the serial link, removing escaping if needed
  * Return value :
- *  1 if read succeed, 0 otherwise
+ *  1 if read succeed,
+ *  0 if there was nothing to read
+ *  -1 on error while escaping
  */
 int XbeeReadByteEscaped(uint8_t *byte){
+    uint32_t sw=0; //stopwatch
+    int byteRed=0;
+
     if(serialRead(byte)){
         // un-escape characters if needed
-        if (*byte == XBEE_ESCAPE_CHAR){
-            if (!serialRead(byte)) return 0;
-            (*byte)^=XBEE_ESCAPE_MASK;
+        if (*byte == (uint8_t)XBEE_ESCAPE_CHAR){
+            //wait for the next byte on the serial (arduino is fucking slow here)
+            while (!(byteRed=serialRead(byte)) && testTimeout(XBEE_READBYTE_TIMEOUT,&sw));
+            if (!byteRed) return -1;
+
+            (*byte) ^= (uint8_t)XBEE_ESCAPE_MASK;
         }
         return 1;
     }
