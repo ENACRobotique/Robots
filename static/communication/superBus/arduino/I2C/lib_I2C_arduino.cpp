@@ -64,6 +64,7 @@ int I2C_receive(sMsg *pRet){
  *  number of bytes writen (-1 if error)
  */
 int I2C_send(const sMsg *msg, sb_Address firstDest){
+    int err;
 
     //these two variables are here to ensure that enough time was spent between the current sending of data and the previous one
     static unsigned long prevSend=0,delay=0;
@@ -79,8 +80,8 @@ int I2C_send(const sMsg *msg, sb_Address firstDest){
     delay=((msg->header.size+sizeof(sGenericHeader)+2)*37);//in µs, based on experimental measurement, 2.4 ms required for 66 Bytes (header+Pload+I2C address)
 
 
-    if( Wire.endTransmission() ){
-    	return -1;
+    if( (err=Wire.endTransmission())!=0 ){
+    	return -err;
     }
     return count;
 }

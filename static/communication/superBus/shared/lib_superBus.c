@@ -144,23 +144,22 @@ int sb_routine(){
     if ( (count=Xbee_receive(&temp.msg)) > 0 ) {
         sb_pushInBufLast(&temp.msg,IF_XBEE);
         // TODO : optimize this (sb_pushInBuf directly in Xbee_receive())
-//        count+=sb_forward(&temp.msg,IF_XBEE);
     }
     else if (count<0) return count;
     count=0;
 
 #endif
 #if (MYADDRI)!=0
-    if (I2C_receive(&temp.msg)>0) {
+    if ( (count=I2C_receive(&temp.msg))>0) {
         sb_pushInBufLast(&temp.msg,IF_I2C);
         // TODO : optimize this (sb_pushInBuf directly in I2C_receive())
-//        count+=sb_forward(&temp.msg,IF_I2C);
     }
+    else if (count<0) return count;
+    count=0;
 #endif
 #if (MYADDRU)!=0
     if (UART_receive(&temp)>0) {
         sb_pushInBufLast(&temp.msg,IF_UART);
-//        count+=sb_forward(&temp,IF_UART);
     }
 #endif
 
@@ -168,12 +167,12 @@ int sb_routine(){
 
     //handles stored messages
     if ( (pTmp=sb_getInBufFirst()) != NULL){
-        //checks checksum of message before forwarding
+        //checks checksum of message before forwarding. If error, drop message
         if ( checksumHead(&pTmp->msg.header)==0 || checksumPload(&pTmp->msg)==0){
             sb_freeInBufFirst();
             return -1;
         }
-        count+=sb_forward(&(pTmp->msg),pTmp->iFace);
+        count=sb_forward(&(pTmp->msg),pTmp->iFace);
         sb_freeInBufFirst();
     }
 
@@ -451,7 +450,7 @@ int sb_pushInBufLast(sMsg *msg, E_IFACE iFace){
     nbMsg++;
     mutexUnlock();
 
-    msgIfBuf[iNext].iFace=iFace;
+    msgIfBuf[iTmp].iFace=iFace;
     memcpy(&msgIfBuf[iTmp].msg,msg, MIN(msg->header.size+sizeof(sGenericHeader),sizeof(sMsg)));
     return 1;
 }
