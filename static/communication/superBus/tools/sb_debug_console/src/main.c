@@ -44,7 +44,7 @@ int main(){
 
         //receives messages, displays string if message is a debug message
         if (sb_receive(&msgIn)){
-            printf("message received from %hx, type : %uc %s\n",msgIn.header.srcAddr,msgIn.header.type,eType2str(msgIn.header.type));
+            printf("message received from %hx, type : %u %s\n",msgIn.header.srcAddr,msgIn.header.type,eType2str(msgIn.header.type));
             switch (msgIn.header.type){
             case E_DEBUG : printf("%s\n",msgIn.payload.debug); break;
             default : break;
