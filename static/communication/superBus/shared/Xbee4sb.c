@@ -134,7 +134,7 @@ int Xbee_receive(sMsg *pRet){
     if (stru.APID!=XBEE_APID_RX16) return 0;
 
     //oterwise (something red && good type), return size of frame red
-    memcpy(pRet,(stru.data.RX16Data.payload),size);
+    memcpy(pRet,(stru.data.RX16Data.payload),MIN(size,100));
     return size;
 }
 

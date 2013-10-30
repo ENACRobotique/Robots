@@ -18,6 +18,10 @@ E_TYPE toto;
 #include <stdlib.h>
 
 
+#ifndef MIN
+#define MIN(m, n) (m)>(n)?(n):(m)
+#endif
+
 #ifdef ARCH_328P_ARDUINO
     #if MYADDRU !=0
         #include "UART/lib_UART_arduino.h"
@@ -401,11 +405,14 @@ int sb_deattach(E_TYPE type){
     //checks if the type is correct (should be within the E_TYPE enum range)
     if (type>=E_TYPE_COUNT) return -1;
 
+    if (firstAttach==NULL) return -2;
+
     //looking for already existing occurence of this type
     //first element
     if (elem->type==type){
         firstAttach=elem->next;
         free(elem);
+        return 0;
     }
 
     //rest of the chain
