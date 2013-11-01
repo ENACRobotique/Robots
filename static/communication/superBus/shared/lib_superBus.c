@@ -12,6 +12,7 @@
 #include "network_cfg.h"
 #include "node_cfg.h"
 #include "mutex/mutex.h"
+#include "timeout.h"
 
 
 
@@ -80,15 +81,14 @@ uint8_t seqNum=0;
  * Handles the initialization of the superBus interfaces
  */
 int sb_init(){
-    // FIXME use macros defined in params.h
 
 #if MYADDRU!=0
 #   ifdef ARCH_X86_LINUX
-    UART_initSerial("/dev/ttyUSB0");
+    UART_init("/dev/ttyUSB0",0);
 #   endif
 
 #   ifdef ARCH_328P_ARDUINO
-    UART_init(111111);
+    UART_init(0,111111);
 #   endif
 #endif
 
@@ -172,7 +172,7 @@ int sb_genericSend(sMsg *msg){
  */
 int sb_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
-    sMsg msgIn={0}; //incoming message (may be our ack)
+    sMsg msgIn={{0}}; //incoming message (may be our ack)
 
     sb_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -184,7 +184,7 @@ int sb_sendAck(sMsg *msg){
     if (sb_genericSend(msg) < 0) return -1;
 
     // waiting for the reply
-    while ( testTimeout(SB_ACK_TIMEOUT*1000,&sw)){ //TODO add timeout driver for SB
+    while ( testTimeout(SB_ACK_TIMEOUT*1000,&sw)){
         // route message (to receive the one we are waiting for)
         sb_routine();
         // if we receive a message
@@ -194,7 +194,7 @@ int sb_sendAck(sMsg *msg){
                 sb_pushInBufLast(msg,IF_LOCAL);
             }
             // if this msg is not the ack expected (not the good destination or seqnum), drop it (do nothing)
-            else if ( msgIn.payload.ack.addr != tmpAddr || msgIn.payload.ack.seqNum != tmpSeqNum);
+            else if ( msgIn.payload.ack.addr != tmpAddr || msgIn.payload.ack.seqNum != tmpSeqNum) continue;
             else if ( msgIn.payload.ack.ans == A_ACK) return 1;
             else if ( msgIn.payload.ack.ans == A_NACK_BROKEN_LINK) return -2;
             else if ( msgIn.payload.ack.ans == A_NACK_BUFFER_FULL) return -3; //XXX behavior?

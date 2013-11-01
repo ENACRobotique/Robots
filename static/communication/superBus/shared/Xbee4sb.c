@@ -11,6 +11,8 @@
 #include "messages.h"
 #include "node_cfg.h"
 #include "lib_superBus.h"
+#include "lib_UART_framing.h"
+#include "timeout.h"
 
 #include <string.h>
 
@@ -24,40 +26,40 @@
  *      -3 if error for wrong command/parameter or ERROR
  *
  */
-int setupXbee(){
+int Xbee_setup(){
     int byteRead=0;
     spAPISpecificStruct stru;
     uint32_t sw=0;
 
 
 //writes node's address on the xbee
-    XbeeATCmd("MY",12,XBEE_ATCMD_SET,MYADDRX);
+    Xbee_ATCmd("MY",12,XBEE_ATCMD_SET,MYADDRX);
 
     //waits for acknowledgement
     do {
-        byteRead=XbeeReadFrame(&stru);
+        byteRead=Xbee_readFrame(&stru);
     } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
     else if (stru.data.ATResponse.status!=0) return -3;
 
 //writes CE parameter on the xbee to match peer-to-peer use
-    XbeeATCmd("CE",12,XBEE_ATCMD_SET,0);
+    Xbee_ATCmd("CE",12,XBEE_ATCMD_SET,0);
 
     //waits for acknowledgement
     do {
-        byteRead=XbeeReadFrame(&stru);
+        byteRead=Xbee_readFrame(&stru);
     } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
     else if (stru.data.ATResponse.status!=0) return -3;
 
 //writes A1 parameter on the xbee to match peer-to-peer use
-    XbeeATCmd("A1",12,XBEE_ATCMD_SET,0);
+    Xbee_ATCmd("A1",12,XBEE_ATCMD_SET,0);
 
     //waits for acknowledgement
     do {
-        byteRead=XbeeReadFrame(&stru);
+        byteRead=Xbee_readFrame(&stru);
     } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
@@ -65,52 +67,27 @@ int setupXbee(){
 
 
     //writes A1 parameter on the xbee to match peer-to-peer use
-        XbeeATCmd("MM",12,XBEE_ATCMD_SET,2);
+    Xbee_ATCmd("MM",12,XBEE_ATCMD_SET,2);
 
-        //waits for acknowledgement
-        do {
-            byteRead=XbeeReadFrame(&stru);
-        } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
+    //waits for acknowledgement
+    do {
+        byteRead=Xbee_readFrame(&stru);
+    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(SB_WAIT_XBEE_SND_FAIL,&sw));
 
-        if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
-            else if (stru.data.ATResponse.status!=0) return -3;
+    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
+    else if (stru.data.ATResponse.status!=0) return -3;
 
 
     //saves changes in non-volatile memory
-    XbeeATCmd("WR",13,XBEE_ATCMD_SET,MYADDRX);
+    Xbee_ATCmd("WR",13,XBEE_ATCMD_SET,MYADDRX);
     do {
-        byteRead=XbeeReadFrame(&stru);
+        byteRead=Xbee_readFrame(&stru);
     } while( !(stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==13) );
     if (stru.data.ATResponse.status!=0) return -3;
 
     return 1;
 }
 
-
-void Xbee_init(){
-    uint8_t garbage;
-
-    //waits for the Xbee to totally start
-    uint32_t sw=0;
-    while( testTimeout(10000000,&sw));
-
-    //init the serial link
-#ifdef ARCH_X86_LINUX
-    serialInit(0,"/dev/ttyUSB0");
-#elif defined(ARCH_328P_ARDUINO)
-    serialInit(111111,0);
-#else 
-#error "no arch defined for Xbee4sb.c, or arch no available (yet)"
-#endif
-
-    //clear in buffer from remaining bytes
-    while (serialRead(&garbage));
-
-    //setup Xbee
-    setupXbee();
-
-
-}
 
 
 /* handle the reading of the data from the Xbee on the serial port.
@@ -124,7 +101,7 @@ int Xbee_receive(sMsg *pRet){
     spAPISpecificStruct stru;
     int size=0;
     //read one frame. If nothing red, return 0
-    if ((size=XbeeReadFrame(&stru))<=0) return size;
+    if ((size=Xbee_readFrame(&stru))<=0) return size;
 
     //computes real size of payload
     size-=sizeof(stru.APID)+sizeof(stru.data.RX16Data.lSrcAddr_be)+sizeof(stru.data.RX16Data.options)+sizeof(stru.data.RX16Data.rssi);
@@ -157,10 +134,10 @@ int Xbee_send(sMsg *msg, uint16_t nexthop){
     uint32_t sw=0; //stopwatch
     int byteRead=0;
 
-    if (!XbeeTx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader))) return -1;
+    if (!Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader))) return -1;
 
     do {
-        byteRead=XbeeReadFrame(&stru);
+        byteRead=Xbee_readFrame(&stru);
 
         if ( byteRead && stru.APID==XBEE_APID_RX16){
             sb_pushInBufLast((sMsg*)&(stru.data.RX16Data.payload),IF_XBEE);
