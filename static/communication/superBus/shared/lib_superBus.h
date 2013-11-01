@@ -44,6 +44,8 @@ typedef struct {
 
 int sb_init();
 int sb_send(sMsg *msg);
+int sb_genericSend(sMsg *msg);
+int sb_sendAck(sMsg *msg);
 int sb_routine();
 int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);

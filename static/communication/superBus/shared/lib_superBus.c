@@ -7,12 +7,13 @@
 
 #include "lib_superBus.h"
 #include "lib_checksum.h"
+#include "lib_sbDebug.h"
 #include "Xbee4sb.h"
 #include "network_cfg.h"
 #include "node_cfg.h"
 #include "mutex/mutex.h"
 
-E_TYPE toto;
+
 
 #include <string.h>
 #include <stdlib.h>
@@ -54,7 +55,7 @@ sMsgIf msgIfBuf[SB_INC_MSG_BUF_SIZE]={{{{0}}}};
 int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
 int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 
-//local message to transmit via sb_receive()
+//local message to "transmit" via sb_receive()
 sMsg localMsg={{0}};
 int localReceived=0; //indicates whether a message is available for local or not
 
@@ -68,7 +69,12 @@ typedef struct sAttachdef{
 //sb_attach first element
 sAttach *firstAttach=NULL;
 
+//sequence number counter;
+uint8_t seqNum=0;
 
+
+
+// todo sb_deinit
 
 /*
  * Handles the initialization of the superBus interfaces
@@ -98,10 +104,9 @@ int sb_init(){
     return 0;
 }
 
-// todo sb_deinit
 
 /*
- * sb_send : handles the sending of a message over the SuperBus network
+ * sb_send : handles the "classic" sending of a message over the SuperBus network (no ack nor broadcast)
  * For user's use only, the message was previously NOT "in the network"
  * Arguments :
  *      msg : pointer to the message to send.
@@ -112,10 +117,37 @@ int sb_init(){
  *
  */
 int sb_send(sMsg *msg){
+
+    //sets ack bit
+    msg->header.ack=0;
+
+    // sending
+    return sb_genericSend(msg);
+}
+
+/*
+ * sb_genericSend : system use only, not for user.
+ * Arguments :
+ *      msg : pointer to the message to send.
+ * Return Value :
+ *      see sb_forward :
+ *          <0 if error
+ *          >0 : nb of bytes written is correct
+ * Remark : will increment global seqNum. the seqNum of the send message is the value of the global var seqNum BEFORE the call to sb_genericSend.
+ */
+int sb_genericSend(sMsg *msg){
     // sets source address
     msg->header.srcAddr = (MYADDRX?:MYADDRI)?:MYADDRU;
 
+    //check the size of the message
     if ( (msg->header.size + sizeof(sGenericHeader)) > SB_MAX_PDU) return -1;
+
+    //sets type version
+    msg->header.typeVersion=SB_TYPE_VERSION;
+
+    //sets seqNum
+    msg->header.seqNum=seqNum;
+    seqNum+=(seqNum+1)&15;      //for a 4 bits sequence number
 
     // sets checksum
     setSum(msg);
@@ -124,6 +156,52 @@ int sb_send(sMsg *msg){
     return sb_forward(msg, IF_LOCAL);
 }
 
+/*
+ * sb_send : handles the "acked" sending of a message over the SuperBus network (no broadcast)
+ * For user's use only, the message was previously NOT "in the network"
+ * Arguments :
+ *      msg : pointer to the message to send.
+ * Return Value :
+ *      see sb_forward :
+ *          -1 if error
+ *          -2 if nack broken link received
+ *          -3 if nack buffer full received
+ *          -4 if no ack is received
+ *          1  if message acked
+ *  WARNING : "BLOCKING" FUNCTION (timeout SB_ACK_TIMEOUT)
+ */
+int sb_sendAck(sMsg *msg){
+    uint32_t sw=0;  // stopwatch memory
+    sMsg msgIn={0}; //incoming message (may be our ack)
+
+    sb_Address tmpAddr=msg->header.destAddr;
+    uint8_t tmpSeqNum=seqNum;
+
+    // sets ack bit
+    msg->header.ack=1;
+
+    // sending
+    if (sb_genericSend(msg) < 0) return -1;
+
+    // waiting for the reply
+    while ( testTimeout(SB_ACK_TIMEOUT*1000,&sw)){ //TODO add timeout driver for SB
+        // route message (to receive the one we are waiting for)
+        sb_routine();
+        // if we receive a message
+        if (sb_receive(&msgIn)>0){
+            //if this message is not an ack response,  put it back in the incoming buffer (sent to self)
+            if ( msgIn.header.type != E_ACK_RESPONSE ){
+                sb_pushInBufLast(msg,IF_LOCAL);
+            }
+            // if this msg is not the ack expected (not the good destination or seqnum), drop it (do nothing)
+            else if ( msgIn.payload.ack.addr != tmpAddr || msgIn.payload.ack.seqNum != tmpSeqNum);
+            else if ( msgIn.payload.ack.ans == A_ACK) return 1;
+            else if ( msgIn.payload.ack.ans == A_NACK_BROKEN_LINK) return -2;
+            else if ( msgIn.payload.ack.ans == A_NACK_BUFFER_FULL) return -3; //XXX behavior?
+        }
+    }
+    return -4;
+}
 
 /*
  * SuperBus Routine, handles receiving messages, routing/forwarding them, putting them in a buffer
@@ -132,7 +210,8 @@ int sb_send(sMsg *msg){
  * Non blocking function
  * Arguments : none
  * Return value :
- *  number of bytes handled
+ *  >=0 : number of bytes handled
+ *  <0 : error
  *
  */
 int sb_routine(){
@@ -167,12 +246,44 @@ int sb_routine(){
 
     //handles stored messages
     if ( (pTmp=sb_getInBufFirst()) != NULL){
-        //checks checksum of message before forwarding. If error, drop message
-        if ( checksumHead(&pTmp->msg.header)==0 || checksumPload(&pTmp->msg)==0){
+        //checks checksum of message before forwarding. If error, drop message and return
+        if ( checkSum(&(pTmp->msg)) ){
             sb_freeInBufFirst();
             return -1;
         }
+        //forward message
         count=sb_forward(&(pTmp->msg),pTmp->iFace);
+
+        //handle the acknowledgement
+        if ( pTmp->msg.header.ack == 1){
+            //if the message is for us, send acknowledgement to the initial sender
+            if (pTmp->msg.header.destAddr == MYADDRX || pTmp->msg.header.destAddr == MYADDRI || pTmp->msg.header.destAddr == MYADDRU ){
+
+                temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
+                temp.msg.header.type=E_ACK_RESPONSE;
+                temp.msg.header.size=sizeof(sAckPayload);
+
+                temp.msg.payload.ack.ans=A_ACK;
+                temp.msg.payload.ack.addr=pTmp->msg.header.destAddr;
+                temp.msg.payload.ack.seqNum=pTmp->msg.header.seqNum;
+
+                sb_send(&(temp.msg));
+
+            }
+            //else send nack on forwarding fail
+            else if (count<0){
+                temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
+                temp.msg.header.type=E_ACK_RESPONSE;
+                temp.msg.header.size=sizeof(sAckPayload);
+
+                temp.msg.payload.ack.ans=A_NACK_BROKEN_LINK;
+                temp.msg.payload.ack.addr=pTmp->msg.header.destAddr;
+                temp.msg.payload.ack.seqNum=pTmp->msg.header.seqNum;
+
+                sb_send(&(temp.msg));
+            }
+        }
+
         sb_freeInBufFirst();
     }
 
@@ -186,15 +297,28 @@ int sb_routine(){
  * Return value :
  *      nb of bytes written
  *      0 if nothing is available
+ *      -1 on error
  */
 int sb_receive(sMsg *msg){
     sAttach *elem=firstAttach;
 
-    //if no message available
+    // if no message available
     if ( !localReceived) return 0;
 
-    //checks if there are any functions attached to the type of the incoming message.
-    //if so, run it silently an removes message.
+    // Check the type
+    // is the version different ?
+    if ( msg->header.typeVersion != SB_TYPE_VERSION ){
+        sb_printfDbg("type version rx %u (loc. %u)",msg->header.typeVersion,SB_TYPE_VERSION);
+        return -1;
+    }
+    // is it above the highest type this node knows ? (time to rebuild and update this node)
+    if ( msg->header.type >= E_TYPE_COUNT) {
+        sb_printDbg("type unknown (too big)");
+        return -1;
+    }
+
+    // checks if there are any functions attached to the type of the incoming message.
+    // if so, run it silently an removes message.
     while ( elem!=NULL ){
        if ( elem->type == localMsg.header.type ) {
            //call attached function
@@ -205,7 +329,7 @@ int sb_receive(sMsg *msg){
        else elem=elem->next;
     }
 
-    //if no function is attached to this type
+    // if no function is attached to this type
     localReceived--;
     memcpy(msg,&localMsg,sizeof(sMsg));
     return (msg->header.size + sizeof(sGenericHeader));
@@ -225,9 +349,16 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
     int i=0;
     sRouteInfo routeInfo;
 
-    // if this message if for us
+    // if this message if for this node (including broadcast possibilities) but not from this node XXX enable I2C broadcast rx
     if ( ifFrom!=IF_LOCAL && (
             msg->header.destAddr==MYADDRU || msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
+        routeInfo.ifTo=IF_LOCAL;
+        routeInfo.nextHop=msg->header.destAddr;
+        return routeInfo;
+    }
+    //if this message is from this node , for this node AND not a broadcast one (ie. dest address is exactly ours), treat it like an incoming message for this node
+    if ( ifFrom==IF_LOCAL && (
+            msg->header.destAddr==MYADDRU || msg->header.destAddr==MYADDRI || msg->header.destAddr == MYADDRX ) ){
         routeInfo.ifTo=IF_LOCAL;
         routeInfo.nextHop=msg->header.destAddr;
         return routeInfo;
@@ -333,10 +464,16 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
         return 0;
         break;
     case IF_LOCAL :
-
-        memcpy(&localMsg,msg,sizeof(sMsg));
-        localReceived=1;
-        return (msg->header.size + sizeof(sGenericHeader));
+        // check if there are not already a message for sb_receive(). If not, give msg to sb_receive.
+        // If yes, put last msg back in the central buffer (this case will happen only if the node sends a message to itself, so only the "local" message is put in the buffer)
+        if (!localReceived){
+            memcpy(&localMsg,msg,sizeof(sMsg));
+            localReceived=1;
+            return (msg->header.size + sizeof(sGenericHeader));
+        }
+        else {
+            sb_pushInBufLast(msg,ifFrom);
+        }
         break;
     default : return -1;
     }

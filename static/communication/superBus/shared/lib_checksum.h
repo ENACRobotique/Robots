@@ -16,11 +16,7 @@ extern "C" {
 
 #include <stdint.h>
 
-uint8_t checksumHead(sGenericHeader *pt);
-uint8_t cbChecksumHead(uint8_t *pt,uint8_t size, uint8_t lastB);
-uint8_t calSsumHead(uint8_t *pt);
-uint8_t checksumPload(sMsg *msg);
-uint8_t calcSumPload(uPayload *pt,int size);
+uint8_t checkSum(sMsg *msg);
 void setSum(sMsg *msg);
 
 #ifdef __cplusplus

@@ -7,95 +7,52 @@
 
 #include "lib_checksum.h"
 
-/* Computes the checksum
+
+/*
+Checksum algorithm :
+    To compute :
+        sum = sum of all the bytes of the message (header and payload), exluding the "checksum" field in the header
+        sum&=0xff : Keep the last 8 bits (logical "AND" with 0xff)
+        checksum field on the header : checksum=0xff-sum+1
+    To test
+        add all the bytes of the message, result should be 0.
+
+
+ */
+
+/* Verifies the integrity of the message using the checksum field in the header
  * Argument :
- *  pt :pointer to the memory area containing the header to check
+ *  msg :pointer to the memory area containing the header to check
  * Return value :
  *  0 if checksum not correct, non-zero value otherwise
  *
  * Remark : header must be without offset between his bytes
  */
-uint8_t checksumHead(sGenericHeader *pt){
+uint8_t checkSum(sMsg *msg){
     int i;
     uint8_t sum=0;
-    for (i=0;i<sizeof(sGenericHeader)-1;i++){
-        sum+=((uint8_t *)pt)[i];
+    for ( i=0 ; i < sizeof(sGenericHeader)+msg->header.size ; i++ ){
+        sum+=((uint8_t *)msg)[i];
     }
     return !(sum);
 }
 
-
-/* Computes the checksum for the circulars buffers
- * Arguments :
- *  pt : pointer to the memory area containing the header to check
- *  size : size of the circular buffer (MUST be a power of 2)
- *  last : index of the byte in the rolling buffer corresponding to the last byte of the header
- * Return value :
- *  0 if checksum not correct, non-zero value otherwise
- *
- * Remarks :
- *  header must be  without offset between his bytes
- *  /!\ size MUST be a power of 2
- */
-uint8_t cbChecksumHead(uint8_t *pt, uint8_t size, uint8_t lastB){
-    int i;
-    uint8_t sum=0;
-    for (i=1;i<sizeof(sGenericHeader);i++){
-        sum+=pt[(lastB-i)&(size-1) ];
-    }
-    return !(sum);
-}
-
-
-
-/*
- * compute the checksum to include in a generic header
- *
- * remark : this checksum is also used as a "start" character than a real checksum. We rely on the xbee layer 2 to avoid data corruption
- */
-uint8_t calcSumHead(sGenericHeader *pt){
-    int i;
-    uint8_t sum=0;
-    for (i=0;i<sizeof(sGenericHeader)-2;i++){
-        sum+=((uint8_t *)pt)[i];
-    }
-    return (~sum)+1;
-}
-
-
-/* Computes the checksum
+/* Sets the "checksum" field in the header of the mesage at msg.
  * Argument :
- *  msg : message of which payload must be checked
+ *  msg : pointer to the memory area where the message to handle is located.
  * Return value :
- *  0 if checksum not correct, non-zero value otherwise
+ *  none.
  *
- * Remark : header must be without offset between his bytes
+ * Remark : the message must be "ready to send", every other header feild must already be set,especially
+ * the "size" field must be correctly set before calling setSum;
  */
-uint8_t checksumPload(sMsg *msg){
-    int i;
-    uint8_t sum=0;
-    for (i=0;i<msg->header.size;i++){
-        sum+=msg->payload.raw[i];
-    }
-    sum+=msg->header.checksumPload;
-    return !sum;
-}
-
-/*
- * Compute the checksum to include in a generic header
- * Argument :
- *  size : size (in bytes) of the payload to checksum
- */
-uint8_t calcSumPload(uPayload *pt, int size){
-    int i;
-    uint8_t sum=0;
-    for (i=0;i<size;i++){
-        sum+=pt->raw[i];
-    }
-    return (~sum)+1;
-}
-
 void setSum(sMsg *msg){
-    msg->header.checksumHead=calcSumHead(&(msg->header));
-    msg->header.checksumPload=calcSumPload(&(msg->payload),msg->header.size);
+    int i;
+    uint8_t sum=0;
+    for ( i=0 ; i < sizeof(sGenericHeader)+msg->header.size ; i++ ){
+        sum+=((uint8_t *)msg)[i];
+    }
+    sum-=msg->header.checksum;
+    msg->header.checksum = 0xff - sum + 1;
+    return;
 }

@@ -13,6 +13,7 @@ extern "C" { //to enable use in both C projects an C++ projects
 #endif
 
 #include "messages.h"
+#include "Xbee_API.h"
 
 int setupXbee();
 void Xbee_init();

@@ -29,7 +29,6 @@ int setupXbee(){
     spAPISpecificStruct stru;
     uint32_t sw=0;
 
-    // TODO writes Xbee module config here (AT command)
 
 //writes node's address on the xbee
     XbeeATCmd("MY",12,XBEE_ATCMD_SET,MYADDRX);
