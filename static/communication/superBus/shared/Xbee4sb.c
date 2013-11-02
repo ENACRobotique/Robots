@@ -24,7 +24,6 @@
  *      -1 if error
  *      -2 if config frame to statused
  *      -3 if error for wrong command/parameter or ERROR
- *
  */
 int Xbee_setup(){
     int byteRead=0;

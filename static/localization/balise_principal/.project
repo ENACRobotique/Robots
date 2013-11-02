@@ -99,6 +99,21 @@
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/Wire</locationURI>
 		</link>
 		<link>
+			<name>arduinolib/timeout</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/timeout</locationURI>
+		</link>
+		<link>
+			<name>lib/UART_arduino</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/UART_framing/arduino</locationURI>
+		</link>
+		<link>
+			<name>lib/UART_shared</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/UART_framing/shared</locationURI>
+		</link>
+		<link>
 			<name>lib/Xbee_API_arduino</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/communication/Xbee_API/arduino</locationURI>

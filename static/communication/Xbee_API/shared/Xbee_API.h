@@ -49,7 +49,6 @@ extern "C" {
 #ifdef ARCH_328P_ARDUINO
 #include "../arduino/Xbee_API_arduino_drivers.h"
 #elif defined(ARCH_X86_LINUX)
-#include "../linux/Xbee_API_linux_drivers.h"
 #include <stdio.h>
 #else
 #error will not compile, check architecture define and driver library

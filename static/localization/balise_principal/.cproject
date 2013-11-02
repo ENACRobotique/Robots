@@ -49,6 +49,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib/MemoryFree}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/UART_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/UART_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib/timeout}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.409861217" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.1869692401" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
@@ -74,6 +77,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib/MemoryFree}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/UART_arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/lib/UART_shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_principal/arduinolib/timeout}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.742023057" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.612068759" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>

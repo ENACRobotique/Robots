@@ -15,7 +15,6 @@
 #include "node_cfg.h"
 #include "Xbee_API.h"
 #include "Xbee4sb.h"
-#include "Xbee_API_linux_drivers.h"
 
 
 static int menu = 0;
