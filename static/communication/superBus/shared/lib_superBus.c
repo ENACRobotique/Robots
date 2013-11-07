@@ -218,29 +218,34 @@ int sb_sendAck(sMsg *msg){
 int sb_routine(){
     sMsgIf temp;
     sMsgIf *pTmp=NULL;
-    int count=0;
+    int count=0,ret=0;
 
 #if (MYADDRX)!=0
-    if ( (count=Xbee_receive(&temp.msg)) > 0 ) {
+    if ( (ret=Xbee_receive(&temp.msg)) > 0 ) {
         sb_pushInBufLast(&temp.msg,IF_XBEE);
         // TODO : optimize this (sb_pushInBuf directly in Xbee_receive())
     }
-    else if (count<0) return count;
-    count=0;
+    else if (ret<0) return ret;
+    count+=ret;
+    ret=0;
 
 #endif
 #if (MYADDRI)!=0
-    if ( (count=I2C_receive(&temp.msg))>0) {
+    if ( (ret=I2C_receive(&temp.msg))>0) {
         sb_pushInBufLast(&temp.msg,IF_I2C);
         // TODO : optimize this (sb_pushInBuf directly in I2C_receive())
     }
-    else if (count<0) return count;
-    count=0;
+    else if (ret<0) return ret;
+    count+=ret;
+    ret=0;
 #endif
 #if (MYADDRU)!=0
-    if (UART_receive(&temp)>0) {
+    if (ret=UART_receive(&temp)>0) {
         sb_pushInBufLast(&temp.msg,IF_UART);
     }
+    else if (ret<0) return ret;
+    count+=ret;
+    ret=0;
 #endif
 
 
@@ -248,9 +253,9 @@ int sb_routine(){
     //handles stored messages
     if ( (pTmp=sb_getInBufFirst()) != NULL){
         //checks checksum of message before forwarding. If error, drop message and return
-        if ( checkSum(&(pTmp->msg)) ){
+        if ( checkSum(&(pTmp->msg))==0 ){
             sb_freeInBufFirst();
-            return -1;
+            return -18;
         }
         //forward message
         count=sb_forward(&(pTmp->msg),pTmp->iFace);
@@ -308,13 +313,13 @@ int sb_receive(sMsg *msg){
 
     // Check the type
     // is the version different ?
-    if ( msg->header.typeVersion != SB_TYPE_VERSION ){
-        sb_printfDbg("type version rx %u (loc. %u)",msg->header.typeVersion,SB_TYPE_VERSION);
+    if ( localMsg.header.typeVersion != SB_TYPE_VERSION ){
+//        sb_printfDbg("type version rx %u (loc. %u)",msg->header.typeVersion,SB_TYPE_VERSION);
         return -1;
     }
     // is it above the highest type this node knows ? (time to rebuild and update this node)
-    if ( msg->header.type >= E_TYPE_COUNT) {
-        sb_printDbg("type unknown (too big)");
+    if ( localMsg.header.type >= E_TYPE_COUNT) {
+//        sb_printDbg("type unknown (too big)");
         return -1;
     }
 
