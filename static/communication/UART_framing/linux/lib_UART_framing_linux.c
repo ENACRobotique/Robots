@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/select.h>
 
 
 int Xbee_serial_port;
@@ -99,12 +100,12 @@ int serialRead(uint8_t *byte,uint32_t timeout){
     tv.tv_usec = timeout%1000000;
 
     // select() wait
-    retval = select(1, &rfds, NULL, NULL, &tv);
+    retval = select(Xbee_serial_port+1, &rfds, NULL, NULL, &tv);
 
     if (retval == -1){
        perror("select()");
     }
-    else if (retval){
+    else if (retval>0){
        // Data is available now, we can read
         i=read(Xbee_serial_port,byte,1);
         if (i<0) {

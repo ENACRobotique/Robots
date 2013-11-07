@@ -8,11 +8,11 @@
 #include "lib_superBus.h"
 #include "lib_checksum.h"
 #include "lib_sbDebug.h"
+#include "timeout.h"
 #include "Xbee4sb.h"
 #include "network_cfg.h"
 #include "node_cfg.h"
 #include "mutex/mutex.h"
-#include "timeout.h"
 
 
 
@@ -100,6 +100,7 @@ int sb_init(){
 
 #if MYADDRX!=0
     Xbee_init();
+    Xbee_setup();
 #endif
     return 0;
 }

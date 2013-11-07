@@ -37,7 +37,7 @@ int UART_init(const char* device, uint32_t speed){
 #ifdef ARCH_328P_ARDUINO
     serialInit(speed);
 #elif defined(ARCH_X86_LINUX)
-#include "lib_UART_framing_linux.h"
+    serialInit(device);
 #endif
     return 0;
 }
@@ -58,23 +58,22 @@ int UART_deinit(const char* device){
  */
 int UART_writeFrame(const void *pt,int size){
     uint8_t cSum=0; //checksum
-    uint8_t *ptc=pt; //casted pointer
     int j=0;
 
     //check size :
-    if ( size >= (1<<16) ) return -2;
+    if ( size >= (UART_MTU) ) return -2;
 
     //write start byte
     if ( serialWrite(UART_FRAME_START) < 0 ) return -1;
 
     //write size
     if ( serialWriteEscaped((uint8_t)(size>>8)) < 0 ) return -1; //MSB
-    if ( serialWriteEscaped((uint8_t)(size>>8)) < 0 ) return -1; //LSB
+    if ( serialWriteEscaped((uint8_t)(size&0xff)) < 0 ) return -1; //LSB
 
     //write data
     for (j=0;j<size;j++){
-        if ( serialWriteEscaped(ptc[j]) < 0 ) return -1;
-        cSum+=ptc[j];
+        if ( serialWriteEscaped(((uint8_t*)pt)[j]) < 0 ) return -1;
+        cSum+=((uint8_t*)pt)[j];
     }
 
     //compute and write checksum

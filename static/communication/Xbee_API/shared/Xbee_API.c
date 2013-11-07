@@ -58,7 +58,7 @@
  *  frameID : for ack purposes (not used if NOACK or BCAST).
  *  data : pointer to the data to send over Xbee.
  *  datasize : size that should be read at data.
- * Return value : 0 if error, nb of bytes written on serial link (including start, size and checksum, but excluding escaping char)
+ * Return value : cf Xbee_writeFrame
  *
  */
 int Xbee_Tx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
@@ -157,19 +157,20 @@ inline int Xbee_readFrame(spAPISpecificStruct *str){
 void Xbee_init(){
     uint8_t garbage;
 
-    //waits for the Xbee to totally start
-    uint32_t sw=0;
-    while( testTimeout(10000000,&sw));
 
     //init the serial link
 #ifdef ARCH_X86_LINUX
-    UART_init(0,"/dev/ttyUSB0");
+    UART_init("/dev/ttyUSB0",0); //TODO bad, in this case the second argument is not used
 #elif defined(ARCH_328P_ARDUINO)
     Xbee_rst();
-    UART_init(0,111111);
+    UART_init(0,111111);        //TODO and here, it is the first
 #else
 #error "no arch defined for Xbee4sb.c, or arch no available (yet)"
 #endif
+
+    //waits for the Xbee to totally start
+    uint32_t sw=0;
+    while( testTimeout(10000000,&sw));
 
     //clear in buffer from remaining bytes
     while (serialRead(&garbage));
