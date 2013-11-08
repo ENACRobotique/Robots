@@ -257,6 +257,20 @@ int sb_routine(){
             sb_freeInBufFirst();
             return -18;
         }
+
+        //handle the traceroute (sends reply)
+        if (pTmp->msg.header.type == E_TRACEROUTE_REQUEST){
+            temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
+            temp.msg.header.type=E_TRACEROUTE_RESPONSE;
+            temp.msg.header.size=0;
+            sb_send(&(temp.msg));
+            //destroy the incoming message if we were the destination
+            if (pTmp->msg.header.destAddr == MYADDRX || pTmp->msg.header.destAddr == MYADDRI || pTmp->msg.header.destAddr == MYADDRU ){
+                sb_freeInBufFirst();
+                return 0;
+            }
+        }
+
         //forward message
         count=sb_forward(&(pTmp->msg),pTmp->iFace);
 
@@ -443,7 +457,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
     case IF_XBEE :
         while (retVal<=0 && retries<SB_MAX_RETRIES){
             retVal=Xbee_send(msg, routeInfo.nextHop);
-            retries++;
+            retries++; //FIXME : handling duplicate receive
         }
         return retVal;
         break;
@@ -472,6 +486,7 @@ int sb_forward(sMsg *msg, E_IFACE ifFrom){
     case IF_LOCAL :
         // check if there are not already a message for sb_receive(). If not, give msg to sb_receive.
         // If yes, put last msg back in the central buffer (this case will happen only if the node sends a message to itself, so only the "local" message is put in the buffer)
+        // FIXME : possible deadlock : if we wait for a particular type of message, buffer may be full of message, and we will loop forever
         if (!localReceived){
             memcpy(&localMsg,msg,sizeof(sMsg));
             localReceived=1;
@@ -680,3 +695,4 @@ void sb_freeInBufFirst(){
 
     return;
 }
+

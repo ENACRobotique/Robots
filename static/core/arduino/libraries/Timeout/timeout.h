@@ -15,6 +15,7 @@ extern "C" {
 #include <stdint.h>
 
 int testTimeout(uint32_t delay, uint32_t *store);
+uint32_t stopwatch(uint32_t *store);
 
 #ifdef __cplusplus
 }

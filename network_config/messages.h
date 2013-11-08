@@ -30,7 +30,10 @@ typedef enum{
     E_DEBUG,                // general debug
     E_DEBUG_SIGNALLING,     // debug receiver signalling
     E_DATA,                 // arbitrary data payload
-    E_ACK_RESPONSE,                  // ack response
+    E_ACK_RESPONSE,         // ack response
+    E_PING,
+    E_TRACEROUTE_REQUEST,   // traceroute request
+    E_TRACEROUTE_RESPONSE,  // traceroute response
 
 /************************ user types start ************************/
     E_SWITCH_CHANNEL,       // switch channel message
