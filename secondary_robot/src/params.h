@@ -50,7 +50,7 @@
 #define DIR_SERVO_START -30// rem : en tenant compte de ANGLE_ZERO
 
 #define COLOR_RED HIGH
-#define COLOR_BLUE LOW
+#define COLOR_YELLOW LOW
 
 #define ARM_LEFT_UP 0
 #define ARM_LEFT_DOWN 170
@@ -62,8 +62,8 @@
 
 #define UPPERCUT
 
-#define RADAR_SAFETY_TIME 500//in ms
-#define RADAR_SAFETY_DST 20 //in cm
+#define ENEMY_SAFETY_DST 5 //in cm
+#define ENEMY_SAFETY_TIME 500 //in ms
 
 #define DEBUG
 

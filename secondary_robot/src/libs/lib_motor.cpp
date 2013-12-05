@@ -29,6 +29,11 @@ void motorInitHard(int pinDir,int pinPWM){
 #define KP  4// >>2 , with ziegler nichols (Ku = 9>>2, Tu=80ms)
 #define KI  1// >>2
 
+void motAsserTemp() // 255 est la vitesse max en fonction de la charge de la batterie
+	{
+	analogWrite(_motPinPWM,_motCon);
+	}
+
 void motAsser(){
     unsigned long int time=millis();
     int eps;

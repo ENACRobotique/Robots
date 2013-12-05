@@ -11,6 +11,6 @@
 #define LINE_THRESHOLD 3500
 
 uint16_t getIntensity(uint8_t ch);
-
+void asserLine(void);
 
 #endif /* LIB_LINE_H_ */

@@ -8,13 +8,14 @@
 
 #include "Arduino.h"
 #include "state_tirette.h"
-#include "state_traj.h"
+#include "state_goline.h"
 #include "../params.h"
 #include "../tools.h"
 
 #include "lib_move.h"
+#include "sharp_2d120x.h"
 
-/* State : tirerre, first state of all, waits until the tirette is pulled
+/* State : tirette, first state of all, waits until the tirette is pulled
  *
  * tirette pulled -> next state, according to the "start side swich"
  *
@@ -23,8 +24,8 @@ sState* testTirette(){
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY) {
-        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajRed;
-        else return &sTrajBlue;
+        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sGolineRed;
+        else return &sGolineRed; //a remplacer par &sGolineYellow
     }
     return 0;
 }
@@ -50,3 +51,10 @@ sState sTirette={
 };
 
 
+
+int EnemyDetection()
+	{
+	if(raw2dist120x(analogRead(PIN_SHARP_FRONT))< 16*ENEMY_SAFETY_DST) return 1;
+	Serial.println(raw2dist120x(analogRead(PIN_SHARP_FRONT))/16);
+	return 0;
+	}

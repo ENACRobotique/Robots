@@ -15,6 +15,7 @@
 #include "lib_radar.h"
 #include "lib_motor.h"
 #include "lib_wall.h"
+#include "lib_line.h"
 
 
 Servo armServoLeft,armServoRight;
@@ -58,7 +59,8 @@ void loop(){
     if (current->flag & BIT(E_BLINK) ) blink();
     if (current->flag & BIT(E_WALL)  ) periodicWall();
     if (current->flag & BIT(E_RADAR) ) radarRefresh();
-    if (current->flag & BIT(E_MOTOR) ) motAsser();
+    if (current->flag & BIT(E_MOTOR) ) motAsserTemp(); //motAsser() en attendant le nouveau codeur
+    if (current->flag & BIT(E_LINE)  ) asserLine();
 
     sState *next;
     if (current->testFunction){
@@ -70,3 +72,5 @@ void loop(){
     }
 
 }
+
+

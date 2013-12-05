@@ -7,12 +7,13 @@
 #include "state_funny.h"
 #include "lib_radar.h"
 #include "lib_move.h"
+#include "state_tirette.h"
 
 sState *pausePrevState;
 sState* testPause(){
     static unsigned long lastSeen;
-    if(radarIntrusion()) lastSeen=millis();
-    if( (millis()-lastSeen)>= RADAR_SAFETY_TIME ) return pausePrevState;
+    if(EnemyDetection()) lastSeen=millis();
+    if( (millis()-lastSeen)>= ENEMY_SAFETY_TIME ) return pausePrevState;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
     return 0;
 }
@@ -33,7 +34,7 @@ void deinitPause(sState *next){
 }
 
 sState sPause={
-    BIT(E_RADAR)|BIT(E_MOTOR),
+    BIT(E_MOTOR),
     &initPause,
     &deinitPause,
     &testPause
