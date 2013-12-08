@@ -16,7 +16,7 @@
  *  >=0 amount of millisecond required by a message to make a two-way travel to the destination
  *  <0 on error (host unreacheable or else, see sb_sendAcked for details on error codes)
  */
-int ping(sb_Address dest){
+int sb_ping(sb_Address dest){
     sMsg msg={0};
     int ret;
     uint32_t sw=0;
@@ -41,7 +41,7 @@ int ping(sb_Address dest){
  *      cf sb_send for error codes
  * WARNING : traceroute must not be used in game, only for developpment and test purposes
  */
-int traceroute(sb_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout){
+int sb_traceroute(sb_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout){
     sMsg msg={0};
     uint32_t sw=0,to=0;
     int i=0,ret=0;
