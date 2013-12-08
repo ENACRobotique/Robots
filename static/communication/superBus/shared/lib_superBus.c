@@ -20,6 +20,8 @@
 #include <stdlib.h>
 
 
+
+
 #ifndef MIN
 #define MIN(m, n) (m)>(n)?(n):(m)
 #endif
@@ -148,7 +150,8 @@ int sb_genericSend(sMsg *msg){
 
     //sets seqNum
     msg->header.seqNum=seqNum;
-    seqNum+=(seqNum+1)&15;      //for a 4 bits sequence number
+    //updates seqnum for next message
+    seqNum=(seqNum+1)&15;      //for a 4 bits sequence number
 
     // sets checksum
     setSum(msg);
@@ -190,6 +193,12 @@ int sb_sendAck(sMsg *msg){
         sb_routine();
         // if we receive a message
         if (sb_receive(&msgIn)>0){
+#ifdef DEBUG_PC
+        {
+        sMsg *msgPtr=&msgIn;
+        printf("%hx -> %hx type %u seq %u ack %u [sndack received], ack addr %hx ans %d seq %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,msgPtr->payload.ack.addr,msgPtr->payload.ack.ans,msgPtr->payload.ack.seqNum);
+        }
+#endif
             //if this message is not an ack response,  put it back in the incoming buffer (sent to self)
             if ( msgIn.header.type != E_ACK_RESPONSE ){
                 sb_pushInBufLast(msg,IF_LOCAL);
@@ -257,6 +266,13 @@ int sb_routine(){
             sb_freeInBufFirst();
             return -18;
         }
+
+#ifdef DEBUG_PC
+        {
+        sMsg *msgPtr=&(pTmp->msg);
+        printf("%hx -> %hx type %u seq %u ack %u [routine]\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack);
+        }
+#endif
 
         //handle the traceroute (sends reply)
         if (pTmp->msg.header.type == E_TRACEROUTE_REQUEST){
@@ -452,6 +468,14 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
 int sb_forward(sMsg *msg, E_IFACE ifFrom){
     sRouteInfo routeInfo=sb_route(msg, ifFrom);
     int retVal=0,retries=0;
+
+#ifdef DEBUG_PC
+        {
+        sMsg *msgPtr=msg;
+        printf("%hx -> %hx type %u seq %u ack %u [forward] ifto %d nexthop %hx\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,routeInfo.ifTo,routeInfo.nextHop);
+        }
+#endif
+
     switch (routeInfo.ifTo){
 #if MYADDRX !=0
     case IF_XBEE :
