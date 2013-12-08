@@ -17,15 +17,15 @@
  *  <0 on error (host unreacheable or else, see sb_sendAcked for details on error codes)
  */
 int sb_ping(sb_Address dest){
-    sMsg msg={0};
+    sMsg msg={{0}};
     int ret;
     uint32_t sw=0;
     msg.header.type=E_PING;
     msg.header.size=0;
     msg.header.destAddr=dest;
     stopwatch(&sw);
-    if ( (ret=sb_sendAck(&msg)) <0) return ret;
-    else return stopwatch(&sw);
+    if ( (ret=(&msg)) <0) return ret;
+    else return (stopwatch(&sw)/1000);
 }
 
 
@@ -42,7 +42,7 @@ int sb_ping(sb_Address dest){
  * WARNING : traceroute must not be used in game, only for developpment and test purposes
  */
 int sb_traceroute(sb_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout){
-    sMsg msg={0};
+    sMsg msg={{0}};
     uint32_t sw=0,to=0;
     int i=0,ret=0;
 

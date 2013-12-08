@@ -51,6 +51,7 @@ int sb_receive(sMsg *msg);
 sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom);
 int sb_forward(sMsg *msg, E_IFACE ifFrom);
 int sb_attach(E_TYPE type,pfvpm ptr);
+int sb_deattach(E_TYPE type);
 int sb_pushInBufLast(sMsg *msg, E_IFACE iFace);
 sMsgIf * sb_getAllocInBufLast();
 int sb_popInBuf(sMsgIf * msg);
