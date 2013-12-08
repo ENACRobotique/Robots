@@ -519,16 +519,9 @@ int sb_forward(const sMsg *msg, E_IFACE ifFrom){
             localReceived=1;
             return (msg->header.size + sizeof(sGenericHeader));
         }
-        // If yes, put last msg back in the central buffer (this case will happen only if the node sends a message to itself, so only the "local" message is put in the buffer)
-        // reminder : central buffer policy : drop-tail
-        // exception : if the incoming is an "ack response", do not drop it, instead drop the oldest message in buffer.
+        // If yes, put last msg back in the central buffer (this case should normally happen only if the node sends a message to itself, so only the "local" message is put in the buffer)
         else {
-            if ( sb_pushInBufLast(msg,ifFrom)==-1 && msg->header.type==E_ACK_RESPONSE){
-                // drop oldest message
-                sb_freeInBufFirst();
-                // puts ack there.
-                sb_pushInBufLast(msg,ifFrom);
-            }
+            sb_pushInBufLast(msg,ifFrom);
         }
         break;
     default : return -1;
@@ -624,19 +617,24 @@ int sb_deattach(E_TYPE type){
 /* sb_insertInBuf : insert a message at the last postion in the incoming message buffer
  * Argument :
  *      msg : pointer to the  message to store
- *      iFace : interface on which the messahe has been received
+ *      iFace : interface on which the message has been received
  * Return value :
  *      1
  *      -1 on error (buffer full)
- * WARNING : will drop msg if the buffer is full
+ * WARNING : will drop msg if the buffer is full, unless the msg is an ack.
  */
 int sb_pushInBufLast(const sMsg *msg, E_IFACE iFace){
     int iTmp;
 
     mutexLock();
     if (nbMsg==SB_INC_MSG_BUF_SIZE) {
-        mutexUnlock();
-        return -1;
+        // unless it is an ack, drop the message
+        if (msg->header.type!=E_ACK_RESPONSE){
+            mutexUnlock();
+            return -1;
+        }
+        //makes some room if it is an ack
+        else sb_freeInBufFirst();
     }
     iTmp=iNext;
     iNext=(iNext+1)%SB_INC_MSG_BUF_SIZE;
