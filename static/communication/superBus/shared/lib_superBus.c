@@ -267,7 +267,7 @@ int sb_routine(){
             return -18;
         }
 
-#ifdef DEBUG_PC
+#ifdef DEBUG_PC_RT
     {
         sMsg *msgPtr=&(pTmp->msg);
         int f;
@@ -474,7 +474,7 @@ int sb_forward(const sMsg *msg, E_IFACE ifFrom){
     sRouteInfo routeInfo=sb_route(msg, ifFrom);
     int retVal=0,retries=0;
 
-#ifdef DEBUG_PC_FWD
+#ifdef DEBUG_PC_RT
         {
         sMsg *msgPtr=msg;
         printf("%hx -> %hx type %u seq %u ack %u [forward] ifto %d nexthop %hx\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,routeInfo.ifTo,routeInfo.nextHop);

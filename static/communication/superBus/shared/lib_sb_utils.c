@@ -34,7 +34,7 @@ int sb_ping(sb_Address dest){
  *  dest : should I really write something here ?
  *  *retvals : pointer to a table of sTraceInfo of L elements.
  *  macDpth : maximum number of relay to display (should in fact be L). The macDpth+1 node on the path will not be displayed.
- *  timeout : time after which we consider the host as unreachable.
+ *  timeout : time after which we consider the host as unreachable (in ms).
  * Return value :
  *  if >0 : number of elements correctly written in retVals (ie nb of nodes on the way to dest, including dest, or L if there are too many nodes)
  *  if <0 : error !
@@ -46,6 +46,10 @@ int sb_traceroute(sb_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t tim
     uint32_t sw=0,to=0;
     int i=0,ret=0;
 
+
+    //starts stopwatch
+    stopwatch(&sw);
+
     //prepare and sends the message
     msg.header.type=E_TRACEROUTE_REQUEST;
     msg.header.destAddr=dest;
@@ -53,10 +57,8 @@ int sb_traceroute(sb_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t tim
     ret=sb_send(&msg);
     if ( ret<0 )return ret;
 
-    //starts stopwatch
-    stopwatch(&sw);
     //waits for the answers and stores it if correct. If incorrect, drop the message (traceroute must not be used in game, only for developpment and test purposes)
-    while ( testTimeout(timeout,&to) ){
+    while ( testTimeout(timeout*1000,&to) ){
         sb_routine();
         if(sb_receive(&msg)>0){
             //check the type
@@ -64,7 +66,7 @@ int sb_traceroute(sb_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t tim
             //if type correct, stores the info (if there is space left)
                 if ( i < maxDpth ){
                     retVals[i].addr=msg.header.srcAddr;
-                    retVals[i].ping=stopwatch(&sw);
+                    retVals[i].ping=stopwatch(&sw)/1000;
                     i++;
                 }
                 //if the sender of the message is the ultimate destination, return
