@@ -33,8 +33,8 @@ typedef enum{
     A_NACK_BROKEN_LINK
 }E_ACK_ANS;
 
-typedef struct{
-    E_ACK_ANS ans;      // type of ack
+typedef struct  __attribute__((__packed__)){
+    uint8_t ans;      // type of ack
     uint8_t seqNum;     // Sequence number of acked message
     sb_Address addr;    // Destination address  of the acked message
 }sAckPayload;

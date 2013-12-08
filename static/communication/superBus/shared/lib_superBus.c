@@ -193,7 +193,7 @@ int sb_sendAck(sMsg *msg){
         sb_routine();
         // if we receive a message
         if (sb_receive(&msgIn)>0){
-#ifdef DEBUG_PC
+#ifdef DEBUG_PC_ACK
         {
         sMsg *msgPtr=&msgIn;
         printf("%hx -> %hx type %u seq %u ack %u [sndack received], ack addr %hx ans %d seq %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,msgPtr->payload.ack.addr,msgPtr->payload.ack.ans,msgPtr->payload.ack.seqNum);
@@ -201,7 +201,7 @@ int sb_sendAck(sMsg *msg){
 #endif
             //if this message is not an ack response,  put it back in the incoming buffer (sent to self)
             if ( msgIn.header.type != E_ACK_RESPONSE ){
-                sb_pushInBufLast(msg,IF_LOCAL);
+                sb_pushInBufLast(&msgIn,IF_LOCAL);
             }
             // if this msg is not the ack expected (not the good destination or seqnum), drop it (do nothing)
             else if ( msgIn.payload.ack.addr != tmpAddr || msgIn.payload.ack.seqNum != tmpSeqNum) continue;
@@ -225,7 +225,7 @@ int sb_sendAck(sMsg *msg){
  *
  */
 int sb_routine(){
-    sMsgIf temp;
+    sMsgIf temp={{{0}}};
     sMsgIf *pTmp=NULL;
     int count=0,ret=0;
 
@@ -268,10 +268,15 @@ int sb_routine(){
         }
 
 #ifdef DEBUG_PC
-        {
+    {
         sMsg *msgPtr=&(pTmp->msg);
-        printf("%hx -> %hx type %u seq %u ack %u [routine]\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack);
+        int f;
+        printf("%hx -> %hx type %u seq %u ack %u [routine] pload (%u bytes) : ",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,msgPtr->header.size);
+        for(f=0;f<msgPtr->header.size;f++){
+            printf("%hx ",msgPtr->payload.raw[f]);
         }
+        printf("\n");
+    }
 #endif
 
         //handle the traceroute (sends reply)
@@ -381,7 +386,7 @@ int sb_receive(sMsg *msg){
  *
  * Remark : routing tables are defined in network_cfg.h & network_cfg.cpp
  */
-sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
+sRouteInfo sb_route(const sMsg *msg,E_IFACE ifFrom){
     int i=0;
     sRouteInfo routeInfo;
 
@@ -465,11 +470,11 @@ sRouteInfo sb_route(sMsg *msg,E_IFACE ifFrom){
  *
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
-int sb_forward(sMsg *msg, E_IFACE ifFrom){
+int sb_forward(const sMsg *msg, E_IFACE ifFrom){
     sRouteInfo routeInfo=sb_route(msg, ifFrom);
     int retVal=0,retries=0;
 
-#ifdef DEBUG_PC
+#ifdef DEBUG_PC_FWD
         {
         sMsg *msgPtr=msg;
         printf("%hx -> %hx type %u seq %u ack %u [forward] ifto %d nexthop %hx\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,routeInfo.ifTo,routeInfo.nextHop);
@@ -619,7 +624,7 @@ int sb_deattach(E_TYPE type){
  *      -1 on error (buffer full)
  * WARNING : will drop msg if the buffer is full
  */
-int sb_pushInBufLast(sMsg *msg, E_IFACE iFace){
+int sb_pushInBufLast(const sMsg *msg, E_IFACE iFace){
     int iTmp;
 
     mutexLock();
@@ -632,8 +637,15 @@ int sb_pushInBufLast(sMsg *msg, E_IFACE iFace){
     nbMsg++;
     mutexUnlock();
 
+#ifdef DEBUG_PC_BUF
+    {
+        sMsg *msgPtr=msg;
+        printf("%hx -> %hx type %u seq %u ack %u [pushbuf] iTmp %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iTmp);
+    }
+#endif
+
     msgIfBuf[iTmp].iFace=iFace;
-    memcpy(&msgIfBuf[iTmp].msg,msg, MIN(msg->header.size+sizeof(sGenericHeader),sizeof(sMsg)));
+    memcpy(&(msgIfBuf[iTmp].msg),msg, MIN(msg->header.size+sizeof(sGenericHeader),sizeof(sMsg)));
     return 1;
 }
 
@@ -659,6 +671,11 @@ sMsgIf * sb_getAllocInBufLast(){
     nbMsg++;
     mutexUnlock();
 
+#ifdef DEBUG_PC_BUF
+    {
+        printf("? -> ? type ? seq ? ack ? [getAllocBuf] iTmp %d\n",(iNext+SB_INC_MSG_BUF_SIZE-1)%SB_INC_MSG_BUF_SIZE);
+    }
+#endif
 
     return tmp;
 }
@@ -684,6 +701,13 @@ int sb_popInBuf(sMsgIf * pstru){
     nbMsg--;
     mutexUnlock();
 
+#ifdef DEBUG_PC_BUF
+    {
+        sMsg *msgPtr=&(msgIfBuf[iFirst]);
+        printf("%hx -> %hx type %u seq %u ack %u [popBuf] iFirst %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iFirst);
+    }
+#endif
+
     memcpy(pstru, &(msgIfBuf[iTmp]), MIN(msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader),sizeof(sMsg)));
 
     return 1;
@@ -701,6 +725,13 @@ int sb_popInBuf(sMsgIf * pstru){
 sMsgIf *sb_getInBufFirst(){
 
     if (nbMsg==0) return NULL;
+
+#ifdef DEBUG_PC_BUF
+    {
+        sMsg *msgPtr=&(msgIfBuf[iFirst]);
+        printf("%hx -> %hx type %u seq %u ack %u [getbuf] iFirst %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iFirst);
+    }
+#endif
     return &(msgIfBuf[iFirst]);
 }
 

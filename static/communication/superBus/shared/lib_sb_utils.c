@@ -24,7 +24,7 @@ int sb_ping(sb_Address dest){
     msg.header.size=0;
     msg.header.destAddr=dest;
     stopwatch(&sw);
-    if ( (ret=(&msg)) <0) return ret;
+    if ( (ret=sb_sendAck(&msg)) <0) return ret;
     else return (stopwatch(&sw)/1000);
 }
 

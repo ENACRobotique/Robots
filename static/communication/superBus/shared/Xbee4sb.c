@@ -128,7 +128,7 @@ int Xbee_receive(sMsg *pRet){
  *      -2 if error on receiving the status frame
  *      -3 if sending not successful (e.g. no ack)
  */
-int Xbee_send(sMsg *msg, uint16_t nexthop){
+int Xbee_send(const sMsg *msg, uint16_t nexthop){
     spAPISpecificStruct stru={0};
     uint32_t sw=0; //stopwatch
     int byteRead=0;
