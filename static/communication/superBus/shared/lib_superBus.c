@@ -486,7 +486,7 @@ int sb_forward(const sMsg *msg, E_IFACE ifFrom){
     case IF_XBEE :
         while (retVal<=0 && retries<SB_MAX_RETRIES){
             retVal=Xbee_send(msg, routeInfo.nextHop);
-            retries++; //FIXME : handling duplicate receive
+            retries++; //FIXME : handling duplicate receive (ie check last seqnum in sb_routine)
         }
         return retVal;
         break;
@@ -514,15 +514,21 @@ int sb_forward(const sMsg *msg, E_IFACE ifFrom){
         break;
     case IF_LOCAL :
         // check if there are not already a message for sb_receive(). If not, give msg to sb_receive.
-        // If yes, put last msg back in the central buffer (this case will happen only if the node sends a message to itself, so only the "local" message is put in the buffer)
-        // FIXME : possible deadlock : if we wait for a particular type of message, buffer may be full of message, and we will loop forever
         if (!localReceived){
             memcpy(&localMsg,msg,sizeof(sMsg));
             localReceived=1;
             return (msg->header.size + sizeof(sGenericHeader));
         }
+        // If yes, put last msg back in the central buffer (this case will happen only if the node sends a message to itself, so only the "local" message is put in the buffer)
+        // reminder : central buffer policy : drop-tail
+        // exception : if the incoming is an "ack response", do not drop it, instead drop the oldest message in buffer.
         else {
-            sb_pushInBufLast(msg,ifFrom);
+            if ( sb_pushInBufLast(msg,ifFrom)==-1 && msg->header.type==E_ACK_RESPONSE){
+                // drop oldest message
+                sb_freeInBufFirst();
+                // puts ack there.
+                sb_pushInBufLast(msg,ifFrom);
+            }
         }
         break;
     default : return -1;

@@ -104,7 +104,7 @@ int UART_readFrame(void *pt, int maxsize){
     uint8_t cSum=0; //checksum
     int j;
 
-    //waiting for a start character. If something else, read again (XXX : cf line 83, what do we do if we are spammed?)
+    //waiting for a start character. If something else, read again
     do {
         if ( (ret=serialRead(&byte,UART_WAITFRAME_TIMEOUT))==0 ){
             return 0;
@@ -113,8 +113,7 @@ int UART_readFrame(void *pt, int maxsize){
     if (byte!=UART_FRAME_START) return 0;
 
 
-frame_start :   //XXX if we are spammed with 0x7E, what behavior should we adopt ? currently, we keep reading (like an I2C bus locked if one device if crashed).
-
+frame_start :
     //read size of frame
     //(for EVERY byte, test if error AND test if start byte)
     if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -3;

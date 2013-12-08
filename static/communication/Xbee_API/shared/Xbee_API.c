@@ -160,10 +160,10 @@ void Xbee_init(){
 
     //init the serial link
 #ifdef ARCH_X86_LINUX
-    UART_init("/dev/ttyUSB0",0); //TODO bad, in this case the second argument is not used
+    UART_init("/dev/ttyUSB0",0); //xxx bad, in this case the second argument is not used
 #elif defined(ARCH_328P_ARDUINO)
     Xbee_rst();
-    UART_init(0,111111);        //TODO and here, it is the first
+    UART_init(0,111111);        //xxx and here, it is the first
 #else
 #error "no arch defined for Xbee4sb.c, or arch no available (yet)"
 #endif
