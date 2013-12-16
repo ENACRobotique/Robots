@@ -8,7 +8,7 @@
 volatile int status_flag = 0;
 volatile int irq_count = 0;
 
-void isr_eint0() __attribute__ ((interrupt));
+void isr_eint0() __attribute__ ((interrupt("IRQ")));
 void isr_eint0(){
     status_flag = 1;
     irq_count++;
@@ -17,7 +17,7 @@ void isr_eint0(){
     VIC_VectAddr = (unsigned)0; // updates priority hardware
 }
 
-void isr_eint3() __attribute__ ((interrupt));
+void isr_eint3() __attribute__ ((interrupt("IRQ")));
 void isr_eint3(){
     status_flag = 2;
     irq_count+=256;
@@ -39,7 +39,7 @@ int	main(){
     gpio_output(1, 24);
     gpio_output(0, 31);
 
-    global_interrupts_enable();
+    global_IRQ_enable();
 
     while(1) {
         sys_time_update();

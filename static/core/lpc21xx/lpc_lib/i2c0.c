@@ -36,6 +36,7 @@ struct {
 #endif
 
 // TODO reflect failure cases to the state of the transaction
+void _i2c0_isr() __attribute__((interrupt("IRQ")));
 void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
   struct i2c_transaction *trans = p.trans[p.trans_extract_idx];
 
@@ -235,7 +236,8 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
   }
 #endif
 
-  I2C0_CONCLR = BIT(3 /*SIC*/); // clear SI bit in I2C0_CONSET
+  I2C0_CONCLR = BIT(3 /*SIC*/); // clear SI bit in I2C0_CONSET | acknowledges interrupt
+  VIC_VectAddr = (unsigned)0; // updates priority hardware
 }
 
 void i2c0_init(unsigned int speed, uint8_t sla_addr, i2c_handler h, void *userp) {
@@ -279,7 +281,8 @@ void i2c0_init(unsigned int speed, uint8_t sla_addr, i2c_handler h, void *userp)
 }
 
 int i2c0_submit(struct i2c_transaction* t) {
-  register uint8_t idx;
+  uint8_t idx;
+  int irq_status;
 
   idx = (p.trans_insert_idx + 1)%I2C_TRANSACTION_QUEUE_LEN;
   if (idx == p.trans_extract_idx) {
@@ -289,7 +292,7 @@ int i2c0_submit(struct i2c_transaction* t) {
   t->status = I2CTransPending;
   t->nb_retry = 0;
 
-  global_interrupts_disable();
+  irq_status = global_IRQ_disable();
   p.trans[p.trans_insert_idx] = t;
   p.trans_insert_idx = idx;
   /* if peripheral is idle, start the transaction */
@@ -299,7 +302,7 @@ int i2c0_submit(struct i2c_transaction* t) {
   }
   /* else it will be started by the interrupt handler */
   /* when the previous transactions completes (see I2cEndOfTransaction) */
-  global_interrupts_enable();
+  global_IRQ_restore(irq_status);
 
   return 0;
 }
