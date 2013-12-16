@@ -1,6 +1,6 @@
 /* ***************************************************************************************************************
 
-	crt.s						STARTUP  ASSEMBLY  CODE 
+	crt.s						STARTUP  ASSEMBLY  CODE
 								-----------------------
 
 
@@ -9,11 +9,11 @@
   *************************************************************************************************************** */
 
 /* Stack Sizes */
-.set  UND_STACK_SIZE, 0x00000004		/* stack for "undefined instruction" interrupts is 4 bytes  */
-.set  ABT_STACK_SIZE, 0x00000004		/* stack for "abort" interrupts is 4 bytes                  */
-.set  FIQ_STACK_SIZE, 0x00000004		/* stack for "FIQ" interrupts  is 4 bytes         			*/
-.set  IRQ_STACK_SIZE, 0X00000004		/* stack for "IRQ" normal interrupts is 4 bytes    			*/
-.set  SVC_STACK_SIZE, 0x00000004		/* stack for "SVC" supervisor mode is 4 bytes  				*/
+.set  UND_STACK_SIZE, 0x00000010		/* stack for "undefined instruction" interrupts is 4 bytes  */
+.set  ABT_STACK_SIZE, 0x00000010		/* stack for "abort" interrupts is 4 bytes                  */
+.set  FIQ_STACK_SIZE, 0x00000010		/* stack for "FIQ" interrupts  is 4 bytes         			*/
+.set  IRQ_STACK_SIZE, 0X00000010		/* stack for "IRQ" normal interrupts is 4 bytes    			*/
+.set  SVC_STACK_SIZE, 0x00000010		/* stack for "SVC" supervisor mode is 4 bytes  				*/
 
 /* Standard definitions of Mode bits and Interrupt (I & F) flags in PSRs (program status registers) */
 .set  MODE_USR, 0x10            		/* Normal User Mode 										*/
@@ -39,12 +39,12 @@ _startup:
 
 # Exception Vectors
 
-_vectors:       ldr     PC, Reset_Addr         
+_vectors:       ldr     PC, Reset_Addr
                 ldr     PC, Undef_Addr
                 ldr     PC, SWI_Addr
                 ldr     PC, PAbt_Addr
                 ldr     PC, DAbt_Addr
-                .word 0xb9205f84							/* Reserved Vector (holds Philips ISP checksum) */
+                .word 	0xb9205f84		/* Reserved Vector (holds Philips ISP checksum) */
                 ldr     PC, [PC,#-0xFF0]	/* see page 71 of "Insiders Guide to the Philips ARM7-Based Microcontrollers" by Trevor Martin  */
                 ldr     PC, FIQ_Addr
 
@@ -61,46 +61,6 @@ FIQ_Addr:       .word   fiq_handler
 # Reset Handler
 
 reset_handler:
-
-				/* Setup a stack for each mode - note that this only sets up a usable stack
-				for User mode.   Also each mode is setup with interrupts initially disabled. */
-    			  
-    			ldr   r0, =_stack_end
-    			msr   CPSR_c, #MODE_UND|I_BIT|F_BIT 	/* Undefined Instruction Mode  */
-    			mov   sp, r0
-    			sub   r0, r0, #UND_STACK_SIZE
-    			msr   CPSR_c, #MODE_ABT|I_BIT|F_BIT 	/* Abort Mode */
-    			mov   sp, r0
-    			sub   r0, r0, #ABT_STACK_SIZE
-    			msr   CPSR_c, #MODE_FIQ|I_BIT|F_BIT 	/* FIQ Mode */
-    			mov   sp, r0	
-   				sub   r0, r0, #FIQ_STACK_SIZE
-    			msr   CPSR_c, #MODE_IRQ|I_BIT|F_BIT 	/* IRQ Mode */
-    			mov   sp, r0
-    			sub   r0, r0, #IRQ_STACK_SIZE
-    			msr   CPSR_c, #MODE_SVC|I_BIT|F_BIT 	/* Supervisor Mode */
-    			mov   sp, r0
-    			sub   r0, r0, #SVC_STACK_SIZE
-    			msr   CPSR_c, #MODE_SYS|I_BIT|F_BIT 	/* User Mode */
-    			mov   sp, r0
-
-				/* copy .data section (Copy from ROM to RAM) */
-                ldr     R1, =_etext
-                ldr     R2, =_data
-                ldr     R3, =_edata
-1:        		cmp     R2, R3
-                ldrlo   R0, [R1], #4
-                strlo   R0, [R2], #4
-                blo     1b
-
-				/* Clear .bss section (Zero init)  */
-                mov     R0, #0
-                ldr     R1, =_bss_start
-                ldr     R2, =_bss_end
-2:				cmp     R1, R2
-                strlo   R0, [R1], #4
-                blo     2b
-
                 /* Setup clock source : Fosc = 12Mhz, P = 2, M = 5 : Fcco = 240Mhz, cclk = 60Mhz */
                 ldr r0, =0xE01FC000
                 /* Configure PLL Multiplier/Divider */
@@ -137,6 +97,61 @@ pll_lock_loop:
                 /* Configure the VPB clock */
                 ldr r1, =2
                 str r1, [r0, #0x100]
+
+				/* Setup a stack for each mode - note that this only sets up a usable stack
+				for User mode.   Also each mode is setup with interrupts initially disabled. */
+
+    			mrs   r0, CPSR
+    			bic   r0, r0, #0x1f
+    			ldr   r2, =_stack_end
+    			/* Undefined Istruction Mode */
+    			orr   r1, r0, #MODE_UND|I_BIT|F_BIT
+    			msr   CPSR_cxsf, r1
+    			mov   sp, r2
+    			sub   r2, r2, #UND_STACK_SIZE
+    			/* Abort Mode */
+                orr   r1, r0, #MODE_ABT|I_BIT|F_BIT
+                msr   CPSR_cxsf, r1
+                mov   sp, r2
+                sub   r2, r2, #ABT_STACK_SIZE
+                /* FIQ Mode */
+                orr   r1, r0, #MODE_FIQ|I_BIT|F_BIT
+                msr   CPSR_cxsf, r1
+                mov   sp, r2
+                sub   r2, r2, #FIQ_STACK_SIZE
+                /* IRQ Mode */
+                orr   r1, r0, #MODE_IRQ|I_BIT|F_BIT
+                msr   CPSR_cxsf, r1
+                mov   sp, r2
+                sub   r2, r2, #IRQ_STACK_SIZE
+                /* Supervisor Mode */
+                orr   r1, r0, #MODE_SVC|I_BIT|F_BIT
+                msr   CPSR_cxsf, r1
+                mov   sp, r2
+                sub   r2, r2, #SVC_STACK_SIZE
+                /* System Mode */
+                orr   r1, r0, #MODE_SYS|I_BIT|F_BIT
+                msr   CPSR_cxsf, r1
+                mov   sp, r2
+
+
+				/* copy .data section (Copy from ROM to RAM) */
+                ldr     R1, =_etext
+                ldr     R2, =_data
+                ldr     R3, =_edata
+1:        		cmp     R2, R3
+                ldrlo   R0, [R1], #4
+                strlo   R0, [R2], #4
+                blo     1b
+
+				/* Clear .bss section (Zero init)  */
+                mov     R0, #0
+                ldr     R1, =_bss_start
+                ldr     R2, =_bss_end
+2:				cmp     R1, R2
+                strlo   R0, [R1], #4
+                blo     2b
+
 
 				/* Enter the C code  */
                 b       main

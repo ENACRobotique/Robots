@@ -12,7 +12,7 @@ void eint_init(void (*isr_14)(), void (*isr_17)()) {
 
   SCB_EXTMODE |= BIT(0) | BIT(3); // EINT0 & 3 are edge-sensitive
   SCB_EXTPOLAR |= BIT(0) | BIT(3);  // EINT0 & 3 are rising-edge sensitive
-  SCB_EXTINT |= BIT(0) | BIT(3);  // clear interrupt flag
+  SCB_EXTINT = BIT(0) | BIT(3);  // clear interrupt flag
 
   VIC_IntSelect &= ~(BIT(14) | BIT(17)); // IRQ (not FIQ)
   // FIXME classify those 2 interrupts as FIQ using VICIntSelect
@@ -23,6 +23,6 @@ void eint_init(void (*isr_14)(), void (*isr_17)()) {
   VIC_VectCntl3 = BIT(5)|17;
   VIC_VectAddr3 = (unsigned)isr_17;
 
-  SCB_EXTINT |= BIT(0) | BIT(3);  // clear interrupt flag
+  SCB_EXTINT = BIT(0) | BIT(3);  // clear interrupt flag
   VIC_IntEnable = BIT(14) | BIT(17);  // enable EINT0 & 3 interrupts
 }

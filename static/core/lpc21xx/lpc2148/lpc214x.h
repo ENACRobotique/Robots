@@ -722,21 +722,21 @@ typedef volatile unsigned char * pREG8;
 ## I2C
 ##############################################################################*/
 
-#define I2C0_CONSET         (*((pREG32) (0xe001c000)))
-#define I2C0_STAT           (*((pREG32) (0xe001c004)))
-#define I2C0_DAT            (*((pREG32) (0xe001c008)))
-#define I2C0_ADR            (*((pREG32) (0xe001c00c)))
-#define I2C0_SCLH           (*((pREG32) (0xe001c010)))
-#define I2C0_SCLL           (*((pREG32) (0xe001c014)))
-#define I2C0_CONCLR         (*((pREG32) (0xe001c018)))
+#define I2C0_CONSET         (*((pREG8) (0xe001c000)))
+#define I2C0_STAT           (*((pREG8) (0xe001c004)))
+#define I2C0_DAT            (*((pREG8) (0xe001c008)))
+#define I2C0_ADR            (*((pREG8) (0xe001c00c)))
+#define I2C0_SCLH           (*((pREG8) (0xe001c010)))
+#define I2C0_SCLL           (*((pREG8) (0xe001c014)))
+#define I2C0_CONCLR         (*((pREG8) (0xe001c018)))
 
-#define I2C1_CONSET         (*((pREG32) (0xe005c000)))
-#define I2C1_STAT           (*((pREG32) (0xe005c004)))
-#define I2C1_DAT            (*((pREG32) (0xe005c008)))
-#define I2C1_ADR            (*((pREG32) (0xe005c00c)))
-#define I2C1_SCLH           (*((pREG32) (0xe005c010)))
-#define I2C1_SCLL           (*((pREG32) (0xe005c014)))
-#define I2C1_CONCLR         (*((pREG32) (0xe005c018)))
+#define I2C1_CONSET         (*((pREG8) (0xe005c000)))
+#define I2C1_STAT           (*((pREG8) (0xe005c004)))
+#define I2C1_DAT            (*((pREG8) (0xe005c008)))
+#define I2C1_ADR            (*((pREG8) (0xe005c00c)))
+#define I2C1_SCLH           (*((pREG8) (0xe005c010)))
+#define I2C1_SCLL           (*((pREG8) (0xe005c014)))
+#define I2C1_CONCLR         (*((pREG8) (0xe005c018)))
 
 #define I2C_CONSET_AA       (0x00000004)
 #define I2C_CONSET_SI       (0x00000008)
@@ -763,11 +763,11 @@ typedef volatile unsigned char * pREG8;
 ## SPI - Serial Peripheral Interface
 ##############################################################################*/
 
-#define SPI_SPCR        (*((pREG32) (0xe0020000)))
-#define SPI_SPSR        (*((pREG32) (0xe0020004)))
-#define SPI_SPDR        (*((pREG32) (0xe0020008)))
-#define SPI_SPCCR       (*((pREG32) (0xe002000c)))
-#define SPI_SPINT       (*((pREG32) (0xe002001c)))
+#define SPI_SPCR        (*((pREG16) (0xe0020000)))
+#define SPI_SPSR        (*((pREG8) (0xe0020004)))
+#define SPI_SPDR        (*((pREG16) (0xe0020008)))
+#define SPI_SPCCR       (*((pREG8) (0xe002000c)))
+#define SPI_SPINT       (*((pREG8) (0xe002001c)))
 
 #define SPI_SPCR_BITENABLE    ((unsigned int) 0x00000004)
 #define SPI_SPCR_CPHA         ((unsigned int) 0x00000008)
