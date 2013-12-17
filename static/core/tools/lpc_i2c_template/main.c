@@ -1,42 +1,15 @@
-#include <targets/LPC2000.h>
-#include <ctl_api.h>
-#include <math.h>
-#include <limits.h>
+#include <lpc214x.h>
+#include <stdio.h>
+#include <ime.h>
+#include <gpio.h>
+#include <sys_time.h>
+#include <i2c0.h>
 
-#include "gpio.h"
-#include "eint.h"
-#include "pwm.h"
-#include "sys_time.h"
-#include "params.h"
-#include "trigo.h"
-#include "i2c0.h"
+#define MULTI_MASTER // comment if necessary
 
-#ifndef BIT
-#define BIT(b) (1<<(b))
-#endif
-
-#ifndef min
-#define min(a, b) ((a)>(b)?(b):(a))
-#endif
-#ifndef max
-#define max(a, b) ((a)>(b)?(a):(b))
-#endif
-#ifndef MINMAX
-#define MINMAX(m, v, M) max(m, min(v, M))
-#endif
-
-#define SQR(v) ((long long)(v)*(v))
-
-void mybreak_i() {
-  static int i = 0;
-  i++;
-}
-
-#define MULTI_MASTER
-
-#define I2C_MASTER
+#define I2C_MASTER // comment if necessary
 #ifndef I2C_MASTER
-#define I2C_SLAVE
+#define I2C_SLAVE // comment if necessary
 #endif
 
 unsigned int sum1 = 0, nb1 = 0;
@@ -106,9 +79,14 @@ void i2chnd(struct i2c_transaction *t, void *userp) {
 }
 
 int main(void) {
-  unsigned int prevI2C1 = 0, prevI2C2 = 0;
-  static struct i2c_transaction t_1 = {.status=I2CTransDone}, t_2 = {.status=I2CTransDone};
-  static int led1_etat = 0, led2_etat = 0;
+  unsigned int prevI2C1 = 0;
+  static struct i2c_transaction t_1 = {.status=I2CTransDone};
+  static int led1_etat = 0;
+#if (defined(I2C_MASTER) && !defined(MULTI_MASTER)) || (defined(I2C_SLAVE) && defined(MULTI_MASTER))
+  unsigned int prevI2C2 = 0;
+  static struct i2c_transaction t_2 = {.status=I2CTransDone};
+  static int led2_etat = 0;
+#endif
 
   gpio_init_all();  // use fast GPIOs
 
@@ -133,7 +111,7 @@ int main(void) {
 // init time management
   sys_time_init();
 
-  ctl_global_interrupts_enable();
+  global_IRQ_enable();
 
 // main loop
   while(1) {
