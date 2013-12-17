@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "lib_superBus.h"
 #include "lib_sbDebug.h"
@@ -37,12 +38,13 @@ int main(){
 
     //main loop
     while (!quit){
+        usleep(500);
 
         sb_routine();
 
         //receives messages, displays string if message is a debug message
         if (sb_receive(&msgIn)){
-            printf("message received from %hx, type : %uc\n",msgIn.header.srcAddr,msgIn.header.type);
+            printf("message received from %hx, type : %u %s\n",msgIn.header.srcAddr,msgIn.header.type,eType2str(msgIn.header.type));
             switch (msgIn.header.type){
             case E_DEBUG : printf("%s\n",msgIn.payload.debug); break;
             default : break;

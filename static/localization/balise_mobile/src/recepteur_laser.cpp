@@ -10,14 +10,15 @@
 #include "lib_superBus.h"
 #include "params.h"
 #include "network_cfg.h"
-
+#include "MemoryFree.h"
+#include "lib_sbDebug.h"
 
 
 char nbSync=0;
 unsigned long lastLaserDetect=0,lastLaserDetectMicros=0;
 int debug_led=1;
 unsigned long time_prev_led=0, time_prev_laser=0;
-int state=GAME;
+int state=SYNC;
 plStruct laserStruct0={0},laserStruct1={0};
 unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
 
@@ -30,18 +31,10 @@ unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
 void setup() {
   laserIntInit(0);
   laserIntInit(1);
-  Serial.begin(111111);
 
-  pinMode(PIN_DBG_LED,OUTPUT);
-  pinMode(PIN_RST_XBEE,OUTPUT);
+  sb_init();
 
-  digitalWrite(PIN_RST_XBEE,HIGH);
-  delay(100);
-  digitalWrite(PIN_RST_XBEE,LOW);
-  delay(200);
-
-
-
+  sb_printDbg("start mobile 1");
 }
 
 void loop() {
@@ -131,9 +124,10 @@ void loop() {
     }
 
     //blink
-    if((time - time_prev_led)>=500) {
+    if((time - time_prev_led)>=3000) {
       time_prev_led= time;
       digitalWrite(PIN_DBG_LED,debug_led^=1);
+      sb_printfDbg("mob1 %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
     }
 
 //STATE MACHINE

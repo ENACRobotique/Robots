@@ -22,6 +22,7 @@ extern "C" {
 #define MAX(m, n) (m)<(n)?(n):(m)
 #endif
 
+extern volatile sb_Address debug_addr;
 
 int sb_printDbg(const char * str);
 int sb_printfDbg(char *format, ...);

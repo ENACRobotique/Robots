@@ -3,8 +3,4 @@ Superbus is a network API working over several bus interfaces.
 
 
 Requirements :
-    - Every project in which is used the superbus API (lib_superbus.h) MUST have a node_cfg.h file, described in node.h.example.
-    - Every project in which is used the superbus API (lib_superbus.h) MUST include a network_cfg.h and network_cfg.c files, like the .examples files
-    - Every project in which is used the superbus API (lib_superbus.h) MUST include the "drivers" for the interfaces, matching the prototypes of the ones in superBus_arduino for example)
-    
-    
+    - Every project in which is used the superbus API (lib_superbus.h) MUST include config files, as described in "example_config_files" folder.
