@@ -1,12 +1,12 @@
 #include <lpc214x.h>
+#include <stdio.h>
 #include <ime.h>
 #include <gpio.h>
 #include <sys_time.h>
-#include <params.h>
 #include <i2c.h>
 
-#define I2C_MASTER 1
-//#define I2C_POLL_PERIOD 200
+#define I2C_MASTER 1 // must be equal to 1 or 2
+//#define I2C_POLL_PERIOD 200 // comment if necessary
 
 int main(void) {
     unsigned int led0_status = 0, led1_status = 0;
