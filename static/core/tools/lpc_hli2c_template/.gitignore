@@ -1,4 +1,1 @@
-/ARM Flash Debug/
-/ARM Flash Release/
-*.bak
-*~
+/Debug

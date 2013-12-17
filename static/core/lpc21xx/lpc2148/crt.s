@@ -9,11 +9,11 @@
   *************************************************************************************************************** */
 
 /* Stack Sizes */
-.set  UND_STACK_SIZE, 0x00000010		/* stack for "undefined instruction" interrupts is 4 bytes  */
-.set  ABT_STACK_SIZE, 0x00000010		/* stack for "abort" interrupts is 4 bytes                  */
-.set  FIQ_STACK_SIZE, 0x00000010		/* stack for "FIQ" interrupts  is 4 bytes         			*/
-.set  IRQ_STACK_SIZE, 0X00000010		/* stack for "IRQ" normal interrupts is 4 bytes    			*/
-.set  SVC_STACK_SIZE, 0x00000010		/* stack for "SVC" supervisor mode is 4 bytes  				*/
+.set  UND_STACK_SIZE, 0x00000010		/* stack for "undefined instruction" interrupts is 16 bytes */
+.set  ABT_STACK_SIZE, 0x00000010		/* stack for "abort" interrupts is 16 bytes                 */
+.set  FIQ_STACK_SIZE, 0x00000010		/* stack for "FIQ" interrupts  is 16 bytes         			*/
+.set  IRQ_STACK_SIZE, 0X00000010		/* stack for "IRQ" normal interrupts is 16 bytes    		*/
+.set  SVC_STACK_SIZE, 0x00000010		/* stack for "SVC" supervisor mode is 16 bytes  			*/
 
 /* Standard definitions of Mode bits and Interrupt (I & F) flags in PSRs (program status registers) */
 .set  MODE_USR, 0x10            		/* Normal User Mode 										*/
