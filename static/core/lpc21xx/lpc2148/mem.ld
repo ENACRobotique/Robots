@@ -198,6 +198,7 @@ SECTIONS
 	{
 		_bss_start = .;					/* define a global symbol marking the start of the .bss section */
 		*(.bss)							/* all .bss sections  */
+		*(.bss*)
 	} >ram								/* put all the above in RAM (it will be cleared in the startup code */
 
 	. = ALIGN(4);						/* advance location counter to the next 32-bit boundary */
