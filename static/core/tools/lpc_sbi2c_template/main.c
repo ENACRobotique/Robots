@@ -1,14 +1,12 @@
-#include <math.h>
-#include <limits.h>
-#include <stdint.h>
-
+#include <stdio.h>
 #include <lib_superBus.h>
 #include <lib_sbDebug.h>
-#include "node_cfg.h"
 #include <i2c.h>
 #include <gpio.h>
 #include <ime.h>
 #include <sys_time.h>
+
+#include "node_cfg.h"
 
 int main(void) {
     unsigned int time;
