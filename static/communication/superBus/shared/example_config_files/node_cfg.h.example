@@ -22,6 +22,7 @@
 
 // defines the architecture of this node.
 #define ARCH_328P_ARDUINO
+// #define ARCH_LPC21XX
 #define ARCH_LITTLE_ENDIAN
 
 
@@ -32,11 +33,11 @@
 #define MYADDRU 0                   // UART address. Remember to include the relevant architecture libraries in the build if needed.
 
 // Superbus parameters
-#define SB_INC_MSG_BUF_SIZE 4           //size of the global incoming buffer (requires RAM space : SB_INC_MSG_BUF_SIZE*SB_MAX_PDU Bytes(cf message.h) )
-#define SB_MAX_RETRIES          2       //number of retries at the superBus level (if the level 2 send fail)
+#define SB_INC_MSG_BUF_SIZE 4           // size of the global incoming buffer (requires RAM space : SB_INC_MSG_BUF_SIZE*SB_MAX_PDU Bytes(cf message.h) )
+#define SB_MAX_RETRIES          2       // number of retries at the superBus level (if the level 2 send fail)
 
 // Xbee for superbus parameters
-#define SB_WAIT_XBEE_SND_FAIL   25000   //experimentally set, time un µs before we consider a send frame not "statused" if no status frame has been received.
+#define SB_WAIT_XBEE_SND_FAIL   25000   // experimentally set, time in µs before we consider a send frame not "statused" if no status frame has been received.
 
 // Xbee parameters
 #define XBEE_WAITFRAME_TIMEOUT 10       // timeout for a waited frame, in µs

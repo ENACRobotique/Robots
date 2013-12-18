@@ -46,12 +46,12 @@ extern "C" {
     #define ADDRX_REMOTE_IA ( BIT(6) | SUBNETX )
     #define ADDRX_BROADCAST ( 0xff   | SUBNETX )
 
-//I2C adresses
+//I2C adresses (least significant bit of I²C addresses must be unused)
     //subnet MAIN
-    #define ADDRI_MAIN_TURRET   (2 | SUBNETI_MAIN)
-    #define ADDRI_MAIN_PROP     (4 | SUBNETI_MAIN)
-    #define ADDRI_MAIN_GLASS    (6 | SUBNETI_MAIN)
-    #define ADDRI_MAIN_CANDLE   (8 | SUBNETI_MAIN)
+    #define ADDRI_MAIN_TURRET   ( (1<<1) | SUBNETI_MAIN )
+    #define ADDRI_MAIN_PROP     ( (2<<1) | SUBNETI_MAIN )
+    #define ADDRI_MAIN_GLASS    ( (3<<1) | SUBNETI_MAIN )
+    #define ADDRI_MAIN_CANDLE   ( (4<<1) | SUBNETI_MAIN )
 
 //default debug address :
     #define ADDR_DEBUG_DFLT ADDRX_DEBUG

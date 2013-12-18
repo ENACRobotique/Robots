@@ -25,7 +25,7 @@ extern "C" {
 extern volatile sb_Address debug_addr;
 
 int sb_printDbg(const char * str);
-int sb_printfDbg(char *format, ...);
+int sb_printfDbg(char *format, ...) __attribute__ ((format (printf, 1, 2)));
 void sb_debugUpdateAddr(sMsg * msg);
 int sb_debugSendAddr(sb_Address dest);
 

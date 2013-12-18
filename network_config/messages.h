@@ -64,19 +64,19 @@ typedef struct __attribute__((__packed__)){
 
 typedef struct {
 // segment
-  float p1_x;
-  float p1_y;
-  float p2_x;
-  float p2_y;
-  float seg_len;
+    float p1_x;
+    float p1_y;
+    float p2_x;
+    float p2_y;
+    float seg_len;
 // circle
-  float c_x;
-  float c_y;
-  float c_r;
-  float arc_len;
+    float c_x;
+    float c_y;
+    float c_r;
+    float arc_len;
 // trajectory data
-  uint16_t tid; // trajectory identifier
-  uint16_t sid; // step identifier
+    uint16_t tid; // trajectory identifier
+    uint16_t sid; // step identifier
 } sTrajElRaw_t;
 
 typedef struct {
