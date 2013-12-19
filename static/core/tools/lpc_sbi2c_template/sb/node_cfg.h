@@ -17,7 +17,7 @@
 // Addresses of the current node (0 means no such interface attached to this device)
 // These addresses MUST be first defined in network_cfg.h
 #define MYADDRX 0                   // Xbee address . Remember to include the Xbee_API_shared lib and Xbee_API_XXXARCH lib in the build
-#define MYADDRI ADDRI_MAIN_CANDLE   // I2C address. Remember to include the relevant architecture libraries in the build if needed.
+#define MYADDRI ADDRI_MAIN_IO   // I2C address. Remember to include the relevant architecture libraries in the build if needed.
 #define MYADDRU 0                   // UART address. Remember to include the relevant architecture libraries in the build if needed.
 
 // Superbus parameters

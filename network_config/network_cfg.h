@@ -50,8 +50,7 @@ extern "C" {
     //subnet MAIN
     #define ADDRI_MAIN_TURRET   ( (1<<1) | SUBNETI_MAIN )
     #define ADDRI_MAIN_PROP     ( (2<<1) | SUBNETI_MAIN )
-    #define ADDRI_MAIN_GLASS    ( (3<<1) | SUBNETI_MAIN )
-    #define ADDRI_MAIN_CANDLE   ( (4<<1) | SUBNETI_MAIN )
+    #define ADDRI_MAIN_IO       ( (3<<1) | SUBNETI_MAIN )
 
 //default debug address :
     #define ADDR_DEBUG_DFLT ADDRX_DEBUG
