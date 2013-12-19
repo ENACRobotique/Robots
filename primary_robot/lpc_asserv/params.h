@@ -1,13 +1,6 @@
 #ifndef _PARAMS_H
 #define _PARAMS_H
 
-#include "network_cfg.h"
-
-#define MYADDRX 0
-#define MYADDRI ADDRI_MAIN_PROP
-#define SB_INC_MSG_BUF_SIZE 4
-#define ARCH_LPC21XX
-
 #define SHIFT (8)
 #define SHIFT_PID (8)
 #define dSHIFT ((double)(1<<SHIFT))
