@@ -11,8 +11,7 @@
 #include "network_cfg.h"
 #include "node_cfg.h"
 #include "mutex/mutex.h"
-
-E_TYPE toto;
+#include "messages.h"
 
 #include <string.h>
 #include <stdlib.h>

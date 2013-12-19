@@ -17,23 +17,6 @@
 #include "params.h"
 #include "controller.h"
 
-#ifndef BIT
-#define BIT(b) (1<<(b))
-#endif
-
-#ifndef min
-#define min(a, b) ((a)>(b)?(b):(a))
-#endif
-#ifndef max
-#define max(a, b) ((a)>(b)?(a):(b))
-#endif
-#ifndef MINMAX
-#define MINMAX(m, v, M) max(m, min(v, M))
-#endif
-//#ifndef SWAP32
-//#define SWAP32(a, b) do { uint32_t c; c = (a); (a) = (b); (b) = c; } while(0)
-//#endif
-
 #define SQR(v) ((long long)(v)*(v))
 
 volatile int _ticks_l=0, _ticks_r=0;
@@ -341,7 +324,7 @@ int main(void) {
                 dist_lim = (int)( ((long long)SQR(v)*3/(long long)AMAX)>>SHIFT );
 
                 if(curr_traj_step&1) { // portion de cercle
-                    consigne = min(traj[curr_traj][curr_traj_step>>1].arc_sp_max, d_consigne);
+                    consigne = MIN(traj[curr_traj][curr_traj_step>>1].arc_sp_max, d_consigne);
                     // TODO (use arc_len - len_travelled)
                 }
                 else { // portion de segment
@@ -354,7 +337,7 @@ int main(void) {
                             dist_tmp += traj[curr_traj][i].seg_len + traj[curr_traj][i-1].arc_len
                     ) {
                         dtime = abs(((long long)v - (long long)traj[curr_traj][i].arc_sp_max)*3/(long long)AMAX);
-                        consigne = min(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
+                        consigne = MIN(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
                     }
                 }
 
