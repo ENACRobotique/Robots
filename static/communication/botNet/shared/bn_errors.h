@@ -1,0 +1,36 @@
+/*
+ * sb_errors.h
+ *
+ *  Created on: 16 déc. 2013
+ *      Author: quentin
+ */
+
+#ifndef BN_ERRORS_H_
+#define BN_ERRORS_H_
+
+enum{
+    // NETWORK ERRORS
+    ERR_NACK_BROKEN_LINK,
+    ERR_NACK_FULL_BUFFER,
+    ERR_ACK_TIMEOUT,
+    ERR_TYPE_TOO_HIGH,
+    ERR_TYPE_VERSION,
+
+    // PING ERRORS
+    ERR_TIMEOUT,
+
+
+    // LINK LAYER ERRORS
+    ERR_SERIAL_WRITE,
+    ERR_SERIAL_WRITE_TIMEOUT,
+    ERR_SERIAL_READ,
+    ERR_SERIAL_READ_TIMEOUT,
+
+
+    ERR_INSUFFICIENT_MEMORY,
+
+    ERR_UNKNOWN_ERROR,
+    ERR_NUMERRCODES
+};
+
+#endif /* BN_ERRORS_H_ */
