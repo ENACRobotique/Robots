@@ -13,7 +13,7 @@ extern "C" { //to enable use in both C projects an C++ projects
 #endif
 
 #include "messages.h"
-#include "Xbee_API.h"
+#include "../../Xbee_API/shared/Xbee_API.h"
 
 int Xbee_setup();
 int Xbee_receive(sMsg *pRet);

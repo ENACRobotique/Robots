@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#ifdef ARCH_X86_LINUX
+
 #ifndef LIB_UART_FRAMING_LINUX_H_
 #define LIB_UART_FRAMING_LINUX_H_
 
@@ -27,3 +29,6 @@ int serialWrite(uint8_t byte);
 #endif
 
 #endif /* LIB_UART_FRAMING_LINUX_H_ */
+
+
+#endif // ARC_X86_LINUX

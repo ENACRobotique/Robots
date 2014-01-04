@@ -9,7 +9,7 @@
 #define UART4SB_H_
 
 #include "messages.h"
-#include "lib_UART_framing.h"
+#include "../../UART_framing/shared/lib_UART_framing.h"
 
 #ifdef __cplusplus
 extern "C" { //to enable use in both C projects an C++ projects

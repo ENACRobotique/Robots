@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#ifdef ARCH_328P_ARDUINO
+
 #ifndef LIB_UART_FRAMING_ARDUINO_H_
 #define LIB_UART_FRAMING_ARDUINO_H_
 
@@ -25,3 +27,5 @@ int serialWrite(uint8_t byte);
 #endif
 
 #endif /* LIB_UART_FRAMING_ARDUINO_H_ */
+
+#endif // ARCH_328P_ARDUINO

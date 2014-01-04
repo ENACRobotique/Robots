@@ -43,9 +43,12 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
+// config files
 #include "node_cfg.h"
 
+// other required libraries
+
+// XBEE specific libraries
 #ifdef ARCH_328P_ARDUINO
 #include "../arduino/Xbee_API_arduino_drivers.h"
 #elif defined(ARCH_X86_LINUX)
@@ -53,6 +56,12 @@ extern "C" {
 #else
 #error will not compile, check architecture define and driver library
 #endif
+
+// standard libraries
+#include <stdint.h>
+
+
+
 
 
 
@@ -118,7 +127,7 @@ typedef struct __attribute__((__packed__)){
 
     //// TX option flags
     #define XBEE_TX_O_NOACK     0x01
-    #define XBEE_TX_O_BCAST     0x04    // use alone (withous other flags)
+    #define XBEE_TX_O_BCAST     0x04    // use alone (without other flags)
     //// TX status
     #define XBEE_TX_S_SUCCESS   0
     #define XBEE_TX_S_NOACK     1       // no ack received after all retries (ALWAYS the case if broadcast)
@@ -142,10 +151,10 @@ typedef struct __attribute__((__packed__)){
     #define XBEE_ATCMD_GET      0
     #define XBEE_ATCMD_SET      1
     //// AT response status
-    #define XBEE_ATR_S_OK
-    #define XBEE_ATR_S_ERROR
-    #define XBEE_ATR_S_INVCOM   // Invalid command
-    #define XBEE_ATR_S_INVPAR   // Invalid parameter
+    #define XBEE_ATR_S_OK       0
+    #define XBEE_ATR_S_ERROR    1
+    #define XBEE_ATR_S_INVCOM   2    // Invalid command
+    #define XBEE_ATR_S_INVPAR   3    // Invalid parameter
 
 
     //// API Identifiers

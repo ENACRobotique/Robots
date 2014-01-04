@@ -34,7 +34,7 @@
         #include "I2C/lib_I2C_arduino.h"
     #endif
     #if MYADDRX !=0
-        #include "Xbee_API.h"
+        #include "../../Xbee_API/shared/Xbee_API.h"
     #endif
 #elif defined(ARCH_X86_LINUX)
     #include <stdarg.h>
@@ -54,9 +54,10 @@
 
 //incoming message buffer, indexes to parse it and total number of messages.
 //Warning : central buffer where most of the incoming messages will be stacked
-sMsgIf msgIfBuf[SB_INC_MSG_BUF_SIZE]={{{{0}}}};
-int iFirst=0,iNext=0; //index of the first (oldest) message written in the buffer and index of where the next message will be written
-int nbMsg=0;//nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
+//Policy : drop oldest (except when there is an ack, the ack has always priority)
+sMsgIf msgIfBuf[SB_INC_MSG_BUF_SIZE]={{{{0}}}}; // DAT buffer.
+int iFirst=0,iNext=0;   // index of the first (oldest) message written in the buffer and index of where the next message will be written
+int nbMsg=0;            // nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 
 //local message to "transmit" via sb_receive()
 sMsg localMsg={{0}};
@@ -161,7 +162,7 @@ int sb_genericSend(sMsg *msg){
 }
 
 /*
- * sb_send : handles the "acked" sending of a message over the SuperBus network (no broadcast)
+ * sb_sendAck : handles the "acked" sending of a message over the SuperBus network (no broadcast)
  * For user's use only, the message was previously NOT "in the network"
  * Arguments :
  *      msg : pointer to the message to send.
@@ -392,7 +393,7 @@ sRouteInfo sb_route(const sMsg *msg,E_IFACE ifFrom){
 
     // if this message if for this node (including broadcast possibilities) but not from this node XXX enable I2C broadcast rx
     if ( ifFrom!=IF_LOCAL && (
-            msg->header.destAddr==MYADDRU || msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){
+            msg->header.destAddr==MYADDRU || msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){// xxx improve test
         routeInfo.ifTo=IF_LOCAL;
         routeInfo.nextHop=msg->header.destAddr;
         return routeInfo;
@@ -412,7 +413,7 @@ sRouteInfo sb_route(const sMsg *msg,E_IFACE ifFrom){
             routeInfo.nextHop=msg->header.destAddr;
             return routeInfo;
         }
-        else {
+        else { //do no resent on I2C a message received on I2C
             routeInfo.ifTo=IF_DROP;
             return routeInfo;
         }

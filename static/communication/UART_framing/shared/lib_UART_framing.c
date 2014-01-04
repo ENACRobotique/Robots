@@ -18,16 +18,25 @@
  *  To verify: Add all bytes (include checksum, but not the delimiter and length). If the checksum is correct, the sum will equal 0xFF.
  */
 
-#include "lib_UART_framing.h"
+
+// config files
 #include "node_cfg.h"
 
+// other required libraries
+
+// UART_FRAMING specific libraries
+#include "lib_UART_framing.h"
 #ifdef ARCH_328P_ARDUINO
-#include "lib_UART_framing_arduino.h"
+#include "../arduino/lib_UART_framing_arduino.h"
 #elif defined(ARCH_X86_LINUX)
-#include "lib_UART_framing_linux.h"
+#include "../linux/lib_UART_framing_linux.h"
 #else
 #error "in UART_framing lib, no known arch symbol defined"
 #endif
+
+// standard libraries
+
+
 
 
 
@@ -186,7 +195,6 @@ int serialReadEscaped(uint8_t *byte, uint32_t timeout){
     return 1;
 
 }
-
 
 
 

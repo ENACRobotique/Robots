@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#ifdef ARCH_328P_ARDUINO
+
 #include "lib_UART_framing_arduino.h"
 #include "Arduino.h"
 
@@ -77,3 +79,5 @@ int serialWrite(uint8_t byte){
     if (Serial.write(byte)) return 1;
     return -1;
 }
+
+#endif

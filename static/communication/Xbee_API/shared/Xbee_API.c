@@ -30,20 +30,22 @@
  *
  */
 
+
+// config files
 #include "Xbee_API.h"
 #include "node_cfg.h"
-#include "lib_UART_framing.h"
+
+// other required libraries
+#include "../../UART_framing/shared/lib_UART_framing.h"
 #include "timeout.h"
 
+// standard libraries
 #include <string.h>
 
 #ifndef MIN
 #define MIN(m, n) (m)>(n)?(n):(m)
 #endif
 
-#ifdef ARCH_328P_ARDUINO
-#include "Xbee_API_arduino_drivers.h"
-#endif
 
 #if (defined(ARCH_BIG_ENDIAN) && defined(ARCH_LITTLE_ENDIAN))
 #error bi-endianess or esle not supported

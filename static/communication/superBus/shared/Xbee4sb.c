@@ -5,15 +5,21 @@
  *      Author: quentin
  */
 
-#include "Xbee_API.h"
-#include "Xbee4sb.h"
+// config files
+#include "node_cfg.h"
 #include "network_cfg.h"
 #include "messages.h"
-#include "node_cfg.h"
-#include "lib_superBus.h"
-#include "lib_UART_framing.h"
-#include "timeout.h"
 
+// superBus specific libraries
+#include "Xbee4sb.h"
+#include "lib_superBus.h"
+
+// other required libraries
+#include "timeout.h"
+#include "../../Xbee_API/shared/Xbee_API.h"
+#include "../../UART_framing/shared/lib_UART_framing.h"
+
+// std libs
 #include <string.h>
 
 

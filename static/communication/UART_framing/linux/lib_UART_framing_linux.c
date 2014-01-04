@@ -5,6 +5,9 @@
  *      Author: quentin
  */
 
+
+#ifdef ARCH_X86_LINUX
+
 #include "lib_UART_framing_linux.h"
 
 #include <stdio.h>
@@ -144,3 +147,5 @@ int serialWrite(uint8_t byte){
     fflush(NULL); //flushes all stream
     return (i==0)?-1:i;
 }
+
+#endif // ARC_X86_LINUX
