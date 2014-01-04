@@ -13,7 +13,7 @@
 #include "node_cfg.h"
 
 // other required libraries
-#include "../../shared/checksum.h"
+#include "../../shared/bn_checksum.h"
 
 // I2C_arduino specific libraries
 #include "lib_I2C_arduino.h"

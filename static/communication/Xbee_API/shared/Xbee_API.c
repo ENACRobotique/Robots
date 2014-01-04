@@ -33,7 +33,6 @@
 
 // config files
 #include "Xbee_API.h"
-#include "node_cfg.h"
 
 // other required libraries
 #include "../../UART_framing/shared/lib_UART_framing.h"

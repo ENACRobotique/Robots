@@ -10,8 +10,6 @@
 
 
 #include <stdint.h>
-#include "../static/communication/botNet/shared/message_header.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +19,7 @@ extern "C" {
 #define BIT(a) (1<<(a))
 #endif
 
+// sb_Address : on 16 bytes,  * cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
 
 
 #define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits adress. Must equal the larger size of the adresse in the different subnetworks
@@ -48,21 +47,16 @@ extern "C" {
     #define ADDRX_BROADCAST ( 0xff   | SUBNETX )
 
 //I2C adresses
-//!\ NO ODD ADDRESSES FOR I²C !!!!
     //subnet MAIN
     #define ADDRI_MAIN_TURRET   (2 | SUBNETI_MAIN)
     #define ADDRI_MAIN_PROP     (4 | SUBNETI_MAIN)
     #define ADDRI_MAIN_GLASS    (6 | SUBNETI_MAIN)
     #define ADDRI_MAIN_CANDLE   (8 | SUBNETI_MAIN)
 
-//default debug address :
-    #define ADDR_DEBUG_DFLT 0
 
 
+// Interface enum
 
-/* Interface enum
- *
- */
 typedef enum{
 	IF_XBEE,
 	IF_I2C,
@@ -97,11 +91,11 @@ typedef enum{
 
 typedef struct {
     E_IFACE ifTo;
-    bn_Address nextHop;
+    sb_Address nextHop;
 }sRouteInfo;
 
 typedef struct{
-    bn_Address destSubnet;
+    sb_Address destSubnet;
     sRouteInfo nextHop;
 }sRTableEntry;
 

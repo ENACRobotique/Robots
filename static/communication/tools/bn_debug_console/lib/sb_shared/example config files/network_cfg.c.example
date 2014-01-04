@@ -1,0 +1,35 @@
+/*
+ * netrwork_cfg.c.example
+ *
+ *  Created on: 28 mai 2013
+ *      Author: quentin
+ */
+
+#include "network_cfg.h"
+#include "node_cfg.h"
+
+/*Remark : requires a "node_cfg.h" in the project, containing :
+ * MYADDRX : adress of the xbee interface of the node
+ * MYADDRI : address of the i2c interface of ne node
+ * MYADDRU : address of the UART interface of the node
+ */
+
+// contents of the routing tables :
+// cf network_cfg.h.example for the details.
+// /!\ the last entry is the default route, its content MUST be {0x42&(~SUBNET_MASK),default interface,default address}
+
+#if (MYADDRX == ADDRX_MAIN || MYADDRI == ADDRI_MAIN_TURRET)
+sRTableEntry rTable[]={
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRI == ADDRI_MAIN_CANDLE)
+sRTableEntry rTable[]={
+        {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRI == ADDRI_MAIN_PROP)
+sRTableEntry rTable[]={
+        {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#endif

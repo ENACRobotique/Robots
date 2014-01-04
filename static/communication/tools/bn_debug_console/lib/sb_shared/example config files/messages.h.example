@@ -1,0 +1,52 @@
+/*
+ * messages.h.example
+ *
+ *  Created on: 4 mai 2013
+ *      Author: quentin
+ */
+
+#ifndef MESSAGES_H_
+#define MESSAGES_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdint.h>
+#include "network_cfg.h"
+#include "message_header.h"
+
+/* sb_Address : cf SUBNET_MASK and ADDRxxxx_MASK in network_cfg.h
+ *
+ */
+
+
+#define SB_MAX_PDU 64 //max size of a message
+
+//message types enumaration, to complete with your own types
+typedef enum{
+    E_DEBUG,                //general debug
+
+    E_TYPE_COUNT
+}E_TYPE;
+
+char *eType2str(E_TYPE elem);
+
+// union with every payload type, add your own payload types, just make sure that  (size of the payload + size of header) < SB_MAX_PDU
+typedef union{
+    uint8_t raw[SB_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
+    uint8_t data[SB_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
+}uPayload;
+
+
+// message definition (do not modify)
+typedef struct{
+    sGenericHeader header;
+    uPayload payload;
+}sMsg;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* MESSAGES_H_ */

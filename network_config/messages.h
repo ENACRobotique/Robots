@@ -19,11 +19,11 @@ extern "C" {
 
 #include <stdint.h>
 #include "network_cfg.h"
-#include "message_header.h"
+#include "../static/communication/botNet/shared/message_header.h"
 
-// sb_Address : cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
+// bn_Address : cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
 
-#define SB_MAX_PDU 64 //max size of a message, including header AND payload.
+#define BN_MAX_PDU 64 //max size of a message, including header AND payload.
 
 //message types
 typedef enum{
@@ -50,19 +50,19 @@ typedef enum{
 }E_TYPE;
 
 /************************ !!! user action required start ************************/
-/* WARNING : SB_TYPE_VERSION describes the version of the above enum.
+/* WARNING : BN_TYPE_VERSION describes the version of the above enum.
  It is managed "by hand" by the user. It MUST be incremented (modulo 16) only when the order of the *already existing* elements
  of this enum is modified.
  Examples :
-     New type AFTER the last one (but before E_TYPE_COUNT) : do not increment SB_TYPE_VERSION
-     New type between 2 previously exinsting types : increment SB_TYPE_VERSION
-     Cleaning (removing) unused type : increment SB_TYPE_VERSION
-     Changing the order of the types : increment SB_TYPE_VERSION
+     New type AFTER the last one (but before E_TYPE_COUNT) : do not increment BN_TYPE_VERSION
+     New type between 2 previously exinsting types : increment BN_TYPE_VERSION
+     Cleaning (removing) unused type : increment BN_TYPE_VERSION
+     Changing the order of the types : increment BN_TYPE_VERSION
  The recommended use is the following :
      Add every new type at the end of the list (but before E_TYPE_COUNT), do not delete old ones.
-     Every month (or so, when it is needed) : remove unused types, sort logically the other types and increse SB_TYPE_VERSION.
+     Every month (or so, when it is needed) : remove unused types, sort logically the other types and increse BN_TYPE_VERSION.
  */
-#define SB_TYPE_VERSION 0       //last modifed : 2013/10/31
+#define BN_TYPE_VERSION 0       //last modifed : 2013/10/31
 /************************ user action required stop ************************/
 
 //function returning a string corresponding to one element of the above enum. Must be managed by hand.
@@ -72,7 +72,7 @@ char *eType2str(E_TYPE elem);
 /************************ user payload definition start ************************/
 //user-defined payload types.
 //for simple payloads ( single variable or array), this step can be skipped
-//Warning : the user has to make sure that these payloads are not too big (cf SB_MAX_PDU)
+//Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
 
 typedef struct __attribute__((__packed__)){
     uint32_t value;        //laser measured delta-time
@@ -121,14 +121,14 @@ typedef struct {
  * union defining the different possible payloads
  */
 typedef union{
-    uint8_t raw[SB_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
-    uint8_t data[SB_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
-    uint8_t debug[SB_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
+    uint8_t raw[BN_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
+    uint8_t data[BN_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
+    uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
     sAckPayload ack;
 
 /************************ user payload start ************************/
 //the user-defined payloads from above must be added here. The simple ones can be directly added here
-//Warning : the user has to make sure that these payloads are not too big (cf SB_MAX_PDU)
+//Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
     uint32_t syncTime;
     uint8_t channel;
     uint32_t period;

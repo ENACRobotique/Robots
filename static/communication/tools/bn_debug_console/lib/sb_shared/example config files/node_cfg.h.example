@@ -1,0 +1,25 @@
+/*
+ * node_cfg.h
+ *
+ *  Created on: 1 oct. 2013
+ *      Author: quentin
+ */
+
+#ifndef NODE_CFG_H_
+#define NODE_CFG_H_
+
+#include "network_cfg.h"
+
+#define MYADDRX XXXX    //Xbee address, 0 if no Xbee interface available
+#define MYADDRI XXXX    //I²c address, 0 if no I²c interface available
+#define MYADDRU XXXX    //UART address, 0 if no UART interface available
+
+#define SB_INC_MSG_BUF_SIZE X   // incoming message buffer size
+#define SB_WAIT_SND_FAIL    XX  // (in µs) time before considering a frame send on Xbee as failed if not statused
+#define ARCH_XXXX               // architecture of the hardware (arduino...)
+
+#define ARCH_LITTLE_ENDIAN or ARCH_BIG_ENDIAN	// match to your architecture (used by Xbee)		
+#define XBEE_WAITFRAME_TIMEOUT 10			
+#define XBEE_READBYTE_TIMEOUT 10000
+
+#endif /* NODE_CFG_H_ */

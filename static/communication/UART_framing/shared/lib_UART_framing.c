@@ -8,7 +8,7 @@
 /*
  * UART_framing library.
  * Frame-oriented level 2 communication protocol over UART.
- * Matchs the use of Xbee API mode 2 UART communication.
+ * Matches the use of Xbee API mode 2 UART communication.
  *
  * Frame structure :
  * | start character | size of data (MSB) | size of data (LSB) | data (first byte) |...| data (last byte) | checksum |
