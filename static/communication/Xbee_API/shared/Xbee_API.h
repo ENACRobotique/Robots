@@ -174,7 +174,7 @@ typedef struct __attribute__((__packed__)){
 
 
 
-void Xbee_init();
+int Xbee_init();
 int Xbee_Tx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* data, uint16_t datasize_h);
 int Xbee_ATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter);
 int Xbee_writeFrame(const spAPISpecificStruct *str_be, uint16_t size);

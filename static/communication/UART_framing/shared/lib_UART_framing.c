@@ -60,9 +60,7 @@ int UART_deinit(const char* device){
  *  size : size of data to read at pt.
  * Return value :
  *  >0 : nb of bytes written on success (excluding escape char and UART_framing overhead)
- *  <0 if error :
- *      writing error
- *      if size too big;
+ *  <0 if error (ex : writing error, size too big)
  */
 int UART_writeFrame(const void *pt,int size){
     uint8_t cSum=0; //checksum

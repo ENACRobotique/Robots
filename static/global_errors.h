@@ -25,8 +25,8 @@ enum{
 
 
     // UART (and UART_FRAMING) errors
-        ERR_UART_OVERSIZE,          // packet too big to send
-        ERR_UART_CSUM,              // frame rejected (incorrect checksum)
+        ERR_UART_OVERSIZE,          // packet too big to send over UART_MTU)
+        ERR_UART_CSUM,              // incoming frame rejected (incorrect checksum)
         ERR_UART_WRITE_BYTE,
         ERR_UART_WRITE_TIMEOUT,
         ERR_UART_READ_BYTE,
@@ -41,7 +41,7 @@ enum{
         ERR_XBEE_INIT_FAILED,
 
 
-    // Generaml errors
+    // General errors
     ERR_INSUFFICIENT_MEMORY,
 
     ERR_UNKNOWN_ERROR,

@@ -36,6 +36,7 @@
 
 // other required libraries
 #include "../../UART_framing/shared/lib_UART_framing.h"
+#include "../../../global_errors.h"
 #include "timeout.h"
 
 // standard libraries
@@ -145,26 +146,22 @@ inline int Xbee_writeFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
  *  *frame : pointer to the memory area in which the frame shall be written
  * Return value :
  *  >0 : size of the frame written in *frame if correct,
- *  0  : if no frame available after frame timeout
- *  -1 : if bad checksum
- *  -2 : if size too big to be any Xbee structure
- *  -3 : if reading error (timeout or else)
+ *  <0 if error (check return for error code)
  */
 inline int Xbee_readFrame(spAPISpecificStruct *str){
     return UART_readFrame(str,sizeof(spAPISpecificStruct));
 }
 
 
-void Xbee_init(){
+int Xbee_init(){
     uint8_t garbage;
-
-
+    int ret;
     //init the serial link
 #ifdef ARCH_X86_LINUX
-    UART_init("/dev/ttyUSB0",0); //xxx bad, in this case the second argument is not used
+    ret=UART_init("/dev/ttyUSB0",0); //xxx bad, in this case the second argument is not used
 #elif defined(ARCH_328P_ARDUINO)
     Xbee_rst();
-    UART_init(0,111111);        //xxx and here, it is the first
+    ret=UART_init(0,111111);        //xxx and here, it is the first
 #else
 #error "no arch defined for Xbee4sb.c, or arch no available (yet)"
 #endif
@@ -175,6 +172,8 @@ void Xbee_init(){
 
     //clear in buffer from remaining bytes
     while (serialReadEscaped(&garbage,1000));
+    if (ret<0) return ret;
+    else return 1;
 }
 
 
