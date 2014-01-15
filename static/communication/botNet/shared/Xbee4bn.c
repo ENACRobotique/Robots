@@ -14,6 +14,7 @@
 #include "timeout.h"
 #include "../../Xbee_API/shared/Xbee_API.h"
 #include "../../UART_framing/shared/lib_UART_framing.h"
+#include "../../../global_errors.h"
 
 // superBus specific libraries
 #include "Xbee4bn.h"
@@ -23,72 +24,54 @@
 #include <string.h>
 
 
+
+
+
+
 /* setupXbee :
  *  Sets the parameters of the Xbee
  * Return value :
  *      1 if ok
  *      -1 if error
- *      -2 if config frame to statused
+ *      -2 if config frame not statused
  *      -3 if error for wrong command/parameter or ERROR
  */
 int Xbee_setup(){
-    int byteRead=0;
-    spAPISpecificStruct stru;
-    uint32_t sw=0;
+    int frID=12;
+    int ret;
 
 
 //writes node's address on the xbee
-    Xbee_ATCmd("MY",12,XBEE_ATCMD_SET,MYADDRX);
+    Xbee_ATCmd("MY",frID,XBEE_ATCMD_SET,MYADDRX);
 
-    //waits for acknowledgement
-    do {
-        byteRead=Xbee_readFrame(&stru);
-    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
-
-    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
-    else if (stru.data.ATResponse.status!=0) return -3;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
 
 //writes CE parameter on the xbee to match peer-to-peer use
-    Xbee_ATCmd("CE",12,XBEE_ATCMD_SET,0);
+    Xbee_ATCmd("CE",frID,XBEE_ATCMD_SET,0);
 
-    //waits for acknowledgement
-    do {
-        byteRead=Xbee_readFrame(&stru);
-    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
-
-    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
-    else if (stru.data.ATResponse.status!=0) return -3;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
 
 //writes A1 parameter on the xbee to match peer-to-peer use
-    Xbee_ATCmd("A1",12,XBEE_ATCMD_SET,0);
+    Xbee_ATCmd("A1",frID,XBEE_ATCMD_SET,0);
 
-    //waits for acknowledgement
-    do {
-        byteRead=Xbee_readFrame(&stru);
-    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
-
-    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
-        else if (stru.data.ATResponse.status!=0) return -3;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
 
 
     //writes A1 parameter on the xbee to match peer-to-peer use
-    Xbee_ATCmd("MM",12,XBEE_ATCMD_SET,2);
+    Xbee_ATCmd("MM",frID,XBEE_ATCMD_SET,2);
 
-    //waits for acknowledgement
-    do {
-        byteRead=Xbee_readFrame(&stru);
-    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==12) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
-
-    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=12) return -2;
-    else if (stru.data.ATResponse.status!=0) return -3;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
 
 
     //saves changes in non-volatile memory
-    Xbee_ATCmd("WR",13,XBEE_ATCMD_SET,MYADDRX);
-    do {
-        byteRead=Xbee_readFrame(&stru);
-    } while( !(stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==13) );
-    if (stru.data.ATResponse.status!=0) return -3;
+    Xbee_ATCmd("WR",frID,XBEE_ATCMD_SET,MYADDRX);
+
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
 
     return 1;
 }
@@ -130,16 +113,17 @@ int Xbee_receive(sMsg *pRet){
  * Return value :
  *  number of bytes of the message send
  *  <0 if error :
- *      -1 if error on sending frame to Xbee
- *      -2 if error on receiving the status frame
- *      -3 if sending not successful (e.g. no ack)
+ *      error on sending frame to Xbee
+ *      error on receiving the status frame
+ *      sending not successful (e.g. no ack)
  */
 int Xbee_send(const sMsg *msg, uint16_t nexthop){
     spAPISpecificStruct stru={0};
     uint32_t sw=0; //stopwatch
     int byteRead=0;
+    int ret=0;
 
-    if (!Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader))) return -1;
+    if ( (ret=Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader)))<0 ) return ret;
 
     do {
         byteRead=Xbee_readFrame(&stru);
@@ -150,11 +134,11 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
         }
     } while( !(stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
 
-    if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -2;
+    if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -ERR_XBEE_NOSTAT;
 
     else {
         if (stru.data.TXStatus.status==XBEE_TX_S_SUCCESS) return (msg->header.size+sizeof(sGenericHeader));
-        else return -3;
+        else return -ERR_XBEE_NOACK;
     }
 
 

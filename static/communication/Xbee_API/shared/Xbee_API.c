@@ -104,6 +104,7 @@ int Xbee_Tx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* da
  *
  * Remark : does not perform check on size and consistency of parameter
  * /!\ refer to XBEE doc for available commands
+ * TODO : everything in one function (send cmd, waits status frame, return value)
  */
 int Xbee_ATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h){
     spAPISpecificStruct sCmd;
@@ -126,6 +127,32 @@ int Xbee_ATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h
     }
     else return Xbee_writeFrame(&sCmd,4);
 
+}
+
+/* Xbee_ATCmd : waits for the ack after and AT cmd.
+ * Arguments :
+ *  frID : for acknowledgment purposes. 0 means no acknowledgment asked.
+ *  option : XBEE_ATCMD_SET xor XBEE_ATCMD_GET.
+ * Return value : nb of bytes written on serial link (including start, size and checksum, but excluding escaping char)
+ * Remark : does not perform check on size and consistency of parameter
+ * refer to XBEE doc for available commands
+ * /*\ do not use if returned values are expected !
+ */
+int Xbee_waitATAck(int frID, uint32_t timeOut){
+    int byteRead=0;
+    spAPISpecificStruct stru;
+    uint32_t sw=0;
+
+    //waits for acknowledgement
+    do {
+        byteRead=Xbee_readFrame(&stru);
+    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==frID) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
+
+    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=frID) return -ERR_XBEE_NOSTAT;
+    else if (stru.data.ATResponse.status!=XBEE_ATR_S_ERROR) return -ERR_XBEE_AT_ERR;
+    else if (stru.data.ATResponse.status!=XBEE_ATR_S_INVCOM) return -ERR_XBEE_AT_WRONG_CMD;
+    else if (stru.data.ATResponse.status!=XBEE_ATR_S_INVPAR) return -ERR_XBEE_AT_WRONG_PAR;
+    return 1;
 }
 
 /* XbeeWriteFrame : writes a specific frame one the serial link, for the Xbee.

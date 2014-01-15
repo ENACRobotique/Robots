@@ -8,6 +8,14 @@
 #ifndef GLOBAL_ERRORS_H_
 #define GLOBAL_ERRORS_H_
 
+/*
+ * Philosophy of this error definition :
+ * Functions SHOULD return a value, >=0 of the expected result has been producted, <0 if error.
+ * Error codes SHOULD be kept and returned by calling functions (ex : main() calls fun1() which calls fun2(). fun2() returns -ERR_YYY. fun1() should return -ERR_YYY.
+ *
+ */
+
+
 //!\ first error must be equal to 1.
 // every function returning an error MUST return "-ERR_XXXXXX"
 
@@ -20,8 +28,11 @@ enum{
         ERR_BN_ACK_TIMEOUT,
         ERR_BN_TYPE_TOO_HIGH,
         ERR_BN_TYPE_VERSION,
-        // PING ERRORS
-        ERR_BN_TIMEOUT,
+        ERR_BN_OVERSIZE,
+        ERR_BN_CSUM,
+        ERR_BN_NO_SUCH_INTERFACE,   //no such interface on this device
+        ERR_BN_TYPE_ALREADY_ATTACHED,
+        ERR_BN_BUFFER_FULL,
 
 
     // UART (and UART_FRAMING) errors
@@ -34,15 +45,20 @@ enum{
         ERR_UART_INIT_FAILED,
         ERR_UART_DEINIT_FAILED,
 
-    // XBEE_API errors
+    // XBEE errors
         ERR_XBEE_NOSTAT,    // status frame not received
-        ERR_XBEE_NOACK,     // status frame received, but not acknoledged
+        ERR_XBEE_NOACK,     // status frame received and transmitted frame not acknoledged (may have been purged or CCAfail)
         ERR_XBEE_CSUM,      // frame rejected (incorrect checksum)
+        ERR_XBEE_OVERSIZE,
+        ERR_XBEE_AT_WRONG_CMD,  //AT cmd wrong command
+        ERR_XBEE_AT_WRONG_PAR,  //AT cmd wrong param
+        ERR_XBEE_AT_ERR,        //AT cmd error
         ERR_XBEE_INIT_FAILED,
 
 
     // General errors
     ERR_INSUFFICIENT_MEMORY,
+    ERR_NOT_FOUND,
 
     ERR_UNKNOWN_ERROR,
     ERR_NUMBERRCODES

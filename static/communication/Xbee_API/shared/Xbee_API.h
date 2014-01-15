@@ -179,6 +179,7 @@ int Xbee_Tx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* da
 int Xbee_ATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter);
 int Xbee_writeFrame(const spAPISpecificStruct *str_be, uint16_t size);
 int Xbee_readFrame(spAPISpecificStruct *str);
+int Xbee_waitATAck(int frID, uint32_t timeOut);
 
 
 /*
