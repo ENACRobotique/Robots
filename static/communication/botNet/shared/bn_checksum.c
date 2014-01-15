@@ -6,6 +6,7 @@
  */
 
 #include "bn_checksum.h"
+#include "../../../global_errors.h"
 
 
 /*
@@ -24,7 +25,7 @@ Checksum algorithm :
  * Argument :
  *  msg :pointer to the memory area containing the header to check
  * Return value :
- *  0 if checksum not correct, non-zero value otherwise
+ *  0 if checksum correct, negative error code otherwise
  *
  * Remark : header must be without offset between his bytes
  */
@@ -34,7 +35,8 @@ uint8_t checkSum(sMsg *msg){
     for ( i=0 ; i < sizeof(sGenericHeader)+msg->header.size ; i++ ){
         sum+=((uint8_t *)msg)[i];
     }
-    return !(sum);
+    if (sum) return -ERR_BN_CSUM;
+    else return 0;
 }
 
 /* Sets the "checksum" field in the header of the mesage at msg.

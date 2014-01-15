@@ -9,12 +9,13 @@
 #include "timeout.h"
 #include "botNet_core.h"
 
+
 /* ping : what we can expect from anything called ping. Sends one message and returns the time required to receive the acknowledgement.
  * Argument :
  *  dest : bn_address of the thing to ping (unless it's a teapot, is this case return value is undefined, but should be between 3 and 5 minutes depending on the variety of the tea).
  * Return value :
  *  >=0 amount of millisecond required by a message to make a two-way travel to the destination
- *  <0 on error (host unreacheable or else, see bn_sendAcked for details on error codes)
+ *  <0 on error (host unreacheable or else, see error codes)
  */
 int bn_ping(bn_Address dest){
     sMsg msg={{0}};
@@ -38,7 +39,7 @@ int bn_ping(bn_Address dest){
  * Return value :
  *  if >0 : number of elements correctly written in retVals (ie nb of nodes on the way to dest, including dest, or L if there are too many nodes)
  *  if <0 : error !
- *      cf bn_send for error codes
+ *      cf error codes
  * WARNING : traceroute must not be used in game, only for developpment and test purposes
  */
 int bn_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout){

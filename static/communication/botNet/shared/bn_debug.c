@@ -34,7 +34,7 @@ volatile bn_Address debug_addr=ADDR_DEBUG_DFLT;
  *  str : pointer to the string to send
  * Return value :
  *  number of bytes written/send
- *  -1 if error
+ *  <0 if error (check error code)
  *
  * Remark : this will blindly shorten the string if the latter was too big.
  */
@@ -58,7 +58,7 @@ int bn_printDbg(const char * str){
  *  format : see printf documentation
  * Return value :
  *  number of bytes written/send
- *  -1 if error
+ *  <0 if error (check error code)
  *
  * Remark : this will blindly shorten the string if the latter was too big.
  */

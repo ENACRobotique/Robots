@@ -11,6 +11,7 @@
 
 // other required libraries
 #include "timeout.h"
+#include "../../../global_errors.h"
 
 // botNet specific libraries
 #include "botNet_core.h"
@@ -80,28 +81,32 @@ uint8_t seqNum=0;
 
 /*
  * Handles the initialization of the superBus interfaces
+ * return value :
+ *  0 if OK
+ *  <0 if error
  */
 int bn_init(){
+    int ret=0;
 
 #if MYADDRU!=0
 #   ifdef ARCH_X86_LINUX
-    UART_init("/dev/ttyUSB0",0);
+    if ( (ret=UART_init("/dev/ttyUSB0",0))<0 ) return ret;
 #   endif
 
 #   ifdef ARCH_328P_ARDUINO
-    UART_init(0,111111);
+    if ( (ret=UART_init(0,111111))<0 ) return ret;
 #   endif
 #endif
 
 #if MYADDRI!=0
 #   if defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX)
-    I2C_init(400000UL);
+    if ( (ret=I2C_init(400000UL))<0 ) return ret;
 #   endif
 #endif
 
 #if MYADDRX!=0
-    Xbee_init();
-    Xbee_setup();
+    if ( (ret=Xbee_init())<0 ) return ret;
+    if ( (ret=Xbee_setup())<0 ) return ret;
 #endif
     return 0;
 }
@@ -205,11 +210,11 @@ int bn_sendAck(sMsg *msg){
             // if this msg is not the ack expected (not the good destination or seqnum), drop it (do nothing)
             else if ( msgIn.payload.ack.addr != tmpAddr || msgIn.payload.ack.seqNum != tmpSeqNum) continue;
             else if ( msgIn.payload.ack.ans == A_ACK) return 1;
-            else if ( msgIn.payload.ack.ans == A_NACK_BROKEN_LINK) return -2;
-            else if ( msgIn.payload.ack.ans == A_NACK_BUFFER_FULL) return -3; //XXX behavior?
+            else if ( msgIn.payload.ack.ans == A_NACK_BROKEN_LINK) return -ERR_BN_NACK_BROKEN_LINK;
+            else if ( msgIn.payload.ack.ans == A_NACK_BUFFER_FULL) return -ERR_BN_NACK_FULL_BUFFER; //XXX behavior?
         }
     }
-    return -4;
+    return -ERR_BN_ACK_TIMEOUT;
 }
 
 /*
@@ -226,7 +231,7 @@ int bn_sendAck(sMsg *msg){
 int bn_routine(){
     sMsgIf temp={{{0}}};
     sMsgIf *pTmp=NULL;
-    int count=0,ret=0;
+    int count=0,ret=0; //count : indicator, used for debug purposes
 
 #if (MYADDRX)!=0
     if ( (ret=Xbee_receive(&temp.msg)) > 0 ) {
@@ -261,9 +266,9 @@ int bn_routine(){
     //handles stored messages
     if ( (pTmp=bn_getInBufFirst()) != NULL){
         //checks checksum of message before forwarding. If error, drop message and return
-        if ( checkSum(&(pTmp->msg))==0 ){
+        if ( checkSum(&(pTmp->msg))==-ERR_BN_CSUM ){
             bn_freeInBufFirst();
-            return -18;
+            return -ERR_BN_CSUM;
         }
 
 #ifdef DEBUG_PC_RT
@@ -287,7 +292,7 @@ int bn_routine(){
             //destroy the incoming message if we were the destination
             if (pTmp->msg.header.destAddr == MYADDRX || pTmp->msg.header.destAddr == MYADDRI || pTmp->msg.header.destAddr == MYADDRU ){
                 bn_freeInBufFirst();
-                return 0;
+                return count;
             }
         }
 
@@ -337,7 +342,7 @@ int bn_routine(){
  * Return value :
  *      nb of bytes written
  *      0 if nothing is available
- *      -1 on error
+ *      <0 on error
  */
 int bn_receive(sMsg *msg){
     sAttach *elem=firstAttach;
@@ -349,12 +354,12 @@ int bn_receive(sMsg *msg){
     // is the version different ?
     if ( localMsg.header.typeVersion != BN_TYPE_VERSION ){
 //        bn_printfDbg("type version rx %u (loc. %u)",msg->header.typeVersion,BN_TYPE_VERSION);
-        return -1;
+        return -ERR_BN_TYPE_VERSION;
     }
     // is it above the highest type this node knows ? (time to rebuild and update this node)
     if ( localMsg.header.type >= E_TYPE_COUNT) {
 //        bn_printDbg("type unknown (too big)");
-        return -1;
+        return -ERR_BN_TYPE_TOO_HIGH;
     }
 
     // checks if there are any functions attached to the type of the incoming message.
@@ -523,7 +528,7 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
             bn_pushInBufLast(msg,ifFrom);
         }
         break;
-    default : return -1;
+    default : return -ERR_BN_NO_SUCH_INTERFACE;
     }
     return 0;
 }
@@ -544,12 +549,12 @@ int bn_attach(E_TYPE type,pfvpm ptr){
     sAttach *elem=firstAttach, *prev, *new;
 
     //checks if the type is correct (should be within the E_TYPE enum range)
-    if (type>=E_TYPE_COUNT) return -1;
+    if (type>=E_TYPE_COUNT) return -ERR_BN_TYPE_TOO_HIGH;
 
     // TODO check if enough free space before allocating
     //looking for already existing occurence of this type while searching for the last element of the chain
     while ( elem!=NULL){
-        if ( elem->type == type ) return -2;
+        if ( elem->type == type ) return -ERR_BN_TYPE_ALREADY_ATTACHED;
         else {
             prev=elem;
             elem=elem->next;
@@ -557,7 +562,7 @@ int bn_attach(E_TYPE type,pfvpm ptr){
     }
 
     //create new entry
-    if ( (new = (sAttach *)malloc(sizeof(sAttach))) == NULL ) return -3;
+    if ( (new = (sAttach *)malloc(sizeof(sAttach))) == NULL ) return -ERR_INSUFFICIENT_MEMORY;
 
     //updates anchor
     if ( firstAttach==NULL) firstAttach=new;
@@ -573,23 +578,23 @@ int bn_attach(E_TYPE type,pfvpm ptr){
 
 
 /* bn_deattach(E_TYPE type);
+ * Unsets an automatic call to function upon reception of a message of type "type".
  * Arguments :
  *      type : type of the message to remove the attachement from.
  * Return value :
  *      0 if everything went fine
- *      -1 if wrong type
- *      -2 if type not found (not previously attached, or already de-attached)
- *      -3 if memory free fails
- *  Unset an automatic call to function upon reception of a message of type "type".
+ *      <0 if :
+ *          wrong type
+ *          type not found (not previously attached, or already de-attached)
  *  Warning : after a call to bn_attach, any message of type "type" received by this node WILL be given to the user (won't pop with bn_receive)
  */
 int bn_deattach(E_TYPE type){
     sAttach *elem=firstAttach,*nextElem;
 
     //checks if the type is correct (should be within the E_TYPE enum range)
-    if (type>=E_TYPE_COUNT) return -1;
+    if (type>=E_TYPE_COUNT) return -ERR_BN_TYPE_TOO_HIGH;
 
-    if (firstAttach==NULL) return -2;
+    if (firstAttach==NULL) return -ERR_NOT_FOUND;
 
     //looking for already existing occurence of this type
     //first element
@@ -610,7 +615,7 @@ int bn_deattach(E_TYPE type){
         else elem=elem->next;
     }
 
-    return -2;
+    return -ERR_NOT_FOUND;
 }
 
 /* bn_insertInBuf : insert a message at the last postion in the incoming message buffer
@@ -619,7 +624,7 @@ int bn_deattach(E_TYPE type){
  *      iFace : interface on which the message has been received
  * Return value :
  *      1
- *      -1 on error (buffer full)
+ *      <0 on error (buffer full)
  * WARNING : will drop msg if the buffer is full, unless the msg is an ack.
  */
 int bn_pushInBufLast(const sMsg *msg, E_IFACE iFace){
@@ -630,7 +635,7 @@ int bn_pushInBufLast(const sMsg *msg, E_IFACE iFace){
         // unless it is an ack, drop the message
         if (msg->header.type!=E_ACK_RESPONSE){
             mutexUnlock();
-            return -1;
+            return -ERR_BN_BUFFER_FULL;
         }
         //makes some room if it is an ack
         else bn_freeInBufFirst();
