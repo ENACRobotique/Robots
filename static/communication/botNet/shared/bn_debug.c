@@ -12,6 +12,7 @@
 #include "node_cfg.h"
 
 // other required libraries
+#include "../../../global_errors.h"
 
 // botNet specific libraries
 #include "botNet_core.h"
@@ -42,7 +43,7 @@ int bn_printDbg(const char * str){
     sMsg tmp;
 
     //do not send anything if the debug address is not defined
-    if (debug_addr==0) return -1;
+    if (debug_addr==0) return -ERR_BN_UNKNOWN_ADDR;
 
     tmp.header.destAddr=debug_addr;
     tmp.header.type=E_DEBUG;

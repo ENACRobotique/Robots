@@ -20,20 +20,25 @@
 // every function returning an error MUST return "-ERR_XXXXXX"
 
 enum{
+    // General errors
+        ERR_MOAERR=1,
+        ERR_INSUFFICIENT_MEMORY,
+        ERR_NOT_FOUND,
+        ERR_UNKNOWN_ERROR,
+
     // BOTNET specific errors
-        ERR_BN_INIT_FAILED=1,
-        // NETWORK ERRORS
+        ERR_BN_INIT_FAILED,
         ERR_BN_NACK_BROKEN_LINK,
         ERR_BN_NACK_FULL_BUFFER,
         ERR_BN_ACK_TIMEOUT,
         ERR_BN_TYPE_TOO_HIGH,
         ERR_BN_TYPE_VERSION,
+        ERR_BN_TYPE_ALREADY_ATTACHED,
         ERR_BN_OVERSIZE,
         ERR_BN_CSUM,
         ERR_BN_NO_SUCH_INTERFACE,   //no such interface on this device
-        ERR_BN_TYPE_ALREADY_ATTACHED,
+        ERR_BN_UNKNOWN_ADDR,
         ERR_BN_BUFFER_FULL,
-
 
     // UART (and UART_FRAMING) errors
         ERR_UART_OVERSIZE,          // packet too big to send over UART_MTU)
@@ -55,12 +60,10 @@ enum{
         ERR_XBEE_AT_ERR,        //AT cmd error
         ERR_XBEE_INIT_FAILED,
 
+    // I²C error
+    ERR_I2C_END_TX,
 
-    // General errors
-    ERR_INSUFFICIENT_MEMORY,
-    ERR_NOT_FOUND,
 
-    ERR_UNKNOWN_ERROR,
     ERR_NUMBERRCODES
 };
 

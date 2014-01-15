@@ -14,6 +14,7 @@
 
 // other required libraries
 #include "../../shared/bn_checksum.h"
+#include "../../../global_errors.h"
 
 // I2C_arduino specific libraries
 #include "lib_I2C_arduino.h"
@@ -92,7 +93,7 @@ int I2C_send(const sMsg *msg, bn_Address firstDest){
 
 
     if( (err=Wire.endTransmission())!=0 ){
-    	return -err;
+    	return -ERR_I2C_END_TX;
     }
     return count;
 }

@@ -147,7 +147,7 @@ int bn_genericSend(sMsg *msg){
     msg->header.srcAddr = (MYADDRX?:MYADDRI)?:MYADDRU;
 
     //check the size of the message
-    if ( (msg->header.size + sizeof(sGenericHeader)) > BN_MAX_PDU) return -1;
+    if ( (msg->header.size + sizeof(sGenericHeader)) > BN_MAX_PDU) return -ERR_BN_OVERSIZE;
 
     //sets type version
     msg->header.typeVersion=BN_TYPE_VERSION;
@@ -181,6 +181,7 @@ int bn_genericSend(sMsg *msg){
 int bn_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
     sMsg msgIn={{0}}; //incoming message (may be our ack)
+    int ret=0;
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -189,7 +190,7 @@ int bn_sendAck(sMsg *msg){
     msg->header.ack=1;
 
     // sending
-    if (bn_genericSend(msg) < 0) return -1;
+    if ( (ret=bn_genericSend(msg)) < 0) return ret;
 
     // waiting for the reply
     while ( testTimeout(BN_ACK_TIMEOUT*1000,&sw)){
