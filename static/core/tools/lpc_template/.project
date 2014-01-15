@@ -35,10 +35,4 @@
 			<locationURI>PARENT-2-PROJECT_LOC/lpc21xx/lpc_lib</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-2-PROJECT_LOC%7D/github/static/core</value>
-		</variable>
-	</variableList>
 </projectDescription>
