@@ -9,6 +9,7 @@
 #ifdef ARCH_X86_LINUX
 
 #include "lib_UART_framing_linux.h"
+#include "../../../global_errors.h"
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -27,40 +28,39 @@ int Xbee_serial_port;
  *  device : string describing the device
  * Return value :
  *  >0 on success
- *  <0 on error
+ *  <0 (or terminate programm) on error
  */
 int serialInit(const char *device){
     struct termios options;
-        char *devStr=device;
+    char *devStr=device;
 
-        printf("opening of:%s: at 115200 bd\n",devStr);
-        Xbee_serial_port = open(devStr, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);//lecture et ecriture | pas controlling terminal | ne pas attendre DCD
+    printf("opening of:%s: at 115200 bd\n",devStr);
+    Xbee_serial_port = open(devStr, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);//lecture et ecriture | pas controlling terminal | ne pas attendre DCD
 
-        //cas d'erreur d'ouverture
-        if(Xbee_serial_port < 0)
-        {
-            perror("Erreur d'ouverture du port serie");
-            exit(-1);
-        }
+    //cas d'erreur d'ouverture
+    if(Xbee_serial_port < 0)
+    {
+        perror("Erreur d'ouverture du port serie");
+        exit(-1);       //XXX terminate programm abruptly here or gently tell the calling function (main) that a problem occured ?
+    }
 
-        //chargement des données
-        tcgetattr(Xbee_serial_port, &options);
-        //B115200 bauds
-        cfsetospeed(&options, B115200);
-        options.c_cflag |= (CLOCAL | CREAD);//programme propriétaire du port
-        options.c_cflag &= ~PARENB; //pas de parité
-        options.c_cflag |= CSTOPB; // 2 bit de stop
-        options.c_cflag &= ~CSIZE; //option a 0
-        options.c_cflag |= CS8; //8 bits
+    //chargement des données
+    tcgetattr(Xbee_serial_port, &options);
+    //B115200 bauds
+    cfsetospeed(&options, B115200);
+    options.c_cflag |= (CLOCAL | CREAD);//programme propriétaire du port
+    options.c_cflag &= ~PARENB; //pas de parité
+    options.c_cflag |= CSTOPB; // 2 bit de stop
+    options.c_cflag &= ~CSIZE; //option a 0
+    options.c_cflag |= CS8; //8 bits
 
-        options.c_iflag |= IXON;    //enable flow control
-        options.c_iflag |= IXOFF;   //enable flow control
-        tcsetattr(Xbee_serial_port, TCSANOW, &options); //enregistrement des valeurs de configuration
-        printf("Port serie ouvert\n");
+    options.c_iflag |= IXON;    //enable flow control
+    options.c_iflag |= IXOFF;   //enable flow control
+    tcsetattr(Xbee_serial_port, TCSANOW, &options); //enregistrement des valeurs de configuration
+    printf("Port serie ouvert\n");
 
-        fcntl(Xbee_serial_port,F_SETFL,O_NONBLOCK);//mode non bloquant pour la fonction read() si aucun caractere dispo, programme attend
+    fcntl(Xbee_serial_port,F_SETFL,O_NONBLOCK);//mode non bloquant pour la fonction read() si aucun caractere dispo, programme attend
 
-        return 1;
     return 1;
 }
 
@@ -82,8 +82,8 @@ int serialDeinit(){
  *  timeout : in µs, time after which the function returns 0 if no byte can be read.
  * Return value :
  *  1 if one byte have been read
- *  0 if timeout
- *  -1 on error
+ *  0 if timeout (nothing to read, not an error)
+ *  <0 on error
  *
  */
 int serialRead(uint8_t *byte,uint32_t timeout){
@@ -107,6 +107,7 @@ int serialRead(uint8_t *byte,uint32_t timeout){
 
     if (retval == -1){
        perror("select()");
+       exit(-1);
     }
     else if (retval>0){
        // Data is available now, we can read
@@ -145,7 +146,7 @@ int serialWrite(uint8_t byte){
     int i;
     i=write(Xbee_serial_port, &byte, 1);
     fflush(NULL); //flushes all stream
-    return (i==0)?-1:i;
+    return (i==0)?-ERR_UART_WRITE_BYTE:i;
 }
 
 #endif // ARC_X86_LINUX

@@ -23,6 +23,7 @@
 #include "node_cfg.h"
 
 // other required libraries
+#include "../../../global_errors.h"
 
 // UART_FRAMING specific libraries
 #include "lib_UART_framing.h"
@@ -37,23 +38,20 @@
 // standard libraries
 
 
-
-
-
-
-
 int UART_init(const char* device, uint32_t speed){
+    int retval=0;
 #ifdef ARCH_328P_ARDUINO
-    serialInit(speed);
+    retval=serialInit(speed);
 #elif defined(ARCH_X86_LINUX)
-    serialInit(device);
+    retval=serialInit(device);
 #endif
-    return 0;
+    if (retval>=0) return 0;
+    else return -ERR_UART_INIT_FAILED;
 }
 
 int UART_deinit(const char* device){
-    serialDeinit();
-    return 0;
+    if (serialDeinit()>=0) return 0;
+    else return -ERR_UART_DEINIT_FAILED;
 }
 
 /* UART_readFrame writes an UART frame on the wire
@@ -62,32 +60,33 @@ int UART_deinit(const char* device){
  *  size : size of data to read at pt.
  * Return value :
  *  >0 : nb of bytes written on success (excluding escape char and UART_framing overhead)
- *  -1 : if writing error
- *  -2 : if size too big;
+ *  <0 if error :
+ *      writing error
+ *      if size too big;
  */
 int UART_writeFrame(const void *pt,int size){
     uint8_t cSum=0; //checksum
     int j=0;
 
     //check size :
-    if ( size >= (UART_MTU) ) return -2;
+    if ( size >= (UART_MTU) ) return -ERR_UART_OVERSIZE;
 
     //write start byte
-    if ( serialWrite(UART_FRAME_START) < 0 ) return -1;
+    if ( serialWrite(UART_FRAME_START) < 0 ) return -ERR_UART_WRITE_BYTE;
 
     //write size
-    if ( serialWriteEscaped((uint8_t)(size>>8)) < 0 ) return -1; //MSB
-    if ( serialWriteEscaped((uint8_t)(size&0xff)) < 0 ) return -1; //LSB
+    if ( serialWriteEscaped((uint8_t)(size>>8)) < 0 ) return -ERR_UART_WRITE_BYTE;   //MSB
+    if ( serialWriteEscaped((uint8_t)(size&0xff)) < 0 ) return -ERR_UART_WRITE_BYTE; //LSB
 
     //write data
     for (j=0;j<size;j++){
-        if ( serialWriteEscaped(((uint8_t*)pt)[j]) < 0 ) return -1;
+        if ( serialWriteEscaped(((uint8_t*)pt)[j]) < 0 ) return -ERR_UART_WRITE_BYTE;
         cSum+=((uint8_t*)pt)[j];
     }
 
     //compute and write checksum
     cSum=0xff-cSum;
-    if ( serialWriteEscaped(cSum) < 0 ) return -1;
+    if ( serialWriteEscaped(cSum) < 0 ) return -ERR_UART_WRITE_BYTE;
 
     return size;
 }
@@ -99,7 +98,7 @@ int UART_writeFrame(const void *pt,int size){
  *  maxsize : maximum number of bytes written at pt.
  * Return value :
  *  >0 : nb of bytes written (success)
- *  0 : there was no frame to read
+ *  0 : there was no frame to read (normal behavior when nothing to read)
  *  -1 : if checksum error
  *  -2 : size read too big, WARNING : in this case, the frame is dropped.
  *  -3 : if reading error (timeout of expected byte or else)
@@ -125,9 +124,9 @@ int UART_readFrame(void *pt, int maxsize){
 frame_start :
     //read size of frame
     //(for EVERY byte, test if error AND test if start byte)
-    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -3;
+    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -ERR_UART_READ_BYTE_TIMEOUT;
     if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
-    if ( (ret=serialReadEscaped(&byte1,UART_READBYTE_TIMEOUT)) <= 0 ) return -3;
+    if ( (ret=serialReadEscaped(&byte1,UART_READBYTE_TIMEOUT)) <= 0 ) return -ERR_UART_READ_BYTE_TIMEOUT;
     if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
 
     size=(byte<<8)+byte1;
@@ -135,58 +134,59 @@ frame_start :
     //test maxSize if too big for destination buffer, read the message bytes and checksum to clear the UART link of them
     if ( size > maxsize ){
         for (j=0;j<size+1;j++){
-            if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -3;
+            if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -ERR_UART_READ_BYTE_TIMEOUT;
             if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
         }
-        return -2;
+        return -ERR_UART_OVERSIZE;
     }
 
     //read the data bytes (and start computing for the test of checksum)
     for (j=0;j<size;j++){
-        if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -3;
+        if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -ERR_UART_READ_BYTE_TIMEOUT;
         if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
         ((uint8_t*)pt)[j]=byte;
         cSum+=byte;
     }
 
     //read the checksum byte
-    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -3;
+    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return -ERR_UART_READ_BYTE_TIMEOUT;
     if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
     cSum+=byte;
     if (cSum==0xff) return size;
-    else return -1;
+    else return -ERR_UART_CSUM;
 }
 
-/* XbeeWriteByteEscaped : writes `byte` on the serial link, including escaping if needed
+/* XbeeWriteEscaped : writes `byte` on the serial link, including escaping if needed
  * Argument :
  *  byte : byte to write
  * Return value :
- *  1 if write succeed, 0 otherwise
+ *  1 if write succeed,
+ *  <0 otherwise
  */
 int serialWriteEscaped(uint8_t byte){
     if ( byte == UART_FRAME_START || byte == UART_XOFF || byte == UART_XON || byte == UART_ESCAPE_CHAR ){
         if (serialWrite(UART_ESCAPE_CHAR) && serialWrite( byte^UART_ESCAPE_MASK )) return 1;
-        return 0;
+        return -ERR_UART_WRITE_BYTE;
     }
     else if (serialWrite(byte)) return 1;
-    return 0;
+    return -ERR_UART_WRITE_BYTE;
 }
 
-/* XbeeWriteByteEscaped : writes one byte on the serial link, removing escaping if needed
+/* XbeeReadEscaped : writes one byte on the serial link, removing escaping if needed
  * Return value :
  *  1 if read succeed,
  *  2 if an escaping occured
  *  0 if there was nothing to read
- *  -1 on error while reading
+ *  <0 on error while reading
  */
 int serialReadEscaped(uint8_t *byte, uint32_t timeout){
     uint8_t byteRed=0;
     int ret;
 
-    if ( (ret=serialRead(&byteRed,timeout)) <= 0 ) return ret;
+    if ( (ret=serialRead(&byteRed,timeout)) <= 0 ) return -ERR_UART_READ_BYTE;
 
     if ( byteRed == UART_ESCAPE_CHAR ){
-        if ( (ret=serialRead(&byteRed,timeout)) <= 0 ) return ret;
+        if ( (ret=serialRead(&byteRed,timeout)) <= 0 ) return -ERR_UART_READ_BYTE;
         *byte=byteRed^UART_ESCAPE_MASK;
         return 2;
     }

@@ -8,6 +8,7 @@
 #ifdef ARCH_328P_ARDUINO
 
 #include "lib_UART_framing_arduino.h"
+#include "../../../global_errors.h"
 #include "Arduino.h"
 
 
@@ -77,7 +78,7 @@ int serialRead(uint8_t *byte,uint32_t timeout){
  */
 int serialWrite(uint8_t byte){
     if (Serial.write(byte)) return 1;
-    return -1;
+    return -ERR_UART_WRITE_BYTE;
 }
 
 #endif
