@@ -1,0 +1,25 @@
+Test example for botNet. May be used as example.
+
+
+
+
+Topology of the network (nodes between parenthesis are not implemented yet).
+
+
+
+                             Xbee
+    --------------------------------------------------------------
+    |                              |                             |
+ ___|___                        ___|___                       ___|___
+|       |                      |       |                     |       |
+|  PC1  |                      |beacon1|                     |beacon2|
+|_______|                      |_______|                     |_______|
+                                   |
+                                   |
+                                I²C|______________________
+                                   |                      |
+                                   |                      |
+     _______                    ___|___                ___|___                 _______ 
+    |       |      UART1       |       |              |       |     UART2     |       |
+    |  PC2  |------------------|arduino|              | (LPC) |---------------| (PC3) |
+    |_______|                  |_______|              |_______|               |_______|
