@@ -19,12 +19,7 @@
 
 // compile-time config
 #define ASSERV_TEST
-//#define TIME_STATS
-
-// compile-time config check
-#if defined(ASSERV_TEST) && defined(TIME_STATS)
-#warning "TIME_STATS has no effect when ASSERV_TEST is used"
-#endif
+#define TIME_STATS
 
 #define SQR(v) ((long long)(v)*(v))
 
@@ -111,13 +106,17 @@ enum {
     S_CHG_TRAJ, // new trajectory to follow
     S_RUN_TRAJ // we are following a trajectory
 } state = S_WAIT; // state of the trajectory follow
+#endif
 
 #ifdef TIME_STATS
 // stats
+#ifndef ASSERV_TEST
 int nb_l = 0, nb_c = 0;
 int m_l, m_c;
-unsigned int start_us;
 #endif
+int nb_loop;
+int m_loop;
+unsigned int start_us;
 #endif
 
 int main(void) {
@@ -287,10 +286,8 @@ int main(void) {
                 continue;
             }
 
-#ifndef ASSERV_TEST
 #ifdef TIME_STATS
             start_us = micros();
-#endif
 #endif
 
             // get current number of ticks per sampling period
@@ -427,7 +424,7 @@ int main(void) {
                     tmp>>=1;  // gain
 
 #ifdef TIME_STATS
-                    // time stats... result 160µs!
+                    // time stats... result 160µs! (outdated)
                     m_c = (m_c*nb_c + ((micros() - start_us)<<8))/(nb_c+1);
                     nb_c++;
 #endif
@@ -450,7 +447,7 @@ int main(void) {
                     tmp>>=4; // gain
 
 #ifdef TIME_STATS
-                    // time stats... result 257µs!
+                    // time stats... result 257µs! (outdated)
                     m_l = (m_l*nb_l + ((micros() - start_us)<<8))/(nb_l+1);
                     nb_l++;
 #endif
@@ -465,6 +462,12 @@ int main(void) {
                 consigne_r = (((long long)_mul_r*(long long)consigne)>>SHIFT) + tmp;
                 break;
             }
+#endif
+
+#ifdef TIME_STATS
+            // time stats... result 22µs! (in ASSERV_TEST)
+            m_loop = (m_loop*nb_loop + ((micros() - start_us)<<8))/(nb_loop+1);
+            nb_loop++;
 #endif
         }
 
