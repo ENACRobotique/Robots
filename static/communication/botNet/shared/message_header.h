@@ -5,8 +5,13 @@
  *      Author: quentin
  */
 
+
 #ifndef MESSAGE_HEADER_H_
 #define MESSAGE_HEADER_H_
+
+#include <stdint.h>
+
+#define BN_MAX_PDU 64 //max size of a message, including header AND payload.
 
 /* bn_Address : on 16 bytes,
  * cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
