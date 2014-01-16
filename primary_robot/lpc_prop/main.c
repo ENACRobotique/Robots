@@ -17,6 +17,15 @@
 #include "params.h"
 #include "controller.h"
 
+// compile-time config
+#define ASSERV_TEST
+//#define TIME_STATS
+
+// compile-time config check
+#if defined(ASSERV_TEST) && defined(TIME_STATS)
+#warning "TIME_STATS has no effect when ASSERV_TEST is used"
+#endif
+
 #define SQR(v) ((long long)(v)*(v))
 
 volatile int _ticks_l=0, _ticks_r=0;
@@ -43,6 +52,7 @@ void _isr_right(){ // irq14
     VIC_VectAddr = (unsigned)0; // updates priority hardware
 }
 
+#ifndef ASSERV_TEST
 #define TRAJ_MAX_SIZE (16)
 
 typedef struct {
@@ -89,8 +99,10 @@ void traj_conv(sTrajEl_t *t) {
         t->arc_sp_max = SQRT(1.3*1.3*(double)t->c_r);
     }
 }
+#endif
 
 int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
+#ifndef ASSERV_TEST
 int gx, gy; // goal (I<<SHIFT)
 int d_consigne = isDpS2IpP(15. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
@@ -100,33 +112,44 @@ enum {
     S_RUN_TRAJ // we are following a trajectory
 } state = S_WAIT; // state of the trajectory follow
 
-//#define TIME_STATS
 #ifdef TIME_STATS
 // stats
 int nb_l = 0, nb_c = 0;
 int m_l, m_c;
 unsigned int start_us;
 #endif
+#endif
 
 int main(void) {
     unsigned int prevAsserv=0, prevLed=0;
     int ticks_l, ticks_r;
-    int consigne;
+#ifdef ASSERV_TEST
+    int consigne_l = isDpS2IpP(15. /* cm/s */); // desired speed (IpP<<SHIFT)
+    int consigne_r = isDpS2IpP(15. /* cm/s */); // desired speed (IpP<<SHIFT)
+#else
     int consigne_l = 0;
     int consigne_r = 0;
+#endif
+
+    int ct, st;
+    int v;
+
+#ifndef ASSERV_TEST
+    int consigne;
     long long tmp, dtime;
-    sMsg msg;
-
-    int ct, st, n_x, n_y, i;
-    int v, alpha, dist, dist_tmp, dist_lim;
-
+    int n_x, n_y, i;
+    int alpha, dist, dist_tmp, dist_lim;
     int step_rotdir = 0; // initial value unused, but necessary to avoid a warning
+    sMsg msg;
+#endif
 
     gpio_init_all();  // use fast GPIOs
 
     pwm_init(0, 1024);  // 29.3kHz update rate => not audible
 
+#ifndef ASSERV_TEST
     sb_init();
+#endif
 
     // sortie LED
     gpio_output(1, 24);
@@ -150,11 +173,14 @@ int main(void) {
 
     global_IRQ_enable();
 
+#ifndef ASSERV_TEST
     sb_printDbg("start prop");
+#endif
 
     // main loop
     while(1) {
         sys_time_update();
+#ifndef ASSERV_TEST
         sb_routine();
 
         if(sb_receive(&msg) > 0) {
@@ -246,9 +272,10 @@ int main(void) {
                 break;
             }
         }
+#endif
 
         if(millis() - prevAsserv >= 20) { // each 20 milliseconds
-            prevAsserv = millis();
+            prevAsserv += 20;
             // TODO reduce period
             if(millis() - prevAsserv > 10) { // we are very late, do not take care of these data
                 // for debugger
@@ -260,8 +287,10 @@ int main(void) {
                 continue;
             }
 
+#ifndef ASSERV_TEST
 #ifdef TIME_STATS
             start_us = micros();
+#endif
 #endif
 
             // get current number of ticks per sampling period
@@ -289,6 +318,7 @@ int main(void) {
             x += ((long long)v * ct)>>SHIFT;
             y += ((long long)v * st)>>SHIFT;
 
+#ifndef ASSERV_TEST
             switch(state) {
             default:
             case S_WAIT:
@@ -435,6 +465,7 @@ int main(void) {
                 consigne_r = (((long long)_mul_r*(long long)consigne)>>SHIFT) + tmp;
                 break;
             }
+#endif
         }
 
         if(millis() - prevLed >= 250) {
@@ -445,4 +476,3 @@ int main(void) {
 
     return 0;
 }
-
