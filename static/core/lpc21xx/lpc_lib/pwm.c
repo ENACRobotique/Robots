@@ -25,8 +25,9 @@ void pwm_init(unsigned long prescale, unsigned long range) {
 
   PWM_PR = prescale; // prescale of the PCLK (PCLK/(prescale+1))
   PWM_MR0 = range; // defines the period of the pwm pattern
+  PWM_LER = BIT(0); // updates PWM_MR0
 
-  PWM_TCR |= BIT(0) | BIT(3); // counter and PWM enable
+  PWM_TCR = BIT(0) | BIT(3); // counter and PWM enable
 }
 
 void pwm_enable(unsigned char pwm /* 1-6 */, unsigned long val) {
@@ -41,7 +42,7 @@ void pwm_enable(unsigned char pwm /* 1-6 */, unsigned long val) {
   }
 
   // enable pwm
-  PWM_PCR |= BIT(8+pwm);
+  PWM_PCR = (PWM_PCR & ~0x8183) | BIT(8+pwm);
 
   // set new value
   pwm_update(pwm, val);
@@ -53,5 +54,5 @@ void pwm_update(unsigned char pwm /* 1-6 */, unsigned long val) {
   else
     *(&PWM_MR4+pwm-4) = val;
 
-  PWM_LER |= BIT(pwm);
+  PWM_LER = BIT(pwm); // updates corresponding PWM_MR*
 }

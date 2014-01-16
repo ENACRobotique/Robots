@@ -145,11 +145,11 @@ ENTRY(_startup)
 
 /* specify the LPC2148 memory areas  */
 
-MEMORY 
+MEMORY
 {
-	flash     			: ORIGIN = 0,          LENGTH = 512K	/* FLASH ROM                            	*/	
-	ram_isp_low(A)		: ORIGIN = 0x40000120, LENGTH = 223		/* variables used by Philips ISP bootloader	*/		 
-	ram   				: ORIGIN = 0x40000200, LENGTH = 32224	/* free RAM area							*/
+	flash(rx)     		: ORIGIN = 0,          LENGTH = 512K	/* FLASH ROM                            	*/
+	ram_isp_low(A)		: ORIGIN = 0x40000120, LENGTH = 223		/* variables used by Philips ISP bootloader	*/
+	ram(rw)   			: ORIGIN = 0x40000200, LENGTH = 32224	/* free RAM area							*/
 	ram_isp_high(A)		: ORIGIN = 0x40007FE0, LENGTH = 32		/* variables used by Philips ISP bootloader	*/
 }
 
@@ -163,36 +163,41 @@ _stack_end = 0x40007EDC;
 
 /* now define the output sections  */
 
-SECTIONS 
+SECTIONS
 {
 	. = 0;								/* set location counter to address zero  */
-	
+
 	.init :
 	{
 		*(.init)   /* the startup code goes into FLASH, first */
 	} >flash
-	
-	
 
-	.text :								/* collect all sections that should go into FLASH after startup  */ 
+
+
+	.text :								/* collect all sections that should go into FLASH after startup  */
 	{
 		*(.text)						/* all .text sections (code)  */
+		*(.text*)
 		*(.rodata)						/* all .rodata sections (constants, strings, etc.)  */
 		*(.rodata*)						/* all .rodata* sections (constants, strings, etc.)  */
 		*(.glue_7)						/* all .glue_7 sections  (no idea what these are) */
 		*(.glue_7t)						/* all .glue_7t sections (no idea what these are) */
-		_etext = .;						/* define a global symbol _etext just after the last code byte */
 	} >flash							/* put all the above into FLASH */
-	
 
-	
+    .ARM : {
+        __exidx_start = .;
+        *(.ARM.exidx*)
+        __exidx_end = .;
+    } >flash
+	_etext = .;						/* define a global symbol _etext just after the last code byte */
 
-	.data :								/* collect all initialized .data sections that go into RAM  */ 
+	.data : 							/* collect all initialized .data sections that go into RAM  */
 	{
 		_data = .;						/* create a global symbol marking the start of the .data section  */
 		*(.data)						/* all .data sections  */
+		*(.data*)
 		_edata = .;						/* define a global symbol marking the end of the .data section  */
-	} >ram AT >flash					/* put all the above into RAM (but load the LMA copy into FLASH) */
+	} >ram AT> flash					/* put all the above into RAM (but load the LMA copy into FLASH) */
 
 	.bss :								/* collect all uninitialized .bss sections that go into RAM  */
 	{
@@ -205,4 +210,4 @@ SECTIONS
 	_bss_end = . ;						/* define a global symbol marking the end of the .bss section */
 }
 	_end = .;							/* define a global symbol marking the end of application RAM */
-	
+

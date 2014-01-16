@@ -538,12 +538,12 @@ typedef volatile unsigned char * pREG8;
 #define PCB_PINSEL1_P031_RSVD3    ((unsigned int) 0xc0000000)
 #define PCB_PINSEL1_P031_MASK     ((unsigned int) 0xc0000000)
 
-#define PCB_PINSEL2_P13626_GPIO   ((unsigned int) 0x00000000) 
-#define PCB_PINSEL2_P13626_DEBUG  ((unsigned int) 0x00000004) 
+#define PCB_PINSEL2_P13626_GPIO   ((unsigned int) 0x00000000)
+#define PCB_PINSEL2_P13626_DEBUG  ((unsigned int) 0x00000004)
 #define PCB_PINSEL2_P13626_MASK   ((unsigned int) 0x00000004)
 
-#define PCB_PINSEL2_P12516_GPIO   ((unsigned int) 0x00000000) 
-#define PCB_PINSEL2_P12516_TRACE  ((unsigned int) 0x00000008) 
+#define PCB_PINSEL2_P12516_GPIO   ((unsigned int) 0x00000000)
+#define PCB_PINSEL2_P12516_TRACE  ((unsigned int) 0x00000008)
 #define PCB_PINSEL2_P12516_MASK   ((unsigned int) 0x00000008)
 
 /*##############################################################################
@@ -1127,8 +1127,8 @@ typedef volatile unsigned char * pREG8;
 ## PWM
 ##############################################################################*/
 
-#define PWM_IR            (*((pREG32) (0xe0014000)))
-#define PWM_TCR           (*((pREG32) (0xe0014004)))
+#define PWM_IR            (*((pREG16) (0xe0014000)))
+#define PWM_TCR           (*((pREG8) (0xe0014004)))
 #define PWM_TC            (*((pREG32) (0xe0014008)))
 #define PWM_PR            (*((pREG32) (0xe001400c)))
 #define PWM_PC            (*((pREG32) (0xe0014010)))
@@ -1141,8 +1141,8 @@ typedef volatile unsigned char * pREG8;
 #define PWM_MR5           (*((pREG32) (0xe0014044)))
 #define PWM_MR6           (*((pREG32) (0xe0014048)))
 #define PWM_EMR           (*((pREG32) (0xe001403c)))
-#define PWM_PCR           (*((pREG32) (0xe001404c)))
-#define PWM_LER           (*((pREG32) (0xe0014050)))
+#define PWM_PCR           (*((pREG16) (0xe001404c)))
+#define PWM_LER           (*((pREG8) (0xe0014050)))
 
 #define PWM_IR_MR0        ((unsigned int) 0x00000001)
 #define PWM_IR_MR1        ((unsigned int) 0x00000002)
@@ -1269,7 +1269,7 @@ typedef volatile unsigned char * pREG8;
 #define RTC_AMR_AMRYEAR (0x00000080)
 #define RTC_AMR_AMRMASK (0x000000ff)
 
-typedef struct __attribute__ ((packed)) 
+typedef struct __attribute__ ((packed))
 {
   union
   {
@@ -1284,11 +1284,11 @@ typedef struct __attribute__ ((packed))
 }
 rtcCTC_t;
 
-typedef struct __attribute__ ((packed)) 
+typedef struct __attribute__ ((packed))
 {
   union
   {
-    struct 
+    struct
     {
       unsigned int seconds   : 6;
       unsigned int rsvd7_6   : 2;
@@ -1305,7 +1305,7 @@ typedef struct __attribute__ ((packed))
 }
 rtcCTIME0_t;
 
-typedef struct __attribute__ ((packed)) 
+typedef struct __attribute__ ((packed))
 {
   union
   {
@@ -1324,11 +1324,11 @@ typedef struct __attribute__ ((packed))
 }
 rtcCTIME1_t;
 
-typedef struct __attribute__ ((packed)) 
+typedef struct __attribute__ ((packed))
 {
   union
   {
-    struct 
+    struct
     {
       unsigned int doy       : 12;
       unsigned int rsvd12_31 : 20;
