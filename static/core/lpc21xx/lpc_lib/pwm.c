@@ -54,5 +54,5 @@ void pwm_update(unsigned char pwm /* 1-6 */, unsigned long val) {
   else
     *(&PWM_MR4+pwm-4) = val;
 
-  PWM_LER = BIT(pwm); // updates corresponding PWM_MR*
+  PWM_LER |= BIT(pwm); // marks this pwm for update at the next MR0 match
 }
