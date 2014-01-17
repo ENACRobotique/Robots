@@ -8,6 +8,10 @@
 #ifndef BN_UTILS_H_
 #define BN_UTILS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "botNet_core.h"
 
 typedef struct{
@@ -18,5 +22,8 @@ typedef struct{
 int sb_ping(bn_Address dest);
 int sb_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIB_SB_UTILS_H_ */
