@@ -35,6 +35,7 @@ typedef enum{
 /************************ user types start ************************/
     E_CBR_CTRL,
     E_TEST_PKT,
+    E_WELL_CTRL,
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -67,9 +68,9 @@ char *eType2str(E_TYPE elem);
 
 typedef struct {
     uint8_t flag;
-    uint8_t fluxID;         // identifier of the flux (-1 means every flux)
+    int8_t fluxID;         // identifier of the flux (-1 means every flux)
     bn_Address dest;        // destination of the CBR
-    uint32_t  period;       // minimal period between messages asked (in millisecond). May be exceeded by the actual sending.
+    uint32_t  period;       // minimal period between messages asked (in microsecond). May be exceeded by the actual sending.
     uint32_t number;        // amount of messages to send
     uint8_t size;           // size of the payload of the messages
 }sCBRCtrl;

@@ -11,40 +11,30 @@
 #include "../../../botNet/shared/bn_debug.h"
 #include "../../../botNet/shared/botNet_core.h"
 
-enum {
-    E_CBR_START,
-    E_CRB_START_ACK,
-    E_CBR_STOP,
-    E_CBR_STATS,
-    E_CBR_RESET
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-enum {
-    E_WELL_STATS,
-    E_WELL_RESET
-};
 
 
-typedef struct {
-    bn_Address receiver;
-    uint8_t fluxID;
-    uint32_t period;        // period of sending
-    uint32_t sw;            // memory to store a stopwatch
-    uint8_t size;           // size of the paylod of the packets
-    uint32_t number;        // amount of packet left
-} sFluxDescriptor;
+int cbr_deamon();       // constant bit rate source, must run on the source of the flux.
 
-
-int cbr_deamon(sMsg *msg);       // constant bit rate source
-
+// CBR management functions
+int cbr_newFlux(sMsg *msg);
+int cbr_controller(sMsg *msg);
 int cbr_start(bn_Address server, bn_Address receiver,uint8_t fluxID, uint32_t period, uint8_t size,uint32_t number);
 int cbrAcked_start(bn_Address server, bn_Address receiver,uint8_t fluxID, uint32_t period, uint8_t size,uint32_t number);
-int cbr_printResults(bn_Address server);
-int cbr_reset(bn_Address);
+int cbr_printResults(bn_Address server, int8_t fluxID);
+int cbr_reset(bn_Address server);
+int cbr_stop(bn_Address server, int8_t fluxID);
 
 int well_deamon(sMsg *msg);             // counts received test packets
-int well_printStat(bn_Address server);  // sends back the results as a debug message
+int well_printStat(bn_Address server);  // sends a result request
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BN_TESTFUNC_H_ */

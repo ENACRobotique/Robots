@@ -25,6 +25,10 @@ enum{
         ERR_INSUFFICIENT_MEMORY,
         ERR_NOT_FOUND,
         ERR_UNKNOWN_ERROR,
+        ERR_WRONG_FLAG,
+        ERR_ALREADY_IN_USE,
+        ERR_OUT_OF_BOND,
+        ERR_MALLOC,
 
     // BOTNET specific errors
         ERR_BN_INIT_FAILED,
@@ -34,6 +38,7 @@ enum{
         ERR_BN_TYPE_TOO_HIGH,
         ERR_BN_TYPE_VERSION,
         ERR_BN_TYPE_ALREADY_ATTACHED,
+        ERR_BN_WRONG_TYPE,
         ERR_BN_OVERSIZE,
         ERR_BN_CSUM,
         ERR_BN_NO_SUCH_INTERFACE,   //no such interface on this device
