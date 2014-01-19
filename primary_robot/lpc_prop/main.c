@@ -19,7 +19,12 @@
 
 // compile-time config
 #define ASSERV_TEST
+#define NETWORK_TEST
 #define TIME_STATS
+
+#if defined(NETWORK_TEST) && !defined(ASSERV_TEST)
+#warning "NETWORK_TEST is useless when ASSERV_TEST is not defined"
+#endif
 
 #define SQR(v) ((long long)(v)*(v))
 
@@ -139,6 +144,8 @@ int main(void) {
     int n_x, n_y, i;
     int alpha, dist, dist_tmp, dist_lim;
     int step_rotdir = 0; // initial value unused, but necessary to avoid a warning
+#endif
+#if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
     sMsg msg;
 #endif
 
@@ -146,7 +153,7 @@ int main(void) {
 
     pwm_init(0, 1024);  // 29.3kHz update rate => not audible
 
-#ifndef ASSERV_TEST
+#if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
     sb_init();
 #endif
 
@@ -179,9 +186,24 @@ int main(void) {
     // main loop
     while(1) {
         sys_time_update();
-#ifndef ASSERV_TEST
+#if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
         sb_routine();
+#endif
 
+#if defined(ASSERV_TEST) && defined(NETWORK_TEST)
+        if(sb_receive(&msg) > 0) {
+            switch(msg.header.type){
+            case E_DATA: // beacon
+                gpio_write(0, 31, !msg.payload.raw[0]);
+
+                break;
+            default:
+                break;
+            }
+        }
+#endif
+
+#ifndef ASSERV_TEST
         if(sb_receive(&msg) > 0) {
             switch(msg.header.type){
             case E_DATA: // beacon

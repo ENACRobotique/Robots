@@ -11,6 +11,8 @@
 #include "lib_sbDebug.h"
 #include "network_cfg.h"
 
+#define NETWORK_TEST
+
 uint8_t traj_extract_idx = 0;
 sTrajElRaw_t traj_blue[] = {
         {7.50, 100.00, 88.75, 112.90, 82.26, 90.00, 105.00, 8.00, 16.43, 0, 0},
@@ -38,6 +40,7 @@ int main(void) {
 
     global_IRQ_enable();
 
+#ifndef NETWORK_TEST
     // send position update
     sb_printDbg("start io");
 
@@ -51,6 +54,7 @@ int main(void) {
     msg.payload.pos.theta = 0.;
     msg.payload.pos.id = 0; // primaire
     sb_send(&msg);
+#endif
 
     // main loop
     while(1) {
@@ -58,6 +62,7 @@ int main(void) {
 
         sb_routine();
 
+#ifndef NETWORK_TEST
         if( traj_extract_idx < sizeof(traj_blue)/sizeof(*traj_blue) ) {
             msg.header.destAddr = ADDRI_MAIN_PROP;
             msg.header.type = E_TRAJ;
@@ -67,12 +72,21 @@ int main(void) {
 
             traj_extract_idx++;
         }
+#endif
 
         if(millis() - prevLed >= 250) {
             prevLed = millis();
 
             gpio_toggle(1, 24);
             //      gpio_write(0, 31, gpio_read(1, 24));
+
+#ifdef NETWORK_TEST
+            msg.header.destAddr = ADDRI_MAIN_PROP;
+            msg.header.type = E_DATA;
+            msg.header.size = 1;
+            msg.payload.raw[0] = !gpio_read(1, 24);
+            sb_send(&msg);
+#endif
         }
     }
 
