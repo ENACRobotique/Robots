@@ -76,6 +76,12 @@ typedef struct {
 }sCBRCtrl;
 
 typedef struct {
+    uint8_t flag;
+    int8_t fluxID;         // identifier of the flux (-1 means every flux)
+    bn_Address src;        // destination of the CBR
+}sWellCtrl;
+
+typedef struct {
     uint8_t fluxID;             // identifier of the flux
     uint8_t bullshit[BN_MAX_PDU-sizeof(uint8_t)-sizeof(sGenericHeader)];           // size of the payload of the messages
 }sTestMsg;
@@ -98,7 +104,7 @@ typedef union{
 
     sCBRCtrl CBRCtrl;
     sTestMsg testMsg;
-    uint8_t wellCrtl;
+    sWellCtrl wellCrtl;
 
 /************************ user payload stop ************************/
 

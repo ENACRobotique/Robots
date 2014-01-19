@@ -45,9 +45,23 @@ typedef struct sFluxDescDef{
     struct sFluxDescDef *next;
 } sFluxDescriptor;
 
-// flux database (chained list pointer to first elem)
+typedef struct sStatDescDef{
+    bn_Address sender;
+    int8_t fluxID;
+    uint32_t sw;            // memory to store a stopwatch
+    uint32_t meanIAT;       // mean inter-arrival time (µs)
+    uint32_t numberRX;      // number of message received
+    struct sStatDescDef *next;
+} sStatDescriptor;
+
+
+
+
+// flux database (chained list, pointer to first elem)
 sFluxDescriptor *fluxDB=0;
 
+//stat database
+sStatDescriptor *statDB=0;
 
 
 /* Creates an new flux.
@@ -108,7 +122,7 @@ int cbr_findAndKill(sMsg * msg){
 }
 
 
-int cbr_printDbg(sMsg *msg){
+int cbr_printStat(sMsg *msg){
     sFluxDescriptor *curP;
     int i=0;
 
@@ -151,7 +165,7 @@ int cbr_controller(sMsg *msg){
         cbr_findAndKill(msg);
         break;
     case E_CBR_STATS :
-        cbr_printDbg(msg);
+        cbr_printStat(msg);
         break;
     default : return -ERR_WRONG_FLAG;
     }
@@ -180,6 +194,7 @@ int cbr_deamon(){
 
                 //restart it
                 curP->sw=0;
+                stopwatch(&(curP->sw));
 
                 //fill the pkt with this flux data
                 testPkt.header.destAddr=curP->receiver;
@@ -287,17 +302,105 @@ int cbr_stop(bn_Address server, int8_t fluxID){
     return bn_send(&msg);
 }
 
+int well_recordPkt(sMsg *msg){
+    sStatDescriptor *curP=0, *prevP=statDB;
+
+    //record global stat
+
+    //search for the duet (sender,fluxID) in the DB and update its value
+    for (curP=statDB; curP!=0 && (msg->header.srcAddr==curP->sender && msg->payload.testMsg.fluxID==curP->fluxID) ; curP=curP->next){
+        prevP=curP;
+    }
+    //if found, update stat values
+    if ( curP!=0 ) {
+        //increment number of pkts
+        curP->numberRX++;
+
+        //compute  man store mean IAT
+        curP->meanIAT=( stopwatch(&(curP->sw))*(curP->numberRX - 1) + curP->meanIAT)/curP->numberRX;
+
+        //restart stopwatch
+        curP->sw=0;
+        stopwatch(&(curP->sw));
+    }
+    //if not found, create new entry
+    else {
+
+        //allocate memory
+        if ( (curP=malloc(sizeof(sStatDescriptor)))<0) return -ERR_MALLOC;
+        prevP->next=curP;
+
+        //fill it
+        curP->fluxID=msg->payload.testMsg.fluxID;
+        curP->meanIAT=0;
+        curP->next=0;
+        curP->numberRX=1;
+        curP->sender=msg->header.srcAddr;
+        curP->sw=0;
+        stopwatch(&(curP->sw));
+    }
+    return 0;
+}
+
+/* Replies to the sender of msg by the asked statistics
+ *
+ */
+int well_sendStat(sMsg *msg){
+    sStatDescriptor *curP;
+    int i=0;
+
+    //every flux
+    if ( msg->payload.wellCrtl.fluxID==-1 && msg->payload.wellCrtl.src==0 ){
+        bn_printfDbg("Full Well report from x%hx|i%hx|u%hx\n", MYADDRX, MYADDRI, MYADDRU);
+        for ( curP=statDB ; curP!=0 ; curP=curP->next){
+            i++;
+        }
+        bn_printfDbg("End Well report. nb entries : %d",i);
+    }
+    else {
+        bn_printfDbg("short Well report from x%hx|i%hx|u%hx\n", MYADDRX, MYADDRI, MYADDRU);
+
+        for ( curP=statDB ; curP!=0 ; curP=curP->next){
+            if ( (msg->payload.wellCrtl.src==0 || msg->payload.wellCrtl.src==curP->sender) \
+                   && (msg->payload.wellCrtl.fluxID==-1 || msg->payload.wellCrtl.fluxID==curP->fluxID) ){
+                bn_printfDbg("from %hx, id %d, rxed %d, IAT %d\n", curP->sender, curP->fluxID, curP->numberRX, curP->meanIAT);
+            }
+        }
+    }
+
+    return 0;
+}
+
+/* Deletes all stat
+ *
+ */
+int well_deleteAll(){
+    sStatDescriptor *curP,*nextP;
+    for (curP=statDB; curP!=0 ; ){
+        nextP=curP->next;
+        free(curP);
+        curP=nextP;
+    }
+    return 0;
+}
+
+
 /* Stat generator on the receiver side.
  * Should receive any  E_TEST_PKT and E_WELL_CTRL messages.
  */
 // counts received test packets
 int well_deamon(sMsg *msg){
 
+    //check type
+    if (msg->header.type!=E_TEST_PKT && msg->header.type!=E_WELL_CTRL) return -ERR_BN_WRONG_TYPE;
 
     switch (msg->header.type){
     case E_TEST_PKT :
+         return well_recordPkt(msg);
         break;
     case E_WELL_CTRL :
+        if (msg->payload.wellCrtl.flag==E_WELL_RESET) return well_deleteAll();
+        else if (msg->payload.wellCrtl.flag==E_WELL_STATS)return well_sendStat(msg);
         break;
     default :
         break;
@@ -305,7 +408,36 @@ int well_deamon(sMsg *msg){
     return 0;
 }
 
-// sends a result request
-int well_printStat(bn_Address server){
-    return 0;
+/* sends a result request
+ * Arguments :
+ *  server : address of the node where the resuslts are recorded
+ *  sender : source of the traffic monitored (0 for all sender)
+ *  fluxID : ID of the flux monitored (-1 for all flux of sender specified with "sender" argument)
+ */
+int well_requestStat(bn_Address server,bn_Address sender, int8_t fluxID){
+    sMsg msg;
+
+    msg.header.destAddr=server;
+    msg.header.size=sizeof(sWellCtrl);
+    msg.header.type=E_WELL_CTRL;
+
+    msg.payload.wellCrtl.flag=E_WELL_STATS;
+    msg.payload.wellCrtl.fluxID=fluxID;
+    msg.payload.wellCrtl.src=sender;
+
+    return bn_send(&msg);
 }
+
+// sends a "delete everything" request
+int well_reset(bn_Address server){
+    sMsg msg;
+
+    msg.header.destAddr=server;
+    msg.header.size=sizeof(sWellCtrl);
+    msg.header.type=E_WELL_CTRL;
+
+    msg.payload.wellCrtl.flag=E_WELL_RESET;
+
+    return bn_send(&msg);
+}
+

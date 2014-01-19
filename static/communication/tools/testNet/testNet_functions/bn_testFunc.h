@@ -30,8 +30,8 @@ int cbr_reset(bn_Address server);
 int cbr_stop(bn_Address server, int8_t fluxID);
 
 int well_deamon(sMsg *msg);             // counts received test packets
-int well_printStat(bn_Address server);  // sends a result request
-
+int well_resquestStat(bn_Address server,bn_Address sender, int8_t fluxID);  // sends a result request
+int well_reset(bn_Address server);  // sends a "delete everything" request
 
 #ifdef __cplusplus
 }
