@@ -100,7 +100,7 @@ int bn_init(){
 
 #if MYADDRI!=0
 #   if defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX)
-    if ( (ret=I2C_init(400000UL))<0 ) return ret;
+    I2C_init(400000UL);
 #   endif
 #endif
 

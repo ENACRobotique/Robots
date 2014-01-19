@@ -198,7 +198,7 @@ int Xbee_init(){
     while( testTimeout(10000000,&sw));
 
     //clear in buffer from remaining bytes
-    while (serialReadEscaped(&garbage,1000));
+    while ( serialReadEscaped(&garbage,1000)>=0 );
     if (ret<0) return ret;
     else return 1;
 }

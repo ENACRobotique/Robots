@@ -14,11 +14,11 @@
 
 // other required libraries
 #include "../../shared/bn_checksum.h"
-#include "../../../global_errors.h"
+#include "../../../../global_errors.h"
 
 // I2C_arduino specific libraries
 #include "lib_I2C_arduino.h"
-#include "Wire.h"
+#include "../../../../core/arduino/libraries/Wire/Wire.h"
 #include "../../shared/botNet_core.h"
 
 // standard libraries
