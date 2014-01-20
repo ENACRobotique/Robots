@@ -13,6 +13,7 @@
 
 #include "Arduino.h"
 
+// XXX: rename
 
 //pseudo-mutex for superBus central Buffer access management
 inline void mutexLock(){

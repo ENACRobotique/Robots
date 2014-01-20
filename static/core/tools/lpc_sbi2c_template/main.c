@@ -1,84 +1,56 @@
-#include <targets/LPC2000.h>
-#include <ctl_api.h>
-#include <math.h>
-#include <limits.h>
-#include <stdint.h>
+#include <stdio.h>
+#include <lib_superBus.h>
+#include <lib_sbDebug.h>
+#include <i2c.h>
+#include <gpio.h>
+#include <ime.h>
+#include <sys_time.h>
 
-#include "gpio.h"
-#include "eint.h"
-#include "pwm.h"
-#include "sys_time.h"
-#include "params.h"
-#include "trigo.h"
-#include "i2c.h"
-
-#include "lib_superBus.h"
-
-#ifndef BIT
-#define BIT(b) (1<<(b))
-#endif
-
-#ifndef min
-#define min(a, b) ((a)>(b)?(b):(a))
-#endif
-#ifndef max
-#define max(a, b) ((a)>(b)?(a):(b))
-#endif
-#ifndef MINMAX
-#define MINMAX(m, v, M) max(m, min(v, M))
-#endif
-
-#define SQR(v) ((long long)(v)*(v))
-
-void mybreak_i() {
-  static int i = 0;
-  i++;
-}
+#include "node_cfg.h"
 
 int main(void) {
-  static int led_etat = 0;
-  unsigned int prev_I2C = 0;
-  int ret;
-  char buffer[MAX_CHUNK_SIZE];
-  uint8_t addr;
+    unsigned int time;
+    int led0_status = 0, led1_status = 0;
+    unsigned int led0_prevT = 0;
+    sMsg msg;
 
-  gpio_init_all();  // use fast GPIOs
+    gpio_init_all();  // use fast GPIOs
 
-  sb_init();
+    // status LEDs
+    gpio_output(1, 24);
+    gpio_write(1, 24, led0_status); // green LED is on when its output is 0
 
-// sortie LED
-  gpio_output(1, 24);
-  gpio_write(1, 24, 0); // green LED on
+    gpio_output(0, 31);
+    gpio_write(0, 31, led1_status); // orange LED is on when its output is 0
 
-// init time management
-  sys_time_init();
+    // init time management
+    sys_time_init();
 
-  ctl_global_interrupts_enable();
+    // allow interrupt requests
+    global_IRQ_enable();
 
-  sMsg msg;
+    // superbus init
+    sb_init();
 
-  msg.header.destAddr = ADDRI_MAIN_TURRET;
-  msg.header.type = E_DEBUG;
-  msg.header.size = 5;
-  msg.payload.raw[0] = '\0';
-  msg.payload.raw[1] = '\0';
-  msg.payload.raw[2] = '\0';
-  msg.payload.raw[3] = '\0';
-  msg.payload.raw[4] = '\0';
+    sb_printDbg("Hello world, I'm lpc_sbi2c_template!");
 
-  ret = sb_send(&msg);
+    // main loop
+    while(1) {
+        sys_time_update();
+        time = millis();
 
-// main loop
-  while(1) {
-    sys_time_update();
+        sb_routine();
 
-    sb_routine();
+        if(sb_receive(&msg) > 0){
+            gpio_write(0, 31, led1_status^=1);
+        }
 
-//    if( millis() - prev_I2C > 2 ){
-//      prev_I2C = millis();
+        if((time - led0_prevT) > 200){
+            led0_prevT = time;
 
-//    }
-  }
+            gpio_write(1, 24, led0_status^=1);
+        }
+    }
 
-  return 0;
+    return 0;
 }

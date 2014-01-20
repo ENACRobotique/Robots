@@ -3,9 +3,8 @@
 
 #include <stdio.h>
 
-//#include "network_cfg.h"
-//#include "lib_checksum.h"
-#include "params.h" // MYADDRI
+#include "network_cfg.h" // DEVICEI_MASK
+#include "node_cfg.h" // MYADDRI
 
 // from lpc2148/lpc_lib
 #include "i2c.h" // i2c_* lpc functions
