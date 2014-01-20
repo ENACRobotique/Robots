@@ -52,7 +52,7 @@ int testTimeout(uint32_t delay, uint32_t *store) {
  * Expected behavior of stopwatch :
  *   1 - *store is set to 0 prior to first call (resets the stopwatch)
  *   2 - first call after that : returns 0 and starts the stopwatch.
- *   3 - any call after that (and before any modification to *store) : returns the amount of time elapsed after the previous step.
+ *   3 - any call after that (and before any modification to *store) : returns the amount of time elapsed after step 2.
  *   4 - *store is modified (not mandatory). If *store is set to 0, goto 1.
  *
  *  store is a pointer to a storing value, to enable nesting
