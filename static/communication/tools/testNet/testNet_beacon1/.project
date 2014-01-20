@@ -3,6 +3,7 @@
 	<name>testNet_beacon1</name>
 	<comment></comment>
 	<projects>
+		<project>arduinoUno_core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

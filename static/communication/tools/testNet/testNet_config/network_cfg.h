@@ -40,8 +40,8 @@ extern "C" {
 
 //xbee adresses
     #define ADDRX_PC1       ( BIT(0) | SUBNETX )
-    #define ADDRX_BEACON_1  ( BIT(2) | SUBNETX )
-    #define ADDRX_BEACON_2  ( BIT(3) | SUBNETX )
+    #define ADDRX_BEACON_1  ( BIT(1) | SUBNETX )
+    #define ADDRX_BEACON_2  ( BIT(2) | SUBNETX )
 
 //I2C adresses
 //!\ NO ODD ADDRESSES FOR I²C !!!!

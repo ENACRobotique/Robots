@@ -17,9 +17,10 @@
 sRTableEntry rTable[]={
         {0x42&(~SUBNET_MASK),{IF_XBEE,ADDRX_BEACON_1}}
 };
-#elif (MYADDRI == ADDRI_MAIN_CANDLE)
+#elif (MYADDRX == ADDRX_BEACON_1 || MYADDRI == ADDRI_BEACON_1)
 sRTableEntry rTable[]={
-        {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
+        {SUBNETU1, {IF_I2C, ADDRI_ARDUINO}},
+        {SUBNETU2, {IF_I2C, ADDRI_LPC}},
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRI == ADDRI_MAIN_PROP)

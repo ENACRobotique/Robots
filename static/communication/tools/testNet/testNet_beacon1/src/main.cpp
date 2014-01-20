@@ -49,16 +49,18 @@ void loop() {
         routineErr++;
     }
     if (bn_receive(&in)){
-        switch (in.header.type){
-        case E_WELL_CTRL :
-        case E_TEST_PKT :
-            well_deamon(&in);
-        case E_CBR_CTRL :
-            cbr_controller(&in);
-        default : break;
-        }
+//        switch (in.header.type){
+//        case E_WELL_CTRL :
+//        case E_TEST_PKT :
+//            well_deamon(&in);
+//            break;
+//        case E_CBR_CTRL :
+////            cbr_controller(&in);
+//            break;
+//        default : break;
+//        }
     }
-    cbr_deamon();
+//    cbr_deamon();
 
 
 

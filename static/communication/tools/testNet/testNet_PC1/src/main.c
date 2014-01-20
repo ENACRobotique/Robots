@@ -81,6 +81,7 @@ int main(){
             }
 
         }
+        cbr_deamon();
 
 
         if (menu){
