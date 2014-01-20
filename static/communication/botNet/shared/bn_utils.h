@@ -19,8 +19,8 @@ typedef struct{
     uint32_t ping;
 }sTraceInfo;
 
-int sb_ping(bn_Address dest);
-int sb_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout);
+int bn_ping(bn_Address dest);
+int bn_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout);
 
 #ifdef __cplusplus
 }

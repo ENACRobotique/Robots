@@ -38,10 +38,6 @@ int main(){
     sMsg msgIn;
     char cmd;
     bn_Address destAd;
-    int l;
-
-    int sum=0;
-    int rxed[64]={0};
 
     int msg2send=10000,msgSend=0,msgNStatused=0,msgNOk=0,avgElem=0;
     float avgMes=0,avgVal=0;
@@ -173,7 +169,7 @@ int main(){
                     scanf("%hx",&destAd);
                     int depth;
                     printf("enter depth\n");
-                    scanf("%hx",&depth);
+                    scanf("%i",&depth);
                     sTraceInfo trInfo[depth];
                     int nbTraces,f;
                     nbTraces=bn_traceroute(destAd,trInfo,depth,1000);
