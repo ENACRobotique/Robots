@@ -19,7 +19,7 @@ int I2C_receive(sMsg *pRet) {
     return i2c_recvchunk(NULL, (uint8_t *)pRet, sizeof(*pRet));
 }
 
-int I2C_send(const sMsg *msg, sb_Address firstDest){
+int I2C_send(const sMsg *msg, bn_Address firstDest){
     return i2c_sendchunk(firstDest & DEVICEI_MASK, (const uint8_t *)msg, sizeof(msg->header) + msg->header.size);
     //TODO : if applicable, either make an error conversion here, or implement global_erre=ors.h in i2c_sendchunk()
 }

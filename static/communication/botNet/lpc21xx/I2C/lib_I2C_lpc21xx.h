@@ -8,7 +8,7 @@
 
 void I2C_init(unsigned long speed);
 int I2C_receive(sMsg *pRet);
-int I2C_send(const sMsg *msg, sb_Address firstDest);
+int I2C_send(const sMsg *msg, bn_Address firstDest);
 
 #endif
 

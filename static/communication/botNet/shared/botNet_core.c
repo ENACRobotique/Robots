@@ -43,8 +43,9 @@
 #elif defined(ARCH_LPC21XX)
     #include <stdarg.h>
     #if MYADDRI!=0
-        #include "../lpc21xx/lib_I2C_lpc21xx.h"
+        #include "../lpc21xx/I2C/lib_I2C_lpc21xx.h"
     #endif
+    #include "../lpc21xx/mutex/mutex.h"
 #else
 #error "please Define The Architecture Symbol, You Bloody Bastard"
 #endif
@@ -86,7 +87,9 @@ uint8_t seqNum=0;
  *  <0 if error
  */
 int bn_init(){
+#if MYADDRU!=0 || MYADDRX!=0
     int ret=0;
+#endif
 
 #if MYADDRU!=0
 #   ifdef ARCH_X86_LINUX
@@ -94,7 +97,7 @@ int bn_init(){
 #   endif
 
 #   ifdef ARCH_328P_ARDUINO
-    if ( (ret=UART_init(0,111111))<0 ) return ret;
+    if ( (ret=UART_init(NULL,111111))<0 ) return ret;
 #   endif
 #endif
 

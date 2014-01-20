@@ -10,7 +10,7 @@
 #ifndef MUTEX_H_
 #define MUTEX_H_
 
-#warning "this is not a real mutex, use it only with superbus"
+// warning, this is not a real mutex, use it only with botnet
 
 //pseudo-mutex for superBus central Buffer access management
 
