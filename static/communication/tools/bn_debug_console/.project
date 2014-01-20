@@ -25,9 +25,14 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>lib</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<location>/home/quentin/robot_enac/git_robot/static/core/linux/libraries/Timeout</location>
+			<locationURI>PARENT-3-PROJECT_LOC/core/linux/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/UART_framing</name>
@@ -50,22 +55,4 @@
 			<locationURI>PARENT-4-PROJECT_LOC/network_config</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-2-PROJECT_LOC%7D/git_robot/static</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT1</name>
-			<value>$%7BPARENT-2-PROJECT_LOC%7D</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT12</name>
-			<value>$%7Bcopy_PARENT%7D/communication</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT123</name>
-			<value>$%7Bcopy_PARENT1%7D/git_robot</value>
-		</variable>
-	</variableList>
 </projectDescription>

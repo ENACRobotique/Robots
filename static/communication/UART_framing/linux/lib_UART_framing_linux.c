@@ -32,10 +32,9 @@ int Xbee_serial_port;
  */
 int serialInit(const char *device){
     struct termios options;
-    char *devStr=device;
 
-    printf("opening of:%s: at 115200 bd\n",devStr);
-    Xbee_serial_port = open(devStr, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);//lecture et ecriture | pas controlling terminal | ne pas attendre DCD
+    printf("opening of:%s: at 115200 bd\n",device);
+    Xbee_serial_port = open(device, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);//lecture et ecriture | pas controlling terminal | ne pas attendre DCD
 
     //cas d'erreur d'ouverture
     if(Xbee_serial_port < 0)

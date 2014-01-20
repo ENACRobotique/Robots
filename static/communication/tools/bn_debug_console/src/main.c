@@ -65,7 +65,9 @@ int main(){
                 switch (toupper(cmd)){
                 case 'S' :  //sends debug address to distant node
                     printf("enter destination address\n");
-                    scanf("%hx",&destAd);
+                    if (scanf("%hx",&destAd) != 1){
+                        printf("error getting destination address\n");
+                    }
                     if ( (err=bn_debugSendAddr(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;

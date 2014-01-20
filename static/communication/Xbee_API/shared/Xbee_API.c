@@ -41,6 +41,7 @@
 
 // standard libraries
 #include <string.h>
+#include <stdint.h>
 
 #ifndef MIN
 #define MIN(m, n) (m)>(n)?(n):(m)
@@ -136,7 +137,7 @@ int Xbee_ATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h
  * Return value : nb of bytes written on serial link (including start, size and checksum, but excluding escaping char)
  * Remark : does not perform check on size and consistency of parameter
  * refer to XBEE doc for available commands
- * /*\ do not use if returned values are expected !
+ * ! do not use if returned values are expected !
  */
 int Xbee_waitATAck(int frID, uint32_t timeOut){
     int byteRead=0;
