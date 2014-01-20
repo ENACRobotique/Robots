@@ -11,8 +11,8 @@
 #include <pwm.h>
 #include <sys_time.h>
 #include <trigo.h>
-#include "lib_superBus.h"
-#include "lib_sbDebug.h"
+#include "shared/botNet_core.h"
+#include "shared/bn_debug.h"
 
 #include "params.h"
 #include "controller.h"
@@ -154,7 +154,7 @@ int main(void) {
     pwm_init(0, 1024);  // 29.3kHz update rate => not audible
 
 #if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
-    sb_init();
+    bn_init();
 #endif
 
     // sortie LED
@@ -180,18 +180,18 @@ int main(void) {
     global_IRQ_enable();
 
 #ifndef ASSERV_TEST
-    sb_printDbg("start prop");
+    bn_printDbg("start prop");
 #endif
 
     // main loop
     while(1) {
         sys_time_update();
 #if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
-        sb_routine();
+        bn_routine();
 #endif
 
 #if defined(ASSERV_TEST) && defined(NETWORK_TEST)
-        if(sb_receive(&msg) > 0) {
+        if(bn_receive(&msg) > 0) {
             switch(msg.header.type){
             case E_DATA: // beacon
                 gpio_write(0, 31, !msg.payload.raw[0]);
@@ -204,7 +204,7 @@ int main(void) {
 #endif
 
 #ifndef ASSERV_TEST
-        if(sb_receive(&msg) > 0) {
+        if(bn_receive(&msg) > 0) {
             switch(msg.header.type){
             case E_DATA: // beacon
                 gpio_write(0, 31, msg.payload.raw[0]);
@@ -280,7 +280,7 @@ int main(void) {
                     y = isD2I(msg.payload.pos.y); // (I<<SHIFT)
                     theta = isROUND( D2I(RDIAM)*msg.payload.pos.theta ); // (rad.I<<SHIFT)
 
-                    sb_printDbg("got pos");
+                    bn_printDbg("got pos");
                 }
                 break;
                 //case 3: // set desired speed
@@ -289,7 +289,7 @@ int main(void) {
                 // TODO case get position (send position periodically with uncertainty to the fixed beacons for better position estimation)
 
             default:
-                sb_printDbg("got unhandled msg");
+                bn_printDbg("got unhandled msg");
                 break;
             }
         }

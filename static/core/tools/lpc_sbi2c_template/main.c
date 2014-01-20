@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <lib_superBus.h>
-#include <lib_sbDebug.h>
+#include <shared/botNet_core.h>
+#include <shared/bn_debug.h>
 #include <i2c.h>
 #include <gpio.h>
 #include <ime.h>
@@ -30,18 +30,18 @@ int main(void) {
     global_IRQ_enable();
 
     // superbus init
-    sb_init();
+    bn_init();
 
-    sb_printDbg("Hello world, I'm lpc_sbi2c_template!");
+    bn_printDbg("Hello world, I'm lpc_sbi2c_template!");
 
     // main loop
     while(1) {
         sys_time_update();
         time = millis();
 
-        sb_routine();
+        bn_routine();
 
-        if(sb_receive(&msg) > 0){
+        if(bn_receive(&msg) > 0){
             gpio_write(0, 31, led1_status^=1);
         }
 
