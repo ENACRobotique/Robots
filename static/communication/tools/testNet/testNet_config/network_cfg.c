@@ -36,4 +36,10 @@ sRTableEntry rTable[]={
         {SUBNETU2, {IF_I2C, ADDRI_LPC}},
         {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
+#elif MYADDRI == ADDRI_LPC
+sRTableEntry rTable[]={
+        {SUBNETX, {IF_I2C, ADDRI_BEACON_1}},
+        {SUBNETU1, {IF_I2C, ADDRI_ARDUINO}},
+        {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
 #endif

@@ -23,8 +23,8 @@
 #if MYADDRU !=0
     #include "UART4bn.h"
 #endif
-#if MYADDRI
-
+#if MYADDRI !=0
+    #include "I2C4bn.h"
 #endif
 // standard libraries
 #include <string.h>
