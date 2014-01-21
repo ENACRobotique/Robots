@@ -49,10 +49,10 @@ extern "C" {
     #define ADDRI_BEACON_1      (4 | SUBNETI)
     #define ADDRI_LPC           (6 | SUBNETI)
 //UART adresses
-    #define ADDRU_PC2       (1 | SUBNETU1)
-    #define ADDRU_ARDUINO   (2 | SUBNETU1)
-    #define ADDRU_LPC       (1 | SUBNETU2)
-    #define ADDRU_PC3       (2 | SUBNETU2)
+    #define ADDRU1_PC2       (1 | SUBNETU1)
+    #define ADDRU1_ARDUINO   (2 | SUBNETU1)
+    #define ADDRU2_LPC       (1 | SUBNETU2)
+    #define ADDRU2_PC3       (2 | SUBNETU2)
 
 //default debug address :
     #define ADDR_DEBUG_DFLT 0
