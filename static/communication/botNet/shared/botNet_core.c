@@ -20,7 +20,12 @@
 #if MYADDRX !=0
     #include "Xbee4bn.h"
 #endif
+#if MYADDRU !=0
+    #include "UART4bn.h"
+#endif
+#if MYADDRI
 
+#endif
 // standard libraries
 #include <string.h>
 #include <stdlib.h>
@@ -33,18 +38,12 @@
 
 //architecture-specific includes
 #ifdef ARCH_328P_ARDUINO
-    #if MYADDRI!=0
-        #include "../arduino/I2C/lib_I2C_arduino.h"
-    #endif
     #include "../arduino/mutex/mutex.h"
 #elif defined(ARCH_X86_LINUX)
     #include <stdarg.h>
     #include "../linux/mutex/mutex.h"
 #elif defined(ARCH_LPC21XX)
     #include <stdarg.h>
-    #if MYADDRI!=0
-        #include "../lpc21xx/I2C/lib_I2C_lpc21xx.h"
-    #endif
     #include "../lpc21xx/mutex/mutex.h"
 #else
 #error "please Define The Architecture Symbol, You Bloody Bastard"
@@ -512,7 +511,7 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
 #if MYADDRU !=0
     case IF_UART :
         while (retVal<=0 && retries<BN_MAX_RETRIES){
-            retVal=UART_send(msg, routeInfo.nextHop);
+            retVal=UART_send(msg);
             retries++;
         }
         return retVal;

@@ -26,7 +26,7 @@ inline int UART_receive(sMsg *pRet){
     return UART_readFrame(pRet,sizeof(sMsg));
 }
 
-inline int UART_send(sMsg *msg){
+inline int UART_send(const sMsg *msg){
     return UART_writeFrame(msg,sizeof(sGenericHeader)+msg->header.size);
 }
 
