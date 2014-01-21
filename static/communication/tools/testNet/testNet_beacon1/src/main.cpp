@@ -35,7 +35,7 @@ void setup() {
 
 
     bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
-    bn_printfDbg("start balise 1, free mem : %d o\n",freeMemory());
+    bn_printfDbg("start beacon 1, free mem : %d o\n",freeMemory());
 
 
     pinMode(13,OUTPUT);

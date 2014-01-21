@@ -35,7 +35,7 @@ void setup() {
 
 
     bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
-    bn_printfDbg("start balise 1, free mem : %d o\n",freeMemory());
+    bn_printfDbg("start beacon 2, free mem : %d o\n",freeMemory());
 
 
     pinMode(13,OUTPUT);
@@ -49,18 +49,8 @@ void loop() {
         routineErr++;
     }
     if (bn_receive(&in)){
-//        switch (in.header.type){
-//        case E_WELL_CTRL :
-//        case E_TEST_PKT :
-//            well_deamon(&in);
-//            break;
-//        case E_CBR_CTRL :
-////            cbr_controller(&in);
-//            break;
-//        default : break;
-//        }
+
     }
-//    cbr_deamon();
 
 
 
