@@ -186,6 +186,7 @@ int bn_sendAck(sMsg *msg){
     sMsg msgIn={{0}}; //incoming message (may be our ack)
     int ret=0;
 
+
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
 
@@ -257,7 +258,7 @@ int bn_routine(){
     ret=0;
 #endif
 #if (MYADDRU)!=0
-    if (ret=UART_receive(&temp)>0) {
+    if ( (ret=UART_receive(&temp))>0) {
         bn_pushInBufLast(&temp.msg,IF_UART);
     }
     else if (ret<0) return ret;
