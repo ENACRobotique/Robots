@@ -8,6 +8,11 @@
 #ifndef UART4BN_H_
 #define UART4BN_H_
 
+#include "node_cfg.h"
+
+#if MYADDRU
+
+
 #include "messages.h"
 #include "../../UART_framing/shared/lib_UART_framing.h"
 
@@ -28,5 +33,7 @@ inline int UART_send(sMsg *msg){
 #ifdef __cplusplus
 }
 #endif
+
+#endif //MYADDRU
 
 #endif /* UART4BN_H_ */

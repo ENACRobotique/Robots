@@ -24,7 +24,7 @@
 #include <string.h>
 #include <stdint.h>
 
-
+#if MYADDRX
 
 
 
@@ -145,3 +145,4 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
 
 }
 
+#endif //MYADDRX
