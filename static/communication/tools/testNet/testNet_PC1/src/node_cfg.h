@@ -19,6 +19,8 @@
 #define BN_MAX_RETRIES          2
 #define BN_ACK_TIMEOUT          1000    //in ms
 
+#define XBEE_UART_PATH "/dev/ttyUSB0"
+
 // #define ARCH_X86_LINUX       in symbols
 // #define ARCH_LITTLE_ENDIAN   in symbols
 #define UART_WAITFRAME_TIMEOUT 10       //in µs
