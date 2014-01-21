@@ -5,8 +5,6 @@ Test example for botNet. May be used as example.
 
 Topology of the network (nodes between parenthesis are not implemented yet).
 
-
-
                              Xbee
     --------------------------------------------------------------
     |                              |                             |
@@ -23,3 +21,10 @@ Topology of the network (nodes between parenthesis are not implemented yet).
     |       |      UART1       |       |              |       |     UART2     |       |
     |  PC2  |------------------|arduino|              | (LPC) |---------------| (PC3) |
     |_______|                  |_______|              |_______|               |_______|
+
+
+Hardware :
+    PCx : any computer with linux.
+    beaconx : mobile laser beacon.
+    arduino : arduino UNO.
+    LPC : LPC2148 dev board.
