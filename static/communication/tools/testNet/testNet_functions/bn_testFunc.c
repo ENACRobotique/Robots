@@ -16,6 +16,7 @@
 #include "node_cfg.h"
 
 #include <stdlib.h>
+#include <inttypes.h>
 
 enum {
     E_CBR_START,
@@ -130,7 +131,7 @@ int cbr_printStat(sMsg *msg){
     if ( msg->payload.CBRCtrl.fluxID==-1 ){
         bn_printfDbg("Full CBR report from x%hx|i%hx|u%hx\n", MYADDRX, MYADDRI, MYADDRU);
         for ( curP=fluxDB ; curP!=0 ; curP=curP->next){
-            bn_printfDbg("id %d, to %hx, send %d, Nsend %d\n", curP->fluxID, curP->receiver, curP->numberSend, curP->numberNSend);
+            bn_printfDbg("id %"PRIi8", to %"PRIx16", send %"PRIu32", Nsend %"PRIu32"\n", curP->fluxID, curP->receiver, curP->numberSend, curP->numberNSend);
             i++;
         }
         bn_printfDbg("End CBR report. nb entries : %d",i);
@@ -138,7 +139,7 @@ int cbr_printStat(sMsg *msg){
     else {
         for ( curP=fluxDB ; curP!=0 && curP->fluxID!=msg->payload.CBRCtrl.fluxID ; curP=curP->next){
             bn_printfDbg("short CBR report from x%hx|i%hx|u%hx\n", MYADDRX, MYADDRI, MYADDRU);
-            bn_printfDbg("id %d, to %hx, send %d, Nsend %d\n", curP->fluxID, curP->receiver, curP->numberSend, curP->numberNSend);
+            bn_printfDbg("id %"PRIi8", to %"PRIx16", send %"PRIu32", Nsend %"PRIu32"\n", curP->fluxID, curP->receiver, curP->numberSend, curP->numberNSend);
         }
     }
 
@@ -351,19 +352,19 @@ int well_sendStat(sMsg *msg){
 
     //every flux
     if ( msg->payload.wellCrtl.fluxID==-1 && msg->payload.wellCrtl.src==0 ){
-        bn_printfDbg("Full Well report from x%hx|i%hx|u%hx\n", MYADDRX, MYADDRI, MYADDRU);
+        bn_printfDbg("Full Well report from x%"PRIx16"|i%"PRIx16"|u%"PRIx16"\n", MYADDRX, MYADDRI, MYADDRU);
         for ( curP=statDB ; curP!=0 ; curP=curP->next){
             i++;
         }
         bn_printfDbg("End Well report. nb entries : %d",i);
     }
     else {
-        bn_printfDbg("short Well report from x%hx|i%hx|u%hx\n", MYADDRX, MYADDRI, MYADDRU);
+        bn_printfDbg("short Well report from x%"PRIx16"|i%"PRIx16"|u%"PRIx16"\n", MYADDRX, MYADDRI, MYADDRU);
 
         for ( curP=statDB ; curP!=0 ; curP=curP->next){
             if ( (msg->payload.wellCrtl.src==0 || msg->payload.wellCrtl.src==curP->sender) \
                    && (msg->payload.wellCrtl.fluxID==-1 || msg->payload.wellCrtl.fluxID==curP->fluxID) ){
-                bn_printfDbg("from %hx, id %d, rxed %d, IAT %d\n", curP->sender, curP->fluxID, curP->numberRX, curP->meanIAT);
+                bn_printfDbg("from %"PRIx16", id %"PRIi8", rxed %"PRIu32", IAT %"PRIu32"\n", curP->sender, curP->fluxID, curP->numberRX, curP->meanIAT);
             }
         }
     }
