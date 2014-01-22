@@ -19,7 +19,7 @@ Topology of the network (nodes between parenthesis are not implemented yet).
                                    |                      |
      _______                    ___|___                ___|___                 _______ 
     |       |      UART1       |       |              |       |     UART2     |       |
-    |  PC2  |------------------|arduino|              | (LPC) |---------------| (PC3) |
+    |  PC2  |------------------|arduino|              |  LPC  |---------------| (PC3) |
     |_______|                  |_______|              |_______|               |_______|
 
 
