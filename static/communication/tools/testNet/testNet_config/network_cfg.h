@@ -45,9 +45,9 @@ extern "C" {
 
 //I2C adresses
 //!\ NO ODD ADDRESSES FOR I²C !!!!
-    #define ADDRI_ARDUINO       (2 | SUBNETI)
-    #define ADDRI_BEACON_1      (4 | SUBNETI)
-    #define ADDRI_LPC           (6 | SUBNETI)
+    #define ADDRI_ARDUINO       ((1<<1) | SUBNETI)
+    #define ADDRI_BEACON_1      ((2<<1) | SUBNETI)
+    #define ADDRI_LPC           ((3<<1) | SUBNETI)
 //UART adresses
     #define ADDRU1_PC2       (1 | SUBNETU1)
     #define ADDRU1_ARDUINO   (2 | SUBNETU1)
