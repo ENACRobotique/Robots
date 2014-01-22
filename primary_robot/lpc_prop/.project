@@ -37,7 +37,7 @@
 		<link>
 			<name>bn/Timeout</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/core/lpc21xx/libraries/Timeout</locationURI>
+			<location>/home/ludo6431/Robots/static/tools/libraries/Timeout</location>
 		</link>
 		<link>
 			<name>bn/botNet</name>
