@@ -27,27 +27,27 @@
 		<link>
 			<name>lpc2148</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/core/lpc21xx/lpc2148</location>
+			<locationURI>PARENT-4-PROJECT_LOC/core/lpc21xx/lpc2148</locationURI>
 		</link>
 		<link>
 			<name>lpc_lib</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/core/lpc21xx/lpc_lib</location>
+			<locationURI>PARENT-4-PROJECT_LOC/core/lpc21xx/lpc_lib</locationURI>
 		</link>
 		<link>
 			<name>bn/Timeout</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/core/lpc21xx/libraries/Timeout</location>
+			<locationURI>PARENT-4-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>bn/botNet</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/botNet</location>
+			<locationURI>PARENT-4-PROJECT_LOC/communication/botNet</locationURI>
 		</link>
 		<link>
 			<name>bn/testNet_config</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/tools/testNet/testNet_config</location>
+			<locationURI>PARENT-1-PROJECT_LOC/testNet_config</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

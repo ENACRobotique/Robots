@@ -11,7 +11,7 @@
 #include "messages.h"
 
 // other required libraries
-#include "timeout.h"
+#include "../../../tools/libraries/Timeout/timeout.h"
 #include "../../Xbee_API/shared/Xbee_API.h"
 #include "../../UART_framing/shared/lib_UART_framing.h"
 #include "../../../global_errors.h"

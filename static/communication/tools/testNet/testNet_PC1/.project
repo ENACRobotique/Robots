@@ -32,7 +32,7 @@
 		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<locationURI>PARENT-4-PROJECT_LOC/core/linux/libraries/Timeout</locationURI>
+			<locationURI>PARENT-4-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/UART_framing</name>
@@ -48,6 +48,11 @@
 			<name>lib/botNet</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/botNet</locationURI>
+		</link>
+		<link>
+			<name>lib/millis</name>
+			<type>2</type>
+			<locationURI>PARENT-4-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
 		</link>
 		<link>
 			<name>lib/testNet_config</name>

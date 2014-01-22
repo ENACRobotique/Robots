@@ -10,7 +10,7 @@
 #include "node_cfg.h"
 
 // other required libraries
-#include "timeout.h"
+#include "../../../tools/libraries/Timeout/timeout.h"
 #include "../../../global_errors.h"
 
 // botNet specific libraries

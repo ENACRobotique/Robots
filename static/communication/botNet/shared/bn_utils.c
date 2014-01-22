@@ -6,7 +6,7 @@
  */
 
 #include "bn_utils.h"
-#include "timeout.h"
+#include "../../../tools/libraries/Timeout/timeout.h"
 #include "botNet_core.h"
 
 
@@ -48,14 +48,18 @@ int bn_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t tim
     int i=0,ret=0;
 
 
-    //starts stopwatch
-    stopwatch(&sw);
 
-    //prepare and sends the message
+    //prepare  the message
     msg.header.type=E_TRACEROUTE_REQUEST;
     msg.header.destAddr=dest;
     msg.header.size=0;
+
+    //starts stopwatch
+    stopwatch(&sw);
+
+    //sends the message
     ret=bn_send(&msg);
+
     if ( ret<0 )return ret;
 
     //waits for the answers and stores it if correct. If incorrect, drop the message (traceroute must not be used in game, only for developpment and test purposes)

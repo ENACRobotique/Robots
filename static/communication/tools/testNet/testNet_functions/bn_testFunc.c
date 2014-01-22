@@ -11,7 +11,7 @@
  */
 
 #include "bn_testFunc.h"
-#include "timeout.h"
+#include "../../../../tools/libraries/Timeout/timeout.h"
 #include "../../../../global_errors.h"
 #include "node_cfg.h"
 

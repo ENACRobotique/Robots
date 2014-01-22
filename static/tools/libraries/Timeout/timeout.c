@@ -6,8 +6,16 @@
  */
 
 #include "timeout.h"
-#include "Arduino.h"
 
+#ifdef ARCH_328P_ARDUINO
+#include "Arduino.h"
+#elif defined(ARCH_X86_LINUX)
+#include "../../../core/linux/libraries/Millis/millis.h"
+#elif defined(ARCH_LPC21XX)
+#include <sys_time.h>
+#else
+#error "no ARCH_XXX symbol defined"
+#endif
 
 /* Expected behavior of testTimeout :
  *  1 - first call : start a timer of micros microsecond and return 1.
