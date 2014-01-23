@@ -25,27 +25,32 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>lpc2148</name>
+			<name>lib</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/core/lpc21xx/lpc2148</locationURI>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>lpc_lib</name>
+			<name>lib/Timeout</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/core/lpc21xx/lpc_lib</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/static/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
-			<name>bn/Timeout</name>
-			<type>2</type>
-			<location>/home/ludo6431/Robots/static/tools/libraries/Timeout</location>
-		</link>
-		<link>
-			<name>bn/botNet</name>
+			<name>lib/botNet</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/static/communication/botNet</locationURI>
 		</link>
 		<link>
-			<name>bn/network_config</name>
+			<name>lib/lpc2148</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/core/lpc21xx/lpc2148</locationURI>
+		</link>
+		<link>
+			<name>lib/lpc_lib</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/core/lpc21xx/lpc_lib</locationURI>
+		</link>
+		<link>
+			<name>lib/network_config</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/network_config</locationURI>
 		</link>
