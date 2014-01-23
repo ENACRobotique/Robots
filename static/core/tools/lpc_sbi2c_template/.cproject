@@ -29,12 +29,12 @@
 								<option id="gnu.c.compiler.option.debugging.level.523115483" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.misc.other.1602161673" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fno-common -mcpu=arm7tdmi -march=armv4t" valueType="string"/>
 								<option id="gnu.c.compiler.option.include.paths.301710111" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lpc2148}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lpc_lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn/network_config}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn/botNet}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn/Timeout}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lpc2148}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lpc_lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Timeout}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.584976814" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
@@ -51,7 +51,7 @@
 								<option id="gnu.c.link.option.libs.918310849" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="m"/>
 								</option>
-								<option id="gnu.c.link.option.ldflags.1266393938" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-T${workspace_loc:/${ProjName}/lpc2148/mem.ld}" valueType="string"/>
+								<option id="gnu.c.link.option.ldflags.1266393938" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-T${workspace_loc:/${ProjName}/lib/lpc2148/mem.ld}" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1653775475" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -67,7 +67,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="bn/botNet/shared/Xbee4bn.c|sb/shared/Xbee4sb.c|lpc_lib/uart0.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="lib/botNet/shared/Xbee4bn.c|lib/lpc_lib/uart0.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -99,4 +99,5 @@
 			</profile>
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
