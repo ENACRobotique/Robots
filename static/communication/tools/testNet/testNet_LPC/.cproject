@@ -29,12 +29,12 @@
 								<option id="gnu.c.compiler.option.debugging.level.1626711181" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.misc.other.1803199646" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fno-common -mcpu=arm7tdmi -march=armv4t" valueType="string"/>
 								<option id="gnu.c.compiler.option.include.paths.791702393" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lpc2148}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lpc_lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn/testNet_config}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn/botNet}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bn/Timeout}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lpc2148}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lpc_lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/testNet_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Timeout}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1808259533" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_LPC21XX"/>
@@ -51,7 +51,7 @@
 								<option id="gnu.c.link.option.libs.281664541" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="m"/>
 								</option>
-								<option id="gnu.c.link.option.ldflags.2125995616" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-T${workspace_loc:/${ProjName}/lpc2148/mem.ld}" valueType="string"/>
+								<option id="gnu.c.link.option.ldflags.2125995616" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-T${workspace_loc:/${ProjName}/lib/lpc2148/mem.ld}" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1192004399" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -67,7 +67,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="bn/botNet/shared/Xbee4bn.c|sb/shared/Xbee4sb.c|lpc_lib/uart0.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="lib/lpc_lib/uart0.c|lib/botNet/shared/Xbee4bn.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -77,7 +77,17 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="testNet_LPC.null.1230850205" name="testNet_LPC"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration"/>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/testNet_LPC"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1623915672.240243043.558106089.1447765230.1069776174;cdt.managedbuild.config.gnu.cross.exe.debug.1623915672.240243043.558106089.1447765230.1069776174.;cdt.managedbuild.tool.gnu.cross.c.compiler.946462280;cdt.managedbuild.tool.gnu.c.compiler.input.1113859777">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
