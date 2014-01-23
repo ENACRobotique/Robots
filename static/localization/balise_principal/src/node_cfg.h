@@ -15,10 +15,10 @@
 #define MYADDRI ADDRI_MAIN_TURRET
 #define MYADDRU 0
 
-#define SB_INC_MSG_BUF_SIZE 4
-#define SB_WAIT_XBEE_SND_FAIL   25000
-#define SB_MAX_RETRIES          2
-#define SB_ACK_TIMEOUT          1000    //in ms
+#define BN_INC_MSG_BUF_SIZE 4
+#define BN_WAIT_XBEE_SND_FAIL   25000
+#define BN_MAX_RETRIES          2
+#define BN_ACK_TIMEOUT          1000    //in ms
 
 #define ARCH_328P_ARDUINO
 #define ARCH_LITTLE_ENDIAN
