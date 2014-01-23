@@ -7,39 +7,39 @@
 
 
 #include "Arduino.h"
-#include "state_tirette.h"
-#include "state_goline.h"
+#include "state_traj.h"
 #include "state_pause.h"
 #include "../params.h"
 #include "../tools.h"
 
 #include "lib_move.h"
+#include "lib_radar2.h"
 
 
-sState* testLaunch()
+sState* testFresco()
 	{
-	if (EnemyDetection()) return &sPause;
+    if (radarIntrusion()) return &sPause;
     return 0;
 	}
 
-void initLaunch(sState *prev)
+void initFresco(sState *prev)
 	{
 	#ifdef DEBUG
-		Serial.println("Début launch");
+		Serial.println("Début fresco");
 	#endif
 	}
 
-void deinitLaunch(sState *next)
+void deinitFresco(sState *next)
 	{
 	#ifdef DEBUG
-		Serial.println("Fin launch");
+		Serial.println("Fin fresco");
 	#endif
 	}
 
-sState sLaunch={
+sState sFresco={
         BIT(E_MOTOR) | BIT(E_LINE),
-        &initLaunch,
-        &deinitLaunch,
-        &testLaunch
+        &initFresco,
+        &deinitFresco,
+        &testFresco
 };
 

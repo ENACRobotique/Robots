@@ -5,7 +5,7 @@ Simple version, with only 2 positions (we cover the whole surroundings of the ro
 
 */
 
-#include "lib_radar.h"
+/*#include "lib_radar.h"
 
 
 //globals
@@ -21,7 +21,7 @@ index  angle  direction
 4      22,5   front-right
 5      337,5  front-left
 6      292,5  left-front
-7      247,5  left-rear*/
+7      247,5  left-rear/
 ///!\ valid for min=65 && max=110
 
 void radarSetLim(uint16_t limits[RAD_NB_PTS]){
@@ -52,11 +52,13 @@ if(etat_rad) {
         C_rad[ (pos_rad-RAD_POS_MIN)/RAD_POS_INC + (3-nb)*RAD_NB_POS] = getRangeResult(nb);
         }
         //move the servo
-        if(sens_rad && pos_rad < RAD_POS_MAX) {
-              pos_rad = pos_rad + RAD_POS_INC;
-              if(pos_rad == RAD_POS_MAX) sens_rad = 0;
+        if(sens_rad && pos_rad < RAD_POS_MAX)
+        	{
+             pos_rad = pos_rad + RAD_POS_INC;
+             if(pos_rad == RAD_POS_MAX) sens_rad = 0;
             }
-        else if(!sens_rad && pos_rad > RAD_POS_MIN) {
+        else if(!sens_rad && pos_rad > RAD_POS_MIN)
+        {
           pos_rad = pos_rad - RAD_POS_INC;
           if(pos_rad == RAD_POS_MIN) sens_rad = 1;
         }
@@ -108,3 +110,4 @@ int radarIntrusion(){
   }
   return nb; 
 }
+*/

@@ -88,3 +88,14 @@ for(int i=0;i<8;i++)
 			}
 	}
 
+int lineDetection(void)
+	{
+	int i;
+	int nb=0;
+	for(i=0;i<8;i++)
+		{
+		if(getIntensity(i)>4500)nb++;
+		}
+	if(nb>1) return 1; //Si 2 capteurs détecte la ligne
+	return 0;
+	}

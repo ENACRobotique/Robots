@@ -6,7 +6,7 @@
 
 
 int startRange(uint8_t nb) {
-  uint8_t addr = (0xE0 >> 1) + (nb & 0x3);
+  uint8_t addr = (0xE0 >> 1) + (nb & 0x1);
 
   // send command to start ranging
   Wire.beginTransmission(addr);
@@ -15,9 +15,9 @@ int startRange(uint8_t nb) {
   return (int)Wire.endTransmission();
 }
 
-uint16_t getRangeResult(uint8_t nb) {
+uint16_t getRangeResult(uint8_t nb) { //retourner plutot la valeur mediane
   uint16_t range;
-  uint8_t addr = (0xE0 >> 1) + (nb & 0x3);
+  uint8_t addr = (0xE0 >> 1) + (nb & 0x1); //70 + nb (with safety)
 
   // ask data
   Wire.beginTransmission(addr);

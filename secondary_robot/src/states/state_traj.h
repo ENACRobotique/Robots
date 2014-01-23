@@ -3,6 +3,8 @@
  *
  *  Created on: 8 mai 2013
  *      Author: quentin
+ *   Modify on: janvier 2014
+ *   		By: Seb
  */
 
 #ifndef STATE_TRAJ_H_
@@ -19,10 +21,10 @@ typedef struct {
 int progTraj(trajElem tab[]);
 
 
-extern sState sTrajBlue;
-extern sState sTrajRed;
-extern sState sTrajBlueFinal;
+extern sState sTrajRedInit;
+extern sState sTrajYellowInit;
 extern sState sTrajRedFinal;
+extern sState sTrajYellowFinal;
 
 
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);

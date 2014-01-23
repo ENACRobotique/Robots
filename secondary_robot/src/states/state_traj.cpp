@@ -3,13 +3,16 @@
  *
  *  Created on: 8 mai 2013
  *      Author: quentin
+ *   Modify on: janvier 2014
+ *   		By: Seb
  */
 
 
 #include "Arduino.h"
 #include "state_types.h"
 #include "lib_move.h"
-#include "lib_radar.h"
+#include "lib_radar2.h"
+#include "lib_line.h"
 #include "../tools.h"
 #include "../params.h"
 #include "state_traj.h"
@@ -17,54 +20,51 @@
 #include "state_wall.h"
 #include "state_funny.h"
 #include "state_wait.h"
+#include "state_fresco.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0;
 
 
-void initTrajBlue(sState *prev) {
+void initTrajRedInit(sState *prev)
+	{
     uint16_t tab[RAD_NB_PTS];
     int i;
-    for (i=0;i<RAD_NB_PTS;i++){
-        tab[i]=15;
-    }
-    for (i=1;i<6;i++){
-            tab[i]=RADAR_SAFETY_DST;
-        }
+    for (i=0;i<RAD_NB_PTS;i++)
+    	{
+        tab[i]=RADAR_SAFETY_DST;
+    	}
     radarSetLim(tab);
-#ifdef DEBUG
-    Serial.println("debut traj bleue");
-#endif
-    if (prev==&sPause) {
-#ifdef DEBUG
-    Serial.println("\tback from pause");
-#endif
+
+	#ifdef DEBUG
+		Serial.println("debut traj rouge");
+	#endif
+
+    if (prev==&sPause)
+    	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
         st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-    }
-    else {
-#ifdef UPPERCUT
-    armServoRight.write(ARM_RIGHT_DOWN);
-#else
-    armServoRight.write(ARM_RIGHT_UP);
-#endif
-    }
+    	}
+	}
 
-}
-
-void deinitTrajBlue(sState *next){
-    //pause :
-    if (next==&sPause) {
+void deinitTrajRedInit(sState *next)
+	{
+    //pause
+    if (next==&sPause)
+    	{
         st_prevSaveTime=st_saveTime;
         st_saveTime=millis();
-    }
-    else {
+    	}
+    else
+    	{
         st_saveTime=0;
         st_prevSaveTime=0;
-        move(0,0);
-    }
-
+        //move(0,0);
+    	}
 }
 
-trajElem start_blue[]={
+trajElem start_red[]={ //A MODIFIER
         {0,0,100}, //to wait until the servo is in the good position
         {100,0,3000}, //avant 29cm
         {0,45,500},
@@ -75,70 +75,68 @@ trajElem start_blue[]={
         {-100,90,1000},
         {0,0,100},
         {0,0,0}
-};
+	};
 
-sState *testTrajBlue(){
+sState *testTrajRedInit()
+	{
     static int i=0;
     static unsigned long prev_millis=0;
-    if (periodicProgTraj(start_blue,&st_saveTime,&i,&prev_millis)) return &sWallRight;
+    if (periodicProgTraj(start_red,&st_saveTime,&i,&prev_millis)) return &sWallLeft;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
     if (radarIntrusion()) return &sPause;
     return 0;
-}
+	}
 
-sState sTrajBlue={
+sState sTrajRedInit={
         BIT(E_MOTOR) | BIT(E_RADAR),
-        &initTrajBlue,
-        &deinitTrajBlue,
-        &testTrajBlue
+        &initTrajRedInit,
+        &deinitTrajRedInit,
+        &testTrajRedInit
 };
 
 
 
 
-void initTrajRed(sState *prev) {
+void initTrajYellowInit(sState *prev)
+	{
     uint16_t tab[RAD_NB_PTS];
     int i;
-    for (i=0;i<RAD_NB_PTS;i++){
-        tab[i]=15;
-    }
-    for (i=6;i<RAD_NB_PTS;i++){
-            tab[i]=RADAR_SAFETY_DST;
-        }
+    for (i=0;i<RAD_NB_PTS;i++)
+    	{
+        tab[i]=RADAR_SAFETY_DST;
+    	}
     radarSetLim(tab);
-#ifdef DEBUG
-    Serial.println("debut traj rouge");
-#endif
-    if (prev==&sPause) {
-#ifdef DEBUG
-    Serial.println("\tback from pause");
-#endif
+
+	#ifdef DEBUG
+		Serial.println("debut traj rouge");
+	#endif
+
+    if (prev==&sPause)
+    	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
         st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-    }
-    else {
-#ifdef UPPERCUT
-    armServoLeft.write(ARM_LEFT_DOWN);
-#else
-    armServoLeft.write(ARM_LEFT_UP);
-#endif
-    }
+    	}
+	}
 
-}
-
-void deinitTrajRed(sState *next){
-    //pause :
-    if (next==&sPause) {
+void deinitTrajYellowInit(sState *next)
+	{
+    //pause
+    if (next==&sPause)
+    	{
         st_prevSaveTime=st_saveTime;
         st_saveTime=millis();
-    }
-    else {
+    	}
+    else
+    	{
         st_saveTime=0;
         st_prevSaveTime=0;
-        move(0,0);
-    }
+        //move(0,0);
+    	}
 }
 
-trajElem start_red[]={
+trajElem start_yellow[]={ //A MODIFIER
         {0,0,100}, //to wait until the servo is in the good position
         {100,0,2800},
         {0,-45,250},
@@ -149,71 +147,70 @@ trajElem start_red[]={
         {100,90,800},
         {0,0,100},
         {0,0,0}
-};
+	};
 
-sState *testTrajRed(){
+sState *testTrajYellowInit()
+	{
     static int i=0;
     static unsigned long prev_millis=0;
-    if (periodicProgTraj(start_red,&st_saveTime,&i,&prev_millis)) return &sWallLeft;
+    if (periodicProgTraj(start_yellow,&st_saveTime,&i,&prev_millis)) return &sWallRight;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
     if (radarIntrusion()) return &sPause;
     return 0;
-}
+	}
 
-sState sTrajRed={
+sState sTrajYellowInit={
         BIT(E_MOTOR) | BIT(E_RADAR),
-        &initTrajRed,
-        &deinitTrajRed,
-        &testTrajRed
-};
+        &initTrajYellowInit,
+        &deinitTrajYellowInit,
+        &testTrajYellowInit
+		};
+
+
+//***************Fin trajectoire initiale*****************//
 
 
 
-void initTrajRedFinal(sState *prev) {
+void initTrajRedFinal(sState *prev)
+	{
     uint16_t tab[RAD_NB_PTS];
     int i;
-    for (i=0;i<=4;i++){
+    for (i=0;i<RAD_NB_PTS;i++)
+    	{
         tab[i]=RADAR_SAFETY_DST;
-    }
-    for (i=10;i<=11;i++){
-            tab[i]=RADAR_SAFETY_DST;
-        }
-    for (i=4;i<10;i++){
-            tab[i]=15;
-        }
+    	}
     radarSetLim(tab);
-#ifdef DEBUG
-    Serial.println("debut traj finale rouge");
-#endif
-    if (prev==&sPause) {
-#ifdef DEBUG
-    Serial.println("\tback from pause");
-#endif
+
+	#ifdef DEBUG
+		Serial.println("debut traj finale rouge");
+	#endif
+
+    if (prev==&sPause)
+    	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
         st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-    }
-    else {
-    move(0,0);
-    armServoLeft.write(ARM_LEFT_UP);
-    delay(500);
-    armServoRight.write(ARM_RIGHT_GLASS);
-    }
+    	}
+	}
 
-}
-
-void deinitTrajRedFinal(sState *next){
-    //pause :
-    if (next==&sPause) {
+void deinitTrajRedFinal(sState *next)
+	{
+    //pause
+    if (next==&sPause)
+    	{
         st_prevSaveTime=st_saveTime;
         st_saveTime=millis();
-    }
-    else {
+    	}
+    else
+    	{
         st_saveTime=0;
         st_prevSaveTime=0;
-        move(0,0);
-    }
-}
+        //move(0,0);
+    	}
+	}
 
-trajElem final_red[]={
+trajElem final_red[]={ //A MODIFIER
         {0,0,100}, //to wait until the servo is in the good position
         {-100,45,650},
         {-100,0,6000},
@@ -222,106 +219,92 @@ trajElem final_red[]={
         {-100,-5,10000},
         {0,0,100},
         {0,0,0}
-};
+		};
 
-sState *testTrajRedFinal(){
+sState *testTrajRedFinal()
+	{
     static int i=0;
     static unsigned long prev_millis=0;
-    if (periodicProgTraj(final_red,&st_saveTime,&i,&prev_millis)) return &sWait;
+    if (periodicProgTraj(final_red,&st_saveTime,&i,&prev_millis)) return &sWait;//Cas a voir
+    if (lineDetection()) return &sFresco;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
     if (radarIntrusion()) return &sPause;
     return 0;
-}
+	}
 
 sState sTrajRedFinal={
         BIT(E_MOTOR)| BIT(E_RADAR),
         &initTrajRedFinal,
         &deinitTrajRedFinal,
         &testTrajRedFinal
-};
+		};
 
 
-
-
-void initTrajBlueFinal(sState *prev) {
+void initTrajYellowFinal(sState *prev)
+	{
     uint16_t tab[RAD_NB_PTS];
     int i;
-    for (i=0;i<=4;i++){
+    for (i=0;i<RAD_NB_PTS;i++)
+    	{
         tab[i]=RADAR_SAFETY_DST;
-    }
-    for (i=10;i<=11;i++){
-            tab[i]=RADAR_SAFETY_DST;
-        }
-    for (i=4;i<10;i++){
-            tab[i]=15;
-        }
+    	}
     radarSetLim(tab);
-#ifdef DEBUG
-    Serial.println("debut traj finale rouge");
-#endif
-    if (prev==&sPause) {
-#ifdef DEBUG
-    Serial.println("\tback from pause");
-#endif
+
+	#ifdef DEBUG
+		Serial.println("debut traj finale rouge");
+	#endif
+
+    if (prev==&sPause)
+    	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
         st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-    }
-    else {
-    move(0,0);
-    armServoLeft.write(ARM_LEFT_UP);
-    delay(500);
-    armServoRight.write(ARM_RIGHT_GLASS);
-    }
+    	}
+	}
 
-}
-
-void deinitTrajBlueFinal(sState *next){
-    //pause :
-    if (next==&sPause) {
+void deinitTrajYellowFinal(sState *next)
+	{
+    //pause
+    if (next==&sPause)
+    	{
         st_prevSaveTime=st_saveTime;
         st_saveTime=millis();
-    }
-    else {
+    	}
+    else
+    	{
         st_saveTime=0;
         st_prevSaveTime=0;
-        move(0,0);
-    }
-}
+        //move(0,0);
+    	}
+	}
 
-trajElem final_blue[]={
-//        {0,0,100}, //to wait until the servo is in the good position
-//        {-100,-45,1000},
-//        {-100,0,15000},
-//        {-100,45,500},
-//        {-100,0,14000},
-//        {0,0,0}
+trajElem final_yellow[]={ //A MODIFIER
         {0,0,100}, //to wait until the servo is in the good position
         {-100,-45,1600},
         {-100,0,10000},
         {-100,45,1000},
         {-100,-2,16000},
         {0,0,0}
+		};
 
-};
-
-sState *testTrajBlueFinal(){
+sState *testTrajYellowFinal()
+	{
     static int i=0;
     static unsigned long prev_millis=0;
-    if (periodicProgTraj(final_blue,&st_saveTime,&i,&prev_millis)) return &sWait;
+    if (periodicProgTraj(final_yellow,&st_saveTime,&i,&prev_millis)) return &sWait; //Cas a voir
+    if (lineDetection()) return &sFresco;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
     if (radarIntrusion()) return &sPause;
     return 0;
-}
+	}
 
-
-
-
-
-sState sTrajBlueFinal={
+sState sTrajYellowFinal={
         BIT(E_MOTOR) | BIT(E_RADAR),
-        &initTrajBlueFinal,
-        &deinitTrajBlueFinal,
-        &testTrajBlueFinal
-};
+        &initTrajYellowFinal,
+        &deinitTrajYellowFinal,
+        &testTrajYellowFinal
+		};
 
 
 

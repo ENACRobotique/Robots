@@ -20,11 +20,12 @@
 int _wall_pin_left,_wall_pin_right;
 int wall_side, wall_dist, wall_speed=0;
 
-void wallSetVal(int side, int dist, int speed){
+void wallSetVal(int side, int dist, int speed)
+	{
     wall_side=side;
     wall_dist=dist;
     wall_speed=speed;
-}
+	}
 
 
 void wallInitHard(int left_sensor, int right_sensor){
@@ -95,4 +96,21 @@ void periodicWall(){
     }
 
 }
+
+int diff(int pin_1 , int pin_2)
+	{
+	int dist_1, dist_2;
+	dist_1=raw2dist120x(analogRead(pin_1));
+	dist_2=raw2dist120x(analogRead(pin_2));
+	return(abs(dist_1-dist_2));
+	}
+
+int endWall(int pin_front , int pin_back)
+	{
+	int front, back;
+	front=raw2dist120x(analogRead(pin_front));
+	back=raw2dist120x(analogRead(pin_back));
+	if(front+3>back) return 1; //En cm
+	return 0;
+	}
 

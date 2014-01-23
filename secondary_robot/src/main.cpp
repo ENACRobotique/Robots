@@ -12,13 +12,13 @@
 #include "states/state_hardinit.h"
 #include "states/state_blink.h"
 #include "Arduino.h"
-#include "lib_radar.h"
+#include "lib_radar2.h"
 #include "lib_motor.h"
 #include "lib_wall.h"
 #include "lib_line.h"
 
 
-Servo armServoLeft,armServoRight;
+Servo launcherServoDown,launcherServoUp, launcherServoNet;
 
 sState *current=&sInitHard;
 
@@ -41,7 +41,6 @@ void setup(){
     }
 
 }
-
 
 
 void loop(){

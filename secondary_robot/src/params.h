@@ -17,27 +17,27 @@
 /* Defines ************************************************/
 //pins
 //digital I/O
-#define PIN_RAD_SERVO 4
 #define PIN_DIR_SERVO 5
 #define PIN_MOTOR_PWM 6
 #define PIN_MOTOR_DIR 7
-#define PIN_FUNNY 10
 #define PIN_ODO_INT 2//odometer, interruption pin
 #define PIN_ODO_SEN 9
-#define PIN_TIRETTE 12
+#define PIN_TIRETTE 10
 #define PIN_LED 13
-#define PIN_ARM_LEFT 11
-#define PIN_ARM_RIGHT 3
-#define PIN_COLOR 8
+#define PIN_LAUNCHER_1 8
+#define PIN_LAUNCHER_2 3
+#define PIN_LAUNCHER_NET 4
+#define PIN_COLOR 12
 
 //analog in
-#define PIN_SHARP_FRONT A0
-#define PIN_SHARP_LEFT A2
-#define PIN_SHARP_RIGHT A1
+#define PIN_SHARP_FRONT_RIGHT A0
+#define PIN_SHARP_FRONT_LEFT A1
+#define PIN_SHARP_BACK_RIGHT A2
+#define PIN_SHARP_BACK_LEFT A3
 
 //times
 #define TIME_MATCH_STOP 90000   //in ms
-#define TIME_FUNNY_STOP 100000
+#define TIME_FUNNY_STOP 950000
 
 //tirette related infos
 #define TIRETTE_IN HIGH
@@ -52,18 +52,26 @@
 #define COLOR_RED HIGH
 #define COLOR_YELLOW LOW
 
-#define ARM_LEFT_UP 0
-#define ARM_LEFT_DOWN 170
-#define ARM_RIGHT_UP 162
-#define ARM_RIGHT_DOWN 5
-#define ARM_RIGHT_GLASS 35
+#define LAUNCHER_DOWN_POS_0 0
+#define LAUNCHER_DOWN_POS_1 0
+#define LAUNCHER_DOWN_POS_2 0
+#define LAUNCHER_DOWN_POS_3 0
+#define LAUNCHER_UP_POS_0 0
+#define LAUNCHER_UP_POS_1 0
+#define LAUNCHER_UP_POS_2 0
+#define LAUNCHER_UP_POS_3 0
+#define LAUNCHER_NET_POS_0 0
+#define LAUNCHER_NET_POS_1 0
+
 #define ARM_RAISE_TIME 3000//in millis
 #define ARM_2WAY_FAST 500   //in millis
 
 #define UPPERCUT
 
-#define ENEMY_SAFETY_DST 5 //in cm
-#define ENEMY_SAFETY_TIME 500 //in ms
+#define RADAR_SAFETY_DST 30 //in cm
+#define RADAR_SAFETY_TIME 500 //in ms
+
+#define TIME_READY_LAUNCHER 500 //in ms
 
 #define DEBUG
 
@@ -75,7 +83,7 @@
 
 /*  externs*************************************************/
 extern unsigned long _matchStart;
-extern Servo armServoLeft,armServoRight;
+extern Servo launcherServoUp,launcherServoDown, launcherServoNet;
 
 /*  end externs*********************************************/
 

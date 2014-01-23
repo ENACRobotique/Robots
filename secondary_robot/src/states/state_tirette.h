@@ -11,6 +11,5 @@
 #include "state_types.h"
 
 extern sState sTirette;
-extern int EnemyDetection();
 
 #endif /* STATE_TIRETTE_H_ */
