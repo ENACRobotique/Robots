@@ -1,4 +1,4 @@
-%% derniere modif sur Octave 0.10.1
+%% derniere modif sur Matlab R2013a Linux
 clear all;
 close all;
 clc;
@@ -42,7 +42,7 @@ obs = [
 
 x = 0:300;
 theta = 0:pi/50:2*pi;
-figure; hold on; axis([0 300 0 200], 'equal');
+figure; hold on; axis('equal', [0 300 0 200]);
 
 obs(:,3) = obs(:, 3) + obs(:, 4);
 
