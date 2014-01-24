@@ -29,6 +29,7 @@ enum{
         ERR_ALREADY_IN_USE,
         ERR_OUT_OF_BOND,
         ERR_MALLOC,
+        ERR_INTERRUPTED,
 
     // BOTNET specific errors
         ERR_BN_INIT_FAILED,

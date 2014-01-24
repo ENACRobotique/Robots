@@ -9,10 +9,13 @@
 #include <ctype.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <malloc.h>
+#include <stdlib.h>
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
 #include "../botNet/shared/bn_utils.h"
+#include "../../global_errors.h"
 #include "node_cfg.h"
 
 
@@ -23,7 +26,7 @@ void intHandler(int dummy) {
 }
 
 int main(){
-    volatile int quit=0,quitMenu=0,err;
+    int quit=0,quitMenu=0,err;
     sMsg msgIn;
     char cmd;
     bn_Address destAd;
@@ -40,23 +43,41 @@ int main(){
 
         usleep(500);
 
-        bn_routine();
+        err = bn_routine();
+        if (err < 0){
+            if (err == -ERR_INTERRUPTED){
+                menu=1;
+            }
+            else if(err != -ERR_UART_READ_BYTE_TIMEOUT){
+                fprintf(stderr, "bn_routine() error #%i\n", -err);
+                exit(1);
+            }
+        }
 
         //receives messages, displays string if message is a debug message
-        if (bn_receive(&msgIn)){
-            printf("message received from %hx, type : %u %s\n",msgIn.header.srcAddr,msgIn.header.type,eType2str(msgIn.header.type));
+        err = bn_receive(&msgIn);
+        if (err > 0){
+            printf("message received from %hx, type : %s (%hhu)\n",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
             switch (msgIn.header.type){
-            case E_DEBUG : printf("%s\n",msgIn.payload.debug); break;
+            case E_DEBUG : printf("  %s\n",msgIn.payload.debug); break;
+            case E_POS : printf("  robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta); break;
             default : break;
+            }
+        }
+        else if (err < 0){
+            if (err == -ERR_INTERRUPTED){
+                menu=1;
+            }
+            else{
+                fprintf(stderr, "bn_receive() error #%i\n", -err);
+                exit(1);
             }
         }
 
         //menu
         if (menu){
-            menu=0;
             quitMenu=0;
             while (!quitMenu){
-                cmd=0;
                 printf("\ndebug reader menu\n");
                 printf("s : send debugger address\n");
                 printf("p : ping\n");
@@ -69,10 +90,13 @@ int main(){
 
                 switch (toupper(cmd)){
                 case 'S' :  //sends debug address to distant node
-                    printf("enter destination address\n");
-                    if (scanf("%hx",&destAd) != 1){
-                        printf("error getting destination address\n");
-                    }
+                    do{
+                        printf("enter destination address\n");
+                        err = scanf("%hx",&destAd);
+                        if (err != 1){
+                            printf("error getting destination address\n");
+                        }
+                    }while(err != 1);
                     if ( (err=bn_debugSendAddr(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;
@@ -83,21 +107,34 @@ int main(){
                     }
                     break;
                 case 'P' :
-                    destAd=0;
-                    printf("enter destination adress\n");
-                    scanf("%hx",&destAd);
-                    printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
+                    do{
+                         printf("enter destination address\n");
+                         err = scanf("%hx",&destAd);
+                         if (err != 1){
+                             printf("error getting destination address\n");
+                         }
+                     }while(err != 1);
+                     printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
                     break;
                 case 'T' :
                     {
-                        destAd=0;
-
-                        printf("enter destination adress\n");
-                        scanf("%hx",&destAd);
+                        sTraceInfo *trInfo=NULL;
                         int depth;
-                        printf("enter depth\n");
-                        scanf("%i",&depth);
-                        sTraceInfo trInfo[depth];
+                        do{
+                             printf("enter destination address\n");
+                             err = scanf("%hx",&destAd);
+                             if (err != 1){
+                                 printf("error getting destination address\n");
+                             }
+                        }while(err != 1);
+                        do{
+                             printf("enter depth\n");
+                             err = scanf("%i",&depth);
+                             if (err != 1 || depth <= 0){
+                                 printf("error getting depth\n");
+                             }
+                        }while(err != 1 || depth <= 0);
+                        trInfo = (sTraceInfo *)malloc(depth * sizeof(sTraceInfo));
                         nbTraces=bn_traceroute(destAd,trInfo,depth,1000);
                         for (f=0;f<nbTraces;f++){
                             printf("%hx in %d ms\n",trInfo[f].addr,trInfo[f].ping);
@@ -115,9 +152,9 @@ int main(){
                 case 'Q' : quitMenu=1; quit=1; break;
                 default : break;
                 }
-
             }
 
+            menu=0;
         }
 
     }

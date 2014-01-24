@@ -105,8 +105,13 @@ int serialRead(uint8_t *byte,uint32_t timeout){
     retval = select(Xbee_serial_port+1, &rfds, NULL, NULL, &tv);
 
     if (retval == -1){
-       perror("select()");
-       exit(-1);
+        if (errno == EINTR){
+            return -ERR_INTERRUPTED;
+        }
+        else{
+            perror("select()");
+            exit(-1);
+        }
     }
     else if (retval>0){
        // Data is available now, we can read
@@ -125,10 +130,8 @@ int serialRead(uint8_t *byte,uint32_t timeout){
         }
 #endif
         return i;
-
    }
-   else return 0; //timeout
-
+   else return -ERR_UART_READ_BYTE_TIMEOUT;
 }
 
 /* serialWrite : writes a byte on the serial interface
@@ -145,7 +148,7 @@ int serialWrite(uint8_t byte){
     int i;
     i=write(Xbee_serial_port, &byte, 1);
     fflush(NULL); //flushes all stream
-    return (i==0)?-ERR_UART_WRITE_BYTE:i;
+    return (i<=0)?-ERR_UART_WRITE_BYTE:i;
 }
 
 #endif // ARC_X86_LINUX
