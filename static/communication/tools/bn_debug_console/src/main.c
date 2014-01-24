@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
@@ -60,7 +61,7 @@ int main(){
             printf("message received from %hx, type : %s (%hhu)\n",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
             switch (msgIn.header.type){
             case E_DEBUG : printf("  %s\n",msgIn.payload.debug); break;
-            case E_POS : printf("  robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta); break;
+            case E_POS : printf("  robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI); break;
             default : break;
             }
         }

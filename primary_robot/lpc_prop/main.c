@@ -18,8 +18,8 @@
 #include "controller.h"
 
 // compile-time config
-#define ASSERV_TEST
-#define NETWORK_TEST
+//#define ASSERV_TEST
+//#define NETWORK_TEST
 #define TIME_STATS
 
 #if defined(NETWORK_TEST) && !defined(ASSERV_TEST)
@@ -133,6 +133,7 @@ int main(void) {
 #else
     int consigne_l = 0;
     int consigne_r = 0;
+    unsigned int prevPos=0;
 #endif
 
     int ct, st;
@@ -491,6 +492,20 @@ int main(void) {
             m_loop = (m_loop*nb_loop + ((micros() - start_us)<<8))/(nb_loop+1);
             nb_loop++;
 #endif
+        }
+
+        if(millis() - prevPos >= 500) {
+            prevPos = millis();
+
+            msg.header.destAddr = ADDRX_DEBUG;
+            msg.header.type = E_POS;
+            msg.header.size = sizeof(sPosPayload);
+            msg.payload.pos.id = 0; // main robot
+            msg.payload.pos.x = I2Ds(x);
+            msg.payload.pos.y = I2Ds(y);
+            msg.payload.pos.theta = RI2Rs(theta);
+
+            bn_send(&msg);
         }
 
         if(millis() - prevLed >= 250) {
