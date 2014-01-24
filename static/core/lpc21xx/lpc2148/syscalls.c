@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-extern unsigned char  *_bss_end;
+extern unsigned char _bss_end;
 
 caddr_t _sbrk(int incr){
     static unsigned char* current_heap_end = NULL;
@@ -16,7 +16,7 @@ caddr_t _sbrk(int incr){
     register unsigned char * stack_ptr asm ("sp");
 
     if(current_heap_end == NULL){
-        current_heap_end = _bss_end;
+        current_heap_end = &_bss_end;
     }
 
     current_block_address = current_heap_end;
