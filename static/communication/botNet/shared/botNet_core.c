@@ -202,10 +202,10 @@ int bn_sendAck(sMsg *msg){
         // if we receive a message
         if (bn_receive(&msgIn)>0){
 #ifdef DEBUG_PC_ACK
-        {
-        sMsg *msgPtr=&msgIn;
-        printf("%hx -> %hx type %u seq %u ack %u [sndack received], ack addr %hx ans %d seq %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,msgPtr->payload.ack.addr,msgPtr->payload.ack.ans,msgPtr->payload.ack.seqNum);
-        }
+            {
+            sMsg *msgPtr=&msgIn;
+            printf("%hx -> %hx type %u seq %u ack %u [sndack received], ack addr %hx ans %d seq %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,msgPtr->payload.ack.addr,msgPtr->payload.ack.ans,msgPtr->payload.ack.seqNum);
+            }
 #endif
             //if this message is not an ack response,  put it back in the incoming buffer (sent to self)
             if ( msgIn.header.type != E_ACK_RESPONSE ){
@@ -257,7 +257,7 @@ int bn_routine(){
     ret=0;
 #endif
 #if (MYADDRU)!=0
-    if ( (ret=UART_receive(&temp))>0) {
+    if ( (ret=UART_receive(&temp.msg))>0) {
         bn_pushInBufLast(&temp.msg,IF_UART);
     }
     else if (ret<0) return ret;
@@ -521,7 +521,7 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
         return 0;
         break;
     case IF_LOCAL :
-        // check if there are not already a message for bn_receive(). If not, give msg to bn_receive.
+        // check if there is not already a message for bn_receive(). If not, give msg to bn_receive.
         if (!localReceived){
             memcpy(&localMsg,msg,sizeof(sMsg));
             localReceived=1;
@@ -550,7 +550,7 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
  *  Warning : after a call to bn_attach, any message of type "type" received by this node WILL NOT be given to the user (won't pop with bn_receive)
  */
 int bn_attach(E_TYPE type,pfvpm ptr){
-    sAttach *elem=firstAttach, *prev, *new;
+    sAttach *elem=firstAttach, *prev=0, *new;
 
     //checks if the type is correct (should be within the E_TYPE enum range)
     if (type>=E_TYPE_COUNT) return -ERR_BN_TYPE_TOO_HIGH;
@@ -652,7 +652,7 @@ int bn_pushInBufLast(const sMsg *msg, E_IFACE iFace){
 #ifdef DEBUG_PC_BUF
     {
         sMsg *msgPtr=msg;
-        printf("%hx -> %hx type %u seq %u ack %u [pushbuf] iTmp %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iTmp);
+        printf("%hx -> %hx type %u seq %u ack %u [pushBuf] iWrite %d  iFirst %d iNext %d nbMsg %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iTmp,iFirst,iNext,nbMsg);
     }
 #endif
 
@@ -685,7 +685,7 @@ sMsgIf * bn_getAllocInBufLast(){
 
 #ifdef DEBUG_PC_BUF
     {
-        printf("? -> ? type ? seq ? ack ? [getAllocBuf] iTmp %d\n",(iNext+BN_INC_MSG_BUF_SIZE-1)%BN_INC_MSG_BUF_SIZE);
+        printf("? -> ? type ? seq ? ack ? [getAllocBuf] iWrite %d  iFirst %d iNext %d nbMsg %d\n",(iNext+BN_INC_MSG_BUF_SIZE-1)%BN_INC_MSG_BUF_SIZE,iFirst,iNext,nbMsg);
     }
 #endif
 
@@ -716,7 +716,7 @@ int bn_popInBuf(sMsgIf * pstru){
 #ifdef DEBUG_PC_BUF
     {
         sMsg *msgPtr=&(msgIfBuf[iFirst]);
-        printf("%hx -> %hx type %u seq %u ack %u [popBuf] iFirst %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iFirst);
+        printf("%hx -> %hx type %u seq %u ack %u [popBuf]  iRead %d  iFirst %d iNext %d nbMsg %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iTmp,iFirst,iNext,nbMsg);
     }
 #endif
 
@@ -741,7 +741,7 @@ sMsgIf *bn_getInBufFirst(){
 #ifdef DEBUG_PC_BUF
     {
         sMsg *msgPtr=&(msgIfBuf[iFirst]);
-        printf("%hx -> %hx type %u seq %u ack %u [getbuf] iFirst %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iFirst);
+        printf("%hx -> %hx type %u seq %u ack %u [getbuf]  iRead  %d ",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,iFirst);
     }
 #endif
     return &(msgIfBuf[iFirst]);
@@ -760,6 +760,11 @@ void bn_freeInBufFirst(){
     iFirst=(iFirst+1)%BN_INC_MSG_BUF_SIZE;
     nbMsg=MAX(nbMsg-1,0);
 
+#ifdef DEBUG_PC_BUF
+    {
+        printf(" iFirst %d iNext %d nbMsg %d  [freeInBuf]\n",iFirst,iNext,nbMsg);
+    }
+#endif
     return;
 }
 

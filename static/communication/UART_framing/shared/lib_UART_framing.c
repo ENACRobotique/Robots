@@ -98,9 +98,10 @@ int UART_writeFrame(const void *pt,int size){
  * Return value :
  *  >0 : nb of bytes written (success)
  *  0 : there was no frame to read (normal behavior when nothing to read)
- *  -1 : if checksum error
- *  -2 : size read too big, WARNING : in this case, the frame is dropped.
- *  -3 : if reading error (timeout of expected byte or else)
+ *  <0 if error. Example :
+ *      checksum error
+ *      size read too big, WARNING : in this case, the frame is dropped.
+ *      reading error (timeout of expected byte or else)
  *
  *  WARNING : data will be written at pt even if checksum is wrong. Testing return value is strongly recommended.
  */
@@ -113,7 +114,7 @@ int UART_readFrame(void *pt, int maxsize){
 
     //waiting for a start character. If something else, read again
     do {
-        if ( (ret=serialRead(&byte,UART_WAITFRAME_TIMEOUT)) <=0 ) return ret;
+        if ( (ret=serialRead(&byte,UART_WAITFRAME_TIMEOUT)) <=0 ) return 0; //nothing to read here is not an error (normal behavior for non blocking functions if there is not message to read)
     }while (byte!=UART_FRAME_START);
 
 frame_start :

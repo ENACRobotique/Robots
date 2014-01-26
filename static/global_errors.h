@@ -47,7 +47,7 @@ enum{
         ERR_BN_BUFFER_FULL,
 
     // UART (and UART_FRAMING) errors
-        ERR_UART_OVERSIZE,          // packet too big to send over UART_MTU)
+        ERR_UART_OVERSIZE,          // packet too big to send (size over UART_MTU)
         ERR_UART_CSUM,              // incoming frame rejected (incorrect checksum)
         ERR_UART_WRITE_BYTE,
         ERR_UART_WRITE_TIMEOUT,

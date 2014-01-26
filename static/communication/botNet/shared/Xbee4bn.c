@@ -128,7 +128,7 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
     do {
         byteRead=Xbee_readFrame(&stru);
 
-        if ( byteRead && stru.APID==XBEE_APID_RX16){
+        if ( byteRead>0 && stru.APID==XBEE_APID_RX16){
             bn_pushInBufLast((sMsg*)&(stru.data.RX16Data.payload),IF_XBEE);
             byteRead=0;
         }
