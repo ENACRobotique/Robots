@@ -69,7 +69,7 @@ sStatDescriptor *statDB=0;
  * Must be executed on the source.
  */
 int cbr_newFlux(sMsg *msg){
-    sFluxDescriptor *curP, *prevP;
+    sFluxDescriptor *curP, *prevP=0;
 
     if ( msg->payload.CBRCtrl.fluxID==-1 ) return -ERR_OUT_OF_BOND;
 

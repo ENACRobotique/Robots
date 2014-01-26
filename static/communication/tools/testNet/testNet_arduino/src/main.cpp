@@ -28,6 +28,8 @@ int avgElem=0;
 unsigned long avgMes=0, avgVal=0;
 
 sMsg in,out;
+int printCount;
+int err;
 
 void setup() {
     sw=millis();
@@ -45,21 +47,22 @@ void setup() {
 }
 
 void loop() {
-    if (bn_routine()<0) {
+    if ( (err=bn_routine())<0) {
         routineErr++;
     }
-    if (bn_receive(&in)){
-
+    else if (err>0){
+        led^=1;
+        digitalWrite(13,led);
+        if (bn_receive(&in)){
+        }
     }
-
 
 
 
     if ( millis()-sw > 1000){
         sw=millis();
-        led^=1;
-        digitalWrite(13,led);
-        bn_printfDbg("%lu s, free mem : %d, routiEr %d\n",millis()/1000,freeMemory(),routineErr);
+        if ( !(printCount%10) ) bn_printfDbg("%lu s, free mem : %d, routiEr %d\n",millis()/1000,freeMemory(),routineErr);
+        printCount++;
     }
 
 }

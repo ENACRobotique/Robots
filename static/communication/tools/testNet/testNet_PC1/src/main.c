@@ -17,12 +17,16 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <string.h>
+#include <math.h>
 
 #include "../../../../botNet/shared/botNet_core.h"
 #include "../../../../botNet/shared/bn_utils.h"
 #include "../../../../botNet/shared/bn_debug.h"
+#include "../../../../../global_errors.h"
 #include "../testNet_functions/bn_testFunc.h"
 #include "node_cfg.h"
+
+
 
 
 static int menu = 0;
@@ -38,6 +42,8 @@ int main(){
     sMsg msgIn;
     char cmd;
     bn_Address destAd;
+    int ret;
+    float var=0;
 
     int msg2send=10000,msgSend=0,msgNStatused=0,msgNOk=0,avgElem=0;
     float avgMes=0,avgVal=0;
@@ -58,7 +64,7 @@ int main(){
 
     while (!quit){
         usleep(500);
-        bn_routine();
+        if ( (ret=bn_routine())<0 ) printf("bn_routine error : %d\n",ret);
         memset(&msgIn,0,sizeof(sMsg));
         if (bn_receive(&msgIn)>0){
             printf("message received from %hx, type : %u\n",msgIn.header.srcAddr,msgIn.header.type);
@@ -119,6 +125,11 @@ int main(){
                     printf("my subnet  : %4hx\n\n",MYADDRX&SUBNET_MASK);
                     break;
                 case 'B' :
+                    avgMes=0;
+                    avgVal=0;
+                    avgElem=0;
+                    var=0;
+
                     printf("enter destination address\n");
                     scanf("%hx",&out.header.destAddr);
                     out.header.type=E_TEST_PKT;
@@ -130,26 +141,32 @@ int main(){
                     msgNOk=0;
                     msgNStatused=0;
                     msgSend=0;
-                    while ( msg2send>=0 ){
+                    while ( msg2send>0 ){
 
-                        out.header.size=msg2send;
-                        gettimeofday(&currentClock,NULL);
+                        out.header.size=1;
 
-                        switch (bn_sendAck(&out)){
-                        case -3 : msgNOk++; break;
-                        case -2 : msgNStatused++; break;
-                        case -1 : msgNStatused++; break;
-                        default : msgSend++; break;
+                        switch (ret=bn_sendAck(&out)){
+                        case 1 : msgSend++; break;
+                        case -ERR_BN_ACK_TIMEOUT : msgNStatused++; break;
+                        case -ERR_BN_NACK_BROKEN_LINK : msgNOk++; break;
+//                        default : printf("blah %d %d\n",ret,msg2send);break;
                         }
 
-                        avgElem++;
-                        avgMes=(float)((currentClock.tv_sec*1000000 + currentClock.tv_usec)-(prevClock.tv_sec*1000000 + prevClock.tv_usec));
-                        avgVal=avgMes/(float)avgElem +avgVal*((float)(avgElem-1))/((float)avgElem);
+                        gettimeofday(&currentClock,NULL);
+                        if (ret>=0){
+                            avgElem++;
+                            avgMes=(float)((currentClock.tv_sec*1000000 + currentClock.tv_usec)-(prevClock.tv_sec*1000000 + prevClock.tv_usec));
+                            avgVal=avgMes/(float)avgElem +avgVal*((float)(avgElem-1))/((float)avgElem);
+
+                            if (avgElem>1) var=((avgElem-1)*var)/avgElem + (avgMes-avgVal)*(avgMes-avgVal)/(avgElem-1);
+
+                            fprintf(stderr,"%f,%f,%f\n", avgMes, avgVal, var);
+                        }
 
                         prevClock=currentClock;
 
 
-                        if (msg2send==0) printf("send %d, Nstat %d, NOk %d, interval %f\n",msgSend, msgNStatused,msgNOk,avgVal);
+                        if (msg2send==1) printf("send(acked) %d, timeout %d, Nack bkn link %d, interval %f , stdev %f \n",msgSend, msgNStatused,msgNOk,avgVal,sqrt(var));
                         msg2send--;
 
 
