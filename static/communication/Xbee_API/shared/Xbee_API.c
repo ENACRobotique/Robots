@@ -130,14 +130,14 @@ int Xbee_ATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h
 
 }
 
-/* Xbee_ATCmd : waits for the ack after and AT cmd.
+/* Xbee_ATCmd : waits for the ack after an AT cmd.
  * Arguments :
  *  frID : for acknowledgment purposes. 0 means no acknowledgment asked.
  *  option : XBEE_ATCMD_SET xor XBEE_ATCMD_GET.
  * Return value : nb of bytes written on serial link (including start, size and checksum, but excluding escaping char)
  * Remark : does not perform check on size and consistency of parameter
  * refer to XBEE doc for available commands
- * ! do not use if returned values are expected !
+ * /!\ do not use if returned values are expected !
  */
 int Xbee_waitATAck(int frID, uint32_t timeOut){
     int byteRead=0;
