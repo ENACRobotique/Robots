@@ -84,7 +84,7 @@ int main(){
         printf("  bn_receive %d\n",ret1);
 #endif
         }
-        else if (ret <= 0){
+        else if (ret < 0){
             if (ret == -ERR_INTERRUPTED){
                 menu=1;
             }

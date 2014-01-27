@@ -27,6 +27,8 @@
 #include "node_cfg.h"
 
 
+#include "../../../../UART_framing/shared/lib_UART_framing.h" //for test purposes
+#include "../../../../UART_framing/linux/lib_UART_framing_linux.h"
 
 
 static int menu = 0;
@@ -44,6 +46,7 @@ int main(){
     bn_Address destAd;
     int ret;
     float var=0;
+    int i;
 
     int msg2send=10000,msgSend=0,msgNStatused=0,msgNOk=0,avgElem=0;
     float avgMes=0,avgVal=0;
@@ -54,9 +57,8 @@ int main(){
     bn_init();
     bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
 
-
-
     printf("listening, CTRL+C  for menu\n");
+
 
     signal(SIGINT, intHandler);
 
@@ -70,6 +72,12 @@ int main(){
             printf("message received from %hx, type : %u\n",msgIn.header.srcAddr,msgIn.header.type);
             switch (msgIn.header.type){
             case E_DEBUG : printf("%s\n",msgIn.payload.debug); break;
+            case E_DATA : //plot raw payload
+                for ( i=0 ; i<msgIn.header.size && i<54; i++){
+                    printf(" %hx",msgIn.payload.raw[i]);
+                }
+                printf("\n");
+                break;
             case E_ACK_RESPONSE : printf("ack response : %d, ack addr %hx\n",msgIn.payload.ack.ans,msgIn.payload.ack.addr); break;
             case E_WELL_CTRL :
             case E_TEST_PKT :

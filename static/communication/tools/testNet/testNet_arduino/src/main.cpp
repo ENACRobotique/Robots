@@ -46,23 +46,27 @@ void setup() {
 
 }
 
+char rawHex[54];
+int i=0,j=0;
+sMsg temp;
+
 void loop() {
+
     if ( (err=bn_routine())<0) {
         routineErr++;
     }
     else if (err>0){
-        led^=1;
-        digitalWrite(13,led);
         if (bn_receive(&in)){
         }
     }
 
 
 
-    if ( millis()-sw > 1000){
+    if ( millis()-sw > 2000){
+        led^=1;
+        digitalWrite(13,led);
         sw=millis();
-        if ( !(printCount%10) ) bn_printfDbg("%lu s, free mem : %d, routiEr %d\n",millis()/1000,freeMemory(),routineErr);
-        printCount++;
+        bn_printfDbg("%lu s, free mem : %d, routiEr %d, lasterr %d\n",millis()/1000,freeMemory(),routineErr,err);
     }
 
 }
