@@ -17,7 +17,12 @@ extern "C" {
 
 #include <stdint.h>
 
-int serialInit(const char *device);
+enum eblah{
+    E_115200_8N2,   //useful for xbee @ 111111 bd
+    E_115200_8N1
+};
+
+int serialInit(const char *device, uint32_t mode);
 int serialDeinit();
 int serialRead(uint8_t *byte,uint32_t timeout);
 int serialWrite(uint8_t byte);

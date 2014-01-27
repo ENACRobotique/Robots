@@ -14,6 +14,9 @@ extern "C" {
 
 #include <stdint.h>
 
+#ifdef ARCH_X86_LINUX
+    #include "../linux/lib_UART_framing_linux.h"
+#endif
 int UART_init(const char* device, uint32_t speed);
 int UART_deinit(const char* device);
 int UART_writeFrame(const void *pt,int size);

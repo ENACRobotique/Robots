@@ -92,11 +92,11 @@ int bn_init(){
 
 #if MYADDRU!=0
 #   ifdef ARCH_X86_LINUX
-    if ( (ret=UART_init(BN_UART_PATH,0))<0 ) return ret;
+    if ( (ret=UART_init(BN_UART_PATH,E_115200_8N1))<0 ) return ret;
 #   endif
 
 #   ifdef ARCH_328P_ARDUINO
-    if ( (ret=UART_init(NULL,111111))<0 ) return ret;
+    if ( (ret=UART_init(NULL,115200))<0 ) return ret;
 #   endif
 #endif
 

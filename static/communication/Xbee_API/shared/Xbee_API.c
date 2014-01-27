@@ -186,10 +186,10 @@ int Xbee_init(){
     int ret;
     //init the serial link
 #ifdef ARCH_X86_LINUX
-    ret=UART_init(XBEE_UART_PATH,0); //xxx bad, in this case the second argument is not used
+    ret=UART_init(XBEE_UART_PATH,E_115200_8N2);
 #elif defined(ARCH_328P_ARDUINO)
     Xbee_rst();
-    ret=UART_init(0,111111);        //xxx and here, it is the first
+    ret=UART_init(0,111111);
 #else
 #error "no arch defined for Xbee4sb.c, or arch no available (yet)"
 #endif
@@ -199,7 +199,7 @@ int Xbee_init(){
     while( testTimeout(10000000,&sw));
 
     //clear in buffer from remaining bytes
-    while ( serialReadEscaped(&garbage,1000)>=0 );
+    while ( serialReadEscaped(&garbage,1000)>0 );
     if (ret<0) return ret;
     else return 1;
 }

@@ -25,12 +25,13 @@ int serial_port;
 
 /* initSerial : Initialises the UART serial interface (opens the serial interface at 115200 bauds nonblocking, in a way that pleases the Xbee)
  * Argument :
- *  device : string describing the device
+ *  device : string describing the device (/dev/ttyYYY)
+ *  mode : E_115200_8N2, E_115200_8N1
  * Return value :
  *  >0 on success
  *  <0 (or terminate programm) on error
  */
-int serialInit(const char *device){
+int serialInit(const char *device, uint32_t mode){
     struct termios options;
 
     printf("opening of:%s: at 115200 bd\n",device);
@@ -43,13 +44,22 @@ int serialInit(const char *device){
         exit(-1);       //XXX terminate programm abruptly here or gently tell the calling function (main) that a problem occured ?
     }
 
-    //chargement des données
+    //reading config data from serial port
     tcgetattr(serial_port, &options);
-    //B115200 bauds
+    //B230400 bauds
     cfsetospeed(&options, B115200);
-    options.c_cflag |= (CLOCAL | CREAD);//programme propriétaire du port
-    options.c_cflag &= ~PARENB; //pas de parité
-    options.c_cflag |= CSTOPB; // 2 bit de stop
+    options.c_cflag |= (CLOCAL | CREAD);
+    options.c_cflag &= ~PARENB; //no parity
+
+    if (mode==E_115200_8N2) {
+        printf("8N2 set\n");
+        options.c_cflag |= CSTOPB; // 2 stop bits (hack for xbee)
+    }
+    else if (mode==E_115200_8N1) {
+        printf("8N1 set\n");
+        options.c_cflag &= ~CSTOPB; //1 stop bit
+    }
+
     options.c_cflag &= ~CSIZE; //option a 0
     options.c_cflag |= CS8; //8 bits
 

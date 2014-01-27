@@ -38,12 +38,12 @@
 // standard libraries
 
 
-int UART_init(const char* device, uint32_t speed){
+int UART_init(const char* device, uint32_t option){
     int retval=0;
 #ifdef ARCH_328P_ARDUINO
-    retval=serialInit(speed);
+    retval=serialInit(option);
 #elif defined(ARCH_X86_LINUX)
-    retval=serialInit(device);
+    retval=serialInit(device,option);
 #endif
     if (retval>=0) return 0;
     else return -ERR_UART_INIT_FAILED;
