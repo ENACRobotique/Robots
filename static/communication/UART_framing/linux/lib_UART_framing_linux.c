@@ -21,7 +21,7 @@
 #include <sys/select.h>
 
 
-int Xbee_serial_port;
+int serial_port;
 
 /* initSerial : Initialises the UART serial interface (opens the serial interface at 115200 bauds nonblocking, in a way that pleases the Xbee)
  * Argument :
@@ -34,17 +34,17 @@ int serialInit(const char *device){
     struct termios options;
 
     printf("opening of:%s: at 115200 bd\n",device);
-    Xbee_serial_port = open(device, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);//lecture et ecriture | pas controlling terminal | ne pas attendre DCD
+    serial_port = open(device, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);//lecture et ecriture | pas controlling terminal | ne pas attendre DCD
 
     //cas d'erreur d'ouverture
-    if(Xbee_serial_port < 0)
+    if(serial_port < 0)
     {
         perror("Erreur d'ouverture du port serie");
         exit(-1);       //XXX terminate programm abruptly here or gently tell the calling function (main) that a problem occured ?
     }
 
     //chargement des données
-    tcgetattr(Xbee_serial_port, &options);
+    tcgetattr(serial_port, &options);
     //B115200 bauds
     cfsetospeed(&options, B115200);
     options.c_cflag |= (CLOCAL | CREAD);//programme propriétaire du port
@@ -55,10 +55,10 @@ int serialInit(const char *device){
 
     options.c_iflag |= IXON;    //enable flow control
     options.c_iflag |= IXOFF;   //enable flow control
-    tcsetattr(Xbee_serial_port, TCSANOW, &options); //enregistrement des valeurs de configuration
+    tcsetattr(serial_port, TCSANOW, &options); //enregistrement des valeurs de configuration
     printf("Port serie ouvert\n");
 
-    fcntl(Xbee_serial_port,F_SETFL,O_NONBLOCK);//mode non bloquant pour la fonction read() si aucun caractere dispo, programme attend
+    fcntl(serial_port,F_SETFL,O_NONBLOCK);//mode non bloquant pour la fonction read() si aucun caractere dispo, programme attend
 
     return 1;
 }
@@ -71,7 +71,7 @@ int serialInit(const char *device){
  *  <0 on error
  */
 int serialDeinit(){
-    close(Xbee_serial_port);
+    close(serial_port);
     return 1;
 }
 
@@ -95,14 +95,14 @@ int serialRead(uint8_t *byte,uint32_t timeout){
 
     // Watch Xbee to see when it has input
     FD_ZERO(&rfds);
-    FD_SET(Xbee_serial_port, &rfds);
+    FD_SET(serial_port, &rfds);
 
     // Wait up to timeout microseconds.
     tv.tv_sec = timeout/1000000;
     tv.tv_usec = timeout%1000000;
 
     // select() wait
-    retval = select(Xbee_serial_port+1, &rfds, NULL, NULL, &tv);
+    retval = select(serial_port+1, &rfds, NULL, NULL, &tv);
 
     if (retval == -1){
         if (errno == EINTR){
@@ -115,7 +115,7 @@ int serialRead(uint8_t *byte,uint32_t timeout){
     }
     else if (retval>0){
        // Data is available now, we can read
-        i=read(Xbee_serial_port,byte,1);
+        i=read(serial_port,byte,1);
         if (i<0) {
             if (errno==EAGAIN || errno==EWOULDBLOCK) return 0;
             else {
@@ -131,7 +131,7 @@ int serialRead(uint8_t *byte,uint32_t timeout){
 #endif
         return i;
    }
-   else return -ERR_UART_READ_BYTE_TIMEOUT;
+   else return 0;
 }
 
 /* serialWrite : writes a byte on the serial interface
@@ -146,7 +146,7 @@ int serialWrite(uint8_t byte){
     printf("w%x ",byte);
 #endif
     int i;
-    i=write(Xbee_serial_port, &byte, 1);
+    i=write(serial_port, &byte, 1);
     fflush(NULL); //flushes all stream
     return (i<=0)?-ERR_UART_WRITE_BYTE:i;
 }
