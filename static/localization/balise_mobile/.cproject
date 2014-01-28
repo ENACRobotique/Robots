@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492" moduleId="org.eclipse.cdt.core.settings" name="328P_16MHz">
@@ -32,9 +30,7 @@
 							</builder>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.1954140436" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.274044504" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
-								<option id="de.innot.avreclipse.asm.option.include.paths.488416253" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/timeout}&quot;"/>
-								</option>
+								<option id="de.innot.avreclipse.asm.option.include.paths.488416253" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath"/>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.588067380" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
 							<tool command="avr-gcc" id="de.innot.avreclipse.tool.compiler.winavr.app.debug.27818288" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug">
@@ -43,16 +39,9 @@
 								<option id="de.innot.avreclipse.compiler.option.incpath.1034646907" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Xbee_API_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Xbee_API_arduino}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/superBus_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/superBus_arduino}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/MemoryFree}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/UART_framing_arduino}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/UART_framing_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/timeout}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.325683192" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.2003967830" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
@@ -61,6 +50,7 @@
 								<option id="de.innot.avreclipse.compiler.option.language.ubitfields.143701590" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.compiler.option.language.ubitfields" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.def.1529335932" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
+									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1584701387" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
@@ -70,16 +60,9 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.91033370" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Xbee_API_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Xbee_API_arduino}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/superBus_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/superBus_arduino}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/MemoryFree}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/UART_framing_arduino}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/UART_framing_shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/timeout}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.786092589" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.1605089648" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -88,6 +71,7 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.other.896591122" name="Other Optimization Flags" superClass="de.innot.avreclipse.cppcompiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.def.1659491298" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
+									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.otherflags.2045478463" name="Other flags" superClass="de.innot.avreclipse.cppcompiler.option.otherflags" value="" valueType="string"/>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.856971024" superClass="de.innot.avreclipse.cppcompiler.input"/>

@@ -10,23 +10,23 @@
 
 #include "network_cfg.h"
 
-#define MYADDRX (ADDRX_MOBILE_1)
+#define MYADDRX (ADDRX_MOBILE_1|SUBNETX)
 #define MYADDRI 0
 #define MYADDRU 0
 
-#define SB_INC_MSG_BUF_SIZE 4
-#define SB_WAIT_XBEE_SND_FAIL   25000
-#define SB_MAX_RETRIES          2
-#define SB_ACK_TIMEOUT          1000    //in ms
+#define BN_INC_MSG_BUF_SIZE 8
 
-#define ARCH_328P_ARDUINO
-#define ARCH_LITTLE_ENDIAN
-#define UART_WAITFRAME_TIMEOUT 10
-#define UART_READBYTE_TIMEOUT 100000
+#define BN_WAIT_XBEE_SND_FAIL    50000
+#define BN_MAX_RETRIES          2
+#define BN_ACK_TIMEOUT          1000    //in ms
 
 #define XBEE_RST_PIN 5
 
-#undef  ADDR_DEBUG_DFLT
-#define ADDR_DEBUG_DFLT ADDRX_DEBUG
+#define UART_WAITFRAME_TIMEOUT 10
+#define UART_READBYTE_TIMEOUT 10000
+
+#undef ADDR_DEBUG_DFLT
+#define ADDR_DEBUG_DFLT 0
+
 
 #endif /* NODE_CFG_H_ */

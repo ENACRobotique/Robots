@@ -7,11 +7,11 @@
 #include "lib_int_laser.h"
 #include "lib_time.h"
 #include "messages.h"
-#include "lib_superBus.h"
+#include "../../../communication/botNet/shared/botNet_core.h"
 #include "params.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"
-#include "lib_sbDebug.h"
+#include "../../../communication/botNet/shared/bn_debug.h"
 
 
 char nbSync=0;
@@ -38,11 +38,11 @@ void setup() {
 
   pinMode(13,OUTPUT);
 
-  sb_init();
+  bn_init();
 
-  sb_printDbg("start mobile 1");
-  sb_attach(E_DEBUG_SIGNALLING,&sb_debugUpdateAddr);
-  //sb_attach(E_PERIOD,&periodHandle);
+  bn_printDbg("start mobile 1");
+  bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+  //bn_attach(E_PERIOD,&periodHandle);
 }
 
 int routineErr=0,i=0;
@@ -53,10 +53,10 @@ sMsg in;
 void loop() {
 
 #if 0
-if (sb_routine()<0) {
+if (bn_routine()<0) {
         routineErr++;
     }
-    if (sb_receive(&in)){
+    if (bn_receive(&in)){
         i++;
     }
 
@@ -79,8 +79,8 @@ if (sb_routine()<0) {
       time_prev_led= time;
       digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
-        sb_printfDbg("blink, %lu s, free mem : %d, rx : %d, routiEr %d\n",millis()/1000,freeMemory(),i,routineErr);
-//      sb_printfDbg("mob1 %lu, mem : %d, state : %d, period : %lu\n",millis()/1000,freeMemory(),state,laser_period);
+        bn_printfDbg("blink, %lu s, free mem : %d, rx : %d, routiEr %d\n",millis()/1000,freeMemory(),i,routineErr);
+//      bn_printfDbg("mob1 %lu, mem : %d, state : %d, period : %lu\n",millis()/1000,freeMemory(),state,laser_period);
 #endif
     }
 
@@ -90,13 +90,13 @@ if (sb_routine()<0) {
 //    if (Serial.available()) delayMicroseconds(2000);
 
     //network routine and test if message for this node
-    int pif=sb_routine();
+    int pif=bn_routine();
     if (pif<0){
-        sb_printfDbg("routine : %d\n",pif);
+        bn_printfDbg("routine : %d\n",pif);
     }
 
 
-    if (rxB=sb_receive(&inMsg)) {
+    if (rxB=bn_receive(&inMsg)) {
         i++;
     }
 #else
@@ -108,7 +108,7 @@ if (sb_routine()<0) {
     //previous data pocessing
     //if some laser has been detected on 0
     if (las0){
-        sb_printDbg("laser0\n");
+        bn_printDbg("laser0\n");
         if ( (laserStruct0.date-lastLaserDetect)> (laser_period>>1) ) { //more than half the period after the last laser detected
             lastLaserDetect=laserStruct0.date;
             lastLaserDetectMicros=micros();
@@ -130,7 +130,7 @@ if (sb_routine()<0) {
     }
     //if some laser has been detected on 1
     if (las1){
-        sb_printDbg("laser1\n");
+        bn_printDbg("laser1\n");
         //more than half the period after the last laser detected
         if ( (laserStruct1.date-lastLaserDetect)> (laser_period>>1)) {
             lastLaserDetect=laserStruct0.date;
@@ -169,7 +169,7 @@ if (sb_routine()<0) {
     if (rxB && inMsg.header.type==E_PERIOD ){
     	laser_period=inMsg.payload.period;
     	rxB=0;
-    	sb_printfDbg("mob1 period received %lu\n",laser_period);
+    	bn_printfDbg("mob1 period received %lu\n",laser_period);
     }
 
 
@@ -192,7 +192,7 @@ if (sb_routine()<0) {
 						outMsg.header.destAddr=ADDRX_MAIN;
 						outMsg.header.type=E_SYNC_OK;
 						outMsg.header.size=0;
-						sb_send(&outMsg);
+						bn_send(&outMsg);
 					}
 					rxB=0;
 					break;
@@ -219,7 +219,7 @@ if (sb_routine()<0) {
                 outMsg.payload.measure.date=laserStruct2Send.date;
                 outMsg.payload.measure.precision=laserStruct2Send.precision;
                 outMsg.payload.measure.sureness=laserStruct2Send.sureness;
-				sb_send(&outMsg);
+				bn_send(&outMsg);
           }
           break;
         default : break;
