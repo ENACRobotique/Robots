@@ -30,6 +30,7 @@ enum{
         ERR_OUT_OF_BOND,
         ERR_MALLOC,
         ERR_INTERRUPTED,
+        ERR_NULL_POINTER_WRITE_ATTEMPT,
 
     // BOTNET specific errors
         ERR_BN_INIT_FAILED,

@@ -6,10 +6,16 @@ License :
 Presentation :
     This library provides a lightweight network API designed to work on any single-threaded processor,
     including desktop computers, enbeeded computers and microconrolers.
-    Currently supported (also check other libraries for compatibilities, eg Xbee_API): 
+    
+    Currently supported architectures (also check other libraries for compatibilities, eg Xbee_API): 
         * Debian/Ubuntu computers;
         * Arduino (ATmega328P) microcontroler;
         * LPC21XX microcontroler.
+    
+    Currently supported link layers :
+        * I²C (for arduino and LPC21XX)
+        * UART (for arduino and linux)
+        * Xbee (for arduino and linux)
 
 Technical details :
     It relies on other API to handle the link layer, Xbee and UART especialy. See their 
@@ -62,8 +68,12 @@ Requirements :
     repository.
 
     Requires that Timeout library is correctly build and linked.
-    Requires any library used (eg UART_framing or Xbee_API) to be build and linked. See their own 
-    documentation for details.  
+    
+    Requires any library used to be build and linked. See their own documentation for details.
+    List of (potentially) used libraries :
+        * Wire (for arduino's I²C);
+        * UART_framing;
+        * Xbee_API.
 
 Usage : 
     bn_init() must be called prior to any use of the bn API.

@@ -45,9 +45,6 @@ void setup() {
 }
 
 void loop() {
-    if (bn_routine()<0) {
-        routineErr++;
-    }
     if (bn_receive(&in)){
 //        switch (in.header.type){
 //        case E_WELL_CTRL :

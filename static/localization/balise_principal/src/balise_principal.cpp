@@ -99,10 +99,7 @@ void loop(){
 
 ///////// must always be done, any state
 
-    //network routine
-    bn_routine();
-
-    //eventual receiving
+    //eventual receiving && routine
     rxB=bn_receive(&inMsg);
 
     time=millis();

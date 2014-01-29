@@ -356,6 +356,10 @@ int bn_routine(){
  */
 int bn_receive(sMsg *msg){
     sAttach *elem=firstAttach;
+    int ret=0;
+
+    // run bn_routine (to receive messages)
+    if ((ret=bn_routine())<0) return ret;
 
     // if no message available
     if ( !localReceived) return 0;
@@ -363,12 +367,10 @@ int bn_receive(sMsg *msg){
     // Check the type
     // is the version different ?
     if ( localMsg.header.typeVersion != BN_TYPE_VERSION ){
-//        bn_printfDbg("type version rx %u (loc. %u)",msg->header.typeVersion,BN_TYPE_VERSION);
         return -ERR_BN_TYPE_VERSION;
     }
     // is it above the highest type this node knows ? (time to rebuild and update this node)
     if ( localMsg.header.type >= E_TYPE_COUNT) {
-//        bn_printDbg("type unknown (too big)");
         return -ERR_BN_TYPE_TOO_HIGH;
     }
 
@@ -386,6 +388,7 @@ int bn_receive(sMsg *msg){
 
     // if no function is attached to this type
     localReceived--;
+    if (msg==NULL) return -ERR_NULL_POINTER_WRITE_ATTEMPT;
     memcpy(msg,&localMsg,sizeof(sMsg));
     return (msg->header.size + sizeof(sGenericHeader));
 }
@@ -726,6 +729,7 @@ int bn_popInBuf(sMsgIf * pstru){
     }
 #endif
 
+    if (pstru==NULL) return -ERR_NULL_POINTER_WRITE_ATTEMPT;
     memcpy(pstru, &(msgIfBuf[iTmp]), MIN(msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader),sizeof(sMsg)));
 
     return 1;

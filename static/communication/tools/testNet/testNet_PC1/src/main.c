@@ -66,8 +66,9 @@ int main(){
 
     while (!quit){
         usleep(500);
-        if ( (ret=bn_routine())<0 ) printf("bn_routine error : %d\n",ret);
+
         memset(&msgIn,0,sizeof(sMsg));
+        // receive messages, and deal with it.
         if (bn_receive(&msgIn)>0){
             printf("message received from %hx, type : %u\n",msgIn.header.srcAddr,msgIn.header.type);
             switch (msgIn.header.type){

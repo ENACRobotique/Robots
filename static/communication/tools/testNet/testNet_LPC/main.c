@@ -34,7 +34,6 @@ int main(void) {
     // main loop
     while(1) {
         sys_time_update();
-        bn_routine();
 
         if(bn_receive(&msg) > 0) {
             gpio_write(0, 31, led_status^=1);

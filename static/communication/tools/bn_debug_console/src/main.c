@@ -44,19 +44,18 @@ int main(){
 
         usleep(500);
 
-        err = bn_routine();
+
+        //receives messages, displays string if message is a debug message
+        err = bn_receive(&msgIn);
         if (err < 0){
             if (err == -ERR_INTERRUPTED){
                 menu=1;
             }
-            else if(err != -ERR_UART_READ_BYTE_TIMEOUT){
+            else {
                 fprintf(stderr, "bn_routine() error #%i\n", -err);
                 exit(1);
             }
         }
-
-        //receives messages, displays string if message is a debug message
-        err = bn_receive(&msgIn);
         if (err > 0){
             printf("message received from %hx, type : %s (%hhu)\n",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
             switch (msgIn.header.type){

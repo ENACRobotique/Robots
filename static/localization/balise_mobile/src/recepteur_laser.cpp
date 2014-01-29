@@ -87,16 +87,9 @@ if (bn_routine()<0) {
 
 //MUST ALWAYS BE DONE (any state)
 
-//    if (Serial.available()) delayMicroseconds(2000);
 
-    //network routine and test if message for this node
-    int pif=bn_routine();
-    if (pif<0){
-        bn_printfDbg("routine : %d\n",pif);
-    }
-
-
-    if (rxB=bn_receive(&inMsg)) {
+    // routine and receive
+    if ((rxB=bn_receive(&inMsg))) {
         i++;
     }
 #else

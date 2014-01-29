@@ -58,31 +58,26 @@ int main(){
 
     while (!quit){
         usleep(500);
-        //message reception
-        if ( (ret=bn_routine()) >0 ){
-            memset(&msgIn,0,sizeof(sMsg));
 
-            if ( (ret1=bn_receive(&msgIn))>0 ){
-                // some display and message handling
-                printf("message received from %hx, type : %u\n",msgIn.header.srcAddr,msgIn.header.type);
-                switch (msgIn.header.type){
-                case E_DEBUG : printf("%s\n",msgIn.payload.debug); break;
-                case E_ACK_RESPONSE : printf("ack response : %d, ack addr %hx\n",msgIn.payload.ack.ans,msgIn.payload.ack.addr); break;
-                case E_WELL_CTRL :
-                case E_TEST_PKT :
-                    well_deamon(&msgIn);
-                    break;
-                case E_CBR_CTRL :
-                    cbr_controller(&msgIn);
-                    break;
-                default :
-                    break;
-                }
+        memset(&msgIn,0,sizeof(sMsg));
+
+        //message reception
+        if ( (ret1=bn_receive(&msgIn))>0 ){
+            // some display and message handling
+            printf("message received from %hx, type : %u\n",msgIn.header.srcAddr,msgIn.header.type);
+            switch (msgIn.header.type){
+            case E_DEBUG : printf("%s\n",msgIn.payload.debug); break;
+            case E_ACK_RESPONSE : printf("ack response : %d, ack addr %hx\n",msgIn.payload.ack.ans,msgIn.payload.ack.addr); break;
+            case E_WELL_CTRL :
+            case E_TEST_PKT :
+                well_deamon(&msgIn);
+                break;
+            case E_CBR_CTRL :
+                cbr_controller(&msgIn);
+                break;
+            default :
+                break;
             }
-#ifdef DEBUG
-        printf("debug bn_routine %d",ret);
-        printf("  bn_receive %d\n",ret1);
-#endif
         }
         else if (ret < 0){
             if (ret == -ERR_INTERRUPTED){

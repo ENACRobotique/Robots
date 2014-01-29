@@ -52,15 +52,7 @@ sMsg temp;
 
 void loop() {
 
-    if ( (err=bn_routine())<0) {
-        routineErr++;
-    }
-    else if (err>0){
-        if (bn_receive(&in)){
-        }
-    }
-
-
+    bn_receive(&in);
 
     if ( millis()-sw > 2000){
         led^=1;
