@@ -17,8 +17,8 @@ extern "C" {
 
 #include <stdint.h>
 
-enum eblah{
-    E_115200_8N2,   //useful for xbee @ 111111 bd
+enum emode{
+    E_115200_8N2,   //useful hack for xbee @ 111111 bd
     E_115200_8N1
 };
 
