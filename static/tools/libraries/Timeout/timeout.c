@@ -67,7 +67,7 @@ int testTimeout(uint32_t delay, uint32_t *store) {
  *
  *  /!\ watch out "store" for nesting /!\
  *  store must me initialized at 0
- *  and reinitialized at 0 before re-use
+ *  and re-set to 0 before re-use
  */
 uint32_t stopwatch(uint32_t *store){
     if ( *store == 0 ) {
