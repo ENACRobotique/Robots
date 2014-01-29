@@ -75,21 +75,21 @@ typedef enum{
 
 /* routing table entry
  * the routing of a message "msg", with destination address "destAddr", coming from the interface "interface" is the following :
- * if (the destination is on one of our subnetworks){
+ * if (the destination is in one of our subnetworks, ie directly reachable){
  * 		if (the message has not already been red on the latter subnet){
  * 			send message on the appropriate subnet;
  * 			return;
  * 			}
  * 		}
  *
- * while(we are not at the end of the routing table){
+ * else while(we are not at the end of the routing table){
  *      if (destination's subnet==routing table entry subnet){
  *      	send to ifTo;
  *      	return
  *      }
  *      go to next routing table entry
  * }
- * perform default action (send to default)
+ * perform default action (last entry of the table)
  *
  * /!\ the last entry MUST be {0x42&(~SUBNET_MASK),default interface,default address}
  */
@@ -103,9 +103,6 @@ typedef struct{
     bn_Address destSubnet;
     sRouteInfo nextHop;
 }sRTableEntry;
-
-
-
 
 extern sRTableEntry rTable[];
 

@@ -13,7 +13,7 @@
  * MYADDRI : address of the i2c interface of the node
  * MYADDRU : address of the UART interface of the node
  *
- * last line of routing table MUST be {0x42&(~SUBNET_MASK),{IF_XXX,ADDRXXX}} (default action)
+ * see network_cfg.h for details.
  */
 
 #if (MYADDRX == ADDRX_PC1 )

@@ -121,9 +121,13 @@ int bn_init(){
  *      msg : pointer to the message to send.
  * Return Value :
  *      see bn_forward :
- *          <0 if error
  *          >0 : nb of bytes written is correct
- *
+ *          <0 if error
+ * /!\ BEFORE calling bn_send one must fill (in msg):
+ *      * header.destAddr
+ *      * header.size
+ *      * header.type
+ *      * payload
  */
 int bn_send(sMsg *msg){
 
@@ -172,12 +176,14 @@ int bn_genericSend(sMsg *msg){
  * Arguments :
  *      msg : pointer to the message to send.
  * Return Value :
- *      see bn_forward :
- *          -1 if error
- *          -2 if nack broken link received
- *          -3 if nack buffer full received
- *          -4 if no ack is received
- *          1  if message acked
+ *      1  if message acked
+ *      <0 if error
+ *
+ * /!\ BEFORE calling bn_send one must fill (in msg):
+ *      * header.destAddr
+ *      * header.size
+ *      * header.type
+ *      * payload
  *  WARNING : "BLOCKING" FUNCTION (timeout BN_ACK_TIMEOUT)
  */
 int bn_sendAck(sMsg *msg){

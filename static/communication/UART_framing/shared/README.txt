@@ -1,6 +1,6 @@
 License : 
     TODO
-    Written by quentin VEY on the 2014/01/28
+    Written by Quentin VEY on the 2014/01/28
 
 
 Presentation :
@@ -29,7 +29,7 @@ Technical details :
 
 Requirements :
     Requires to define the following symbols :
-	    ARCH_XXX  (currently supported : 328P_ARDUINO & X86_LINUX)
+	    ARCH_XXX  (currently supported XXX : 328P_ARDUINO & X86_LINUX)
 	    ARCH_BIG_ENDIAN xor ARCH_LITTLE_ENDIAN 
 	
     Requires a visibility on a "node_cfg.h" file defining :
