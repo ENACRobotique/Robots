@@ -1,5 +1,5 @@
 #define PIN_DBG_LED 13
-#define PIN_RST_XBEE 5
+
 
 
 #include "Arduino.h"
@@ -7,11 +7,11 @@
 #include "lib_int_laser.h"
 #include "lib_time.h"
 #include "messages.h"
-#include "lib_superBus.h"
+#include "../../../communication/botNet/shared/botNet_core.h"
 #include "params.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"
-#include "lib_sbDebug.h"
+#include "../../../communication/botNet/shared/bn_debug.h"
 
 
 char nbSync=0;
@@ -24,6 +24,10 @@ unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
 
 
 
+inline void periodHandle(sMsg *msg){
+    if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
+}
+
 
 
 
@@ -32,14 +36,37 @@ void setup() {
   laserIntInit(0);
   laserIntInit(1);
 
-  sb_init();
+  pinMode(13,OUTPUT);
 
-  sb_printDbg("start mobile 1");
+  bn_init();
+
+  bn_printDbg("start mobile 1");
+  bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+  //bn_attach(E_PERIOD,&periodHandle);
 }
+
+int routineErr=0,i=0;
+unsigned long sw=0;
+int led=1;
+sMsg in;
 
 void loop() {
 
+#if 0
+if (bn_routine()<0) {
+        routineErr++;
+    }
+    if (bn_receive(&in)){
+        i++;
+    }
 
+
+    if ( millis()-sw > 1000){
+        sw=millis();
+        led^=1;
+        digitalWrite(13,led);
+    }
+#elif 1
     sMsg inMsg={{0}},outMsg={{0}};
     plStruct laserStruct2Send={0};
     int rxB=0; // size (bytes) of message available to read
@@ -47,20 +74,34 @@ void loop() {
     unsigned long time = millis(),timeMicros=micros();
 
 
+    //blink
+    if((time - time_prev_led)>=3000) {
+      time_prev_led= time;
+      digitalWrite(PIN_DBG_LED,debug_led^=1);
+#ifdef DEBUG
+        bn_printfDbg("blink, %lu s, free mem : %d, rx : %d, routiEr %d\n",millis()/1000,freeMemory(),i,routineErr);
+//      bn_printfDbg("mob1 %lu, mem : %d, state : %d, period : %lu\n",millis()/1000,freeMemory(),state,laser_period);
+#endif
+    }
+
 
 //MUST ALWAYS BE DONE (any state)
 
-	//network routine and test if message for this node
-    sb_routine();
-	rxB=sb_receive(&inMsg);
 
+    // routine and receive
+    if ((rxB=bn_receive(&inMsg))) {
+        i++;
+    }
+#else
     //reading the eventual data from the lasers
     las0=periodicLaser(&buf0,&laserStruct0);
     las1=periodicLaser(&buf1,&laserStruct1);
 
+
     //previous data pocessing
     //if some laser has been detected on 0
     if (las0){
+        bn_printDbg("laser0\n");
         if ( (laserStruct0.date-lastLaserDetect)> (laser_period>>1) ) { //more than half the period after the last laser detected
             lastLaserDetect=laserStruct0.date;
             lastLaserDetectMicros=micros();
@@ -82,6 +123,7 @@ void loop() {
     }
     //if some laser has been detected on 1
     if (las1){
+        bn_printDbg("laser1\n");
         //more than half the period after the last laser detected
         if ( (laserStruct1.date-lastLaserDetect)> (laser_period>>1)) {
             lastLaserDetect=laserStruct0.date;
@@ -120,15 +162,9 @@ void loop() {
     if (rxB && inMsg.header.type==E_PERIOD ){
     	laser_period=inMsg.payload.period;
     	rxB=0;
-
+    	bn_printfDbg("mob1 period received %lu\n",laser_period);
     }
 
-    //blink
-    if((time - time_prev_led)>=3000) {
-      time_prev_led= time;
-      digitalWrite(PIN_DBG_LED,debug_led^=1);
-      sb_printfDbg("mob1 %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
-    }
 
 //STATE MACHINE
     switch (state){
@@ -149,7 +185,7 @@ void loop() {
 						outMsg.header.destAddr=ADDRX_MAIN;
 						outMsg.header.type=E_SYNC_OK;
 						outMsg.header.size=0;
-						sb_send(&outMsg);
+						bn_send(&outMsg);
 					}
 					rxB=0;
 					break;
@@ -176,11 +212,12 @@ void loop() {
                 outMsg.payload.measure.date=laserStruct2Send.date;
                 outMsg.payload.measure.precision=laserStruct2Send.precision;
                 outMsg.payload.measure.sureness=laserStruct2Send.sureness;
-				sb_send(&outMsg);
+				bn_send(&outMsg);
           }
           break;
         default : break;
 
     }
+#endif
 }
 

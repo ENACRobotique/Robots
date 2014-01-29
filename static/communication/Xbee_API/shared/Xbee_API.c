@@ -30,10 +30,18 @@
  *
  */
 
-#include "Xbee_API.h"
-#include "node_cfg.h"
 
+// config files
+#include "Xbee_API.h"
+
+// other required libraries
+#include "../../UART_framing/shared/lib_UART_framing.h"
+#include "../../../global_errors.h"
+#include "../../../tools/libraries/Timeout/timeout.h"
+
+// standard libraries
 #include <string.h>
+#include <stdint.h>
 
 #ifndef MIN
 #define MIN(m, n) (m)>(n)?(n):(m)
@@ -53,10 +61,10 @@
  *  frameID : for ack purposes (not used if NOACK or BCAST).
  *  data : pointer to the data to send over Xbee.
  *  datasize : size that should be read at data.
- * Return value : 0 if error, nb of bytes written on serial link (including start, size and checksum, but exluding escaping char)
+ * Return value : cf Xbee_writeFrame
  *
  */
-int XbeeTx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
+int Xbee_Tx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
     spAPISpecificStruct stru={0};
 
     //writes API cmd ID
@@ -83,29 +91,23 @@ int XbeeTx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* dat
     memcpy(stru.data.TX16Data.pPayload,data,MIN(dataSize,100));
 
 
-    return XbeeWriteFrame(&stru,dataSize+5);
+    return Xbee_writeFrame(&stru,dataSize+5);
 }
 
-/* Xbee TX status reading
- * Return value : nb of bytes red from serial port, 0 if error
- * status written in *status
- */
-int XbeeGetTxStatus(spTXStatus *status){
-    return 0;
-}
 
 /* XbeeATCmd : sends an AT command
  * Arguments :
  *  cmd : string naming the command
- *  frameID : for acknowledgment purposes. 0 means no acknowledgment.
+ *  frameID : for acknowledgment purposes. 0 means no acknowledgment asked.
  *  option : XBEE_ATCMD_SET xor XBEE_ATCMD_GET.
  *  parameter_h : parameter (may be optional). Ignored if XBEE_ATCMD_GET
- * Return value : nb of bytes written on serial link (including start, size and checksum, but exluding escaping char)
+ * Return value : nb of bytes written on serial link (including start, size and checksum, but excluding escaping char)
  *
  * Remark : does not perform check on size and consistency of parameter
  * /!\ refer to XBEE doc for available commands
+ * TODO : everything in one function (send cmd, waits status frame, return value)
  */
-int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h){
+int Xbee_ATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h){
     spAPISpecificStruct sCmd;
 
     // sets API specific ID
@@ -122,44 +124,46 @@ int XbeeATCmd(char cmd[2],uint8_t frameID, uint8_t option, uint32_t parameter_h)
         // converts the parameter to big endian
         sCmd.data.ATCmd.parameter_be=hbe4_swap(parameter_h);
 
-        return XbeeWriteFrame(&sCmd,8);
+        return Xbee_writeFrame(&sCmd,8);
     }
-    else return XbeeWriteFrame(&sCmd,4);
+    else return Xbee_writeFrame(&sCmd,4);
 
-    //TODO : add wait until satuts
+}
+
+/* Xbee_ATCmd : waits for the ack after an AT cmd.
+ * Arguments :
+ *  frID : for acknowledgment purposes. 0 means no acknowledgment asked.
+ *  option : XBEE_ATCMD_SET xor XBEE_ATCMD_GET.
+ * Return value : nb of bytes written on serial link (including start, size and checksum, but excluding escaping char)
+ * Remark : does not perform check on size and consistency of parameter
+ * refer to XBEE doc for available commands
+ * /!\ do not use if returned values are expected !
+ */
+int Xbee_waitATAck(int frID, uint32_t timeOut){
+    int byteRead=0;
+    spAPISpecificStruct stru;
+    uint32_t sw=0;
+
+    //waits for acknowledgement
+    do {
+        byteRead=Xbee_readFrame(&stru);
+    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==frID) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
+
+    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=frID) return -ERR_XBEE_NOSTAT;
+    else if (stru.data.ATResponse.status!=XBEE_ATR_S_ERROR) return -ERR_XBEE_AT_ERR;
+    else if (stru.data.ATResponse.status!=XBEE_ATR_S_INVCOM) return -ERR_XBEE_AT_WRONG_CMD;
+    else if (stru.data.ATResponse.status!=XBEE_ATR_S_INVPAR) return -ERR_XBEE_AT_WRONG_PAR;
+    return 1;
 }
 
 /* XbeeWriteFrame : writes a specific frame one the serial link, for the Xbee.
  * Return value : nb of bytes written on the serial link (Excluding escaping caracter 0x7D), or 0 if error
  * parameters :
- *  size : size of data to send (memory area pointed to by str_be), INCLUDING API command identifier
+ *  size_h : size of data to send (memory area pointed to by str_be), INCLUDING API command identifier
  *  str_be : api-specific structure to send (/!\ data to be understood by Xbee module MUST be big-endian, unspecified for the rest)
  */
-int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
-    uint8_t checksum=0;
-    int count=0;
-
-    // write start byte
-    if (!serialWrite(XBEE_FRAME_START)) return 0;
-
-    // write size in the right order (big-endian)
-    if (!XbeeWriteByteEscaped((uint8_t)(size_h>>8))) return 0;
-    if (!XbeeWriteByteEscaped((uint8_t)(size_h&0xff))) return 0;
-
-    // writes the API command ID
-    if (!XbeeWriteByteEscaped(str_be->APID)) return 0;
-    checksum+=str_be->APID;
-
-    // writes the rest of the frame and compute checksum
-    while (count!=(size_h-1)){
-        checksum+=str_be->data.raw[count];
-        if (!XbeeWriteByteEscaped(str_be->data.raw[count])) return 0;
-        count++;
-    }
-    // final compute and write the checksum
-    if (!XbeeWriteByteEscaped(0xff-checksum)) return 0;
-
-    return (count+4);
+inline int Xbee_writeFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
+    return UART_writeFrame(str_be,size_h);
 }
 
 
@@ -169,97 +173,36 @@ int XbeeWriteFrame(const spAPISpecificStruct *str_be, uint16_t size_h){
  * Arguments :
  *  *frame : pointer to the memory area in which the frame shall be written
  * Return value :
- *  size of the frame written in *frame if correct,
- *  0 if no frame available after frame timeout
- *  -1 if bad checksum
- *  -2 if byte timeout (but start character detected) or byte error (escaping bytes)
+ *  >0 : size of the frame written in *frame if correct,
+ *  <0 if error (check return for error code)
  */
-int XbeeReadFrame(spAPISpecificStruct *str){
-    uint8_t *rawFrame=(uint8_t*)str;
-    uint16_t size=0;
-    int count=0;
-    uint8_t checksum=0;
-    uint8_t readByte=0,readByte1=0;
-    int lus;
-    uint32_t stopWatch=0;
-
-    //waiting for a frame start byte
-    while (readByte!=XBEE_FRAME_START && testTimeout(XBEE_WAITFRAME_TIMEOUT, &stopWatch)){
-        lus=serialRead(&readByte);
-    }
-    if (readByte!=XBEE_FRAME_START) {
-        return 0;
-    }
-    stopWatch=0; //resets the timeout
-
-    //reading size of message (with timeout)
-    while ( !(lus=XbeeReadByteEscaped(&readByte))  && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-    if (lus <= 0) return -2;
-    stopWatch=0; //resets the timeout
-    while (!(lus=XbeeReadByteEscaped(&readByte1)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-    if (lus <= 0) return -2;
-    stopWatch=0; //resets the timeout
-
-    size= (readByte<<8) | readByte1 ; //endianness-proof
-
-    //read size bytes
-    while (count != size){
-        while (!(lus=XbeeReadByteEscaped(&rawFrame[count])) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-        if ( lus <= 0) return -2;
-        stopWatch=0; //resets the timeout
-        checksum+=rawFrame[count];
-        count++;
-    }
-
-    //checksum (read byte ,add , test and return)
-    while (!(lus=XbeeReadByteEscaped(&readByte)) && testTimeout(XBEE_READBYTE_TIMEOUT, &stopWatch));
-    if ( lus <= 0) return -2;
-    stopWatch=0; //resets the timeout
-    checksum+=readByte;
-
-    if (checksum == 0xff) return count;
-    return -1;
+inline int Xbee_readFrame(spAPISpecificStruct *str){
+    return UART_readFrame(str,sizeof(spAPISpecificStruct));
 }
 
 
-/* XbeeWriteByteEscaped : writes `byte` on the serial link, including escaping if needed
- * Return value :
- *  1 if write succeed, 0 otherwise
- */
-int XbeeWriteByteEscaped(uint8_t byte){
-    if ( byte == XBEE_FRAME_START || byte == XBEE_XOFF || byte == XBEE_XON || byte == XBEE_ESCAPE_CHAR ){
-        if (serialWrite(XBEE_ESCAPE_CHAR) && serialWrite( byte^XBEE_ESCAPE_MASK )) return 1;
-        return 0;
-    }
-    else if (serialWrite(byte)) return 1;
-    return 0;
+int Xbee_init(){
+    uint8_t garbage;
+    int ret;
+    //init the serial link
+#ifdef ARCH_X86_LINUX
+    ret=UART_init(XBEE_UART_PATH,E_115200_8N2);
+#elif defined(ARCH_328P_ARDUINO)
+    Xbee_rst();
+    ret=UART_init(0,111111);
+#else
+#error "no arch defined for Xbee4sb.c, or arch no available (yet)"
+#endif
+
+    //waits for the Xbee to totally start
+    uint32_t sw=0;
+    while( testTimeout(10000000,&sw));
+
+    //clear in buffer from remaining bytes
+    while ( serialReadEscaped(&garbage,1000)>0 );
+    if (ret<0) return ret;
+    else return 1;
 }
-
-/* XbeeWriteByteEscaped : writes one byte on the serial link, removing escaping if needed
- * Return value :
- *  1 if read succeed,
- *  0 if there was nothing to read
- *  -1 on error while escaping
- */
-int XbeeReadByteEscaped(uint8_t *byte){
-    uint32_t sw=0; //stopwatch
-    int byteRed=0;
-
-    if(serialRead(byte)){
-        // un-escape characters if needed
-        if (*byte == (uint8_t)XBEE_ESCAPE_CHAR){
-            //wait for the next byte on the serial (arduino is fucking slow here)
-            while (!(byteRed=serialRead(byte)) && testTimeout(XBEE_READBYTE_TIMEOUT,&sw));
-            if (!byteRed) return -1;
-
-            (*byte) ^= (uint8_t)XBEE_ESCAPE_MASK;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-
 
 
 

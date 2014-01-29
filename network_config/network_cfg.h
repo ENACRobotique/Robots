@@ -10,7 +10,8 @@
 
 
 #include <stdint.h>
-#include "message_header.h"
+#include "../static/communication/botNet/shared/message_header.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,7 +54,7 @@ extern "C" {
     #define ADDRI_MAIN_IO       ( (3<<1) | SUBNETI_MAIN )
 
 //default debug address :
-    #define ADDR_DEBUG_DFLT ADDRX_DEBUG
+    #define ADDR_DEBUG_DFLT 0
 
 
 
@@ -94,11 +95,11 @@ typedef enum{
 
 typedef struct {
     E_IFACE ifTo;
-    sb_Address nextHop;
+    bn_Address nextHop;
 }sRouteInfo;
 
 typedef struct{
-    sb_Address destSubnet;
+    bn_Address destSubnet;
     sRouteInfo nextHop;
 }sRTableEntry;
 

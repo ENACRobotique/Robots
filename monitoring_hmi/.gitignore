@@ -1,6 +1,2 @@
-/cli
-/gtk
-/.depend
-*.o
-*~
+/Debug
 

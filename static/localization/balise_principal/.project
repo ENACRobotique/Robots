@@ -99,29 +99,29 @@
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/Wire</locationURI>
 		</link>
 		<link>
-			<name>lib/Xbee_API_arduino</name>
+			<name>lib/Timeout</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/Xbee_API/arduino</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
-			<name>lib/Xbee_API_shared</name>
+			<name>lib/UART_framing</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/Xbee_API/shared</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/UART_framing</locationURI>
+		</link>
+		<link>
+			<name>lib/Xbee_API</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/Xbee_API</locationURI>
+		</link>
+		<link>
+			<name>lib/botNet</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/botNet</locationURI>
 		</link>
 		<link>
 			<name>lib/network_config</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/network_config/</locationURI>
-		</link>
-		<link>
-			<name>lib/superBus_arduino</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/superBus/arduino</locationURI>
-		</link>
-		<link>
-			<name>lib/superBus_shared</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/superBus/shared</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

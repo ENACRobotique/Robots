@@ -39,4 +39,13 @@
 #define iD2I(d) iROUND(D2I(d))  // (I)
 #define isD2I(d) isROUND(D2I(d)) // (I<<SHIFT)
 
+// increments to centimeters
+#define I2D(I) ((I)*DpR/IpR)
+#define I2Ds(Is) I2D((Is)/dSHIFT)
+#define iI2Ds(Is) iROUND(I2Ds(Is))
+
+// rad.increments to rad
+#define RI2R(RI) ((RI)/D2I(RDIAM))
+#define RI2Rs(RIs) RI2R((RIs)/dSHIFT)
+
 #endif

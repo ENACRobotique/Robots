@@ -7,8 +7,8 @@
 #include <gpio.h>
 #include <ime.h>
 #include <sys_time.h>
-#include "lib_superBus.h"
-#include "lib_sbDebug.h"
+#include "shared/botNet_core.h"
+#include "shared/bn_debug.h"
 #include "network_cfg.h"
 
 #define NETWORK_TEST
@@ -26,7 +26,7 @@ int main(void) {
 
     gpio_init_all();  // use fast GPIOs
 
-    sb_init();
+    bn_init();
 
     // sortie LED
     gpio_output(1, 24);
@@ -42,7 +42,7 @@ int main(void) {
 
 #ifndef NETWORK_TEST
     // send position update
-    sb_printDbg("start io");
+    bn_printDbg("start io");
 
     while(millis() < 500);
 
@@ -53,14 +53,14 @@ int main(void) {
     msg.payload.pos.y = traj_blue[0].p1_y;
     msg.payload.pos.theta = 0.;
     msg.payload.pos.id = 0; // primaire
-    sb_send(&msg);
+    bn_send(&msg);
 #endif
 
     // main loop
     while(1) {
         sys_time_update();
 
-        sb_routine();
+        bn_routine();
 
 #ifndef NETWORK_TEST
         if( traj_extract_idx < sizeof(traj_blue)/sizeof(*traj_blue) ) {
@@ -68,7 +68,7 @@ int main(void) {
             msg.header.type = E_TRAJ;
             msg.header.size = sizeof(sTrajElRaw_t);
             memcpy(&msg.payload.traj, &traj_blue[traj_extract_idx], sizeof(sTrajElRaw_t));
-            while(sb_send(&msg) < 0);
+            while(bn_send(&msg) < 0);
 
             traj_extract_idx++;
         }
@@ -85,7 +85,7 @@ int main(void) {
             msg.header.type = E_DATA;
             msg.header.size = 1;
             msg.payload.raw[0] = !gpio_read(1, 24);
-            sb_send(&msg);
+            bn_send(&msg);
 #endif
         }
     }
