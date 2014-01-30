@@ -73,6 +73,7 @@ void usage(char *cl){
     printf("\t--y-initial, -y       initial y position (cm)\n");
     printf("\t--theta-initial, -t   initial orientation theta (°)\n");
     printf("\t--verbose, -v         increases verbosity\n");
+    printf("\t--quiet, -q           not verbose\n");
     printf("\t--help, -h, -?        prints this help\n");
 }
 
@@ -116,7 +117,7 @@ int main(int argc, char *argv[]){
     }
 
     // arguments parsing
-    int verbose = 0;
+    int verbose = 1;
     while(1){
         static struct option long_options[] = {
                 {"log-file",        required_argument,  NULL, 'f'},
@@ -126,11 +127,12 @@ int main(int argc, char *argv[]){
                 {"y-initial",       required_argument,  NULL, 'y'},
                 {"theta-initial",   required_argument,  NULL, 't'},
                 {"verbose",         no_argument,        NULL, 'v'},
+                {"quiet",           no_argument,        NULL, 'q'},
                 {"help",            no_argument,        NULL, 'h'},
                 {NULL,              0,                  NULL, 0}
         };
 
-        int c = getopt_long(argc, argv, "f:d:a:x:y:t:vh?", long_options, NULL);
+        int c = getopt_long(argc, argv, "f:d:a:x:y:t:vqh?", long_options, NULL);
         if(c == -1)
             break;
 
@@ -159,6 +161,9 @@ int main(int argc, char *argv[]){
         case 'v':
             verbose++;
             break;
+        case 'q':
+            verbose = 0;
+            break;
 
         default:
            printf("?? getopt returned character code 0%o ??\n", c);
@@ -175,7 +180,9 @@ int main(int argc, char *argv[]){
 
     // botNet initialization
     bn_init();
-    printf("Listening to ADDRX_DEBUG messages.\n");
+    if(verbose >= 1){
+        printf("Identified as ADDRX_DEBUG on bn network.");
+    }
 
     // send position
     outMsg.header.destAddr = ADDRI_MAIN_PROP;
@@ -188,7 +195,9 @@ int main(int argc, char *argv[]){
     outMsg.payload.pos.u_b = 0;
     outMsg.payload.pos.x = x;
     outMsg.payload.pos.y = y;
-    printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
+    if(verbose >= 1){
+        printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
+    }
     if(fd) fprintf(fd, "<POS %f, %f, %f\n", x, y, theta);
     ret = bn_sendAck(&outMsg);
     if(ret <= 0){
@@ -196,33 +205,24 @@ int main(int argc, char *argv[]){
     }
 
     // initial config
-    printf("dist  = %.2fcm\n", dist);
-    printf("angle = %.2f°\n", angle*180./M_PI);
+    if(verbose >= 1){
+        printf("dist  = %.2fcm\n", dist);
+        printf("angle = %.2f°\n", angle*180./M_PI);
+    }
     if(fd) fprintf(fd, "=TRN %f, %f\n", dist, angle);
 
     // setup the SIGINT handler
     prevH = signal(SIGINT, sigHandler);
-    printf("(ProTip: Ctrl+C to show menu)\n");
+    printf("(Listening... Ctrl+C to show menu)\n");
 
     // main loop
     while(!quit){
-        ret = bn_routine();
-        if(ret < 0){
-            if(ret == -ERR_INTERRUPTED){
-                sigint=1;
-            }
-            else if(ret != -ERR_UART_READ_BYTE_TIMEOUT){
-                fprintf(stderr, "bn_routine() error #%i\n", -ret);
-                exit(1);
-            }
-        }
-
         ret = bn_receive(&inMsg);
         if(ret < 0){
             if(ret == -ERR_INTERRUPTED){
                 sigint=1;
             }
-            else{
+            else if(ret != -ERR_UART_READ_BYTE_TIMEOUT){
                 fprintf(stderr, "bn_receive() error #%i\n", -ret);
                 exit(1);
             }
@@ -230,10 +230,10 @@ int main(int argc, char *argv[]){
 
         switch(state){
         case E_IDLE:
-            if(ret > 0){
+            if(ret > 0 && verbose >= 1){
                 printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
 
-                if(verbose > 0){
+                if(verbose >= 2){
                     switch(inMsg.header.type){
                     case E_DEBUG:
                         printf("  %s\n", inMsg.payload.debug);
@@ -345,7 +345,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.sid = 0;
                             outMsg.payload.traj.tid = tid++;
 
-                            if(fd) fprintf(fd, "<FWD %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.sid, outMsg.payload.traj.tid);
+                            if(fd) fprintf(fd, "<FWD %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.tid, outMsg.payload.traj.sid);
                             ret = bn_send(&outMsg);
                             if(ret <= 0){
                                 fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
@@ -369,7 +369,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.sid = 0;
                             outMsg.payload.traj.tid = tid++;
 
-                            if(fd) fprintf(fd, "<STP %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.sid, outMsg.payload.traj.tid);
+                            if(fd) fprintf(fd, "<STP %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.tid, outMsg.payload.traj.sid);
                             ret = bn_send(&outMsg);
                             if(ret <= 0){
                                 fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
@@ -397,7 +397,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.sid = 0;
                             outMsg.payload.traj.tid = tid;
 
-                            if(fd) fprintf(fd, "<RG1 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.sid, outMsg.payload.traj.tid);
+                            if(fd) fprintf(fd, "<RG1 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.tid, outMsg.payload.traj.sid);
                             ret = bn_send(&outMsg);
                             if(ret <= 0){
                                 fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
@@ -416,7 +416,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.sid = 1;
                             outMsg.payload.traj.tid = tid++;
 
-                            if(fd) fprintf(fd, "<RG2 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.sid, outMsg.payload.traj.tid);
+                            if(fd) fprintf(fd, "<RG2 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.tid, outMsg.payload.traj.sid);
                             ret = bn_send(&outMsg);
                             if(ret <= 0){
                                 fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
@@ -445,7 +445,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.sid = 0;
                             outMsg.payload.traj.tid = tid;
 
-                            if(fd) fprintf(fd, "<LF1 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.sid, outMsg.payload.traj.tid);
+                            if(fd) fprintf(fd, "<LF1 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.tid, outMsg.payload.traj.sid);
                             ret = bn_send(&outMsg);
                             if(ret <= 0){
                                 fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
@@ -464,7 +464,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.sid = 1;
                             outMsg.payload.traj.tid = tid++;
 
-                            if(fd) fprintf(fd, "<LF2 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.sid, outMsg.payload.traj.tid);
+                            if(fd) fprintf(fd, "<LF2 %f, %f, %f, %f, %f, %f, %f, %f, %f, %hu, %hu\n", outMsg.payload.traj.p1_x, outMsg.payload.traj.p1_y, outMsg.payload.traj.p2_x, outMsg.payload.traj.p2_y, outMsg.payload.traj.seg_len, outMsg.payload.traj.c_x, outMsg.payload.traj.c_y, outMsg.payload.traj.c_r, outMsg.payload.traj.arc_len, outMsg.payload.traj.tid, outMsg.payload.traj.sid);
                             ret = bn_send(&outMsg);
                             if(ret <= 0){
                                 fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
