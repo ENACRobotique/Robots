@@ -96,7 +96,7 @@ void traj_conv(sTrajEl_t *t) {
         t->c_r = isD2I(t->raw.c_r);
         t->arc_len = isD2I(t->raw.arc_len);
 
-        t->arc_sp_max = SQRT(1.3*1.3*(double)t->c_r);
+        t->arc_sp_max = SQRT(1.3*1.3*(double)abs(t->c_r));
     }
 }
 #endif
@@ -144,7 +144,6 @@ int main(void) {
     long long tmp, dtime;
     int n_x, n_y, i;
     int alpha, dist, dist_tmp, dist_lim;
-    int step_rotdir = 0; // initial value unused, but necessary to avoid a warning
 #endif
 #if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
     sMsg msg;
@@ -187,9 +186,6 @@ int main(void) {
     // main loop
     while(1) {
         sys_time_update();
-#if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
-        bn_routine();
-#endif
 
 #if defined(ASSERV_TEST) && defined(NETWORK_TEST)
         if(bn_receive(&msg) > 0) {
@@ -236,7 +232,7 @@ int main(void) {
                         error = 2; // TODO error: too much trajectory steps received
                     }
                 }
-                else if( next_traj_insert_sid > 0 && te->tid == next_tid ) { // we already got some new steps but we stil didn't switch to those (next_tid is valid)
+                else if( next_traj_insert_sid > 0 && te->tid == next_tid ) { // we already got some new steps but we still didn't switch to those (next_tid is valid)
                     if( next_traj_insert_sid < TRAJ_MAX_SIZE ) {
                         if( te->sid == next_traj_insert_sid ) {
                             memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
@@ -386,13 +382,13 @@ int main(void) {
                             traj_conv(&traj[curr_traj][i]),
                             dist_tmp += traj[curr_traj][i].seg_len + traj[curr_traj][i-1].arc_len
                     ) {
-                        dtime = abs(((long long)v - (long long)traj[curr_traj][i].arc_sp_max)*3/(long long)AMAX);
+                        dtime = llabs(((long long)v - (long long)traj[curr_traj][i].arc_sp_max)*3/(long long)AMAX);
                         consigne = MIN(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
                     }
                 }
 
                 if(dist < isD2I(1)) { // we are near the goal
-                    if(!(curr_traj_step&1) && traj[curr_traj][curr_traj_step>>1].c_r < isD2I(1)) { // no next step
+                    if(!(curr_traj_step&1) && abs(traj[curr_traj][curr_traj_step>>1].c_r) < isD2I(1)) { // no next step
                         consigne_l = 0;
                         consigne_r = 0;
                         state = S_WAIT;
@@ -408,21 +404,15 @@ int main(void) {
                         traj_conv(&traj[curr_traj][(curr_traj_step>>1) + 1]);
 
                         if(curr_traj_step&1) {
+                            // circle
                             gx = traj[curr_traj][(curr_traj_step>>1) + 1].p1_x;
                             gy = traj[curr_traj][(curr_traj_step>>1) + 1].p1_y;
-                            step_rotdir = ((long long)traj[curr_traj][curr_traj_step>>1].p1_x - traj[curr_traj][curr_traj_step>>1].p2_x)*((long long)traj[curr_traj][curr_traj_step>>1].c_y - traj[curr_traj][curr_traj_step>>1].p2_y) - ((long long)traj[curr_traj][curr_traj_step>>1].p1_y - traj[curr_traj][curr_traj_step>>1].p2_y)*((long long)traj[curr_traj][curr_traj_step>>1].c_x - traj[curr_traj][curr_traj_step>>1].p2_x) > 0;
-                            if(step_rotdir) { // clockwise
-                                // set speed a priori
-                                _mul_l = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r + isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
-                                _mul_r = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r - isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
-                            }
-                            else {  // counterclockwise
-                                // set speed a priori
-                                _mul_l = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r - isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
-                                _mul_r = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r + isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
-                            }
+                            // set speed a priori
+                            _mul_l = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r + isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
+                            _mul_r = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r - isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
                         }
                         else {
+                            // straight line
                             gx = traj[curr_traj][curr_traj_step>>1].p2_x;
                             gy = traj[curr_traj][curr_traj_step>>1].p2_y;
 
@@ -437,12 +427,7 @@ int main(void) {
                     // future error
                     n_x = x + ((long long)(v*ct)>>(SHIFT-2)); // position prediction in 4 periods
                     n_y = y + ((long long)(v*st)>>(SHIFT-2));
-                    if(step_rotdir) { // clockwise
-                        tmp = -( (SQR(n_x - traj[curr_traj][curr_traj_step>>1].c_x) + SQR(n_y - traj[curr_traj][curr_traj_step>>1].c_y))/traj[curr_traj][curr_traj_step>>1].c_r - traj[curr_traj][curr_traj_step>>1].c_r );
-                    }
-                    else {
-                        tmp =  ( (SQR(n_x - traj[curr_traj][curr_traj_step>>1].c_x) + SQR(n_y - traj[curr_traj][curr_traj_step>>1].c_y))/traj[curr_traj][curr_traj_step>>1].c_r - traj[curr_traj][curr_traj_step>>1].c_r );
-                    }
+                    tmp = -( (SQR(n_x - traj[curr_traj][curr_traj_step>>1].c_x) + SQR(n_y - traj[curr_traj][curr_traj_step>>1].c_y))/traj[curr_traj][curr_traj_step>>1].c_r - traj[curr_traj][curr_traj_step>>1].c_r );
 
                     tmp>>=1;  // gain
 
@@ -494,12 +479,12 @@ int main(void) {
 #endif
         }
 
-        if(millis() - prevPos >= 500) {
+        if(millis() - prevPos >= 100) {
             prevPos = millis();
 
             msg.header.destAddr = ADDRX_DEBUG;
             msg.header.type = E_POS;
-            msg.header.size = sizeof(sPosPayload);
+            msg.header.size = sizeof(msg.payload.pos);
             msg.payload.pos.id = 0; // main robot
             msg.payload.pos.x = I2Ds(x);
             msg.payload.pos.y = I2Ds(y);

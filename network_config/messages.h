@@ -92,7 +92,7 @@ typedef struct {
 // circle
     float c_x;
     float c_y;
-    float c_r;
+    float c_r; // >0 CW | <0 CCW
     float arc_len;
 // trajectory data
     uint16_t tid; // trajectory identifier

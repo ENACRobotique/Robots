@@ -388,7 +388,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.p2_y = y;
                             outMsg.payload.traj.seg_len = 0.;
                             l_r = dist/angle;
-                            outMsg.payload.traj.c_r = fabs(l_r);
+                            outMsg.payload.traj.c_r = l_r;
                             l_x = l_r*sin(angle);
                             l_y = l_r*(cos(angle)-1);
                             outMsg.payload.traj.c_x = x + l_r*sin(theta);
@@ -436,7 +436,7 @@ int main(int argc, char *argv[]){
                             outMsg.payload.traj.p2_y = y;
                             outMsg.payload.traj.seg_len = 0.;
                             l_r = -dist/angle;
-                            outMsg.payload.traj.c_r = fabs(l_r);
+                            outMsg.payload.traj.c_r = l_r;
                             l_x = -l_r*sin(angle);
                             l_y = l_r*(cos(angle)-1);
                             outMsg.payload.traj.c_x = x + l_r*sin(theta);
