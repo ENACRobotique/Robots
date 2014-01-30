@@ -64,7 +64,6 @@ int bn_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t tim
 
     //waits for the answers and stores it if correct. If incorrect, drop the message (traceroute must not be used in game, only for developpment and test purposes)
     while ( testTimeout(timeout*1000,&to) ){
-        bn_routine();
         if(bn_receive(&msg)>0){
             //check the type
             if ( msg.header.type == E_TRACEROUTE_RESPONSE ){

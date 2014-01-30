@@ -203,8 +203,6 @@ int bn_sendAck(sMsg *msg){
 
     // waiting for the reply
     while ( testTimeout(BN_ACK_TIMEOUT*1000,&sw)){
-        // route message (to receive the one we are waiting for)
-        bn_routine();
         // if we receive a message
         if (bn_receive(&msgIn)>0){
 #ifdef DEBUG_PC_ACK
