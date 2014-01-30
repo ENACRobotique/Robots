@@ -41,30 +41,26 @@ int serialInit(const char *device, uint32_t mode){
     if(serial_port < 0)
     {
         perror("Erreur d'ouverture du port serie");
-        exit(-1);       //XXX terminate programm abruptly here or gently tell the calling function (main) that a problem occured ?
+        exit(-1);       //XXX terminate program abruptly here or gently tell the calling function (main) that a problem occurred ?
     }
 
     //reading config data from serial port
     tcgetattr(serial_port, &options);
-    //B230400 bauds
-    cfsetospeed(&options, B115200);
-    options.c_cflag |= (CLOCAL | CREAD);
-    options.c_cflag &= ~PARENB; //no parity
 
+    options.c_iflag = IGNBRK; // ignore break
+    options.c_oflag = 0;
+    options.c_cflag = CLOCAL /* ignore modem ctrl */ | CREAD /* enable receiver */ | CS8 /* 8 bits per character */;
+    cfsetospeed(&options, B115200 /* 115200bauds */);
     if (mode==E_115200_8N2) {
         printf("8N2 set\n");
         options.c_cflag |= CSTOPB; // 2 stop bits (hack for xbee)
     }
     else if (mode==E_115200_8N1) {
         printf("8N1 set\n");
-        options.c_cflag &= ~CSTOPB; //1 stop bit
+//        options.c_cflag &= ~CSTOPB; //1 stop bit
     }
+    options.c_lflag = 0;
 
-    options.c_cflag &= ~CSIZE; //option a 0
-    options.c_cflag |= CS8; //8 bits
-
-    options.c_iflag |= IXON;    //enable flow control
-    options.c_iflag |= IXOFF;   //enable flow control
     tcsetattr(serial_port, TCSANOW, &options); //enregistrement des valeurs de configuration
     printf("Port serie ouvert\n");
 

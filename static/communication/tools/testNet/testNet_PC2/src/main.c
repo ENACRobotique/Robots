@@ -41,7 +41,7 @@ int main(){
     sMsg msgIn;
 
     bn_Address destAd;
-    int ret,ret1,quitMenu,nbTraces,quit=0,f;
+    int ret,quitMenu,nbTraces,quit=0,f;
     char cmd;
     int err;
 
@@ -62,7 +62,7 @@ int main(){
         memset(&msgIn,0,sizeof(sMsg));
 
         //message reception
-        if ( (ret1=bn_receive(&msgIn))>0 ){
+        if ( (ret=bn_receive(&msgIn))>0 ){
             // some display and message handling
             printf("message received from %hx, type : %u\n",msgIn.header.srcAddr,msgIn.header.type);
             switch (msgIn.header.type){
