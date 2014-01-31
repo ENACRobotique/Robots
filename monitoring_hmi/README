@@ -1,0 +1,23 @@
+Human Machine Interface to botNet
+
+Node reachable as ADDRX_DEBUG from any other node on a botNet network.
+
+== Command Line Interface target ==
+The only currently supported node is ADDRI_MAIN_PROP.
+  * Go to remote mode and use ZQSD to move your robot in space
+  * The current position of the robot is showed on the bottom of the screen
+
+== GTK target ==
+The only currently supported node is ADDRI_MAIN_PROP.
+  * The position sent periodically from this node to ADDRX_DEBUG is plotted live
+    on a virtual representation of the game field on the second tab of the GUI.
+  * You can move the robot by clicking on the field. It sends a straight line trajectory
+    from the current position of the robot to the goal to the robot.
+
+
+Install:
+  * The GTK target needs the package libgtk2.0-dev
+  * This eclipse project uses the pkg-config add-on https://code.google.com/p/pkg-config-support-for-eclipse-cdt/
+  * The project contains two targets, make sure to change to the desired target before building
+  * Make sure to have the suitable C/C++ Indexer configuration to follow the selected build configuration
+
