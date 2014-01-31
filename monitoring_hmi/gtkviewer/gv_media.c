@@ -16,7 +16,7 @@ void _media_RawDump() {
     GtkWidget *image;
     FILE *fd;
     unsigned char *data;
-    char fn[64], date[32];
+    char fn[64], date[32], cmd[128];
     time_t rawtime;
     struct tm * timeinfo;
     int width, height, rowstride;
@@ -36,16 +36,20 @@ void _media_RawDump() {
     if(rowstride != width*3)
         return;
 
-    snprintf(fn, sizeof(fn)-5, "dump-%s-%s-%dx%d", gtk_label_get_text(GTK_LABEL(gtk_notebook_get_tab_label(GTK_NOTEBOOK(_gv_nbmedia), image))), date, width, height);
-    strcat(fn, ".data");
+    snprintf(fn, sizeof(fn)-4, "dump-%s-%s-%dx%d", gtk_label_get_text(GTK_LABEL(gtk_notebook_get_tab_label(GTK_NOTEBOOK(_gv_nbmedia), image))), date, width, height);
+    sprintf(cmd, "convert -size \"%ix%i\" -depth 8 %s.rgb %s.png ", width, height, fn, fn);
+    strcat(fn, ".rgb");
 
     fd = fopen(fn, "wb+");
     if(!fd)
         return;
-
     fwrite(data, width*3, height, fd);
-
     fclose(fd);
+
+    if(!system(cmd)){
+        unlink(fn);
+        strcpy(fn+strlen(fn)-3, "png");
+    }
 
     printf("data saved to %s\n", fn);
 
