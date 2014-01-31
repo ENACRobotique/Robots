@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <math.h>
+#include <string.h> // memset
+#include <getopt.h> // parameters parsing
+#include <math.h> // M_PI
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -11,6 +12,9 @@
 #include "../../global_errors.h"
 #include "node_cfg.h"
 extern int serial_port;
+
+#include "gv.h"
+#include "video_draw.h"
 
 #include "context.h"
 
@@ -29,20 +33,43 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
     ret = bn_receive(&inMsg);
     if(ret > 0){
-        if(ret > 0 && ctx->verbose >= 1){
-            printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
+        if(ret > 0){
+            if(ctx->verbose >= 1){
+                printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
+            }
 
-            if(ctx->verbose >= 2){
-                switch(inMsg.header.type){
-                case E_DEBUG:
+            switch(inMsg.header.type){
+            case E_DEBUG:
+                if(ctx->verbose >= 2){
                     printf("  %s\n", inMsg.payload.debug);
-                    break;
-                case E_POS:
-                    printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.pos.id, inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
-                    break;
-                default:
-                    break;
                 }
+                break;
+            case E_POS:{
+                int x, y, dx, dy;
+                float factor_x, factor_y;
+
+                if(ctx->verbose >= 2){
+                    printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.pos.id, inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
+                }
+
+                factor_x = (float)ctx->pos_szx/300.;
+                factor_y = (float)ctx->pos_szy/200.;
+
+                x = (int)(inMsg.payload.pos.x*factor_x + 0.5);
+                y = ctx->pos_szy - (int)(inMsg.payload.pos.y*factor_y + 0.5);
+                dx = 8*factor_x*cos(inMsg.payload.pos.theta);
+                dy = -8*factor_y*sin(inMsg.payload.pos.theta);
+
+                // update position media
+                ctx->pos_cur ^= 1;
+                memset(ctx->pos_data[ctx->pos_cur], 255, ctx->pos_szx*ctx->pos_szy*3);
+                video_draw_arrow(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, dx, dy, 10, 255, 0, 0);
+                gv_media_update(ctx->pos_mid, ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, (gv_destroy)NULL, NULL);
+
+                break;
+            }
+            default:
+                break;
             }
         }
     }
@@ -52,6 +79,8 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
 int main(int argc, char *argv[]) {
     context_t ctx;
+
+    memset(&ctx, 0, sizeof(ctx));
 
     // arguments options
     ctx.verbose = 1;
@@ -88,6 +117,16 @@ int main(int argc, char *argv[]) {
 
     // arguments check
 
+    // gtkviewer init
+    gv_init(&argc, &argv, "GTK UI to botNet", "En construction...");
+    // gtkviewer media creation
+    ctx.pos_szx = 300*4;
+    ctx.pos_szy = 200*4;
+    ctx.pos_mid = gv_media_new("position", "Position des robots en temps réel", ctx.pos_szx, ctx.pos_szy);
+    ctx.pos_data[0] = malloc(ctx.pos_szx*ctx.pos_szy*3);
+    ctx.pos_data[1] = malloc(ctx.pos_szx*ctx.pos_szy*3);
+    ctx.pos_cur = 0;
+
     bn_init();
     if(ctx.verbose >= 1){
         printf("Identified as ADDRX_DEBUG on bn network.");
@@ -102,7 +141,8 @@ int main(int argc, char *argv[]) {
 
     printf("(Listening...)\n");
 
-    gtk_main();
+    // run main loop
+    gv_run();
 
     // never reached
     return 0;
