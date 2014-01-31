@@ -14,16 +14,23 @@ GtkWidget *_gv_window;
 void key_event(GtkWidget *widget, GdkEvent *event, gpointer data) {
     unsigned int k;
 
-    k = event->key.keyval;
-//printf("%08x %s\n", k, event->key.string);
-    if (k < 0xff) {
-        switch (k) {
-        case 'g':		/* grab a raw image */
-            _media_RawDump();
-            break;
-        default:
-            break;
+//    printf("kevent%i\n", (int)event->type);
+
+    switch((int)event->type){
+    case GDK_KEY_RELEASE:
+        k = event->key.keyval;
+        if (k < 0xff) {
+            switch (k) {
+            case 'g':		/* grab a raw image */
+                _media_RawDump();
+                break;
+            default:
+                break;
+            }
         }
+        break;
+    default:
+        break;
     }
 }
 

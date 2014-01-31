@@ -27,8 +27,30 @@ void usage(char *cl) {
     printf("\t--help, -h, -?            prints this help\n");
 }
 
+gint event_cb(GtkWidget *widget, GdkEvent *event, context_t *ctx) {
+    GdkEventButton *bevent = (GdkEventButton *)event;
+
+//    printf("event%i\n", (int)event->type);
+
+    switch ((gint)event->type) {
+    case GDK_BUTTON_PRESS:
+        /* Handle mouse button press */
+
+//        printf("Mouse click %g,%g\n", bevent->x, bevent->y);
+
+        ctx->mouse_event = 1;
+        ctx->mouse_x = (int)bevent->x;
+        ctx->mouse_y = (int)bevent->y;
+
+        return TRUE;
+    }
+
+    /* Event not handled; try parent item */
+    return FALSE;
+}
+
 int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
-    sMsg inMsg;
+    sMsg inMsg, outMsg;
     int ret;
 
     ret = bn_receive(&inMsg);
@@ -55,6 +77,32 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                 factor_x = (float)ctx->pos_szx/300.;
                 factor_y = (float)ctx->pos_szy/200.;
 
+                // send trajectory if event
+                if(ctx->mouse_event){
+                    outMsg.header.destAddr = ADDRI_MAIN_PROP;
+                    outMsg.header.type = E_TRAJ;
+                    outMsg.header.size = sizeof(outMsg.payload.traj);
+                    // payload
+                    outMsg.payload.traj.p1_x = inMsg.payload.pos.x;
+                    outMsg.payload.traj.p1_y = inMsg.payload.pos.y;
+                    outMsg.payload.traj.p2_x = (float)ctx->mouse_x/factor_x;
+                    outMsg.payload.traj.p2_y = 200. - (float)ctx->mouse_y/factor_y;
+                    outMsg.payload.traj.seg_len = sqrt((outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x)*(outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x) + (outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y)*(outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y));
+                    outMsg.payload.traj.c_x = outMsg.payload.traj.p2_x;
+                    outMsg.payload.traj.c_y = outMsg.payload.traj.p2_y;
+                    outMsg.payload.traj.c_r = 0.;
+                    outMsg.payload.traj.arc_len = 0.;
+                    outMsg.payload.traj.tid = ctx->tid++;
+                    outMsg.payload.traj.sid = 0;
+
+                    ret = bn_send(&outMsg);
+                    if(ret <= 0){
+                        fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
+                    }
+
+                    ctx->mouse_event = 0;
+                }
+
                 x = (int)(inMsg.payload.pos.x*factor_x + 0.5);
                 y = ctx->pos_szy - (int)(inMsg.payload.pos.y*factor_y + 0.5);
                 dx = 8*factor_x*cos(inMsg.payload.pos.theta);
@@ -79,6 +127,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
 int main(int argc, char *argv[]) {
     context_t ctx;
+    int ret;
 
     memset(&ctx, 0, sizeof(ctx));
 
@@ -122,7 +171,7 @@ int main(int argc, char *argv[]) {
     // gtkviewer media creation
     ctx.pos_szx = 300*4;
     ctx.pos_szy = 200*4;
-    ctx.pos_mid = gv_media_new("position", "Position des robots en temps réel", ctx.pos_szx, ctx.pos_szy);
+    ctx.pos_mid = gv_media_new("position", "Position des robots en temps réel", ctx.pos_szx, ctx.pos_szy, GTK_SIGNAL_FUNC(event_cb), &ctx);
     ctx.pos_data[0] = malloc(ctx.pos_szx*ctx.pos_szy*3);
     ctx.pos_data[1] = malloc(ctx.pos_szx*ctx.pos_szy*3);
     ctx.pos_cur = 0;
@@ -140,6 +189,28 @@ int main(int argc, char *argv[]) {
     }
 
     printf("(Listening...)\n");
+
+    // send position
+    {
+        sMsg outMsg;
+        outMsg.header.destAddr = ADDRI_MAIN_PROP;
+        outMsg.header.type = E_POS;
+        outMsg.header.size = sizeof(outMsg.payload.pos);
+        outMsg.payload.pos.id = 0;
+        outMsg.payload.pos.theta = M_PI;
+        outMsg.payload.pos.u_a = 0;
+        outMsg.payload.pos.u_a_theta = 0;
+        outMsg.payload.pos.u_b = 0;
+        outMsg.payload.pos.x = 294;
+        outMsg.payload.pos.y = 57;
+        if(ctx.verbose >= 1){
+            printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
+        }
+        ret = bn_sendAck(&outMsg);
+        if(ret <= 0){
+            fprintf(stderr, "bn_sendAck() error #%i\n", -ret);
+        }
+    }
 
     // run main loop
     gv_run();
