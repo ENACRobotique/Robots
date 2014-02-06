@@ -29,16 +29,16 @@ bufStruct buf1={{0},0,0,0,0,0,0,1};
 
 /*
 laserIntInit :
-  arguments : rien
+  arguments : 0 ou 1 (numéro de l'interruption
   valeur de retour : rien
 "attache" les interruptions associées aux couples de capteurs
 */
 void laserIntInit(int irqnb) {
-  pinMode(irqnb+2,INPUT);  // trick for the arduino UNO
+  pinMode(irqnb+2,INPUT);  // trick for the arduino UNO only
   attachInterrupt(irqnb, !irqnb?laserIntHand0:laserIntHand1 ,CHANGE);
 }
     
-//do I really have to do a description ? Anyway, fuck this.
+//do I really have to do a description ? Anyway, it probably won't be used.
 void laserIntDeinit(){
   detachInterrupt(0);
   detachInterrupt(1);

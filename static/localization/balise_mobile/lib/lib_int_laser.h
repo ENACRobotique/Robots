@@ -30,30 +30,23 @@ typedef struct {
 //structure associated to a particular pair of sensors
 typedef struct {
 	volatile unsigned long buf[8];
-	//index of the last value recorded
-	volatile int index;
-	// the laserDetect will only consider values recorded between prevCall and the current time
-	unsigned long prevCall;
-	//used by periodiclaser to detect at which state is this pair of sensor
-	int stage;
-	// authorized latency in tracking mode : +-lat/2 (µs)
-	unsigned long lat;
-	// prevTime & nextTime : used by periodicLaser for its time measurements (µs)
-	unsigned long prevTime;
-	//nextTime : in what time there is something to do (µs)
-	unsigned long nextTime;
-	//intNb : nb of the interrupt
-	int intNb;
+	volatile int index;         //index of the last value recorded
+	unsigned long prevCall;     // the laserDetect will only consider values recorded between prevCall and the current time
+	int stage;                  //used by periodiclaser to detect at which state is this pair of sensor
+	unsigned long lat;          // authorized latency in tracking mode : +-lat/2 (µs)
+	unsigned long prevTime;     // prevTime & nextTime : used by periodicLaser for its time measurements (µs)
+	unsigned long nextTime;     //nextTime : in what time there is something to do (µs)
+	int intNb;                  //intNb : nb of the interrupt
 }bufStruct;
 
 
-extern unsigned long laser_period; //rotation period of the lasers
+extern volatile unsigned long laser_period; //rotation period of the lasers
 //extern unsigned long lastDetect;
 extern bufStruct buf0;
 extern bufStruct buf1;
 
 
-//déclarations :
+//declarations :
 void laserIntInit(int irqnb);
 void laserIntDeinit();
 void laserIntHand0();
