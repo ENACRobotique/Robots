@@ -27,14 +27,14 @@ void setup(){
     bn_init();
 
     bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
-    bn_printfDbg("start turret, free mem : %d o\n",freeMemory());
+    bn_printfDbg((char*)"start turret, free mem : %d o\n",freeMemory());
 
     domi_init(2);
 
     pinMode(PIN_DBG_LED,OUTPUT);
 }
 
-int state=SYNC;
+int state=GAME;
 #ifdef BLINK_1S
 int debug_led=0;
 #endif
@@ -45,52 +45,15 @@ sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
 
 int routineErr=0,i=0,msg2send=100,msgNOk=0,msgNStatused=0,msgSend=0;
 unsigned long avgMes=0,prevMsg=0,avgElem=0,avgVal=0;
-sMsg out,in;
 unsigned long sw=0;
 int led=1;
 
 void loop(){
 
-#if 0
-    if (bn_routine()<0) {
-        routineErr++;
-    }
-    if (bn_receive(&in)){
-        i++;
-    }
-
-    out.header.destAddr=ADDRX_MOBILE_1;
-    out.header.size=40;
-    out.header.type=E_PERIOD;
-    if ( msg2send > 0 ){
-        avgMes=(micros()-prevMsg);
-        avgElem++;
-        avgVal= avgMes + avgVal*(avgElem-1);
-        avgVal/= avgElem;
-        prevMsg=micros();
-        switch (bn_send(&out)){
-        case -3 : msgNOk++; break;
-        case -2 : msgNStatused++; break;
-        case -1 : msgNStatused++; break;
-        default : msgSend++; break;
-        }
-        msg2send--;
-    }
-
-    if (msg2send==0){
-        bn_printfDbg("send %d, Nstat %d, NOk %d, avg int %lu \n",msgSend, msgNStatused,msgNOk,avgVal);
-        msg2send--;
-    }
-
-    if ( millis()-sw > 1000){
-        sw=millis();
-        led^=1;
-        digitalWrite(PIN_DBG_LED,led);
-        bn_printfDbg("blink, %lu s, free mem : %d, rx : %d, routiEr %d\n",millis()/1000,freeMemory(),i,routineErr);
-    }
-#elif 1
     int rxB=0; //received bytes (size of inMsg when a message has been received)
     static unsigned long time_prev_period=0,prev_TR=0;
+
+
 #ifdef BLINK_1S
     static unsigned long time_prev_led=0;
 #endif
@@ -106,19 +69,14 @@ void loop(){
 
     //blinking
 #ifdef BLINK_1S
-    if((time - time_prev_led)>=3000) {
+    if((time - time_prev_led)>=10000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
-        bn_printfDbg("turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
+        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
     }
 #endif
-#if 0
     //period broadcast : one by one
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
-        out.header.destAddr=ADDRX_MOBILE_1;
-        out.header.size=4;
-        out.header.type=E_PERIOD;
-//        bn_send(&out);
 
         time_prev_period = millis();
         period2++;
@@ -136,11 +94,9 @@ void loop(){
         outMsg.header.type=E_PERIOD;
         outMsg.header.size=sizeof(outMsg.payload.period);
         outMsg.payload.period=domi_meanPeriod();
-        int sndVal=bn_send(&out);
-        //bn_printfDbg("period send to %hx %lu, err : %d\n",outMsg.header.destAddr,outMsg.payload.period,sndVal);
+        int sndVal=bn_sendAck(&outMsg); //fixme remove ack
+        bn_printfDbg((char*)"period send to %hx %lu, ack : %d\n",outMsg.header.destAddr,outMsg.payload.period,sndVal);
     }
-#endif
-#else
     //some message handling
     if (rxB){
         switch (inMsg.header.type){
@@ -211,6 +167,5 @@ void loop(){
                   break;
           default : break;
       }
-#endif
 }
 

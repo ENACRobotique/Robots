@@ -20,14 +20,12 @@
 #define BN_MAX_RETRIES          2
 #define BN_ACK_TIMEOUT          1000    //in ms
 
-#define ARCH_328P_ARDUINO
-#define ARCH_LITTLE_ENDIAN
 #define UART_WAITFRAME_TIMEOUT 10
 #define UART_READBYTE_TIMEOUT 10000
 
 #define XBEE_RST_PIN 5
 
-//#undef  ADDR_DEBUG_DFLT
-//#define ADDR_DEBUG_DFLT ADDRX_DEBUG
+#undef  ADDR_DEBUG_DFLT
+#define ADDR_DEBUG_DFLT 0
 
 #endif /* NODE_CFG_H_ */
