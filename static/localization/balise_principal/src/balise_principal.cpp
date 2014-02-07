@@ -24,12 +24,13 @@ uint32_t mesTab[2]={0,0};
 
 void setup(){
 
+    domi_init(2);
+
     bn_init();
 
     bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
     bn_printfDbg((char*)"start turret, free mem : %d o\n",freeMemory());
 
-    domi_init(2);
 
     pinMode(PIN_DBG_LED,OUTPUT);
 }

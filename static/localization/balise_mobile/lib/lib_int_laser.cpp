@@ -11,6 +11,8 @@ pour arduino UNO
 #include "tools.h"
 #include "../src/params.h"
 
+#include "../../../communication/botNet/shared/bn_debug.h"
+
 //globales
 bufStruct buf0={{0},0,0,0,0,0,0,0};
 bufStruct buf1={{0},0,0,0,0,0,0,1};
@@ -23,7 +25,7 @@ bufStruct buf1={{0},0,0,0,0,0,0,1};
 #define DEBOUNCETIME_INT_LASER 20  //measured
 #define DEBUG_LASER
 
-#define LAT_INIT 10000 //in µs TODO : refine
+#define LAT_INIT 100000 //in µs TODO : refine
 
 
 
@@ -46,80 +48,80 @@ void laserIntDeinit(){
 
 void laserIntHand0(){ //interrupt handler, puts the time in the rolling buffer
   //new! debouce, will hide any interruption happening less than DEBOUNCETIME µsec after the last registered interruption
-	unsigned long time=micros();//mymicros();
-	if ( time > (buf0.buf[buf0.index]+DEBOUNCETIME_INT_LASER) ){
+    unsigned long time=micros();//mymicros();
+    if ( time > (buf0.buf[(buf0.index-1)&7]+DEBOUNCETIME_INT_LASER) ){
         buf0.buf[buf0.index]=time;
         buf0.index++;
         buf0.index&=7;
-
-	}
+    }
 }
 
 void laserIntHand1(){
   //new! debouce, will hide any interruption happening less than DEBOUNCETIME µsec after the last registered interruption
-	unsigned long time=micros();//mymicros();
-	if ( time > (buf1.buf[buf1.index]+DEBOUNCETIME_INT_LASER) ){
-		buf1.buf[buf1.index]=time;
-		buf1.index++;
-		buf1.index&=7;
-	}
+    unsigned long time=micros();//mymicros();
+    if ( time > (buf1.buf[(buf1.index-1)&7]+DEBOUNCETIME_INT_LASER) ){
+        buf1.buf[buf1.index]=time;
+        buf1.index++;
+        buf1.index&=7;
+    }
 }
 
 //returns the delta-T in µs and the time at which it was measured
 ldStruct laserDetect(bufStruct *bs){
-	unsigned long prevCall, t = micros();
-	unsigned long bufTemp[8], d1, d2;
-	int i=8, ilast=0, nb;
+    unsigned long prevCall, t = micros();
+    unsigned long bufTemp[8], d1, d2;
+    int i=8, ilast=0, nb;
 
-	//noInterrupts();
+    //noInterrupts();
 
-	prevCall=bs->prevCall;
+    prevCall=bs->prevCall;
     do {
         i--;
         bufTemp[i]=bs->buf[i];
     } while(i);
     ilast=bs->index-1;//index of the last value written in the rolling buffer
 
-	//interrupts();
+    //interrupts();
 
-	//looking for the index of first value updated since the last "interesting" call of laserDetect
-	nb=0;
-	i=ilast;
-	while( nb<8 && long(bufTemp[i&7] - prevCall)>0 ) {
-	i--;
-	nb++;
-	}
-
-	bs->prevCall=t;
-
-	if ( nb>=4 ){
-	// we just got enough data, set the new update time
-    d1 = bufTemp[ilast&7]-bufTemp[(ilast-2)&7];
-    d2 = bufTemp[(ilast-1)&7]-bufTemp[(ilast-3)&7];
-    unsigned long t1,t2;
-    t1=bufTemp[ilast&7]-bufTemp[(ilast-1)&7];
-    t2=bufTemp[(ilast-2)&7] - bufTemp[(ilast-3)&7];
-
-
-    //if the detected patter has not the good shape
-    if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX ){
-        ldStruct ret={0,0};
-        return ret;
-    }
-    //
-    if(d1<d2) {
-        ldStruct ret={d1, bufTemp[(ilast-2)&7], min( t1, t2 )};
-        return ret ;
-    }
-    else {
-        ldStruct ret={d2, bufTemp[(ilast-3)&7], min( t1, t2 ) };
-        return ret;
+    //looking for the index of first value updated since the last "interesting" call of laserDetect
+    nb=0;
+    i=ilast;
+    while( nb<8 && long(bufTemp[i&7] - prevCall)>0 ) {
+    i--;
+    nb++;
     }
 
-	}
-	else { //we don't have enough data,  just drop the current data <=> prevCall=t a few lines above
-	}
-    ldStruct ret={0,0};
+
+    if ( nb>=4 ){
+        // we just got enough data, set the new update time
+        d1 = bufTemp[ilast&7]-bufTemp[(ilast-2)&7];
+        d2 = bufTemp[(ilast-1)&7]-bufTemp[(ilast-3)&7];
+        unsigned long t1,t2;
+        t1=bufTemp[ilast&7]-bufTemp[(ilast-1)&7];
+        t2=bufTemp[(ilast-2)&7] - bufTemp[(ilast-3)&7];
+
+        //if the detected patter has not the good shape
+        //xxx in this case we can only handle a whole pattern (we may be able to do it on 3)
+        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX ){
+            ldStruct ret={0,0,0};
+            return ret;
+        }
+        else {
+            bs->prevCall=t;
+            if(d1<d2) {
+                ldStruct ret={d1, bufTemp[(ilast-2)&7], min( t1, t2 )};
+                return ret ;
+            }
+            else {
+                ldStruct ret={d2, bufTemp[(ilast-3)&7], min( t1, t2 ) };
+                return ret;
+            }
+        }
+
+    }
+    else { //we don't have enough data,  just drop the current data <=> prevCall=t a few lines above
+    }
+    ldStruct ret={0,0,0};
     return ret;
 
 }
@@ -130,10 +132,11 @@ ldStruct laserDetect(bufStruct *bs){
  *  pRet : pointer to the return structure. This latter is not modified if there is no new value
  * Return value : 1 if something new has been detected and written, 0 otherwise
  *
+ *todo : improve robustness to micros buffer overflow (use time differences instead of absolute time).
  */
 int periodicLaser(bufStruct *bs,plStruct *pRet){
     unsigned long int time=micros();
-    ldStruct measure;
+    ldStruct measure={0};
 
     if ( time >= bs->nextTime){
         switch (bs->stage){
@@ -157,7 +160,7 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     return 1;
 
                 }
-                //else, "delay" laserPeriod/2
+                //else, "delay" periodicLaser
                 else {
                     //set the nextime and prevtime
                     bs->prevTime=time;
@@ -179,8 +182,8 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
 
                     bs->lat=LAT_INIT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN);
                     bs->prevTime=time;
-                    bs->nextTime=measure.date+laser_period-(bs->lat>>1);
-
+                    bs->nextTime=time+laser_period-(bs->lat>>1);
+bn_printDbg("successful lock");
                     bs->stage=2;
 
                     return 1;
@@ -189,7 +192,7 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                 else {
                     bs->lat=LAT_INIT;  //bs->lat+LAT_INC;
                     bs->prevTime=time;
-                    bs->nextTime=measure.date+laser_period-(bs->lat>>1);
+                    bs->nextTime=time+laser_period-(bs->lat>>1);
 
                     bs->stage=0;
 

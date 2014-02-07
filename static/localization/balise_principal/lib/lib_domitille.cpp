@@ -10,7 +10,7 @@ int _pinInt;
 //number of revolution
 volatile unsigned int _nbTR=0;
 volatile unsigned long prev_int=0,last_TR=0,TR_period=0,TR_mean_period=0;
-#define FILTER_SHIFT 5
+#define FILTER_SHIFT 2
 volatile unsigned long filter_reg=0;
 
 #ifdef BLINK_1TR
