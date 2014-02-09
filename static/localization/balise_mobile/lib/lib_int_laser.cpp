@@ -25,7 +25,7 @@ bufStruct buf1={{0},0,0,0,0,0,0,1};
 #define DEBOUNCETIME_INT_LASER 20  //measured
 #define DEBUG_LASER
 
-#define LAT_INIT 100000 //in µs TODO : refine
+#define LAT_INIT 50000 //in µs TODO : refine
 
 
 
@@ -132,13 +132,12 @@ ldStruct laserDetect(bufStruct *bs){
  *  pRet : pointer to the return structure. This latter is not modified if there is no new value
  * Return value : 1 if something new has been detected and written, 0 otherwise
  *
- *todo : improve robustness to micros buffer overflow (use time differences instead of absolute time).
  */
 int periodicLaser(bufStruct *bs,plStruct *pRet){
     unsigned long int time=micros();
     ldStruct measure={0};
 
-    if ( time >= bs->nextTime){
+    if ( time-bs->prevTime >= bs->timeInc){
         switch (bs->stage){
             case 0 : { //acquisition
                 //laserdetect
@@ -148,8 +147,8 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     bs->stage=2;
 
                     bs->lat=LAT_INIT;
-                    bs->prevTime=time;
-                    bs->nextTime=time+laser_period- (bs->lat>>1);
+                    bs->prevTime=measure.date;
+                    bs->timeInc=laser_period- (bs->lat>>1);
 
                     pRet->deltaT=measure.deltaT;
                     pRet->date=measure.date;
@@ -162,9 +161,15 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                 }
                 //else, "delay" periodicLaser
                 else {
+
+                    //"clear "the buffer
+                    bs->prevCall=time;
+
                     //set the nextime and prevtime
                     bs->prevTime=time;
-                    bs->nextTime=time+ ((3*laser_period)>>3); // NOT a period submultiple
+                    bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
+                    bs->stage=0;
+
                     return 0;
                 }
                 break;
@@ -177,40 +182,46 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     pRet->deltaT=measure.deltaT;
                     pRet->date=measure.date;
                     pRet->thickness=measure.thickness;
-                    pRet->sureness=time-bs->prevTime+(bs->lat>>1); //sureness = difference between the expected time and the measured time
+                    pRet->sureness=measure.date-bs->prevTime+(bs->lat>>1); //sureness = difference between the expected time and the measured time
                     pRet->precision=4; //in µs TODO
 
                     bs->lat=LAT_INIT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN);
-                    bs->prevTime=time;
-                    bs->nextTime=time+laser_period-(bs->lat>>1);
-bn_printDbg("successful lock");
+                    bs->prevTime=measure.date;
+                    bs->timeInc=laser_period-(bs->lat>>1);
                     bs->stage=2;
 
+bn_printDbg("locked\n");
                     return 1;
                 }
                 //else, go to acquisition
                 else {
+
+                    //"clear "the buffer
+                    bs->prevCall=time;
+
                     bs->lat=LAT_INIT;  //bs->lat+LAT_INC;
                     bs->prevTime=time;
-                    bs->nextTime=time+laser_period-(bs->lat>>1);
+                    bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
 
                     bs->stage=0;
+bn_printDbg("unlocked");
 
                     return 0;
 
                 }
                 break;
             }
-            case 2 :{ //tracking : clear the buffer right before the beginning of the measurement time
+            case 2 :{ // clear the buffer right before the beginning of the measurement time
                 //"clear "the buffer
                 bs->prevCall=time;
 
                 //set the nextime and prevtime
                 bs->prevTime=time;
-                bs->nextTime=time+bs->lat;
+                bs->timeInc=bs->lat;
 
                 //return to stage 1
                 bs->stage=1;
+
 
                 return 0;
                 break;

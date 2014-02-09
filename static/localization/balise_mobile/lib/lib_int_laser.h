@@ -35,7 +35,7 @@ typedef struct {
 	int stage;                  //used by periodiclaser to detect at which state is this pair of sensor
 	unsigned long lat;          // authorized latency in tracking mode : +-lat/2 (µs)
 	unsigned long prevTime;     // prevTime & nextTime : used by periodicLaser for its time measurements (µs)
-	unsigned long nextTime;     //nextTime : in what time there is something to do (µs)
+	unsigned long timeInc;      //timeInc : increment of time after which there is something to do (µs)
 	int intNb;                  //intNb : nb of the interrupt
 }bufStruct;
 
