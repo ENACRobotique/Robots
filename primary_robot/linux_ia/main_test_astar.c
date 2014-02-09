@@ -11,16 +11,16 @@
 
 ERROR main(int argc, char *argv[]) {
     uint8_t i, j;
-//    sTrajEl_t *p, prev; 
+//    sTrajEl_t *p, prev;
 //    sTrajEl_t* traj = NULL;
     sPath_t path;
 
     // entry point
     printf("N=%u\n", N);    // number of elements
 
-    printf("sizeof(obs) =%uB\n", sizeof(obs));
-    printf("sizeof(tgts)=%uB\n", sizeof(tgts));
-    printf("sizeof(lnk) =%uB\n", sizeof(lnk));
+    printf("sizeof(obs) =%luB\n", sizeof(obs));
+    printf("sizeof(tgts)=%luB\n", sizeof(tgts));
+    printf("sizeof(lnk) =%luB\n", sizeof(lnk));
 
     printf("\n");
 
@@ -73,7 +73,7 @@ ERROR main(int argc, char *argv[]) {
         obs[0].c.x = 7.5;
         obs[0].c.y = 100.;
         obs[0].r = 0.;
-        
+
         obs[2].r = 8.;
         obs[3].r = 8.;
 
