@@ -23,7 +23,7 @@ typedef struct {
 	unsigned long date;
 	unsigned long thickness;
 	int precision;
-	int sureness;
+	long int sureness;
 }plStruct;
 
 
