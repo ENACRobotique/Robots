@@ -4,7 +4,7 @@
 #include "tools.h"
 #include "perception.h"
 
-void neldermead(sPt_t *x0, float range, sPerception *p);
+int neldermead(sPt_t *x0, float range, sPerception *p);
 
 #endif
 

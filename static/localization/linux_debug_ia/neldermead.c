@@ -6,7 +6,7 @@
 
 //#define NM_DEBUG
 
-void neldermead(sPt_t *x0, float range, sPerception *p) {
+int neldermead(sPt_t *x0, float range, sPerception *p) {
     sPt_t xb, xr, xe, xc, x[3];
     int i, j, i_max, i_MAX, i_MIN;
     float z[3], z_xr, z_xe, z_xc, alpha=1., gamma=2., rho=-0.5, sigma=0.5;
@@ -25,7 +25,7 @@ void neldermead(sPt_t *x0, float range, sPerception *p) {
             printf("=> ret x[%u]\n", j);
 #endif
             *x0 = x[j];
-            return;
+            return 0;
         }
     }
 
@@ -70,7 +70,7 @@ void neldermead(sPt_t *x0, float range, sPerception *p) {
             printf("=> ret xr\n");
 #endif
             *x0 = xr;
-            return;
+            return 0;
         }
 
 // reflexion
@@ -96,7 +96,7 @@ void neldermead(sPt_t *x0, float range, sPerception *p) {
                 printf("=> ret xe\n");
 #endif
                 *x0 = xe;
-                return;
+                return 0;
             }
 
             if(z_xe < z_xr) {
@@ -128,7 +128,7 @@ void neldermead(sPt_t *x0, float range, sPerception *p) {
             printf("=> ret xc\n");
 #endif
             *x0 = xc;
-            return;
+            return 0;
         }
 
         if(z_xc < z_xr) {
@@ -156,12 +156,31 @@ void neldermead(sPt_t *x0, float range, sPerception *p) {
                 printf("=> ret x[%u]\n", j);
 #endif
                 *x0 = x[j];
-                return;
+                return 0;
             }
         }
     }
 
 // too much iterations
-    x0->x = x0->y = -1;
+#ifdef NM_DEBUG
+    printf("=> no convergence:");
+#endif
+
+    i_MIN = 0;
+    for(j=0; j<3; j++) {
+        z[j] = critere(&x[j], p);
+
+#ifdef NM_DEBUG
+        printf(" z[%i]=%.2f", j, z[j]);
+#endif
+
+        if(z[j] < z[i_MIN])
+            i_MIN = j;
+    }
+#ifdef NM_DEBUG
+    printf("\n=> ret x[%u]\n", i_MIN);
+#endif
+    *x0 = x[i_MIN];
+    return 1;
 }
 

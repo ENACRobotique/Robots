@@ -1,4 +1,2 @@
-*~
-*.o
-.depend
-pos_test
+/Debug
+
