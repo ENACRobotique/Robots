@@ -146,7 +146,7 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                 if (measure.deltaT!=0){
                     bs->stage=2;
 
-                    bs->lat=LAT_INIT;
+                    bs->lat=laser_period>>2;
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period- (bs->lat>>1);
 
@@ -185,11 +185,11 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     pRet->sureness=(long int)(measure.date-bs->prevTime-(bs->lat>>1)); //sureness = difference between the expected time and the measured time
                     pRet->precision=4; //in µs TODO
 
-                    bs->lat=LAT_INIT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN);
+                    bs->lat=laser_period>>2;    //MAX( bs->lat-LAT_DEINC,LAT_MIN);
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period-(bs->lat>>1);
                     bs->stage=2;
-
+bn_printfDbg((char*)"mes %lu \t sur %ld",pRet->deltaT,pRet->sureness);
                     return 1;
                 }
                 //else, go to acquisition
