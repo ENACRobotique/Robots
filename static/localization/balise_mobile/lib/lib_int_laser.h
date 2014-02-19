@@ -19,11 +19,11 @@ typedef struct {
 
 //"return" structure for periodicLaser
 typedef struct {
-	unsigned long deltaT;
-	unsigned long date;
-	unsigned long thickness;
-	int precision;
-	long int sureness;
+	unsigned long deltaT;       //delay between two laser small peaks
+	unsigned long date;         //when was the laser recorded last
+	unsigned long thickness;    //thickness of the small laser peak /!\ thickness==0 <=> no laser detected
+	int precision;              //xxx TDB
+	long int sureness;          //TBD
 }plStruct;
 
 

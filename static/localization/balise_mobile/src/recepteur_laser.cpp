@@ -20,7 +20,7 @@ int debug_led=1;
 unsigned long time_prev_led=0, time_prev_laser=0;
 int state=SYNC;
 plStruct laserStruct0={0},laserStruct1={0};
-unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
+volatile unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
 
 
 
@@ -42,7 +42,7 @@ void setup() {
 
   bn_printDbg("start mobile 1");
   bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
-  //bn_attach(E_PERIOD,&periodHandle);
+  bn_attach(E_PERIOD,&periodHandle);
 }
 
 int routineErr=0,i=0;
@@ -52,25 +52,9 @@ sMsg in;
 
 void loop() {
 
-#if 0
-if (bn_routine()<0) {
-        routineErr++;
-    }
-    if (bn_receive(&in)){
-        i++;
-    }
-
-
-    if ( millis()-sw > 1000){
-        sw=millis();
-        led^=1;
-        digitalWrite(13,led);
-    }
-#elif 1
     sMsg inMsg={{0}},outMsg={{0}};
-    plStruct laserStruct2Send={0};
+    plStruct laserStruct={0}; //structure containing info about the last laser detection (deleted if not processed within one loop)
     int rxB=0; // size (bytes) of message available to read
-    int las0=0,las1=0; // boolean, saying if laser 0 or 1 have received something in this loop
     unsigned long time = millis(),timeMicros=micros();
 
 
@@ -79,8 +63,7 @@ if (bn_routine()<0) {
       time_prev_led= time;
       digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
-        bn_printfDbg("blink, %lu s, free mem : %d, rx : %d, routiEr %d\n",millis()/1000,freeMemory(),i,routineErr);
-//      bn_printfDbg("mob1 %lu, mem : %d, state : %d, period : %lu\n",millis()/1000,freeMemory(),state,laser_period);
+      bn_printfDbg((char*)"mob1 %lu, mem : %d, state : %d, period : %lu\n",time/1000,freeMemory(),state,laser_period);
 #endif
     }
 
@@ -92,81 +75,34 @@ if (bn_routine()<0) {
     if ((rxB=bn_receive(&inMsg))) {
         i++;
     }
-#else
     //reading the eventual data from the lasers
-    las0=periodicLaser(&buf0,&laserStruct0);
-    las1=periodicLaser(&buf1,&laserStruct1);
+    periodicLaser(&buf0,&laserStruct0);
+    periodicLaser(&buf1,&laserStruct1);
 
 
-    //previous data pocessing
-    //if some laser has been detected on 0
-    if (las0){
-        bn_printDbg("laser0\n");
-        if ( (laserStruct0.date-lastLaserDetect)> (laser_period>>1) ) { //more than half the period after the last laser detected
-            lastLaserDetect=laserStruct0.date;
-            lastLaserDetectMicros=micros();
-        }
-        else if ((laserStruct0.date-lastLaserDetect)< (laser_period>>6)){ //if it is the second detection of the same turn that have already been recorded in lastLaserDetecd
-            //test thickness and write lastLaseDetect and laserStruct2Send
-            if (laserStruct0.thickness > laserStruct1.thickness){ //"returns" the value with the biggest thickness
-                memcpy(&laserStruct2Send,&laserStruct0,sizeof(plStruct));
-                lastLaserDetect=laserStruct0.date;
-            }
-            else {
-                memcpy(&laserStruct2Send,&laserStruct1,sizeof(plStruct));
-                lastLaserDetect=laserStruct1.date;
-            }
-            //reset everything
-            memset(&laserStruct0,0,sizeof(plStruct));
-            memset(&laserStruct1,0,sizeof(plStruct));
-        }
-    }
-    //if some laser has been detected on 1
-    if (las1){
-        bn_printDbg("laser1\n");
-        //more than half the period after the last laser detected
-        if ( (laserStruct1.date-lastLaserDetect)> (laser_period>>1)) {
-            lastLaserDetect=laserStruct0.date;
-            lastLaserDetectMicros=micros();
-        }
-        //if it is the second detection of the same turn that have already been recorded in lastLaserDetecd
-        else if ((laserStruct1.date-lastLaserDetect)< (laser_period>>6)){
-            //test thickness and write lastLaseDetect and laserStruct2Send
-            if (laserStruct0.thickness > laserStruct1.thickness){
-                //"returns" the value with the biggest thickness
-                memcpy(&laserStruct2Send,&laserStruct0,sizeof(plStruct));
-                lastLaserDetect=laserStruct0.date;
-            }
-            else {
-                memcpy(&laserStruct2Send,&laserStruct1,sizeof(plStruct));
-                lastLaserDetect=laserStruct1.date;
-            }
-            //reset everything
-            memset(&laserStruct0,0,sizeof(plStruct));
-            memset(&laserStruct1,0,sizeof(plStruct));
-        }
-    }
-    //if we do not expect the second laser detection anymore
-    if ( (!las0 && !las1) && (timeMicros-lastLaserDetectMicros)> (laser_period>>6) && (laserStruct0.date || laserStruct1.date) ){
-        //writes laserStruct2Send
-        if (laserStruct0.thickness > laserStruct1.thickness){ //"returns" the value with the biggest thickness
-            memcpy(&laserStruct2Send,&laserStruct0,sizeof(plStruct));
-        }
-        else memcpy(&laserStruct2Send,&laserStruct1,sizeof(plStruct));
-        //reset everything
+    //laser data pocessing
+    if (laserStruct0.thickness && laserStruct1.thickness){ //case of two laser detected
+        //return the the best signal (i.e. one with the biggest thickness)
+        if (laserStruct0.thickness>laserStruct1.thickness) laserStruct=laserStruct0;
+        else laserStruct=laserStruct1;
+
+        //reset
         memset(&laserStruct0,0,sizeof(plStruct));
         memset(&laserStruct1,0,sizeof(plStruct));
     }
-
-    //update the laser period
-    if (rxB && inMsg.header.type==E_PERIOD ){
-    	laser_period=inMsg.payload.period;
-    	rxB=0;
-    	bn_printfDbg("mob1 period received %lu\n",laser_period);
+    else if (laserStruct0.thickness && (timeMicros-laserStruct0.date)>(laser_period>>6)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+        laserStruct=laserStruct0;
+    }
+    else if (laserStruct1.thickness && (timeMicros-laserStruct1.date)>(laser_period>>6)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+        laserStruct=laserStruct1;
     }
 
 
+
+
+
 //STATE MACHINE
+#if 0
     switch (state){
         case SYNC:
         	if (rxB){
@@ -203,20 +139,19 @@ if (bn_routine()<0) {
 
 
         case GAME :
-        	if ( laserStruct2Send.date ) { //if there is some data to send
+        	if ( laserStruct.thickness ) { //if there is some data to send
 				outMsg.header.destAddr=ADDRX_MAIN;
 				outMsg.header.type=E_MEASURE;
 				outMsg.header.size=sizeof(sMesPayload);
 
-                outMsg.payload.measure.value=laserStruct2Send.deltaT;
-                outMsg.payload.measure.date=laserStruct2Send.date;
-                outMsg.payload.measure.precision=laserStruct2Send.precision;
-                outMsg.payload.measure.sureness=laserStruct2Send.sureness;
+                outMsg.payload.measure.value=laserStruct.deltaT;
+                outMsg.payload.measure.date=laserStruct.date;
+                outMsg.payload.measure.precision=laserStruct.precision;
+                outMsg.payload.measure.sureness=laserStruct.sureness;
 				bn_send(&outMsg);
           }
           break;
         default : break;
-
     }
 #endif
 }

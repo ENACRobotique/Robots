@@ -130,7 +130,9 @@ ldStruct laserDetect(bufStruct *bs){
  * Argument :
  *  bs : pointer to the buffer structure to test
  *  pRet : pointer to the return structure. This latter is not modified if there is no new value
- * Return value : 1 if something new has been detected and written, 0 otherwise
+ * Return value :
+ *  1 if something new has been detected and written,
+ *  0 otherwise
  *
  */
 int periodicLaser(bufStruct *bs,plStruct *pRet){
@@ -229,8 +231,10 @@ bn_printfDbg((char*)"mes %lu \t sur %ld",pRet->deltaT,pRet->sureness);
 return 0;
 }
 
-
+/* laser2dist : converts delta-T and period in distance in mm
+ * TODO : re-write it to take into account measured period
+ */
 float laser2dist(unsigned long delta){
-    return 0;//2.5/sin( (delta/laser_period-0.5*3.141593/180)/2);
+    return 25/( (delta/laser_period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2)
 
 }
