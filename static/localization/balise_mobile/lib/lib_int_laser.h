@@ -22,6 +22,7 @@ typedef struct {
 	unsigned long deltaT;       // µs, delay between two laser small peaks
 	unsigned long date;         // local µs, when was the laser recorded last
 	unsigned long thickness;    // µs, thickness of the small laser peak /!\ thickness==0 <=> no laser detected
+	unsigned long period;       // µs, MEASURED period (0 if not applicable).
 	int precision;              // xxx TDB
 	long int sureness;          // TBD
 }plStruct;
@@ -32,6 +33,7 @@ typedef struct {
 	volatile unsigned long buf[8];
 	volatile int index;         // index of the last value recorded
 	unsigned long prevCall;     // local µs,  the laserDetect will only consider values recorded between prevCall and the current time
+	unsigned long lastDetect;   // last date at which a laser was detected on this interrupt
 	int stage;                  // used by periodiclaser to detect at which state is this pair of sensor
 	unsigned long lat;          // µs, authorized latency in tracking mode : +-lat/2
 	unsigned long prevTime;     // local µs, prevTime & nextTime : used by periodicLaser for its time measurements
@@ -60,6 +62,6 @@ ldStruct laserDetect(bufStruct *bs);
 //function to call periodically, ensures acquisition and tracking of our laser beam
 int periodicLaser(bufStruct *bs,plStruct *pRet);
 
-//float laser2dist(unsigned long delta);
+uint32_t laser2dist(unsigned long delta, unsigned long period);
 
 #endif /* LIB_INT_LASER_H_ */

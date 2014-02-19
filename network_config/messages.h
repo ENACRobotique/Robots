@@ -75,7 +75,7 @@ char *eType2str(E_TYPE elem);
 //Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
 
 typedef struct __attribute__((__packed__)){
-    uint32_t value;        //laser measured delta-time
+    uint32_t value;          //laser measured distance (in mm)
     uint32_t date;           //laser sensing time
     uint16_t precision;      //precision of the measure
     uint16_t sureness;       //sureness of the mesure

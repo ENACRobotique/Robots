@@ -14,8 +14,8 @@ pour arduino UNO
 #include "../../../communication/botNet/shared/bn_debug.h"
 
 //globales
-bufStruct buf0={{0},0,0,0,0,0,0,0};
-bufStruct buf1={{0},0,0,0,0,0,0,1};
+bufStruct buf0={{0},0,0,0,0,0,0,0,0};
+bufStruct buf1={{0},0,0,0,0,0,0,0,1};
 
 
 
@@ -131,13 +131,14 @@ ldStruct laserDetect(bufStruct *bs){
  *  bs : pointer to the buffer structure to test
  *  pRet : pointer to the return structure. This latter is not modified if there is no new value
  * Return value :
- *  1 if something new has been detected and written,
+ *  1 if something new has been detected and written in pRet,
  *  0 otherwise
  *
  */
 int periodicLaser(bufStruct *bs,plStruct *pRet){
     unsigned long int time=micros();
     ldStruct measure={0};
+
 
     if ( time-bs->prevTime >= bs->timeInc){
         switch (bs->stage){
@@ -152,6 +153,7 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period- (bs->lat>>1);
 
+                    pRet->period=0;
                     pRet->deltaT=measure.deltaT;
                     pRet->date=measure.date;
                     pRet->thickness=measure.thickness;
@@ -179,28 +181,28 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
             case 1 :{ //tracking
                 //laserdetect
                 measure=laserDetect(bs);
-                //if correct, decrease lat (unused), sets the delay to go to 2
                 if (measure.deltaT!=0){
                     pRet->deltaT=measure.deltaT;
                     pRet->date=measure.date;
                     pRet->thickness=measure.thickness;
                     pRet->sureness=(long int)(measure.date-bs->prevTime-(bs->lat>>1)); //sureness = difference between the expected time and the measured time
                     pRet->precision=4; //in µs TODO
+                    pRet->period=measure.date-bs->lastDetect;
 
-                    bs->lat=laser_period>>2;    //MAX( bs->lat-LAT_DEINC,LAT_MIN);
+                    bs->lastDetect=measure.date;
+                    bs->lat=laser_period>>2;    //MAX( bs->lat-LAT_DEINC,LAT_MIN); todo refine
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period-(bs->lat>>1);
                     bs->stage=2;
 bn_printfDbg((char*)"mes %lu \t sur %ld",pRet->deltaT,pRet->sureness);
                     return 1;
                 }
-                //else, go to acquisition
                 else {
 
                     //"clear "the buffer
                     bs->prevCall=time;
 
-                    bs->lat=LAT_INIT;  //bs->lat+LAT_INC;
+                    bs->lat=laser_period>>2;  //bs->lat+LAT_INC;
                     bs->prevTime=time;
                     bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
 
@@ -234,7 +236,7 @@ return 0;
 /* laser2dist : converts delta-T and period in distance in mm
  * TODO : re-write it to take into account measured period
  */
-float laser2dist(unsigned long delta){
-    return 25/( (delta/laser_period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2)
+uint32_t laser2dist(unsigned long delta, unsigned long period){
+    return 25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2)
 
 }
