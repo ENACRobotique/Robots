@@ -18,7 +18,7 @@ ERROR main(int argc, char *argv[]) {
     // entry point
     printf("N=%u\n", N);    // number of elements
 
-    printf("sizeof(obs) =%luB\n", sizeof(obs));
+    printf("sizeof(obs) =%luB (%luelts)\n", sizeof(obs), sizeof(obs)/sizeof(*obs));
     printf("sizeof(tgts)=%luB\n", sizeof(tgts));
     printf("sizeof(lnk) =%luB\n", sizeof(lnk));
 
@@ -57,6 +57,8 @@ ERROR main(int argc, char *argv[]) {
         for(i = 0; i < path.path_len; i++) {
             printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, path.path[i].p1.x, path.path[i].p1.y, path.path[i].p2.x, path.path[i].p2.y,path.path[i].obs.c.x,path.path[i].obs.c.y, path.path[i].obs.r,path.path[i].arc_len,path.path[i].seg_len);
        }
+
+    printf("\n");
 
 #if 0
     printf("\n\nA* test\n");

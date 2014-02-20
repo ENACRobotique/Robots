@@ -29,6 +29,10 @@ void a_star(iABObs_t start, iABObs_t goal, sPath_t *path) {
 
     os_start = start;
 
+#ifdef AS_DEBUG
+printf("goal %u%c\n", O(goal), DIR(goal)?'b':'a');
+#endif
+
     for(i = 0; i < 2*N; i++) {
         _aselts[i].openset = 0;
         _aselts[i].closedset = 0;
@@ -161,5 +165,9 @@ printf("    nothing...\n");
     path->path_len = 0;
     path->dist = 0.;
     path->path = NULL;
+
+#ifdef AS_DEBUG
+printf("no solution\n");
+#endif
 }
 

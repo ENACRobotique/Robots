@@ -22,27 +22,56 @@ sObs_t obs[N] = {
 };
 #else
 sObs_t obs[] = {
-// départ
-    {{30., 100.}, 0., 1, 1},
-// gateau
-    {{150., 200.}, R_ROBOT+50., 1, 1},
-// verres bleus
-    {{90., 55.}, 8., 1, 1},
-    {{90., 105.}, 8., 1, 1},
-    {{105., 80.}, R_ROBOT+4., 1, 0},
-    {{135., 80.}, R_ROBOT+4., 1, 0},
-    {{120., 55.}, R_ROBOT+4., 1, 0},
-    {{120., 105.}, R_ROBOT+4., 1, 0},
-// verres rouges
-    {{300.-90., 55.}, 8., 1, 1},
-    {{300.-90., 105.}, 8., 1, 1},
-    {{300.-105., 80.}, R_ROBOT+4., 1, 0},
-    {{300.-135., 80.}, R_ROBOT+4., 1, 0},
-    {{300.-120., 55.}, R_ROBOT+4., 1, 0},
-    {{300.-120., 105.}, R_ROBOT+4., 1, 0},
-// arrivée
-    {{250., 50.}, 0., 1, 1}
-};
+	// départ
+		{{10., 170.}, 0., 1, 1},
+	// foyers
+		{{0.  , 0.  }, R_ROBOT+25, 1, 1},//1
+		{{300., 0.  }, R_ROBOT+25, 1, 1},
+		{{150., 95. }, R_ROBOT+15, 1, 1},
+	// torches mobile
+		{{90. , 90. }, R_ROBOT+8, 1, 1},
+		{{210., 90. }, R_ROBOT+8, 1, 1},//5
+	// torches fixe
+		{{0.  , 120.}, R_ROBOT+5, 1, 1},
+		{{130., 0.  }, R_ROBOT+5, 1, 1},
+		{{170., 0.  }, R_ROBOT+5, 1, 1},
+		{{300., 120.}, R_ROBOT+5, 1, 1},
+	// arbres
+		{{0.  , 70. }, R_ROBOT+15, 1, 1},
+		{{70. , 0.  }, R_ROBOT+15, 1, 1},
+		{{230., 0.  }, R_ROBOT+15, 1, 1},
+		{{300., 70. }, R_ROBOT+15, 1, 1},
+	// feux
+		{{40. , 90. }, R_ROBOT+7, 1, 1},
+		{{90. , 40. }, R_ROBOT+7, 1, 1},
+		{{90. , 140.}, R_ROBOT+7, 1, 1},
+		{{210., 40. }, R_ROBOT+7, 1, 1},
+		{{210., 140.}, R_ROBOT+7, 1, 1},
+		{{260., 110.}, R_ROBOT+7, 1, 1},
+		{{0.  , 120.}, R_ROBOT+7, 1, 1},
+		{{130., 0.  }, R_ROBOT+7, 1, 1},
+		{{170., 0.  }, R_ROBOT+7, 1, 1},
+		{{300., 120.}, R_ROBOT+7, 1, 1},
+		{{90. , 90. }, R_ROBOT+7, 1, 1},//24
+		{{90. , 90. }, R_ROBOT+7, 1, 1},
+		{{90. , 90. }, R_ROBOT+7, 1, 1},
+		{{210., 90. }, R_ROBOT+7, 1, 1},
+		{{210., 90. }, R_ROBOT+7, 1, 1},
+		{{210., 90. }, R_ROBOT+7, 1, 1},//29
+	// bac fruit
+		{{55. , 185.}, R_ROBOT+15, 1, 1},
+		{{75. , 185.}, R_ROBOT+15, 1, 1},
+		{{95. , 185.}, R_ROBOT+15, 1, 1},
+		{{42. , 172.}, R_ROBOT+4, 1, 1},
+		{{108., 172.}, R_ROBOT+4, 1, 1},
+		{{205., 185.}, R_ROBOT+15, 1, 1},
+		{{225., 185.}, R_ROBOT+15, 1, 1},
+		{{245., 185.}, R_ROBOT+15, 1, 1},
+		{{192., 172.}, R_ROBOT+4, 1, 1},
+		{{258., 172.}, R_ROBOT+4, 1, 1},
+	// arrivée
+		{{260., 80.}, 0., 1, 1}
+	};
 #endif
 
 // tangents between physical obstacles (17kiB)
@@ -66,6 +95,7 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
         return 0;
 
     if(out->d < 2*LOW_THR) {
+//    	printf("concentric %u/%u\n", _o1, _o2);
         return 0;
     }
     else if(o1->r < LOW_THR && o2->r < LOW_THR) {
@@ -74,9 +104,11 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
             out_s->s1.p1 = out->s1.p2;
             out_s->s1.p2 = out->s1.p1;
 
+//        	printf("straight line %u/%u\n", _o1, _o2);
         return 1;
     }
     else if(o1->r + out->d < o2->r + 4*LOW_THR || o2->r + out->d < o1->r + 4*LOW_THR) {
+//    	printf("inside %u/%u\n", _o1, _o2);
         return 0;
     }
 
@@ -197,6 +229,7 @@ printf("  dist %.2f\n", DIST(i, j));
 
                 lnk[A(i)][B(j)] = ok;
                 lnk[A(j)][B(i)] = ok;
+                /* no break */
             case 3:
                 ok = check_segment(i, &tgts[i][j].s3, j);
 
@@ -207,6 +240,7 @@ printf("  dist %.2f\n", DIST(i, j));
                     lnk[A(i)][B(j)] = 0;
                     lnk[A(j)][B(i)] = 0;
                 }
+                /* no break */
             case 2:
                 ok = check_segment(i, &tgts[i][j].s2, j);
 
@@ -230,6 +264,7 @@ printf("  dist %.2f\n", DIST(i, j));
                     lnk[B(i)][B(j)] = ok;
                     lnk[A(j)][A(i)] = ok;
                 }
+                /* no break */
             case 1:
                 ok = check_segment(i, &tgts[i][j].s1, j);
 
@@ -306,16 +341,16 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
             sc3 = l3.a*obs[i].c.x + l3.b*obs[i].c.y + l3.c;
 
             if(cross < 0) {
-                if(sc1 < 0 || sc3 > 0)
+                if(sc1 <= 0 || sc3 >= 0)
                     continue;
             }
             else {
-                if(sc1 < 0 && sc3 > 0)
+                if(sc1 <= 0 && sc3 >= 0)
                     continue;
             }
 
             if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
-                return 0;
+                return 0; // bad arc
         }
     }
     else {  // counter clock wise
@@ -327,20 +362,20 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
             sc3 = l3.a*obs[i].c.x + l3.b*obs[i].c.y + l3.c;
 
             if(cross < 0) {
-                if(sc1 > 0 && sc3 < 0)
+                if(sc1 >= 0 && sc3 <= 0)
                     continue;
             }
             else {
-                if(sc1 > 0 || sc3 < 0)
+                if(sc1 >= 0 || sc3 <= 0)
                     continue;
             }
 
             if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
-                return 0;
+                return 0; // bad arc
         }
     }
 
-    return 1;
+    return 1; // good arc
 }
 
 sNum_t o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
