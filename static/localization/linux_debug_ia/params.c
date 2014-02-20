@@ -19,7 +19,7 @@ void init_globals() {
     glob_params.omega = 20.*2.*M_PI;
     glob_params.r = 25e-3;
     glob_params.epsilon = 0.5*M_PI/180.;
-    
+
     glob_params.u_delta_t_distance = 8e-6;
     glob_params.u_delta_t_angle = 16e-6;
     glob_params.u_omega = SQR(glob_params.omega)/(2.*M_PI)*4e-6;
