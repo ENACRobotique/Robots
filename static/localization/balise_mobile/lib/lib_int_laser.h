@@ -62,6 +62,6 @@ ldStruct laserDetect(bufStruct *bs);
 //function to call periodically, ensures acquisition and tracking of our laser beam
 int periodicLaser(bufStruct *bs,plStruct *pRet);
 
-uint32_t laser2dist(unsigned long delta, unsigned long period);
+uint32_t delta2dist(unsigned long delta, unsigned long period);
 
 #endif /* LIB_INT_LASER_H_ */

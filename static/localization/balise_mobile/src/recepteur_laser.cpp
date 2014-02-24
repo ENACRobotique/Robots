@@ -15,12 +15,13 @@
 
 
 char nbSync=0;
-unsigned long lastLaserDetect=0,lastLaserDetectMicros=0;
+unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;
 int debug_led=1;
 unsigned long time_prev_led=0, time_prev_laser=0;
-int state=SYNC;
+int state=GAME;
 plStruct laserStruct0={0},laserStruct1={0};
-volatile unsigned long laser_period=50000; // in µs, to be confirmed by the main robot
+unsigned long lasStrRec0=0,lasStrRec1=0;
+volatile unsigned long laser_period=100000; // in µs, to be confirmed by the main robot
 
 
 
@@ -57,16 +58,14 @@ void loop() {
     int rxB=0; // size (bytes) of message available to read
     unsigned long time = millis(),timeMicros=micros();
 
-
     //blink
     if((time - time_prev_led)>=3000) {
       time_prev_led= time;
       digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
-      bn_printfDbg((char*)"mob1 %lu, mem : %d, state : %d, period : %lu\n",time/1000,freeMemory(),state,laser_period);
+      bn_printfDbg((char*)"%lu, mem : %d\n",time/1000,freeMemory());
 #endif
     }
-
 
 //MUST ALWAYS BE DONE (any state)
 
@@ -76,8 +75,8 @@ void loop() {
         i++;
     }
     //reading the eventual data from the lasers
-    periodicLaser(&buf0,&laserStruct0);
-    periodicLaser(&buf1,&laserStruct1);
+    if (periodicLaser(&buf0,&laserStruct0)) lasStrRec0=timeMicros;
+    if (periodicLaser(&buf1,&laserStruct1)) lasStrRec1=timeMicros;;
 
 
     //laser data pocessing
@@ -90,30 +89,36 @@ void loop() {
         memset(&laserStruct0,0,sizeof(plStruct));
         memset(&laserStruct1,0,sizeof(plStruct));
     }
-    else if (laserStruct0.thickness && (timeMicros-laserStruct0.date)>(laser_period>>6)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
-        laserStruct=laserStruct0;
+    else if (laserStruct0.thickness && (timeMicros-lasStrRec0)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+//        if ((timeMicros-lastLaserDetectMicros)>(laser_period>>2))
+            laserStruct=laserStruct0;
+        memset(&laserStruct0,0,sizeof(plStruct));
     }
-    else if (laserStruct1.thickness && (timeMicros-laserStruct1.date)>(laser_period>>6)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
-        laserStruct=laserStruct1;
+    else if (laserStruct1.thickness && (timeMicros-lasStrRec1)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+//        if ((timeMicros-lastLaserDetectMicros)>(laser_period>>2))
+            laserStruct=laserStruct1;
+        memset(&laserStruct1,0,sizeof(plStruct));
     }
 
-
-
+    if ( laserStruct.thickness ) {
+        lastLaserDetectMicros=laserStruct.date;
+        lastLaserDetectMillis=laserStruct.date/1000;
+    }
 
 
 //STATE MACHINE
-#if 0
+#if 1
     switch (state){
         case SYNC:
         	if (rxB){
         		switch (inMsg.header.type) {
         		case E_SYNC_EXPECTED_TIME :
 					if (nbSync<3){
-						if ( abs((l2gMicros(lastLaserDetect)-inMsg.payload.syncTime))<SYNC_TOL ){
+						if ( abs((l2gMicros(lastLaserDetectMillis)-inMsg.payload.syncTime))<SYNC_TOL ){
 							nbSync++;
 						}
 						else {
-							setMicrosOffset(lastLaserDetect-inMsg.payload.syncTime);//FIXME : to correct
+							setMicrosOffset(lastLaserDetectMillis-inMsg.payload.syncTime);//FIXME : to correct
 							nbSync=0; //TODO : man, i'm no sure about this one. I is highly unprobable that we receive 3 times a laser in sync with our TXed time. On the other hand, we will miss some message (or unsync)
 						}
 					}
@@ -140,15 +145,18 @@ void loop() {
 
         case GAME :
         	if ( laserStruct.thickness ) { //if there is some data to send
-				outMsg.header.destAddr=ADDRX_MAIN;
-				outMsg.header.type=E_MEASURE;
-				outMsg.header.size=sizeof(sMesPayload);
-
-                outMsg.payload.measure.value=laserStruct.deltaT;
-                outMsg.payload.measure.date=laserStruct.date;
-                outMsg.payload.measure.precision=laserStruct.precision;
-                outMsg.payload.measure.sureness=laserStruct.sureness;
-				bn_send(&outMsg);
+//				outMsg.header.destAddr=ADDRX_MAIN;
+//				outMsg.header.type=E_MEASURE;
+//				outMsg.header.size=sizeof(sMesPayload);
+//
+//                outMsg.payload.measure.value=laserStruct.deltaT;
+////                if (laserStruct.period) outMsg.payload.measure.value=laser2dist(laserStruct.deltaT,laserStruct.period);
+////                else outMsg.payload.measure.value=laser2dist(laserStruct.deltaT,laser_period);
+//                outMsg.payload.measure.date=laserStruct.date;
+//                outMsg.payload.measure.precision=laserStruct.precision;
+//                outMsg.payload.measure.sureness=laserStruct.sureness;
+//				bn_send(&outMsg);
+        	    bn_printfDbg((char*)"date, %lu, mes : %lu\n",laserStruct.date,delta2dist(laserStruct.period,laserStruct.deltaT));
           }
           break;
         default : break;

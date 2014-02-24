@@ -25,7 +25,7 @@ bufStruct buf1={{0},0,0,0,0,0,0,0,1};
 #define DEBOUNCETIME_INT_LASER 20  //measured
 #define DEBUG_LASER
 
-#define LAT_INIT 50000 //in µs TODO : refine
+#define LAT_SHIFT 2 //in µs TODO : refine
 
 
 
@@ -149,7 +149,7 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                 if (measure.deltaT!=0){
                     bs->stage=2;
 
-                    bs->lat=laser_period>>2;
+                    bs->lat=laser_period>>LAT_SHIFT;
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period- (bs->lat>>1);
 
@@ -190,11 +190,11 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     pRet->period=measure.date-bs->lastDetect;
 
                     bs->lastDetect=measure.date;
-                    bs->lat=laser_period>>2;    //MAX( bs->lat-LAT_DEINC,LAT_MIN); todo refine
+                    bs->lat=laser_period>>LAT_SHIFT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN); todo refine
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period-(bs->lat>>1);
                     bs->stage=2;
-bn_printfDbg((char*)"mes %lu \t sur %ld",pRet->deltaT,pRet->sureness);
+//bn_printfDbg((char*)"mes %lu \t sur %ld",pRet->deltaT,pRet->sureness);
                     return 1;
                 }
                 else {
@@ -233,10 +233,11 @@ bn_printfDbg((char*)"mes %lu \t sur %ld",pRet->deltaT,pRet->sureness);
 return 0;
 }
 
-/* laser2dist : converts delta-T and period in distance in mm
+/* delta2dist : converts delta-T and period in distance in mm
  * TODO : re-write it to take into account measured period
  */
-uint32_t laser2dist(unsigned long delta, unsigned long period){
-    return 25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2)
-
+uint32_t delta2dist(unsigned long delta, unsigned long period){
+    float temp=((float)8.006/(((float)delta/(float)period) - (float)0.001127));//<-eureqa-ifed equation //25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2) (formula found by geometry)
+    uint32_t temp2=((8*delta)<<16)/(delta-(1127*period)/1000000);
+    return temp2>>16;
 }
