@@ -33,7 +33,7 @@ typedef struct {
 	volatile unsigned long buf[8];
 	volatile int index;             // index of the last value recorded
 	unsigned long prevCall;         // local µs,  the laserDetect will only consider values recorded between prevCall and the current time
-	unsigned long lastDetectTrack;  // last date at which a laser was detected on this interrupt WHILE TRACKING (0 if the previous detection was not made in tracking)
+	unsigned long lastDetect;       // last date at which a laser was detected on this interrupt (0 if the previous try to detect was unsuccessful)
 	int stage;                      // used by periodiclaser to detect at which state is this pair of sensor
 	unsigned long lat;              // µs, authorized latency in tracking mode : +-lat/2
 	unsigned long prevTime;         // local µs, prevTime & nextTime : used by periodicLaser for its time measurements
