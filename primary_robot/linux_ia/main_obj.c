@@ -1,23 +1,13 @@
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
+#include <string.h>
 
 #include "a_star.h"
 #include "math_types.h"
 #include "math_ops.h"
 #include "tools.h"
-
-
-#define SEB 1
-#define Nb_obs_start 41
-
-typedef enum{E_VERRE, E_CADAL, E_BOUGIE , E_MAISON } eObj_t;
-
-typedef struct {
-    eObj_t type;
-    sNum_t test;
-    iABObs_t obs;
-    sPt_t *position;
-} sObj_t;
+#include "type_ia.h"
 
 #define MAX(a, b) ((a)>(b)?(a):(b))
 #define MIN(a, b) ((a)>(b)?(b):(a))
@@ -29,233 +19,135 @@ sNum_t t_lastg_r = 1000.;
 sNum_t av_occ_t = 2000.;    // average occupation time
 int gnb_l,gnb_r; // glass number right/left
 sNum_t pts_per_msec = 128./90000.;
-
-typedef struct {
-
-    int type;
+int gat_ind;
 
 
-} sMess_t;
 
-//Initialisation des éléments de jeu
-	sPath_t path= {.dist = 0.,  .path = NULL };
-
-	//structure arbre
-	typedef struct{	//TODO définir l'entré de l'arbre en fonction des fruits
-		uint8_t fruit_1; //définition : 0=violet non récolté, 1=récolté, 2=noir
-		uint8_t fruit_2;
-		uint8_t fruit_3;
-		uint8_t fruit_4;
-		uint8_t fruit_5;
-		uint8_t fruit_6;
-		//TODO orientation du robot sur cible
-		uint8_t nb_point;
-		uint8_t dist;
-		uint8_t prio;
-		} arbre;
-
-	sObs_t arbre_1a ={{10., 90.}, 0, 0, 1}; //1ere entré sur l'objectif arbre 1
-	sObs_t arbre_1b ={{10., 50.}, 0, 0, 1};
-	//TODO idem pour les 3 autres arbres
-
-	//Obstacle
-		sObs_t obs2[] = {
-			// foyer
-				{{0., 0.}, R_ROBOT+25, 1, 1},
-				{{300., 0.}, R_ROBOT+25, 1, 1},
-				{{150., 95.}, R_ROBOT+30, 1, 1},
-			// torche mobile
-				{{90., 90.}, R_ROBOT+16., 1, 1},
-				{{210., 90.}, R_ROBOT+16, 1, 1},
-			//torche fixe
-				{{0., 120.}, R_ROBOT+5, 1, 1},
-				{{130., 0.}, R_ROBOT+5, 1, 1},
-				{{170., 0.}, R_ROBOT+5, 1, 1},
-				{{300., 120.}, R_ROBOT+5, 1, 1},
-			};
-
-
-	sObs_t bougie_a = {{218., 179.}, R_ROBOT, 0, 0};
-	sObs_t bougie_b = {{83., 180.}, R_ROBOT, 0, 0}; //FIXME
-
-// TODO initialise obj_pts 0-1 bougies / 2-9 cadeaux / 10-21 verres / 22 retour maison TODO
-sObj_t obj_pts[]={ //mettre a jour liste des objectifs
-    {E_VERRE, 1., A(2), NULL},
-    {E_VERRE, 1., A(3), NULL},
-    {E_BOUGIE, 1., A(N-1), &bougie_a.c}
-};
-
-#define NB_OBJ ((int)sizeof(obj_pts)/(int)sizeof(*obj_pts))
-
-unsigned long _start_time;
-unsigned long millis()
+void update_end (sNum_t radius,  sPt_t *center)
 	{
-    unsigned long res = (time(NULL) - _start_time)*1000;
-    //printf("millis()=%lu\n", res);
-    return res;
-	}
-
-
-
-
-void update_end (sNum_t radius,  sPt_t *center) {
-
     obs[N-1].c = *center;
     obs[N-1].r = radius;
     obs[N-1].active = 1;
-
-}
+	}
 
 void active (sObs_t *obs) {obs->active = 1;}
 void unactive (sObs_t *obs) {obs->active = 0;}
 
-int gat_ind;
 
-sNum_t val_obj( sObj_t *objc , sNum_t av_speed)
+
+sNum_t val_obj(int num) //numeros de l'objectif dans list_obj[] compris entre 0 et NB_OBJ
 	{
+	#if DEBUG
+		printf("Debut val_obj\n");
+	#endif
 
-    unsigned long current_t = millis();
-    sNum_t margin = 500.; // TODO def margin
-    sNum_t g_bougie, g_verre, d_home;
-    g_bougie = 4.;
-    //sNum_t g_cadal = 4.;
+	sNum_t speed=1; // in m/s //TODO Faire pour trajectoire circulaire
+	sNum_t time;
+	sNum_t dist;
+	sNum_t point;
+	sNum_t ratio;
 
-//FIXME valeurs en dur! rayons
-   // sNum_t r_cadal = 4.;
-    sNum_t r_bougie = R_ROBOT;
-    sNum_t r_verre = 15.; // h TODO
+	fill_tgts_lnk();
+	a_star(A(0), A(N-1), &path);
+	dist=path.dist;
+	if(dist==0) return (-1); //On est sur l'objectif
+	time=dist/speed;
+	if(time > (END_MATCH-millis())) //temps restant insuffisant
+		{
+		list_obj[num].active=0;
+		return 0;
+		}
 
-
-
-
-    switch( objc -> type) {
-
-        case E_BOUGIE :
-
-            update_end(r_bougie, objc -> position);
-
-            fill_tgts_lnk();
-
-            a_star(0, B(N-1), &path);
-            printf("val_obj dist(curr,bougie%u%c)=%.2f\n", O(objc->obs), DIR(objc->obs)?'b':'a', path.dist);
-
-            return(path.dist?g_bougie * av_speed / path.dist:0);
-            break;
-
-/* cadeaux
-
-        case E_CADAL :
-
-            update_end(r_cadal, objc -> position);
-
-            //  écrire dans le tab des obstacles, dans la case 2N-1, la positon du pt cadal
-            a_star(0, 2*N-1 , &path);
-        return(path.dist?g_cadal * av_speed / path.dist:0);
-        break;
-*/
-        case E_VERRE :
-            update_end(r_verre, &obs[O(objc -> obs)].c);
-            unactive(& obs[O(objc -> obs)]);
-
-            fill_tgts_lnk();
-
-            if (objc -> obs & 1) {
-
-                sNum_t t_wait = - (sNum_t)current_t + t_lastg_l + av_occ_t; // time to wait before glass stack available
-                if (t_wait < 0.) g_verre = 4.*objc->test*(gnb_l+1.);
-                else g_verre = (4.*(gnb_l+1.) - t_wait*pts_per_msec)*objc->test;
-           }
-           else{
-                sNum_t t_wait = - (sNum_t)current_t + t_lastg_r + av_occ_t;
-                if (t_wait < 0.) g_verre = 4.*(gnb_r+1.)*objc->test;
-                else {
-                g_verre = (4.*(gnb_r+1.) - t_wait*pts_per_msec)*objc->test;
-            }
-            }
-//            printf("g_verre=%.2f\n", g_verre);
-            a_star(0, A(N-1) + DIR(objc -> obs), &path);
-            printf("val_obj dist(curr,verre%u%c)=%.2f\n", O(objc->obs), DIR(objc->obs)?'b':'a', path.dist);
-
-            active(& obs[O(objc -> obs)]);
-
-            return(path.dist?g_verre * av_speed / path.dist:0);
-
-            break;
-
-        case E_MAISON :
-
-            update_end(0., objc -> position);
-
-            fill_tgts_lnk();
-
-            a_star(0, A(N-1), &path);
-            d_home =  path.dist;
-            if (av_speed*(90000. - current_t + margin) > d_home) return(0.);
-            else return (9001.);
-
-        default:
-            break;
-    }
-
-    return 0.;
-}
-
-iABObs_t next_obj (int* test_bougie) //retourne l'objectif suivant
-	{
-
-
-    int i;
-
-    sNum_t tmp_val = 0.;
-    sNum_t tmp_val2;
-    int tmp_inx=-1;
-
-    for(i = 0 ; i < NB_OBJ ; i++)
+    switch(list_obj[num].type)
     	{
-        if (obj_pts[i].test)
-        tmp_val2 = val_obj( &obj_pts[i], 0.5); //FIXME speed codée en dur !
-        printf("next_obj g[%u%c]=%.4f\n", O(obj_pts[i].obs), DIR(obj_pts[i].obs)?'b':'a', tmp_val2);
+		case E_FEU :
+			break;
 
-            if (tmp_val2 > tmp_val) {
-                tmp_val = tmp_val2;
-                tmp_inx = i;
-            }
-    }
-    if (obj_pts[tmp_inx].type == E_BOUGIE) *test_bougie = 1;
+		case E_TORCHE_MOBILE :
+			break;
 
-    else *test_bougie = 0;
+        case E_ARBRE :
+			#if DEBUG
+				printf("enum=%i => type=E_ARBRE, dist=%f\n",list_obj[num].type,dist);
+			#endif
+        	point=((Obj_arbre*)list_obj[num].type_struct)->nb_point;
+        	ratio=point/time*1000+ratio_arbre() ;
+        	break;
 
-    return ((iABObs_t)tmp_inx);
+        case E_BAC :
+			#if DEBUG
+				printf("enum=%i => type=E_BAC, dist=%f\n",list_obj[num].type,dist);
+			#endif
+			point=((Obj_bac*)list_obj[num].type_struct)->nb_point;
+        	ratio=point/time*1000+ratio_bac();
+        	break;
+
+        case E_FOYER :
+        	break;
+
+        case E_TORCHE_FIXE :
+        	break;
+    	}
+    return ratio;
 	}
 
-/*
+iABObs_t next_obj (void)
+	{
+	#if DEBUG
+		printf("Debut next_obj\n");
+	#endif
+    sNum_t tmp_val = 0.;
+    sNum_t tmp_val2;
+    sNum_t tmp_val3;
+    int tmp_inx=-1; //index de l'objectif qui va  etre selectionner
+    int i;
+    for(i = 0 ; i < NB_OBJ ; i++)
+    	{
+        if (list_obj[i].active==0) continue; //test si ojectif existe encore
 
-typedef struct {
-    sPt_t p1;
-    sPt_t p2;
-    sObs_t obs;
+        switch(list_obj[i].type)
+        	{
+        	case E_ARBRE :
+            	obs[i+1].active=0;
+    			memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer1), sizeof(obs[N-1]));
+    			tmp_val2 = val_obj(i);
 
-    unsigned short sid;
-} sTrajEl_t;
+    			memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer2), sizeof(obs[N-1]));
+    			tmp_val3=val_obj(i);
 
-typedef struct {
-    sNum_t dist;
-    unsigned short tid;
+    			if(tmp_val3>tmp_val2) tmp_val2=tmp_val3;
+    			obs[i+1].active=1;
+    			break;
+        	case E_BAC :
+        		obs[i+1+5].active=0;
+        		obs[i+2+5].active=0;
+        		obs[i+3+5].active=0;
+        		memcpy(&obs[N-1], &(((Obj_bac*)list_obj[i].type_struct)->entrer), sizeof(obs[N-1]));
+        		tmp_val2 =val_obj(i);
+        		obs[i+1+5].active=1;
+        		obs[i+2+5].active=1;
+        		obs[i+3+5].active=1;
+        		break;
+        	}
 
-    unsigned int path_len;
-    sTrajEl_t *path;
-} sPath_t;
+			//determination ratio objectif
+			#if DEBUG
+					printf("objectif n°%hhi avec ratio=%f \n\n",i,tmp_val2);
+			#endif
 
-typedef struct {
-    sPt_t c;    // center of obstacle
-    sNum_t r;   // radius
-
-    uint8_t moved:4;
-    uint8_t active:4;
-} sObs_t;
-*/
-
-
+			//Actualisation meilleur objectif
+			if (tmp_val2 > tmp_val)
+				{
+				tmp_val = tmp_val2;
+				tmp_inx = i;
+				}
+			if(tmp_inx != -1)
+				{
+				obs[tmp_inx+1].r=R_ROBOT + 5;
+				}
+    	}
+    return (tmp_inx);
+	}
 
 int same_obs (sObs_t *obs1, sObs_t *obs2){
     return ( obs1->r == obs2->r && obs1->c.x == obs2->c.x && obs1->c.y == obs2->c.y);
@@ -291,40 +183,52 @@ int test_tirette() //Simulation TODO fonction réel
 	return(millis() > 500); // FIXME
 	}
 
-typedef enum {ATTENTE , JEU , SHUT_DOWN} estate_t;
+void send_robot(iABObs_t goal)
+	{
+	obs[N-1].c.x=obs_PA[2*goal].c.x;
+	obs[N-1].c.y=obs_PA[2*goal].c.y;
+	}
 
-int distance_bougie (sObj_t ** bougie_ind){
-    sNum_t d1, d2;
-    sqdistPt2Pt(obj_pts[1].position,&(obs[0].c), &d1); // FIXME FIXME bougie dans obs ou obj ou les 2? les 2!
-    sqdistPt2Pt(obj_pts[2].position,&(obs[0].c), &d2);
-    if (d1 > 1 && d2 > 1) return 0;
-    else {
-        if (d1 < 1) *bougie_ind = &obj_pts[2];
-        else *bougie_ind = &obj_pts[1];
-        }
-    return 1 ;
-}
-void get_position() { //TODO
+void get_position(iABObs_t goal, sObs_t *pos) //TODO normalement seulement le dernier parametre
+	{
+	pos->c.x=obs_PA[2*goal].c.x;
+	pos->c.y=obs_PA[2*goal].c.y;
+	}
 
-return;
-}
+void obj_tree(iABObs_t obj)
+	{
+	sleep(5);//simule le temps de faire l'action
+	list_obj[obj].active=0;
+	bac.nb_point=bac.nb_point+3;
+	#if DEBUG
+		printf("Objectif : arbre n°%hhi fini\n\n\n",obj);
+	#endif
+	}
+
+void obj_bac(iABObs_t obj)
+	{
+	list_obj[obj].active=0;
+	bac.nb_point=0;
+	#if DEBUG
+		printf("Objectif : bac fini\n\n\n");
+	#endif
+	}
 
 void state_machine()
 	{
     gat_ind = 1;
     estate_t state = ATTENTE;
     iABObs_t current_obj;
+    iABObs_t current_obs;
+    int stop=10;
+    int stop_int=0;
 
-    sPath_t current_path, next_path;
-    current_path.tid = 1;
-    next_path.tid = 1;
-
-   // int test_bougie = 0;
-
-    sPath_t *_current_path = &current_path;
+    sPath_t next_path;
+    //next_path.tid = 1;
+   // sPath_t current_path
+   // sPath_t *_current_path = &current_path; //non utiliser pour le moment
     sPath_t *_next_path = &next_path;
 
-    //sObj_t *bougie_ind = NULL;
 #if 0
 		sMsg msg;
 #endif
@@ -334,7 +238,7 @@ void state_machine()
         switch (state) {
 
             case ATTENTE :
-                printf("Attente. time = %ld\n", millis()); // FIXME debug
+//                printf("Attente. time = %ld\n", millis()); // FIXME debug
                 if ( test_tirette() )
                 	{
                 	state = JEU;
@@ -344,6 +248,10 @@ void state_machine()
 
             case JEU :
                 if (millis() > 90000) state = SHUT_DOWN;
+
+                //temporaine pour test
+            	stop_int++;
+            	if(stop_int==stop) state = SHUT_DOWN;
 #if 0
                 sb_receive(&msg);
                 else {
@@ -352,76 +260,61 @@ void state_machine()
                     else
 #endif
 
-                    {
-                          // TEST prog
-                              sNum_t xpos, ypos; //FIXME debug
-                              printf("Jeu. time = %ld\n", millis()); //FIXME debug
-                              printf("position?\n");
-                              fflush(stdout);
-                              scanf("%f %f", &xpos, &ypos);
-                              obs[0].c.x = xpos;
-                              obs[0].c.y = ypos;
-                              printf("cx %f cy %f \n",obs[0].c.x ,obs[0].c.y);
-                           //END test
 
-                              fill_tgts_lnk();
+				  // TEST prog
+                    	/*if(first==0)
+                    		{
+							  sNum_t xpos, ypos; //FIXME debug
+							  printf("Jeu. time = %ld\n", millis()); //FIXME debug
+							  printf("position?\n");
+							  fflush(stdout);
+							 // scanf("%f %f", &xpos, &ypos);
+							  obs[0].c.x = 10;
+							  obs[0].c.y = 170;
+							  printf("cx %f cy %f \n",obs[0].c.x ,obs[0].c.y);
+						   //END test
+							  first=1;
+                    		}*/
 
-                              current_obj = next_obj(&test_bougie); //current_pos plutot ou rien
-                              if ( current_obj == -1) continue; //aucun objectif actif atteignable
+					  current_obj = next_obj();
 
-                                  switch (test_bougie){
+					  current_obs = (list_obj[current_obj]).num_obs ;//Conversion objectif -> obstable
+					  if ( current_obj == -1) continue; //aucun objectif actif atteignable
 
-                                  case 0:
+					  fill_tgts_lnk();
+					  a_star(A(0), current_obs, _next_path);
 
-                                        printf("state_m test bougie case 0\n");
-
-
-                                        a_star(A(0), current_obj, _next_path);
-
-                                        if (!(same_traj(_next_path,_current_path)))
-                                        {
-                                        current_path.tid++;
-                                        next_path.tid = current_path.tid;
-                                        _current_path = _next_path;
-                                        }
-
-
-                                //transfert_traj(current_path);//TODO
-
-
-
-
-
-                                  case 1: //cas bougies
-
-                                    printf("state_m test bougie case 1\n");
-
-                                    if (distance_bougie (&bougie_ind)){  // TODO TODO TODO
-                                    printf("switch 2.0 bougie\n");
-
-                                     a_star(A(0),bougie_ind->obs,_current_path);
+					  send_robot(current_obj) ;// Envoie au bas niveau la trajectoire courante
+					  get_position(current_obj, &_current_pos);
+					  memcpy(&obs[0],&_current_pos, sizeof(obs[0]));
+					  printf("Position actuel : x=%f et y=%f\n", obs[0].c.x,obs[0].c.y);
+					  if (fabs(obs[N-1].c.x -_current_pos.c.x)<RESO_POS && fabs(obs[N-1].c.y -_current_pos.c.y)<RESO_POS)   //objectif atteint
+						  {
+						  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
+						  	  {
+						  	  case E_ARBRE :
+						  		  obj_tree(current_obj);
+						  		  break;
+						  	  case E_BAC :
+						  		  obj_bac(current_obj);
+						  		  break;
 
 
-                                    }
-                                    else
-                                        a_star(A(0), current_obj, _current_path);
-                     }
-
-               }
-            break;
+							  }
+						  }
+                break;
 
             case SHUT_DOWN:
-            printf ("SHUT_DOWN\n");
+           // printf ("SHUT_DOWN\n");
                 //TODO arrêt total
-            break;
+            	return;
+            	break;
 
 
+              }
         }
-    }
-
-
     return;
-}
+    }
 
 
 int main()
@@ -438,41 +331,48 @@ int main()
 
 #else
     //Activation des éléments du jeu
-	int i;
+	int i, j;
 	for(i=0; i<Nb_obs_start;i++ )
 		{
 		obs[i].active =1;
 		}
+	//Initialisation des arbres
+		for(i=0 ; i<4 ; i++)
+			{
+			list_obj[i].type_struct = &arbre[list_obj[i].num_obj];
+			((Obj_arbre*)list_obj[i].type_struct)->nb_point=10;
+			for(j=0 ; j<6 ; j++)
+				{
+				((Obj_arbre*)list_obj[i].type_struct)->eFruit[j]=0;
+				}
+			((Obj_arbre*)list_obj[i].type_struct)->entrer1=obs_PA[2*i];
+			((Obj_arbre*)list_obj[i].type_struct)->entrer2=obs_PA[2*i+1];
+			}
+	//Initialisation du bac
+		list_obj[5].type_struct = &bac;
+		((Obj_bac*)list_obj[i].type_struct)->nb_point=0;
+		((Obj_bac*)list_obj[i].type_struct)->entrer=obs_PA[8];
+
+	//TODO Initialisation des autres éléments
+	//TODO activation bac jaune ou rouge
 #endif
 
+
+
+	//Initialisation de la position courante;
+	_current_pos.c.x=10;
+	_current_pos.c.y=170;
+	_current_pos.r=0;
+	_current_pos.moved=1;
+	_current_pos.active=1;
+
+#if DEBUG
+	printf("Fin d'initialisation des éléments de jeu\n");
+#endif
 
     _start_time = time(NULL);
     state_machine();
 
-
-
- //test next_obj
-
-/*    _start_time = time(NULL);
-
-    obs[0].active = 1;
-    obs[2].active = 1;
-    obs[3].active = 1;
-
-    obs[N-1].c.x = 80;
-    obs[N-1].c.y = 180;
-    obs[N-1].active = 1;
-
-    // fill
-    fill_tgts_lnk();
-    int j = 10;
-    while(j) {
-        int res = next_obj (A(0));
-        printf("res=%i\n", res);
-        j--;
-        usleep(500000);
-    }
-*/
     return 0;
 }
 
