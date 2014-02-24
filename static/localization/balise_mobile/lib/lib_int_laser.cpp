@@ -166,8 +166,9 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                 //else, "delay" periodicLaser
                 else {
 
-                    //"clear "the buffer
+                    //"clear "the buffer and lastLaserDetection
                     bs->prevCall=time;
+                    bs->lastDetectTrack=0;
 
                     //set the nextime and prevtime
                     bs->prevTime=time;
@@ -187,9 +188,10 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     pRet->thickness=measure.thickness;
                     pRet->sureness=(long int)(measure.date-bs->prevTime-(bs->lat>>1)); //sureness = difference between the expected time and the measured time
                     pRet->precision=4; //in µs TODO
-                    pRet->period=measure.date-bs->lastDetect;
+                    if (bs->lastDetectTrack) pRet->period=measure.date-bs->lastDetectTrack;
+                    else pRet->period=0;
 
-                    bs->lastDetect=measure.date;
+                    bs->lastDetectTrack=measure.date;
                     bs->lat=laser_period>>LAT_SHIFT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN); todo refine
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period-(bs->lat>>1);
@@ -201,6 +203,7 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
 
                     //"clear "the buffer
                     bs->prevCall=time;
+                    bs->lastDetectTrack=0;
 
                     bs->lat=laser_period>>2;  //bs->lat+LAT_INC;
                     bs->prevTime=time;
