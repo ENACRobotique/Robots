@@ -238,6 +238,6 @@ return 0;
  */
 uint32_t delta2dist(unsigned long delta, unsigned long period){
     float temp=((float)8.006/(((float)delta/(float)period) - (float)0.001127));//<-eureqa-ifed equation //25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2) (formula found by geometry)
-    uint32_t temp2=((8*delta)<<16)/(delta-(1127*period)/1000000);
-    return temp2>>16;
+    uint32_t temp2=temp;
+    return temp2;
 }
