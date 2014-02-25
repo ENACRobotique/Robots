@@ -17,6 +17,7 @@ extern int serial_port;
 #include "video_draw.h"
 
 #include "context.h"
+#include "draw_list.h"
 
 void usage(char *cl) {
     printf("GTK UI\n");
@@ -69,10 +70,15 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             case E_POS:{
                 int x, y, dx, dy;
                 float factor_x, factor_y;
+                sPosLEl *pel;
+                sTrajLEl *tel;
 
                 if(ctx->verbose >= 2){
                     printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.pos.id, inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
                 }
+
+                // adds position to list of positions to draw
+                pl_addTail(&ctx->poslist, &inMsg.payload.pos);
 
                 factor_x = (float)ctx->pos_szx/300.;
                 factor_y = (float)ctx->pos_szy/200.;
@@ -95,6 +101,8 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                     outMsg.payload.traj.tid = ctx->tid++;
                     outMsg.payload.traj.sid = 0;
 
+                    tl_addTail(&ctx->trajlist, &outMsg.payload.traj);
+
                     ret = bn_send(&outMsg);
                     if(ret <= 0){
                         fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
@@ -103,15 +111,49 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                     ctx->mouse_event = 0;
                 }
 
+                // update position media
+                ctx->pos_cur ^= 1;
+                memset(ctx->pos_data[ctx->pos_cur], 255, ctx->pos_szx*ctx->pos_szy*3);
+
+                // draw current position
                 x = (int)(inMsg.payload.pos.x*factor_x + 0.5);
                 y = ctx->pos_szy - (int)(inMsg.payload.pos.y*factor_y + 0.5);
                 dx = 8*factor_x*cos(inMsg.payload.pos.theta);
                 dy = -8*factor_y*sin(inMsg.payload.pos.theta);
 
-                // update position media
-                ctx->pos_cur ^= 1;
-                memset(ctx->pos_data[ctx->pos_cur], 255, ctx->pos_szx*ctx->pos_szy*3);
                 video_draw_arrow(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, dx, dy, 10, 255, 0, 0);
+
+                // draw trajectories
+                for(tel = tl_getFirst(&ctx->trajlist); tel; tel = tl_getNext(&ctx->trajlist)){
+                    x = (int)(tel->traj.p1_x*factor_x + 0.5);
+                    y = ctx->pos_szy - (int)(tel->traj.p1_y*factor_y + 0.5);
+                    dx = (int)(tel->traj.p2_x*factor_x + 0.5) - x;
+                    dy = ctx->pos_szy - (int)(tel->traj.p2_y*factor_y + 0.5) - y;
+
+                    video_draw_line(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, x+dx, y+dy, 0, 0, 0);
+
+                    x = (int)(tel->traj.c_x*factor_x + 0.5);
+                    y = ctx->pos_szy - (int)(tel->traj.c_y*factor_y + 0.5);
+                    dx = (int)(tel->traj.c_r*factor_x + 0.5);
+                    dy = (int)(tel->traj.c_r*factor_y + 0.5);
+
+                    video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 0);
+                    video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 0);
+                }
+
+                // draw previous positions
+                for(pel = pl_getFirst(&ctx->poslist); pel && pel->next; pel = pl_getNext(&ctx->poslist)){
+                    x = (int)(pel->pos.x*factor_x + 0.5);
+                    y = ctx->pos_szy - (int)(pel->pos.y*factor_y + 0.5);
+                    dx = 3*factor_x;
+                    dy = 3*factor_y;
+
+    //                video_draw_cross(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
+                    video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 255);
+                    video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
+                }
+
+                // switch drawing buffer in gui
                 gv_media_update(ctx->pos_mid, ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, (gv_destroy)NULL, NULL);
 
                 break;
@@ -130,6 +172,8 @@ int main(int argc, char *argv[]) {
     int ret;
 
     memset(&ctx, 0, sizeof(ctx));
+    pl_init(&ctx.poslist, -1);
+    tl_init(&ctx.trajlist, -1);
 
     // arguments options
     ctx.verbose = 1;
