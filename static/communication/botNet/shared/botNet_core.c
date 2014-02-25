@@ -26,6 +26,9 @@
 #if MYADDRU !=0
 #   include "UART4bn.h"
 #endif
+#if MYADDRD !=0
+#   include "UDP4bn.h"
+#endif
 // standard libraries
 #include <string.h>
 #include <stdlib.h>
@@ -87,7 +90,7 @@ uint8_t seqNum=0;
  *  <0 if error
  */
 int bn_init(){
-#if MYADDRU!=0 || MYADDRX!=0
+#if MYADDRX!=0 || MYADDRU!=0 || MYADDRD!=0
     int ret=0;
 #endif
 
@@ -110,6 +113,10 @@ int bn_init(){
 #   ifdef ARCH_328P_ARDUINO
     if ( (ret=UART_init(NULL,115200))<0 ) return ret;
 #   endif
+#endif
+
+#if MYADDRD!=0
+    if((ret=UDP_init()) < 0) return ret;
 #endif
     return 0;
 }
@@ -151,7 +158,7 @@ int bn_send(sMsg *msg){
  */
 int bn_genericSend(sMsg *msg){
     // sets source address
-    msg->header.srcAddr = (MYADDRX?:MYADDRI)?:MYADDRU;
+    msg->header.srcAddr = ((MYADDRX?:MYADDRI)?:MYADDRU)?:MYADDRD;
 
     //check the size of the message
     if ( (msg->header.size + sizeof(sGenericHeader)) > BN_MAX_PDU) return -ERR_BN_OVERSIZE;
@@ -268,6 +275,14 @@ int bn_routine(){
     count+=ret;
 #endif
 
+#if MYADDRD!=0
+    if ( (ret=UDP_receive(&temp.msg)) > 0 ) {
+        bn_pushInBufLast(&temp.msg,IF_UDP);
+    }
+    else if (ret<0) return ret;
+    count+=ret;
+#endif
+
     //handles stored messages
     if ( (pTmp=bn_getInBufFirst()) != NULL){
         //checks checksum of message before forwarding. If error, drop message and return
@@ -298,7 +313,8 @@ int bn_routine(){
             if (
                 pTmp->msg.header.destAddr == MYADDRX ||
                 pTmp->msg.header.destAddr == MYADDRI ||
-                pTmp->msg.header.destAddr == MYADDRU
+                pTmp->msg.header.destAddr == MYADDRU ||
+                pTmp->msg.header.destAddr == MYADDRD
             ){
                 bn_freeInBufFirst();
                 return count;
@@ -314,7 +330,8 @@ int bn_routine(){
             if (
                 pTmp->msg.header.destAddr == MYADDRX ||
                 pTmp->msg.header.destAddr == MYADDRI ||
-                pTmp->msg.header.destAddr == MYADDRU
+                pTmp->msg.header.destAddr == MYADDRU ||
+                pTmp->msg.header.destAddr == MYADDRD
             ){
                 temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
                 temp.msg.header.type=E_ACK_RESPONSE;
@@ -413,7 +430,8 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         (
             ( (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ||
             msg->header.destAddr==MYADDRI ||
-            msg->header.destAddr==MYADDRU
+            msg->header.destAddr==MYADDRU ||
+            msg->header.destAddr==MYADDRD
         )
     ){// xxx improve test
         routeInfo->ifTo=IF_LOCAL;
@@ -425,7 +443,8 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         (
             msg->header.destAddr==MYADDRX ||
             msg->header.destAddr==MYADDRI ||
-            msg->header.destAddr==MYADDRU
+            msg->header.destAddr==MYADDRU ||
+            msg->header.destAddr==MYADDRD
         )
     ){
         routeInfo->ifTo=IF_LOCAL;
@@ -466,6 +485,20 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
     if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRU & SUBNET_MASK) ){
         if (ifFrom!=IF_UART ) {
             routeInfo->ifTo=IF_UART;
+            routeInfo->nextHop=msg->header.destAddr;
+            return;
+        }
+        else {
+            routeInfo->ifTo=IF_DROP;
+            return;
+        }
+    }
+#endif
+
+#if MYADDRD!=0
+    if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRD & SUBNET_MASK) ){
+        if (ifFrom!=IF_UDP) {
+            routeInfo->ifTo=IF_UDP;
             routeInfo->nextHop=msg->header.destAddr;
             return;
         }
@@ -537,6 +570,15 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
     case IF_UART :
         while (retVal<=0 && retries<BN_MAX_RETRIES){
             retVal=UART_send(msg);
+            retries++;
+        }
+        return retVal;
+        break;
+#endif
+#if MYADDRD !=0
+    case IF_UDP :
+        while (retVal<=0 && retries<BN_MAX_RETRIES){
+            retVal=UDP_send(msg, routeInfo.nextHop);
             retries++;
         }
         return retVal;
