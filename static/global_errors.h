@@ -33,7 +33,7 @@ enum{
         ERR_NULL_POINTER_WRITE_ATTEMPT,
 
     // BOTNET specific errors
-        ERR_BN_INIT_FAILED,
+        ERR_BN_INIT_FAILED,// 11
         ERR_BN_NACK_BROKEN_LINK,
         ERR_BN_NACK_FULL_BUFFER,
         ERR_BN_ACK_TIMEOUT,
@@ -48,7 +48,7 @@ enum{
         ERR_BN_BUFFER_FULL,
 
     // UART (and UART_FRAMING) errors
-        ERR_UART_OVERSIZE,          // packet too big to send (size over UART_MTU)
+        ERR_UART_OVERSIZE,   // 24  // packet too big to send (size over UART_MTU)
         ERR_UART_CSUM,              // incoming frame rejected (incorrect checksum)
         ERR_UART_WRITE_BYTE,
         ERR_UART_WRITE_TIMEOUT,
@@ -58,7 +58,7 @@ enum{
         ERR_UART_DEINIT_FAILED,
 
     // XBEE errors
-        ERR_XBEE_NOSTAT,    // status frame not received
+        ERR_XBEE_NOSTAT, // 32 // status frame not received
         ERR_XBEE_NOACK,     // status frame received and transmitted frame not acknoledged (may have been purged or CCAfail)
         ERR_XBEE_CSUM,      // frame rejected (incorrect checksum)
         ERR_XBEE_OVERSIZE,
@@ -68,7 +68,7 @@ enum{
         ERR_XBEE_INIT_FAILED,
 
     // I²C error
-    ERR_I2C_END_TX,
+    ERR_I2C_END_TX, // 40
 
 
     ERR_NUMBERRCODES
