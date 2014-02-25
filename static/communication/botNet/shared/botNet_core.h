@@ -29,6 +29,7 @@ extern "C" {
  * MYADDRX : the current node Xbee address
  * MYADDRI : the current node I2C address
  * MYADDRU : the current node UART address
+ * MYADDRT : the current node TCP address
  *
  * SB_INC_MSG_BUF_SIZE : size of the buffer for incoming messages
  * ARCH_xxxx : architecture of the node

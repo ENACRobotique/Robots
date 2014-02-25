@@ -12,6 +12,7 @@
  * MYADDRX : adress of the xbee interface of the node
  * MYADDRI : address of the i2c interface of the node
  * MYADDRU : address of the uart interface of the node
+ * MYADDRT : address of the TCP interface of the node
  */
 
 #if (MYADDRX == ADDRX_MAIN || MYADDRI == ADDRI_MAIN_TURRET)
@@ -49,6 +50,17 @@ sRTableEntry rTable[]={
 };
 #elif (MYADDRX == 0 && MYADDRI == ADDRI_MAIN_TURRET) //for tests purposes only
 sRTableEntry rTable[]={
+    {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRT == ADDRT_DEBUG)
+sRTableEntry rTable[]={
+    {SUBNETI_MAIN, {IF_TCP, ADDRT_DBGBRIDGE}},
+    {SUBNETX, {IF_TCP, ADDRT_DBGBRIDGE}},
+    {0x42&(~SUBNET_MASK),{IF_DROP,0}}
+};
+#elif (MYADDRT == ADDRT_DBGBRIDGE)
+sRTableEntry rTable[]={
+    {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #endif

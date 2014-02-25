@@ -29,14 +29,17 @@ extern "C" {
     #define DEVICEX_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define DEVICEU_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
+    #define DEVICET_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define ADDRX_MASK  (0xff)      //on a 16-bits address, i2c devices
     #define ADDRI_MASK  (0xff)      //on a 16-bits address, xbee devices
     #define ADDRU_MASK  (0xff)
+    #define ADDRT_MASK  (0xff)
 
 //subnet addresses
     #define SUBNETX         (1<<DEVICE_ADDR_SIZE)
     #define SUBNETI_MAIN    (2<<DEVICE_ADDR_SIZE)
     #define SUBNETU_DEBUG   (3<<DEVICE_ADDR_SIZE)
+    #define SUBNETT_DEBUG   (4<<DEVICE_ADDR_SIZE)
 
 //xbee addresses
     #define ADDRX_MAIN      ( BIT(0) | SUBNETX )
@@ -46,6 +49,7 @@ extern "C" {
     #define ADDRX_SECOND    ( BIT(4) | SUBNETX )
     #define ADDRX_DEBUG     ( BIT(5) | SUBNETX )
     #define ADDRX_REMOTE_IA ( BIT(6) | SUBNETX )
+    #define ADDRX_DBGBRIDGE ( BIT(7) | SUBNETX )
     #define ADDRX_BROADCAST ( 0xff   | SUBNETX )
 
 //I2C addresses (least significant bit of I²C addresses must be unused)
@@ -53,10 +57,15 @@ extern "C" {
     #define ADDRI_MAIN_TURRET   ( (1<<1) | SUBNETI_MAIN )
     #define ADDRI_MAIN_PROP     ( (2<<1) | SUBNETI_MAIN )
     #define ADDRI_MAIN_IO       ( (3<<1) | SUBNETI_MAIN )
+    #define ADDRI_DBGBRIDGE     ( (4<<1) | SUBNETI_MAIN )
 
 //UART addresses
     #define ADDRU_DBGBRIDGE ( 1 | SUBNETU_DEBUG )
     #define ADDRU_DEBUG     ( 2 | SUBNETU_DEBUG )
+
+//TCP addresses (odd addresses are TCP servers, even are clients)
+    #define ADDRT_DBGBRIDGE ( 3 | SUBNETT_DEBUG )
+    #define ADDRT_DEBUG     ( 2 | SUBNETT_DEBUG )
 
 //default debug address :
     #define ADDR_DEBUG_DFLT 0
