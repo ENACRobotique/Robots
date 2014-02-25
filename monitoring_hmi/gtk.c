@@ -56,111 +56,109 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
     ret = bn_receive(&inMsg);
     if(ret > 0){
-        if(ret > 0){
-            if(ctx->verbose >= 1){
-                printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
+        if(ctx->verbose >= 1){
+            printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
+        }
+
+        switch(inMsg.header.type){
+        case E_DEBUG:
+            if(ctx->verbose >= 2){
+                printf("  %s\n", inMsg.payload.debug);
+            }
+            break;
+        case E_POS:{
+            int x, y, dx, dy;
+            float factor_x, factor_y;
+            sPosLEl *pel;
+            sTrajLEl *tel;
+
+            if(ctx->verbose >= 2){
+                printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.pos.id, inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
             }
 
-            switch(inMsg.header.type){
-            case E_DEBUG:
-                if(ctx->verbose >= 2){
-                    printf("  %s\n", inMsg.payload.debug);
-                }
-                break;
-            case E_POS:{
-                int x, y, dx, dy;
-                float factor_x, factor_y;
-                sPosLEl *pel;
-                sTrajLEl *tel;
+            // adds position to list of positions to draw
+            pl_addTail(&ctx->poslist, &inMsg.payload.pos);
 
-                if(ctx->verbose >= 2){
-                    printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.pos.id, inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
-                }
+            factor_x = (float)ctx->pos_szx/300.;
+            factor_y = (float)ctx->pos_szy/200.;
 
-                // adds position to list of positions to draw
-                pl_addTail(&ctx->poslist, &inMsg.payload.pos);
+            // send trajectory if event
+            if(ctx->mouse_event){
+                outMsg.header.destAddr = ADDRI_MAIN_PROP;
+                outMsg.header.type = E_TRAJ;
+                outMsg.header.size = sizeof(outMsg.payload.traj);
+                // payload
+                outMsg.payload.traj.p1_x = inMsg.payload.pos.x;
+                outMsg.payload.traj.p1_y = inMsg.payload.pos.y;
+                outMsg.payload.traj.p2_x = (float)ctx->mouse_x/factor_x;
+                outMsg.payload.traj.p2_y = 200. - (float)ctx->mouse_y/factor_y;
+                outMsg.payload.traj.seg_len = sqrt((outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x)*(outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x) + (outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y)*(outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y));
+                outMsg.payload.traj.c_x = outMsg.payload.traj.p2_x;
+                outMsg.payload.traj.c_y = outMsg.payload.traj.p2_y;
+                outMsg.payload.traj.c_r = 0.;
+                outMsg.payload.traj.arc_len = 0.;
+                outMsg.payload.traj.tid = ctx->tid++;
+                outMsg.payload.traj.sid = 0;
 
-                factor_x = (float)ctx->pos_szx/300.;
-                factor_y = (float)ctx->pos_szy/200.;
+                tl_addTail(&ctx->trajlist, &outMsg.payload.traj);
 
-                // send trajectory if event
-                if(ctx->mouse_event){
-                    outMsg.header.destAddr = ADDRI_MAIN_PROP;
-                    outMsg.header.type = E_TRAJ;
-                    outMsg.header.size = sizeof(outMsg.payload.traj);
-                    // payload
-                    outMsg.payload.traj.p1_x = inMsg.payload.pos.x;
-                    outMsg.payload.traj.p1_y = inMsg.payload.pos.y;
-                    outMsg.payload.traj.p2_x = (float)ctx->mouse_x/factor_x;
-                    outMsg.payload.traj.p2_y = 200. - (float)ctx->mouse_y/factor_y;
-                    outMsg.payload.traj.seg_len = sqrt((outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x)*(outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x) + (outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y)*(outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y));
-                    outMsg.payload.traj.c_x = outMsg.payload.traj.p2_x;
-                    outMsg.payload.traj.c_y = outMsg.payload.traj.p2_y;
-                    outMsg.payload.traj.c_r = 0.;
-                    outMsg.payload.traj.arc_len = 0.;
-                    outMsg.payload.traj.tid = ctx->tid++;
-                    outMsg.payload.traj.sid = 0;
-
-                    tl_addTail(&ctx->trajlist, &outMsg.payload.traj);
-
-                    ret = bn_send(&outMsg);
-                    if(ret <= 0){
-                        fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
-                    }
-
-                    ctx->mouse_event = 0;
+                ret = bn_send(&outMsg);
+                if(ret <= 0){
+                    fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
                 }
 
-                // update position media
-                ctx->pos_cur ^= 1;
-                memset(ctx->pos_data[ctx->pos_cur], 255, ctx->pos_szx*ctx->pos_szy*3);
-
-                // draw current position
-                x = (int)(inMsg.payload.pos.x*factor_x + 0.5);
-                y = ctx->pos_szy - (int)(inMsg.payload.pos.y*factor_y + 0.5);
-                dx = 8*factor_x*cos(inMsg.payload.pos.theta);
-                dy = -8*factor_y*sin(inMsg.payload.pos.theta);
-
-                video_draw_arrow(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, dx, dy, 10, 255, 0, 0);
-
-                // draw trajectories
-                for(tel = tl_getFirst(&ctx->trajlist); tel; tel = tl_getNext(&ctx->trajlist)){
-                    x = (int)(tel->traj.p1_x*factor_x + 0.5);
-                    y = ctx->pos_szy - (int)(tel->traj.p1_y*factor_y + 0.5);
-                    dx = (int)(tel->traj.p2_x*factor_x + 0.5) - x;
-                    dy = ctx->pos_szy - (int)(tel->traj.p2_y*factor_y + 0.5) - y;
-
-                    video_draw_line(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, x+dx, y+dy, 0, 0, 0);
-
-                    x = (int)(tel->traj.c_x*factor_x + 0.5);
-                    y = ctx->pos_szy - (int)(tel->traj.c_y*factor_y + 0.5);
-                    dx = (int)(tel->traj.c_r*factor_x + 0.5);
-                    dy = (int)(tel->traj.c_r*factor_y + 0.5);
-
-                    video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 0);
-                    video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 0);
-                }
-
-                // draw previous positions
-                for(pel = pl_getFirst(&ctx->poslist); pel && pel->next; pel = pl_getNext(&ctx->poslist)){
-                    x = (int)(pel->pos.x*factor_x + 0.5);
-                    y = ctx->pos_szy - (int)(pel->pos.y*factor_y + 0.5);
-                    dx = 3*factor_x;
-                    dy = 3*factor_y;
-
-    //                video_draw_cross(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
-                    video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 255);
-                    video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
-                }
-
-                // switch drawing buffer in gui
-                gv_media_update(ctx->pos_mid, ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, (gv_destroy)NULL, NULL);
-
-                break;
+                ctx->mouse_event = 0;
             }
-            default:
-                break;
+
+            // update position media
+            ctx->pos_cur ^= 1;
+            memset(ctx->pos_data[ctx->pos_cur], 255, ctx->pos_szx*ctx->pos_szy*3);
+
+            // draw current position
+            x = (int)(inMsg.payload.pos.x*factor_x + 0.5);
+            y = ctx->pos_szy - (int)(inMsg.payload.pos.y*factor_y + 0.5);
+            dx = 8*factor_x*cos(inMsg.payload.pos.theta);
+            dy = -8*factor_y*sin(inMsg.payload.pos.theta);
+
+            video_draw_arrow(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, dx, dy, 10, 255, 0, 0);
+
+            // draw trajectories
+            for(tel = tl_getFirst(&ctx->trajlist); tel; tel = tl_getNext(&ctx->trajlist)){
+                x = (int)(tel->traj.p1_x*factor_x + 0.5);
+                y = ctx->pos_szy - (int)(tel->traj.p1_y*factor_y + 0.5);
+                dx = (int)(tel->traj.p2_x*factor_x + 0.5) - x;
+                dy = ctx->pos_szy - (int)(tel->traj.p2_y*factor_y + 0.5) - y;
+
+                video_draw_line(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, x+dx, y+dy, 0, 0, 0);
+
+                x = (int)(tel->traj.c_x*factor_x + 0.5);
+                y = ctx->pos_szy - (int)(tel->traj.c_y*factor_y + 0.5);
+                dx = (int)(tel->traj.c_r*factor_x + 0.5);
+                dy = (int)(tel->traj.c_r*factor_y + 0.5);
+
+                video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 0);
+                video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 0);
             }
+
+            // draw previous positions
+            for(pel = pl_getFirst(&ctx->poslist); pel && pel->next; pel = pl_getNext(&ctx->poslist)){
+                x = (int)(pel->pos.x*factor_x + 0.5);
+                y = ctx->pos_szy - (int)(pel->pos.y*factor_y + 0.5);
+                dx = 3*factor_x;
+                dy = 3*factor_y;
+
+//                video_draw_cross(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
+                video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 255);
+                video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
+            }
+
+            // switch drawing buffer in gui
+            gv_media_update(ctx->pos_mid, ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, (gv_destroy)NULL, NULL);
+
+            break;
+        }
+        default:
+            break;
         }
     }
 
@@ -220,9 +218,14 @@ int main(int argc, char *argv[]) {
     ctx.pos_data[1] = malloc(ctx.pos_szx*ctx.pos_szy*3);
     ctx.pos_cur = 0;
 
-    bn_init();
+    ret = bn_init();
+    if(ret < 0){
+        printf("bn_init failed err#%i\n", -ret);
+        exit(1);
+    }
+
     if(ctx.verbose >= 1){
-        printf("Identified as ADDRX_DEBUG on bn network.");
+        printf("Identified as ADDRX_DEBUG on bn network.\n");
     }
 
     { // add channel input watch
