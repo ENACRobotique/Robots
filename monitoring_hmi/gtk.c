@@ -85,7 +85,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
                 // send trajectory if event
                 if(ctx->mouse_event){
-                    outMsg.header.destAddr = ADDRI_MAIN_PROP;
+                    outMsg.header.destAddr = ctx->prop_address;
                     outMsg.header.type = E_TRAJ;
                     outMsg.header.size = sizeof(outMsg.payload.traj);
                     // payload
@@ -177,8 +177,10 @@ int main(int argc, char *argv[]) {
 
     // arguments options
     ctx.verbose = 1;
+    ctx.prop_address = ADDRI_MAIN_PROP;
     while(1) {
         static struct option long_options[] = {
+            {"prop-simulator", no_argument,       NULL, 's'},
             {"verbose",   no_argument,       NULL, 'v'},
             {"quiet",     no_argument,       NULL, 'q'},
             {"help",      no_argument,       NULL, 'h'},
@@ -190,6 +192,9 @@ int main(int argc, char *argv[]) {
             break;
 
         switch(c) {
+        case 's':
+            ctx.prop_address = ADDRT_DBGBRIDGE;
+            break;
         case 'v':
             ctx.verbose++;
             break;
@@ -237,7 +242,7 @@ int main(int argc, char *argv[]) {
     // send position
     {
         sMsg outMsg;
-        outMsg.header.destAddr = ADDRI_MAIN_PROP;
+        outMsg.header.destAddr = ctx.prop_address;
         outMsg.header.type = E_POS;
         outMsg.header.size = sizeof(outMsg.payload.pos);
         outMsg.payload.pos.id = 0;
