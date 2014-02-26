@@ -16,14 +16,14 @@
 #include <netinet/in.h> // struct sockaddr_in
 #include <arpa/inet.h> // inet_pton()
 
-int sockfd = -1; // file descriptor
+int udpsockfd = -1; // file descriptor
 
 int UDP_init(){
     int ret;
     struct sockaddr_in serv_addr = { 0 };
 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(sockfd < 0){
+    udpsockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(udpsockfd < 0){
         perror("socket()");
         return -1;
     }
@@ -32,7 +32,7 @@ int UDP_init(){
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_addr.sin_port = htons(42000 + MYADDRD);
 
-    ret = bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    ret = bind(udpsockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     if(ret < 0){
         perror("bind()");
         return -1;
@@ -52,10 +52,10 @@ int UDP_receive(sMsg *msg){
 
     // check if there is any data
     FD_ZERO(&rset);
-    FD_SET(sockfd, &rset);
+    FD_SET(udpsockfd, &rset);
     tv.tv_sec = 0;
     tv.tv_usec = 500;
-    ret = select(sockfd + 1, &rset, NULL, NULL, &tv);
+    ret = select(udpsockfd + 1, &rset, NULL, NULL, &tv);
     if(ret < 0){
         perror("select()");
         return -1;
@@ -66,7 +66,7 @@ int UDP_receive(sMsg *msg){
 
     // get data if any
     len = sizeof(cli_addr);
-    ret = recvfrom(sockfd, (char *)msg, sizeof(*msg), 0, (struct sockaddr *)&cli_addr, &len);
+    ret = recvfrom(udpsockfd, (char *)msg, sizeof(*msg), 0, (struct sockaddr *)&cli_addr, &len);
     if(ret < 0){
         perror("recvfrom()");
         return -1;
@@ -90,7 +90,7 @@ int UDP_send(const sMsg *msg, bn_Address nextHop){
         return -1;
     }
 
-    ret = sendto(sockfd, (char *)msg, sizeof(msg->header) + msg->header.size, 0, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    ret = sendto(udpsockfd, (char *)msg, sizeof(msg->header) + msg->header.size, 0, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     if(ret < 0){
         perror("sendto()");
         return -1;

@@ -15,6 +15,8 @@
 
 #if MYADDRD
 
+extern int udpsockfd; // file descriptor
+
 int UDP_init();
 int UDP_receive(sMsg *msg);
 int UDP_send(const sMsg *msg, bn_Address nextHop);
