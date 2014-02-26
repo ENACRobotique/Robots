@@ -11,7 +11,6 @@
 #include "../botNet/shared/bn_debug.h"
 #include "../../global_errors.h"
 #include "node_cfg.h"
-extern int serial_port;
 
 #include "gv.h"
 #include "video_draw.h"
@@ -234,12 +233,26 @@ int main(int argc, char *argv[]) {
         printf("Identified as ADDRX_DEBUG on bn network.\n");
     }
 
+#if MYADDRX
     { // add channel input watch
+        extern int serial_port;
+
         GIOChannel *ch = g_io_channel_unix_new(serial_port);
         g_io_channel_set_encoding(ch, NULL, NULL);  // this is binary data
         g_io_add_watch(ch, G_IO_IN /*| G_IO_PRI*/, (GIOFunc)handle, &ctx);
         g_io_channel_unref(ch);
     }
+#endif
+#if MYADDRD
+    { // add channel input watch
+        extern int udpsockfd; // file descriptor
+
+        GIOChannel *ch = g_io_channel_unix_new(udpsockfd);
+        g_io_channel_set_encoding(ch, NULL, NULL);  // this is binary data
+        g_io_add_watch(ch, G_IO_IN /*| G_IO_PRI*/, (GIOFunc)handle, &ctx);
+        g_io_channel_unref(ch);
+    }
+#endif
 
     printf("(Listening...)\n");
 
