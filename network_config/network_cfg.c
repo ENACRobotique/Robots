@@ -52,7 +52,7 @@ sRTableEntry rTable[]={
 sRTableEntry rTable[]={
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
-#elif (MYADDRD == ADDRD_DEBUG)
+#elif (MYADDRD == ADDRD_DEBUG || MYADDRD == ADDRD_MAIN_PROP_SIMU)
 sRTableEntry rTable[]={
     {SUBNETI_MAIN, {IF_UDP, ADDRD_DBGBRIDGE}},
     {SUBNETX, {IF_UDP, ADDRD_DBGBRIDGE}},

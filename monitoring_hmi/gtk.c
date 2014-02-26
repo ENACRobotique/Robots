@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
 
         switch(c) {
         case 's':
-            ctx.prop_address = ADDRD_DBGBRIDGE;
+            ctx.prop_address = ADDRD_MAIN_PROP_SIMU;
             break;
         case 'v':
             ctx.verbose++;
