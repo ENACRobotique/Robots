@@ -27,7 +27,6 @@ sRTableEntry rTable[]={
 #elif (MYADDRI == ADDRI_MAIN_PROP)
 sRTableEntry rTable[]={
     {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
-    {SUBNETU_1, {IF_I2C, ADDRI_BRIDGE}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRX == ADDRX_MOBILE_1)
