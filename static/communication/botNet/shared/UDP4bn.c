@@ -72,7 +72,7 @@ int UDP_receive(sMsg *msg){
         return -1;
     }
 
-    printf("received %i bytes from %hhu.%hhu.%hhu.%hhu:%hu\n", ret, ntohl(cli_addr.sin_addr.s_addr)>>24, ntohl(cli_addr.sin_addr.s_addr)>>16, ntohl(cli_addr.sin_addr.s_addr)>>8, ntohl(cli_addr.sin_addr.s_addr), ntohs(cli_addr.sin_port));
+//    printf("received %i bytes from %hhu.%hhu.%hhu.%hhu:%hu\n", ret, ntohl(cli_addr.sin_addr.s_addr)>>24, ntohl(cli_addr.sin_addr.s_addr)>>16, ntohl(cli_addr.sin_addr.s_addr)>>8, ntohl(cli_addr.sin_addr.s_addr), ntohs(cli_addr.sin_port));
 
     return ret;
 }
@@ -96,7 +96,7 @@ int UDP_send(const sMsg *msg, bn_Address nextHop){
         return -1;
     }
 
-    printf("sent %i bytes to %hhu.%hhu.%hhu.%hhu:%hu\n", ret, ntohl(serv_addr.sin_addr.s_addr)>>24, ntohl(serv_addr.sin_addr.s_addr)>>16, ntohl(serv_addr.sin_addr.s_addr)>>8, ntohl(serv_addr.sin_addr.s_addr), ntohs(serv_addr.sin_port));
+//    printf("sent %i bytes to %hhu.%hhu.%hhu.%hhu:%hu\n", ret, ntohl(serv_addr.sin_addr.s_addr)>>24, ntohl(serv_addr.sin_addr.s_addr)>>16, ntohl(serv_addr.sin_addr.s_addr)>>8, ntohl(serv_addr.sin_addr.s_addr), ntohs(serv_addr.sin_port));
 
     return ret;
 }
