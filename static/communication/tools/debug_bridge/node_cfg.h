@@ -10,7 +10,7 @@
 
 #include "network_cfg.h"
 
-#define MYADDRX 0 // ADDRX_DBGBRIDGE
+#define MYADDRX ADDRX_DBGBRIDGE
 #define MYADDRI 0
 #define MYADDRU 0 // ADDRU_DEBUG
 #define MYADDRD ADDRD_DBGBRIDGE
