@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
             {NULL,        0,                 NULL, 0}
         };
 
-        int c = getopt_long(argc, argv, "vqh?", long_options, NULL);
+        int c = getopt_long(argc, argv, "svqh?", long_options, NULL);
         if(c == -1)
             break;
 
