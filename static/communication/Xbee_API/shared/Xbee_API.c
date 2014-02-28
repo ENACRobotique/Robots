@@ -147,12 +147,12 @@ int Xbee_waitATAck(int frID, uint32_t timeOut){
     //waits for acknowledgement
     do {
         byteRead=Xbee_readFrame(&stru);
-    } while( !(byteRead && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==frID) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
+    } while( !(byteRead>0 && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==frID) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
 
-    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=frID) return -ERR_XBEE_NOSTAT;
-    else if (stru.data.ATResponse.status!=XBEE_ATR_S_ERROR) return -ERR_XBEE_AT_ERR;
-    else if (stru.data.ATResponse.status!=XBEE_ATR_S_INVCOM) return -ERR_XBEE_AT_WRONG_CMD;
-    else if (stru.data.ATResponse.status!=XBEE_ATR_S_INVPAR) return -ERR_XBEE_AT_WRONG_PAR;
+    if (byteRead<=0 || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=frID) return -ERR_XBEE_NOSTAT;
+    else if (stru.data.ATResponse.status==XBEE_ATR_S_ERROR) return -ERR_XBEE_AT_ERR;
+    else if (stru.data.ATResponse.status==XBEE_ATR_S_INVCOM) return -ERR_XBEE_AT_WRONG_CMD;
+    else if (stru.data.ATResponse.status==XBEE_ATR_S_INVPAR) return -ERR_XBEE_AT_WRONG_PAR;
     return 1;
 }
 
