@@ -18,6 +18,76 @@
 #include "context.h"
 #include "draw_list.h"
 
+#define R_ROBOT (15.)
+// real number
+typedef float sNum_t;
+// 2D point
+typedef struct {
+    sNum_t x;
+    sNum_t y;
+} sPt_t;
+// an obstacle
+typedef struct {
+    sPt_t c;    // center of obstacle
+    sNum_t r;   // radius
+
+    uint8_t moved:4;
+    uint8_t active:4;
+} sObs_t;   // sizeof(sObs_t)=16
+
+sObs_t obs[] = {
+	// départ
+		{{10., 170.}, 0., 1, 1},
+	// arbres
+		{{0.  , 70. }, R_ROBOT+15, 1, 1},
+		{{70. , 0.  }, R_ROBOT+15, 1, 1},
+		{{230., 0.  }, R_ROBOT+15, 1, 1},
+		{{300., 70. }, R_ROBOT+15, 1, 1},
+	// bac fruit
+		{{55. , 185.}, R_ROBOT+15, 1, 1},
+		{{75. , 185.}, R_ROBOT+15, 1, 1},
+		{{95. , 185.}, R_ROBOT+15, 1, 1},
+		{{42. , 172.}, R_ROBOT+4, 1, 1},
+		{{108., 172.}, R_ROBOT+4, 1, 1},
+		{{205., 185.}, R_ROBOT+15, 1, 1},
+		{{225., 185.}, R_ROBOT+15, 1, 1},
+		{{245., 185.}, R_ROBOT+15, 1, 1},
+		{{192., 172.}, R_ROBOT+4, 1, 1},
+		{{258., 172.}, R_ROBOT+4, 1, 1},
+	// foyers
+		{{0.  , 0.  }, R_ROBOT+25, 1, 1},
+		{{300., 0.  }, R_ROBOT+25, 1, 1},
+		{{150., 95. }, R_ROBOT+15, 1, 1},
+	// torches mobile
+		{{90. , 90. }, R_ROBOT+8, 1, 1},
+		{{210., 90. }, R_ROBOT+8, 1, 1},
+	// torches fixe
+		{{0.  , 120.}, R_ROBOT+5, 1, 1},
+		{{130., 0.  }, R_ROBOT+5, 1, 1},
+		{{170., 0.  }, R_ROBOT+5, 1, 1},
+		{{300., 120.}, R_ROBOT+5, 1, 1},
+	// feux
+		{{40. , 90. }, R_ROBOT+7, 1, 1},
+		{{90. , 40. }, R_ROBOT+7, 1, 1},
+		{{90. , 140.}, R_ROBOT+7, 1, 1},
+		{{210., 40. }, R_ROBOT+7, 1, 1},
+		{{210., 140.}, R_ROBOT+7, 1, 1},
+		{{260., 110.}, R_ROBOT+7, 1, 1},
+		{{0.  , 120.}, R_ROBOT+7, 1, 1},
+		{{130., 0.  }, R_ROBOT+7, 1, 1},
+		{{170., 0.  }, R_ROBOT+7, 1, 1},
+		{{300., 120.}, R_ROBOT+7, 1, 1},
+		{{90. , 90. }, R_ROBOT+7, 1, 1},
+		{{90. , 90. }, R_ROBOT+7, 1, 1},
+		{{90. , 90. }, R_ROBOT+7, 1, 1},
+		{{210., 90. }, R_ROBOT+7, 1, 1},
+		{{210., 90. }, R_ROBOT+7, 1, 1},
+		{{210., 90. }, R_ROBOT+7, 1, 1},
+	// arrivée
+		{{10. , 90.}, 0, 1,1}
+	};
+
+
 void usage(char *cl) {
     printf("GTK UI\n");
     printf("Usage:\n\t%s [options]\n", cl);
@@ -52,7 +122,7 @@ gint event_cb(GtkWidget *widget, GdkEvent *event, context_t *ctx) {
 
 int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
     sMsg inMsg, outMsg;
-    int ret;
+    int ret, i;
 
     ret = bn_receive(&inMsg);
     if(ret > 0){
@@ -122,6 +192,17 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             video_draw_arrow(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, dx, dy, 10, 255, 0, 0);
 
+            // draw obstacles
+            for(i = 0; i < sizeof(obs)/sizeof(*obs); i++){
+                x = (int)(obs[i].c.x*factor_x + 0.5);
+                y = ctx->pos_szy - (int)(obs[i].c.y*factor_y + 0.5);
+                dx = (int)(obs[i].r*factor_x + 0.5);
+                dy = (int)(obs[i].r*factor_y + 0.5);
+
+                video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 255, 0, 0);
+                video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 255, 0, 0);
+            }
+
             // draw trajectories
             for(tel = tl_getFirst(&ctx->trajlist); tel; tel = tl_getNext(&ctx->trajlist)){
                 x = (int)(tel->traj.p1_x*factor_x + 0.5);
@@ -133,8 +214,8 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
                 x = (int)(tel->traj.c_x*factor_x + 0.5);
                 y = ctx->pos_szy - (int)(tel->traj.c_y*factor_y + 0.5);
-                dx = (int)(tel->traj.c_r*factor_x + 0.5);
-                dy = (int)(tel->traj.c_r*factor_y + 0.5);
+                dx = (int)(fabs(tel->traj.c_r)*factor_x + 0.5);
+                dy = (int)(fabs(tel->traj.c_r)*factor_y + 0.5);
 
                 video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 0);
                 video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 0);
@@ -157,6 +238,11 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             break;
         }
+        case E_TRAJ:
+        	printf("received traj step %i|%i\n", inMsg.payload.traj.sid, inMsg.payload.traj.tid);
+
+            tl_addTail(&ctx->trajlist, &inMsg.payload.traj);
+        	break;
         default:
             break;
         }
