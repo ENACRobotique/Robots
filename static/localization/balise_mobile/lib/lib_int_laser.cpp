@@ -102,20 +102,15 @@ ldStruct laserDetect(bufStruct *bs){
 
         //if the detected patter has not the good shape
         //xxx in this case we can only handle a whole pattern (we may be able to do it on 3)
-        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX ){
+        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX || abs((d1-d2)*100)>(d1+d2)*10 ){
             ldStruct ret={0,0,0};
             return ret;
         }
         else {
             bs->prevCall=t;
-            if(d1<d2) {
-                ldStruct ret={d1, bufTemp[(ilast-2)&7], min( t1, t2 )};
-                return ret ;
-            }
-            else {
-                ldStruct ret={d2, bufTemp[(ilast-3)&7], min( t1, t2 ) };
-                return ret;
-            }
+
+            ldStruct ret={(d1+d2)>>1, (bufTemp[(ilast-3)&7]+bufTemp[(ilast)&7])>>1, min( t1, t2 )};
+            return ret ;
         }
 
     }
