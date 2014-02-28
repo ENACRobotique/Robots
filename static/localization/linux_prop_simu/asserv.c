@@ -248,7 +248,9 @@ int new_asserv_step(){
                     dist_tmp += traj[curr_traj][i].seg_len + traj[curr_traj][i-1].arc_len
             ) {
                 dtime = llabs(((long long)v - (long long)traj[curr_traj][i].arc_sp_max)*3/(long long)AMAX);
-                consigne = MIN(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
+                if(dtime>0){
+                	consigne = MIN(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
+                }
             }
         }
 
