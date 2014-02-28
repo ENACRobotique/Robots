@@ -97,7 +97,11 @@ int main(int argc, char **argv){
             }
         }
 
-    bn_init();
+    err = bn_init();
+    if (err < 0){
+        printf("bn_init() error #%i\n", -err);
+        exit(1);
+    }
 
     printf("listening, CTRL+C  for menu\n");
 
