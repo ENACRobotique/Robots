@@ -3,14 +3,17 @@
 #include <math.h>
 #include <string.h>
 
+#include "../botNet/shared/botNet_core.h"
+#include "../botNet/shared/bn_debug.h"
+#include "../../global_errors.h"
+#include "node_cfg.h"
+
 #include "a_star.h"
 #include "math_types.h"
 #include "math_ops.h"
 #include "tools.h"
 #include "type_ia.h"
 
-#define MAX(a, b) ((a)>(b)?(a):(b))
-#define MIN(a, b) ((a)>(b)?(b):(a))
 #define CLAMP(m, v, M) MAX(m, MIN(v, M))
 
 // constantes qui vont bien TODO TODO TODO !!!!!!
@@ -20,6 +23,8 @@ sNum_t av_occ_t = 2000.;    // average occupation time
 int gnb_l,gnb_r; // glass number right/left
 sNum_t pts_per_msec = 128./90000.;
 int gat_ind;
+
+sMsg inMsg, outMsg;
 
 
 
@@ -229,9 +234,6 @@ void state_machine()
    // sPath_t *_current_path = &current_path; //non utiliser pour le moment
     sPath_t *_next_path = &next_path;
 
-#if 0
-		sMsg msg;
-#endif
 
     while(1){
 
@@ -252,14 +254,6 @@ void state_machine()
                 //temporaine pour test
             	stop_int++;
             	if(stop_int==stop) state = SHUT_DOWN;
-#if 0
-                sb_receive(&msg);
-                else {
-                    if (msg.header.type == E_POS) {
-
-                    else
-#endif
-
 
 				  // TEST prog
                     	/*if(first==0)
@@ -319,6 +313,97 @@ void state_machine()
 
 int main()
 	{
+	int i, ret;
+    sPath_t path;
+
+	ret = bn_init();
+	if(ret < 0){
+		printf("bn_init() failed #%i\n", -ret);
+		exit(1);
+	}
+
+    outMsg.header.destAddr = ADDRD_MAIN_PROP_SIMU;
+    outMsg.header.type = E_POS;
+    outMsg.header.size = sizeof(outMsg.payload.pos);
+    outMsg.payload.pos.id = 0;
+    outMsg.payload.pos.theta = 0;
+    outMsg.payload.pos.u_a = 0;
+    outMsg.payload.pos.u_a_theta = 0;
+    outMsg.payload.pos.u_b = 0;
+    outMsg.payload.pos.x = obs[0].c.x;
+    outMsg.payload.pos.y = obs[0].c.y;
+	printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
+    ret = bn_sendAck(&outMsg);
+    if(ret <= 0){
+        printf("bn_sendAck() error #%i\n", -ret);
+    }
+    fill_tgts_lnk();
+    a_star(A(0), A(N-1), &path);
+    printf("path from 0a to %ua (dist %.2fcm & path_len=%i):\n", N-1, path.dist, path.path_len);
+
+    if(path.path)
+    	for(i = 0; i < path.path_len; i++) {
+    		printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, path.path[i].p1.x, path.path[i].p1.y, path.path[i].p2.x, path.path[i].p2.y,path.path[i].obs.c.x,path.path[i].obs.c.y, path.path[i].obs.r,path.path[i].arc_len,path.path[i].seg_len);
+
+    		outMsg.header.destAddr = ADDRD_MAIN_PROP_SIMU;
+    		outMsg.header.type = E_TRAJ;
+    		outMsg.header.size = sizeof(outMsg.payload.traj);
+
+    		outMsg.payload.traj.p1_x = path.path[i].p1.x;
+    		outMsg.payload.traj.p1_y = path.path[i].p1.y;
+    		outMsg.payload.traj.p2_x = path.path[i].p2.x;
+    		outMsg.payload.traj.p2_y = path.path[i].p2.y;
+    		outMsg.payload.traj.seg_len = path.path[i].seg_len;
+
+    		outMsg.payload.traj.c_x = path.path[i].obs.c.x;
+    		outMsg.payload.traj.c_y = path.path[i].obs.c.y;
+    		outMsg.payload.traj.c_r = path.path[i].obs.r;
+    		outMsg.payload.traj.arc_len = path.path[i].arc_len;
+
+    		outMsg.payload.traj.sid = i;
+    		outMsg.payload.traj.tid = 0;
+
+    		ret = bn_sendAck(&outMsg);
+    		if(ret < 0){
+    			printf("bn_send() failed #%i\n", -ret);
+    		}
+
+    		outMsg.header.destAddr = ADDRD_DEBUG;
+    		ret = bn_sendAck(&outMsg);
+    		if(ret < 0){
+    			printf("bn_send() failed #%i\n", -ret);
+    		}
+
+    		usleep(1000);
+    	}
+
+    while(1) {
+    	ret = bn_receive(&inMsg);
+    	if(ret < 0){
+    		printf("bn_receive() error #%i\n", -ret);
+    		continue;
+    	}
+
+    	if(ret > 0){
+			switch(inMsg.header.type){
+			case E_POS:
+				printf("received position (%.1fcm,%.1fcm,%.2f°)\n", inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
+
+				memcpy(&outMsg, &inMsg, sizeof(inMsg.header)+inMsg.header.size);
+				outMsg.header.destAddr = ADDRD_DEBUG;
+				ret = bn_send(&outMsg);
+				if(ret < 0){
+					printf("bn_send() error #%i\n", -ret);
+				}
+				break;
+			default:
+				//printf("received unknown messsage, type %s (%i)\n", eType2str(inMsg.header.type), inMsg.header.type);
+				break;
+			}
+    	}
+    }
+
+#if 0
 #if SEB
 	obs[0].active = 1;
     obs[2].active = 1;
@@ -372,6 +457,7 @@ int main()
 
     _start_time = time(NULL);
     state_machine();
+#endif
 
     return 0;
 }

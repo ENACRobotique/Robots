@@ -165,7 +165,7 @@ int new_pos(sPosPayload *pos){
 int send_pos(){
     sMsg msg;
 
-    msg.header.destAddr = ADDRD_DEBUG;
+    msg.header.destAddr = ADDRD_MAIN_IA_SIMU;
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
     msg.payload.pos.id = 0; // main robot

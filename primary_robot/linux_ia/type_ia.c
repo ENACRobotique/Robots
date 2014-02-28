@@ -11,6 +11,9 @@ sObs_t _current_pos;
 unsigned long _start_time;
 sPath_t path= {.dist = 0.,  .path = NULL };
 
+Obj_arbre arbre[4];
+Obj_bac bac;
+
 sObj_t list_obj[]={
 	{E_ARBRE, 0., 1, 2, 1 , &arbre[0]},
 	{E_ARBRE, 1., 2, 2, 1 , &arbre[1]},
@@ -30,13 +33,6 @@ sObs_t obs_PA[]={
 {{290. ,90.}, 0 ,1,1},
 {{225.,170.},0,1,1} //bac rouge
 };
-
-
-unsigned long millis() //retourne le temps depuis le depart de _start_time en ms
-	{
-    unsigned long res = (time(NULL) - _start_time)*1000;
-    return res;
-	}
 
 sNum_t ratio_arbre(void)
 	{
