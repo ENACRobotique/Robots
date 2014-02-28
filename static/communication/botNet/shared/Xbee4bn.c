@@ -42,33 +42,33 @@ int Xbee_setup(){
 
 
 //writes node's address on the xbee
-    Xbee_ATCmd("MY",frID,XBEE_ATCMD_SET,MYADDRX);
+    if ( (ret=Xbee_ATCmd("MY",frID,XBEE_ATCMD_SET,MYADDRX))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
 
 //writes CE parameter on the xbee to match peer-to-peer use
-    Xbee_ATCmd("CE",frID,XBEE_ATCMD_SET,0);
+    if ( (ret=Xbee_ATCmd("CE",frID,XBEE_ATCMD_SET,0))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
 
 //writes A1 parameter on the xbee to match peer-to-peer use
-    Xbee_ATCmd("A1",frID,XBEE_ATCMD_SET,0);
+    if ( (ret=Xbee_ATCmd("A1",frID,XBEE_ATCMD_SET,0))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
 
 
     //writes A1 parameter on the xbee to match peer-to-peer use
-    Xbee_ATCmd("MM",frID,XBEE_ATCMD_SET,2);
+    if ( (ret=Xbee_ATCmd("MM",frID,XBEE_ATCMD_SET,2))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
 
 
     //saves changes in non-volatile memory
-    Xbee_ATCmd("WR",frID,XBEE_ATCMD_SET,MYADDRX);
+    if ( (ret=Xbee_ATCmd("WR",frID,XBEE_ATCMD_SET,MYADDRX))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
