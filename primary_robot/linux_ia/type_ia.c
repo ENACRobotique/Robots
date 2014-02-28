@@ -5,10 +5,13 @@
  *      Author: seb
  */
 
+#include "millis.h"
+
 #include"type_ia.h"
 
-sObs_t _current_pos;
-unsigned long _start_time;
+sPt_t _current_pos;
+long _start_time;
+long last_time;
 sPath_t path= {.dist = 0.,  .path = NULL };
 
 Obj_arbre arbre[4];
@@ -37,16 +40,16 @@ sObs_t obs_PA[]={
 sNum_t ratio_arbre(void)
 	{
 	//décroissance lineaire
-	int res;
-	res=-millis()/1000+90;
+	float res;
+	res=-(millis()-_start_time)/1000+90;
 	return res;
 	}
 
 sNum_t ratio_bac(void)
 	{
 	//Croissance lineaire
-	int res;
-	res=millis()/1000-20;
+	float res;
+	res=(millis()-_start_time)/1000-20;
 	return res;
 	}
 

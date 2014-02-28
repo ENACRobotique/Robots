@@ -50,12 +50,12 @@ extern Obj_bac bac;
 extern sObj_t list_obj[]; //Liste des objectifs
 extern sObs_t obs_PA[]; //Liste de tous les points d'acces des objectifs
 
-extern sObs_t _current_pos;
+extern sPt_t _current_pos;
 extern sPath_t path;
-extern unsigned long _start_time;
+extern long _start_time;
 extern sNum_t ratio_arbre(void);
 extern sNum_t ratio_bac(void);
-extern unsigned long millis();
+extern long last_time;
 
 #endif
 

@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#include "millis.h"
+
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
 #include "../../global_errors.h"
@@ -40,7 +42,7 @@ void unactive (sObs_t *obs) {obs->active = 0;}
 
 
 
-sNum_t val_obj(int num) //numeros de l'objectif dans list_obj[] compris entre 0 et NB_OBJ
+sNum_t val_obj(int num, sPath_t *path_loc) //numeros de l'objectif dans list_obj[] compris entre 0 et NB_OBJ
 	{
 	#if DEBUG
 		printf("Debut val_obj\n");
@@ -51,13 +53,15 @@ sNum_t val_obj(int num) //numeros de l'objectif dans list_obj[] compris entre 0 
 	sNum_t dist;
 	sNum_t point;
 	sNum_t ratio;
-
+//	printf("A0 x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
+//	printf("AN-1 x=%f & y=%f\n", obs[N-1].c.x, obs[N-1].c.y);
 	fill_tgts_lnk();
-	a_star(A(0), A(N-1), &path);
-	dist=path.dist;
+	a_star(A(0), A(N-1), path_loc);
+	dist=path_loc->dist;
+	printf("fin a_star dist=%f\n",dist);
 	if(dist==0) return (-1); //On est sur l'objectif
 	time=dist/speed;
-	if(time > (END_MATCH-millis())) //temps restant insuffisant
+	if(time > (END_MATCH-(millis()-_start_time))) //temps restant insuffisant
 		{
 		list_obj[num].active=0;
 		return 0;
@@ -102,10 +106,12 @@ iABObs_t next_obj (void)
 		printf("Debut next_obj\n");
 	#endif
     sNum_t tmp_val = 0.;
+    sPath_t path_loc={.dist = 0.,  .path = NULL };
     sNum_t tmp_val2;
     sNum_t tmp_val3;
     int tmp_inx=-1; //index de l'objectif qui va  etre selectionner
     int i;
+
     for(i = 0 ; i < NB_OBJ ; i++)
     	{
         if (list_obj[i].active==0) continue; //test si ojectif existe encore
@@ -115,10 +121,10 @@ iABObs_t next_obj (void)
         	case E_ARBRE :
             	obs[i+1].active=0;
     			memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer1), sizeof(obs[N-1]));
-    			tmp_val2 = val_obj(i);
+    			tmp_val2 = val_obj(i, &path_loc);
 
     			memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer2), sizeof(obs[N-1]));
-    			tmp_val3=val_obj(i);
+    			tmp_val3=val_obj(i, &path_loc);
 
     			if(tmp_val3>tmp_val2) tmp_val2=tmp_val3;
     			obs[i+1].active=1;
@@ -128,7 +134,7 @@ iABObs_t next_obj (void)
         		obs[i+2+5].active=0;
         		obs[i+3+5].active=0;
         		memcpy(&obs[N-1], &(((Obj_bac*)list_obj[i].type_struct)->entrer), sizeof(obs[N-1]));
-        		tmp_val2 =val_obj(i);
+        		tmp_val2 =val_obj(i, &path_loc);
         		obs[i+1+5].active=1;
         		obs[i+2+5].active=1;
         		obs[i+3+5].active=1;
@@ -145,6 +151,7 @@ iABObs_t next_obj (void)
 				{
 				tmp_val = tmp_val2;
 				tmp_inx = i;
+				memcpy(&path, &path_loc, sizeof(path));
 				}
 			if(tmp_inx != -1)
 				{
@@ -188,16 +195,81 @@ int test_tirette() //Simulation TODO fonction réel
 	return(millis() > 500); // FIXME
 	}
 
-void send_robot(iABObs_t goal)
+void send_robot(sPath_t path)
 	{
-	obs[N-1].c.x=obs_PA[2*goal].c.x;
-	obs[N-1].c.y=obs_PA[2*goal].c.y;
+	sMsg outMsg;
+	int i, ret ;
+	static int tid = 0;
+	tid++;
+    if(path.path)
+    	for(i = 0; i < path.path_len; i++) {
+    		printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, path.path[i].p1.x, path.path[i].p1.y, path.path[i].p2.x, path.path[i].p2.y,path.path[i].obs.c.x,path.path[i].obs.c.y, path.path[i].obs.r,path.path[i].arc_len,path.path[i].seg_len);
+
+    		outMsg.header.destAddr = ADDRD_MAIN_PROP_SIMU;
+    		outMsg.header.type = E_TRAJ;
+    		outMsg.header.size = sizeof(outMsg.payload.traj);
+
+    		outMsg.payload.traj.p1_x = path.path[i].p1.x;
+    		outMsg.payload.traj.p1_y = path.path[i].p1.y;
+    		outMsg.payload.traj.p2_x = path.path[i].p2.x;
+    		outMsg.payload.traj.p2_y = path.path[i].p2.y;
+    		outMsg.payload.traj.seg_len = path.path[i].seg_len;
+
+    		outMsg.payload.traj.c_x = path.path[i].obs.c.x;
+    		outMsg.payload.traj.c_y = path.path[i].obs.c.y;
+    		outMsg.payload.traj.c_r = path.path[i].obs.r;
+    		outMsg.payload.traj.arc_len = path.path[i].arc_len;
+
+    		outMsg.payload.traj.sid = i;
+    		outMsg.payload.traj.tid = tid;
+
+    		ret = bn_sendAck(&outMsg);
+    		if(ret < 0){
+    			printf("bn_send() failed #%i\n", -ret);
+    		}
+
+    		outMsg.header.destAddr = ADDRD_DEBUG;
+    		ret = bn_sendAck(&outMsg);
+    		if(ret < 0){
+    			printf("bn_send() failed #%i\n", -ret);
+    		}
+
+    		usleep(1000);
+    	}
 	}
 
-void get_position(iABObs_t goal, sObs_t *pos) //TODO normalement seulement le dernier parametre
+void get_position( sPt_t *pos) //TODO normalement seulement le dernier parametre
 	{
-	pos->c.x=obs_PA[2*goal].c.x;
-	pos->c.y=obs_PA[2*goal].c.y;
+//	pos->c.x=obs_PA[2*goal].c.x;
+//	pos->c.y=obs_PA[2*goal].c.y;
+	sMsg inMsg;
+	int ret;
+	ret = bn_receive(&inMsg);
+	if(ret < 0)
+		{
+		printf("bn_receive() error #%i\n", -ret);
+		}
+	else
+		{
+		switch(inMsg.header.type)
+			{
+			case E_POS:
+				pos->x=inMsg.payload.pos.x;
+				pos->y=inMsg.payload.pos.y;
+				printf("received position (%.1fcm,%.1fcm,%.2f°)\n", inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
+
+				memcpy(&outMsg, &inMsg, sizeof(inMsg.header)+inMsg.header.size);
+				outMsg.header.destAddr = ADDRD_DEBUG;
+				ret = bn_send(&outMsg);
+				if(ret < 0){
+					printf("bn_send() error #%i\n", -ret);
+				}
+				break;
+			default:
+				//printf("received unknown messsage, type %s (%i)\n", eType2str(inMsg.header.type), inMsg.header.type);
+				break;
+			}
+    	}
 	}
 
 void obj_tree(iABObs_t obj)
@@ -218,6 +290,76 @@ void obj_bac(iABObs_t obj)
 		printf("Objectif : bac fini\n\n\n");
 	#endif
 	}
+void obj_tree2(iABObs_t obj)
+	{
+	list_obj[obj].active=0;
+	#if DEBUG
+		printf("Objectif : arbre fondn°%hhi fini\n\n\n",obj);
+	#endif
+	}
+
+float sign(float x)
+	{
+	if(x==0) return 0;
+	return x/fabs(x);
+	}
+
+void project_point(float xp, float yp, float rc, float xc, float yc, sPt_t *point) //Ajout de 0.1
+	{
+	float alpha;
+	if((xp-xc)==0)
+		{
+		point->x = xc;
+		point->y = yc+rc;
+		}
+	else
+		{
+		if((xp-xc)>0)
+			{
+			alpha=atan((yp-yc)/(xp-xc));
+//			printf("return sign =%f et alpha=%f\n",sign(xp-xc), alpha*180/M_PI);
+			point->x = xc + rc*cos(alpha);
+			point->y = yc + rc*sin(alpha);
+			if((yp-yc)>0)
+				{
+				point->x = point->x + 0.1;
+				point->y = point->y + 0.1;
+				}
+			if((yp-yc)<0)
+				{
+				point->x = point->x + 0.1;
+				point->y = point->y - 0.1;
+				}
+			}
+		if((xp-xc)<0)
+			{
+			alpha=atan((yp-yc)/(xp-xc));
+//			printf("return sign =%f et alpha=%f\n",sign(xp-xc), alpha*180/M_PI);
+			point->x = xc + rc*cos(alpha+M_PI);
+			point->y = yc + rc*sin(alpha+M_PI);
+			if((yp-yc)>0)
+				{
+				point->x = point->x - 0.1;
+				point->y = point->y + 0.1;
+				}
+			if((yp-yc)<0)
+				{
+				point->x = point->x - 0.1;
+				point->y = point->y - 0.1;
+				}
+			}
+		}
+  	}
+
+int test_in_obs() //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
+	{		//FIXME si le robot dans plusieur obstable
+	int i;
+	for(i=1; i<N-2;i++)
+		{
+		if( sqrt(pow(obs[i].c.x-_current_pos.x,2)+pow(obs[i].c.y-_current_pos.y,2)) < obs[i].r) return i;
+		}
+	return 0;
+	}
 
 void state_machine()
 	{
@@ -225,14 +367,13 @@ void state_machine()
     estate_t state = ATTENTE;
     iABObs_t current_obj;
     iABObs_t current_obs;
-    int stop=10;
-    int stop_int=0;
-
-    sPath_t next_path;
+    sPt_t point;
+    int i;
+   // sPath_t path;
     //next_path.tid = 1;
    // sPath_t current_path
    // sPath_t *_current_path = &current_path; //non utiliser pour le moment
-    sPath_t *_next_path = &next_path;
+  //  sPath_t *_next_path = &next_path;
 
 
     while(1){
@@ -244,16 +385,18 @@ void state_machine()
                 if ( test_tirette() )
                 	{
                 	state = JEU;
-                	_start_time = time(NULL);
+                	_start_time = millis();
+                	last_time=_start_time;
                 	}
         		break;
 
             case JEU :
-                if (millis() > 90000) state = SHUT_DOWN;
+                if (millis()-_start_time > 90000) state = SHUT_DOWN;
 
-                //temporaine pour test
-            	stop_int++;
-            	if(stop_int==stop) state = SHUT_DOWN;
+                //TEST projection
+//                project_point(-16, -45, 10, 5, 0, &point);
+//                printf("x=%f & y=%f\n", point.x, point.y);
+
 
 				  // TEST prog
                     	/*if(first==0)
@@ -269,20 +412,31 @@ void state_machine()
 						   //END test
 							  first=1;
                     		}*/
-
+            	printf("A0 x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
 					  current_obj = next_obj();
-
-					  current_obs = (list_obj[current_obj]).num_obs ;//Conversion objectif -> obstable
+					//  getchar();
 					  if ( current_obj == -1) continue; //aucun objectif actif atteignable
+					  current_obs = (list_obj[current_obj]).num_obs ;//Conversion objectif -> obstable
 
-					  fill_tgts_lnk();
-					  a_star(A(0), current_obs, _next_path);
 
-					  send_robot(current_obj) ;// Envoie au bas niveau la trajectoire courante
-					  get_position(current_obj, &_current_pos);
-					  memcpy(&obs[0],&_current_pos, sizeof(obs[0]));
+					  printf("Envoi de la trajectoire et mise a jour de la position time=%li\n",millis()-last_time);
+					  if((millis()-last_time)>1000)
+					  	  {
+						  printf("Envoi\n");
+						  send_robot(path) ;// Envoie au bas niveau la trajectoire courante
+						  last_time=millis();
+					  	  }
+					  get_position(&_current_pos);
+					  printf("Position actuel avant correction : x=%f et y=%f\n", obs[0].c.x,obs[0].c.y);
+
+					  if((i=test_in_obs())!=0) project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);;
+//					  _current_pos.x=_current_pos.x+0.1;
+//					  _current_pos.y=_current_pos.y+0.1;
+					  memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
 					  printf("Position actuel : x=%f et y=%f\n", obs[0].c.x,obs[0].c.y);
-					  if (fabs(obs[N-1].c.x -_current_pos.c.x)<RESO_POS && fabs(obs[N-1].c.y -_current_pos.c.y)<RESO_POS)   //objectif atteint
+
+
+					  if (fabs(obs[N-1].c.x -_current_pos.x)<RESO_POS && fabs(obs[N-1].c.y -_current_pos.y)<RESO_POS)   //objectif atteint
 						  {
 						  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
 						  	  {
@@ -314,13 +468,18 @@ void state_machine()
 int main()
 	{
 	int i, ret;
-    sPath_t path;
 
+	//Position de départ
+	obs[0].c.x=14,612196;
+	obs[0].c.y=152,104095;
+
+	//initialisation de la communication
 	ret = bn_init();
-	if(ret < 0){
+	if(ret < 0)
+		{
 		printf("bn_init() failed #%i\n", -ret);
-		exit(1);
-	}
+		return(1);
+		}
 
     outMsg.header.destAddr = ADDRD_MAIN_PROP_SIMU;
     outMsg.header.type = E_POS;
@@ -334,76 +493,11 @@ int main()
     outMsg.payload.pos.y = obs[0].c.y;
 	printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
     ret = bn_sendAck(&outMsg);
-    if(ret <= 0){
+    if(ret <= 0)
+    	{
         printf("bn_sendAck() error #%i\n", -ret);
-    }
-    fill_tgts_lnk();
-    a_star(A(0), A(N-1), &path);
-    printf("path from 0a to %ua (dist %.2fcm & path_len=%i):\n", N-1, path.dist, path.path_len);
-
-    if(path.path)
-    	for(i = 0; i < path.path_len; i++) {
-    		printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, path.path[i].p1.x, path.path[i].p1.y, path.path[i].p2.x, path.path[i].p2.y,path.path[i].obs.c.x,path.path[i].obs.c.y, path.path[i].obs.r,path.path[i].arc_len,path.path[i].seg_len);
-
-    		outMsg.header.destAddr = ADDRD_MAIN_PROP_SIMU;
-    		outMsg.header.type = E_TRAJ;
-    		outMsg.header.size = sizeof(outMsg.payload.traj);
-
-    		outMsg.payload.traj.p1_x = path.path[i].p1.x;
-    		outMsg.payload.traj.p1_y = path.path[i].p1.y;
-    		outMsg.payload.traj.p2_x = path.path[i].p2.x;
-    		outMsg.payload.traj.p2_y = path.path[i].p2.y;
-    		outMsg.payload.traj.seg_len = path.path[i].seg_len;
-
-    		outMsg.payload.traj.c_x = path.path[i].obs.c.x;
-    		outMsg.payload.traj.c_y = path.path[i].obs.c.y;
-    		outMsg.payload.traj.c_r = path.path[i].obs.r;
-    		outMsg.payload.traj.arc_len = path.path[i].arc_len;
-
-    		outMsg.payload.traj.sid = i;
-    		outMsg.payload.traj.tid = 0;
-
-    		ret = bn_sendAck(&outMsg);
-    		if(ret < 0){
-    			printf("bn_send() failed #%i\n", -ret);
-    		}
-
-    		outMsg.header.destAddr = ADDRD_DEBUG;
-    		ret = bn_sendAck(&outMsg);
-    		if(ret < 0){
-    			printf("bn_send() failed #%i\n", -ret);
-    		}
-
-    		usleep(1000);
     	}
 
-    while(1) {
-    	ret = bn_receive(&inMsg);
-    	if(ret < 0){
-    		printf("bn_receive() error #%i\n", -ret);
-    		continue;
-    	}
-
-    	if(ret > 0){
-			switch(inMsg.header.type){
-			case E_POS:
-				printf("received position (%.1fcm,%.1fcm,%.2f°)\n", inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
-
-				memcpy(&outMsg, &inMsg, sizeof(inMsg.header)+inMsg.header.size);
-				outMsg.header.destAddr = ADDRD_DEBUG;
-				ret = bn_send(&outMsg);
-				if(ret < 0){
-					printf("bn_send() error #%i\n", -ret);
-				}
-				break;
-			default:
-				//printf("received unknown messsage, type %s (%i)\n", eType2str(inMsg.header.type), inMsg.header.type);
-				break;
-			}
-    	}
-    }
-
-#if 0
 #if SEB
 	obs[0].active = 1;
     obs[2].active = 1;
@@ -415,8 +509,9 @@ int main()
     obs[N-1].active = 1;
 
 #else
+    printf("Debut initialisation element du jeu\n");
     //Activation des éléments du jeu
-	int i, j;
+	int j;
 	for(i=0; i<Nb_obs_start;i++ )
 		{
 		obs[i].active =1;
@@ -445,19 +540,16 @@ int main()
 
 
 	//Initialisation de la position courante;
-	_current_pos.c.x=10;
-	_current_pos.c.y=170;
-	_current_pos.r=0;
-	_current_pos.moved=1;
-	_current_pos.active=1;
+	_current_pos=obs[0].c;
+
+
 
 #if DEBUG
 	printf("Fin d'initialisation des éléments de jeu\n");
 #endif
 
-    _start_time = time(NULL);
+    _start_time = millis();
     state_machine();
-#endif
 
     return 0;
 }
