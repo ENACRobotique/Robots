@@ -35,6 +35,7 @@
 
 #if (MYADDRX == ADDRX_MAIN || MYADDRI == ADDRI_MAIN_TURRET)
 sRTableEntry rTable[]={
+    {SUBNETD_DEBUG, {IF_XBEE, ADDRX_DBGBRIDGE}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRI == ADDRI_MAIN_IO)
@@ -45,6 +46,7 @@ sRTableEntry rTable[]={
 #elif (MYADDRI == ADDRI_MAIN_PROP)
 sRTableEntry rTable[]={
     {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
+    {SUBNETD_DEBUG, {IF_I2C, ADDRI_MAIN_TURRET}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRX == ADDRX_MOBILE_1)
