@@ -20,8 +20,8 @@
 #define BN_MAX_RETRIES          2
 #define BN_ACK_TIMEOUT          1000    //in ms
 
-#define ARCH_328P_ARDUINO
-#define ARCH_LITTLE_ENDIAN
+//#define ARCH_328P_ARDUINO
+//#define ARCH_LITTLE_ENDIAN
 #define UART_WAITFRAME_TIMEOUT 10
 #define UART_READBYTE_TIMEOUT 10000
 
