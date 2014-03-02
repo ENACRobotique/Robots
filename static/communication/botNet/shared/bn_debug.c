@@ -39,7 +39,7 @@ volatile bn_Address debug_addr=ADDR_DEBUG_DFLT;
  *
  * Remark : this will blindly shorten the string if the latter was too big.
  */
-int bn_printDbg(const char * str){
+int bn_printDbg(const char *str){
     sMsg tmp;
 
     //do not send anything if the debug address is not defined
@@ -63,7 +63,7 @@ int bn_printDbg(const char * str){
  *
  * Remark : this will blindly shorten the string if the latter was too big.
  */
-int bn_printfDbg(char *format, ...){
+int bn_printfDbg(const char *format, ...){
 
     char string[BN_MAX_PDU-sizeof(sGenericHeader)];
 
