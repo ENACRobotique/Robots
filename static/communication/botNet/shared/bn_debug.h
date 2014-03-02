@@ -25,7 +25,7 @@ extern "C" {
 extern volatile bn_Address debug_addr;
 
 int bn_printDbg(const char * str);
-int bn_printfDbg(char *format, ...) __attribute__ ((format (printf, 1, 2)));
+int bn_printfDbg(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
 void bn_debugUpdateAddr(sMsg * msg);
 int bn_debugSendAddr(bn_Address dest);
 
