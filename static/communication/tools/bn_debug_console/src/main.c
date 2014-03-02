@@ -230,9 +230,24 @@ int main(int argc, char **argv){
                     break;
                 case 'i' :  //displays info about current node
                     {
-                        printf("my addr (total) : %4hx\n",MYADDRX);
-                        printf("my addr (local) : %4hx\n",MYADDRX&DEVICEX_MASK);
-                        printf("my subnet  : %4hx\n\n",MYADDRX&SUBNET_MASK);
+                        printf("xBee address:\n");
+                        printf("  total : %4hx\n",MYADDRX);
+                        printf("  local : %4hx\n",MYADDRX&DEVICEX_MASK);
+                        printf("  subnet: %4hx\n",MYADDRX&SUBNET_MASK);
+                        printf("I²C address:\n");
+                        printf("  total : %4hx\n",MYADDRI);
+                        printf("  local : %4hx\n",MYADDRI&DEVICEX_MASK);
+                        printf("  subnet: %4hx\n",MYADDRI&SUBNET_MASK);
+                        printf("UART address:\n");
+                        printf("  total : %4hx\n",MYADDRU);
+                        printf("  local : %4hx\n",MYADDRU&DEVICEX_MASK);
+                        printf("  subnet: %4hx\n",MYADDRU&SUBNET_MASK);
+                        printf("UDP address:\n");
+                        printf("  total : %4hx\n",MYADDRD);
+                        printf("  local : %4hx\n",MYADDRD&DEVICEX_MASK);
+                        printf("  subnet: %4hx\n",MYADDRD&SUBNET_MASK);
+
+                        printf("\n");
                     }
                     break;
                 case 'l' :

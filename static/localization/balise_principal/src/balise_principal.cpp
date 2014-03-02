@@ -73,7 +73,7 @@ void loop(){
     if((time - time_prev_led)>=10000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
-        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
+        bn_printfDbg("main turret beacon %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
     }
 #endif
     //period broadcast : one by one
