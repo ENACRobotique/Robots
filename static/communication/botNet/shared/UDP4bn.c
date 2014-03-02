@@ -15,6 +15,9 @@
 #include <sys/socket.h> // socket(), bind(), recvfrom(), sendto()
 #include <netinet/in.h> // struct sockaddr_in
 #include <arpa/inet.h> // inet_pton()
+#include <errno.h> // errno
+
+#include "../../../global_errors.h"
 
 int udpsockfd = -1; // file descriptor
 
@@ -57,6 +60,10 @@ int UDP_receive(sMsg *msg){
     tv.tv_usec = 500;
     ret = select(udpsockfd + 1, &rset, NULL, NULL, &tv);
     if(ret < 0){
+        if(errno == EINTR){
+            return -ERR_INTERRUPTED;
+        }
+
         perror("select()");
         return -1;
     }
