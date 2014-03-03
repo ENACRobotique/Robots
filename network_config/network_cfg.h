@@ -59,7 +59,7 @@ extern "C" {
     #define ADDRU_DEBUG     ( 2 | SUBNETU_DEBUG )
 
 //default debug address :
-    #define ADDR_DEBUG_DFLT 0
+    #define ADDR_DEBUG_DFLT (0)
 
 
 

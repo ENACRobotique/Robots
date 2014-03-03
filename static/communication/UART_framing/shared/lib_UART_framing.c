@@ -35,32 +35,41 @@
 #error "in UART_framing lib, no known arch symbol defined"
 #endif
 
-// standard libraries
-
-
-int UART_init(const char* device, uint32_t option){
-    int retval=0;
-#ifdef ARCH_328P_ARDUINO
-    retval=serialInit(option);
-#elif defined(ARCH_X86_LINUX)
-    retval=serialInit(device,option);
-#endif
-    if (retval>=0) return 0;
-    else return -ERR_UART_INIT_FAILED;
-}
-
-int UART_deinit(const char* device){
-    if (serialDeinit()>=0) return 0;
-    else return -ERR_UART_DEINIT_FAILED;
-}
-
-/* UART_readFrame writes an UART frame on the wire
+/* UART_init initializes the UART hardware
  * Argument :
- *  pt : pointeur to the memory area where the frame will be read.
+ *  device : /dev/tty???# (linux only)
+ *  option : baudrate (arduino only)  |  E_115200_8N2, E_115200_8N1 (linux only)
+ * Return value :
+ *  >=0 : success
+ *  <0 : error
+ */
+int UART_init(const char* device, uint32_t option){
+#ifdef ARCH_328P_ARDUINO
+    return serialInit(option);
+#elif defined(ARCH_X86_LINUX)
+    return serialInit(device,option);
+#endif
+    return -1;
+}
+
+/* UART_deinit un-initializes the UART hardware
+ * Argument :
+ *  none
+ * Return value :
+ *  >=0 : success
+ *  <0 : error
+ */
+int UART_deinit(){
+    return serialDeinit();
+}
+
+/* UART_writeFrame writes an UART frame on the wire
+ * Argument :
+ *  pt : pointer to the memory area where the frame will be read.
  *  size : size of data to read at pt.
  * Return value :
  *  >0 : nb of bytes written on success (excluding escape char and UART_framing overhead)
- *  <0 if error (ex : writing error, size too big)
+ *  <=0 : error (ex : writing error, size too big)
  */
 int UART_writeFrame(const void *pt,int size){
     uint8_t cSum=0; //checksum
@@ -93,12 +102,12 @@ int UART_writeFrame(const void *pt,int size){
 
 /* UART_readFrame : reads an UART frame if available
  * Argument :
- *  pt : pointeur to the memory area where the frame will be written.
+ *  pt : pointer to the memory area where the frame will be written.
  *  maxsize : maximum number of bytes written at pt.
  * Return value :
  *  >0 : nb of bytes written (success)
  *  0 : there was no frame to read (normal behavior when nothing to read)
- *  <0 if error. Example :
+ *  <0 : error. Example :
  *      checksum error
  *      size read too big, WARNING : in this case, the frame is dropped.
  *      reading error (timeout of expected byte or else)
@@ -120,9 +129,9 @@ int UART_readFrame(void *pt, int maxsize){
 frame_start :
     //read size of frame
     //(for EVERY byte, test if error AND test if start byte)
-    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return (ret==0)?-ERR_UART_READ_BYTE_TIMEOUT:ret;
+    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return ret;
     if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
-    if ( (ret=serialReadEscaped(&byte1,UART_READBYTE_TIMEOUT)) <= 0 ) return (ret==0)?-ERR_UART_READ_BYTE_TIMEOUT:ret;
+    if ( (ret=serialReadEscaped(&byte1,UART_READBYTE_TIMEOUT)) <= 0 ) return ret;
     if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
 
     size=(byte<<8)+byte1;
@@ -130,7 +139,7 @@ frame_start :
     //test maxSize if too big for destination buffer, read the message bytes and checksum to clear the UART link of them
     if ( size > maxsize ){
         for (j=0;j<size+1;j++){
-            if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return (ret==0)?-ERR_UART_READ_BYTE_TIMEOUT:ret;
+            if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return ret;
             if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
         }
         return -ERR_UART_OVERSIZE;
@@ -138,14 +147,14 @@ frame_start :
 
     //read the data bytes (and start computing for the test of checksum)
     for (j=0;j<size;j++){
-        if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return (ret==0)?-ERR_UART_READ_BYTE_TIMEOUT:ret;;
+        if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return ret;
         if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
         ((uint8_t*)pt)[j]=byte;
         cSum+=byte;
     }
 
     //read the checksum byte
-    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return (ret==0)?-ERR_UART_READ_BYTE_TIMEOUT:ret;
+    if ( (ret=serialReadEscaped(&byte,UART_READBYTE_TIMEOUT)) <= 0 ) return ret;
     if ( byte == UART_FRAME_START && ret == 1) goto frame_start;
     cSum+=byte;
     if (cSum==0xff) return size;
@@ -176,21 +185,18 @@ int serialWriteEscaped(uint8_t byte){
  *  <0 on error while reading
  */
 int serialReadEscaped(uint8_t *byte, uint32_t timeout){
-    uint8_t byteRed=0;
+    uint8_t byteRead=0;
     int ret;
 
-    if ( (ret=serialRead(&byteRed,timeout)) <= 0 ) return ret;
+    if ( (ret=serialRead(&byteRead,timeout)) <= 0 ) return ret;
 
-    if ( byteRed == UART_ESCAPE_CHAR ){
-        if ( (ret=serialRead(&byteRed,timeout)) <= 0 ) return (ret==0)?-ERR_UART_READ_BYTE_TIMEOUT:ret;
-        *byte=byteRed^UART_ESCAPE_MASK;
+    if ( byteRead == UART_ESCAPE_CHAR ){
+        if ( (ret=serialRead(&byteRead,timeout)) <= 0 ) return ret;
+        *byte=byteRead^UART_ESCAPE_MASK;
         return 2;
     }
 
-    else *byte=byteRed;
+    else *byte=byteRead;
     return 1;
 
 }
-
-
-
