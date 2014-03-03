@@ -229,26 +229,32 @@ int main(int argc, char **argv){
                     }
                     break;
                 case 'i' :  //displays info about current node
-                    {
-                        printf("xBee address:\n");
-                        printf("  total : %4hx\n",MYADDRX);
-                        printf("  local : %4hx\n",MYADDRX&DEVICEX_MASK);
-                        printf("  subnet: %4hx\n",MYADDRX&SUBNET_MASK);
-                        printf("I²C address:\n");
-                        printf("  total : %4hx\n",MYADDRI);
-                        printf("  local : %4hx\n",MYADDRI&DEVICEX_MASK);
-                        printf("  subnet: %4hx\n",MYADDRI&SUBNET_MASK);
-                        printf("UART address:\n");
-                        printf("  total : %4hx\n",MYADDRU);
-                        printf("  local : %4hx\n",MYADDRU&DEVICEX_MASK);
-                        printf("  subnet: %4hx\n",MYADDRU&SUBNET_MASK);
-                        printf("UDP address:\n");
-                        printf("  total : %4hx\n",MYADDRD);
-                        printf("  local : %4hx\n",MYADDRD&DEVICEX_MASK);
-                        printf("  subnet: %4hx\n",MYADDRD&SUBNET_MASK);
+#if MYADDRX
+                    printf("xBee address:\n");
+                    printf("  total : %4hx\n",MYADDRX);
+                    printf("  local : %4hx\n",MYADDRX&DEVICEX_MASK);
+                    printf("  subnet: %4hx\n",MYADDRX&SUBNET_MASK);
+#endif
+#if MYADDRI
+                    printf("I²C address:\n");
+                    printf("  total : %4hx\n",MYADDRI);
+                    printf("  local : %4hx\n",MYADDRI&DEVICEI_MASK);
+                    printf("  subnet: %4hx\n",MYADDRI&SUBNET_MASK);
+#endif
+#if MYADDRU
+                    printf("UART address:\n");
+                    printf("  total : %4hx\n",MYADDRU);
+                    printf("  local : %4hx\n",MYADDRU&DEVICEU_MASK);
+                    printf("  subnet: %4hx\n",MYADDRU&SUBNET_MASK);
+#endif
+#if MYADDRD
+                    printf("UDP address:\n");
+                    printf("  total : %4hx\n",MYADDRD);
+                    printf("  local : %4hx\n",MYADDRD&DEVICED_MASK);
+                    printf("  subnet: %4hx\n",MYADDRD&SUBNET_MASK);
+#endif
 
-                        printf("\n");
-                    }
+                    printf("\n");
                     break;
                 case 'l' :
                     oLF^=1;

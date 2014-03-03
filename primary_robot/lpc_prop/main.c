@@ -20,7 +20,7 @@
 // compile-time config
 //#define ASSERV_TEST
 //#define NETWORK_TEST
-#define TIME_STATS
+//#define TIME_STATS
 
 #if defined(NETWORK_TEST) && !defined(ASSERV_TEST)
 #warning "NETWORK_TEST is useless when ASSERV_TEST is not defined"
@@ -294,7 +294,7 @@ int main(void) {
 
         if(millis() - prevAsserv >= 20) { // each 20 milliseconds
             prevAsserv += 20;
-            // TODO reduce period
+            // TODO reduce period, may use interrupt on level change to double number of irqs
             if(millis() - prevAsserv > 10) { // we are very late, do not take care of these data
                 // for debugger
                 prevAsserv = millis();
