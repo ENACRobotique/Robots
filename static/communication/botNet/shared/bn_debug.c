@@ -24,8 +24,6 @@
 #include <string.h>
 
 
-
-
 //debug address
 volatile bn_Address debug_addr=ADDR_DEBUG_DFLT;
 
@@ -64,7 +62,6 @@ int bn_printDbg(const char *str){
  * Remark : this will blindly shorten the string if the latter was too big.
  */
 int bn_printfDbg(const char *format, ...){
-
     char string[BN_MAX_PDU-sizeof(sGenericHeader)];
 
     va_list ap;
@@ -83,10 +80,9 @@ int bn_printfDbg(const char *format, ...){
  * Return value : none
  */
 void bn_debugUpdateAddr(sMsg * msg){
-
     if (msg->header.type==E_DEBUG_SIGNALLING) {
          debug_addr=msg->header.srcAddr;
-         bn_printfDbg("dbgaddr updtated to %hx\n",msg->header.srcAddr);
+         bn_printfDbg("dbgaddr updated to %hx\n",msg->header.srcAddr);
     }
 }
 
@@ -101,6 +97,4 @@ int bn_debugSendAddr(bn_Address dest){
     msg.header.type=E_DEBUG_SIGNALLING;
     msg.header.size=0;
     return bn_send(&msg);
-
 }
-

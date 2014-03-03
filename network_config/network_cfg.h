@@ -69,7 +69,7 @@ extern "C" {
     #define ADDRD_MAIN_PROP_SIMU   ( 3 | SUBNETD_DEBUG )
 
 //default debug address :
-    #define ADDR_DEBUG_DFLT 0
+    #define ADDR_DEBUG_DFLT (0)
 
 
 

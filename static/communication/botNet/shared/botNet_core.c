@@ -138,7 +138,6 @@ int bn_init(){
  *      * payload
  */
 int bn_send(sMsg *msg){
-
     //sets ack bit
     msg->header.ack=0;
 
@@ -198,7 +197,6 @@ int bn_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
     sMsg msgIn={{0}}; //incoming message (may be our ack)
     int ret=0;
-
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -326,7 +324,7 @@ int bn_routine(){
 
         //handle the acknowledgement
         if ( pTmp->msg.header.ack == 1){
-            //if the message is for us, send acknowledgement to the initial sender
+            //if the message is for us, send acknowledgment to the initial sender
             if (
                 pTmp->msg.header.destAddr == MYADDRX ||
                 pTmp->msg.header.destAddr == MYADDRI ||
@@ -342,7 +340,6 @@ int bn_routine(){
                 temp.msg.payload.ack.seqNum=pTmp->msg.header.seqNum;
 
                 bn_send(&(temp.msg));
-
             }
             //else send nack on forwarding fail
             else if (count<0){
@@ -643,7 +640,6 @@ int bn_attach(E_TYPE type,pfvpm ptr){
     new->type=type;
     new->func=ptr;
 
-
     return 0;
 }
 
@@ -667,7 +663,7 @@ int bn_deattach(E_TYPE type){
 
     if (firstAttach==NULL) return -ERR_NOT_FOUND;
 
-    //looking for already existing occurence of this type
+    //looking for already existing occurrence of this type
     //first element
     if (elem->type==type){
         firstAttach=elem->next;

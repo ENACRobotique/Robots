@@ -66,7 +66,7 @@ typedef enum{
 /************************ user action required stop ************************/
 
 //function returning a string corresponding to one element of the above enum. Must be managed by hand.
-char *eType2str(E_TYPE elem);
+const char *eType2str(E_TYPE elem);
 
 
 /************************ user payload definition start ************************/
