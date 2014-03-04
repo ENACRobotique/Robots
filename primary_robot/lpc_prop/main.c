@@ -487,7 +487,7 @@ int main(void) {
         if(millis() - prevPos >= 100) {
             prevPos = millis();
 
-            msg.header.destAddr = ADDRD_MAIN_PROP_SIMU;
+            msg.header.destAddr = ADDRD_MAIN_IA_SIMU;
             msg.header.type = E_POS;
             msg.header.size = sizeof(msg.payload.pos);
             msg.payload.pos.id = 0; // main robot
