@@ -10,15 +10,12 @@
 
 #include "network_cfg.h"
 
-// defines the architecture of this node.
-//#define ARCH_LPC21XX
-//#define ARCH_LITTLE_ENDIAN
-
 // Addresses of the current node (0 means no such interface attached to this device)
 // These addresses MUST be first defined in network_cfg.h
 #define MYADDRX 0                   // Xbee address . Remember to include the Xbee_API_shared lib and Xbee_API_XXXARCH lib in the build
-#define MYADDRI ADDRI_MAIN_IO   // I2C address. Remember to include the relevant architecture libraries in the build if needed.
+#define MYADDRI ADDRI_MAIN_PROP   // I2C address. Remember to include the relevant architecture libraries in the build if needed.
 #define MYADDRU 0                   // UART address. Remember to include the relevant architecture libraries in the build if needed.
+#define MYADDRD 0
 
 // Superbus parameters
 #define BN_INC_MSG_BUF_SIZE 4           // size of the global incoming buffer (requires RAM space : SB_INC_MSG_BUF_SIZE*SB_MAX_PDU Bytes(cf message.h) )

@@ -14,6 +14,7 @@
 #include <math.h>
 #include <string.h>
 #include <getopt.h> // parameters parsing
+#include <errno.h>
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
@@ -97,7 +98,11 @@ int main(int argc, char **argv){
             }
         }
 
-    bn_init();
+    err = bn_init();
+    if (err < 0){
+        printf("bn_init() error #%i\n", -err);
+        exit(1);
+    }
 
     printf("listening, CTRL+C  for menu\n");
 
@@ -113,7 +118,7 @@ int main(int argc, char **argv){
         //receives messages, displays string if message is a debug message
         err = bn_receive(&msgIn);
         if (err < 0){
-            if (err == -ERR_INTERRUPTED){
+            if (err == -ERR_SYSERRNO && errno == EINTR){
                 menu=1;
             }
             else {
@@ -145,7 +150,7 @@ int main(int argc, char **argv){
             }
         }
         else if (err < 0){
-            if (err == -ERR_INTERRUPTED){
+            if (err == -ERR_SYSERRNO && errno == EINTR){
                 menu=1;
             }
             else{
@@ -225,11 +230,32 @@ int main(int argc, char **argv){
                     }
                     break;
                 case 'i' :  //displays info about current node
-                    {
-                        printf("my addr (total) : %4hx\n",MYADDRX);
-                        printf("my addr (local) : %4hx\n",MYADDRX&DEVICEX_MASK);
-                        printf("my subnet  : %4hx\n\n",MYADDRX&SUBNET_MASK);
-                    }
+#if MYADDRX
+                    printf("xBee address:\n");
+                    printf("  total : %4hx\n",MYADDRX);
+                    printf("  local : %4hx\n",MYADDRX&DEVICEX_MASK);
+                    printf("  subnet: %4hx\n",MYADDRX&SUBNET_MASK);
+#endif
+#if MYADDRI
+                    printf("I²C address:\n");
+                    printf("  total : %4hx\n",MYADDRI);
+                    printf("  local : %4hx\n",MYADDRI&DEVICEI_MASK);
+                    printf("  subnet: %4hx\n",MYADDRI&SUBNET_MASK);
+#endif
+#if MYADDRU
+                    printf("UART address:\n");
+                    printf("  total : %4hx\n",MYADDRU);
+                    printf("  local : %4hx\n",MYADDRU&DEVICEU_MASK);
+                    printf("  subnet: %4hx\n",MYADDRU&SUBNET_MASK);
+#endif
+#if MYADDRD
+                    printf("UDP address:\n");
+                    printf("  total : %4hx\n",MYADDRD);
+                    printf("  local : %4hx\n",MYADDRD&DEVICED_MASK);
+                    printf("  subnet: %4hx\n",MYADDRD&SUBNET_MASK);
+#endif
+
+                    printf("\n");
                     break;
                 case 'l' :
                     oLF^=1;

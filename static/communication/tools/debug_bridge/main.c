@@ -101,12 +101,12 @@ int main(int argc, char *argv[]){
         ret = bn_receive(&inMsg);
         if(ret < 0){
 #ifdef CTRLC_MENU
-            if(ret == -ERR_INTERRUPTED){
+            if(ret == -ERR_SYSERRNO && errno == EINTR){
                 sigint=1;
             }
             else
 #endif
-            if(ret != -ERR_UART_READ_BYTE_TIMEOUT){
+            {
                 fprintf(stderr, "bn_receive() error #%i\n", -ret);
                 exit(1);
             }

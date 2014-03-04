@@ -11,7 +11,6 @@
 #include "Xbee_API_arduino_drivers.h"
 
 void Xbee_rst(){
-
 #ifdef XBEE_RST_PIN
     pinMode(XBEE_RST_PIN,OUTPUT);
     digitalWrite(XBEE_RST_PIN,HIGH);

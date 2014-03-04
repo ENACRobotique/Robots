@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
 #ifdef CTRLC_MENU
     int cmd, quitMenu = 0;
 #endif
-    unsigned int prevAsserv=0, prevPos=0;
+    unsigned int prevAsserv = 0, prevPos = 0, prevDbg = 0;
 
     // arguments parsing
     int verbose = 1;
@@ -106,6 +106,8 @@ int main(int argc, char *argv[]){
     // arguments check
 
     // botNet initialization
+    bn_attach(E_DEBUG_SIGNALLING, bn_debugUpdateAddr);
+
     ret = bn_init();
     if(ret < 0){
         printf("bn_init() failed err#%i\n", -ret);
@@ -116,17 +118,19 @@ int main(int argc, char *argv[]){
         printf("Node ready.\n");
     }
 
+    prevAsserv = millis();
+
     // main loop
     while(!quit){
         ret = bn_receive(&inMsg);
         if(ret < 0){
 #ifdef CTRLC_MENU
-            if(ret == -ERR_INTERRUPTED){
+            if(ret == -ERR_SYSERRNO && errno == EINTR){
                 sigint=1;
             }
             else
 #endif
-            if(ret != -ERR_UART_READ_BYTE_TIMEOUT){
+            {
                 fprintf(stderr, "bn_receive() error #%i\n", -ret);
                 exit(1);
             }
@@ -208,6 +212,15 @@ int main(int argc, char *argv[]){
             ret = send_pos();
             if(ret < 0){
                 printf("send_pos() error #%i\n", -ret);
+            }
+        }
+
+        if(millis() - prevDbg >= 1000){
+            prevDbg = millis();
+
+            ret = show_stats();
+            if(ret < 0){
+                printf("show_stats() error #%i\n", -ret);
             }
         }
     }

@@ -116,16 +116,15 @@ enum {
 #ifdef TIME_STATS
 // stats
 #ifndef ASSERV_TEST
-int nb_l = 0, nb_c = 0;
-int m_l, m_c;
+unsigned int m_l, m_c;
 #endif
-int nb_loop;
-int m_loop;
+unsigned int m_loop;
 unsigned int start_us;
+#define TIME_STATS_SHIFT (3)
 #endif
 
 int main(void) {
-    unsigned int prevAsserv=0, prevLed=0;
+    unsigned int prevAsserv = 0, prevLed = 0;
     int ticks_l, ticks_r;
 #ifdef ASSERV_TEST
     int consigne_l = isDpS2IpP(15. /* cm/s */); // desired speed (IpP<<SHIFT)
@@ -134,6 +133,9 @@ int main(void) {
     int consigne_l = 0;
     int consigne_r = 0;
     unsigned int prevPos=0;
+#endif
+#ifdef TIME_STATS
+    unsigned int prevDbg = 0;
 #endif
 
     int ct, st;
@@ -154,6 +156,8 @@ int main(void) {
     pwm_init(0, 1024);  // 29.3kHz update rate => not audible
 
 #if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
+    bn_attach(E_DEBUG_SIGNALLING, bn_debugUpdateAddr);
+
     bn_init();
 #endif
 
@@ -182,6 +186,8 @@ int main(void) {
 #ifndef ASSERV_TEST
     bn_printDbg("start prop");
 #endif
+
+    prevAsserv = millis();
 
     // main loop
     while(1) {
@@ -294,7 +300,7 @@ int main(void) {
 
         if(millis() - prevAsserv >= 20) { // each 20 milliseconds
             prevAsserv += 20;
-            // TODO reduce period
+            // TODO reduce period, may use interrupt on level change to double number of irqs
             if(millis() - prevAsserv > 10) { // we are very late, do not take care of these data
                 // for debugger
                 prevAsserv = millis();
@@ -435,8 +441,7 @@ int main(void) {
 
 #ifdef TIME_STATS
                     // time stats... result 160µs! (outdated)
-                    m_c = (m_c*nb_c + ((micros() - start_us)<<8))/(nb_c+1);
-                    nb_c++;
+                    m_c = m_c - (m_c >> TIME_STATS_SHIFT) + (micros() - start_us);
 #endif
                 }
                 else {  // straight line
@@ -458,8 +463,7 @@ int main(void) {
 
 #ifdef TIME_STATS
                     // time stats... result 257µs! (outdated)
-                    m_l = (m_l*nb_l + ((micros() - start_us)<<8))/(nb_l+1);
-                    nb_l++;
+                    m_l = m_l - (m_l >> TIME_STATS_SHIFT) + (micros() - start_us);
 #endif
                 }
 
@@ -476,15 +480,14 @@ int main(void) {
 
 #ifdef TIME_STATS
             // time stats... result 22µs! (in ASSERV_TEST)
-            m_loop = (m_loop*nb_loop + ((micros() - start_us)<<8))/(nb_loop+1);
-            nb_loop++;
+            m_loop = m_loop - (m_loop >> TIME_STATS_SHIFT) + (micros() - start_us);
 #endif
         }
 
         if(millis() - prevPos >= 100) {
             prevPos = millis();
 
-            msg.header.destAddr = ADDRX_DEBUG;
+            msg.header.destAddr = ADDRD_MAIN_IA_SIMU;
             msg.header.type = E_POS;
             msg.header.size = sizeof(msg.payload.pos);
             msg.payload.pos.id = 0; // main robot
@@ -494,6 +497,14 @@ int main(void) {
 
             bn_send(&msg);
         }
+
+#ifdef TIME_STATS
+        if(millis() - prevDbg >= 1000){
+            prevDbg = millis();
+
+            bn_printfDbg("time stats: circle%uµs, line%uµs, loop%uµs\n", (uint16_t)m_c>>TIME_STATS_SHIFT, (uint16_t)m_l>>TIME_STATS_SHIFT, (uint16_t)m_loop>>TIME_STATS_SHIFT);
+        }
+#endif
 
         if(millis() - prevLed >= 250) {
             prevLed += 250;

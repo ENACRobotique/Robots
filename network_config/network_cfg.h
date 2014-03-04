@@ -64,15 +64,16 @@ extern "C" {
     #define ADDRU_DEBUG     ( 2 | SUBNETU_DEBUG )
 
 //UDP addresses
-    #define ADDRD_DBGBRIDGE        ( 1 | SUBNETD_DEBUG )
-    #define ADDRD_DEBUG            ( 2 | SUBNETD_DEBUG )
-    #define ADDRD_MAIN_PROP_SIMU   ( 3 | SUBNETD_DEBUG )
-    #define ADDRD_MAIN_IA_SIMU     ( 4 | SUBNETD_DEBUG )
+    #define ADDRD_DEBUG1           ( 1 | SUBNETD_DEBUG )
+    #define ADDRD_DEBUG2           ( 2 | SUBNETD_DEBUG )
+    #define ADDRD_DEBUG3           ( 3 | SUBNETD_DEBUG )
+    #define ADDRD_DBGBRIDGE        ( 4 | SUBNETD_DEBUG )
+    #define ADDRD_MONITORING       ( 5 | SUBNETD_DEBUG )
+    #define ADDRD_MAIN_PROP_SIMU   ( 6 | SUBNETD_DEBUG )
+    #define ADDRD_MAIN_IA_SIMU     ( 7 | SUBNETD_DEBUG )
 
 //default debug address :
-    #define ADDR_DEBUG_DFLT 0
-
-
+    #define ADDR_DEBUG_DFLT (0)
 
 /* Interface enum
  *

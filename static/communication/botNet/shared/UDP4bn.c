@@ -15,6 +15,9 @@
 #include <sys/socket.h> // socket(), bind(), recvfrom(), sendto()
 #include <netinet/in.h> // struct sockaddr_in
 #include <arpa/inet.h> // inet_pton()
+#include <errno.h> // errno
+
+#include "../../../global_errors.h"
 
 int udpsockfd = -1; // file descriptor
 
@@ -24,8 +27,8 @@ int UDP_init(){
 
     udpsockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if(udpsockfd < 0){
-        perror("socket()");
-        return -1;
+        perror("socket() @ UDP_init");
+        return -ERR_SYSERRNO;
     }
 
     serv_addr.sin_family = AF_INET;
@@ -34,8 +37,8 @@ int UDP_init(){
 
     ret = bind(udpsockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     if(ret < 0){
-        perror("bind()");
-        return -1;
+        perror("bind() @ UDP_init");
+        return -ERR_SYSERRNO;
     }
 
     printf("peer initialized on port %hu...\n", ntohs(serv_addr.sin_port));
@@ -57,8 +60,8 @@ int UDP_receive(sMsg *msg){
     tv.tv_usec = 500;
     ret = select(udpsockfd + 1, &rset, NULL, NULL, &tv);
     if(ret < 0){
-        perror("select()");
-        return -1;
+        perror("select() @ UDP_receive");
+        return -ERR_SYSERRNO;
     }
     else if(!ret){
         return 0; // no data available
@@ -68,8 +71,8 @@ int UDP_receive(sMsg *msg){
     len = sizeof(cli_addr);
     ret = recvfrom(udpsockfd, (char *)msg, sizeof(*msg), 0, (struct sockaddr *)&cli_addr, &len);
     if(ret < 0){
-        perror("recvfrom()");
-        return -1;
+        perror("recvfrom() @ UDP_receive");
+        return -ERR_SYSERRNO;
     }
 
 //    printf("received %i bytes from %hhu.%hhu.%hhu.%hhu:%hu\n", ret, ntohl(cli_addr.sin_addr.s_addr)>>24, ntohl(cli_addr.sin_addr.s_addr)>>16, ntohl(cli_addr.sin_addr.s_addr)>>8, ntohl(cli_addr.sin_addr.s_addr), ntohs(cli_addr.sin_port));
@@ -86,14 +89,14 @@ int UDP_send(const sMsg *msg, bn_Address nextHop){
 
     ret = inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr);
     if(ret < 0){
-        perror("inet_pton()");
-        return -1;
+        perror("inet_pton() @ UDP_send");
+        return -ERR_SYSERRNO;
     }
 
     ret = sendto(udpsockfd, (char *)msg, sizeof(msg->header) + msg->header.size, 0, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     if(ret < 0){
-        perror("sendto()");
-        return -1;
+        perror("sendto() @ UDP_send");
+        return -ERR_SYSERRNO;
     }
 
 //    printf("sent %i bytes to %hhu.%hhu.%hhu.%hhu:%hu\n", ret, ntohl(serv_addr.sin_addr.s_addr)>>24, ntohl(serv_addr.sin_addr.s_addr)>>16, ntohl(serv_addr.sin_addr.s_addr)>>8, ntohl(serv_addr.sin_addr.s_addr), ntohs(serv_addr.sin_port));

@@ -12,29 +12,29 @@
 #include "Arduino.h"
 
 
-/* initSerial : Initialises the UART serial interface
+/* initSerial : Initializes the UART serial interface
  * Argument :
- *  speed : speed
+ *  speed : speed in bauds
  * Return value :
- *  >0 on success
+ *  0 on success
  *  <0 on error
  */
 int serialInit(uint32_t speed){
     Serial.begin(speed);
     Serial.setTimeout(0); // immediate and non-blocking read, custom tempo done in serialRead.
-    return 1;
+    return 0;
 }
 
 /* deinitSerial : Closes the UART serial interface
  * Argument :
  *  none
  * Return value :
- *  >0 on success
+ *  0 on success
  *  <0 on error
  */
 int serialDeinit(){
     Serial.end();
-    return 1;
+    return 0;
 }
 
 /* serialRead : reads one byte from serial interface
@@ -44,24 +44,25 @@ int serialDeinit(){
  * Return value :
  *  1 if one byte have been read
  *  0 if timeout
- *  -1 on error
+ *  <0 on error
  *
  */
 int serialRead(uint8_t *byte,uint32_t timeout){
     unsigned long int sw=micros();
+    int c;
 
     if (timeout){
         while ( (micros()-sw) <= timeout ) {
-            if (Serial.available()) {
-                *byte = Serial.read();
+            if (Serial.available() && (c = Serial.read())>=0) {
+                *byte = c;
                 return 1;
             }
         }
     }
 
     else {
-        if (Serial.available()) {
-            *byte = Serial.read();
+        if (Serial.available() && (c = Serial.read())>=0) {
+            *byte = c;
             return 1;
         }
     }
@@ -74,7 +75,7 @@ int serialRead(uint8_t *byte,uint32_t timeout){
  *  byte : byte to write
  * Return value :
  *  1 on success
- *  -1 on error
+ *  <0 on error
  */
 int serialWrite(uint8_t byte){
     if (Serial.write(byte)) return 1;

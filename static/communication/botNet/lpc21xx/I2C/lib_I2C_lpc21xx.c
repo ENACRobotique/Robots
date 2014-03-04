@@ -21,7 +21,7 @@ int I2C_receive(sMsg *pRet) {
 
 int I2C_send(const sMsg *msg, bn_Address firstDest){
     return i2c_sendchunk(firstDest & DEVICEI_MASK, (const uint8_t *)msg, sizeof(msg->header) + msg->header.size);
-    //TODO : if applicable, either make an error conversion here, or implement global_erre=ors.h in i2c_sendchunk()
+    //TODO : if applicable, either make an error conversion here, or implement global_errors.h in i2c_sendchunk()
 }
 
 #endif // ARCH_LPC21XX
