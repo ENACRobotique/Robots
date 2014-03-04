@@ -224,10 +224,10 @@ int main(int argc, char *argv[]){
     while(!quit){
         ret = bn_receive(&inMsg);
         if(ret < 0){
-            if(ret == -ERR_INTERRUPTED){
+            if(ret == -ERR_SYSERRNO && errno == EINTR){
                 sigint=1;
             }
-            else if(ret != -ERR_UART_READ_BYTE_TIMEOUT){
+            else{
                 fprintf(stderr, "bn_receive() error #%i\n", -ret);
                 exit(1);
             }
