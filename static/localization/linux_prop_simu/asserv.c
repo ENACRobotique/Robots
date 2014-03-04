@@ -11,6 +11,8 @@
 #include <string.h>
 
 #include "../botNet/shared/botNet_core.h"
+#include "../botNet/shared/bn_debug.h"
+#include "millis.h"
 
 #include "params.h"
 #include "controller.h"
@@ -20,6 +22,7 @@
 
 #define SQR(v) ((long long)(v)*(v))
 
+#define TIME_STATS
 
 #define TRAJ_MAX_SIZE (16)
 
@@ -77,6 +80,13 @@ enum {
     S_CHG_TRAJ, // new trajectory to follow
     S_RUN_TRAJ // we are following a trajectory
 } state = S_WAIT; // state of the trajectory follow
+
+#ifdef TIME_STATS
+// stats
+unsigned int m_l, m_c, m_loop;
+unsigned int start_us;
+#define TIME_STATS_SHIFT (3)
+#endif
 
 int _ticks_l=0, _ticks_r=0;
 int ticks_l, ticks_r;
@@ -165,7 +175,7 @@ int new_pos(sPosPayload *pos){
 int send_pos(){
     sMsg msg;
 
-    msg.header.destAddr = ADDRD_DEBUG;
+    msg.header.destAddr = ADDRD_MONITORING;
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
     msg.payload.pos.id = 0; // main robot
@@ -177,6 +187,10 @@ int send_pos(){
 }
 
 int new_asserv_step(){
+#ifdef TIME_STATS
+    start_us = micros();
+#endif
+
     // get current number of ticks per sampling period
     ticks_l = motor_getticks(&motGauche)<<SHIFT; _ticks_l = 0; // (IpP<<SHIFT)
     ticks_r = motor_getticks(&motDroit)<<SHIFT; _ticks_r = 0; // (IpP<<SHIFT)
@@ -249,7 +263,7 @@ int new_asserv_step(){
             ) {
                 dtime = llabs(((long long)v - (long long)traj[curr_traj][i].arc_sp_max)*3/(long long)AMAX);
                 if(dtime>0){
-                	consigne = MIN(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
+                    consigne = MIN(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
                 }
             }
         }
@@ -300,8 +314,7 @@ int new_asserv_step(){
 
 #ifdef TIME_STATS
             // time stats... result 160µs! (outdated)
-            m_c = (m_c*nb_c + ((micros() - start_us)<<8))/(nb_c+1);
-            nb_c++;
+            m_c = m_c - (m_c >> TIME_STATS_SHIFT) + (micros() - start_us);
 #endif
         }
         else {  // straight line
@@ -323,8 +336,7 @@ int new_asserv_step(){
 
 #ifdef TIME_STATS
             // time stats... result 257µs! (outdated)
-            m_l = (m_l*nb_l + ((micros() - start_us)<<8))/(nb_l+1);
-            nb_l++;
+            m_l = m_l - (m_l >> TIME_STATS_SHIFT) + (micros() - start_us);
 #endif
         }
 
@@ -338,5 +350,18 @@ int new_asserv_step(){
         break;
     }
 
+#ifdef TIME_STATS
+    // time stats... result 22µs! (in ASSERV_TEST)
+    m_loop = m_loop - (m_loop >> TIME_STATS_SHIFT) + (micros() - start_us);
+#endif
+
     return 0;
+}
+
+int show_stats(){
+#ifdef TIME_STATS
+    return bn_printfDbg("time stats: circle%uµs, line%uµs, loop%uµs\n", (uint16_t)m_c>>TIME_STATS_SHIFT, (uint16_t)m_l>>TIME_STATS_SHIFT, (uint16_t)m_loop>>TIME_STATS_SHIFT);
+#else
+    return 0;
+#endif
 }
