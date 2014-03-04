@@ -11,7 +11,7 @@
 
 sPt_t _current_pos;
 long _start_time;
-long last_time;
+long last_time=0;
 sPath_t path= {.dist = 0.,  .path = NULL };
 
 Obj_arbre arbre[4];

@@ -190,9 +190,9 @@ int same_traj (sPath_t *traj1, sPath_t *traj2) {
     return 1 ;
 }
 
-int test_tirette() //Simulation TODO fonction réel
+int test_tirette()
 	{
-	return(millis() > 500); // FIXME
+	return(1);
 	}
 
 void send_robot(sPath_t path)
@@ -228,17 +228,18 @@ void send_robot(sPath_t path)
     			printf("bn_send() failed #%i\n", -ret);
     		}
 
-    		outMsg.header.destAddr = ADDRD_DEBUG;
+    		outMsg.header.destAddr = ADDRD_MONITORING;
     		ret = bn_sendAck(&outMsg);
     		if(ret < 0){
     			printf("bn_send() failed #%i\n", -ret);
+    			sleep(10);
     		}
 
     		usleep(1000);
     	}
 	}
 
-void get_position( sPt_t *pos) //TODO normalement seulement le dernier parametre
+int get_position( sPt_t *pos) //TODO normalement seulement le dernier parametre
 	{
 //	pos->c.x=obs_PA[2*goal].c.x;
 //	pos->c.y=obs_PA[2*goal].c.y;
@@ -249,7 +250,7 @@ void get_position( sPt_t *pos) //TODO normalement seulement le dernier parametre
 		{
 		printf("bn_receive() error #%i\n", -ret);
 		}
-	else
+	else if(ret > 0)
 		{
 		switch(inMsg.header.type)
 			{
@@ -259,17 +260,20 @@ void get_position( sPt_t *pos) //TODO normalement seulement le dernier parametre
 				printf("received position (%.1fcm,%.1fcm,%.2f°)\n", inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
 
 				memcpy(&outMsg, &inMsg, sizeof(inMsg.header)+inMsg.header.size);
-				outMsg.header.destAddr = ADDRD_DEBUG;
+				outMsg.header.destAddr = ADDRD_MONITORING;
 				ret = bn_send(&outMsg);
 				if(ret < 0){
 					printf("bn_send() error #%i\n", -ret);
 				}
+
+				return 1;
 				break;
 			default:
 				//printf("received unknown messsage, type %s (%i)\n", eType2str(inMsg.header.type), inMsg.header.type);
 				break;
 			}
     	}
+	return 0;
 	}
 
 void obj_tree(iABObs_t obj)
@@ -412,48 +416,47 @@ void state_machine()
 						   //END test
 							  first=1;
                     		}*/
-            	printf("A0 x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
-					  current_obj = next_obj();
-					//  getchar();
-					  if ( current_obj == -1) continue; //aucun objectif actif atteignable
-					  current_obs = (list_obj[current_obj]).num_obs ;//Conversion objectif -> obstable
 
-
-					  printf("Envoi de la trajectoire et mise a jour de la position time=%li\n",millis()-last_time);
 					  if((millis()-last_time)>1000)
 					  	  {
-						  printf("Envoi\n");
+						  printf("A0 x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
+						  current_obj = next_obj();
+						  //  getchar();
+						  if ( current_obj == -1) continue; //aucun objectif actif atteignable
+						  current_obs = (list_obj[current_obj]).num_obs ;//Conversion objectif -> obstable
+
 						  send_robot(path) ;// Envoie au bas niveau la trajectoire courante
 						  last_time=millis();
 					  	  }
-					  get_position(&_current_pos);
-					  printf("Position actuel avant correction : x=%f et y=%f\n", obs[0].c.x,obs[0].c.y);
+					  if(get_position(&_current_pos)){
+						  printf("Position actuel avant correction : x=%f et y=%f\n", obs[0].c.x,obs[0].c.y);
 
-					  if((i=test_in_obs())!=0) project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);;
-//					  _current_pos.x=_current_pos.x+0.1;
-//					  _current_pos.y=_current_pos.y+0.1;
-					  memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
-					  printf("Position actuel : x=%f et y=%f\n", obs[0].c.x,obs[0].c.y);
+						  if((i=test_in_obs())!=0) project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);;
+						  //					  _current_pos.x=_current_pos.x+0.1;
+						  //					  _current_pos.y=_current_pos.y+0.1;
+						  memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
+						  printf("Position actuel : x=%f et y=%f\n Rayon=%f", obs[0].c.x,obs[0].c.y,sqrt(obs[0].c.x*obs[0].c.x+(obs[0].c.y-160)*(obs[0].c.y-160)));
 
 
-					  if (fabs(obs[N-1].c.x -_current_pos.x)<RESO_POS && fabs(obs[N-1].c.y -_current_pos.y)<RESO_POS)   //objectif atteint
+						  if (fabs(obs[N-1].c.x -_current_pos.x)<RESO_POS && fabs(obs[N-1].c.y -_current_pos.y)<RESO_POS)   //objectif atteint
 						  {
-						  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
-						  	  {
-						  	  case E_ARBRE :
-						  		  obj_tree(current_obj);
-						  		  break;
-						  	  case E_BAC :
-						  		  obj_bac(current_obj);
-						  		  break;
+							  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
+							  {
+							  case E_ARBRE :
+								  obj_tree(current_obj);
+								  break;
+							  case E_BAC :
+								  obj_bac(current_obj);
+								  break;
 
 
 							  }
 						  }
+					  }
                 break;
 
             case SHUT_DOWN:
-           // printf ("SHUT_DOWN\n");
+            printf ("SHUT_DOWN\n");
                 //TODO arrêt total
             	return;
             	break;
@@ -470,8 +473,8 @@ int main()
 	int i, ret;
 
 	//Position de départ
-	obs[0].c.x=14,612196;
-	obs[0].c.y=152,104095;
+	obs[0].c.x=1;
+	obs[0].c.y=199;
 
 	//initialisation de la communication
 	ret = bn_init();
