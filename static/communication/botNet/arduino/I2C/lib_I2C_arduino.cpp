@@ -24,7 +24,6 @@
 // standard libraries
 #include "Arduino.h"
 
-
 /*
  * puts the received message directly in the incoming message buffer
  */

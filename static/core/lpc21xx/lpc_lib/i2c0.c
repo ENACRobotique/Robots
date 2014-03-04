@@ -28,10 +28,11 @@ struct i2c_periph p;
 #ifdef I2C_DEBUG
 unsigned int i_debug_tab = 0;
 struct {
-  unsigned long t;
+  unsigned int t;
   uint8_t stat;
   uint8_t start_set;
   uint8_t end_set;
+  uint8_t extract_idx;
 } debug_tab[128];
 #endif
 
@@ -45,8 +46,9 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
 
   if(i_debug_tab < sizeof(debug_tab)/sizeof(*debug_tab)) {
     debug_tab[i_debug_tab].stat = stat;
-    debug_tab[i_debug_tab].t = millis();
+    debug_tab[i_debug_tab].t = micros();
     debug_tab[i_debug_tab].start_set = I2C0_CONSET;
+    debug_tab[i_debug_tab].extract_idx = p.trans_extract_idx;
   }
 
   switch(stat) { // get new status

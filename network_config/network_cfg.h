@@ -62,7 +62,6 @@ extern "C" {
     #define ADDR_DEBUG_DFLT (0)
 
 
-
 /* Interface enum
  *
  */
@@ -70,7 +69,6 @@ typedef enum{
     IF_XBEE,
     IF_I2C,
     IF_UART,
-    IF_TCP,
     IF_LOCAL,     //virtual interface, describing local node. A message send to "self" should be popped out and "given" to the node through the sb_receive() api
     IF_DROP,    //virtual interface, equivalent to /dev/null in linux
 
