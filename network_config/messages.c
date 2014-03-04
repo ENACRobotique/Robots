@@ -5,9 +5,11 @@
  *      Author: quentin
  */
 
+#include <stdlib.h>
+
 #include "messages.h"
 
-char *eType2str(E_TYPE elem){
+const char *eType2str(E_TYPE elem){
     switch (elem){
     case E_DEBUG :                  return "DEBUG";
     case E_DEBUG_SIGNALLING :       return "DEBUG_SIGNALLING";
@@ -32,6 +34,5 @@ char *eType2str(E_TYPE elem){
         return "not an E_TYPE element";
     }
 
-    return 0;
+    return NULL;
 }
-

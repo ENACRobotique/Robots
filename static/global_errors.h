@@ -21,55 +21,51 @@
 
 enum{
     // General errors
-        ERR_MOAERR=1,
-        ERR_INSUFFICIENT_MEMORY,
-        ERR_NOT_FOUND,
-        ERR_UNKNOWN_ERROR,
-        ERR_WRONG_FLAG,
-        ERR_ALREADY_IN_USE,
-        ERR_OUT_OF_BOND,
-        ERR_MALLOC,
-        ERR_INTERRUPTED,
-        ERR_NULL_POINTER_WRITE_ATTEMPT,
+    ERR_MOAERR=1,
+    ERR_INSUFFICIENT_MEMORY,
+    ERR_NOT_FOUND,
+    ERR_UNKNOWN_ERROR,
+    ERR_WRONG_FLAG,
+    ERR_ALREADY_IN_USE,
+    ERR_OUT_OF_BOND,
+    ERR_SYSERRNO,
+    ERR_NULL_POINTER_WRITE_ATTEMPT,
 
     // BOTNET specific errors
-        ERR_BN_INIT_FAILED,// 11
-        ERR_BN_NACK_BROKEN_LINK,
-        ERR_BN_NACK_FULL_BUFFER,
-        ERR_BN_ACK_TIMEOUT,
-        ERR_BN_TYPE_TOO_HIGH,
-        ERR_BN_TYPE_VERSION,
-        ERR_BN_TYPE_ALREADY_ATTACHED,
-        ERR_BN_WRONG_TYPE,
-        ERR_BN_OVERSIZE,
-        ERR_BN_CSUM,
-        ERR_BN_NO_SUCH_INTERFACE,   //no such interface on this device
-        ERR_BN_UNKNOWN_ADDR,
-        ERR_BN_BUFFER_FULL,
+    ERR_BN_INIT_FAILED,// 10
+    ERR_BN_NACK_BROKEN_LINK,
+    ERR_BN_NACK_FULL_BUFFER,
+    ERR_BN_ACK_TIMEOUT,
+    ERR_BN_TYPE_TOO_HIGH,
+    ERR_BN_TYPE_VERSION,
+    ERR_BN_TYPE_ALREADY_ATTACHED,
+    ERR_BN_WRONG_TYPE,
+    ERR_BN_OVERSIZE,
+    ERR_BN_CSUM,
+    ERR_BN_NO_SUCH_INTERFACE,   //no such interface on this device
+    ERR_BN_UNKNOWN_ADDR,
+    ERR_BN_BUFFER_FULL,
 
     // UART (and UART_FRAMING) errors
-        ERR_UART_OVERSIZE,   // 24  // packet too big to send (size over UART_MTU)
-        ERR_UART_CSUM,              // incoming frame rejected (incorrect checksum)
-        ERR_UART_WRITE_BYTE,
-        ERR_UART_WRITE_TIMEOUT,
-        ERR_UART_READ_BYTE,
-        ERR_UART_READ_BYTE_TIMEOUT,
-        ERR_UART_INIT_FAILED,
-        ERR_UART_DEINIT_FAILED,
+    ERR_UART_OVERSIZE,   // 23  // packet too big to send (size over UART_MTU)
+    ERR_UART_CSUM,              // incoming frame rejected (incorrect checksum)
+    ERR_UART_WRITE_BYTE,
+    ERR_UART_WRITE_TIMEOUT,
+    ERR_UART_READ_BYTE,
+    ERR_UART_READ_BYTE_TIMEOUT,
 
     // XBEE errors
-        ERR_XBEE_NOSTAT, // 32 // status frame not received
-        ERR_XBEE_NOACK,     // status frame received and transmitted frame not acknoledged (may have been purged or CCAfail)
-        ERR_XBEE_CSUM,      // frame rejected (incorrect checksum)
-        ERR_XBEE_OVERSIZE,
-        ERR_XBEE_AT_WRONG_CMD,  //AT cmd wrong command
-        ERR_XBEE_AT_WRONG_PAR,  //AT cmd wrong param
-        ERR_XBEE_AT_ERR,        //AT cmd error
-        ERR_XBEE_INIT_FAILED,
+    ERR_XBEE_NOSTAT, // 29 // status frame not received
+    ERR_XBEE_NOACK,     // status frame received and transmitted frame not acknoledged (may have been purged or CCAfail)
+    ERR_XBEE_CSUM,      // frame rejected (incorrect checksum)
+    ERR_XBEE_OVERSIZE,
+    ERR_XBEE_AT_WRONG_CMD,  //AT cmd wrong command
+    ERR_XBEE_AT_WRONG_PAR,  //AT cmd wrong param
+    ERR_XBEE_AT_ERR,        //AT cmd error
+    ERR_XBEE_INIT_FAILED,
 
     // I²C error
-    ERR_I2C_END_TX, // 40
-
+    ERR_I2C_END_TX, // 37
 
     ERR_NUMBERRCODES
 };

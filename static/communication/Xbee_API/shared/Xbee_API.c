@@ -90,7 +90,6 @@ int Xbee_Tx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* da
     //but will require to have a smart XbeeWriteFrame (or sending done here)
     memcpy(stru.data.TX16Data.pPayload,data,MIN(dataSize,100));
 
-
     return Xbee_writeFrame(&stru,dataSize+5);
 }
 
@@ -147,7 +146,7 @@ int Xbee_waitATAck(int frID, uint32_t timeOut){
     //waits for acknowledgement
     do {
         byteRead=Xbee_readFrame(&stru);
-    } while( !(byteRead>0 && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==frID) && testTimeout(BN_WAIT_XBEE_SND_FAIL*4,&sw));
+    } while( !(byteRead>0 && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==frID) && testTimeout(timeOut,&sw));
 
     if (byteRead<=0 || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=frID) return -ERR_XBEE_NOSTAT;
     else if (stru.data.ATResponse.status==XBEE_ATR_S_ERROR) return -ERR_XBEE_AT_ERR;
@@ -189,10 +188,11 @@ int Xbee_init(){
     ret=UART_init(XBEE_UART_PATH,E_115200_8N2);
 #elif defined(ARCH_328P_ARDUINO)
     Xbee_rst();
-    ret=UART_init(0,111111);
+    ret=UART_init(NULL,111111);
 #else
 #error "no arch defined for Xbee4sb.c, or arch no available (yet)"
 #endif
+    if (ret<0) return ret;
 
     //waits for the Xbee to totally start
     uint32_t sw=0;
@@ -200,19 +200,5 @@ int Xbee_init(){
 
     //clear in buffer from remaining bytes
     while ( serialReadEscaped(&garbage,1000)>0 );
-    if (ret<0) return ret;
-    else return 1;
+    return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

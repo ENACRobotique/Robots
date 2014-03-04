@@ -24,8 +24,6 @@
 #include <string.h>
 
 
-
-
 //debug address
 volatile bn_Address debug_addr=ADDR_DEBUG_DFLT;
 
@@ -40,6 +38,7 @@ volatile bn_Address debug_addr=ADDR_DEBUG_DFLT;
  * Remark : this will blindly shorten the string if the latter was too big.
  */
 int bn_printDbg(const char *str){
+    int ret;
     sMsg tmp;
 
     //do not send anything if the debug address is not defined
@@ -51,7 +50,14 @@ int bn_printDbg(const char *str){
     strncpy((char *)tmp.payload.data , str , BN_MAX_PDU-sizeof(sGenericHeader)-1);
     tmp.payload.debug[tmp.header.size-1]=0; //strncpy does no ensure the null-termination, so we force it
 
-    return bn_send(&tmp);
+    ret = bn_send(&tmp);
+    if(ret > sizeof(tmp.header)){
+        ret -= sizeof(tmp.header);
+    }
+    else{
+        ret = -1;
+    }
+    return ret;
 }
 
 /* bn_printfDbg : sends a string in a message to the address debug_addr unsing a printf-like formatting.
@@ -64,7 +70,6 @@ int bn_printDbg(const char *str){
  * Remark : this will blindly shorten the string if the latter was too big.
  */
 int bn_printfDbg(const char *format, ...){
-
     char string[BN_MAX_PDU-sizeof(sGenericHeader)];
 
     va_list ap;
@@ -83,10 +88,9 @@ int bn_printfDbg(const char *format, ...){
  * Return value : none
  */
 void bn_debugUpdateAddr(sMsg * msg){
-
     if (msg->header.type==E_DEBUG_SIGNALLING) {
          debug_addr=msg->header.srcAddr;
-         bn_printfDbg("dbgaddr updtated to %hx\n",msg->header.srcAddr);
+         bn_printfDbg("dbgaddr updated to %hx\n",msg->header.srcAddr);
     }
 }
 
@@ -101,6 +105,4 @@ int bn_debugSendAddr(bn_Address dest){
     msg.header.type=E_DEBUG_SIGNALLING;
     msg.header.size=0;
     return bn_send(&msg);
-
 }
-

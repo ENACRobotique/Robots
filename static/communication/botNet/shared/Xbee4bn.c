@@ -31,7 +31,7 @@
 /* setupXbee :
  *  Sets the parameters of the Xbee
  * Return value :
- *      1 if ok
+ *      0 if ok
  *      -1 if error
  *      -2 if config frame not statused
  *      -3 if error for wrong command/parameter or ERROR
@@ -70,10 +70,10 @@ int Xbee_setup(){
     //saves changes in non-volatile memory
     if ( (ret=Xbee_ATCmd("WR",frID,XBEE_ATCMD_SET,MYADDRX))<0 ) return ret;
 
-    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL*4))<0 ) return ret;
     frID++;
 
-    return 1;
+    return 0;
 }
 
 
@@ -123,7 +123,7 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
     int byteRead=0;
     int ret=0;
 
-    if ( (ret=Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader)))<0 ) return ret;
+    if ( (ret=Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader)))<=0 ) return ret;
 
     do {
         byteRead=Xbee_readFrame(&stru);
@@ -140,9 +140,7 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
         if (stru.data.TXStatus.status==XBEE_TX_S_SUCCESS) return (msg->header.size+sizeof(sGenericHeader));
         else return -ERR_XBEE_NOACK;
     }
-
-
-
+    // unreachable
 }
 
 #endif //MYADDRX

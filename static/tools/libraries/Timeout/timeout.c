@@ -47,7 +47,6 @@ int testTimeout(uint32_t delay, uint32_t *store) {
         return 1;
     }
     return 0;
-
 }
 
 

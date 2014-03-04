@@ -15,13 +15,16 @@
 
 // XXX: rename
 
+static volatile uint8_t SREG_save;
+
 //pseudo-mutex for superBus central Buffer access management
 inline void mutexLock(){
+    SREG_save = SREG;
     noInterrupts();
 }
 
 inline void mutexUnlock(){
-    interrupts();
+    SREG = SREG_save;
 }
 
 #endif /* MUTEX_H_ */

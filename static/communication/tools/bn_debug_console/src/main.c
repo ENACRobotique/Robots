@@ -14,6 +14,7 @@
 #include <math.h>
 #include <string.h>
 #include <getopt.h> // parameters parsing
+#include <errno.h>
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
@@ -117,7 +118,7 @@ int main(int argc, char **argv){
         //receives messages, displays string if message is a debug message
         err = bn_receive(&msgIn);
         if (err < 0){
-            if (err == -ERR_INTERRUPTED){
+            if (err == -ERR_SYSERRNO && errno == EINTR){
                 menu=1;
             }
             else {
@@ -149,7 +150,7 @@ int main(int argc, char **argv){
             }
         }
         else if (err < 0){
-            if (err == -ERR_INTERRUPTED){
+            if (err == -ERR_SYSERRNO && errno == EINTR){
                 menu=1;
             }
             else{

@@ -138,7 +138,6 @@ int bn_init(){
  *      * payload
  */
 int bn_send(sMsg *msg){
-
     //sets ack bit
     msg->header.ack=0;
 
@@ -198,7 +197,6 @@ int bn_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
     sMsg msgIn={{0}}; //incoming message (may be our ack)
     int ret=0;
-
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -324,9 +322,9 @@ int bn_routine(){
         //forward message
         count=bn_forward(&(pTmp->msg),pTmp->iFace);
 
-        //handle the acknowledgement
+        //handle the acknowledgment
         if ( pTmp->msg.header.ack == 1){
-            //if the message is for us, send acknowledgement to the initial sender
+            //if the message is for us, send acknowledgment to the initial sender
             if (
                 pTmp->msg.header.destAddr == MYADDRX ||
                 pTmp->msg.header.destAddr == MYADDRI ||
@@ -342,7 +340,6 @@ int bn_routine(){
                 temp.msg.payload.ack.seqNum=pTmp->msg.header.seqNum;
 
                 bn_send(&(temp.msg));
-
             }
             //else send nack on forwarding fail
             else if (count<0){
@@ -643,7 +640,6 @@ int bn_attach(E_TYPE type,pfvpm ptr){
     new->type=type;
     new->func=ptr;
 
-
     return 0;
 }
 
@@ -667,7 +663,7 @@ int bn_deattach(E_TYPE type){
 
     if (firstAttach==NULL) return -ERR_NOT_FOUND;
 
-    //looking for already existing occurence of this type
+    //looking for already existing occurrence of this type
     //first element
     if (elem->type==type){
         firstAttach=elem->next;
@@ -724,7 +720,7 @@ int bn_pushInBufLast(const sMsg *msg, E_IFACE iFace){
 #endif
 
     msgIfBuf[iTmp].iFace=iFace;
-    memcpy(&(msgIfBuf[iTmp].msg),msg, MIN(msg->header.size+sizeof(sGenericHeader),sizeof(sMsg)));
+    memcpy(&msgIfBuf[iTmp].msg,msg,MIN(msg->header.size+sizeof(sGenericHeader),sizeof(sMsg)));
     return 1;
 }
 
@@ -778,7 +774,6 @@ int bn_popInBuf(sMsgIf * pstru){
     iTmp=iFirst;
     iFirst=(iFirst+1)%BN_INC_MSG_BUF_SIZE;
     nbMsg--;
-    mutexUnlock();
 
 #ifdef DEBUG_PC_BUF
     {
@@ -787,8 +782,13 @@ int bn_popInBuf(sMsgIf * pstru){
     }
 #endif
 
-    if (pstru==NULL) return -ERR_NULL_POINTER_WRITE_ATTEMPT;
-    memcpy(pstru, &(msgIfBuf[iTmp]), MIN(msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader),sizeof(sMsg)));
+    if (pstru==NULL) {
+        mutexUnlock();
+        return -ERR_NULL_POINTER_WRITE_ATTEMPT;
+    }
+    memcpy(&pstru->msg, &msgIfBuf[iTmp].msg, MIN(sizeof(pstru->msg.header)+msgIfBuf[iTmp].msg.header.size,sizeof(pstru->msg)));
+    pstru->iFace = msgIfBuf[iTmp].iFace;
+    mutexUnlock();
 
     return 1;
 }
@@ -803,7 +803,6 @@ int bn_popInBuf(sMsgIf * pstru){
  * WARNING : it is mandatory to call bn_freeInBufFirst() after treatment
  */
 sMsgIf *bn_getInBufFirst(){
-
     if (nbMsg==0) return NULL;
 
 #ifdef DEBUG_PC_BUF
@@ -824,7 +823,6 @@ sMsgIf *bn_getInBufFirst(){
  * WARNING : DO NOT call if the previous bn_getInBufFirst() returned NULL
  */
 void bn_freeInBufFirst(){
-
     iFirst=(iFirst+1)%BN_INC_MSG_BUF_SIZE;
     nbMsg=MAX(nbMsg-1,0);
 
@@ -833,6 +831,4 @@ void bn_freeInBufFirst(){
         printf(" iFirst %d iNext %d nbMsg %d  [freeInBuf]\n",iFirst,iNext,nbMsg);
     }
 #endif
-    return;
 }
-
