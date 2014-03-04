@@ -732,7 +732,6 @@ int bn_popInBuf(sMsgIf * pstru){
     iTmp=iFirst;
     iFirst=(iFirst+1)%BN_INC_MSG_BUF_SIZE;
     nbMsg--;
-    mutexUnlock();
 
 #ifdef DEBUG_PC_BUF
     {
@@ -741,8 +740,13 @@ int bn_popInBuf(sMsgIf * pstru){
     }
 #endif
 
-    if (pstru==NULL) return -ERR_NULL_POINTER_WRITE_ATTEMPT;
-    memcpy(pstru, &(msgIfBuf[iTmp]), MIN(msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader),sizeof(sMsg)));
+    if (pstru==NULL) {
+        mutexUnlock();
+        return -ERR_NULL_POINTER_WRITE_ATTEMPT;
+    }
+    memcpy(&pstru->msg, &msgIfBuf[iTmp].msg, MIN(sizeof(pstru->msg.header)+msgIfBuf[iTmp].msg.header.size,sizeof(pstru->msg)));
+    pstru->iFace = msgIfBuf[iTmp].iFace;
+    mutexUnlock();
 
     return 1;
 }
