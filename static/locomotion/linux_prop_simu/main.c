@@ -218,10 +218,10 @@ int main(int argc, char *argv[]){
         if(millis() - prevDbg >= 1000){
             prevDbg = millis();
 
-            ret = show_stats();
-            if(ret < 0){
-                printf("show_stats() error #%i\n", -ret);
-            }
+            /*ret = */show_stats();
+//            if(ret < 0){
+//                printf("show_stats() error #%i\n", -ret);
+//            }
         }
     }
 

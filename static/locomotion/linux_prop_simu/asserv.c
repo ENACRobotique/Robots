@@ -175,13 +175,15 @@ int new_pos(sPosPayload *pos){
 int send_pos(){
     sMsg msg;
 
-    msg.header.destAddr = ADDRD_MONITORING;
+    msg.header.destAddr = ADDRD_MAIN_IA_SIMU;
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
     msg.payload.pos.id = 0; // main robot
     msg.payload.pos.x = I2Ds(x);
     msg.payload.pos.y = I2Ds(y);
     msg.payload.pos.theta = RI2Rs(theta);
+
+    printf("sending pos (%.2fcm,%.2fcm,%.2f°)\n", msg.payload.pos.x, msg.payload.pos.y, msg.payload.pos.theta*180./M_PI);
 
     return bn_send(&msg);
 }
