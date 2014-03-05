@@ -13,6 +13,7 @@
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
 #include "millis.h"
+#include "roles.h"
 
 #include "params.h"
 #include "controller.h"
@@ -175,7 +176,7 @@ int new_pos(sPosPayload *pos){
 int send_pos(){
     sMsg msg;
 
-    msg.header.destAddr = ADDRD_MONITORING;
+//    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
     msg.payload.pos.id = 0; // main robot
@@ -183,7 +184,7 @@ int send_pos(){
     msg.payload.pos.y = I2Ds(y);
     msg.payload.pos.theta = RI2Rs(theta);
 
-    return bn_send(&msg);
+    return role_send(&msg);
 }
 
 int new_asserv_step(){

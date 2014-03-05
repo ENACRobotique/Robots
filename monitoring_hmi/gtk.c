@@ -10,6 +10,7 @@
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
 #include "../../global_errors.h"
+#include "roles.h"
 #include "node_cfg.h"
 
 #include "gv.h"
@@ -56,6 +57,11 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
     ret = bn_receive(&inMsg);
     if(ret > 0){
+        ret = role_relay(&inMsg);
+        if(ret < 0){
+            fprintf(stderr, "role_relay() error #%i\n", ret);
+        }
+
         if(ctx->verbose >= 1){
             printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
         }
@@ -84,7 +90,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             // send trajectory if event
             if(ctx->mouse_event){
-                outMsg.header.destAddr = ctx->prop_address;
+//                outMsg.header.destAddr = ctx->prop_address; role_send() => useless
                 outMsg.header.type = E_TRAJ;
                 outMsg.header.size = sizeof(outMsg.payload.traj);
                 // payload
@@ -102,9 +108,9 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
                 tl_addTail(&ctx->trajlist, &outMsg.payload.traj);
 
-                ret = bn_send(&outMsg);
+                ret = role_send(&outMsg);
                 if(ret <= 0){
-                    fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
+                    fprintf(stderr, "role_send() error #%i\r\n", -ret); // '\r' needed, raw mode
                 }
 
                 ctx->mouse_event = 0;
@@ -222,6 +228,8 @@ int main(int argc, char *argv[]) {
     ctx.pos_data[0] = malloc(ctx.pos_szx*ctx.pos_szy*3);
     ctx.pos_data[1] = malloc(ctx.pos_szx*ctx.pos_szy*3);
     ctx.pos_cur = 0;
+
+    bn_attach(E_ROLE_SETUP, role_setup);
 
     ret = bn_init();
     if(ret < 0){

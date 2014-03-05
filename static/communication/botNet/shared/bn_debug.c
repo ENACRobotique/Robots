@@ -10,6 +10,7 @@
 #include "messages.h"
 #include "network_cfg.h"
 #include "node_cfg.h"
+#include "roles.h"
 
 // other required libraries
 #include "../../../global_errors.h"
@@ -22,10 +23,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-
-
-//debug address
-volatile bn_Address debug_addr=ADDR_DEBUG_DFLT;
 
 
 /* bn_printDbg : sends a fixed string in a message to the address debug_addr.
@@ -41,16 +38,13 @@ int bn_printDbg(const char *str){
     int ret;
     sMsg tmp;
 
-    //do not send anything if the debug address is not defined
-    if (debug_addr==0) return -ERR_BN_UNKNOWN_ADDR;
-
-    tmp.header.destAddr=debug_addr;
+//    tmp.header.destAddr=addr; role_send() => useless
     tmp.header.type=E_DEBUG;
     tmp.header.size=MIN(strlen(str)+1 , BN_MAX_PDU-sizeof(sGenericHeader));
     strncpy((char *)tmp.payload.data , str , BN_MAX_PDU-sizeof(sGenericHeader)-1);
     tmp.payload.debug[tmp.header.size-1]=0; //strncpy does no ensure the null-termination, so we force it
 
-    ret = bn_send(&tmp);
+    ret = role_send(&tmp);
     if(ret > sizeof(tmp.header)){
         ret -= sizeof(tmp.header);
     }
@@ -81,19 +75,6 @@ int bn_printfDbg(const char *format, ...){
     return bn_printDbg(string);
 }
 
-
-/* bn_debugAddrSignal : modifies the local debug address. This should be used on receiving a signalling message of type E_DEBUG_SIGNALLING
- * Arguments :
- *  msg : pointer to the received message
- * Return value : none
- */
-void bn_debugUpdateAddr(sMsg * msg){
-    if (msg->header.type==E_DEBUG_SIGNALLING) {
-         debug_addr=msg->header.srcAddr;
-         bn_printfDbg("dbgaddr updated to %hx\n",msg->header.srcAddr);
-    }
-}
-
 /* bn_debugSignalling : sends the new debug address to dest. MUST be issued ONLY by the debugger.
  * Arguments :
  *  dest : address of the node whitch we want up update
@@ -101,8 +82,22 @@ void bn_debugUpdateAddr(sMsg * msg){
  */
 int bn_debugSendAddr(bn_Address dest){
     sMsg msg;
-    msg.header.destAddr=dest;
-    msg.header.type=E_DEBUG_SIGNALLING;
-    msg.header.size=0;
+
+    msg.header.type = E_ROLE_SETUP;
+    msg.header.destAddr = dest;
+    msg.header.size = 2 + 4*2;
+    msg.payload.roleSetup.nb_steps = 2;
+    // step #0 (overrides any previous debug setup on the remote node)
+    msg.payload.roleSetup.steps[0].step = UPDATE_ACTIONS;
+    msg.payload.roleSetup.steps[0].type = E_DEBUG;
+    msg.payload.roleSetup.steps[0].actions.sendTo.first = ROLE_DEBUG;
+    msg.payload.roleSetup.steps[0].actions.sendTo.second = ROLE_UNKNOWN;
+    msg.payload.roleSetup.steps[0].actions.relayTo.n1 = ROLE_UNKNOWN;
+    msg.payload.roleSetup.steps[0].actions.relayTo.n2 = ROLE_UNKNOWN;
+    // step #1 (I will be the default debug node for this remote one)
+    msg.payload.roleSetup.steps[1].step = UPDATE_ADDRESS;
+    msg.payload.roleSetup.steps[1].role = ROLE_DEBUG;
+    msg.payload.roleSetup.steps[1].address = MYADDR;
+
     return bn_send(&msg);
 }

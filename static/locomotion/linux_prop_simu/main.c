@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
     // arguments check
 
     // botNet initialization
-    bn_attach(E_DEBUG_SIGNALLING, bn_debugUpdateAddr);
+    bn_attach(E_ROLE_SETUP, role_setup);
 
     ret = bn_init();
     if(ret < 0){
@@ -137,6 +137,11 @@ int main(int argc, char *argv[]){
         }
 
         if(ret > 0){
+           ret = role_relay(&inMsg); // relay any received message if asked to
+           if(ret < 0){
+               printf("role_relay() error #%i\n", ret);
+           }
+
             switch(inMsg.header.type){
             case E_TRAJ:
 //                bn_printDbg("got traj element");

@@ -98,6 +98,8 @@ int main(int argc, char **argv){
             }
         }
 
+    bn_attach(E_ROLE_SETUP, role_setup);
+
     err = bn_init();
     if (err < 0){
         printf("bn_init() error #%i\n", -err);
@@ -127,6 +129,11 @@ int main(int argc, char **argv){
             }
         }
         if (err > 0){
+            err = role_relay(&msgIn);
+            if(err < 0){
+                printf("role_relay() error #%i\n", -err);
+            }
+
             if (verbose>=1) {
                 printf("message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);

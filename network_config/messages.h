@@ -18,8 +18,8 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "network_cfg.h"
 #include "../static/communication/botNet/shared/message_header.h"
+
 
 // bn_Address : cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
 
@@ -28,7 +28,7 @@ extern "C" {
 //message types
 typedef enum{
     E_DEBUG,                // general debug
-    E_DEBUG_SIGNALLING,     // debug receiver signalling
+    E_ROLE_SETUP,           // setup addresses of some standard nodes + automatic relaying of messages between them
     E_DATA,                 // arbitrary data payload
     E_ACK_RESPONSE,         // ack response
     E_PING,
@@ -68,6 +68,35 @@ typedef enum{
 //function returning a string corresponding to one element of the above enum. Must be managed by hand.
 const char *eType2str(E_TYPE elem);
 
+typedef struct __attribute__((packed)){ // 2bytes
+    struct __attribute__((packed)){
+        uint8_t first  :4;
+        uint8_t second :4;
+    } sendTo;
+    struct __attribute__((packed)){
+        uint8_t n1 :4;
+        uint8_t n2 :4;
+    } relayTo;
+} sRoleActions;
+typedef struct __attribute__((packed)){
+    uint16_t nb_steps; // must be <=13 to fit in a sMsg payload (2+4*13=54)
+    struct{ // 4bytes
+        enum{
+            UPDATE_ADDRESS,
+            UPDATE_ACTIONS
+        } step :8;
+        union{
+            struct __attribute__((packed)){
+                uint8_t role;
+                bn_Address address;
+            };
+            struct __attribute__((packed)){
+                E_TYPE type :8;
+                sRoleActions actions;
+            };
+        };
+    } steps[];
+} sRoleSetupPayload;
 
 /************************ user payload definition start ************************/
 //user-defined payload types.
@@ -125,6 +154,7 @@ typedef union{
     uint8_t data[BN_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
     uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
     sAckPayload ack;
+    sRoleSetupPayload roleSetup;
 
 /************************ user payload start ************************/
 //the user-defined payloads from above must be added here. The simple ones can be directly added here
