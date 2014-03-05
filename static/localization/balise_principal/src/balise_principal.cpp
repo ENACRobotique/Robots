@@ -5,8 +5,6 @@
  *      Author: quentin
  */
 
-
-
 #include "Arduino.h"
 #include "inttypes.h"
 #include "float.h"
@@ -21,16 +19,14 @@
 
 uint32_t mesTab[2]={0,0};
 
-
 void setup(){
 
-    domi_init(2);
+    domi_init(2); //fixme add domi_init(1) ?
 
     bn_init();
 
     bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
     bn_printfDbg((char*)"start turret, free mem : %d o\n",freeMemory());
-
 
     pinMode(PIN_DBG_LED,OUTPUT);
 }
@@ -54,7 +50,6 @@ void loop(){
     int rxB=0; //received bytes (size of inMsg when a message has been received)
     static unsigned long time_prev_period=0,prev_TR=0;
 
-
 #ifdef BLINK_1S
     static unsigned long time_prev_led=0;
 #endif
@@ -64,7 +59,7 @@ void loop(){
 ///////// must always be done, any state
 
     //eventual receiving && routine
-    rxB=bn_receive(&inMsg);
+    /*rxB=*/bn_receive(&inMsg);
 
     time=millis();
 
@@ -169,4 +164,3 @@ void loop(){
           default : break;
       }
 }
-

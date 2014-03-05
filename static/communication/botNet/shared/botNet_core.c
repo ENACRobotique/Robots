@@ -26,6 +26,9 @@
 #if MYADDRU !=0
 #   include "UART4bn.h"
 #endif
+#if MYADDRD !=0
+#   include "UDP4bn.h"
+#endif
 // standard libraries
 #include <string.h>
 #include <stdlib.h>
@@ -87,7 +90,7 @@ uint8_t seqNum=0;
  *  <0 if error
  */
 int bn_init(){
-#if MYADDRU!=0 || MYADDRX!=0
+#if MYADDRX!=0 || MYADDRU!=0 || MYADDRD!=0
     int ret=0;
 #endif
 
@@ -111,6 +114,10 @@ int bn_init(){
     if ( (ret=UART_init(NULL,115200))<0 ) return ret;
 #   endif
 #endif
+
+#if MYADDRD!=0
+    if((ret=UDP_init()) < 0) return ret;
+#endif
     return 0;
 }
 
@@ -131,7 +138,6 @@ int bn_init(){
  *      * payload
  */
 int bn_send(sMsg *msg){
-
     //sets ack bit
     msg->header.ack=0;
 
@@ -151,7 +157,7 @@ int bn_send(sMsg *msg){
  */
 int bn_genericSend(sMsg *msg){
     // sets source address
-    msg->header.srcAddr = (MYADDRX?:MYADDRI)?:MYADDRU;
+    msg->header.srcAddr = ((MYADDRX?:MYADDRI)?:MYADDRU)?:MYADDRD;
 
     //check the size of the message
     if ( (msg->header.size + sizeof(sGenericHeader)) > BN_MAX_PDU) return -ERR_BN_OVERSIZE;
@@ -191,7 +197,6 @@ int bn_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
     sMsg msgIn={{0}}; //incoming message (may be our ack)
     int ret=0;
-
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -268,6 +273,14 @@ int bn_routine(){
     count+=ret;
 #endif
 
+#if MYADDRD!=0
+    if ( (ret=UDP_receive(&temp.msg)) > 0 ) {
+        bn_pushInBufLast(&temp.msg,IF_UDP);
+    }
+    else if (ret<0) return ret;
+    count+=ret;
+#endif
+
     //handles stored messages
     if ( (pTmp=bn_getInBufFirst()) != NULL){
         //checks checksum of message before forwarding. If error, drop message and return
@@ -298,7 +311,8 @@ int bn_routine(){
             if (
                 pTmp->msg.header.destAddr == MYADDRX ||
                 pTmp->msg.header.destAddr == MYADDRI ||
-                pTmp->msg.header.destAddr == MYADDRU
+                pTmp->msg.header.destAddr == MYADDRU ||
+                pTmp->msg.header.destAddr == MYADDRD
             ){
                 bn_freeInBufFirst();
                 return count;
@@ -308,13 +322,14 @@ int bn_routine(){
         //forward message
         count=bn_forward(&(pTmp->msg),pTmp->iFace);
 
-        //handle the acknowledgement
+        //handle the acknowledgment
         if ( pTmp->msg.header.ack == 1){
-            //if the message is for us, send acknowledgement to the initial sender
+            //if the message is for us, send acknowledgment to the initial sender
             if (
                 pTmp->msg.header.destAddr == MYADDRX ||
                 pTmp->msg.header.destAddr == MYADDRI ||
-                pTmp->msg.header.destAddr == MYADDRU
+                pTmp->msg.header.destAddr == MYADDRU ||
+                pTmp->msg.header.destAddr == MYADDRD
             ){
                 temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
                 temp.msg.header.type=E_ACK_RESPONSE;
@@ -325,7 +340,6 @@ int bn_routine(){
                 temp.msg.payload.ack.seqNum=pTmp->msg.header.seqNum;
 
                 bn_send(&(temp.msg));
-
             }
             //else send nack on forwarding fail
             else if (count<0){
@@ -413,7 +427,8 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         (
             ( (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ||
             msg->header.destAddr==MYADDRI ||
-            msg->header.destAddr==MYADDRU
+            msg->header.destAddr==MYADDRU ||
+            msg->header.destAddr==MYADDRD
         )
     ){// xxx improve test
         routeInfo->ifTo=IF_LOCAL;
@@ -425,7 +440,8 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         (
             msg->header.destAddr==MYADDRX ||
             msg->header.destAddr==MYADDRI ||
-            msg->header.destAddr==MYADDRU
+            msg->header.destAddr==MYADDRU ||
+            msg->header.destAddr==MYADDRD
         )
     ){
         routeInfo->ifTo=IF_LOCAL;
@@ -466,6 +482,20 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
     if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRU & SUBNET_MASK) ){
         if (ifFrom!=IF_UART ) {
             routeInfo->ifTo=IF_UART;
+            routeInfo->nextHop=msg->header.destAddr;
+            return;
+        }
+        else {
+            routeInfo->ifTo=IF_DROP;
+            return;
+        }
+    }
+#endif
+
+#if MYADDRD!=0
+    if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRD & SUBNET_MASK) ){
+        if (ifFrom!=IF_UDP) {
+            routeInfo->ifTo=IF_UDP;
             routeInfo->nextHop=msg->header.destAddr;
             return;
         }
@@ -542,6 +572,15 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
         return retVal;
         break;
 #endif
+#if MYADDRD !=0
+    case IF_UDP :
+        while (retVal<=0 && retries<BN_MAX_RETRIES){
+            retVal=UDP_send(msg, routeInfo.nextHop);
+            retries++;
+        }
+        return retVal;
+        break;
+#endif
     case IF_DROP :
         return 0;
         break;
@@ -601,7 +640,6 @@ int bn_attach(E_TYPE type,pfvpm ptr){
     new->type=type;
     new->func=ptr;
 
-
     return 0;
 }
 
@@ -625,7 +663,7 @@ int bn_deattach(E_TYPE type){
 
     if (firstAttach==NULL) return -ERR_NOT_FOUND;
 
-    //looking for already existing occurence of this type
+    //looking for already existing occurrence of this type
     //first element
     if (elem->type==type){
         firstAttach=elem->next;
@@ -682,7 +720,7 @@ int bn_pushInBufLast(const sMsg *msg, E_IFACE iFace){
 #endif
 
     msgIfBuf[iTmp].iFace=iFace;
-    memcpy(&(msgIfBuf[iTmp].msg),msg, MIN(msg->header.size+sizeof(sGenericHeader),sizeof(sMsg)));
+    memcpy(&msgIfBuf[iTmp].msg,msg,MIN(msg->header.size+sizeof(sGenericHeader),sizeof(sMsg)));
     return 1;
 }
 
@@ -736,7 +774,6 @@ int bn_popInBuf(sMsgIf * pstru){
     iTmp=iFirst;
     iFirst=(iFirst+1)%BN_INC_MSG_BUF_SIZE;
     nbMsg--;
-    mutexUnlock();
 
 #ifdef DEBUG_PC_BUF
     {
@@ -745,8 +782,13 @@ int bn_popInBuf(sMsgIf * pstru){
     }
 #endif
 
-    if (pstru==NULL) return -ERR_NULL_POINTER_WRITE_ATTEMPT;
-    memcpy(pstru, &(msgIfBuf[iTmp]), MIN(msgIfBuf[iTmp].msg.header.size + sizeof(sGenericHeader),sizeof(sMsg)));
+    if (pstru==NULL) {
+        mutexUnlock();
+        return -ERR_NULL_POINTER_WRITE_ATTEMPT;
+    }
+    memcpy(&pstru->msg, &msgIfBuf[iTmp].msg, MIN(sizeof(pstru->msg.header)+msgIfBuf[iTmp].msg.header.size,sizeof(pstru->msg)));
+    pstru->iFace = msgIfBuf[iTmp].iFace;
+    mutexUnlock();
 
     return 1;
 }
@@ -761,7 +803,6 @@ int bn_popInBuf(sMsgIf * pstru){
  * WARNING : it is mandatory to call bn_freeInBufFirst() after treatment
  */
 sMsgIf *bn_getInBufFirst(){
-
     if (nbMsg==0) return NULL;
 
 #ifdef DEBUG_PC_BUF
@@ -782,7 +823,6 @@ sMsgIf *bn_getInBufFirst(){
  * WARNING : DO NOT call if the previous bn_getInBufFirst() returned NULL
  */
 void bn_freeInBufFirst(){
-
     iFirst=(iFirst+1)%BN_INC_MSG_BUF_SIZE;
     nbMsg=MAX(nbMsg-1,0);
 
@@ -791,6 +831,4 @@ void bn_freeInBufFirst(){
         printf(" iFirst %d iNext %d nbMsg %d  [freeInBuf]\n",iFirst,iNext,nbMsg);
     }
 #endif
-    return;
 }
-

@@ -12,7 +12,7 @@ int main(void) {
     unsigned int time;
     int led0_status = 0, led1_status = 0;
     unsigned int led0_prevT = 0;
-    sMsg msg;
+    sMsg inMsg;
 
     gpio_init_all();  // use fast GPIOs
 
@@ -32,23 +32,23 @@ int main(void) {
     // superbus init
     bn_init();
 
-    bn_printDbg("Hello world, I'm lpc_sbi2c_template!");
+    bn_printDbg("Hello world, I'm lpc_bn_template!");
+
+    led0_prevT = millis();
 
     // main loop
     while(1) {
         sys_time_update();
         time = millis();
 
-        bn_routine();
-
-        if(bn_receive(&msg) > 0){
-            gpio_write(0, 31, led1_status^=1);
-        }
+        bn_receive(&inMsg);
 
         if((time - led0_prevT) > 200){
             led0_prevT = time;
 
             gpio_write(1, 24, led0_status^=1);
+
+            bn_printfDbg("led0_status=%i\n", led0_status);
         }
     }
 

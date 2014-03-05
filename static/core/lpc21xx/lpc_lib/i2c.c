@@ -46,7 +46,7 @@ int i2c_sendchunk(uint8_t addr, const uint8_t *data, uint8_t len) {
         return -1;
 
     for(i = 0; i < MAX_SEND_I2C_CHUNKS; i++)
-        if(send_buffer[i].status == I2CTransSuccess)
+        if(send_buffer[i].status == I2CTransSuccess || send_buffer[i].status == I2CTransFailed)
             break;
 
     if(i == MAX_SEND_I2C_CHUNKS)
