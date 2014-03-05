@@ -13,6 +13,7 @@
 #define MYADDRX (ADDRX_MOBILE_1|SUBNETX)
 #define MYADDRI 0
 #define MYADDRU 0
+#define MYADDRD 0
 
 #define BN_INC_MSG_BUF_SIZE 8
 
@@ -26,7 +27,7 @@
 #define UART_READBYTE_TIMEOUT 10000
 
 #undef ADDR_DEBUG_DFLT
-#define ADDR_DEBUG_DFLT 0
+#define ADDR_DEBUG_DFLT ADDRX_DEBUG
 
 
 #endif /* NODE_CFG_H_ */
