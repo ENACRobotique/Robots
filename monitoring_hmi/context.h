@@ -1,13 +1,19 @@
 #ifndef _CONTEXT_H
 #define _CONTEXT_H
 
+#include "draw_list.h"
+
 typedef struct {
     int verbose;
 
     // trajectory data
     int tid;
 
-    // position media
+    // robot data
+    sPosList poslist;
+    sTrajList trajlist;
+
+    // position media (first tab in gui)
     int pos_mid;
     unsigned int pos_szx;
     unsigned int pos_szy;

@@ -179,9 +179,14 @@ int main(int argc, char *argv[]){
     // arguments check
 
     // botNet initialization
-    bn_init();
+    ret = bn_init();
+    if(ret < 0){
+        printf("bn_init() failed err#%i\n", -ret);
+        exit(1);
+    }
+
     if(verbose >= 1){
-        printf("Identified as ADDRX_DEBUG on bn network.");
+        printf("Identified as ADDRX_DEBUG on bn network.\n");
     }
 
     // send position

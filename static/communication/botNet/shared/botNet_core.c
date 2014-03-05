@@ -18,17 +18,18 @@
 #include "bn_checksum.h"
 #include "bn_debug.h"
 #if MYADDRX !=0
-    #include "Xbee4bn.h"
-#endif
-#if MYADDRU !=0
-    #include "UART4bn.h"
+#   include "Xbee4bn.h"
 #endif
 #if MYADDRI !=0
-    #include "I2C4bn.h"
+#   include "I2C4bn.h"
+#endif
+#if MYADDRU !=0
+#   include "UART4bn.h"
 #endif
 // standard libraries
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 // useful define
 #ifndef MIN
@@ -90,14 +91,9 @@ int bn_init(){
     int ret=0;
 #endif
 
-#if MYADDRU!=0
-#   ifdef ARCH_X86_LINUX
-    if ( (ret=UART_init(BN_UART_PATH,E_115200_8N1))<0 ) return ret;
-#   endif
-
-#   ifdef ARCH_328P_ARDUINO
-    if ( (ret=UART_init(NULL,115200))<0 ) return ret;
-#   endif
+#if MYADDRX!=0
+    if ( (ret=Xbee_init())<0 ) return ret;
+    if ( (ret=Xbee_setup())<0 ) return ret;
 #endif
 
 #if MYADDRI!=0
@@ -106,9 +102,14 @@ int bn_init(){
 #   endif
 #endif
 
-#if MYADDRX!=0
-    if ( (ret=Xbee_init())<0 ) return ret;
-    if ( (ret=Xbee_setup())<0 ) return ret;
+#if MYADDRU!=0
+#   ifdef ARCH_X86_LINUX
+    if ( (ret=UART_init(BN_UART_PATH,E_115200_8N1))<0 ) return ret;
+#   endif
+
+#   ifdef ARCH_328P_ARDUINO
+    if ( (ret=UART_init(NULL,115200))<0 ) return ret;
+#   endif
 #endif
     return 0;
 }
@@ -248,28 +249,24 @@ int bn_routine(){
     }
     else if (ret<0) return ret;
     count+=ret;
-    ret=0;
-
 #endif
+
 #if (MYADDRI)!=0
-    if ( (ret=I2C_receive(&temp.msg))>0) {
+    if ( (ret=I2C_receive(&temp.msg)) > 0 ) {
         bn_pushInBufLast(&temp.msg,IF_I2C);
         // TODO : optimize this (bn_pushInBuf directly in I2C_receive())
     }
     else if (ret<0) return ret;
     count+=ret;
-    ret=0;
 #endif
+
 #if (MYADDRU)!=0
-    if ( (ret=UART_receive(&temp.msg))>0) {
+    if ( (ret=UART_receive(&temp.msg)) > 0 ) {
         bn_pushInBufLast(&temp.msg,IF_UART);
     }
     else if (ret<0) return ret;
     count+=ret;
-    ret=0;
 #endif
-
-
 
     //handles stored messages
     if ( (pTmp=bn_getInBufFirst()) != NULL){
@@ -298,7 +295,11 @@ int bn_routine(){
             temp.msg.header.size=0;
             bn_send(&(temp.msg));
             //destroy the incoming message if we were the destination
-            if (pTmp->msg.header.destAddr == MYADDRX || pTmp->msg.header.destAddr == MYADDRI || pTmp->msg.header.destAddr == MYADDRU ){
+            if (
+                pTmp->msg.header.destAddr == MYADDRX ||
+                pTmp->msg.header.destAddr == MYADDRI ||
+                pTmp->msg.header.destAddr == MYADDRU
+            ){
                 bn_freeInBufFirst();
                 return count;
             }
@@ -310,8 +311,11 @@ int bn_routine(){
         //handle the acknowledgement
         if ( pTmp->msg.header.ack == 1){
             //if the message is for us, send acknowledgement to the initial sender
-            if (pTmp->msg.header.destAddr == MYADDRX || pTmp->msg.header.destAddr == MYADDRI || pTmp->msg.header.destAddr == MYADDRU ){
-
+            if (
+                pTmp->msg.header.destAddr == MYADDRX ||
+                pTmp->msg.header.destAddr == MYADDRI ||
+                pTmp->msg.header.destAddr == MYADDRU
+            ){
                 temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
                 temp.msg.header.type=E_ACK_RESPONSE;
                 temp.msg.header.size=sizeof(sAckPayload);
@@ -401,48 +405,59 @@ int bn_receive(sMsg *msg){
  *
  * Remark : routing tables are defined in network_cfg.h & network_cfg.cpp
  */
-sRouteInfo bn_route(const sMsg *msg,E_IFACE ifFrom){
+void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
     int i=0;
-    sRouteInfo routeInfo;
 
-    // if this message if for this node (including broadcast possibilities) but not from this node XXX enable I2C broadcast rx
-    if ( ifFrom!=IF_LOCAL && (
-            msg->header.destAddr==MYADDRU || msg->header.destAddr==MYADDRI || (  (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ) ){// xxx improve test
-        routeInfo.ifTo=IF_LOCAL;
-        routeInfo.nextHop=msg->header.destAddr;
-        return routeInfo;
+    // if this message is for this node (including broadcast possibilities) but not from this node XXX enable I2C broadcast rx
+    if ( ifFrom!=IF_LOCAL &&
+        (
+            ( (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ||
+            msg->header.destAddr==MYADDRI ||
+            msg->header.destAddr==MYADDRU
+        )
+    ){// xxx improve test
+        routeInfo->ifTo=IF_LOCAL;
+        routeInfo->nextHop=msg->header.destAddr;
+        return;
     }
     //if this message is from this node , for this node AND not a broadcast one (ie. dest address is exactly ours), treat it like an incoming message for this node
-    if ( ifFrom==IF_LOCAL && (
-            msg->header.destAddr==MYADDRU || msg->header.destAddr==MYADDRI || msg->header.destAddr == MYADDRX ) ){
-        routeInfo.ifTo=IF_LOCAL;
-        routeInfo.nextHop=msg->header.destAddr;
-        return routeInfo;
+    if ( ifFrom==IF_LOCAL &&
+        (
+            msg->header.destAddr==MYADDRX ||
+            msg->header.destAddr==MYADDRI ||
+            msg->header.destAddr==MYADDRU
+        )
+    ){
+        routeInfo->ifTo=IF_LOCAL;
+        routeInfo->nextHop=msg->header.destAddr;
+        return;
     }
-#if MYADDRI!=0
+
     // if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
-    if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
-        if (ifFrom!=IF_I2C ) {
-            routeInfo.ifTo=IF_I2C;
-            routeInfo.nextHop=msg->header.destAddr;
-            return routeInfo;
-        }
-        else { //do no resent on I2C a message received on I2C
-            routeInfo.ifTo=IF_DROP;
-            return routeInfo;
-        }
-    }
-#endif
 #if MYADDRX!=0
     if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
         if (ifFrom!=IF_XBEE ) {
-            routeInfo.ifTo=IF_XBEE;
-            routeInfo.nextHop=msg->header.destAddr;
-            return routeInfo;
+            routeInfo->ifTo=IF_XBEE;
+            routeInfo->nextHop=msg->header.destAddr;
+            return;
         }
         else {
-            routeInfo.ifTo=IF_DROP;
-            return routeInfo;
+            routeInfo->ifTo=IF_DROP;
+            return;
+        }
+    }
+#endif
+
+#if MYADDRI!=0
+    if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
+        if (ifFrom!=IF_I2C ) {
+            routeInfo->ifTo=IF_I2C;
+            routeInfo->nextHop=msg->header.destAddr;
+            return;
+        }
+        else { //do no resent on I2C a message received on I2C
+            routeInfo->ifTo=IF_DROP;
+            return;
         }
     }
 #endif
@@ -450,25 +465,26 @@ sRouteInfo bn_route(const sMsg *msg,E_IFACE ifFrom){
 #if MYADDRU!=0
     if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRU & SUBNET_MASK) ){
         if (ifFrom!=IF_UART ) {
-            routeInfo.ifTo=IF_UART;
-            routeInfo.nextHop=msg->header.destAddr;
-            return routeInfo;
+            routeInfo->ifTo=IF_UART;
+            routeInfo->nextHop=msg->header.destAddr;
+            return;
         }
         else {
-            routeInfo.ifTo=IF_DROP;
-            return routeInfo;
+            routeInfo->ifTo=IF_DROP;
+            return;
         }
     }
 #endif
+
     // else, sweep the table until you reach the matching subnetwork or the end
     while(rTable[i].destSubnet!=(0x42&(~SUBNET_MASK))){
         if ( rTable[i].destSubnet == (msg->header.destAddr & SUBNET_MASK) ) {
-            return rTable[i].nextHop;
+            break;
         }
         i++;
     }
     //if you reach the end, send to default destination
-    return rTable[i].nextHop;
+    *routeInfo = rTable[i].nextHop;
 }
 
 
@@ -486,8 +502,10 @@ sRouteInfo bn_route(const sMsg *msg,E_IFACE ifFrom){
  * Remark : if the message is for this node in particular, it is stored in the incoming buffer msgBuf
  */
 int bn_forward(const sMsg *msg, E_IFACE ifFrom){
-    sRouteInfo routeInfo=bn_route(msg, ifFrom);
+    sRouteInfo routeInfo;
     int retVal=0,retries=0;
+
+    bn_route(msg, ifFrom, &routeInfo);
 
 #ifdef DEBUG_PC_RT
         {
