@@ -51,9 +51,9 @@ sRoleActions role_actions[3] = {
                 .relayTo.n2 = 0
         },
 };
-sRoleActions *act_msg_traj = &role_actions[0];
-sRoleActions *act_msg_pos = &role_actions[1];
-sRoleActions *act_msg_dbg = &role_actions[2];
+#define ACT_MSG_TRAJ (&role_actions[0])
+#define ACT_MSG_POS  (&role_actions[1])
+#define ACT_MSG_DBG  (&role_actions[2])
 
 void role_setup(sMsg *msg){
     int i;
@@ -74,13 +74,13 @@ void role_setup(sMsg *msg){
 //            printf("auto update actions %s (=%hhu)\n", eType2str(s->type), s->type);
             switch(s->type){
             case E_TRAJ:
-                memcpy((void*)act_msg_traj, (void*)&s->actions, sizeof(*act_msg_traj));
+                memcpy((void*)ACT_MSG_TRAJ, (void*)&s->actions, sizeof(*ACT_MSG_TRAJ));
                 break;
             case E_POS:
-                memcpy((void*)act_msg_pos, (void*)&s->actions, sizeof(*act_msg_pos));
+                memcpy((void*)ACT_MSG_POS, (void*)&s->actions, sizeof(*ACT_MSG_POS));
                 break;
             case E_DEBUG:
-                memcpy((void*)act_msg_dbg, (void*)&s->actions, sizeof(*act_msg_dbg));
+                memcpy((void*)ACT_MSG_DBG, (void*)&s->actions, sizeof(*ACT_MSG_DBG));
                 break;
             default:
                 break;
@@ -200,13 +200,13 @@ int role_send(sMsg *msg){
 
     switch(msg->header.type){
     case E_TRAJ:
-        SEND_BLOCK(act_msg_traj);
+        SEND_BLOCK(ACT_MSG_TRAJ);
         break;
     case E_POS:
-        SEND_BLOCK(act_msg_pos);
+        SEND_BLOCK(ACT_MSG_POS);
         break;
     case E_DEBUG:
-        SEND_BLOCK(act_msg_dbg);
+        SEND_BLOCK(ACT_MSG_DBG);
         break;
     default:
         break;
@@ -244,13 +244,13 @@ int role_relay(sMsg *msg){
 
     switch(msg->header.type){
     case E_TRAJ:
-        RELAY_BLOCK(act_msg_traj);
+        RELAY_BLOCK(ACT_MSG_TRAJ);
         break;
     case E_POS:
-        RELAY_BLOCK(act_msg_pos);
+        RELAY_BLOCK(ACT_MSG_POS);
         break;
     case E_DEBUG:
-        RELAY_BLOCK(act_msg_dbg);
+        RELAY_BLOCK(ACT_MSG_DBG);
         break;
     default:
         break;
