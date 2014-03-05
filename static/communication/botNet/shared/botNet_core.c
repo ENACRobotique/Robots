@@ -203,7 +203,7 @@ int bn_sendAck(sMsg *msg){
     if ( (ret=bn_genericSend(msg)) < 0) return ret;
 
     // waiting for the reply
-    while ( testTimeout(BN_ACK_TIMEOUT*1000,&sw)){
+    while ( testTimeout(BN_ACK_TIMEOUT*1000UL,&sw)){
         // if we receive a message
         if (bn_receive(&msgIn)>0){
 #ifdef DEBUG_PC_ACK
