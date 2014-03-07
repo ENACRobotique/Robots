@@ -8,7 +8,7 @@
 #ifndef LIB_INT_LASER_H_
 #define LIB_INT_LASER_H_
 
-
+#include <stdint.h>
 
 //"return" structure for laserDetect
 typedef struct {

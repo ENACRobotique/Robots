@@ -7,7 +7,6 @@ pour arduino UNO
 
 #include "Arduino.h"
 #include "lib_int_laser.h"
-#include "lib_time.h"
 #include "tools.h"
 #include "../src/params.h"
 

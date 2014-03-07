@@ -10,10 +10,10 @@
 
 #include "network_cfg.h"
 
-#define MYADDRX 0 // ADDRX_DEBUG
+#define MYADDRX  ADDRX_DEBUG
 #define MYADDRI 0
 #define MYADDRU 0
-#define MYADDRD ADDRD_DEBUG1
+#define MYADDRD 0//ADDRD_DEBUG1
 
 #define BN_INC_MSG_BUF_SIZE     4
 #define BN_WAIT_XBEE_SND_FAIL   5000000
