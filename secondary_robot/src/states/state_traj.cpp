@@ -19,7 +19,7 @@
 #include "state_wait.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0;
-
+int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
 void initTrajBlue(sState *prev) {
     uint16_t tab[RAD_NB_PTS];
