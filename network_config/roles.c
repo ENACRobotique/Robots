@@ -178,6 +178,21 @@ uint8_t role_get_role(bn_Address address){
     }
 }
 
+const char *role_string(uint8_t role){
+    switch(role){
+    case ROLE_MONITORING:
+        return "monitoring";
+    case ROLE_IA:
+        return "ia";
+    case ROLE_PROPULSION:
+        return "propulsion";
+    case ROLE_DEBUG:
+        return "debug";
+    default:
+        return "unknown";
+    }
+}
+
 int role_send(sMsg *msg){
     int ret = 0;
 

@@ -39,6 +39,7 @@ int         role_set_addr   (uint8_t role, bn_Address address);
 bn_Address  role_get_addr   (uint8_t role);
 // gives role associated with any ADDRESS on the botNet network
 uint8_t     role_get_role   (bn_Address address);
+const char *role_string(uint8_t role);
 // sends data according to the rules defined during setup
 int         role_send       (sMsg *msg);
 #if MYROLE

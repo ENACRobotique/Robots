@@ -63,7 +63,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         }
 
         if(ctx->verbose >= 1){
-            printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
+            printf("message received from %s (%03hx), type : %s (%hhu)\n", role_string(role_get_role(inMsg.header.srcAddr)), inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
         }
 
         switch(inMsg.header.type){
