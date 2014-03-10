@@ -18,7 +18,7 @@ void motor_update(motor_t *m, int pwm_speed) {
 }
 
 int motor_getticks(motor_t *m){
-    int time = millis();
+    unsigned int time = millis();
     int input = m->setpoint; // here, the number of ticks per period is in the same order of magnitude than the pwm control of the motor
 
 #define MOTOR_TIME_CONSTANT (100.) // (ms)
