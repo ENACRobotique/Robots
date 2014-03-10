@@ -36,7 +36,7 @@
  */
 int bn_printDbg(const char *str){
     int ret;
-    sMsg tmp;
+    sMsg tmp = {{0}};
 
 //    tmp.header.destAddr=addr; role_send() => useless
     tmp.header.type=E_DEBUG;
@@ -81,7 +81,7 @@ int bn_printfDbg(const char *format, ...){
  * Return value : like bn_send.
  */
 int bn_debugSendAddr(bn_Address dest){
-    sMsg msg;
+    sMsg msg = {{0}};
 
     msg.header.type = E_ROLE_SETUP;
     msg.header.destAddr = dest;
@@ -91,9 +91,6 @@ int bn_debugSendAddr(bn_Address dest){
     msg.payload.roleSetup.steps[0].step = UPDATE_ACTIONS;
     msg.payload.roleSetup.steps[0].type = E_DEBUG;
     msg.payload.roleSetup.steps[0].actions.sendTo.first = ROLE_DEBUG;
-    msg.payload.roleSetup.steps[0].actions.sendTo.second = ROLE_UNKNOWN;
-    msg.payload.roleSetup.steps[0].actions.relayTo.n1 = ROLE_UNKNOWN;
-    msg.payload.roleSetup.steps[0].actions.relayTo.n2 = ROLE_UNKNOWN;
     // step #1 (I will be the default debug node for this remote one)
     msg.payload.roleSetup.steps[1].step = UPDATE_ADDRESS;
     msg.payload.roleSetup.steps[1].role = ROLE_DEBUG;

@@ -174,7 +174,7 @@ uint8_t role_get_role(bn_Address address){
     case ADDRX_DEBUG:
         return ROLE_DEBUG;
     default:
-        return ROLE_UNKNOWN;
+        return 0;
     }
 }
 
@@ -183,13 +183,13 @@ int role_send(sMsg *msg){
 
 #define SEND_BLOCK(act) \
     do{                                                                     \
-        if((act)->sendTo.first != ROLE_UNKNOWN){                            \
+        if((act)->sendTo.first){                                            \
             msg->header.destAddr = role_get_addr((act)->sendTo.first);      \
             ret = bn_send(msg);                                             \
             if(ret < 0)                                                     \
                 break;                                                      \
         }                                                                   \
-        if((act)->sendTo.second != ROLE_UNKNOWN){                           \
+        if((act)->sendTo.second){                                           \
             msg->header.destAddr = role_get_addr((act)->sendTo.second);     \
             ret = bn_send(msg);                                             \
             if(ret < 0)                                                     \
@@ -223,7 +223,7 @@ int role_relay(sMsg *msg){
     uint8_t msg_src_role = role_get_role(msg->header.srcAddr);
     int ret = 0;
 
-    if(msg_src_role == ROLE_UNKNOWN || role_get_role(msg->header.destAddr) == ROLE_UNKNOWN){
+    if(!msg_src_role || !role_get_role(msg->header.destAddr)){
         return 0;
     }
 

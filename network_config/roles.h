@@ -13,7 +13,7 @@
 #include "node_cfg.h"
 #include "messages.h"
 
-#define ROLE_UNKNOWN    (0) // must be 0 (memory init'd to 0)
+// a role of 0 is considered unavailable
 #define ROLE_MONITORING (1)
 #define ROLE_IA         (2)
 #define ROLE_PROPULSION (3)
