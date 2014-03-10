@@ -25,7 +25,7 @@ sNum_t av_occ_t = 2000.;    // average occupation time
 int gnb_l,gnb_r; // glass number right/left
 sNum_t pts_per_msec = 128./90000.;
 int gat_ind;
-
+sPt_t pt_select;
 sMsg inMsg, outMsg;
 
 
@@ -81,6 +81,7 @@ sNum_t val_obj(int num, sPath_t *path_loc) //numeros de l'objectif dans list_obj
 			#endif
         	point=((Obj_arbre*)list_obj[num].type_struct)->nb_point;
         	ratio=point/time*1000+ratio_arbre() ;
+        	printf("ratio_arbre()=%f et n=%d\n",ratio_arbre(),num);
         	break;
 
         case E_BAC :
@@ -109,6 +110,8 @@ iABObs_t next_obj (void)
     sPath_t path_loc={.dist = 0.,  .path = NULL };
     sNum_t tmp_val2;
     sNum_t tmp_val3;
+
+
     int tmp_inx=-1; //index de l'objectif qui va  etre selectionner
     int i;
 
@@ -126,7 +129,19 @@ iABObs_t next_obj (void)
     			memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer2), sizeof(obs[N-1]));
     			tmp_val3=val_obj(i, &path_loc);
 
+    			if(i==0)
+    			{
+    				printf("y1=%f et ratio=%f\n",((Obj_arbre*)list_obj[i].type_struct)->entrer1.c.y,tmp_val2);
+       				printf("y2=%f et ratio=%f\n",((Obj_arbre*)list_obj[i].type_struct)->entrer2.c.y,tmp_val3);
+    			}
     			if(tmp_val3>tmp_val2) tmp_val2=tmp_val3;
+    			else
+    				{
+    				memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer1), sizeof(obs[N-1]));
+    				val_obj(i, &path_loc);
+    				printf("non\n");
+    				}
+
     			obs[i+1].active=1;
     			break;
         	case E_BAC :
@@ -152,12 +167,15 @@ iABObs_t next_obj (void)
 				tmp_val = tmp_val2;
 				tmp_inx = i;
 				memcpy(&path, &path_loc, sizeof(path));
+			    pt_select.x=obs[N-1].c.x;
+			    pt_select.y=obs[N-1].c.y;
 				}
 			if(tmp_inx != -1)
 				{
 				obs[tmp_inx+1].r=R_ROBOT + 5;
 				}
     	}
+ //   printf("pos select y=%f\n",path.
     return (tmp_inx);
 	}
 
@@ -428,31 +446,34 @@ void state_machine()
 						  send_robot(path) ;// Envoie au bas niveau la trajectoire courante
 						  last_time=millis();
 					  	  }
-					  if(get_position(&_current_pos)){
+					  if(get_position(&_current_pos))
+					  	  {
 						  printf("Position actuel avant correction : x=%f et y=%f\n", obs[0].c.x,obs[0].c.y);
 
 						  if((i=test_in_obs())!=0) project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);;
 						  //					  _current_pos.x=_current_pos.x+0.1;
 						  //					  _current_pos.y=_current_pos.y+0.1;
 						  memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
-						  printf("Position actuel : x=%f et y=%f\n Rayon=%f", obs[0].c.x,obs[0].c.y,sqrt(obs[0].c.x*obs[0].c.x+(obs[0].c.y-160)*(obs[0].c.y-160)));
+						  printf("Position actuel : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
+						  printf("select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.x-_current_pos.y));
 
 
-						  if (fabs(obs[N-1].c.x -_current_pos.x)<RESO_POS && fabs(obs[N-1].c.y -_current_pos.y)<RESO_POS)   //objectif atteint
-						  {
-							  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
+						  if (fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS)   //objectif atteint
 							  {
-							  case E_ARBRE :
-								  obj_tree(current_obj);
-								  break;
-							  case E_BAC :
-								  obj_bac(current_obj);
-								  break;
+							  printf("Un objectif a été atteint\n");
+								  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
+								  {
+								  case E_ARBRE :
+									  obj_tree(current_obj);
+									  break;
+								  case E_BAC :
+									  obj_bac(current_obj);
+									  break;
 
 
+								  }
 							  }
-						  }
-					  }
+					  	  }
                 break;
 
             case SHUT_DOWN:
