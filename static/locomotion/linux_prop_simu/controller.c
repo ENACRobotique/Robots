@@ -55,12 +55,12 @@ void motor_controller_update(int sPL, int pVL, int sPR, int pVR) {
     // limit acceleration (keeping ratio of errors constant)
     errL = sPL - pVL;
     errR = sPR - pVR;
-    if(abs(errL) > abs(errR) && abs(errL) > AMAX){
+    if(abs(errL) >= abs(errR) && abs(errL) > AMAX){
         newerr = SIGN(errL)*AMAX;
         sPL = pVL + newerr;
         sPR = pVR + newerr*errR/errL;
     }
-    else if(abs(errR) > abs(errL) && abs(errR) > AMAX){
+    else if(abs(errR) >= abs(errL) && abs(errR) > AMAX){
         newerr = SIGN(errR)*AMAX;
         sPR = pVR + newerr;
         sPL = pVL + newerr*errL/errR;
