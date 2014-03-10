@@ -31,18 +31,38 @@ bn_Address addr_role_dbg = ADDR_DEBUG_DFLT;
 #endif
 
 sRoleActions role_actions[3] = {
+#if MYROLE == ROLE_IA
+        { // E_TRAJ messages
+                .sendTo.first = ROLE_PROPULSION,
+                .sendTo.second = ROLE_MONITORING,
+                .relayTo.n1 = 0,
+                .relayTo.n2 = 0
+        },
+#else
         { // E_TRAJ messages
                 .sendTo.first = 0,
                 .sendTo.second = 0,
                 .relayTo.n1 = 0,
                 .relayTo.n2 = 0
         },
+#endif
+
+#if MYROLE == ROLE_IA
         { // E_POS messages
-                .sendTo.first = 0,
+                .sendTo.first = ROLE_PROPULSION,
+                .sendTo.second = ROLE_MONITORING,
+                .relayTo.n1 = ROLE_PROPULSION,
+                .relayTo.n2 = ROLE_MONITORING
+        },
+#else
+        { // E_POS messages
+                .sendTo.first = ROLE_IA,
                 .sendTo.second = 0,
                 .relayTo.n1 = 0,
                 .relayTo.n2 = 0
         },
+#endif
+
         { // E_DEBUG messages
                 .sendTo.first = ADDR_DEBUG_DFLT?ROLE_DEBUG:0,
                 .sendTo.second = 0,
