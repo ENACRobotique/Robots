@@ -14,7 +14,7 @@ void motor_init(motor_t *m, unsigned char pwm, int bank, int pin) {
 }
 
 void motor_update(motor_t *m, int pwm_speed) {
-    m->setpoint = pwm_speed;
+    m->setpoint = pwm_speed>1024?1024:pwm_speed<-1024?-1024:pwm_speed;
 }
 
 int motor_getticks(motor_t *m){
