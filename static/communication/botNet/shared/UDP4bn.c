@@ -41,7 +41,7 @@ int UDP_init(){
         return -ERR_SYSERRNO;
     }
 
-    printf("peer initialized on port %hu...\n", ntohs(serv_addr.sin_port));
+    printf("peer initialized on port %hu (bn_addr %hx)...\n", ntohs(serv_addr.sin_port), MYADDRD);
 
     return 0;
 }

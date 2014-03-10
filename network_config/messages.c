@@ -29,6 +29,9 @@ const char *eType2str(E_TYPE elem){
     case E_POS :                    return "POS";
     case E_SERIAL_DUMP :            return "SERIAL_DUMP";
     case E_ASSERV_STATS :           return "ASSERV_STATS";
+    case E_GOAL :                   return "GOAL";
+    case E_OBS_CFG :                return "OBS_CFG";
+    case E_OBSS :                   return "OBSS" ;
     /************************ user types stop ************************/
 
     default :

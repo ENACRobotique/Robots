@@ -12,6 +12,7 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
+#include "../../../global_errors.h"
 #include "millis.h"
 #include "roles.h"
 
@@ -23,7 +24,7 @@
 
 #define SQR(v) ((long long)(v)*(v))
 
-#define TIME_STATS
+//#define TIME_STATS
 
 #define TRAJ_MAX_SIZE (16)
 
@@ -74,7 +75,7 @@ void traj_conv(sTrajEl_t *t) {
 
 int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
 int gx, gy; // goal (I<<SHIFT)
-int d_consigne = isDpS2IpP(15. /* cm/s */); // desired speed (IpP<<SHIFT)
+int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
 enum {
     S_WAIT, // no action asked (we are stopped)
@@ -183,6 +184,16 @@ int send_pos(){
     msg.payload.pos.x = I2Ds(x);
     msg.payload.pos.y = I2Ds(y);
     msg.payload.pos.theta = RI2Rs(theta);
+    if(state == S_RUN_TRAJ){
+        msg.payload.pos.tid = curr_tid;
+        msg.payload.pos.sid = curr_traj_step>>1;
+        msg.payload.pos.ssid = curr_traj_step&1;
+    }
+    else{
+        msg.payload.pos.tid = msg.payload.pos.sid = -1;
+    }
+
+//    printf("sending pos (%.2fcm,%.2fcm,%.1f°)\n", msg.payload.pos.x, msg.payload.pos.y, msg.payload.pos.theta*180./M_PI);
 
     return role_send(&msg);
 }
@@ -361,7 +372,12 @@ int new_asserv_step(){
 
 int show_stats(){
 #ifdef TIME_STATS
-    return bn_printfDbg("time stats: circle%uµs, line%uµs, loop%uµs\n", (uint16_t)m_c>>TIME_STATS_SHIFT, (uint16_t)m_l>>TIME_STATS_SHIFT, (uint16_t)m_loop>>TIME_STATS_SHIFT);
+    int ret;
+    ret = bn_printfDbg("time stats: circle%uµs, line%uµs, loop%uµs\n", (uint16_t)m_c>>TIME_STATS_SHIFT, (uint16_t)m_l>>TIME_STATS_SHIFT, (uint16_t)m_loop>>TIME_STATS_SHIFT);
+    if(ret == -ERR_BN_UNKNOWN_ADDR){
+        ret = 0;
+    }
+    return ret;
 #else
     return 0;
 #endif

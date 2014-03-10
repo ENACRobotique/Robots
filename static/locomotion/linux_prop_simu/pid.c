@@ -2,7 +2,7 @@
 
 #include "pid.h"
 
-void pid_init(pid_t *p, unsigned int KP, unsigned int KI, unsigned int KD, unsigned int I_max, unsigned char shift) {
+void pid_init(PID_t *p, unsigned int KP, unsigned int KI, unsigned int KD, unsigned int I_max, unsigned char shift) {
     p->shift = shift;
 
     p->KP = KP; // Proportional factor (KP)
@@ -13,7 +13,7 @@ void pid_init(pid_t *p, unsigned int KP, unsigned int KI, unsigned int KD, unsig
     pid_reset(p);
 }
 
-void pid_reset(pid_t *p) {
+void pid_reset(PID_t *p) {
     p->maxErr = INT_MAX / (p->KP + 1);
 
     p->sum = 0;
@@ -26,7 +26,7 @@ void pid_reset(pid_t *p) {
     p->lastProcessValue = 0;
 }
 
-int pid_update(pid_t *p, int setPoint, int processValue) {
+int pid_update(PID_t *p, int setPoint, int processValue) {
     long long err, temp, ret;
 
     // input error

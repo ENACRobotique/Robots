@@ -50,53 +50,51 @@ int main(int argc, char **argv){
     char cmd;
     bn_Address destAd;
 
-
     // arguments parsing
+    while(1){
+        static struct option long_options[] = {
+                {"log-file",        required_argument,  NULL, 'f'},
+                {"add-return",      no_argument,        NULL, 'r'},
+                {"no-add-return",   no_argument,        NULL, 'R'},
+                {"verbose",         no_argument,        NULL, 'v'},
+                {"quiet",           no_argument,        NULL, 'q'},
+                {"help",            no_argument,        NULL, 'h'},
+                {NULL,              0,                  NULL, 0}
+        };
 
-        while(1){
-            static struct option long_options[] = {
-                    {"log-file",        required_argument,  NULL, 'f'},
-                    {"add-return",      no_argument,        NULL, 'r'},
-                    {"no-add-return",   no_argument,        NULL, 'R'},
-                    {"verbose",         no_argument,        NULL, 'v'},
-                    {"quiet",           no_argument,        NULL, 'q'},
-                    {"help",            no_argument,        NULL, 'h'},
-                    {NULL,              0,                  NULL, 0}
-            };
-
-            int c = getopt_long(argc, argv, "f:rRvqh?", long_options, NULL);
-            if(c == -1)
-                break;
-            switch(c){
-            case 'f':
-                if(fd){
-                    fclose(fd);
-                }
-                fd = fopen(optarg, "wb+");
-                break;
-            case 'r' :
-                oLF=1;
-                break;
-            case 'R' :
-                oLF=0;
-                break;
-            case 'v':
-                verbose++;
-                break;
-            case 'q':
-                verbose = 0;
-                break;
-
-            default:
-               printf("?? getopt returned character code 0%o ??\n", c);
-               /* no break */
-            case 'h':
-            case '?':
-                usage(argv[0]);
-                exit(EXIT_FAILURE);
-                break;
+        int c = getopt_long(argc, argv, "f:rRvqh?", long_options, NULL);
+        if(c == -1)
+            break;
+        switch(c){
+        case 'f':
+            if(fd){
+                fclose(fd);
             }
+            fd = fopen(optarg, "wb+");
+            break;
+        case 'r' :
+            oLF=1;
+            break;
+        case 'R' :
+            oLF=0;
+            break;
+        case 'v':
+            verbose++;
+            break;
+        case 'q':
+            verbose = 0;
+            break;
+
+        default:
+           printf("?? getopt returned character code 0%o ??\n", c);
+           /* no break */
+        case 'h':
+        case '?':
+            usage(argv[0]);
+            exit(EXIT_FAILURE);
+            break;
         }
+    }
 
     bn_attach(E_ROLE_SETUP, role_setup);
 
@@ -106,9 +104,8 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    printf("listening, CTRL+C  for menu\n");
-
     signal(SIGINT, intHandler);
+    printf("listening, CTRL+C  for menu\n");
 
     //main loop
     while (!quit){
@@ -116,18 +113,8 @@ int main(int argc, char **argv){
 
         usleep(500);
 
-
         //receives messages, displays string if message is a debug message
         err = bn_receive(&msgIn);
-        if (err < 0){
-            if (err == -ERR_SYSERRNO && errno == EINTR){
-                menu=1;
-            }
-            else {
-                fprintf(stderr, "bn_routine() error #%i\n", -err);
-                if (err<=ERR_BN_INIT_FAILED) exit(1);
-            }
-        }
         if (err > 0){
             err = role_relay(&msgIn);
             if(err < 0){

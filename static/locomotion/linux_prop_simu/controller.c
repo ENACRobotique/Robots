@@ -1,10 +1,28 @@
+#include <stdlib.h> // abs()
+
 #include "pid.h"
 #include "params.h"
 
 #include "controller.h"
 
-pid_t vitMotGauche, vitMotDroit;
+PID_t vitMotGauche, vitMotDroit;
 motor_t motGauche, motDroit;
+
+//#define ASSERV_STATS
+
+#ifdef ASSERV_STATS
+#include <string.h>
+#include "shared/botNet_core.h"
+#include "shared/bn_debug.h"
+#include "millis.h"
+#include "messages.h"
+
+sMsg outMsg;
+#define AS (&outMsg.payload.asservStats)
+int i_as = 0;
+unsigned int prev_time = 0;
+unsigned int nb_seq = 0;
+#endif
 
 void motor_controller_init() {
     // asserv
@@ -14,46 +32,71 @@ void motor_controller_init() {
     // motors
     motor_init(&motGauche, 4 /* P0.8 */, 1, 22);
     motor_init(&motDroit,  6 /* P0.9 */, 1, 23);
+
+#ifdef ASSERV_STATS
+    prev_time = micros();
+#endif
 }
 
 void motor_controller_update(int sPL, int pVL, int sPR, int pVR) {
-    int value;
+    int valL, valR;
+    int errL, errR, newerr;
 
-    // left motor
-    // limit acceleration
-    if(sPL-pVL>AMAX)
-        sPL = pVL+AMAX;
-    else if(sPL-pVL<-AMAX)
-        sPL = pVL-AMAX;
+#define SIGN(v) ((v)>=0?1:-1)
 
-    // update pid
-    value = pid_update(&vitMotGauche, sPL, pVL);
+#ifdef ASSERV_STATS
+    {
+        unsigned int t = micros();
+        AS->steps[i_as].delta_t = t - prev_time;
+        prev_time = t;
+    }
+#endif
 
-    // limit speed
-    if(value>VMAX)
-        value = VMAX;
-    else if(value<-VMAX)
-        value = -VMAX;
+    // limit acceleration (keeping ratio of errors constant)
+    errL = sPL - pVL;
+    errR = sPR - pVR;
+    if(abs(errL) > abs(errR) && abs(errL) > AMAX){
+        newerr = SIGN(errL)*AMAX;
+        sPL = pVL + newerr;
+        sPR = pVR + newerr*errR/errL;
+    }
+    else if(abs(errR) > abs(errL) && abs(errR) > AMAX){
+        newerr = SIGN(errR)*AMAX;
+        sPR = pVR + newerr;
+        sPL = pVL + newerr*errL/errR;
+    }
 
-    // send command
-    motor_update(&motGauche, value);
+    // update PIDs
+    valL = pid_update(&vitMotGauche, sPL, pVL);
+    valR = pid_update(&vitMotDroit, sPR, pVR);
 
-    // right motor
-    // limit acceleration
-    if(sPR-pVR>AMAX)
-        sPR = pVR+AMAX;
-    else if(sPR-pVR<-AMAX)
-        sPR = pVR-AMAX;
+    // send command to motors
+    motor_update(&motGauche, valL);
+    motor_update(&motDroit, valR);
 
-    // update pid
-    value = pid_update(&vitMotDroit, sPR, pVR);
+#ifdef ASSERV_STATS
+    AS->steps[i_as].ticks_l = pVL;
+    AS->steps[i_as].consigne_l = sPL;
+    AS->steps[i_as].out_l = valL;
 
-    // limit speed
-    if(value>VMAX)
-        value = VMAX;
-    else if(value<-VMAX)
-        value = -VMAX;
+    AS->steps[i_as].ticks_r = pVR;
+    AS->steps[i_as].consigne_r = sPR;
+    AS->steps[i_as].out_r = valR;
 
-    // send command
-    motor_update(&motDroit, value);
+    if(i_as >= NB_ASSERV_STEPS_PER_MSG-1){
+        i_as = 0;
+        AS->nb_seq = nb_seq++;
+
+        outMsg.header.destAddr = role_get_addr(ROLE_DEBUG);
+        if(outMsg.header.destAddr){
+            outMsg.header.type = E_ASSERV_STATS;
+            outMsg.header.size = sizeof(outMsg.payload.asservStats);
+
+            bn_send(&outMsg);
+        }
+    }
+    else{
+        i_as++;
+    }
+#endif
 }

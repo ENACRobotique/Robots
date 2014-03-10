@@ -45,6 +45,9 @@ typedef enum{
     E_POS,                  // position (w/ uncertainty) of an element
     E_SERIAL_DUMP,          // serial dump (for debug)
     E_ASSERV_STATS,         // control loop statistics
+    E_GOAL,                 // asks the robot to go to this goal (x,y)
+    E_OBS_CFG,              // obstacle array config
+    E_OBSS,                  // obstacles update (position & status update)
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -138,9 +141,32 @@ typedef struct {
     float u_a_theta; // (rad)
     float u_a; // (cm)
     float u_b; // (cm)
+// trajectory steps
+    int tid; // trajectory identifier
+    int sid; // step identifier
+    uint8_t ssid; // sub-step identifier (0:line, 1:circle)
 // identifier of the robot/element
     uint8_t id; // 0:prim, 1:sec, 2:adv_prim, 3:adv_sec
 } sPosPayload;
+
+typedef struct __attribute__((packed)){
+    uint8_t nb_obs;
+    float r_robot;
+} sObsConfig;
+
+#define MAX_NB_OBSS_PER_MSG (6)
+typedef struct __attribute__((packed)){
+    uint16_t nb_obs; // must be <= 6 (2 + 8*6 = 50)
+    struct __attribute__((packed)){ // 8bytes
+        int16_t x; // (LSB=0.1mm)
+        int16_t y; // (LSB=0.1mm)
+        int16_t r; // (LSB=0.1mm)
+
+        uint8_t moved :4;
+        uint8_t active :4;
+        uint8_t id; // index in the tab of obstacles
+    } obs[];
+} sObss;
 
 #define NB_ASSERV_STEPS_PER_MSG (4)
 typedef struct __attribute__((packed)){
@@ -181,6 +207,8 @@ typedef union{
     sTrajElRaw_t traj;
     sPosPayload pos;
     sAsservStats asservStats;
+    sObsConfig obsCfg;
+    sObss obss;
 /************************ user payload stop ************************/
 
 }uPayload;

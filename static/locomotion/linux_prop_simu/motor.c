@@ -19,16 +19,14 @@ void motor_update(motor_t *m, int pwm_speed) {
 
 int motor_getticks(motor_t *m){
     int time = millis();
-    int input = m->setpoint*4;
+    int input = m->setpoint; // here, the number of ticks per period is in the same order of magnitude than the pwm control of the motor
 
-#define MOTOR_TIME_CONSTANT (800.) // (ms)
+#define MOTOR_TIME_CONSTANT (100.) // (ms)
 
-    // very simple motor model... (low-pass filter)
+    // very simple motor model... (continuous-time low-pass filter)
     m->speed = (int)(input + (float)(m->speed - input)*exp(-(float)(time - m->lastticksquery)/MOTOR_TIME_CONSTANT));
 
     m->lastticksquery = time;
-
-//    printf("gt %p|%i\n", m, m->speed);
 
     return m->speed;
 }
