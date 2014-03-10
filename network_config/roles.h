@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 
+#include "node_cfg.h"
 #include "messages.h"
 
 #define ROLE_UNKNOWN    (0) // must be 0 (memory init'd to 0)
@@ -40,7 +41,9 @@ bn_Address  role_get_addr   (uint8_t role);
 uint8_t     role_get_role   (bn_Address address);
 // sends data according to the rules defined during setup
 int         role_send       (sMsg *msg);
+#if MYROLE
 // relays data according to the rules defined durring setup
 int         role_relay      (sMsg *msg);
+#endif
 
 #endif /* ROLES_H_ */

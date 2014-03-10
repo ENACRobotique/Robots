@@ -10,11 +10,10 @@
 
 #include "../static/communication/botNet/shared/botNet_core.h"
 #include "network_cfg.h"
-#include "node_cfg.h"
 
 #include "roles.h"
 
-#if !defined(MYROLE) || (MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_IA && MYROLE!=ROLE_PROPULSION && MYROLE!=ROLE_DEBUG)
+#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_IA && MYROLE!=ROLE_PROPULSION && MYROLE!=ROLE_DEBUG)
 #error "MYROLE must be correct and defined in node_cfg.h"
 #endif
 
@@ -217,6 +216,8 @@ int role_send(sMsg *msg){
     return ret;
 }
 
+#if MYROLE
+
 int role_relay(sMsg *msg){
     bn_Address dest_save = msg->header.destAddr;
     uint8_t msg_src_role = role_get_role(msg->header.srcAddr);
@@ -261,3 +262,5 @@ int role_relay(sMsg *msg){
 
     return ret;
 }
+
+#endif
