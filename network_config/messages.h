@@ -44,6 +44,7 @@ typedef enum{
     E_TRAJ,                 // a trajectory step
     E_POS,                  // position (w/ uncertainty) of an element
     E_SERIAL_DUMP,          // serial dump (for debug)
+    E_ASSERV_STATS,         // control loop statistics
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -141,6 +142,20 @@ typedef struct {
     uint8_t id; // 0:prim, 1:sec, 2:adv_prim, 3:adv_sec
 } sPosPayload;
 
+#define NB_ASSERV_STEPS_PER_MSG (4)
+typedef struct __attribute__((packed)){
+    uint16_t nb_seq;
+    struct __attribute__((packed)){ // 13bytes*4
+        unsigned short delta_t;
+        short ticks_l;
+        short ticks_r;
+        short consigne_l;
+        short consigne_r;
+        short out_l :12;
+        short out_r :12;
+    } steps[NB_ASSERV_STEPS_PER_MSG];
+} sAsservStats;
+
 /************************ user payload definition stop ************************/
 
 
@@ -165,6 +180,7 @@ typedef union{
     sMesPayload measure;
     sTrajElRaw_t traj;
     sPosPayload pos;
+    sAsservStats asservStats;
 /************************ user payload stop ************************/
 
 }uPayload;

@@ -28,6 +28,7 @@ const char *eType2str(E_TYPE elem){
     case E_TRAJ :                   return "TRAJ";
     case E_POS :                    return "POS";
     case E_SERIAL_DUMP :            return "SERIAL_DUMP";
+    case E_ASSERV_STATS :           return "ASSERV_STATS";
     /************************ user types stop ************************/
 
     default :

@@ -139,6 +139,18 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
             }
             switch (msgIn.header.type){
+            case E_ASSERV_STATS :
+                {
+                    int i;
+                    sAsservStats *as = &msgIn.payload.asservStats;
+                    printf("seq %hu\n", as->nb_seq);
+                    if(fd) fprintf(fd, "seq %hu\n", as->nb_seq);
+                    for(i=0; i<NB_ASSERV_STEPS_PER_MSG; i++){
+                        printf("~%hu,%hi,%hi,%hi,%hi,%hi,%hi\n", as->steps[i].delta_t, as->steps[i].ticks_l, as->steps[i].consigne_l, as->steps[i].out_l, as->steps[i].ticks_r, as->steps[i].consigne_r, as->steps[i].out_r);
+                        if(fd) fprintf(fd, "~%hu,%hi,%hi,%hi,%hi,%hi,%hi\n", as->steps[i].delta_t, as->steps[i].ticks_l, as->steps[i].consigne_l, as->steps[i].out_l, as->steps[i].ticks_r, as->steps[i].consigne_r, as->steps[i].out_r);
+                    }
+                }
+                break;
             case E_DEBUG :
                 printf("%s",msgIn.payload.debug);
                 if(fd) fprintf(fd,"%s",msgIn.payload.debug);
@@ -153,7 +165,10 @@ int main(int argc, char **argv){
                 printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
                 break;
-            default : break;
+            default :
+                printf("\n");
+                if(fd) fprintf(fd, "\n");
+                break;
             }
         }
         else if (err < 0){
