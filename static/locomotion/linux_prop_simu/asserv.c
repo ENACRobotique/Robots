@@ -322,7 +322,7 @@ int new_asserv_step(){
             n_y = y + ((long long)(v*st)>>(SHIFT-2));
             tmp = -( (SQR(n_x - traj[curr_traj][curr_traj_step>>1].c_x) + SQR(n_y - traj[curr_traj][curr_traj_step>>1].c_y))/traj[curr_traj][curr_traj_step>>1].c_r - traj[curr_traj][curr_traj_step>>1].c_r );
 
-            tmp>>=1;  // gain
+            tmp>>=2;  // gain
 
 #ifdef TIME_STATS
             // time stats... result 160µs! (outdated)
@@ -355,6 +355,10 @@ int new_asserv_step(){
         //        if(abs(tmp) > consigne) { // very high compensation term
         //          mybreak_i();
         //        }
+
+        if(abs(tmp) > abs(consigne)>>2){
+            consigne = (SQR(consigne)>>2)/abs(tmp);
+        }
 
         // update set point of each motor
         consigne_l = (((long long)_mul_l*(long long)consigne)>>SHIFT) - tmp; // (IpP<<SHIFT)
