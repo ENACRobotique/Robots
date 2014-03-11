@@ -20,7 +20,7 @@ struct {
 } _aselts[N*2];
 
 void a_star(iABObs_t start, iABObs_t goal, sPath_t *path) {
-    iABObs_t os_start, current, prev, curr;
+    iABObs_t os_start, current, prev, curr, next;
     int i, neighbor;
     sNum_t tmp_g_score, s_l, a_l;
     sSeg_t *seg;
@@ -131,7 +131,7 @@ printf("    worse than before\n");
             if(!_aselts[neighbor].openset || tmp_g_score < _aselts[neighbor].g_score) {
                 _aselts[neighbor].prev = current;
                 _aselts[neighbor].g_score = tmp_g_score;
-                _aselts[neighbor].f_score = _aselts[neighbor].g_score + DIST(O(neighbor), O(goal));
+                _aselts[neighbor].f_score = _aselts[neighbor].g_score + DIST(O(neighbor), O(goal)) - obs[O(neighbor)].r;
                 _aselts[neighbor].arc_len = a_l;
                 _aselts[neighbor].seg_len = s_l;
 
@@ -147,13 +147,35 @@ printf("    worse than before\n");
 
                     _aselts[neighbor].openset = 1;
 #ifdef AS_DEBUG
-printf("    adding to openset\n");
+printf("    adding to openset");
+#endif
+                }
+                else{
+                    prev = NOELT;
+                    for(curr = os_start; curr!=NOELT && _aselts[curr].f_score < _aselts[neighbor].f_score; prev = curr, curr = _aselts[curr].next);
 
+                    if(neighbor != curr){ // update needed
+                        next = _aselts[neighbor].next;
+
+                        _aselts[neighbor].next = curr;
+
+                        if(prev != NOELT)
+                            _aselts[prev].next = neighbor;
+                        else
+                            os_start = neighbor;
+
+                        for(; curr!=NOELT && _aselts[curr].next!=neighbor; curr = _aselts[curr].next);
+
+                        if(curr!=NOELT)
+                            _aselts[curr].next = next;
+                    }
+
+#ifdef AS_DEBUG
+printf("    updating in openset");
 #endif
                 }
 #ifdef AS_DEBUG
-else
-printf("    updating in openset\n");
+printf(" (f_score = %.2f + %.2f = %.2f)\n", _aselts[neighbor].g_score, DIST(O(neighbor), O(goal)) - obs[O(neighbor)].r, _aselts[neighbor].f_score);
 #endif
             }
 #ifdef AS_DEBUG
