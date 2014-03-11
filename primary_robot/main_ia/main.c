@@ -261,12 +261,12 @@ int main(int argc, char **argv){
         if(obs[N - 1].moved){
             fill_tgts_lnk();
 
-            if(DIST(0, N - 1) < 1.){
-                continue;
-            }
-
             for(i = 0; i < N; i++){
                 obs[i].moved = 0;
+            }
+
+            if(DIST(0, N - 1) < 1.){
+                continue;
             }
 
             if(new_path.path){
@@ -279,7 +279,7 @@ int main(int argc, char **argv){
                 curr_tid++;
 
                 for(i = 0; i < new_path.path_len; i++){
-                    printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, new_path.path[i].p1.x, new_path.path[i].p1.y, new_path.path[i].p2.x, new_path.path[i].p2.y,new_path.path[i].obs.c.x,new_path.path[i].obs.c.y, new_path.path[i].obs.r,new_path.path[i].arc_len,new_path.path[i].seg_len);
+                    printf("  %u: p1 x%f y%f, p2 x%f y%f, s_l%f; obs x%f y%f r%.2f, a_l%f\n", i, new_path.path[i].p1.x, new_path.path[i].p1.y, new_path.path[i].p2.x, new_path.path[i].p2.y,new_path.path[i].seg_len,new_path.path[i].obs.c.x,new_path.path[i].obs.c.y, new_path.path[i].obs.r,new_path.path[i].arc_len);
 
                     msgOut.header.type = E_TRAJ;
                     msgOut.header.size = sizeof(msgOut.payload.traj);
@@ -309,7 +309,7 @@ int main(int argc, char **argv){
                     memset(&curr_path, 0, sizeof(curr_path));
                 }
                 memcpy(&curr_path, &new_path, sizeof(curr_path));
-                memset(&new_path, 0, sizeof(curr_path));
+                memset(&new_path, 0, sizeof(new_path));
             }
         }
 
