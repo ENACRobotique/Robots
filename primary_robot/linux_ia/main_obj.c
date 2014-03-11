@@ -27,6 +27,7 @@ sNum_t pts_per_msec = 128./90000.;
 int gat_ind;
 sPt_t pt_select;
 sMsg inMsg, outMsg;
+int mode_obj=0;
 
 
 
@@ -53,8 +54,8 @@ sNum_t val_obj(int num, sPath_t *path_loc) //numeros de l'objectif dans list_obj
 	sNum_t dist;
 	sNum_t point;
 	sNum_t ratio;
-//	printf("A0 x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
-//	printf("AN-1 x=%f & y=%f\n", obs[N-1].c.x, obs[N-1].c.y);
+	printf("A0 x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
+	printf("AN-1 x=%f & y=%f\n", obs[N-1].c.x, obs[N-1].c.y);
 	fill_tgts_lnk();
 	a_star(A(0), A(N-1), path_loc);
 	dist=path_loc->dist;
@@ -124,9 +125,11 @@ iABObs_t next_obj (void)
         	case E_ARBRE :
             	obs[i+1].active=0;
     			memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer1), sizeof(obs[N-1]));
+    			printf("Next obj AN-1 x=%f & y=%f\n", obs[N-1].c.x, obs[N-1].c.y);
     			tmp_val2 = val_obj(i, &path_loc);
 
     			memcpy(&obs[N-1], &(((Obj_arbre*)list_obj[i].type_struct)->entrer2), sizeof(obs[N-1]));
+    			printf("Next obj AN-1 x=%f & y=%f\n", obs[N-1].c.x, obs[N-1].c.y);
     			tmp_val3=val_obj(i, &path_loc);
 
     			if(i==0)
@@ -257,7 +260,7 @@ void send_robot(sPath_t path)
     	}
 	}
 
-int get_position( sPt_t *pos) //TODO normalement seulement le dernier parametre
+int get_position( sPt_t *pos)
 	{
 //	pos->c.x=obs_PA[2*goal].c.x;
 //	pos->c.y=obs_PA[2*goal].c.y;
@@ -296,12 +299,25 @@ int get_position( sPt_t *pos) //TODO normalement seulement le dernier parametre
 
 void obj_tree(iABObs_t obj)
 	{
-	sleep(5);//simule le temps de faire l'action
 	list_obj[obj].active=0;
 	bac.nb_point=bac.nb_point+3;
-	#if DEBUG
-		printf("Objectif : arbre n°%hhi fini\n\n\n",obj);
-	#endif
+	mode_obj=1;
+
+	if(pt_select.x==(((Obj_arbre*)list_obj[obj].type_struct)->entrer1).c.x && pt_select.y==(((Obj_arbre*)list_obj[obj].type_struct)->entrer1).c.y)
+		{
+		pt_select=((Obj_arbre*)list_obj[obj].type_struct)->entrer2.c;
+		printf("Sortie 2 selectionné\n");
+		}
+	else
+		{
+		pt_select=((Obj_arbre*)list_obj[obj].type_struct)->entrer1.c;
+		printf("Sortie 1 selectionné\n");
+		}
+
+	obs[N-1].c.x=pt_select.x;
+	obs[N-1].c.y=pt_select.y;
+
+	printf("Objectif : arbre n°%hhi en cour\n\n\n",obj);
 	}
 
 void obj_bac(iABObs_t obj)
@@ -387,10 +403,10 @@ void state_machine()
 	{
     gat_ind = 1;
     estate_t state = ATTENTE;
-    iABObs_t current_obj;
+    iABObs_t current_obj=0;
     iABObs_t current_obs;
     sPt_t point;
-    int i;
+    int i,j;
    // sPath_t path;
     //next_path.tid = 1;
    // sPath_t current_path
@@ -435,10 +451,11 @@ void state_machine()
 							  first=1;
                     		}*/
 
-					  if((millis()-last_time)>1000)
+					  if( ((millis()-last_time)>1000) && (mode_obj==0))
 					  	  {
 						  printf("A0 x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
 						  current_obj = next_obj();
+
 						  //  getchar();
 						  if ( current_obj == -1) continue; //aucun objectif actif atteignable
 						  current_obs = (list_obj[current_obj]).num_obs ;//Conversion objectif -> obstable
@@ -455,23 +472,34 @@ void state_machine()
 						  //					  _current_pos.y=_current_pos.y+0.1;
 						  memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
 						  printf("Position actuel : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
-						  printf("select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.x-_current_pos.y));
+						  printf("select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
 
+						  if( (millis()-last_time)>1000 &&mode_obj==1)
+							  {
+							  fill_tgts_lnk();
+							  a_star(A(0), A(N-1), &path);
+							  printf("Objectif atteint : dist local=%l",path.dist);
+							  send_robot(path) ;
+							  }
 
 						  if (fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS)   //objectif atteint
 							  {
-							  printf("Un objectif a été atteint\n");
-								  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
-								  {
-								  case E_ARBRE :
-									  obj_tree(current_obj);
-									  break;
-								  case E_BAC :
-									  obj_bac(current_obj);
-									  break;
+							  if(mode_obj==1)mode_obj=0;
+							  else
+							  {
+								  printf("Un objectif a été atteint\n");
+									  switch ((list_obj[current_obj]).type) //Mise en place des procedure local en fonction de l'objectif
+									  {
+									  case E_ARBRE :
+										  obj_tree(current_obj);
+										  break;
+									  case E_BAC :
+										  obj_bac(current_obj);
+										  break;
 
 
-								  }
+									  }
+							  	  }
 							  }
 					  	  }
                 break;
@@ -536,11 +564,12 @@ int main()
     printf("Debut initialisation element du jeu\n");
     //Activation des éléments du jeu
 	int j;
-	for(i=0; i<Nb_obs_start;i++ )
+	for(i=0; i<N;i++ )
 		{
 		obs[i].active =1;
 		}
 	//Initialisation des arbres
+	printf("Initialisation du bac\n");
 		for(i=0 ; i<4 ; i++)
 			{
 			list_obj[i].type_struct = &arbre[list_obj[i].num_obj];
@@ -553,12 +582,14 @@ int main()
 			((Obj_arbre*)list_obj[i].type_struct)->entrer2=obs_PA[2*i+1];
 			}
 	//Initialisation du bac
+		printf("Initialisation du bac\n");
 		list_obj[5].type_struct = &bac;
 		((Obj_bac*)list_obj[i].type_struct)->nb_point=0;
 		((Obj_bac*)list_obj[i].type_struct)->entrer=obs_PA[8];
 
 	//TODO Initialisation des autres éléments
 	//TODO activation bac jaune ou rouge
+
 #endif
 
 
@@ -567,6 +598,42 @@ int main()
 	_current_pos=obs[0].c;
 
 
+/*//test
+//	for(i=1;i<N-1;i++) obs[i].active=0;
+	obs[N-1].c.x=20;
+	obs[N-1].c.y=40;
+	 last_time=millis();
+
+	while(1)
+	{
+	fill_tgts_lnk();
+
+
+    for(i=0; i<2*N; i++) {
+        printf(" %u%c", (i>>1)%10, obs[i>>1].r?(i&1?'b':'a'):' ');
+    }
+    printf("\n");
+    for(i=0; i<2*N; i++) {
+        printf("%u%c", (i>>1)%10, obs[i>>1].r?(i&1?'b':'a'):' ');
+        for(j=0; j<2*N; j++) {
+            printf("%c%c ", j?',':' ', lnk[i][j]?'1':' ');
+        }
+        printf("\n");
+    }
+
+
+	a_star(A(0), A(N-1), &path);
+	printf("dist=%f\n",path.dist);
+
+	 if((millis()-last_time)>1000)
+		 {
+		 send_robot(path) ;
+		 last_time=millis();
+		 }
+	get_position(&_current_pos);
+	obs[0].c=_current_pos;
+	}
+*/
 
 #if DEBUG
 	printf("Fin d'initialisation des éléments de jeu\n");

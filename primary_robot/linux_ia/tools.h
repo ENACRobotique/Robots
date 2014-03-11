@@ -76,7 +76,7 @@ typedef int8_t iABObs_t;
 // ==== global matrices ====
 
 // number of physical obstacles (16)
-#define N (41)
+#define N (63)
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
 extern sLnk_t lnk[2*N][2*N]; // 2Nx2N links between logical obstacles (1kiB)
