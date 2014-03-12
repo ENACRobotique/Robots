@@ -13,12 +13,12 @@
 
 
 #define SEB 0
+#define COLOR 1 //0=red and 1=yellow
 #define DEBUG 1
 #define Nb_obs_start 41
 #define RESO_POS 2
 #define NB_OBJ 5
 #define END_MATCH 90000 //in ms
-#define COLOR 0 //0=red and 1=yellow
 #define CONST_AJUST 0.1 //TODO trouver le pb a star ou fill tangente
 
 typedef enum {ATTENTE , JEU , SHUT_DOWN} estate_t;

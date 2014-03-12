@@ -59,7 +59,9 @@ sObs_t listEP[]={
 	{{280. ,90.}, 0 ,1,1},
 
 	//Bac
-	{{225.,170.},0,1,1}
+	{{225.,170.},0,1,1}, //rouge
+
+	{{75. ,170.},0,1,1}	 //jaune
 };
 
 sNum_t ratio_arbre(void)
@@ -120,10 +122,12 @@ void init_ele(void)
 		listObj[i].type=E_BAC;
 		listObj[i].numObj=0;
 		listObj[i].nbObs=1;
-		listObj[i].listIABObs[0]=10;
+		if(COLOR==0) listObj[i].listIABObs[0]=10;
+		else listObj[i].listIABObs[0]=5;
 		listObj[i].dist=0.;
 		listObj[i].active=1;
 		listObj[i].nbEP=1;
+		if(COLOR==1) numPA++;
 		listObj[i].entryPoint[0]=listEP[numPA];
 			listObj[i].entryPoint[0].active=1;
 		listObj[i].typeStruct = &bac;
@@ -176,7 +180,7 @@ void send_robot(sPath_t path)
     			printf("bn_send() failed #%i\n", -ret);
     			sleep(10);
     		}
-
+    		printf("\n");
     		usleep(1000);
     	}
 	}

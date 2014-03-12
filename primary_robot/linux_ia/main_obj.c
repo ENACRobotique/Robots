@@ -26,6 +26,9 @@ int gnb_l,gnb_r; // glass number right/left
 sNum_t pts_per_msec = 128./90000.;
 int gat_ind;
 sPt_t pt_select;
+int stop=0;
+
+int current_obj=-1;
 
 int mode_obj=0;
 
@@ -112,7 +115,9 @@ iABObs_t next_obj (void)
     sPath_t path_loc2={.dist = 0.,  .path = NULL };
     sNum_t tmp_val2;
     sNum_t dist=999.;
-    sPt_t pointactuel;
+    sPt_t pointactuel={0,0};
+    float dist_prev_current=0;
+    int k=1;
 
     int i,j, tmp_inx=-1; //tmp_inx : index de l'objectif qui va  etre selectionner
 
@@ -134,12 +139,22 @@ iABObs_t next_obj (void)
 	    	if(path_loc.dist==0) printf("\nATTENTION : Erreur\n\n");
 	    	if(dist>path_loc.dist)
 				{
+	    		if(i==current_obj && k==1)
+	    			{
+	    			dist_prev_current=listObj[i].dist;
+	    			k=0;
+	    			}
 	    		listObj[i].dist=path_loc.dist;
 				dist=listObj[i].dist;
 				path_loc2=path_loc;
 				pointactuel.x=obs[N-1].c.x;
 				pointactuel.y=obs[N-1].c.y;
 				}
+			}
+        if((listObj[i].dist>dist_prev_current) && (listObj[i].dist!=0) && (i==current_obj))
+			{
+			printf("\nBIG BIG ERREUR DE TRAJECTOIRE (go to obj)!!!!!!! STOP !!!!\n\n");
+			stop=1;
 			}
         tmp_val2=val_obj(i);
         dist=999;
@@ -206,8 +221,9 @@ void obj_tree(iABObs_t obj)
 
 	if(first==0)
 		{
-		printf("Debut objectif arbre\:");
+		printf("Debut objectif arbre\n");
 		listObj[obj].active=0;
+		listObj[obj].dist=0;
 		bac.nb_point=bac.nb_point+3; //TODO peut etre 4 dépend ou est le fruit noir
 		mode_obj=1;
 
@@ -232,12 +248,19 @@ void obj_tree(iABObs_t obj)
 		}
 	else
 		{
+
 		if( (millis()-last_time)>1000)
 			{
 			last_time=millis();
 			fill_tgts_lnk();
 			a_star(A(0), A(N-1), &path);
 			send_robot(path) ;
+	        if((listObj[obj].dist<path.dist) && (listObj[obj].dist!=0))
+				{
+				printf("\nBIG BIG ERREUR DE TRAJECTOIRE (go to obj)!!!!!!! STOP !!!!\n\n");
+				stop=1;
+				}
+	        listObj[obj].dist=path.dist;
 			}
 		if ((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS))
 			{
@@ -245,6 +268,7 @@ void obj_tree(iABObs_t obj)
 			first=0;
 			pt_select.x=0;
 			pt_select.y=0;
+			listObj[obj].dist=0;
 			}
 		}
 	}
@@ -285,10 +309,10 @@ void state_machine()
 	{
     gat_ind = 1;
     estate_t state = ATTENTE;
-    iABObs_t current_obj=0;
+
     iABObs_t current_obs;
     sPt_t point;
-    int i,j;
+    int i=0,j;
    // sPath_t path;
     //next_path.tid = 1;
    // sPath_t current_path
@@ -312,6 +336,18 @@ void state_machine()
 
             case JEU :
             	if (millis()-_start_time > 90000) state = SHUT_DOWN;
+
+            	if(stop==1) //Bug quelque part
+					{
+					i++;
+					if(i==2)
+						{
+						printf("Stop\n");
+						getchar();
+						stop=0;
+						i=0;
+						}
+					}
 
 				if( ((millis()-last_time)>1000) && (mode_obj==0)) //calcul objectif suivant toute les seconde
 					{
@@ -372,10 +408,20 @@ void state_machine()
 
 int main()
 	{
-	//Position de départ
-	obs[0].c.x=1;
-	obs[0].c.y=199;
-	_current_pos=obs[0].c;
+	if(COLOR==1)
+		{
+		//Position de départ
+		obs[0].c.x=299;
+		obs[0].c.y=199;
+		_current_pos=obs[0].c;
+		}
+	else
+		{
+		//Position de départ
+		obs[0].c.x=1;
+		obs[0].c.y=199;
+		_current_pos=obs[0].c;
+		}
 
 	init_mes(); //initialisation de la communication
 	init_ele();	//initialisation des éléments
