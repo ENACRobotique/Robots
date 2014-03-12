@@ -46,6 +46,25 @@ typedef struct {
     uint8_t active:4;
 } sObs_t;   // sizeof(sObs_t)=16
 
+typedef struct {
+    sPt_t p1;
+    sPt_t p2;
+    sObs_t obs;
+
+    sNum_t arc_len;
+    sNum_t seg_len;
+
+    unsigned short sid;
+} sTrajEl_t;
+
+typedef struct {
+    sNum_t dist;
+    unsigned short tid;
+
+    unsigned int path_len;
+    sTrajEl_t *path;
+} sPath_t;
+
 // a set of common tangents between two obstacles (from o1 to o2)
 typedef struct {
     sSeg_t s1;  // first external (clock wise / a)
@@ -56,13 +75,11 @@ typedef struct {
     sNum_t d; // distance between obstacles
 } sTgts_t;  // sizeof(sTgts_t)=68
 
-// a tangent possibility between two obstacles (4 per pair of physical obstacles)
-typedef uint8_t sLnk_t; // sizeof(sLnk_t)=1
-
 // an index of obstacle between 0:N-1
 typedef int8_t iObs_t;
 // an index of obstacle between 0:2N-1
 typedef int8_t iABObs_t;
+#define ABNOELT ((iABObs_t)-1)
 
 // between 0:2N-1
 #define A(i) ((iABObs_t)( ((iObs_t)(i))<<1 ))
@@ -73,13 +90,35 @@ typedef int8_t iABObs_t;
 // between 0:N-1
 #define O(i) ((iObs_t)( ((iABObs_t)(i))>>1 ))
 
+// A* node (trajectopry from o1 to o2)
+typedef struct {
+    iABObs_t o1; // oriented object
+    iABObs_t o2;
+} sASNode_t;
+#define ASNODE(o1, o2) ((sASNode_t){(o1), (o2)})
+#define ASNOELT ASNODE(ABNOELT, ABNOELT)
+
+typedef struct __attribute__((packed)){ // XXX this attribute reduces the size of this structure from 16 to 13bytes but ~doubles the processing time of a_star()
+                                        // aselts array is reduced by 12*N² bytes, you have to choose between speed and memory...
+    uint8_t active :1;
+    uint8_t closedset :1;
+    uint8_t openset :1;
+
+    sNum_t f_score;
+    sNum_t g_score;
+
+    sASNode_t next; // in openset
+    sASNode_t prev; // in path
+} sASEl_t;
+
 // ==== global matrices ====
 
 // number of physical obstacles (16)
 #define N (41)
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
-extern sLnk_t lnk[2*N][2*N]; // 2Nx2N links between logical obstacles (1kiB)
+extern sASEl_t aselts[N*2][N*2]; // 2Nx2N elements (an A* node is a trajectory from an iABObs_t to another)
+#define ASELT(n) aselts[(n).o1][(n).o2]
 // NxN distances between obstacles
 #define DIST(i, j) (tgts[(iObs_t)(i)][(iObs_t)(j)].d)
 

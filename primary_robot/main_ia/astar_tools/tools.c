@@ -34,10 +34,10 @@ sObs_t obs[] = {
     {{90. , 90. }, R_ROBOT+8, 1, 1}, // 18
     {{210., 90. }, R_ROBOT+8, 1, 1},
     // torches fixe
-    {{0.  , 120.}, R_ROBOT+5, 1, 0}, // 20
-    {{130., 0.  }, R_ROBOT+5, 1, 0},
-    {{170., 0.  }, R_ROBOT+5, 1, 0},
-    {{300., 120.}, R_ROBOT+5, 1, 0},
+    {{0.  , 120.}, R_ROBOT+5, 1, 1}, // 20
+    {{130., 0.  }, R_ROBOT+5, 1, 1},
+    {{170., 0.  }, R_ROBOT+5, 1, 1},
+    {{300., 120.}, R_ROBOT+5, 1, 1},
     // feux
     {{40. , 90. }, R_ROBOT+7, 1, 1}, // 24
     {{90. , 40. }, R_ROBOT+7, 1, 1},
@@ -61,8 +61,9 @@ sObs_t obs[] = {
 
 // tangents between physical obstacles (17kiB)
 sTgts_t tgts[N][N];
-// matrix of 2Nx2N links between logical obstacles (1kiB)
-sLnk_t lnk[2*N][2*N];
+// A* elements
+sASEl_t aselts[N*2][N*2];
+
 
 static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o2
     sVec_t o1o2, t, n;
@@ -212,88 +213,88 @@ printf("  dist %.2f\n", DIST(i, j));
             case 4:
                 ok = check_segment(i, &tgts[i][j].s4, j);
 
-                lnk[A(i)][B(j)] = ok;
-                lnk[A(j)][B(i)] = ok;
+                aselts[A(i)][B(j)].active = ok;
+                aselts[A(j)][B(i)].active = ok;
                 /* no break */
             case 3:
                 ok = check_segment(i, &tgts[i][j].s3, j);
 
-                lnk[B(i)][A(j)] = ok;
-                lnk[B(j)][A(i)] = ok;
+                aselts[B(i)][A(j)].active = ok;
+                aselts[B(j)][A(i)].active = ok;
 
                 if(nb == 3) {
-                    lnk[A(i)][B(j)] = 0;
-                    lnk[A(j)][B(i)] = 0;
+                    aselts[A(i)][B(j)].active = 0;
+                    aselts[A(j)][B(i)].active = 0;
                 }
                 /* no break */
             case 2:
                 ok = check_segment(i, &tgts[i][j].s2, j);
 
                 if(nb == 2) {
-                    lnk[A(i)][B(j)] = 0;
-                    lnk[A(j)][B(i)] = 0;
+                    aselts[A(i)][B(j)].active = 0;
+                    aselts[A(j)][B(i)].active = 0;
 
-                    lnk[B(i)][A(j)] = 0;
-                    lnk[B(j)][A(i)] = 0;
+                    aselts[B(i)][A(j)].active = 0;
+                    aselts[B(j)][A(i)].active = 0;
                 }
 
                 if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
-                    lnk[A(i)][B(j)] = ok;
-                    lnk[A(j)][A(i)] = ok;
+                    aselts[A(i)][B(j)].active = ok;
+                    aselts[A(j)][A(i)].active = ok;
                 }
                 else if(nb == 2 && obs[j].r < LOW_THR) {    // point/circle case
-                    lnk[B(i)][A(j)] = ok;
-                    lnk[A(j)][A(i)] = ok;
+                    aselts[B(i)][A(j)].active = ok;
+                    aselts[A(j)][A(i)].active = ok;
                 }
                 else {
-                    lnk[B(i)][B(j)] = ok;
-                    lnk[A(j)][A(i)] = ok;
+                    aselts[B(i)][B(j)].active = ok;
+                    aselts[A(j)][A(i)].active = ok;
                 }
                 /* no break */
             case 1:
                 ok = check_segment(i, &tgts[i][j].s1, j);
 
                 if(nb == 1) {
-                    lnk[A(i)][B(j)] = 0;
-                    lnk[A(j)][B(i)] = 0;
+                    aselts[A(i)][B(j)].active = 0;
+                    aselts[A(j)][B(i)].active = 0;
 
-                    lnk[B(i)][A(j)] = 0;
-                    lnk[B(j)][A(i)] = 0;
+                    aselts[B(i)][A(j)].active = 0;
+                    aselts[B(j)][A(i)].active = 0;
 
-                    lnk[B(i)][B(j)] = 0;
-                    lnk[A(j)][A(i)] = 0;
+                    aselts[B(i)][B(j)].active = 0;
+                    aselts[A(j)][A(i)].active = 0;
                 }
 
                 if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
-                    lnk[A(i)][A(j)] = ok;
-                    lnk[B(j)][A(i)] = ok;
+                    aselts[A(i)][A(j)].active = ok;
+                    aselts[B(j)][A(i)].active = ok;
                 }
                 else if(nb == 2 && obs[j].r < LOW_THR) {    // point/circle case
-                    lnk[A(i)][A(j)] = ok;
-                    lnk[A(j)][B(i)] = ok;
+                    aselts[A(i)][A(j)].active = ok;
+                    aselts[A(j)][B(i)].active = ok;
                 }
                 else if(nb == 1) {  // point/point case
-                    lnk[A(i)][A(j)] = ok;
-                    lnk[A(j)][A(i)] = ok;
+                    aselts[A(i)][A(j)].active = ok;
+                    aselts[A(j)][A(i)].active = ok;
                 }
                 else {
-                    lnk[A(i)][A(j)] = ok;
-                    lnk[B(j)][B(i)] = ok;
+                    aselts[A(i)][A(j)].active = ok;
+                    aselts[B(j)][B(i)].active = ok;
                 }
                 break;
             default:
             case 0:
-                lnk[A(i)][B(j)] = 0;
-                lnk[A(j)][B(i)] = 0;
+                aselts[A(i)][B(j)].active = 0;
+                aselts[A(j)][B(i)].active = 0;
 
-                lnk[B(i)][A(j)] = 0;
-                lnk[B(j)][A(i)] = 0;
+                aselts[B(i)][A(j)].active = 0;
+                aselts[B(j)][A(i)].active = 0;
 
-                lnk[B(i)][B(j)] = 0;
-                lnk[A(j)][A(i)] = 0;
+                aselts[B(i)][B(j)].active = 0;
+                aselts[A(j)][A(i)].active = 0;
 
-                lnk[A(i)][A(j)] = 0;
-                lnk[B(j)][B(i)] = 0;
+                aselts[A(i)][A(j)].active = 0;
+                aselts[B(j)][B(i)].active = 0;
                 break;
             }
         }
