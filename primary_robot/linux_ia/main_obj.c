@@ -27,6 +27,8 @@ sNum_t pts_per_msec = 128./90000.;
 int gat_ind;
 sPt_t pt_select;
 int stop=0;
+int prio=0;
+int part=-1;
 
 int current_obj=-1;
 
@@ -75,6 +77,9 @@ sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 e
     switch(listObj[num].type)
     	{
 		case E_FEU :
+			printf("enum=%i => type=E_FEU, dist=%f\n",listObj[num].type,dist);
+			point=((Obj_feu*)listObj[num].typeStruct)->nb_point;
+			ratio=point/time*1000;
 			break;
 
 		case E_TORCHE_MOBILE :
@@ -117,7 +122,9 @@ iABObs_t next_obj (void)
     sNum_t dist=999.;
     sPt_t pointactuel={0,0};
     float dist_prev_current=0;
+    int obs_deactive[10];
     int k=1;
+    int l=0,m=0;
 
     int i,j, tmp_inx=-1; //tmp_inx : index de l'objectif qui va  etre selectionner
 
@@ -126,7 +133,17 @@ iABObs_t next_obj (void)
     	{
         if (listObj[i].active==0) continue; //test si ojectif existe encore
 
-        for(j=0 ; j<listObj[i].nbObs ; j++) obs[listObj[i].listIABObs[j]].active=0;
+        for(j=0 ; j<listObj[i].nbObs ; j++)
+        	{
+        	if(obs[listObj[i].listIABObs[j]].active==1) obs[listObj[i].listIABObs[j]].active=0;
+        	else
+        		{
+        		obs_deactive[l]=j;
+        		l++;
+        		}
+        	}
+
+        printf("Deactivé : 5=%d | 10=%d | 25=%d | 26=%d | 27=%d\n",obs[5].active,obs[10].active,obs[25].active,obs[26].active,obs[27].active);
 
         for(j=0 ; j<listObj[i].nbEP ; j++)
 			{
@@ -136,7 +153,7 @@ iABObs_t next_obj (void)
 			fill_tgts_lnk(); //TODO optimisation car uniquement la position de fin change dans la boucle
 	    	a_star(A(0), A(N-1), &path_loc);
 	    	printf("Pour obj=%i avec pa=%i dist=%f\n",i,j,path_loc.dist);
-	    	if(path_loc.dist==0) printf("\nATTENTION : Erreur\n\n");
+	    	if(path_loc.dist==0) printf("ATTENTION : Erreur : distance nul\n");
 	    	if(dist>path_loc.dist)
 				{
 	    		if(i==current_obj && k==1)
@@ -160,6 +177,8 @@ iABObs_t next_obj (void)
         dist=999;
 
         for(j=0 ; j<listObj[i].nbObs ; j++) obs[listObj[i].listIABObs[j]].active=1;
+        for(m=0 ; m<l ; m++) obs[listObj[i].listIABObs[obs_deactive[m]]].active=0;
+        l=0;
 
 		printf("objectif n°%hhi avec ratio=%f \n\n",i,tmp_val2);
 
@@ -175,9 +194,19 @@ iABObs_t next_obj (void)
 			pt_select.y = obs[N-1].c.y;
 			}
     	}
-
+    if(part!=-1)
+		{
+    	for(j=0 ; j<listObj[current_obj].nbObs ; j++) obs[(listObj[part].listIABObs[j])].active=1;
+		part=-1;
+		}
 	printListObj();
 	printf("Objectif sélectionné : %i\n\n",tmp_inx);
+	if(stop==1) //bug => on n'envoie pas la trajectoire
+		{
+		path.tid=0;
+		path.path_len=0;
+		path.dist=0;
+		}
     return (tmp_inx);
 	}
 
@@ -222,6 +251,7 @@ void obj_tree(iABObs_t obj)
 	if(first==0)
 		{
 		printf("Debut objectif arbre\n");
+		last_time=millis();
 		listObj[obj].active=0;
 		listObj[obj].dist=0;
 		bac.nb_point=bac.nb_point+3; //TODO peut etre 4 dépend ou est le fruit noir
@@ -251,18 +281,22 @@ void obj_tree(iABObs_t obj)
 
 		if( (millis()-last_time)>1000)
 			{
+			printf("Arbre en cour\n");
 			last_time=millis();
 			fill_tgts_lnk();
 			a_star(A(0), A(N-1), &path);
-			send_robot(path) ;
+			printf("start x=%f y=%f end x=%f y=%f\n",obs[0].c.x,obs[0].c.y,obs[N-1].c.x,obs[N-1].c.y);
 	        if((listObj[obj].dist<path.dist) && (listObj[obj].dist!=0))
 				{
 				printf("\nBIG BIG ERREUR DE TRAJECTOIRE (go to obj)!!!!!!! STOP !!!!\n\n");
-				stop=1;
+				path.tid=0;
+				path.path_len=0;
+				path.dist=0;
 				}
+			send_robot(path) ;
 	        listObj[obj].dist=path.dist;
 			}
-		if ((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS))
+		if ((fabs(pt_select.x-_current_pos.x)<1 && fabs(pt_select.y-_current_pos.y)<1))
 			{
 			mode_obj=0;
 			first=0;
@@ -276,6 +310,7 @@ void obj_tree(iABObs_t obj)
 void obj_bac(iABObs_t obj)
 	{
 	listObj[obj].active=0;
+	obs[(listObj[obj].listIABObs[0])].active=0;
 	bac.nb_point=0;
 	#if DEBUG
 		printf("Objectif : bac fini\n\n\n");
@@ -313,6 +348,7 @@ void state_machine()
     iABObs_t current_obs;
     sPt_t point;
     int i=0,j;
+    int temp=0;
    // sPath_t path;
     //next_path.tid = 1;
    // sPath_t current_path
@@ -335,7 +371,7 @@ void state_machine()
         		break;
 
             case JEU :
-            	if (millis()-_start_time > 90000) state = SHUT_DOWN;
+            	if (millis()-_start_time > END_MATCH) state = SHUT_DOWN;
 
             	if(stop==1) //Bug quelque part
 					{
@@ -343,14 +379,25 @@ void state_machine()
 					if(i==2)
 						{
 						printf("Stop\n");
-						getchar();
+						//getchar();
 						stop=0;
 						i=0;
 						}
 					}
+            	//!!!SPAM!!!
+            	//printf("active=%i, x=%f y=%f r=%f\n", obs[10].active,obs[10].c.x, obs[10].c.y, obs[10].r);
 
-				if( ((millis()-last_time)>1000) && (mode_obj==0)) //calcul objectif suivant toute les seconde
+            	//Test si tous objectif sont fini
+            	temp=0;
+            	for(j=0 ; j<NB_OBJ ; j++)
+            		{
+            		if(listObj[j].active==0) temp++;
+            		}
+            	if(temp==NB_OBJ) state = SHUT_DOWN;
+
+				if( (((millis()-last_time)>1000) && (mode_obj==0)) || prio==1) //calcul objectif suivant toute les seconde
 					{
+					prio=0;
 					printf("obs[0] suivi par next_obj(): x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
 					current_obj = next_obj();
 					//getchar();
@@ -363,13 +410,26 @@ void state_machine()
 
 				if(get_position(&_current_pos))
 					{
-
+					memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
+					//FIXME
 					//printf("Position actuel avant correction : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
 					//for(j=0 ; j<listObj[current_obj].nbObs;j++) obs[(listObj[current_obj].listIABObs[j])].active=0;
-					//if((i=test_in_obs())!=0) project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);;
+					if(((i=test_in_obs())!=0) )
+						{
+						project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);;
+						if(sqrt(pow(_current_pos.x-obs[0].c.x,2)+pow(_current_pos.y-obs[0].c.y,2)<2))
+							{
+							memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
+							}
+						else
+							{
+							memcpy(&_current_pos,&obs[0].c, sizeof(obs[0].c));
+							}
+
+						}
 					//for(j=0 ; j<listObj[current_obj].nbObs;j++) obs[(listObj[current_obj].listIABObs[j])].active=1;
 
-					memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
+
 					if((millis()-last_time2)>1000)
 						{
 						long last_time2=0;
@@ -386,7 +446,13 @@ void state_machine()
 							break;
 						case E_BAC :
 							obj_bac(current_obj);
-							state = SHUT_DOWN; //temporaire
+							//state = SHUT_DOWN; //temporaire
+							break;
+						case E_FEU :
+							listObj[current_obj].active=0;
+							listObj[current_obj].dist=0;
+							for(i=0 ; i<listObj[current_obj].nbObs ; i++) obs[(listObj[current_obj].listIABObs[i])].active=0;
+							part=current_obj;
 							break;
 						}
 					}

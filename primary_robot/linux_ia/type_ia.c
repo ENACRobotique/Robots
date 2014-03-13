@@ -21,6 +21,7 @@ sPath_t path= {.dist = 0.,  .path = NULL };
 
 Obj_arbre arbre[4];
 Obj_bac bac;
+Obj_feu feu[4];
 
 
 sObj_t listObj[NB_OBJ];
@@ -61,7 +62,29 @@ sObs_t listEP[]={
 	//Bac
 	{{225.,170.},0,1,1}, //rouge
 
-	{{75. ,170.},0,1,1}	 //jaune
+	{{75. ,170.},0,1,1}, //jaune
+
+	//Feux (centre)
+	{{40. ,  90. }, 0, 1, 1},
+	{{90. , 40.  }, 0, 1, 1},
+	{{90. , 140. }, 0, 1, 1},
+	{{210., 40.  }, 0, 1, 1},
+	{{210., 140. }, 0, 1, 1},
+	{{260.,  90. }, 0, 1, 1},
+
+	{{1.  , 120. }, 0, 1, 1},
+	{{130. , 1.  }, 0, 1, 1},
+	{{170. , 1.  }, 0, 1, 1},
+	{{299., 120. }, 0, 1, 1},
+
+	{{90. , 90.  }, 0, 1, 1},
+	{{90. , 90.  }, 0, 1, 1},
+	{{90. , 90.  }, 0, 1, 1},
+
+	{{210. ,90. }, 0, 1, 1},
+	{{210. ,90. }, 0, 1, 1},
+	{{210. ,90. }, 0, 1, 1},
+
 };
 
 sNum_t ratio_arbre(void)
@@ -86,7 +109,7 @@ void printListObj(void)
 	printf("ListObj :\n");
 	for(i=0 ; i<NB_OBJ ; i++)
 		{
-		printf("type=%i, numObj=%i, nbObs=%i, dist=%f, active=%i, nbEP=%i\n",listObj[i].type,listObj[i].numObj,listObj[i].nbObs,listObj[i].dist,listObj[i].active,listObj[i].nbEP);
+		printf("type=%i, numObj=%i, nbObs=%i,{listIABObs[0]=%i,listIABObs[1]=%i,listIABObs[2]=%i} dist=%f, active=%i, nbEP=%i\n",listObj[i].type,listObj[i].numObj,listObj[i].nbObs,listObj[i].listIABObs[0],listObj[i].listIABObs[1],listObj[i].listIABObs[2],listObj[i].dist,listObj[i].active,listObj[i].nbEP);
 		}
 	printf("\n");
 	}
@@ -133,9 +156,77 @@ void init_ele(void)
 		listObj[i].typeStruct = &bac;
 
 		((Obj_bac*)listObj[i].typeStruct)->nb_point=0;
-
 		i++;
 		numPA++;
+		if(COLOR==0) numPA++;
+
+	//Initialisation des feux vericaux sur la table +  coté
+		for(i=5 ; i<11 ; i++)
+			{
+			listObj[i].type=E_FEU;
+			listObj[i].numObj=i-5;
+			listObj[i].nbObs=2;
+
+			for(j=0 ; j<listObj[i].nbObs ; j++)
+				{
+				listObj[i].listIABObs[j]=26+j+2*(i-5);
+				}
+			listObj[i].dist=0.;
+			listObj[i].active=1;
+			listObj[i].nbEP=1;
+			listObj[i].entryPoint[0]=listEP[numPA];
+				listObj[i].entryPoint[0].active=1;
+			numPA++;
+			listObj[i].typeStruct = &feu[i];
+
+			((Obj_feu*)listObj[i].typeStruct)->pos=0;
+			((Obj_feu*)listObj[i].typeStruct)->nb_point=2;
+			}
+
+		//Initialisation des feux vericaux sur le  coté
+			for(i=11 ; i<15 ; i++)
+				{
+				listObj[i].type=E_FEU;
+				listObj[i].numObj=i-5;
+				listObj[i].nbObs=3;
+
+				if(i==11)
+					{
+					listObj[i].listIABObs[0]=20;
+					listObj[i].listIABObs[1]=21;
+					listObj[i].listIABObs[2]=38;
+					}
+				if(i==12)
+					{
+					listObj[i].listIABObs[0]=22;
+					listObj[i].nbObs=2;
+					listObj[i].listIABObs[1]=39;
+					}
+				if(i==13)
+					{
+					listObj[i].listIABObs[0]=23;
+					listObj[i].nbObs=2;
+					listObj[i].listIABObs[1]=40;
+					}
+				if(i==14)
+					{
+					listObj[i].listIABObs[0]=24;
+					listObj[i].listIABObs[1]=25;
+					listObj[i].listIABObs[2]=41;
+					}
+
+				listObj[i].dist=0.;
+				listObj[i].active=1;
+				listObj[i].nbEP=1;
+				listObj[i].entryPoint[0]=listEP[numPA];
+					listObj[i].entryPoint[0].active=1;
+				numPA++;
+				listObj[i].typeStruct = &feu[i];
+
+				((Obj_feu*)listObj[i].typeStruct)->pos=0;
+				((Obj_feu*)listObj[i].typeStruct)->nb_point=2;
+				}
+
 		printf("Fin de l'initialisation des elements du jeu\n");
 	}
 
