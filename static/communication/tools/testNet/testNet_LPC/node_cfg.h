@@ -19,6 +19,11 @@
 #define MYADDRX 0                   // Xbee address . Remember to include the Xbee_API_shared lib and Xbee_API_XXXARCH lib in the build
 #define MYADDRI ADDRI_LPC     // I2C address. Remember to include the relevant architecture libraries in the build if needed.
 #define MYADDRU 0                   // UART address. Remember to include the relevant architecture libraries in the build if needed.
+#define MYADDRD 0
+#define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
+
+#define MYROLE 0
+// MYROLE must be equal to role_get_role(MYADDR)
 
 // Superbus parameters
 #define BN_INC_MSG_BUF_SIZE 4           // size of the global incoming buffer (requires RAM space : SB_INC_MSG_BUF_SIZE*SB_MAX_PDU Bytes(cf message.h) )

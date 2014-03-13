@@ -79,7 +79,7 @@ int cbr_newFlux(sMsg *msg){
 
     //malloc
     curP=malloc(sizeof(sFluxDescriptor));
-    if ( curP==0 ) return -ERR_MALLOC;
+    if ( curP==0 ) return -ERR_INSUFFICIENT_MEMORY;
     prevP->next=curP;
 
     //fill informations
@@ -328,7 +328,7 @@ int well_recordPkt(sMsg *msg){
     else {
 
         //allocate memory
-        if ( (curP=malloc(sizeof(sStatDescriptor)))<0) return -ERR_MALLOC;
+        if ( (curP=malloc(sizeof(sStatDescriptor)))<0) return -ERR_INSUFFICIENT_MEMORY;
         prevP->next=curP;
 
         //fill it

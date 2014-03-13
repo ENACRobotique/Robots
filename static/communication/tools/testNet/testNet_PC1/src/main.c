@@ -55,7 +55,7 @@ int main(){
 
 
     bn_init();
-    bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+    bn_attach(E_ROLE_SETUP,role_setup);
 
     printf("listening, CTRL+C  for menu\n");
 

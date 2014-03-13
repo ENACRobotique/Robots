@@ -12,11 +12,11 @@
 #include <stdint.h>
 #include "../static/communication/botNet/shared/message_header.h"
 
-#include "roles.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "roles.h"
 
 #ifndef BIT
 #define BIT(a) (1<<(a))

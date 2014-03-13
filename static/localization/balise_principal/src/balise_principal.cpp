@@ -22,7 +22,7 @@ uint32_t mesTab[2]={0,0};
 void setup(){
     bn_init();
 
-    bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+    bn_attach(E_ROLE_SETUP,role_setup);
     bn_printfDbg("start main turret beacon, free mem : %d o\n",freeMemory());
 
 //    domi_init(2);
