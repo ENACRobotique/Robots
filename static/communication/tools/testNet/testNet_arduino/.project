@@ -55,7 +55,7 @@
 		<link>
 			<name>lib/botNet</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/botNet</location>
+			<locationURI>PARENT-3-PROJECT_LOC/botNet</locationURI>
 		</link>
 		<link>
 			<name>lib/testNet_config</name>
