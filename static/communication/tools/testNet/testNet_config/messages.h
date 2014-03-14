@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-#include "network_cfg.h"
+#include <stdint.h>
 #include "../../../botNet/shared/message_header.h"
 
 // bn_Address : cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
@@ -36,6 +36,7 @@ typedef enum{
     E_CBR_CTRL,
     E_TEST_PKT,
     E_WELL_CTRL,
+    E_ROLE_SETUP,
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -60,6 +61,35 @@ typedef enum{
 //function returning a string corresponding to one element of the above enum. Must be managed by hand.
 char *eType2str(E_TYPE elem);
 
+typedef struct __attribute__((packed)){ // 2bytes
+    struct __attribute__((packed)){
+        uint8_t first  :4;
+        uint8_t second :4;
+    } sendTo;
+    struct __attribute__((packed)){
+        uint8_t n1 :4;
+        uint8_t n2 :4;
+    } relayTo;
+} sRoleActions;
+typedef struct __attribute__((packed)){
+    uint16_t nb_steps; // must be <=13 to fit in a sMsg payload (2+4*13=54)
+    struct{ // 4bytes
+        enum{
+            UPDATE_ADDRESS,
+            UPDATE_ACTIONS
+        } step :8;
+        union{
+            struct __attribute__((packed)){
+                uint8_t role;
+                bn_Address address;
+            };
+            struct __attribute__((packed)){
+                E_TYPE type :8;
+                sRoleActions actions;
+            };
+        };
+    } steps[];
+} sRoleSetupPayload;
 
 /************************ user payload definition start ************************/
 //user-defined payload types.
@@ -105,6 +135,8 @@ typedef union{
     sCBRCtrl CBRCtrl;
     sTestMsg testMsg;
     sWellCtrl wellCrtl;
+    sRoleSetupPayload roleSetup;
+
 
 /************************ user payload stop ************************/
 

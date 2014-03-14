@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+#include "roles.h"
+
 #ifndef BIT
 #define BIT(a) (1<<(a))
 #endif
@@ -55,7 +57,10 @@ extern "C" {
     #define ADDRU2_PC3       (2 | SUBNETU2)
 
 //default debug address :
-    #define ADDR_DEBUG_DFLT 0
+    #define ADDR_MONITORING_DFLT    (0)
+    #define ADDR_IA_DFLT            (0)
+    #define ADDR_PROP_DFLT          (0)
+    #define ADDR_DEBUG_DFLT         (0)
 
 
 

@@ -12,7 +12,7 @@
 const char *eType2str(E_TYPE elem){
     switch (elem){
     case E_DEBUG :                  return "DEBUG";
-    case E_DEBUG_SIGNALLING :       return "DEBUG_SIGNALLING";
+    case E_ROLE_SETUP :             return "ROLE_SETUP";
     case E_DATA :                   return "DATA";
     case E_ACK_RESPONSE :           return "ACK_RESPONSE";
     case E_PING :                   return "PING";
@@ -28,6 +28,10 @@ const char *eType2str(E_TYPE elem){
     case E_TRAJ :                   return "TRAJ";
     case E_POS :                    return "POS";
     case E_SERIAL_DUMP :            return "SERIAL_DUMP";
+    case E_ASSERV_STATS :           return "ASSERV_STATS";
+    case E_GOAL :                   return "GOAL";
+    case E_OBS_CFG :                return "OBS_CFG";
+    case E_OBSS :                   return "OBSS" ;
     /************************ user types stop ************************/
 
     default :

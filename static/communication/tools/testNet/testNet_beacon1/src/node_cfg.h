@@ -13,6 +13,11 @@
 #define MYADDRX (ADDRX_BEACON_1|SUBNETX)
 #define MYADDRI (ADDRI_BEACON_1)
 #define MYADDRU 0
+#define MYADDRD 0
+#define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
+
+#define MYROLE 0
+// MYROLE must be equal to role_get_role(MYADDR)
 
 #define BN_INC_MSG_BUF_SIZE 8
 

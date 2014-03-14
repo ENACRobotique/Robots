@@ -9,7 +9,7 @@
  * May (and will certainly) overflow
  * Based on gettimeofday from  <sys/time.h>
  */
-int millis();
+unsigned int millis();
 
 /* micros :
  * Argument : none
@@ -19,7 +19,7 @@ int millis();
  * May (and will certainly) overflow
  * Based on gettimeofday from  <sys/time.h>
  */
-int micros();
+unsigned int micros();
 
 
 #endif
