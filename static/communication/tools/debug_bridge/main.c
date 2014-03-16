@@ -86,6 +86,7 @@ int main(int argc, char *argv[]){
     // arguments check
 
     // botNet initialization
+    bn_attach(E_ROLE_SETUP, role_setup);
     ret = bn_init();
     if(ret < 0){
         printf("bn_init() failed err#%i\n", -ret);

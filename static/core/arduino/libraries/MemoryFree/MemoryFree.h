@@ -12,6 +12,9 @@ extern "C" {
 
 int freeMemory();
 
+void setupFreeTest();
+unsigned int getFreeTest();
+
 #ifdef  __cplusplus
 }
 #endif

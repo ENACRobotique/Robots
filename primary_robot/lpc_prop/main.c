@@ -156,7 +156,7 @@ int main(void) {
     pwm_init(0, 1024);  // 29.3kHz update rate => not audible
 
 #if !defined(ASSERV_TEST) || (defined(ASSERV_TEST) && defined(NETWORK_TEST))
-    bn_attach(E_DEBUG_SIGNALLING, bn_debugUpdateAddr);
+    bn_attach(E_ROLE_SETUP, role_setup);
 
     bn_init();
 #endif
@@ -208,6 +208,8 @@ int main(void) {
 
 #ifndef ASSERV_TEST
         if(bn_receive(&msg) > 0) {
+            role_relay(&msg);
+
             switch(msg.header.type){
             case E_DATA: // beacon
                 gpio_write(0, 31, msg.payload.raw[0]);
@@ -274,6 +276,7 @@ int main(void) {
 
                 if( error ) {
                     // error...
+                    bn_printfDbg("got bad trajectory (%i)\n", error);
                 }
                 break;
             }
@@ -283,7 +286,7 @@ int main(void) {
                     y = isD2I(msg.payload.pos.y); // (I<<SHIFT)
                     theta = isROUND( D2I(RDIAM)*msg.payload.pos.theta ); // (rad.I<<SHIFT)
 
-                    bn_printDbg("got pos");
+                    bn_printDbg("got pos\n");
                 }
                 break;
                 //case 3: // set desired speed
@@ -292,7 +295,7 @@ int main(void) {
                 // TODO case get position (send position periodically with uncertainty to the fixed beacons for better position estimation)
 
             default:
-                bn_printDbg("got unhandled msg");
+                bn_printfDbg("got unhandled msg (%i)\n", msg.header.type);
                 break;
             }
         }
@@ -487,7 +490,7 @@ int main(void) {
         if(millis() - prevPos >= 100) {
             prevPos = millis();
 
-            msg.header.destAddr = ADDRD_MAIN_IA_SIMU;
+//            msg.header.destAddr = ADDRD_MONITORING; role_send() => useless
             msg.header.type = E_POS;
             msg.header.size = sizeof(msg.payload.pos);
             msg.payload.pos.id = 0; // main robot
@@ -495,7 +498,7 @@ int main(void) {
             msg.payload.pos.y = I2Ds(y);
             msg.payload.pos.theta = RI2Rs(theta);
 
-            bn_send(&msg);
+            role_send(&msg);
         }
 
 #ifdef TIME_STATS

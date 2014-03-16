@@ -77,7 +77,7 @@ sPosLEl *pl_getNext(sPosList *pl){
     return pl->curr;
 }
 
-// functions for list of trajectories
+// functions for list of trajectories (assumes consecutive, increasing tids)
 
 void tl_init(sTrajList *pl, int maxlen){
     assert(pl);
@@ -118,15 +118,17 @@ int tl_addTail(sTrajList *tl, sTrajElRaw_t *p){
     else
         memset(&el->traj, 0, sizeof(el->traj));
 
-    if(tl->maxlen > 0 && tl->len > tl->maxlen){
-        el = tl->head;
-        tl->head = tl->head->next;
-        if(tl->curr == el){
-            tl->curr = NULL;
-        }
-        tl->len--;
+    if(tl->maxlen > 0){
+        while(tl->head->traj.tid <= tl->tail->traj.tid - tl->maxlen){
+            el = tl->head;
+            tl->head = tl->head->next;
+            if(tl->curr == el){
+                tl->curr = NULL;
+            }
+            tl->len--;
 
-        free(el);
+            free(el);
+        }
     }
 
     return 0;

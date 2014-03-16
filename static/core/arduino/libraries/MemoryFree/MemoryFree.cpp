@@ -42,3 +42,20 @@ int freeMemory() {
   }
   return free_memory;
 }
+
+void setupFreeTest(){
+    char *p = (char*)(__brkval?((int*)__brkval)+1:(int*)&__heap_start+1);
+
+    while((void*)p < (void*)&p){
+        *p++ = 0x42;
+    }
+}
+
+unsigned int getFreeTest(){
+    unsigned int sz = 0;
+    char *p = (char*)(__brkval?((int*)__brkval)+1:(int*)&__heap_start+1);
+
+    while(*p++ == 0x42) sz++;
+
+    return sz;
+}

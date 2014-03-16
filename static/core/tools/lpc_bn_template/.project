@@ -32,7 +32,7 @@
 		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/Timeout</location>
+			<locationURI>PARENT-2-copy_PARENT12/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>

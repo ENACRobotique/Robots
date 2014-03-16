@@ -10,6 +10,8 @@
 
 #include "messages.h"
 
+extern int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
+
 int new_traj_el(sTrajElRaw_t *te);
 int new_pos(sPosPayload *pos);
 int new_asserv_step();

@@ -1,8 +1,8 @@
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
 
-#define AMAX (35)
-#define VMAX iDpS2IpP(60.)  // 60cm/s max
+#define AMAX (40)
+//#define VMAX iDpS2IpP(60.)  // 60cm/s max
 
 #include "motor.h"
 

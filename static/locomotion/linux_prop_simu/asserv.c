@@ -12,7 +12,9 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
+#include "../../../global_errors.h"
 #include "millis.h"
+#include "roles.h"
 
 #include "params.h"
 #include "controller.h"
@@ -22,7 +24,7 @@
 
 #define SQR(v) ((long long)(v)*(v))
 
-#define TIME_STATS
+//#define TIME_STATS
 
 #define TRAJ_MAX_SIZE (16)
 
@@ -73,7 +75,7 @@ void traj_conv(sTrajEl_t *t) {
 
 int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
 int gx, gy; // goal (I<<SHIFT)
-int d_consigne = isDpS2IpP(15. /* cm/s */); // desired speed (IpP<<SHIFT)
+int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
 enum {
     S_WAIT, // no action asked (we are stopped)
@@ -175,17 +177,23 @@ int new_pos(sPosPayload *pos){
 int send_pos(){
     sMsg msg;
 
-    msg.header.destAddr = ADDRD_MAIN_IA_SIMU;
+//    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
     msg.payload.pos.id = 0; // main robot
     msg.payload.pos.x = I2Ds(x);
     msg.payload.pos.y = I2Ds(y);
     msg.payload.pos.theta = RI2Rs(theta);
+    if(state == S_RUN_TRAJ){
+        msg.payload.pos.tid = curr_tid;
+        msg.payload.pos.sid = curr_traj_step>>1;
+        msg.payload.pos.ssid = curr_traj_step&1;
+    }
+    else{
+        msg.payload.pos.tid = msg.payload.pos.sid = -1;
+    }
 
-    printf("sending pos (%.2fcm,%.2fcm,%.2f°)\n", msg.payload.pos.x, msg.payload.pos.y, msg.payload.pos.theta*180./M_PI);
-
-    return bn_send(&msg);
+    return role_send(&msg);
 }
 
 int new_asserv_step(){
@@ -312,7 +320,7 @@ int new_asserv_step(){
             n_y = y + ((long long)(v*st)>>(SHIFT-2));
             tmp = -( (SQR(n_x - traj[curr_traj][curr_traj_step>>1].c_x) + SQR(n_y - traj[curr_traj][curr_traj_step>>1].c_y))/traj[curr_traj][curr_traj_step>>1].c_r - traj[curr_traj][curr_traj_step>>1].c_r );
 
-            tmp>>=1;  // gain
+            tmp>>=2;  // gain
 
 #ifdef TIME_STATS
             // time stats... result 160µs! (outdated)
@@ -346,6 +354,10 @@ int new_asserv_step(){
         //          mybreak_i();
         //        }
 
+        if(abs(tmp) > abs(consigne)>>2){
+            consigne = (SQR(consigne)>>2)/abs(tmp);
+        }
+
         // update set point of each motor
         consigne_l = (((long long)_mul_l*(long long)consigne)>>SHIFT) - tmp; // (IpP<<SHIFT)
         consigne_r = (((long long)_mul_r*(long long)consigne)>>SHIFT) + tmp;
@@ -362,7 +374,12 @@ int new_asserv_step(){
 
 int show_stats(){
 #ifdef TIME_STATS
-    return bn_printfDbg("time stats: circle%uµs, line%uµs, loop%uµs\n", (uint16_t)m_c>>TIME_STATS_SHIFT, (uint16_t)m_l>>TIME_STATS_SHIFT, (uint16_t)m_loop>>TIME_STATS_SHIFT);
+    int ret;
+    ret = bn_printfDbg("time stats: circle%uµs, line%uµs, loop%uµs\n", (uint16_t)m_c>>TIME_STATS_SHIFT, (uint16_t)m_l>>TIME_STATS_SHIFT, (uint16_t)m_loop>>TIME_STATS_SHIFT);
+    if(ret == -ERR_BN_UNKNOWN_ADDR){
+        ret = 0;
+    }
+    return ret;
 #else
     return 0;
 #endif

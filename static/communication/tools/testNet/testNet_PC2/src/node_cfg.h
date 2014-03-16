@@ -13,6 +13,11 @@
 #define MYADDRX 0
 #define MYADDRI 0
 #define MYADDRU ADDRU1_PC2
+#define MYADDRD 0
+#define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
+
+#define MYROLE 0
+// MYROLE must be equal to role_get_role(MYADDR)
 
 #define BN_INC_MSG_BUF_SIZE 4
 #define BN_WAIT_XBEE_SND_FAIL    5000000

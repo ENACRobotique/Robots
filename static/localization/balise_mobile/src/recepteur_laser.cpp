@@ -41,7 +41,7 @@ void setup() {
   bn_init();
 
   bn_printDbg("start mobile 1");
-  bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+  bn_attach(E_ROLE_SETUP,role_setup);
   //bn_attach(E_PERIOD,&periodHandle);
 }
 
