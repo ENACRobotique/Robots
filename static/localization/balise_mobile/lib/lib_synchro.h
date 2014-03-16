@@ -10,6 +10,12 @@
 #define LIB_SYNCHRO_H_
 
 #include "lib_int_laser.h"
+#include "messages.h"
+
+
+#define SYNC_STRUCT_BUFF_SIZE       16          // Number of points to compute the average
+#define SYNC_LASER_ELECTION_TIME    2000000     // Time during which we will measure the best laser interruption to measure the clock drift (µs)
+#define SYNC_TIME_DURATION          10000000    // Duration of synchronization
 
 typedef struct {
     int32_t initialDelay;  // Initial delay, Delta_i
@@ -30,8 +36,10 @@ typedef struct {
 }ABCStruct;
 
 enum {
-    OUT_OF_SYNC,
-    SYNCED
+    SYNC_BEGIN_ELECTION,
+    SYNC_BEGIN_MEASURES,
+    SYNC_OUT_OF_SYNC,
+    SYNC_SYNCHRONIZED
 };
 
 /* micros2s : local to synchronized time (microsecond).
@@ -56,18 +64,18 @@ uint32_t millis2s(uint32_t local);
  */
 void updateSync();
 
-
-/* SyncComputation : Computes the synchronization parameters.
- * Arguments :
- *  t_turret : time at which the turret recorded one turn (turret reference, broadcasted by the turret, microsecond).
- *  t_laser : date at which the laser was detected (local reference, microsecond).
- *  period : Duration of last turn (measured on turret, broadcasted alongside with t_turret, microsecond).
- * Return value :
- *  OUT_OF_SYNC : no satisfactory sync has been computed
- *  SYNCED : micros2s() and millis2s() can now be used.
- *
- * Usage : feed syncComputation with data broadcasted by the turret until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
+/* SyncComputationMsg : Computes the synchronization parameters.
+ * Usage : feed syncComputationMsg with data broadcasted by the turret until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
+ *         /!\ feed also syncComputationLaser with laser data
  */
-int syncComputation(uint32_t t_turret, uint32_t t_laser, uint32_t period);
+int syncComputationMsg(sSyncPayload *pload);
+
+
+/* SyncComputationLaser : Computes the synchronization parameters.
+ * Usage : feed syncComputationLaser with data from the elected laser buffer until sync computation is not over.
+ *         /!\ feed also syncComputationMsg with data broadcasted by the turret.
+ */
+void syncComputationLaser(plStruct *sLaser);
+
 
 #endif /* LIB_SYNCHRO_H_ */

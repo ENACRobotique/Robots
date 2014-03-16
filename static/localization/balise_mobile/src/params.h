@@ -10,16 +10,13 @@
 
 
 typedef enum{
-    CHANNEL,
-    SYNC,
-    GAME
+    S_BEGIN,
+    S_CHANNEL,        // Initial channel selection
+    S_SYNC_ELECTION,  // Sync laser interruption election
+    S_SYNC_MEASURES,  // Clock drift measurement
+    S_SYNCED,         // Waiting until everybody is synced (message from turret tells us)
+    S_GAME            // Game mode
 } mainState;
-
-
-
-
-
-#define SYNC_TOL 8 //in µs. max desync tolerated
 
 
 #define DEBUG

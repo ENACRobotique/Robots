@@ -5,25 +5,32 @@
 #include "Arduino.h"
 
 #include "lib_int_laser.h"
-#include "lib_time.h"
+//#include "lib_time.h"
 #include "messages.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "params.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"
+#include "lib_synchro.h"
 #include "../../../communication/botNet/shared/bn_debug.h"
 
 
-char nbSync=0;
 unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;
-int debug_led=1;
-unsigned long time_prev_led=0, time_prev_laser=0;
-int state=GAME;
-plStruct laserStruct0={0},laserStruct1={0};
-unsigned long lasStrRec0=0,lasStrRec1=0;
-volatile unsigned long laser_period=100000; // in µs, to be confirmed by the main robot
+unsigned long time_prev_led=0, sw=0;
+uint32_t time_prev_laser=0;
 
 
+
+plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detecion infos
+volatile uint32_t laser_period=50000;       // in µs, to be confirmed by the main robot
+uint32_t sync_lastTurnDate_stored=0,sync_period_stored=0,sync_last_received=0;
+uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the laser structure
+int nbLas0=0, nbLas1=0;                     // count of laser interruption detected on channel n
+char chosenOne=8;                           // interruption chosen for synchronization
+
+
+char debug_led=1;
+char state=S_SYNC_ELECTION, prevState=S_BEGIN;                           // State machine state
 
 inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
@@ -46,11 +53,6 @@ void setup() {
   bn_attach(E_PERIOD,&periodHandle);
 }
 
-int routineErr=0,i=0;
-unsigned long sw=0;
-int led=1;
-sMsg in;
-
 void loop() {
 
     sMsg inMsg={{0}},outMsg={{0}};
@@ -58,6 +60,8 @@ void loop() {
     int rxB=0; // size (bytes) of message available to read
     unsigned long time = millis(),timeMicros=micros();
 
+
+    updateSync();
     //blink
     if((time - time_prev_led)>=3000) {
       time_prev_led= time;
@@ -71,12 +75,17 @@ void loop() {
 
 
     // routine and receive
-    if ((rxB=bn_receive(&inMsg))) {
-        i++;
-    }
+    rxB=bn_receive(&inMsg);
+
     //reading the eventual data from the lasers
-    if (periodicLaser(&buf0,&laserStruct0)) lasStrRec0=timeMicros;
-    if (periodicLaser(&buf1,&laserStruct1)) lasStrRec1=timeMicros;;
+    if (periodicLaser(&buf0,&laserStruct0)){
+        lasStrRec0=timeMicros;
+        nbLas0++;
+    }
+    if (periodicLaser(&buf1,&laserStruct1)){
+        lasStrRec1=timeMicros;;
+        nbLas1++;
+    }
 
 
     //laser data pocessing
@@ -109,54 +118,59 @@ void loop() {
 //STATE MACHINE
 #if 1
     switch (state){
-        case SYNC:
-        	if (rxB){
-        		switch (inMsg.header.type) {
-        		case E_SYNC_EXPECTED_TIME :
-					if (nbSync<3){
-						if ( abs((l2gMicros(lastLaserDetectMillis)-inMsg.payload.syncTime))<SYNC_TOL ){
-							nbSync++;
-						}
-						else {
-							setMicrosOffset(lastLaserDetectMillis-inMsg.payload.syncTime);//FIXME : to correct
-							nbSync=0; //TODO : man, i'm no sure about this one. I is highly unprobable that we receive 3 times a laser in sync with our TXed time. On the other hand, we will miss some message (or unsync)
-						}
-					}
-					if (nbSync>=3){//yeah, I know, but fuck you, I have my reason (ensures that the syncOK messages are correctly received)
-						outMsg.header.destAddr=ADDRX_MAIN;
-						outMsg.header.type=E_SYNC_OK;
-						outMsg.header.size=0;
-						bn_send(&outMsg);
-					}
-					rxB=0;
-					break;
-        		case E_SYNC_OK :
-        			//switch to game state if the sync_ok signal was send by the main
-        			if ( (inMsg.header.srcAddr == ADDRX_MAIN) || inMsg.header.srcAddr == ADDRI_MAIN_TURRET){
-					  state=GAME;
-					}
-        			rxB=0;
-        			break;
-        		default : break;
-        		}
-			}
+        case S_SYNC_ELECTION :
+            if (prevState!=state) {
+                nbLas0=0;
+                nbLas1=0;
+                prevState=state;
+            }
+            // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
+            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.index>=0){
+                chosenOne=(nbLas0<nbLas1?1:0);
+            }
+            break;
+        case S_SYNC_MEASURES:
+            // laser data
+            if (chosenOne==0 && laserStruct0.thickness){
+                syncComputationLaser(&laserStruct0);
+            }
+            else if(chosenOne==1 && laserStruct1.thickness) {
+                syncComputationLaser(&laserStruct1);
+            }
+            // data broadcasted by turret
+            if (rxB && inMsg.header.type==E_SYNC_DATA){
+                rxB=0;
+                if (syncComputationMsg(&inMsg.payload.sync)==SYNC_SYNCHRONIZED){
+                    state=S_GAME;
+                }
+            }
         	break;
 
+        case S_SYNCED : // waiting the signal from main to go to game mode
+            if (prevState!=state) {
+                prevState=state;
+            }
+            if (rxB && inMsg.header.type==E_SYNC_OK && inMsg.header.srcAddr==ADDRX_MAIN){
+                state=S_GAME;
+            }
 
-        case GAME :
+            break;
+        case S_GAME :
+            if (prevState!=state) {
+                prevState=state;
+            }
         	if ( laserStruct.thickness ) { //if there is some data to send
-//				outMsg.header.destAddr=ADDRX_MAIN;
-//				outMsg.header.type=E_MEASURE;
-//				outMsg.header.size=sizeof(sMesPayload);
-//
-//                outMsg.payload.measure.value=laserStruct.deltaT;
-////                if (laserStruct.period) outMsg.payload.measure.value=laser2dist(laserStruct.deltaT,laserStruct.period);
-////                else outMsg.payload.measure.value=laser2dist(laserStruct.deltaT,laser_period);
-//                outMsg.payload.measure.date=laserStruct.date;
-//                outMsg.payload.measure.precision=laserStruct.precision;
-//                outMsg.payload.measure.sureness=laserStruct.sureness;
-//				bn_send(&outMsg);
-        	    bn_printfDbg((char*)"date, %lu, mes : %lu\n",laserStruct.date,delta2dist(laserStruct.period,laserStruct.deltaT));
+				outMsg.header.destAddr=ADDRX_MAIN;
+				outMsg.header.type=E_MEASURE;
+				outMsg.header.size=sizeof(sMobileReportPayload);
+
+        	    if (laserStruct.period) outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laserStruct.period);
+        	    else outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laser_period);
+                outMsg.payload.mobileReport.date=laserStruct.date;
+                outMsg.payload.mobileReport.precision=laserStruct.precision;
+                outMsg.payload.mobileReport.sureness=laserStruct.sureness;
+				bn_send(&outMsg);
+//        	    bn_printfDbg((char*)"%lu, %lu, mes , %lu, delta ,%lu, thick,%lu\n",laser_period,laserStruct.period,outMsg.payload.measure.value,laserStruct.deltaT,laserStruct.thickness);
           }
           break;
         default : break;

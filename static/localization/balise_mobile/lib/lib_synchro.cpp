@@ -9,14 +9,14 @@
 #include "Arduino.h"
 
 syncStruc syncParam={0,0,0};
-int32_t _offset;            // value to add to time to correct drift (updated by updateSync)
+int32_t _offset;            // value to add to time to correct drift in microsecond (updated by updateSync)
 
+#if 0
 syncMesStruc *firstMesure=NULL;
 ABCStruct *firstABC=NULL;
 syncStruc **syncStrucBuffer=NULL;
-#define SYNCSTRUBUFFSIZE 16
+#endif
 
-#define TIME_SYNC_DURATION 10000000 //(microsecond)
 
 
 /* micros2s : local to synchronized time (microsecond).
@@ -38,7 +38,7 @@ uint32_t micros2s(uint32_t local){
  */
 uint32_t millis2s(uint32_t local){
     updateSync();
-    return local+_offset;
+    return local+(_offset/1000);
 }
 
 /* updateSync : Updates the correction done by millis2s and micros2s
@@ -59,7 +59,41 @@ void updateSync(){
     }
 }
 
+/* SyncComputationMsg : Computes the synchronization parameters.
+ * Usage : feed syncComputationMsg with data broadcasted by the turret, including the first message stating "begin measure (i.e. index=0)" until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
+ *         /!\ feed also syncComputationLaser with laser data
+ */
+int syncComputationMsg(sSyncPayload *pload){
 
+    // if first received, initialize
+
+    // store it in rotating buffer
+
+    // Check for corresponding index values, and store them if useful
+
+    return SYNC_OUT_OF_SYNC;
+}
+
+
+/* SyncComputationLaser : Computes the synchronization parameters.
+ * Usage : feed syncComputationLaser with data from the elected laser buffer until sync computation is not over.
+ *         /!\ feed also syncComputationMsg with data broadcasted by the turret.
+ */
+void syncComputationLaser(plStruct *sLaser){
+    static int syncLocalIndex=-2;
+
+    // Computing the index
+
+    // store it in rotating buffer
+
+    // Check for corresponding index values, and store them if useful
+
+}
+
+
+
+
+#if 0
 /* SyncComputation : Computes the synchronization parameters.
  * Arguments :
  *  t_turret : time at which the turret recorded one turn (turret reference, broadcasted by the turret, microsecond).
@@ -98,7 +132,7 @@ int syncComputation(uint32_t t_turret, uint32_t t_laser, uint32_t period){
         if (firstABC==NULL){
             firstABC=(ABCStruct*)malloc(sizeof(ABCStruct));
             *firstABC=tempABC;
-            syncStrucBuffer=(syncStruc**)malloc(sizeof(syncStruc)*SYNCSTRUBUFFSIZE);
+            syncStrucBuffer=(syncStruc**)malloc(sizeof(syncStruc)*SYNC_STRUCT_BUFF_SIZE);
         }
         // otherwise,
         else {
@@ -114,14 +148,14 @@ int syncComputation(uint32_t t_turret, uint32_t t_laser, uint32_t period){
                 syncStrucBuffer[iBuf]->inc=0;
             }
 
-            iBuf=(iBuf+1)%SYNCSTRUBUFFSIZE;
+            iBuf=(iBuf+1)%SYNC_STRUCT_BUFF_SIZE;
 
             // if we have old enough values, compute the mean and store it as a final result. fixme : what if we don't have enough values ?
-            if ((t_laser-firstMesure->localTime)>TIME_SYNC_DURATION){
+            if ((t_laser-firstMesure->localTime)>SYNC_TIME_DURATION){
                 int32_t meanUpdatePeriod=0;
                 int32_t meanInitialDelay=0;
 
-                for (int j=0; j<SYNCSTRUBUFFSIZE && (syncStrucBuffer[j]->inc || syncStrucBuffer[iBuf]->driftUpdatePeriod) ; j++){
+                for (int j=0; j<SYNC_STRUCT_BUFF_SIZE && (syncStrucBuffer[j]->inc || syncStrucBuffer[iBuf]->driftUpdatePeriod) ; j++){
                     meanUpdatePeriod+=syncStrucBuffer[j]->driftUpdatePeriod*syncStrucBuffer[j]->inc;
                     meanInitialDelay+=syncStrucBuffer[j]->initialDelay;
                 }
@@ -142,9 +176,4 @@ int syncComputation(uint32_t t_turret, uint32_t t_laser, uint32_t period){
     return OUT_OF_SYNC;
 }
 
-
-
-
-
-
-
+#endif

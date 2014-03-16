@@ -37,7 +37,7 @@ typedef enum{
 
 /************************ user types start ************************/
     E_SWITCH_CHANNEL,       // switch channel message
-    E_SYNC_EXPECTED_TIME,   // sync expected time (send from the turret to the receiver)
+    E_SYNC_DATA,            // sync data (send from the turret to the receiver)
     E_SYNC_OK,              // synced
     E_PERIOD,               // period measurement
     E_MEASURE,              // laser delta-time measurement
@@ -79,8 +79,13 @@ typedef struct __attribute__((__packed__)){
     uint32_t date;           //laser sensing time
     uint16_t precision;      //precision of the measure
     uint16_t sureness;       //sureness of the mesure
-} sMesPayload;
+} sMobileReportPayload;
 
+typedef struct __attribute__((__packed__)){
+    uint32_t lastTurnDate;   //last turn date (in µs)
+    uint32_t period;         //last measured period (instantaneous, measured at the same time as lastTurnDate, in µs)
+    int16_t  index;          //index of the current
+} sSyncPayload;
 
 typedef struct {
 // segment
@@ -129,12 +134,12 @@ typedef union{
 /************************ user payload start ************************/
 //the user-defined payloads from above must be added here. The simple ones can be directly added here
 //Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
-    uint32_t syncTime;
     uint8_t channel;
     uint32_t period;
-    sMesPayload measure;
     sTrajElRaw_t traj;
     sPosPayload pos;
+    sMobileReportPayload mobileReport;
+    sSyncPayload sync;
 /************************ user payload stop ************************/
 
 }uPayload;
