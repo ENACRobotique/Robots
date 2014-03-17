@@ -11,7 +11,7 @@
 #include "params.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"
-#include "lib_synchro.h"
+#include "lib_synchro_beacon.h"
 #include "../../../communication/botNet/shared/bn_debug.h"
 
 
@@ -116,7 +116,6 @@ void loop() {
 
 
 //STATE MACHINE
-#if 1
     switch (state){
         case S_SYNC_ELECTION :
             if (prevState!=state) {
@@ -125,23 +124,27 @@ void loop() {
                 prevState=state;
             }
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
-            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.index>=0){
+            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
                 chosenOne=(nbLas0<nbLas1?1:0);
             }
             break;
         case S_SYNC_MEASURES:
-            // laser data
-            if (chosenOne==0 && laserStruct0.thickness){
+            // laser data (if value is ours for sure (ie comes from a tracked measure XXX check if periodicLaser returns a struct compatible with that)
+            if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
                 syncComputationLaser(&laserStruct0);
             }
-            else if(chosenOne==1 && laserStruct1.thickness) {
+            else if(chosenOne==1 && laserStruct1.thickness && laserStruct0.period) {
                 syncComputationLaser(&laserStruct1);
             }
             // data broadcasted by turret
             if (rxB && inMsg.header.type==E_SYNC_DATA){
-                rxB=0;
-                if (syncComputationMsg(&inMsg.payload.sync)==SYNC_SYNCHRONIZED){
+                    rxB=0;
+                if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
+                    //fixme end_computation()
                     state=S_GAME;
+                }
+                else {
+                    syncComputationMsg(&inMsg.payload.sync);
                 }
             }
         	break;
@@ -175,6 +178,5 @@ void loop() {
           break;
         default : break;
     }
-#endif
 }
 

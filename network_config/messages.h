@@ -81,10 +81,16 @@ typedef struct __attribute__((__packed__)){
     uint16_t sureness;       //sureness of the mesure
 } sMobileReportPayload;
 
+typedef enum {
+    SYNCF_BEGIN_ELECTION,
+    SYNCF_MEASURES,
+    SYNCF_END_MEASURES
+} syncFlag;
 typedef struct __attribute__((__packed__)){
     uint32_t lastTurnDate;   //last turn date (in µs)
     uint32_t period;         //last measured period (instantaneous, measured at the same time as lastTurnDate, in µs)
     int16_t  index;          //index of the current
+    syncFlag flag;
 } sSyncPayload;
 
 typedef struct {

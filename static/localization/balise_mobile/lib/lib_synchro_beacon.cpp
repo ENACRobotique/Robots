@@ -5,18 +5,23 @@
  *      Author: quentin
  */
 
-#include "lib_synchro.h"
+#include "lib_synchro_beacon.h"
 #include "Arduino.h"
 
 syncStruc syncParam={0,0,0};
 int32_t _offset;            // value to add to time to correct drift in microsecond (updated by updateSync)
 
-#if 0
-syncMesStruc *firstMesure=NULL;
-ABCStruct *firstABC=NULL;
-syncStruc **syncStrucBuffer=NULL;
-#endif
+#define BUF_ABC_SIZE 10
 
+ABCStruct firstABC;
+ABCStruct bufABC[BUF_ABC_SIZE];
+int bufABCinsert=0,bufABCsize=0;
+
+sSyncPayload firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
+syncMesStruc firstLaserMeasure={0,-2},lastLaserMeasure={0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
+
+
+int syncLocalIndex=-2;
 
 
 /* micros2s : local to synchronized time (microsecond).
@@ -63,34 +68,98 @@ void updateSync(){
  * Usage : feed syncComputationMsg with data broadcasted by the turret, including the first message stating "begin measure (i.e. index=0)" until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
  *         /!\ feed also syncComputationLaser with laser data
  */
-int syncComputationMsg(sSyncPayload *pload){
+void syncComputationMsg(sSyncPayload *pload){
 
-    // if first received, initialize
+    // if no update, return
+    if (pload->lastTurnDate==lastRxSyncData.lastTurnDate) return;
 
-    // store it in rotating buffer
+    // store it in buffer
+    lastRxSyncData=*pload;
 
-    // Check for corresponding index values, and store them if useful
+    //if it is the very first value, store it in special variable, upload laser index and return
+    if (!firstRxSyncData.period){
+        firstRxSyncData=lastRxSyncData;
+        // if first received, initialize
+        if (syncLocalIndex<0 && pload->index>=0){
+            syncLocalIndex=pload->index;
+        }
+    }
 
-    return SYNC_OUT_OF_SYNC;
+    // Check for corresponding index values, if yes computes ABCs and store it in rotating buffer
+    if (lastLaserMeasure.index==lastRxSyncData.index){
+        syncABCCompute(lastLaserMeasure.localTime,lastRxSyncData.lastTurnDate,lastRxSyncData.period);
+    }
+
 }
 
 
 /* SyncComputationLaser : Computes the synchronization parameters.
- * Usage : feed syncComputationLaser with data from the elected laser buffer until sync computation is not over.
+ * Usage : feed syncComputationLaser with data from the elected laser buffer while sync computation is not over.
  *         /!\ feed also syncComputationMsg with data broadcasted by the turret.
  */
 void syncComputationLaser(plStruct *sLaser){
-    static int syncLocalIndex=-2;
+    int16_t tempIndex=0;    //increment to add to lastLaserMeasure
 
-    // Computing the index
+    // if no update, return
+    if (sLaser->date==lastLaserMeasure.localTime) return;
 
-    // store it in rotating buffer
+    // if first value, do not update the index, but store value
+    if (!sLaser->date){
+        // store only value in buffer
+        lastLaserMeasure.localTime=sLaser->date;
 
-    // Check for corresponding index values, and store them if useful
+        //duplicate it in lastLaserMeasure
+        firstLaserMeasure=lastLaserMeasure;
+    }
+    else {
+        // Computing the index : update for any missed detection, and for the last one
+        while ( (sLaser->date-lastLaserMeasure.localTime+tempIndex*lastRxSyncData.period) < lastRxSyncData.period>>1){
+            tempIndex++;
+        }
+
+        // store it in buffer
+        lastLaserMeasure.localTime=sLaser->date;
+        lastLaserMeasure.index+=tempIndex;
+
+        // Check for corresponding index values, if yes AND useful value, computes ABCs and store it in rotating buffer
+        if (lastLaserMeasure.index==lastRxSyncData.index){
+            syncABCCompute(lastLaserMeasure.localTime,lastRxSyncData.lastTurnDate,lastRxSyncData.period);
+        }
+    }
+
 
 }
 
 
+void syncABCCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){
+
+    // avoid division by 0
+    if (firstRxSyncData.period && period){
+        ABCStruct tempABC;
+        uint32_t Delta_n=firstRxSyncData.lastTurnDate -firstLaserMeasure.localTime;
+        uint32_t Delta_m=t_turret-t_local;
+
+        // Computes ABC
+        tempABC.A=(float)Delta_n/firstRxSyncData.period-(float)Delta_m/period;
+        tempABC.B=(float)1./firstRxSyncData.period-(float)1./period;
+        tempABC.C=(float)firstRxSyncData.lastTurnDate/firstRxSyncData.period-(float)t_local/period;
+
+        // if first value computed, store it specially
+        if (!bufABCsize) firstABC=tempABC;
+
+        //stores it and updates insert index and size
+        bufABC[bufABCinsert]=tempABC;
+        bufABCinsert=(bufABCinsert+1)%BUF_ABC_SIZE;
+        if (bufABCsize<BUF_ABC_SIZE) bufABCsize++;
+    }
+}
+
+/* SyncComputationFinal : Computes the sync parameters (least square).
+ * Usage : feed syncComputationLaser with data received under the flag SYNCF_END_MEASURES.
+ */
+void syncComputationFinal(sSyncPayload *pload){
+
+}
 
 
 #if 0

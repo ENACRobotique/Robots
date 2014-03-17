@@ -24,9 +24,8 @@ typedef struct {
 }syncStruc;                 // Structure defining the synchronization parameters
 
 typedef struct{
-    uint32_t localTime;
-    uint32_t turretTime;
-    uint32_t period;
+    uint32_t    localTime;
+    int16_t     index;
 }syncMesStruc;
 
 typedef struct {
@@ -36,8 +35,6 @@ typedef struct {
 }ABCStruct;
 
 enum {
-    SYNC_BEGIN_ELECTION,
-    SYNC_BEGIN_MEASURES,
     SYNC_OUT_OF_SYNC,
     SYNC_SYNCHRONIZED
 };
@@ -68,7 +65,7 @@ void updateSync();
  * Usage : feed syncComputationMsg with data broadcasted by the turret until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
  *         /!\ feed also syncComputationLaser with laser data
  */
-int syncComputationMsg(sSyncPayload *pload);
+void syncComputationMsg(sSyncPayload *pload);
 
 
 /* SyncComputationLaser : Computes the synchronization parameters.
@@ -76,6 +73,16 @@ int syncComputationMsg(sSyncPayload *pload);
  *         /!\ feed also syncComputationMsg with data broadcasted by the turret.
  */
 void syncComputationLaser(plStruct *sLaser);
+
+/* Computes ABCs and store them appropriately.
+ *
+ */
+void syncABCCompute(uint32_t t_local, uint32_t t_turret, uint32_t period);
+
+/* SyncComputationFinal : Computes the sync parameters (least square).
+ * Usage : feed syncComputationLaser with data received under the flag SYNCF_END_MEASURES.
+ */
+void syncComputationFinal(sSyncPayload *pload);
 
 
 #endif /* LIB_SYNCHRO_H_ */
