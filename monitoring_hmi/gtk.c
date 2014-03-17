@@ -421,24 +421,24 @@ int main(int argc, char *argv[]) {
 
     {
         sMsg outMsg = {{0}};
-// send initial position
-        outMsg.header.type = E_POS;
-        outMsg.header.size = sizeof(outMsg.payload.pos);
-
-        outMsg.payload.pos.id = 0;
-        outMsg.payload.pos.theta = M_PI;
-        outMsg.payload.pos.u_a = 0;
-        outMsg.payload.pos.u_a_theta = 0;
-        outMsg.payload.pos.u_b = 0;
-        outMsg.payload.pos.x = 294.;
-        outMsg.payload.pos.y = 57.;
-        if(ctx.verbose >= 1){
-            printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
-        }
-        ret = role_send(&outMsg);
-        if(ret <= 0){
-            fprintf(stderr, "role_send() error #%i\n", -ret);
-        }
+//// send initial position
+//        outMsg.header.type = E_POS;
+//        outMsg.header.size = sizeof(outMsg.payload.pos);
+//
+//        outMsg.payload.pos.id = 0;
+//        outMsg.payload.pos.theta = M_PI;
+//        outMsg.payload.pos.u_a = 0;
+//        outMsg.payload.pos.u_a_theta = 0;
+//        outMsg.payload.pos.u_b = 0;
+//        outMsg.payload.pos.x = 294.;
+//        outMsg.payload.pos.y = 57.;
+//        if(ctx.verbose >= 1){
+//            printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
+//        }
+//        ret = role_send(&outMsg);
+//        if(ret <= 0){
+//            fprintf(stderr, "role_send() error #%i\n", -ret);
+//        }
 
 // ask obstacles
         outMsg.header.destAddr = role_get_addr(ROLE_IA);

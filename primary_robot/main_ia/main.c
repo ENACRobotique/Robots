@@ -29,6 +29,8 @@
 #include "../../global_errors.h"
 #include "node_cfg.h"
 
+#include "obj.h"
+
 #ifdef CTRLC_MENU
 static int menu = 0;
 
@@ -51,7 +53,7 @@ void usage(char *cl){
 int main(int argc, char **argv){
     int ret;
     char verbose=1;
-    sMsg msgIn, msgOut;
+    sMsg msgIn, msgOut = {{0}};
     FILE *fd = NULL;
     sPt_t last_pos = {0., 0.};
     float last_theta = 0.;
@@ -130,6 +132,28 @@ int main(int argc, char **argv){
         exit(1);
     }
 
+    ret = obj_init();
+    if(ret < 0){
+        printf("obj_init() error #%i\n", -ret);
+    }
+
+    // sending initial position
+    msgOut.header.type = E_POS;
+    msgOut.header.size = sizeof(msgOut.payload.pos);
+
+    msgOut.payload.pos.id = 0;
+    msgOut.payload.pos.theta = 0;
+    msgOut.payload.pos.u_a = 0;
+    msgOut.payload.pos.u_a_theta = 0;
+    msgOut.payload.pos.u_b = 0;
+    msgOut.payload.pos.x = obs[0].c.x;
+    msgOut.payload.pos.y = obs[0].c.y;
+    printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
+    ret = role_send(&msgOut);
+    if(ret <= 0){
+        printf("bn_sendAck(E_POS) error #%i\n", -ret);
+    }
+
 #ifdef CTRLC_MENU
     signal(SIGINT, intHandler);
     printf("listening, CTRL+C  for menu\n");
@@ -201,8 +225,8 @@ int main(int argc, char **argv){
                         }
 
                         obs[0].moved = 1;
-                        obs[0].c.x = o_c->x + v.x*(fabs(curr_path.path[msgIn.payload.pos.sid].obs.r) + 0.1)/n;
-                        obs[0].c.y = o_c->y + v.y*(fabs(curr_path.path[msgIn.payload.pos.sid].obs.r) + 0.1)/n;
+                        obs[0].c.x = o_c->x + v.x*(fabs(r) + 0.1)/n;
+                        obs[0].c.y = o_c->y + v.y*(fabs(r) + 0.1)/n;
                         obs[0].r = 0.;
                     }
                     else{ // line portion
@@ -233,11 +257,15 @@ int main(int argc, char **argv){
                 printf("robot%hhu@(%.2fcm,%.2fcm,%.2f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
 
-                if(eAIState == E_AI_SLAVE){
+                switch(eAIState){
+                case E_AI_SLAVE:
                     obs[N - 1].moved = 1;
                     obs[N - 1].c.x = msgIn.payload.pos.x;
                     obs[N - 1].c.y = msgIn.payload.pos.y;
                     obs[N - 1].r = 0.;
+                    break;
+                default:
+                    break;
                 }
 
                 break;
@@ -280,35 +308,45 @@ int main(int argc, char **argv){
             }
         }
 
-        if(eAIState == E_AI_SLAVE && obs[N - 1].moved){
-            fill_tgts_lnk();
+        switch(eAIState){
+        case E_AI_SLAVE:
+            if(obs[N - 1].moved){
+                fill_tgts_lnk();
 
-            for(i = 0; i < N; i++){
-                obs[i].moved = 0;
-            }
-
-            if(DIST(0, N - 1) < 1.){
-                continue;
-            }
-
-            a_star(A(0), A(N-1), &new_path);
-            if(new_path.path){
-                printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N-1, new_path.dist, new_path.path_len);
-
-                if(curr_path.path){
-                    free(curr_path.path);
+                for(i = 0; i < N; i++){
+                    obs[i].moved = 0;
                 }
-                memcpy(&curr_path, &new_path, sizeof(curr_path));
-                new_path.path = NULL;
 
-                curr_traj_extract_sid = 0;
-                curr_path.tid = ++last_tid;
+                if(DIST(0, N - 1) < 1.){
+                    continue;
+                }
+
+                a_star(A(0), A(N-1), &new_path);
+                if(new_path.path){
+                    printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N-1, new_path.dist, new_path.path_len);
+
+                    if(curr_path.path){
+                        free(curr_path.path);
+                    }
+                    memcpy(&curr_path, &new_path, sizeof(curr_path));
+                    new_path.path = NULL;
+
+                    curr_traj_extract_sid = 0;
+                    curr_path.tid = ++last_tid;
+                }
+                else{
+                    printf("no path from 0a to %ua\n", N-1);
+                }
             }
-            else{
-                printf("no path from 0a to %ua\n", N-1);
-            }
+            break;
+        case E_AI_AUTO:
+            obj_step();
+            break;
+        default:
+            break;
         }
 
+        // sending trajectory, one step at a time
         if(curr_path.path && curr_traj_extract_sid < curr_path.path_len && (!curr_traj_extract_sid || (millis() - prevSendTraj > 20))){
             prevSendTraj = millis();
 
@@ -337,6 +375,7 @@ int main(int argc, char **argv){
             }
         }
 
+        // sending obstacles, up to MAX_NB_OBSS_PER_MSG per message
         if(send_obss_reset && (millis() - prevSendObss > 50)){
             prevSendObss = millis();
 
