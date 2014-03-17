@@ -41,10 +41,11 @@ void usage(char *cl){
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
     printf("Options:\n");
+    printf("\t--mode,     -m        AI mode (slave | auto)\n");
     printf("\t--log-file, -f        output log file of received messages (overwritten)\n");
-    printf("\t--verbose, -v         increases verbosity\n");
-    printf("\t--quiet, -q           not verbose\n");
-    printf("\t--help, -h, -?        prints this help\n");
+    printf("\t--verbose,  -v        increases verbosity\n");
+    printf("\t--quiet,    -q        not verbose\n");
+    printf("\t--help,     -h, -?    prints this help\n");
 }
 
 int main(int argc, char **argv){
@@ -52,11 +53,18 @@ int main(int argc, char **argv){
     char verbose=1;
     sMsg msgIn, msgOut;
     FILE *fd = NULL;
-    sPath_t new_path = {.path = NULL}, curr_path = {.path = NULL};
-    int curr_tid = 0;
     sPt_t last_pos = {0., 0.};
     float last_theta = 0.;
+    int last_tid = 0;
     int i;
+    enum{
+        E_AI_SLAVE,
+        E_AI_AUTO
+    } eAIState = E_AI_SLAVE;
+    // traj mgmt
+    sPath_t new_path = {.path = NULL}, curr_path = {.path = NULL};
+    int curr_traj_extract_sid = -1;
+    unsigned int prevSendTraj = 0;
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
     unsigned int prevSendObss = 0;
@@ -70,6 +78,7 @@ int main(int argc, char **argv){
     // arguments parsing
     while(1){
         static struct option long_options[] = {
+                {"mode",            required_argument,  NULL, 'm'},
                 {"log-file",        required_argument,  NULL, 'f'},
                 {"verbose",         no_argument,        NULL, 'v'},
                 {"quiet",           no_argument,        NULL, 'q'},
@@ -77,10 +86,18 @@ int main(int argc, char **argv){
                 {NULL,              0,                  NULL, 0}
         };
 
-        int c = getopt_long(argc, argv, "f:vqh?", long_options, NULL);
+        int c = getopt_long(argc, argv, "m:f:vqh?", long_options, NULL);
         if(c == -1)
             break;
         switch(c){
+        case 'm':
+            if(!strcasecmp(optarg, "slave")){
+                eAIState = E_AI_SLAVE;
+            }
+            else if(!strcasecmp(optarg, "auto")){
+                eAIState = E_AI_AUTO;
+            }
+            break;
         case 'f':
             if(fd){
                 fclose(fd);
@@ -161,8 +178,11 @@ int main(int argc, char **argv){
                 last_pos.x = msgIn.payload.pos.x;
                 last_pos.y = msgIn.payload.pos.y;
                 last_theta = msgIn.payload.pos.theta;
+                if(msgIn.payload.pos.tid > last_tid){
+                    last_tid = msgIn.payload.pos.tid;
+                }
 
-                if(curr_path.path && msgIn.payload.pos.tid == curr_tid){
+                if(curr_path.path && msgIn.payload.pos.tid == curr_path.tid){
                     if(msgIn.payload.pos.ssid){ // circle portion
                         sPt_t *o_c = NULL;
                         sVec_t v;
@@ -210,13 +230,15 @@ int main(int argc, char **argv){
                 }
                 break;
             case E_GOAL :
-                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
+                printf("robot%hhu@(%.2fcm,%.2fcm,%.2f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
 
-                obs[N - 1].moved = 1;
-                obs[N - 1].c.x = msgIn.payload.pos.x;
-                obs[N - 1].c.y = msgIn.payload.pos.y;
-                obs[N - 1].r = 0.;
+                if(eAIState == E_AI_SLAVE){
+                    obs[N - 1].moved = 1;
+                    obs[N - 1].c.x = msgIn.payload.pos.x;
+                    obs[N - 1].c.y = msgIn.payload.pos.y;
+                    obs[N - 1].r = 0.;
+                }
 
                 break;
             case E_OBS_CFG:
@@ -258,7 +280,7 @@ int main(int argc, char **argv){
             }
         }
 
-        if(obs[N - 1].moved){
+        if(eAIState == E_AI_SLAVE && obs[N - 1].moved){
             fill_tgts_lnk();
 
             for(i = 0; i < N; i++){
@@ -269,51 +291,53 @@ int main(int argc, char **argv){
                 continue;
             }
 
-            if(new_path.path){
-                free(new_path.path);
-                memset(&new_path, 0, sizeof(new_path));
-            }
             a_star(A(0), A(N-1), &new_path);
-            printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N-1, new_path.dist, new_path.path_len);
             if(new_path.path){
-                curr_tid++;
-
-                for(i = 0; i < new_path.path_len; i++){
-                    printf("  %u: p1 x%f y%f, p2 x%f y%f, s_l%f; obs x%f y%f r%.2f, a_l%f\n", i, new_path.path[i].p1.x, new_path.path[i].p1.y, new_path.path[i].p2.x, new_path.path[i].p2.y,new_path.path[i].seg_len,new_path.path[i].obs.c.x,new_path.path[i].obs.c.y, new_path.path[i].obs.r,new_path.path[i].arc_len);
-
-                    msgOut.header.type = E_TRAJ;
-                    msgOut.header.size = sizeof(msgOut.payload.traj);
-
-                    msgOut.payload.traj.p1_x = new_path.path[i].p1.x;
-                    msgOut.payload.traj.p1_y = new_path.path[i].p1.y;
-                    msgOut.payload.traj.p2_x = new_path.path[i].p2.x;
-                    msgOut.payload.traj.p2_y = new_path.path[i].p2.y;
-                    msgOut.payload.traj.seg_len = new_path.path[i].seg_len;
-
-                    msgOut.payload.traj.c_x = new_path.path[i].obs.c.x;
-                    msgOut.payload.traj.c_y = new_path.path[i].obs.c.y;
-                    msgOut.payload.traj.c_r = new_path.path[i].obs.r;
-                    msgOut.payload.traj.arc_len = new_path.path[i].arc_len;
-
-                    msgOut.payload.traj.sid = i;
-                    msgOut.payload.traj.tid = curr_tid;
-
-                    ret = role_send(&msgOut);
-                    if(ret < 0){
-                        printf("role_send() error #%i\n", -ret);
-                    }
-                }
+                printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N-1, new_path.dist, new_path.path_len);
 
                 if(curr_path.path){
                     free(curr_path.path);
-                    memset(&curr_path, 0, sizeof(curr_path));
                 }
                 memcpy(&curr_path, &new_path, sizeof(curr_path));
-                memset(&new_path, 0, sizeof(new_path));
+                new_path.path = NULL;
+
+                curr_traj_extract_sid = 0;
+                curr_path.tid = ++last_tid;
+            }
+            else{
+                printf("no path from 0a to %ua\n", N-1);
             }
         }
 
-        if(send_obss_reset && (millis() - prevSendObss > 100)){
+        if(curr_path.path && curr_traj_extract_sid < curr_path.path_len && (!curr_traj_extract_sid || (millis() - prevSendTraj > 20))){
+            prevSendTraj = millis();
+
+            printf("traj step: p1 x%.2f y%.2f, p2 x%.2f y%.2f, s_l%.2f; obs x%.2f y%.2f r%.2f, a_l%.2f\n", curr_path.path[curr_traj_extract_sid].p1.x, curr_path.path[curr_traj_extract_sid].p1.y, curr_path.path[curr_traj_extract_sid].p2.x, curr_path.path[curr_traj_extract_sid].p2.y, curr_path.path[curr_traj_extract_sid].seg_len, curr_path.path[curr_traj_extract_sid].obs.c.x, curr_path.path[curr_traj_extract_sid].obs.c.y, curr_path.path[curr_traj_extract_sid].obs.r, curr_path.path[curr_traj_extract_sid].arc_len);
+
+            msgOut.header.type = E_TRAJ;
+            msgOut.header.size = sizeof(msgOut.payload.traj);
+
+            msgOut.payload.traj.p1_x    = curr_path.path[curr_traj_extract_sid].p1.x;
+            msgOut.payload.traj.p1_y    = curr_path.path[curr_traj_extract_sid].p1.y;
+            msgOut.payload.traj.p2_x    = curr_path.path[curr_traj_extract_sid].p2.x;
+            msgOut.payload.traj.p2_y    = curr_path.path[curr_traj_extract_sid].p2.y;
+            msgOut.payload.traj.seg_len = curr_path.path[curr_traj_extract_sid].seg_len;
+
+            msgOut.payload.traj.c_x     = curr_path.path[curr_traj_extract_sid].obs.c.x;
+            msgOut.payload.traj.c_y     = curr_path.path[curr_traj_extract_sid].obs.c.y;
+            msgOut.payload.traj.c_r     = curr_path.path[curr_traj_extract_sid].obs.r;
+            msgOut.payload.traj.arc_len = curr_path.path[curr_traj_extract_sid].arc_len;
+
+            msgOut.payload.traj.sid     = curr_traj_extract_sid++;
+            msgOut.payload.traj.tid     = curr_path.tid;
+
+            ret = role_send(&msgOut);
+            if(ret < 0){
+                printf("role_send(E_TRAJ) error #%i\n", -ret);
+            }
+        }
+
+        if(send_obss_reset && (millis() - prevSendObss > 50)){
             prevSendObss = millis();
 
             msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
