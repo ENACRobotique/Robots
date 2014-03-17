@@ -86,7 +86,7 @@ printf("  found solution (reverse order):\n");
                 if(i == path->path_len-1){
                     path->path[i].arc_len = 0.;
                 }
-                else if(i > 0){
+                if(i > 0){
                     path->path[i-1].arc_len = arc_len(ASELT(current).prev.o1, current.o1, current.o2);
                 }
                 // step id
