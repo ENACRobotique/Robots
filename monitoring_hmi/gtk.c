@@ -112,13 +112,33 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             bn_printfDbg("received obs cfg, %hhuobss\n", nb_obss);
             break;
         case E_OBSS:
+            if(!nb_obss){
+                outMsg.header.destAddr = role_get_addr(ROLE_IA);
+                outMsg.header.type = E_OBS_CFG;
+                outMsg.header.size = sizeof(outMsg.payload.obsCfg);
+
+                outMsg.payload.obsCfg.nb_obs = 0;
+                outMsg.payload.obsCfg.r_robot = 0.;
+                outMsg.payload.obsCfg.x_min = 0.;
+                outMsg.payload.obsCfg.x_max = 0.;
+                outMsg.payload.obsCfg.y_min = 0.;
+                outMsg.payload.obsCfg.y_max = 0.;
+
+                ret = bn_send(&outMsg);
+                if(ret < 0){
+                    fprintf(stderr, "bn_send(E_OBS_CFG) error #%i\n", -ret);
+                }
+
+                break;
+            }
+
             for(i = 0; i < inMsg.payload.obss.nb_obs; i++){
                 if(inMsg.payload.obss.obs[i].id < nb_obss){
                     obss[inMsg.payload.obss.obs[i].id].active = inMsg.payload.obss.obs[i].active;
                     obss[inMsg.payload.obss.obs[i].id].moved = inMsg.payload.obss.obs[i].moved;
-                    obss[inMsg.payload.obss.obs[i].id].x = (float)inMsg.payload.obss.obs[i].x/100.;
-                    obss[inMsg.payload.obss.obs[i].id].y = (float)inMsg.payload.obss.obs[i].y/100.;
-                    obss[inMsg.payload.obss.obs[i].id].r = (float)inMsg.payload.obss.obs[i].r/100.;
+                    obss[inMsg.payload.obss.obs[i].id].x = ((float)inMsg.payload.obss.obs[i].x)/100.;
+                    obss[inMsg.payload.obss.obs[i].id].y = ((float)inMsg.payload.obss.obs[i].y)/100.;
+                    obss[inMsg.payload.obss.obs[i].id].r = ((float)inMsg.payload.obss.obs[i].r)/100.;
                 }
             }
 
@@ -164,12 +184,12 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                 outMsg.payload.pos.y = Y_PX2CM(ctx->mouse_y);
 
                 // updates list of obstacles
-                if(obss){
-                    obss[nb_obss - 1].x = outMsg.payload.pos.x;
-                    obss[nb_obss - 1].y = outMsg.payload.pos.y;
-                    obss[nb_obss - 1].r = 0.;
-                    obss[nb_obss - 1].moved = 1;
-                }
+//                if(obss){
+//                    obss[nb_obss - 1].x = outMsg.payload.pos.x;
+//                    obss[nb_obss - 1].y = outMsg.payload.pos.y;
+//                    obss[nb_obss - 1].r = 0.;
+//                    obss[nb_obss - 1].moved = 1;
+//                }
 
                 ret = bn_sendAck(&outMsg);
                 if(ret <= 0){

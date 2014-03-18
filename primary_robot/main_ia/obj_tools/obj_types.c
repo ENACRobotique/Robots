@@ -23,6 +23,7 @@ Obj_arbre arbre[4];
 Obj_bac bac;
 Obj_feu feu[4];
 
+uint8_t obs_updated[N] = {0};
 
 sObj_t listObj[NB_OBJ];
                 /*=
@@ -119,7 +120,10 @@ void init_ele(void)
     printf("Debut de l'initialisation des elements du jeu\n");
     int i, j, numPA=0;
 
-    for(i=0; i<N;i++ ) obs[i].active =1; //activation de tous les obstacles
+    for(i=0; i<N;i++ ){
+        obs[i].active =1; //activation de tous les obstacles
+        obs_updated[i]++;
+    }
 
     //Initialisation des arbres
         for(i=0 ; i<4 ; i++)

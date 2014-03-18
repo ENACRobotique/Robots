@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "millis.h"
 
@@ -43,20 +44,6 @@ int current_obj=-1;
 
 int mode_obj=0;
 
-
-
-void update_end (sNum_t radius,  sPt_t *center)
-    {
-    obs[N-1].c = *center;
-    obs[N-1].r = radius;
-    obs[N-1].active = 1;
-    }
-
-void active (sObs_t *obs) {obs->active = 1;}
-void unactive (sObs_t *obs) {obs->active = 0;}
-
-
-
 sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 et NB_OBJ
     {
     #if DEBUG
@@ -67,7 +54,7 @@ sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 e
     sNum_t time;
     sNum_t dist;
     sNum_t point;
-    sNum_t ratio;
+    sNum_t ratio = 0.;
 
     dist=listObj[num].dist;
     if(dist==0)
@@ -116,6 +103,9 @@ sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 e
 
         case E_TORCHE_FIXE :
             break;
+
+        default:
+            break;
         }
     return ratio;
     }
@@ -144,7 +134,10 @@ iABObs_t next_obj (void)
 
         for(j=0 ; j<listObj[i].nbObs ; j++)
             {
-            if(obs[listObj[i].listIABObs[j]].active==1) obs[listObj[i].listIABObs[j]].active=0;
+            if(obs[listObj[i].listIABObs[j]].active==1){
+                obs[listObj[i].listIABObs[j]].active=0;
+                obs_updated[listObj[i].listIABObs[j]]++;
+            }
             else
                 {
                 obs_deactive[l]=j;
@@ -158,6 +151,7 @@ iABObs_t next_obj (void)
             {
             if(listObj[i].entryPoint[j].active==0) continue;
             memcpy(&obs[N-1], &listObj[i].entryPoint[j], sizeof(obs[N-1]));
+            obs_updated[N - 1]++;
             printf("Next obj AN-1 x=%f & y=%f\n", obs[N-1].c.x, obs[N-1].c.y);
             fill_tgts_lnk(); //TODO optimisation car uniquement la position de fin change dans la boucle
             a_star(A(0), A(N-1), &path_loc);
@@ -185,8 +179,14 @@ iABObs_t next_obj (void)
         tmp_val2=val_obj(i);
         dist=999;
 
-        for(j=0 ; j<listObj[i].nbObs ; j++) obs[listObj[i].listIABObs[j]].active=1;
-        for(m=0 ; m<l ; m++) obs[listObj[i].listIABObs[obs_deactive[m]]].active=0;
+        for(j=0 ; j<listObj[i].nbObs ; j++){
+            obs[listObj[i].listIABObs[j]].active=1;
+            obs_updated[listObj[i].listIABObs[j]]++;
+        }
+        for(m=0 ; m<l ; m++){
+            obs[listObj[i].listIABObs[obs_deactive[m]]].active=0;
+            obs_updated[listObj[i].listIABObs[obs_deactive[m]]]++;
+        }
         l=0;
 
         printf("objectif n°%hhi avec ratio=%f \n\n",i,tmp_val2);
@@ -199,13 +199,17 @@ iABObs_t next_obj (void)
             memcpy(&path, &path_loc2, sizeof(path));
             obs[N-1].c.x = pointactuel.x;
             obs[N-1].c.y = pointactuel.y;
+            obs_updated[N-1]++;
             pt_select.x = obs[N-1].c.x;
             pt_select.y = obs[N-1].c.y;
             }
         }
     if(part!=-1)
         {
-        for(j=0 ; j<listObj[current_obj].nbObs ; j++) obs[(listObj[part].listIABObs[j])].active=1;
+        for(j=0 ; j<listObj[current_obj].nbObs ; j++){
+            obs[listObj[part].listIABObs[j]].active=1;
+            obs_updated[listObj[part].listIABObs[j]]++;
+        }
         part=-1;
         }
     printListObj();
@@ -218,35 +222,6 @@ iABObs_t next_obj (void)
         }
     return (tmp_inx);
     }
-
-int same_obs (sObs_t *obs1, sObs_t *obs2){
-    return ( obs1->r == obs2->r && obs1->c.x == obs2->c.x && obs1->c.y == obs2->c.y);
-
-}
-
-int same_traj (sPath_t *traj1, sPath_t *traj2) {
-    unsigned int t1_ind = traj1->path_len;
-    unsigned int t2_ind = traj2->path_len;
-        printf("same_t 1.0\n");
-
-    while ((int)t1_ind > 0 &&  (int)t2_ind > 0) {
-        printf("same_t 2.0\n");
-
-        if (same_obs (&(traj1->path[t1_ind].obs), &(traj2->path[t2_ind].obs)) ){
-        t1_ind--; t2_ind--;
-        }
-        else return 0;
-    }
-    printf("same_t 3.0\n");
-    if (!(same_obs (&(traj1->path[t1_ind].obs), &(traj2->path[t2_ind].obs))))
-        return 0;
-
-    if ((traj1->path[t1_ind].p2.x == traj2->path[t2_ind].p2.x) && (traj1->path[t1_ind].p2.y == traj2->path[t2_ind].p2.y))
-        return 0;
-    else
-    printf("same_t 4.0\n");
-    return 1 ;
-}
 
 int test_tirette()
     {
@@ -279,8 +254,10 @@ void obj_tree(iABObs_t obj)
 
         obs[N-1].c.x=pt_select.x;
         obs[N-1].c.y=pt_select.y;
+        obs_updated[N-1]++;
 
         obs[obj+1].r=R_ROBOT + 5;
+        obs_updated[obj+1]++;
 
         first=1;
         printf("Objectif : arbre n°%hhi en cour\n\n\n",obj);
@@ -319,7 +296,8 @@ void obj_tree(iABObs_t obj)
 void obj_bac(iABObs_t obj)
     {
     listObj[obj].active=0;
-    obs[(listObj[obj].listIABObs[0])].active=0;
+    obs[listObj[obj].listIABObs[0]].active=0;
+    obs_updated[listObj[obj].listIABObs[0]]++;
     bac.nb_point=0;
     #if DEBUG
         printf("Objectif : bac fini\n\n\n");
@@ -402,6 +380,7 @@ void obj_step(){
         if(get_position(&_current_pos))
         {
             memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
+            obs_updated[0]++;
             //FIXME
             //printf("Position actuel avant correction : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
             //for(j=0 ; j<listObj[current_obj].nbObs;j++) obs[(listObj[current_obj].listIABObs[j])].active=0;
@@ -411,10 +390,12 @@ void obj_step(){
                 if(sqrt(pow(_current_pos.x-obs[0].c.x,2)+pow(_current_pos.y-obs[0].c.y,2)<2))
                 {
                     memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
+                    obs_updated[0]++;
                 }
                 else
                 {
                     memcpy(&_current_pos,&obs[0].c, sizeof(obs[0].c));
+                    obs_updated[0]++;
                 }
 
             }
@@ -423,7 +404,7 @@ void obj_step(){
 
             if((millis()-last_time2)>1000)
             {
-                long last_time2=0;
+                last_time2 = millis();
                 printf("Position actuel : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
                 printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
             }
@@ -442,8 +423,13 @@ void obj_step(){
             case E_FEU :
                 listObj[current_obj].active=0;
                 listObj[current_obj].dist=0;
-                for(i=0 ; i<listObj[current_obj].nbObs ; i++) obs[(listObj[current_obj].listIABObs[i])].active=0;
+                for(i=0 ; i<listObj[current_obj].nbObs ; i++){
+                    obs[listObj[current_obj].listIABObs[i]].active=0;
+                    obs_updated[listObj[current_obj].listIABObs[i]]++;
+                }
                 part=current_obj;
+                break;
+            default:
                 break;
             }
         }
@@ -458,6 +444,11 @@ void obj_step(){
 }
 
 int obj_init(){
+    if(sizeof(obs)/sizeof(*obs) != N){
+        printf("N isn't correct, byebye\n");
+        exit(1);
+    }
+
     // setting initial position
     if(COLOR==1){
         obs[0].c.x=299;
@@ -467,6 +458,7 @@ int obj_init(){
         obs[0].c.x=1;
         obs[0].c.y=199;
     }
+    obs_updated[0]++;
     _current_pos=obs[0].c;
 
     init_ele();

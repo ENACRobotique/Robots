@@ -65,6 +65,7 @@ typedef struct{
 
 extern Obj_arbre arbre[4];
 extern Obj_bac bac;
+extern uint8_t obs_updated[N];
 
 extern sObj_t listObj[]; //Liste des objectifs
 extern sObs_t listEP[]; //Liste de tous les points d'acces des objectifs

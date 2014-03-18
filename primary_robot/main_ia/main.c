@@ -30,6 +30,7 @@
 #include "node_cfg.h"
 
 #include "obj.h"
+#include "obj_types.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -69,7 +70,7 @@ int main(int argc, char **argv){
     unsigned int prevSendTraj = 0;
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
-    unsigned int prevSendObss = 0;
+    unsigned int prevSendObss = 0, prevSendObs = 0;
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -263,6 +264,7 @@ int main(int argc, char **argv){
                     obs[N - 1].c.x = msgIn.payload.pos.x;
                     obs[N - 1].c.y = msgIn.payload.pos.y;
                     obs[N - 1].r = 0.;
+                    obs_updated[N - 1]++;
                     break;
                 default:
                     break;
@@ -273,6 +275,10 @@ int main(int argc, char **argv){
                 send_obss_reset = 1;
                 send_obss_idx = 0;
                 prevSendObss = millis();
+
+                for(i = 0; i < N; i++){
+                    obs_updated[i] = 1;
+                }
 
                 msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
                 msgOut.header.type = E_OBS_CFG;
@@ -379,6 +385,20 @@ int main(int argc, char **argv){
             }
         }
 
+        // check if any obs has been updated => synchro with the monitoring interface
+        if(!send_obss_reset && (millis() - prevSendObs > 400)){
+            prevSendObs = millis();
+
+            for(i = 0; i < N; i++){
+                if(obs_updated[i] > 0){
+                    send_obss_reset = 1;
+                    send_obss_idx = 0;
+                    prevSendObss = 0;
+                    break;
+                }
+            }
+        }
+
         // sending obstacles, up to MAX_NB_OBSS_PER_MSG per message
         if(send_obss_reset && (millis() - prevSendObss > 50)){
             prevSendObss = millis();
@@ -386,14 +406,20 @@ int main(int argc, char **argv){
             msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
             msgOut.header.type = E_OBSS;
 
-            for(i=0; send_obss_idx < N && i < MAX_NB_OBSS_PER_MSG; i++, send_obss_idx++){
-                msgOut.payload.obss.obs[i].id = send_obss_idx;
-                msgOut.payload.obss.obs[i].active = obs[send_obss_idx].active;
-                msgOut.payload.obss.obs[i].moved = obs[send_obss_idx].moved;
+            for(i = 0; send_obss_idx < N && i < MAX_NB_OBSS_PER_MSG; send_obss_idx++){
+                if(obs_updated[send_obss_idx] > 0){
+                    obs_updated[send_obss_idx] = 0;
 
-                msgOut.payload.obss.obs[i].x = (int16_t)(obs[send_obss_idx].c.x*100.);
-                msgOut.payload.obss.obs[i].y = (int16_t)(obs[send_obss_idx].c.y*100.);
-                msgOut.payload.obss.obs[i].r = (int16_t)(obs[send_obss_idx].r*100.);
+                    msgOut.payload.obss.obs[i].id = send_obss_idx;
+                    msgOut.payload.obss.obs[i].active = obs[send_obss_idx].active;
+                    msgOut.payload.obss.obs[i].moved = obs[send_obss_idx].moved;
+
+                    msgOut.payload.obss.obs[i].x = (int16_t)(obs[send_obss_idx].c.x*100. + 0.5);
+                    msgOut.payload.obss.obs[i].y = (int16_t)(obs[send_obss_idx].c.y*100. + 0.5);
+                    msgOut.payload.obss.obs[i].r = (int16_t)(obs[send_obss_idx].r*100. + 0.5);
+
+                    i++;
+                }
             }
             msgOut.payload.obss.nb_obs = i;
             msgOut.header.size = 2 + (i<<3);

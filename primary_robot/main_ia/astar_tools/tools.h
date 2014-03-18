@@ -145,12 +145,4 @@ static inline sNum_t arc_len(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
     return o_arc_len(&tgt(o1, o2)->p2, O(o2), DIR(o2), &tgt(o2, o3)->p1);
 }
 
-static inline void active_obs(iObs_t index){
-    obs[index].active = 1;
-}
-
-static inline void unactive_obs(iObs_t index){
-    obs[index].active = 0;
-}
-
 #endif
