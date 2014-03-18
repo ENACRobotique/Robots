@@ -127,7 +127,9 @@ void loop() {
             if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
                 chosenOne=(nbLas0<nbLas1?1:0);
             }
-            break;
+            else {
+                break;
+            }
         case S_SYNC_MEASURES:
             // laser data (if value is ours for sure (ie comes from a tracked measure XXX check if periodicLaser returns a struct compatible with that)
             if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
