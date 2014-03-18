@@ -21,72 +21,29 @@ sPath_t path= {.dist = 0.,  .path = NULL };
 
 Obj_arbre arbre[4];
 Obj_bac bac;
-Obj_feu feu[4];
+Obj_feu feu[16];
 
 uint8_t obs_updated[N] = {0};
 
-sObj_t listObj[NB_OBJ];
-                /*=
-{
-    {E_ARBRE, 0, 1,0,0,1,4,0,&arbre[0]},
-    {E_ARBRE, 1, 1,0,0,1,4,0,&arbre[1]},
-    {E_ARBRE, 2, 1,0,0,1,4,0,&arbre[2]},
-    {E_ARBRE, 3, 1,0,0,1,4,0,&arbre[3]},
-    {E_BAC,   0, 1,0,0,1,4,0,&bac}
-    };*/
+sObj_t listObj[NB_OBJ] = {
+	{.type = E_ARBRE, .numObj=0, .nbObs=1, .numObs[0]=START_ARBRE  ,																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{16. , 90.}, 2.,90. }, .entryPoint[1]={{16. , 50.}, 2.,270.}},
+	{.type = E_ARBRE, .numObj=1, .nbObs=1, .numObs[0]=START_ARBRE+1, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{50. , 16.}, 2.,180.}, .entryPoint[1]={{90. , 16.}, 2.,0.  }},
+	{.type = E_ARBRE, .numObj=2, .nbObs=1, .numObs[0]=START_ARBRE+2, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{210., 16.}, 2.,180.}, .entryPoint[1]={{250., 16.}, 2.,0.  }},
+	{.type = E_ARBRE, .numObj=3, .nbObs=1, .numObs[0]=START_ARBRE+3, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{284., 50.}, 2.,270.}, .entryPoint[1]={{284., 90.}, 2.,90. }},
+	{.type = E_BAC,   .numObj=0, .nbObs=0, 															     				  			 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{230.,155.}, 2.,90. }},
+	{.type = E_BAC,   .numObj=1, .nbObs=0, 																 							 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{70. ,155.}, 2.,90. }},
+	{.type = E_FEU,   .numObj=0, .nbObs=1, .numObs[0]=START_FEU    ,																 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{40. , 90.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=1, .nbObs=1, .numObs[0]=START_FEU+1  ,																 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{90. , 40.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=2, .nbObs=1, .numObs[0]=START_FEU+2  , 																 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{90. ,140.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=3, .nbObs=1, .numObs[0]=START_FEU+3  , 																 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{210., 40.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=4, .nbObs=1, .numObs[0]=START_FEU+4  ,																 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{210.,140.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=5, .nbObs=1, .numObs[0]=START_FEU+5  ,																 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{260., 90.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=6, .nbObs=3, .numObs[0]=START_FEU+6  , .numObs[1]=START_TORCHE_FIXE  , .numObs[2]=START_TORCHE_FIXE+1, .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{1.  ,120.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=7, .nbObs=3, .numObs[0]=START_FEU+7  , .numObs[1]=START_TORCHE_FIXE+2, .numObs[2]=START_TORCHE_FIXE+3, .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{130.,  1.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=8, .nbObs=3, .numObs[0]=START_FEU+8  , .numObs[1]=START_TORCHE_FIXE+4, .numObs[2]=START_TORCHE_FIXE+5, .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{170.,  1.}, 0.,0.  }},
+	{.type = E_FEU,   .numObj=9, .nbObs=3, .numObs[0]=START_FEU+9  , .numObs[1]=START_TORCHE_FIXE+6, .numObs[2]=START_TORCHE_FIXE+7, .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{299.,120.}, 0.,0.  }},
+	};
 
-
-
-
-sObs_t listEP[]={
-    //Arbre
-    {{10. , 90.}, 0 ,1,1},
-    {{10. , 50.}, 0 ,1,1},
-    {{20. , 90.}, 0 ,1,1},
-    {{20. , 50.}, 0 ,1,1},
-
-    {{50. , 10.}, 0 ,1,1},
-    {{90. , 10.}, 0 ,1,1},
-    {{50. , 20.}, 0 ,1,1},
-    {{90. , 20.}, 0 ,1,1},
-
-    {{210. ,10.}, 0 ,1,1},
-    {{250. ,10.}, 0 ,1,1},
-    {{210. ,20.}, 0 ,1,1},
-    {{250. ,20.}, 0 ,1,1},
-
-    {{290. ,50.}, 0 ,1,1},
-    {{290. ,90.}, 0 ,1,1},
-    {{280. ,50.}, 0 ,1,1},
-    {{280. ,90.}, 0 ,1,1},
-
-    //Bac
-    {{225.,170.},0,1,1}, //rouge
-
-    {{75. ,170.},0,1,1}, //jaune
-
-    //Feux (centre)
-    {{40. ,  90. }, 0, 1, 1},
-    {{90. , 40.  }, 0, 1, 1},
-    {{90. , 140. }, 0, 1, 1},
-    {{210., 40.  }, 0, 1, 1},
-    {{210., 140. }, 0, 1, 1},
-    {{260.,  90. }, 0, 1, 1},
-
-    {{1.  , 120. }, 0, 1, 1},
-    {{130. , 1.  }, 0, 1, 1},
-    {{170. , 1.  }, 0, 1, 1},
-    {{299., 120. }, 0, 1, 1},
-
-    {{90. , 90.  }, 0, 1, 1},
-    {{90. , 90.  }, 0, 1, 1},
-    {{90. , 90.  }, 0, 1, 1},
-
-    {{210. ,90. }, 0, 1, 1},
-    {{210. ,90. }, 0, 1, 1},
-    {{210. ,90. }, 0, 1, 1},
-
-};
 
 sNum_t ratio_arbre(void)
     {
@@ -106,132 +63,71 @@ sNum_t ratio_bac(void)
 
 void printListObj(void)
     {
-    int i;
+    int i,j;
     printf("ListObj :\n");
     for(i=0 ; i<NB_OBJ ; i++)
         {
-        printf("type=%i, numObj=%i, nbObs=%i,{listIABObs[0]=%i,listIABObs[1]=%i,listIABObs[2]=%i} dist=%f, active=%i, nbEP=%i\n",listObj[i].type,listObj[i].numObj,listObj[i].nbObs,listObj[i].listIABObs[0],listObj[i].listIABObs[1],listObj[i].listIABObs[2],listObj[i].dist,listObj[i].active,listObj[i].nbEP);
+        printf("type=%d, ",listObj[i].type);
+        printf("numObj=%d, ",listObj[i].numObj);
+        printf("nbObs=%d, ",listObj[i].nbObs);
+        printf("numObs={");
+        for(j=0 ; j<listObj[i].nbObs ; j++) printf("%d, ",listObj[i].numObs[j]);
+        printf("}, ");
+        printf("dist=%f, ",listObj[i].dist);
+        printf("active=%d, ",listObj[i].active);
+        printf("nbEP=%d, ",listObj[i].nbEP);
+        printf("entryPoint={");
+        for(j=0 ; j<listObj[i].nbEP ; j++)
+        	{
+        	printf("{{%d, %d}, ",(int)listObj[i].entryPoint[j].c.x,(int)listObj[i].entryPoint[j].c.y);
+        	printf("%d, ",(int)listObj[i].entryPoint[j].radiusEP);
+        	printf("%d}, ",listObj[i].entryPoint[j].angleEP);
+        	}
+        printf("}, ");
+        printf("\n");
         }
     printf("\n");
     }
 
+void printObsActive(void)
+	{
+	int i;
+	printf("Liste des obs[i].active :\n");
+	for(i=0 ; i<N ; i++)
+		printf("obs[%d].active=%d\n",i,obs[i].active);
+	printf("\n");
+	}
+
 void init_ele(void)
     {
     printf("Debut de l'initialisation des elements du jeu\n");
-    int i, j, numPA=0;
-
-    for(i=0; i<N;i++ ){
-        obs[i].active =1; //activation de tous les obstacles
-        obs_updated[i]++;
-    }
-
+    int i, j;
     //Initialisation des arbres
-        for(i=0 ; i<4 ; i++)
-            {
-            listObj[i].type=E_ARBRE;
-            listObj[i].numObj=i;
-            listObj[i].nbObs=1;
-            listObj[i].listIABObs[0]=i+1;
-            listObj[i].dist=0.;
-            listObj[i].active=1;
-            listObj[i].nbEP=4;
-            for(j=0 ; j<4 ; j++, numPA++) listObj[i].entryPoint[j]=listEP[numPA];
-                listObj[i].entryPoint[0].active=1;
-                listObj[i].entryPoint[1].active=1;
-                listObj[i].entryPoint[2].active=0;
-                listObj[i].entryPoint[3].active=0;
-            listObj[i].typeStruct = &arbre[listObj[i].numObj];
+    for(i=0 ; i<4 ; i++)
+    	{
+    	listObj[i].typeStruct = &arbre[listObj[i].numObj];
+    	((Obj_arbre*)listObj[i].typeStruct)->nb_point=10;                      //1 fruit pouri par arbre
+    	for(j=0 ; j<6 ; j++) ((Obj_arbre*)listObj[i].typeStruct)->eFruit[j]=0; //par défaut tous les fruit sont bon
+    	}
 
-            ((Obj_arbre*)listObj[i].typeStruct)->nb_point=10;                         //1 fruit pouri par arbre
-            for(j=0 ; j<6 ; j++) ((Obj_arbre*)listObj[i].typeStruct)->eFruit[j]=0; //par défaut tous les fruit sont bon
-            }
-    //Initialisation du bac
-        listObj[i].type=E_BAC;
-        listObj[i].numObj=0;
-        listObj[i].nbObs=1;
-        if(COLOR==0) listObj[i].listIABObs[0]=10;
-        else listObj[i].listIABObs[0]=5;
-        listObj[i].dist=0.;
-        listObj[i].active=1;
-        listObj[i].nbEP=1;
-        if(COLOR==1) numPA++;
-        listObj[i].entryPoint[0]=listEP[numPA];
-            listObj[i].entryPoint[0].active=1;
-        listObj[i].typeStruct = &bac;
-
+    //Initialisation des bacs
+    for(i=4 ; i<6 ; i++)
+    	{
+    	listObj[i].typeStruct = &bac;
         ((Obj_bac*)listObj[i].typeStruct)->nb_point=0;
-        i++;
-        numPA++;
-        if(COLOR==0) numPA++;
+    	}
+    if(COLOR==1)listObj[4].active=0;
+    else listObj[5].active=0;
 
-    //Initialisation des feux vericaux sur la table +  coté
-        for(i=5 ; i<11 ; i++)
-            {
-            listObj[i].type=E_FEU;
-            listObj[i].numObj=i-5;
-            listObj[i].nbObs=2;
 
-            for(j=0 ; j<listObj[i].nbObs ; j++)
-                {
-                listObj[i].listIABObs[j]=26+j+2*(i-5);
-                }
-            listObj[i].dist=0.;
-            listObj[i].active=1;
-            listObj[i].nbEP=1;
-            listObj[i].entryPoint[0]=listEP[numPA];
-                listObj[i].entryPoint[0].active=1;
-            numPA++;
-            listObj[i].typeStruct = &feu[i];
-
-            ((Obj_feu*)listObj[i].typeStruct)->pos=0;
-            ((Obj_feu*)listObj[i].typeStruct)->nb_point=2;
-            }
-
-        //Initialisation des feux vericaux sur le  coté
-            for(i=11 ; i<15 ; i++)
-                {
-                listObj[i].type=E_FEU;
-                listObj[i].numObj=i-5;
-                listObj[i].nbObs=3;
-
-                if(i==11)
-                    {
-                    listObj[i].listIABObs[0]=20;
-                    listObj[i].listIABObs[1]=21;
-                    listObj[i].listIABObs[2]=38;
-                    }
-                if(i==12)
-                    {
-                    listObj[i].listIABObs[0]=22;
-                    listObj[i].nbObs=2;
-                    listObj[i].listIABObs[1]=39;
-                    }
-                if(i==13)
-                    {
-                    listObj[i].listIABObs[0]=23;
-                    listObj[i].nbObs=2;
-                    listObj[i].listIABObs[1]=40;
-                    }
-                if(i==14)
-                    {
-                    listObj[i].listIABObs[0]=24;
-                    listObj[i].listIABObs[1]=25;
-                    listObj[i].listIABObs[2]=41;
-                    }
-
-                listObj[i].dist=0.;
-                listObj[i].active=1;
-                listObj[i].nbEP=1;
-                listObj[i].entryPoint[0]=listEP[numPA];
-                    listObj[i].entryPoint[0].active=1;
-                numPA++;
-                listObj[i].typeStruct = &feu[i];
-
-                ((Obj_feu*)listObj[i].typeStruct)->pos=0;
-                ((Obj_feu*)listObj[i].typeStruct)->nb_point=2;
-                }
-
-        printf("Fin de l'initialisation des elements du jeu\n");
+    //Initialisation des feux
+    for(i=6 ; i<16 ; i++)
+        {
+    	listObj[i].typeStruct = &feu[listObj[i].numObj];
+        ((Obj_feu*)listObj[i].typeStruct)->pos=0;
+        ((Obj_feu*)listObj[i].typeStruct)->nb_point=2;
+        }
+    printf("Fin de l'initialisation des elements du jeu\n");
     }
 
 
@@ -264,9 +160,8 @@ void send_robot(sPath_t path)
             outMsg.payload.traj.tid = tid;
 
             ret = role_send(&outMsg);
-            if(ret < 0){
-                printf("role_send(E_TRAJ) failed #%i\n", -ret);
-            }
+            if(ret < 0) printf("role_send(E_TRAJ) failed #%i\n", -ret);
+
             usleep(1000);
         }
     }
@@ -284,55 +179,26 @@ int get_position( sPt_t *pos)
         }
     }
 
-float sign(float x)
+float sign(float x) //retourne -1 ou 1, 0 si nul
     {
     if(x==0) return 0;
     return x/fabs(x);
     }
 
-void project_point(float xp, float yp, float rc, float xc, float yc, sPt_t *point) //Ajout de 0.1
-    {
-    float alpha;
-    if((xp-xc)==0)
-        {
-        point->x = xc;
-        point->y = yc+rc;
-        }
-    else
-        {
-        if((xp-xc)>0)
-            {
-            alpha=atan((yp-yc)/(xp-xc));
-//            printf("return sign =%f et alpha=%f\n",sign(xp-xc), alpha*180/M_PI);
-            point->x = xc + rc*cos(alpha);
-            point->y = yc + rc*sin(alpha);
-            if((yp-yc)>0)
-                {
-                point->x = point->x + 0.1;
-                point->y = point->y + 0.1;
-                }
-            if((yp-yc)<0)
-                {
-                point->x = point->x + 0.1;
-                point->y = point->y - 0.1;
-                }
-            }
-        if((xp-xc)<0)
-            {
-            alpha=atan((yp-yc)/(xp-xc));
-//            printf("return sign =%f et alpha=%f\n",sign(xp-xc), alpha*180/M_PI);
-            point->x = xc + rc*cos(alpha+M_PI);
-            point->y = yc + rc*sin(alpha+M_PI);
-            if((yp-yc)>0)
-                {
-                point->x = point->x - 0.1;
-                point->y = point->y + 0.1;
-                }
-            if((yp-yc)<0)
-                {
-                point->x = point->x - 0.1;
-                point->y = point->y - 0.1;
-                }
-            }
-        }
-      }
+void project_point(sNum_t xp, sNum_t yp, sNum_t rc, sNum_t xc, sNum_t yc, sPt_t *point)
+	{
+	sPt_t o_c= {xc ,yc};
+	sPt_t o_p= {xp ,yp};
+	sVec_t v;
+	sNum_t r=rc, n, d;
+
+	convPts2Vec(&o_c, &o_p, &v);
+	normVec(&v, &n);
+
+	d = n - fabs(r);
+
+	if(fabs(d) > 2.) printf("!!! far from the circle (%.2fcm)...\n", d);
+
+	point->x = o_c.x + v.x*(fabs(r) + 0.1)/n;
+	point->y = o_c.y + v.y*(fabs(r) + 0.1)/n;
+	}
