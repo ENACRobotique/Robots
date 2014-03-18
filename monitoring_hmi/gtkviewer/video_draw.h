@@ -4,6 +4,8 @@
 void video_draw_pixel(unsigned char *rgb, unsigned int rowstride, unsigned int h, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
 void video_draw_line(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x0, int y0, int x1, int y1, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+void video_draw_rectangle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x0, int y0, int x1, int y1, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+void video_draw_filled_rectangle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x0, int y0, int x1, int y1, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void video_draw_cross(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x, int y, unsigned int size, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void video_draw_arrow(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x, int y, int dx, int dy, unsigned int size, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void video_draw_circle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int xc, int yc, unsigned int ray, unsigned char r, unsigned char g, unsigned char b, unsigned char a);

@@ -280,6 +280,10 @@ int main(int argc, char **argv){
 
                 msgOut.payload.obsCfg.nb_obs = N;
                 msgOut.payload.obsCfg.r_robot = R_ROBOT;
+                msgOut.payload.obsCfg.x_min = X_MIN;
+                msgOut.payload.obsCfg.x_max = X_MAX;
+                msgOut.payload.obsCfg.y_min = Y_MIN;
+                msgOut.payload.obsCfg.y_max = Y_MAX;
 
                 ret = bn_send(&msgOut);
                 if(ret < 0){

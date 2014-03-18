@@ -21,7 +21,7 @@
 #define R_SECU (5.)
 #define R_ROBOT (15.)
 
-#if 0
+#if 1
 #   define X_MIN (R_ROBOT)
 #   define X_MAX (300. - R_ROBOT)
 #   define Y_MIN (R_ROBOT)

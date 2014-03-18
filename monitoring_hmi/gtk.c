@@ -60,6 +60,7 @@ struct{
     uint8_t moved:4;
     uint8_t active:4;
 } *obss = NULL;
+float x_min = 0., x_max = 0., y_min = 0., y_max = 0.;
 float r_robot = -1.;
 float curr_x = 0., curr_y = 0., curr_theta = 0.;
 
@@ -103,6 +104,10 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             nb_obss = inMsg.payload.obsCfg.nb_obs;
             obss = (typeof(obss))calloc(inMsg.payload.obsCfg.nb_obs, sizeof(*obss));
             r_robot = inMsg.payload.obsCfg.r_robot;
+            x_min = inMsg.payload.obsCfg.x_min;
+            x_max = inMsg.payload.obsCfg.x_max;
+            y_min = inMsg.payload.obsCfg.y_min;
+            y_max = inMsg.payload.obsCfg.y_max;
 
             bn_printfDbg("received obs cfg, %hhuobss\n", nb_obss);
             break;
@@ -220,6 +225,11 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                 }
             }
         }
+        // draw limits
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(x_min), Y_CM2PX(ctx->pos_maxy), ORANGE(255), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(y_min), ORANGE(255), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(y_max), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), ORANGE(255), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(x_max), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), ORANGE(255), 255);
         // draw active obstacles
         for(i = 0; obss && i < nb_obss; i++){
             x = X_CM2PX(obss[i].x);
@@ -229,6 +239,19 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             if(obss[i].active && r > 0){
                 video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, ORANGE(255), 255);
             }
+        }
+        // draw limits
+        if(x_min - r_robot > 0.){
+            video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(x_min - r_robot), Y_CM2PX(ctx->pos_maxy), RED(255), 255);
+        }
+        if(y_min - r_robot > 0.){
+            video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(y_min - r_robot), RED(255), 255);
+        }
+        if(y_max + r_robot < ctx->pos_maxy){
+            video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(y_max + r_robot), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), RED(255), 255);
+        }
+        if(x_max + r_robot < ctx->pos_maxx){
+            video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(x_max + r_robot), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), RED(255), 255);
         }
         for(i = 0; obss && i < nb_obss; i++){
             x = X_CM2PX(obss[i].x);
@@ -447,6 +470,10 @@ int main(int argc, char *argv[]) {
 
         outMsg.payload.obsCfg.nb_obs = 0;
         outMsg.payload.obsCfg.r_robot = 0.;
+        outMsg.payload.obsCfg.x_min = 0.;
+        outMsg.payload.obsCfg.x_max = 0.;
+        outMsg.payload.obsCfg.y_min = 0.;
+        outMsg.payload.obsCfg.y_max = 0.;
 
         ret = bn_send(&outMsg);
         if(ret < 0){
