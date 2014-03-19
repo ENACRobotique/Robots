@@ -10,5 +10,4 @@
 
 void obj_step();
 int obj_init();
-
 #endif /* OBJ_H_ */

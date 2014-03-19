@@ -56,7 +56,7 @@ sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 e
         case E_FEU :
             printf("enum=%i => type=E_FEU, dist=%f\n",listObj[num].type,dist);
             point=((Obj_feu*)listObj[num].typeStruct)->nb_point;
-            ratio=point/time*1000;
+            ratio=point/time*100;
             break;
 
         case E_TORCHE_MOBILE :
@@ -98,11 +98,11 @@ int8_t next_obj (void)
     sNum_t tmp_val2;
     sNum_t dist=999.;
     sPt_t pointactuel={0,0};
-    float dist_prev_current=0; //FIXME Verifier utilité
-    int obs_deactive[MAX_OBS_BY_OBJ];
-    int k=1;
-    int l=0,m=0;
+    //int obs_deactive[MAX_OBS_BY_OBJ];
+    //int l=0,m=0;
+    int k=0;
     int i,j, tmp_inx=-1; //tmp_inx : index de l'objectif qui va  etre selectionner
+
 
     obs[N-1].active=1;
 
@@ -110,7 +110,7 @@ int8_t next_obj (void)
         {
         if (listObj[i].active==0) continue; //test si ojectif existe encore
 
-        for(j=0 ; j<listObj[i].nbObs ; j++)
+     /*   for(j=0 ; j<listObj[i].nbObs ; j++)
             {
             if(obs[listObj[i].numObs[j]].active==1)
                 {
@@ -122,9 +122,9 @@ int8_t next_obj (void)
                 obs_deactive[l]=j;
                 l++;
                 }
-            }
+            }*/
 		#if DEBUG
-				printObsActive();
+				//printObsActive();
 		#endif
         for(j=0 ; j<listObj[i].nbEP ; j++)
             {
@@ -138,24 +138,21 @@ int8_t next_obj (void)
             	printf("Pour obj=%i avec pa=%i dist=%f\n",i,j,path_loc.dist);
 			#endif
             if(path_loc.dist==0) printf("ATTENTION : A* retourne distance nul\n");
-            if(dist>path_loc.dist)
+            if(dist>path_loc.dist && path_loc.dist!=0) //tri distance optimal en fonction des acces
                 {
-                if(i==current_obj && k==1)
-                    {
-                    dist_prev_current=listObj[i].dist;
-                    k=0;
-                    }
                 listObj[i].dist=path_loc.dist;
                 dist=listObj[i].dist;
-                path_loc2=path_loc;
-                pointactuel.x=obs[N-1].c.x;
-                pointactuel.y=obs[N-1].c.y;
+                memcpy(&path_loc2, &path_loc, sizeof(path_loc));
+                memcpy(&pointactuel,&obs[N-1].c,sizeof(pointactuel));
+                k++;
                 }
             }
+        if(k==0) listObj[i].dist=0; //car aucun distance a été trouver
+        k=0;
         tmp_val2=val_obj(i);
         dist=999;
 
-        for(j=0 ; j<listObj[i].nbObs ; j++)
+    /*    for(j=0 ; j<listObj[i].nbObs ; j++)
         	{
             obs[listObj[i].numObs[j]].active=1;
             obs_updated[listObj[i].numObs[j]]++;
@@ -165,7 +162,7 @@ int8_t next_obj (void)
             obs[listObj[i].numObs[obs_deactive[m]]].active=0;
             obs_updated[listObj[i].numObs[obs_deactive[m]]]++;
         	}
-        l=0;
+        l=0;*/
 
 		#if DEBUG
         	printf("objectif n°%hhi avec ratio=%f \n\n",i,tmp_val2);
@@ -276,7 +273,6 @@ void obj_bac(iABObs_t obj)
     }
 
 
-
 int test_in_obs() //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
     {        //FIXME si le robot dans plusieurs obstable
     int i;
@@ -375,14 +371,6 @@ void obj_step(){
             case E_FEU :
                 listObj[current_obj].active=0;
                 listObj[current_obj].dist=0;
-
-                for(i=0 ; i<listObj[current_obj].nbObs ; i++)
-                    {
-                    obs[listObj[current_obj].numObs[i]].active=0;
-                    obs_updated[listObj[current_obj].numObs[i]]++;
-                    }
-
-                part=current_obj;
                 break;
             default:
                 break;
