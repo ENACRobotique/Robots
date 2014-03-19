@@ -17,6 +17,9 @@
 #include "../../global_errors.h"
 #include "node_cfg.h"
 
+#include "params.h"
+
+#include "controller.h"
 #include "asserv.h"
 
 //#define CTRLC_MENU
@@ -106,7 +109,7 @@ int main(int argc, char *argv[]){
     // arguments check
 
     // botNet initialization
-    bn_attach(E_DEBUG_SIGNALLING, bn_debugUpdateAddr);
+    bn_attach(E_ROLE_SETUP, role_setup);
 
     ret = bn_init();
     if(ret < 0){
@@ -118,11 +121,16 @@ int main(int argc, char *argv[]){
         printf("Node ready.\n");
     }
 
+    motor_controller_init();
+
     prevAsserv = millis();
 
     // main loop
     while(!quit){
+        usleep(500);
+
         ret = bn_receive(&inMsg);
+        printf("\x1b[K");
         if(ret < 0){
 #ifdef CTRLC_MENU
             if(ret == -ERR_SYSERRNO && errno == EINTR){
@@ -135,8 +143,12 @@ int main(int argc, char *argv[]){
                 exit(1);
             }
         }
+        else if(ret > 0){
+            ret = role_relay(&inMsg); // relay any received message if asked to
+            if(ret < 0){
+                printf("role_relay() error #%i\n", ret);
+            }
 
-        if(ret > 0){
             switch(inMsg.header.type){
             case E_TRAJ:
 //                bn_printDbg("got traj element");
@@ -159,6 +171,8 @@ int main(int argc, char *argv[]){
                 break;
             }
         }
+        printf("\x1b[spos %.2fcm, %.2fcm, %.1f°\x1b[u", I2Ds(x), I2Ds(y), RI2Rs(theta)*180./M_PI);
+        fflush(stdout);
 
 #ifdef CTRLC_MENU
         //menu

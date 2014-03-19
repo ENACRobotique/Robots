@@ -5,7 +5,7 @@ typedef struct {
     int speed;
     int setpoint;
 
-    unsigned long lastticksquery;
+    unsigned int lastticksquery;
 } motor_t;
 
 void motor_init(motor_t *m, unsigned char pwm, int bank, int pin);

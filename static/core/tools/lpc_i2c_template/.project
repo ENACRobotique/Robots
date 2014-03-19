@@ -27,12 +27,12 @@
 		<link>
 			<name>lpc2148</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/core/lpc21xx/lpc2148</location>
+			<locationURI>PARENT-2-PROJECT_LOC/lpc21xx/lpc2148</locationURI>
 		</link>
 		<link>
 			<name>lpc_lib</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/core/lpc21xx/lpc_lib</location>
+			<locationURI>PARENT-2-PROJECT_LOC/lpc21xx/lpc_lib</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

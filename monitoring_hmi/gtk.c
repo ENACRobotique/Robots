@@ -10,6 +10,7 @@
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
 #include "../../global_errors.h"
+#include "roles.h"
 #include "node_cfg.h"
 
 #include "gv.h"
@@ -50,14 +51,46 @@ gint event_cb(GtkWidget *widget, GdkEvent *event, context_t *ctx) {
     return FALSE;
 }
 
+uint8_t nb_obss = 0;
+struct{
+    float x;
+    float y;
+    float r;
+
+    uint8_t moved:4;
+    uint8_t active:4;
+} *obss = NULL;
+float r_robot = -1.;
+float curr_x = 0., curr_y = 0., curr_theta = 0.;
+
 int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
-    sMsg inMsg, outMsg;
-    int ret;
+#define X_CM2PX(x) CTX_X_CM2PX(ctx, x)
+#define Y_CM2PX(y) CTX_Y_CM2PX(ctx, y)
+#define DX_CM2PX(dx) CTX_DX_CM2PX(ctx, dx)
+#define DY_CM2PX(dy) CTX_DY_CM2PX(ctx, dy)
+#define CM2PX(r) CTX_CM2PX(ctx, r)
+#define WIDTH() CTX_WIDTH(ctx)
+#define ROWSTRIDE() CTX_ROWSTRIDE(ctx)
+#define HEIGHT() CTX_HEIGHT(ctx)
+#define BUFSZ() CTX_BUFSZ(ctx)
+#define X_PX2CM(x) CTX_X_PX2CM(ctx, x)
+#define Y_PX2CM(y) CTX_Y_PX2CM(ctx, y)
+
+
+    sMsg inMsg, outMsg = {{0}};
+    int ret, i;
+    uint8_t update_media = 0;
 
     ret = bn_receive(&inMsg);
     if(ret > 0){
+        ret = role_relay(&inMsg);
+        if(ret < 0){
+            fprintf(stderr, "role_relay() error #%i\n", ret);
+        }
+
         if(ctx->verbose >= 1){
-            printf("message received from %03hx, type : %s (%hhu)\n", inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
+            if(inMsg.header.type != E_POS)
+            printf("message received from %s (%03hx), type : %s (%hhu)\n", role_string(role_get_role(inMsg.header.srcAddr)), inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
         }
 
         switch(inMsg.header.type){
@@ -66,94 +99,82 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                 printf("  %s\n", inMsg.payload.debug);
             }
             break;
-        case E_POS:{
-            int x, y, dx, dy;
-            float factor_x, factor_y;
-            sPosLEl *pel;
-            sTrajLEl *tel;
+        case E_OBS_CFG:
+            nb_obss = inMsg.payload.obsCfg.nb_obs;
+            obss = (typeof(obss))calloc(inMsg.payload.obsCfg.nb_obs, sizeof(*obss));
+            r_robot = inMsg.payload.obsCfg.r_robot;
 
+            bn_printfDbg("received obs cfg, %hhuobss\n", nb_obss);
+            break;
+        case E_OBSS:
+            for(i = 0; i < inMsg.payload.obss.nb_obs; i++){
+                if(inMsg.payload.obss.obs[i].id < nb_obss){
+                    obss[inMsg.payload.obss.obs[i].id].active = inMsg.payload.obss.obs[i].active;
+                    obss[inMsg.payload.obss.obs[i].id].moved = inMsg.payload.obss.obs[i].moved;
+                    obss[inMsg.payload.obss.obs[i].id].x = (float)inMsg.payload.obss.obs[i].x/100.;
+                    obss[inMsg.payload.obss.obs[i].id].y = (float)inMsg.payload.obss.obs[i].y/100.;
+                    obss[inMsg.payload.obss.obs[i].id].r = (float)inMsg.payload.obss.obs[i].r/100.;
+                }
+            }
+
+            if(inMsg.payload.obss.nb_obs > 0){
+                bn_printfDbg("received obss, %hhuobss (first %hhu)\n", inMsg.payload.obss.nb_obs, inMsg.payload.obss.obs[0].id);
+            }
+
+            update_media = 1;
+            break;
+        case E_TRAJ:
+            tl_addTail(&ctx->trajlist, &inMsg.payload.traj);
+
+            update_media = 1;
+            break;
+        case E_POS:{
             if(ctx->verbose >= 2){
                 printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.pos.id, inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
+            }
+
+            curr_x = inMsg.payload.pos.x;
+            curr_y = inMsg.payload.pos.y;
+            curr_theta = inMsg.payload.pos.theta;
+
+            // updates list of obstacles
+            if(obss){
+                obss[0].x = curr_x;
+                obss[0].y = curr_y;
+                obss[0].r = 0.;
+                obss[0].moved = 1;
             }
 
             // adds position to list of positions to draw
             pl_addTail(&ctx->poslist, &inMsg.payload.pos);
 
-            factor_x = (float)ctx->pos_szx/300.;
-            factor_y = (float)ctx->pos_szy/200.;
-
             // send trajectory if event
             if(ctx->mouse_event){
-                outMsg.header.destAddr = ctx->prop_address;
-                outMsg.header.type = E_TRAJ;
-                outMsg.header.size = sizeof(outMsg.payload.traj);
-                // payload
-                outMsg.payload.traj.p1_x = inMsg.payload.pos.x;
-                outMsg.payload.traj.p1_y = inMsg.payload.pos.y;
-                outMsg.payload.traj.p2_x = (float)ctx->mouse_x/factor_x;
-                outMsg.payload.traj.p2_y = 200. - (float)ctx->mouse_y/factor_y;
-                outMsg.payload.traj.seg_len = sqrt((outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x)*(outMsg.payload.traj.p1_x - outMsg.payload.traj.p2_x) + (outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y)*(outMsg.payload.traj.p1_y - outMsg.payload.traj.p2_y));
-                outMsg.payload.traj.c_x = outMsg.payload.traj.p2_x;
-                outMsg.payload.traj.c_y = outMsg.payload.traj.p2_y;
-                outMsg.payload.traj.c_r = 0.;
-                outMsg.payload.traj.arc_len = 0.;
-                outMsg.payload.traj.tid = ctx->tid++;
-                outMsg.payload.traj.sid = 0;
+                outMsg.header.destAddr = role_get_addr(ROLE_IA);
+                outMsg.header.type = E_GOAL;
+                outMsg.header.size = sizeof(outMsg.payload.pos);
 
-                tl_addTail(&ctx->trajlist, &outMsg.payload.traj);
+                outMsg.payload.pos.id = 0; // main
+                outMsg.payload.pos.x = X_PX2CM(ctx->mouse_x);
+                outMsg.payload.pos.y = Y_PX2CM(ctx->mouse_y);
 
-                ret = bn_send(&outMsg);
+                // updates list of obstacles
+                if(obss){
+                    obss[nb_obss - 1].x = outMsg.payload.pos.x;
+                    obss[nb_obss - 1].y = outMsg.payload.pos.y;
+                    obss[nb_obss - 1].r = 0.;
+                    obss[nb_obss - 1].moved = 1;
+                }
+
+                ret = bn_sendAck(&outMsg);
                 if(ret <= 0){
-                    fprintf(stderr, "bn_send() error #%i\r\n", -ret); // '\r' needed, raw mode
+                    fprintf(stderr, "bn_sendAck(E_GOAL) error #%i\n", -ret);
                 }
 
                 ctx->mouse_event = 0;
             }
 
-            // update position media
-            ctx->pos_cur ^= 1;
-            memset(ctx->pos_data[ctx->pos_cur], 255, ctx->pos_szx*ctx->pos_szy*3);
-
-            // draw current position
-            x = (int)(inMsg.payload.pos.x*factor_x + 0.5);
-            y = ctx->pos_szy - (int)(inMsg.payload.pos.y*factor_y + 0.5);
-            dx = 8*factor_x*cos(inMsg.payload.pos.theta);
-            dy = -8*factor_y*sin(inMsg.payload.pos.theta);
-
-            video_draw_arrow(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, dx, dy, 10, 255, 0, 0);
-
-            // draw trajectories
-            for(tel = tl_getFirst(&ctx->trajlist); tel; tel = tl_getNext(&ctx->trajlist)){
-                x = (int)(tel->traj.p1_x*factor_x + 0.5);
-                y = ctx->pos_szy - (int)(tel->traj.p1_y*factor_y + 0.5);
-                dx = (int)(tel->traj.p2_x*factor_x + 0.5) - x;
-                dy = ctx->pos_szy - (int)(tel->traj.p2_y*factor_y + 0.5) - y;
-
-                video_draw_line(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, x+dx, y+dy, 0, 0, 0);
-
-                x = (int)(tel->traj.c_x*factor_x + 0.5);
-                y = ctx->pos_szy - (int)(tel->traj.c_y*factor_y + 0.5);
-                dx = (int)(tel->traj.c_r*factor_x + 0.5);
-                dy = (int)(tel->traj.c_r*factor_y + 0.5);
-
-                video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 0);
-                video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 0);
-            }
-
-            // draw previous positions
-            for(pel = pl_getFirst(&ctx->poslist); pel && pel->next; pel = pl_getNext(&ctx->poslist)){
-                x = (int)(pel->pos.x*factor_x + 0.5);
-                y = ctx->pos_szy - (int)(pel->pos.y*factor_y + 0.5);
-                dx = 3*factor_x;
-                dy = 3*factor_y;
-
-//                video_draw_cross(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
-                video_draw_pixel(ctx->pos_data[ctx->pos_cur], ctx->pos_szx*3, ctx->pos_szy, x, y, 0, 0, 255);
-                video_draw_circle(ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, ctx->pos_szx*3, x, y, (dx+dy)/2, 0, 0, 255);
-            }
-
-            // switch drawing buffer in gui
-            gv_media_update(ctx->pos_mid, ctx->pos_data[ctx->pos_cur], ctx->pos_szx, ctx->pos_szy, (gv_destroy)NULL, NULL);
+            update_media = 1;
 
             break;
         }
@@ -162,7 +183,147 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         }
     }
 
+    // update position media
+    if(update_media){
+        int x, y, dx, dy, r, x1, y1, x2, y2;
+        int i;
+        sPosLEl *pel;
+        sTrajLEl *tel;
+
+        // draw background
+        ctx->pos_cur ^= 1;
+        {
+            unsigned char *p = &ctx->pos_data[ctx->pos_cur][0];
+            for(i = 0; i < BUFSZ(); i+=3){
+                *p++ = 0;
+                *p++ = 127;
+                *p++ = 0;
+            }
+        }
+
+        // draw inactive obstacles
+        for(i = 0; obss && i < nb_obss; i++){
+            x = X_CM2PX(obss[i].x);
+            y = Y_CM2PX(obss[i].y);
+            if(obss[i].r > r_robot){
+                r = CM2PX(obss[i].r - r_robot);
+            }
+            else{
+                r = CM2PX(obss[i].r);
+            }
+
+            if(!obss[i].active){
+                if(r > 0){
+                    video_draw_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, BLACK(), 255);
+                }
+                else{
+                    video_draw_cross(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, CM2PX(8.), BLACK(), 255);
+                }
+            }
+        }
+        // draw active obstacles
+        for(i = 0; obss && i < nb_obss; i++){
+            x = X_CM2PX(obss[i].x);
+            y = Y_CM2PX(obss[i].y);
+            r = CM2PX(obss[i].r);
+
+            if(obss[i].active && r > 0){
+                video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, ORANGE(255), 255);
+            }
+        }
+        for(i = 0; obss && i < nb_obss; i++){
+            x = X_CM2PX(obss[i].x);
+            y = Y_CM2PX(obss[i].y);
+            if(obss[i].r > r_robot){
+                r = CM2PX(obss[i].r - r_robot);
+            }
+            else{
+                r = CM2PX(obss[i].r);
+            }
+
+            if(obss[i].active){
+                if(r > 0){
+                    video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, RED(255), 255);
+                }
+                else{
+                    video_draw_cross(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, CM2PX(8.), RED(255), 255);
+                }
+            }
+        }
+
+        // draw trajectories
+        for(tel = tl_getFirst(&ctx->trajlist); tel; tel = tl_getNext(&ctx->trajlist)){
+            // segment
+            x1 = X_CM2PX(tel->traj.p1_x);
+            y1 = Y_CM2PX(tel->traj.p1_y);
+            x2 = X_CM2PX(tel->traj.p2_x);
+            y2 = Y_CM2PX(tel->traj.p2_y);
+
+            video_draw_line(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x1, y1, x2, y2, BLACK(), 255);
+
+            // arc
+            x = X_CM2PX(tel->traj.c_x);
+            y = Y_CM2PX(tel->traj.c_y);
+            r = CM2PX(fabs(tel->traj.c_r));
+
+            if(tel->next && tel->traj.tid == tel->next->traj.tid && tel->traj.sid + 1 == tel->next->traj.sid){
+                if(r){
+                    x1 = X_CM2PX(tel->next->traj.p1_x);
+                    y1 = Y_CM2PX(tel->next->traj.p1_y);
+
+                    if(tel->traj.c_r > 0.){
+                        video_draw_arc(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, x2, y2, x1, y1, BLACK(), 255);
+                    }
+                    else{
+                        video_draw_arc(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, x1, y1, x2, y2, BLACK(), 255);
+                    }
+                }
+                else{
+                    video_draw_pixel(ctx->pos_data[ctx->pos_cur], ROWSTRIDE(), HEIGHT(), x, y, BLACK(), 255);
+                }
+            }
+            else{
+                video_draw_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, BLACK(), 255);
+            }
+        }
+
+        // draw previous positions
+        r = CM2PX(3.);
+        for(i = 0, pel = pl_getFirst(&ctx->poslist); pel && pel->next; i++, pel = pl_getNext(&ctx->poslist)){
+            x = X_CM2PX(pel->pos.x);
+            y = Y_CM2PX(pel->pos.y);
+
+            video_draw_pixel(ctx->pos_data[ctx->pos_cur], ROWSTRIDE(), HEIGHT(), x, y, BLUE(255), 255*(i + ctx->poslist.maxlen - ctx->poslist.len)/ctx->poslist.maxlen);
+            video_draw_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, BLUE(255), 255*(i + ctx->poslist.maxlen - ctx->poslist.len)/ctx->poslist.maxlen);
+        }
+
+        // draw current position
+        x = X_CM2PX(curr_x);
+        y = Y_CM2PX(curr_y);
+        r = CM2PX(r_robot);
+        dx = DX_CM2PX(r_robot*cos(curr_theta));
+        dy = DY_CM2PX(r_robot*sin(curr_theta));
+
+        video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, GREY(150), 150);
+        video_draw_arrow(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, dx, dy, 10, BLACK(), 255);
+
+        // switch drawing buffer in gui
+        gv_media_update(ctx->pos_mid, ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), (gv_destroy)NULL, NULL);
+    }
+
     return TRUE; // handled
+
+#undef X_CM2PX
+#undef Y_CM2PX
+#undef DX_CM2PX
+#undef DY_CM2PX
+#undef CM2PX
+#undef WIDTH
+#undef ROWSTRIDE
+#undef HEIGHT
+#undef BUFSZ
+#undef X_PX2CM
+#undef Y_PX2CM
 }
 
 int main(int argc, char *argv[]) {
@@ -170,8 +331,8 @@ int main(int argc, char *argv[]) {
     int ret;
 
     memset(&ctx, 0, sizeof(ctx));
-    pl_init(&ctx.poslist, -1);
-    tl_init(&ctx.trajlist, -1);
+    pl_init(&ctx.poslist, 100);
+    tl_init(&ctx.trajlist, 2);
 
     // arguments options
     ctx.verbose = 1;
@@ -216,12 +377,15 @@ int main(int argc, char *argv[]) {
     // gtkviewer init
     gv_init(&argc, &argv, "GTK UI to botNet", "En construction...");
     // gtkviewer media creation
-    ctx.pos_szx = 300*4;
-    ctx.pos_szy = 200*4;
-    ctx.pos_mid = gv_media_new("position", "Position des robots en temps réel", ctx.pos_szx, ctx.pos_szy, GTK_SIGNAL_FUNC(event_cb), &ctx);
-    ctx.pos_data[0] = malloc(ctx.pos_szx*ctx.pos_szy*3);
-    ctx.pos_data[1] = malloc(ctx.pos_szx*ctx.pos_szy*3);
+    ctx.pos_maxx = 300.;
+    ctx.pos_maxy = 200.;
+    ctx.pos_wfactor = 4;
+    ctx.pos_mid = gv_media_new("position", "Position des robots en temps réel", CTX_WIDTH(&ctx), CTX_HEIGHT(&ctx), GTK_SIGNAL_FUNC(event_cb), &ctx);
+    ctx.pos_data[0] = malloc(CTX_BUFSZ(&ctx));
+    ctx.pos_data[1] = malloc(CTX_BUFSZ(&ctx));
     ctx.pos_cur = 0;
+
+    bn_attach(E_ROLE_SETUP, role_setup);
 
     ret = bn_init();
     if(ret < 0){
@@ -254,27 +418,40 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    printf("(Listening...)\n");
+    printf("Listening...\n");
 
-    // send position
     {
-        sMsg outMsg;
-        outMsg.header.destAddr = ctx.prop_address;
+        sMsg outMsg = {{0}};
+// send initial position
         outMsg.header.type = E_POS;
         outMsg.header.size = sizeof(outMsg.payload.pos);
+
         outMsg.payload.pos.id = 0;
         outMsg.payload.pos.theta = M_PI;
         outMsg.payload.pos.u_a = 0;
         outMsg.payload.pos.u_a_theta = 0;
         outMsg.payload.pos.u_b = 0;
-        outMsg.payload.pos.x = 294;
-        outMsg.payload.pos.y = 57;
+        outMsg.payload.pos.x = 294.;
+        outMsg.payload.pos.y = 57.;
         if(ctx.verbose >= 1){
             printf("Sending initial position to robot%i (%fcm,%fcm,%f°).\n", outMsg.payload.pos.id, outMsg.payload.pos.x, outMsg.payload.pos.y, outMsg.payload.pos.theta*180./M_PI);
         }
-        ret = bn_sendAck(&outMsg);
+        ret = role_send(&outMsg);
         if(ret <= 0){
-            fprintf(stderr, "bn_sendAck() error #%i\n", -ret);
+            fprintf(stderr, "role_send() error #%i\n", -ret);
+        }
+
+// ask obstacles
+        outMsg.header.destAddr = role_get_addr(ROLE_IA);
+        outMsg.header.type = E_OBS_CFG;
+        outMsg.header.size = sizeof(outMsg.payload.obsCfg);
+
+        outMsg.payload.obsCfg.nb_obs = 0;
+        outMsg.payload.obsCfg.r_robot = 0.;
+
+        ret = bn_send(&outMsg);
+        if(ret < 0){
+            fprintf(stderr, "bn_send(E_OBS_CFG) error #%i\n", -ret);
         }
     }
 
@@ -284,4 +461,3 @@ int main(int argc, char *argv[]) {
     // never reached
     return 0;
 }
-

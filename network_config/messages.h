@@ -18,8 +18,8 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "network_cfg.h"
 #include "../static/communication/botNet/shared/message_header.h"
+
 
 // bn_Address : cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
 
@@ -28,7 +28,7 @@ extern "C" {
 //message types
 typedef enum{
     E_DEBUG,                // general debug
-    E_DEBUG_SIGNALLING,     // debug receiver signalling
+    E_ROLE_SETUP,           // setup addresses of some standard nodes + automatic relaying of messages between them
     E_DATA,                 // arbitrary data payload
     E_ACK_RESPONSE,         // ack response
     E_PING,
@@ -44,6 +44,10 @@ typedef enum{
     E_TRAJ,                 // a trajectory step
     E_POS,                  // position (w/ uncertainty) of an element
     E_SERIAL_DUMP,          // serial dump (for debug)
+    E_ASSERV_STATS,         // control loop statistics
+    E_GOAL,                 // asks the robot to go to this goal (x,y)
+    E_OBS_CFG,              // obstacle array config
+    E_OBSS,                  // obstacles update (position & status update)
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -68,6 +72,35 @@ typedef enum{
 //function returning a string corresponding to one element of the above enum. Must be managed by hand.
 const char *eType2str(E_TYPE elem);
 
+typedef struct __attribute__((packed)){ // 2bytes
+    struct __attribute__((packed)){
+        uint8_t first  :4;
+        uint8_t second :4;
+    } sendTo;
+    struct __attribute__((packed)){
+        uint8_t n1 :4;
+        uint8_t n2 :4;
+    } relayTo;
+} sRoleActions;
+typedef struct __attribute__((packed)){
+    uint16_t nb_steps; // must be <=13 to fit in a sMsg payload (2+4*13=54)
+    struct{ // 4bytes
+        enum{
+            UPDATE_ADDRESS,
+            UPDATE_ACTIONS
+        } step :8;
+        union{
+            struct __attribute__((packed)){
+                uint8_t role;
+                bn_Address address;
+            };
+            struct __attribute__((packed)){
+                E_TYPE type :8;
+                sRoleActions actions;
+            };
+        };
+    } steps[];
+} sRoleSetupPayload;
 
 /************************ user payload definition start ************************/
 //user-defined payload types.
@@ -120,9 +153,46 @@ typedef struct {
     float u_a_theta; // (rad)
     float u_a; // (cm)
     float u_b; // (cm)
+// trajectory steps
+    int tid; // trajectory identifier
+    int sid; // step identifier
+    uint8_t ssid; // sub-step identifier (0:line, 1:circle)
 // identifier of the robot/element
     uint8_t id; // 0:prim, 1:sec, 2:adv_prim, 3:adv_sec
 } sPosPayload;
+
+typedef struct __attribute__((packed)){
+    uint8_t nb_obs;
+    float r_robot;
+} sObsConfig;
+
+#define MAX_NB_OBSS_PER_MSG (6)
+typedef struct __attribute__((packed)){
+    uint16_t nb_obs; // must be <= 6 (2 + 8*6 = 50)
+    struct __attribute__((packed)){ // 8bytes
+        int16_t x; // (LSB=0.1mm)
+        int16_t y; // (LSB=0.1mm)
+        int16_t r; // (LSB=0.1mm)
+
+        uint8_t moved :4;
+        uint8_t active :4;
+        uint8_t id; // index in the tab of obstacles
+    } obs[];
+} sObss;
+
+#define NB_ASSERV_STEPS_PER_MSG (4)
+typedef struct __attribute__((packed)){
+    uint16_t nb_seq;
+    struct __attribute__((packed)){ // 13bytes*4
+        unsigned short delta_t;
+        short ticks_l;
+        short ticks_r;
+        short consigne_l;
+        short consigne_r;
+        short out_l :12;
+        short out_r :12;
+    } steps[NB_ASSERV_STEPS_PER_MSG];
+} sAsservStats;
 
 /************************ user payload definition stop ************************/
 
@@ -137,6 +207,7 @@ typedef union{
     uint8_t data[BN_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
     uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
     sAckPayload ack;
+    sRoleSetupPayload roleSetup;
 
 /************************ user payload start ************************/
 //the user-defined payloads from above must be added here. The simple ones can be directly added here
@@ -147,6 +218,9 @@ typedef union{
     sPosPayload pos;
     sMobileReportPayload mobileReport;
     sSyncPayload sync;
+    sAsservStats asservStats;
+    sObsConfig obsCfg;
+    sObss obss;
 /************************ user payload stop ************************/
 
 }uPayload;

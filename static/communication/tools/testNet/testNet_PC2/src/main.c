@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "../../../../botNet/shared/botNet_core.h"
 #include "../../../../botNet/shared/bn_utils.h"
@@ -46,7 +47,7 @@ int main(){
     int err;
 
     bn_init();
-    bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+    bn_attach(E_ROLE_SETUP,role_setup);
 
 
     printf("init terminé, mon adresse est : %hx\n",MYADDRU);
@@ -80,7 +81,7 @@ int main(){
             }
         }
         else if (ret < 0){
-            if (ret == -ERR_INTERRUPTED){
+            if (ret == -ERR_SYSERRNO && errno == EINTR){
                 menu=1;
             }
             else if(ret != -ERR_UART_READ_BYTE_TIMEOUT){

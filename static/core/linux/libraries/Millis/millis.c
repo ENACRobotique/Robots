@@ -11,7 +11,7 @@
  * May (and will certainly) overflow
  * Based on gettimeofday from  <sys/time.h>
  */
-int millis(){
+unsigned int millis(){
     struct timeval clock;
     gettimeofday(&clock,NULL);
     return clock.tv_usec/1000 + clock.tv_sec*1000;
@@ -25,7 +25,7 @@ int millis(){
  * May (and will certainly) overflow
  * Based on gettimeofday from  <sys/time.h>
  */
-int micros(){
+unsigned int micros(){
     struct timeval clock;
     gettimeofday(&clock,NULL);
     return clock.tv_usec + clock.tv_sec*1000000;

@@ -35,7 +35,7 @@ void setup(){
         devicesInfo[i].lastIndex=-1;
     }
     devicesInfo[D_MOBILE_1].addr=ADDRX_MOBILE_1;
-    //fixme : do the salme for the others
+    //fixme : do the same for the others
     domi_init(2);
 
     bn_init();

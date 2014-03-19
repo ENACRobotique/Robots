@@ -34,7 +34,7 @@ void setup() {
     bn_init();
 
 
-    bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+    bn_attach(E_ROLE_SETUP,role_setup);
     bn_printfDbg("start beacon 2, free mem : %d o\n",freeMemory());
 
 
