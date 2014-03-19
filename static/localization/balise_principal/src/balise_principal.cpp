@@ -16,42 +16,45 @@
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "lib_domitille.h"
 #include "../../../communication/botNet/shared/bn_debug.h"
+#include "lib_sync_turret.h"
 
-uint32_t mesTab[2]={0,0};
+mainState state=S_GAME;
+
+sDeviceInfo devicesInfo[D_AMOUNT];
+int iStates;
+
+sMsg inMsg,outMsg;
+
+unsigned long sw=0, sw2=0;
 
 void setup(){
 
-    domi_init(2); //fixme add domi_init(1) ?
+    // initializes the local state of the beacons to "off"
+    for (int i=0;i<D_AMOUNT;i++) {
+        devicesInfo[i].state=DS_OFF;
+        devicesInfo[i].lastIndex=-1;
+    }
+    devicesInfo[D_MOBILE_1].addr=ADDRX_MOBILE_1;
+    //fixme : do the salme for the others
+    domi_init(2);
 
     bn_init();
 
     bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
-    bn_printfDbg((char*)"start turret, free mem : %d o\n",freeMemory());
+    bn_printfDbg((char*)F("start turret, free mem : %d o\n"),freeMemory());
 
     pinMode(PIN_DBG_LED,OUTPUT);
 }
 
-int state=GAME;
-#ifdef BLINK_1S
-int debug_led=0;
-#endif
-int period2=0;
-char syncOKbool=0;
-sMsg inMsg,outMsg;
-sMesPayload last1,last2,lastS; //last measure send by mobile 1,  2, secondary
-
-int routineErr=0,i=0,msg2send=100,msgNOk=0,msgNStatused=0,msgSend=0;
-unsigned long avgMes=0,prevMsg=0,avgElem=0,avgVal=0;
-unsigned long sw=0;
-int led=1;
 
 void loop(){
 
     int rxB=0; //received bytes (size of inMsg when a message has been received)
-    static unsigned long time_prev_period=0,prev_TR=0;
+    static unsigned long time_prev_period=0;
 
 #ifdef BLINK_1S
     static unsigned long time_prev_led=0;
+    static char debug_led=0;
 #endif
 
     unsigned long time=millis();
@@ -68,99 +71,86 @@ void loop(){
     if((time - time_prev_led)>=10000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
-        bn_printfDbg("main turret beacon %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
+//        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
     }
 #endif
-    //period broadcast : one by one
-    if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
-
-        time_prev_period = millis();
-        period2++;
-        period2=(period2)%5;
-//        switch (period2){
-//            case 0 :
-                outMsg.header.destAddr=ADDRX_MOBILE_1;
-//                break;
-//            case 1 : outMsg.header.destAddr=ADDRX_MOBILE_2; break;
-//            case 2 : outMsg.header.destAddr=ADDRX_SECOND; break;
-//            case 3 : outMsg.header.destAddr=ADDRX_FIX; break;
-//            case 4 : outMsg.header.destAddr=debug_addr; break;
-//            default : break;
-//        }
-        outMsg.header.type=E_PERIOD;
-        outMsg.header.size=sizeof(outMsg.payload.period);
-        outMsg.payload.period=domi_meanPeriod();
-        int sndVal=bn_sendAck(&outMsg); //fixme remove ack
-        bn_printfDbg((char*)"period send to %hx %lu, ack : %d\n",outMsg.header.destAddr,outMsg.payload.period,sndVal);
-    }
-    //some message handling
-    if (rxB){
-        switch (inMsg.header.type){
-        case E_SYNC_OK :
-            //write in syncOkbool that the sender is in sync
-            syncOKbool|=(inMsg.header.srcAddr&DEVICEX_MASK);
-            //if everybody is in sync, send a global "SYNC_OK"
-            if (syncOKbool==(ADDRX_MOBILE_1)){//FIXME | ADDRX_MOBILE_2 | ADDRX_SECOND
-                outMsg.header.destAddr=ADDRX_BROADCAST;
-                outMsg.header.type=E_SYNC_OK;
-                outMsg.header.size=0;
-                bn_send(&outMsg);
-                state=GAME;
-            }
-            rxB=0;
-            break;
-        default : break;
-        }
-    }
 
 ///////state machine
       switch (state){
-          case SYNC:
-                  //if nouveau tour, envoyer les expected pour le dernier tour
-                  if(prev_TR!=last_TR){
-                      //send to the laser receiver the expected time they should have seen the laser in order to synchronize the clocks
-                      if (!(syncOKbool & (ADDRX_MOBILE_1&DEVICEX_MASK))){
-                          //expected for balise 1
-                          outMsg.header.destAddr=ADDRX_MOBILE_1;
-                          outMsg.header.type=E_SYNC_EXPECTED_TIME;
-                          outMsg.header.size=sizeof(outMsg.payload.syncTime);
-                          outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_1)>>9)+prev_TR;
-                          bn_send(&outMsg);
-                      }
-//FIXME                      if (!(syncOKbool & (ADDRX_MOBILE_2&DEVICE_MASK))){
-//                          //expected for balise 2
-//                          outMsg.header.destAddr=ADDRX_MOBILE_2;
-//                          outMsg.header.type=E_SYNC_EXPECTED_TIME;
-//                          outMsg.header.size=sizeof(outMsg.payload.syncTime);
-//                          outMsg.payload.syncTime=((TR_period*PHASE_INIT_MOBILE_2)>>9)+prev_TR;
-//                          bn_send(&outMsg);
-//                      }
-                      prev_TR=last_TR;
+          case S_SYNC_ELECTION :
+              if (!sw){
+                  //tell beacon(s) to begin election XXX check amount of beacon that respond correctly
+                  for (int i=0;i<D_AMOUNT;i++){
+                      if (sync_beginElection(devicesInfo[i].addr)>0) devicesInfo[i].state=DS_UNSYNCED;
                   }
-                  break;
-          case GAME :
-                  if (rxB){
-                      switch (inMsg.header.type){
-                      case E_MEASURE :
-                          switch (inMsg.header.srcAddr){
-                          case ADDRX_MOBILE_1 :
-                              last1=inMsg.payload.measure;
-                              break;
-                          case ADDRX_MOBILE_2 :
-                              last2=inMsg.payload.measure;
-                              break;
-                          case ADDRX_SECOND :
-                            lastS=inMsg.payload.measure;
-                            break;
-                          default : break;
-                          }
-                          rxB=0;
-                          break;
 
+                  sw=micros();
+              }
+              //wait 2s
+              else if (micros()-sw>ELECTION_TIME){
+                  //switch to next state (beacon will switch automatically on reception of the first data packet)
+                  state=S_SYNC_MEASURE;
+
+                  sw=micros();
+              }
+              break;  //
+          case S_SYNC_MEASURE:
+              //during the defined synchronization time
+              if (micros()-sw<SYNCRONIZATION_TIME){
+                  // $iStates (device to sync) send data if a new turn has been detected since the last time we have send data to this particular device
+                  if (domi_nbTR()!=devicesInfo[iStates].lastIndex){
+                      devicesInfo[iStates].lastIndex=domi_nbTR();
+
+                      //send data
+                      sync_sendData(devicesInfo[iStates].addr);
+
+                      //increase index for device selection
+                      iStates=(iStates+1)%D_AMOUNT;
+                  }
+              }
+              else {
+                  // at the end, change state
+                  state=S_SYNC_END;
+              }
+              break;
+          case S_SYNC_END :
+
+              //send the SYNCF_END_MESURES
+              for (int i=0;i<D_AMOUNT;i++){
+                  if (sync_sendEnd(devicesInfo[i].addr)>0) devicesInfo[i].state=DS_GAME;
+              }
+              state=S_GAME;
+              break;
+          case S_GAME :
+              //period broadcast : one by one TODO : broadcast
+              if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
+                  time_prev_period = millis();
+                  outMsg.header.destAddr=ADDRX_MOBILE_1; //FIXME : to everybody
+                  outMsg.header.type=E_PERIOD;
+                  outMsg.header.size=sizeof(outMsg.payload.period);
+                  outMsg.payload.period=domi_meanPeriod();
+                  //bn_printfDbg("period send to %hx %lu, err : %d\n",outMsg.header.destAddr,outMsg.payload.period,sndVal);
+                  bn_send(&outMsg);
+              }
+              if (rxB){
+                  switch (inMsg.header.type){
+                  case E_MEASURE :
+                      switch (inMsg.header.srcAddr){
+                      case ADDRX_MOBILE_1 :
+                          break;
+                      case ADDRX_MOBILE_2 :
+                          break;
+                      case ADDRX_SECOND :
+                          break;
                       default : break;
                       }
+                      rxB=0;
+                      break;
+
+                      default : break;
                   }
-                  break;
+              }
+              break;
           default : break;
       }
 }

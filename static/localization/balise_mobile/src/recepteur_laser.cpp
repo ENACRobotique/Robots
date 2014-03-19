@@ -138,11 +138,11 @@ void loop() {
             else if(chosenOne==1 && laserStruct1.thickness && laserStruct0.period) {
                 syncComputationLaser(&laserStruct1);
             }
-            // data broadcasted by turret
+            // handling data broadcasted by turret
             if (rxB && inMsg.header.type==E_SYNC_DATA){
                     rxB=0;
                 if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
-                    //fixme end_computation()
+                    syncComputationFinal(&inMsg.payload.sync);
                     state=S_GAME;
                 }
                 else {
@@ -150,7 +150,7 @@ void loop() {
                 }
             }
         	break;
-
+#if 0   // probably not usefull, so skipped.
         case S_SYNCED : // waiting the signal from main to go to game mode
             if (prevState!=state) {
                 prevState=state;
@@ -160,6 +160,7 @@ void loop() {
             }
 
             break;
+#endif
         case S_GAME :
             if (prevState!=state) {
                 prevState=state;

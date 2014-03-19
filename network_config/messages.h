@@ -84,7 +84,8 @@ typedef struct __attribute__((__packed__)){
 typedef enum {
     SYNCF_BEGIN_ELECTION,
     SYNCF_MEASURES,
-    SYNCF_END_MEASURES
+    SYNCF_END_MEASURES,
+    SYNCF_OK
 } syncFlag;
 typedef struct __attribute__((__packed__)){
     uint32_t lastTurnDate;   //last turn date (in µs)
