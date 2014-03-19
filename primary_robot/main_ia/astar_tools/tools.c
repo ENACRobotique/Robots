@@ -74,7 +74,7 @@ sObs_t obs[] = {
     {{210., 90. }, R_ROBOT+7, 1, 1},
 
     // arrivée
-    {{0. , 0.}, 0, 0, 1} // 40
+    {{0. , 0.}, 0, 0, 1} // 44
 };
 
 // tangents between physical obstacles (17kiB)
@@ -434,16 +434,37 @@ sNum_t o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
     dotVecs(&v1, &v3, &d);
     crossVecs(&v1, &v3, &c);
 
-    d = acos(d/(obs[o2].r*obs[o2].r));
+#if defined(AS_DEBUG) && AS_DEBUG > 2
+dumpPt(p2_1,       "      in ");
+dumpPt(&obs[o2].c, "      c  ");
+printf(            "      r  =%.2f\n", obs[o2].r);
+dumpPt(p2_3,       "      out");
+dumpVec(&v1,       "      v1");
+dumpVec(&v3,       "      v3");
+printf(            "      v1^v3=%.3f ; v1.v3=%.3f\n", c, d);
+#endif
+
+    d = d/(obs[o2].r*obs[o2].r);
+    // d must be between -1 and 1 but because we do not use the true length of v1 and v3
+    // (we use r instead to avoid some heavy calculations) it may be a little outside of this interval
+    // so, let's just be sure we stay in this interval for acos to give a result
+    if(d > 1.) {
+        d = 1.;
+    }
+    else if(d < -1.) {
+        d = -1.;
+    }
+
+    d = acos(d);
 
     if(!dir) {  // clock wise
         if(c > 0) {
-            d += M_PI;
+            d = 2*M_PI - d;
         }
     }
     else {  // counter clock wise
         if(c < 0) {
-            d += M_PI;
+            d = 2*M_PI - d;
         }
     }
 
