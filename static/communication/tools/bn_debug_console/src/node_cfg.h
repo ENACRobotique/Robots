@@ -10,7 +10,7 @@
 
 #include "network_cfg.h"
 
-#define MYADDRX  ADDRX_DEBUG
+#define MYADDRX 0// ADDRX_DEBUG
 #define MYADDRI 0
 #define MYADDRU 0
 #define MYADDRD ADDRD_DEBUG1

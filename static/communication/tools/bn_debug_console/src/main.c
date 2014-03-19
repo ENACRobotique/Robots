@@ -153,8 +153,11 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
                 break;
             default :
-                printf("\n");
-                if(fd) fprintf(fd, "\n");
+                if (verbose>=1){
+                    printf("\n");
+                    if (fd) fprintf(fd,"\n");
+                }
+
                 break;
             }
         }
