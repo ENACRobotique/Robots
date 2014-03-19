@@ -15,6 +15,7 @@
 
 #include "gv.h"
 #include "video_draw.h"
+#include "video_draw_strings.h"
 
 #include "context.h"
 #include "draw_list.h"
@@ -213,6 +214,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         int i;
         sPosLEl *pel;
         sTrajLEl *tel;
+        char s_nb[16];
 
         // draw background
         ctx->pos_cur ^= 1;
@@ -291,6 +293,51 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                     video_draw_cross(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, CM2PX(8.), RED(255), 255);
                 }
             }
+        }
+        // draw obstacles' label
+        for(i = 0; obss && i < nb_obss; i++){
+            float f_dx, f_dy, f_tmp;
+
+#if 1
+            f_dy = 5.;
+            f_dx = f_dy*4./3.;
+
+            f_tmp = obss[i].x + 0.5;
+            if(f_tmp < 1.) f_tmp = 1.;
+            if(f_tmp > ctx->pos_maxx - f_dx - 1.) f_tmp = ctx->pos_maxx - f_dx - 1.;
+            x = X_CM2PX(f_tmp);
+
+            f_tmp = obss[i].y + 0.5;
+            if(f_tmp < 1.) f_tmp = 1.;
+            if(f_tmp > ctx->pos_maxy - f_dy - 1.) f_tmp = ctx->pos_maxy - f_dy - 1.;
+            y = Y_CM2PX(f_tmp);
+
+            dy = CM2PX(f_dy);
+#else
+            // deterministic pseudo-random positioning of the labels: yeah, this is paradoxical
+            f_dy = 4.;
+            f_dx = f_dy*4/3;
+
+            f_tmp = obss[i].x + -30. + ((i*79)%59);
+            if(f_tmp < 1.) f_tmp = 1.;
+            if(f_tmp > ctx->pos_maxx - f_dx - 1.) f_tmp = ctx->pos_maxx - f_dx - 1.;
+            x = X_CM2PX(f_tmp);
+
+            f_tmp = obss[i].y + 15 - ((i*79)%29);
+            if(f_tmp < 1.) f_tmp = 1.;
+            if(f_tmp > ctx->pos_maxy - f_dy - 1.) f_tmp = ctx->pos_maxy - f_dy - 1.;
+            y = Y_CM2PX(f_tmp);
+
+            dy = CM2PX(f_dy);
+
+            x1 = X_CM2PX(obss[i].x);
+            y1 = Y_CM2PX(obss[i].y);
+
+            video_draw_line(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, x1, y1, BLACK(), 60);
+#endif
+
+            sprintf(s_nb, "%02i", i);
+            video_draw_string(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), &ctx->vdsctx, x, y, dy, s_nb, BLUE(255), 255);
         }
 
         // draw trajectories
@@ -375,6 +422,12 @@ int main(int argc, char *argv[]) {
     memset(&ctx, 0, sizeof(ctx));
     pl_init(&ctx.poslist, 100);
     tl_init(&ctx.trajlist, 2);
+
+    ret = video_draw_strings_init(&ctx.vdsctx, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf");
+    if(ret < 0){
+        printf("video_draw_strings_init failed err#%i\n", -ret);
+        exit(1);
+    }
 
     // arguments options
     ctx.verbose = 1;
