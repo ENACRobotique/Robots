@@ -6,6 +6,13 @@
 #include "error.h"
 #include "math_types.h"
 
+
+//#define AS_DEBUG 1
+#define AS_STATS
+// warning, activating AS_DEBUG adds a lot of time to the time statistics (time to print the debug information)
+
+
+
 // ==== definitions ====
 
 /*

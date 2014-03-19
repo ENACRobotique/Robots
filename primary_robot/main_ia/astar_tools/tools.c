@@ -4,6 +4,10 @@
 
 #include "tools.h"
 
+#ifdef AS_STATS
+#include "millis.h"
+#endif
+
 #define CHECK_LIMITS
 
 #if 0
@@ -304,6 +308,9 @@ uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
 void fill_tgts_lnk() {
     iObs_t i, j;
     uint8_t ok, nb;
+#ifdef AS_STATS
+    unsigned int start_us = micros();
+#endif
 
     for(i=0; i<N; i++) {
         for(j=i+1; j<N; j++) {
@@ -407,6 +414,10 @@ printf("  dist %.2f\n", DIST(i, j));
             }
         }
     }
+
+#ifdef AS_STATS
+printf("fill_tgts_lnk executed in %uµs\n", micros() - start_us);
+#endif
 }
 
 uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iObs_t o3) {
