@@ -11,7 +11,6 @@ typedef struct {
     int tid;
 
     // robot data
-    bn_Address prop_address;
     sPosList poslist;
     sTrajList trajlist;
 

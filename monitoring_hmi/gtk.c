@@ -20,16 +20,6 @@
 #include "context.h"
 #include "draw_list.h"
 
-void usage(char *cl) {
-    printf("GTK UI\n");
-    printf("Usage:\n\t%s [options]\n", cl);
-    printf("Options:\n");
-    printf("\t--prop-simulator, -s      uses prop simulator\n");
-    printf("\t--verbose, -v             increases verbosity\n");
-    printf("\t--quiet, -q               not verbose\n");
-    printf("\t--help, -h, -?            prints this help\n");
-}
-
 gint event_cb(GtkWidget *widget, GdkEvent *event, context_t *ctx) {
     GdkEventButton *bevent = (GdkEventButton *)event;
 
@@ -415,6 +405,16 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 #undef Y_PX2CM
 }
 
+void usage(char *cl) {
+    printf("GTK UI\n");
+    printf("Usage:\n\t%s [options]\n", cl);
+    printf("Options:\n");
+    printf("\t--win-factor,     -w          size of the window\n");
+    printf("\t--verbose,        -v          increases verbosity\n");
+    printf("\t--quiet,          -q          not verbose\n");
+    printf("\t--help,           -h, -?      prints this help\n");
+}
+
 int main(int argc, char *argv[]) {
     context_t ctx;
     int ret;
@@ -431,23 +431,23 @@ int main(int argc, char *argv[]) {
 
     // arguments options
     ctx.verbose = 1;
-    ctx.prop_address = ADDRI_MAIN_PROP;
+    ctx.pos_wfactor = 4.;
     while(1) {
         static struct option long_options[] = {
-            {"prop-simulator", no_argument,  NULL, 's'},
-            {"verbose",   no_argument,       NULL, 'v'},
-            {"quiet",     no_argument,       NULL, 'q'},
-            {"help",      no_argument,       NULL, 'h'},
-            {NULL,        0,                 NULL, 0}
+            {"win-factor",      required_argument,  NULL, 'w'},
+            {"verbose",         no_argument,        NULL, 'v'},
+            {"quiet",           no_argument,        NULL, 'q'},
+            {"help",            no_argument,        NULL, 'h'},
+            {NULL,              0,                  NULL, 0}
         };
 
-        int c = getopt_long(argc, argv, "svqh?", long_options, NULL);
+        int c = getopt_long(argc, argv, "w:vqh?", long_options, NULL);
         if(c == -1)
             break;
 
         switch(c) {
-        case 's':
-            ctx.prop_address = ADDRD_MAIN_PROP_SIMU;
+        case 'w':
+            ctx.pos_wfactor = strtof(optarg, NULL);
             break;
         case 'v':
             ctx.verbose++;
@@ -474,7 +474,6 @@ int main(int argc, char *argv[]) {
     // gtkviewer media creation
     ctx.pos_maxx = 300.;
     ctx.pos_maxy = 200.;
-    ctx.pos_wfactor = 4;
     ctx.pos_mid = gv_media_new("position", "Position des robots en temps réel", CTX_WIDTH(&ctx), CTX_HEIGHT(&ctx), GTK_SIGNAL_FUNC(event_cb), &ctx);
     ctx.pos_data[0] = malloc(CTX_BUFSZ(&ctx));
     ctx.pos_data[1] = malloc(CTX_BUFSZ(&ctx));
