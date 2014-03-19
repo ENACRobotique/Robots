@@ -174,14 +174,6 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                 outMsg.payload.pos.x = X_PX2CM(ctx->mouse_x);
                 outMsg.payload.pos.y = Y_PX2CM(ctx->mouse_y);
 
-                // updates list of obstacles
-//                if(obss){
-//                    obss[nb_obss - 1].x = outMsg.payload.pos.x;
-//                    obss[nb_obss - 1].y = outMsg.payload.pos.y;
-//                    obss[nb_obss - 1].r = 0.;
-//                    obss[nb_obss - 1].moved = 1;
-//                }
-
                 ret = bn_sendAck(&outMsg);
                 if(ret <= 0){
                     fprintf(stderr, "bn_sendAck(E_GOAL) error #%i\n", -ret);
@@ -253,29 +245,30 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             }
         }
         // draw limits
-        if(x_min - r_robot > 0.){
+        if(x_min - r_robot >= 0.){
             video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(x_min - r_robot), Y_CM2PX(ctx->pos_maxy), RED(255), 255);
         }
-        if(y_min - r_robot > 0.){
+        if(y_min - r_robot >= 0.){
             video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(y_min - r_robot), RED(255), 255);
         }
-        if(y_max + r_robot < ctx->pos_maxy){
+        if(y_max + r_robot <= ctx->pos_maxy){
             video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(y_max + r_robot), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), RED(255), 255);
         }
-        if(x_max + r_robot < ctx->pos_maxx){
+        if(x_max + r_robot <= ctx->pos_maxx){
             video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(x_max + r_robot), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), RED(255), 255);
         }
+        // draw active obstacles
         for(i = 0; obss && i < nb_obss; i++){
-            x = X_CM2PX(obss[i].x);
-            y = Y_CM2PX(obss[i].y);
-            if(obss[i].r > r_robot){
-                r = CM2PX(obss[i].r - r_robot);
-            }
-            else{
-                r = CM2PX(obss[i].r);
-            }
-
             if(obss[i].active){
+                x = X_CM2PX(obss[i].x);
+                y = Y_CM2PX(obss[i].y);
+                if(obss[i].r > r_robot){
+                    r = CM2PX(obss[i].r - r_robot);
+                }
+                else{
+                    r = CM2PX(obss[i].r);
+                }
+
                 if(r > 0){
                     video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, RED(255), 255);
                 }

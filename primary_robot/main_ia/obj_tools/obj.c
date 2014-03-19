@@ -451,12 +451,12 @@ int obj_init(){
 
     // setting initial position
     if(COLOR==1){
-        obs[0].c.x=299;
-        obs[0].c.y=199;
+        obs[0].c.x=300. - 16.;
+        obs[0].c.y=200. - 16.;
     }
     else{
-        obs[0].c.x=1;
-        obs[0].c.y=199;
+        obs[0].c.x=16.;
+        obs[0].c.y=200. - 16.;
     }
     obs_updated[0]++;
     _current_pos=obs[0].c;
