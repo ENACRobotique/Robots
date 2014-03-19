@@ -23,7 +23,7 @@
  *      b:counter-clockwise
  */
 
-#define LOW_THR ((sNum_t)0.01)
+#define LOW_THR ((sNum_t)0.001)
 
 #define R_SECU (5.)
 #define R_ROBOT (15.)
@@ -80,7 +80,19 @@ typedef struct {
     sSeg_t s4;  // second internal (clock wise / a)
 
     sNum_t d; // distance between obstacles
-} sTgts_t;  // sizeof(sTgts_t)=68
+
+    enum{
+        E_OBSPAIR_UNKNOWN,
+        E_OBSPAIR_0S_CONCENTRIC,
+        E_OBSPAIR_1S_LINE,
+        E_OBSPAIR_0S_SURROUNDS,
+        E_OBSPAIR_0S_SURROUNDED,
+        E_OBSPAIR_2S_INTERSECTION,
+        E_OBSPAIR_2S_POINT2CIRCLE,
+        E_OBSPAIR_2S_CIRCLE2POINT,
+        E_OBSPAIR_4S_FULL
+    } type; // type of relation between those 2 obstacles
+} sTgts_t;  // sizeof(sTgts_t)=72
 
 // an index of obstacle between 0:N-1
 typedef int8_t iObs_t;
@@ -97,7 +109,7 @@ typedef int8_t iABObs_t;
 // between 0:N-1
 #define O(i) ((iObs_t)( ((iABObs_t)(i))>>1 ))
 
-// A* node (trajectopry from o1 to o2)
+// A* node (trajectory from o1 to o2)
 typedef struct {
     iABObs_t o1; // oriented object
     iABObs_t o2;

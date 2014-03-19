@@ -189,24 +189,38 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
     normVec(&o1o2, &out->d);
         out_s->d = out->d;
 
+    out->type = E_OBSPAIR_UNKNOWN;
+        out_s->type = E_OBSPAIR_UNKNOWN;
+
     if(!o1->active || !o2->active)
         return 0;
 
     if(out->d < 2*LOW_THR) {
-//        printf("concentric %u/%u\n", _o1, _o2);
+        out->type = E_OBSPAIR_0S_CONCENTRIC;
+            out_s->type = E_OBSPAIR_0S_CONCENTRIC;
+
         return 0;
     }
     else if(o1->r < LOW_THR && o2->r < LOW_THR) {
         out->s1.p1 = o1->c;
         out->s1.p2 = o2->c;
+        out->type = E_OBSPAIR_1S_LINE;
             out_s->s1.p1 = out->s1.p2;
             out_s->s1.p2 = out->s1.p1;
+            out_s->type = E_OBSPAIR_1S_LINE;
 
-//        printf("straight line %u/%u\n", _o1, _o2);
         return 1;
     }
-    else if(o1->r + out->d < o2->r + 4*LOW_THR || o2->r + out->d < o1->r + 4*LOW_THR) {
-//        printf("inside %u/%u\n", _o1, _o2);
+    else if(o1->r + out->d < o2->r + LOW_THR){
+        out->type = E_OBSPAIR_0S_SURROUNDED;
+            out_s->type = E_OBSPAIR_0S_SURROUNDS;
+
+        return 0;
+    }
+    else if(o2->r + out->d < o1->r + LOW_THR) {
+        out->type = E_OBSPAIR_0S_SURROUNDS;
+            out_s->type = E_OBSPAIR_0S_SURROUNDED;
+
         return 0;
     }
 
@@ -236,22 +250,29 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
     out->s2.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
         out_s->s1.p1 = out->s2.p2;
 
-    if(out->d < o1->r + o2->r + 4*LOW_THR) {
-        return 2;
-    }
-    else if(o1->r < LOW_THR) {
-        out->s3 = out->s1;
-        out->s4 = out->s2;
-            out_s->s4 = out_s->s1;
-            out_s->s3 = out_s->s2;
+    if(o1->r < LOW_THR) {
+            out->s3 = out->s1;
+            out->s4 = out->s2;
+            out->type = E_OBSPAIR_2S_POINT2CIRCLE;
+                out_s->s4 = out_s->s1;
+                out_s->s3 = out_s->s2;
+                out_s->type = E_OBSPAIR_2S_CIRCLE2POINT;
 
-        return 2;
+            return 2;
     }
     else if(o2->r < LOW_THR) {
         out->s4 = out->s1;
         out->s3 = out->s2;
+        out->type = E_OBSPAIR_2S_CIRCLE2POINT;
             out_s->s3 = out_s->s1;
             out_s->s4 = out_s->s2;
+            out_s->type = E_OBSPAIR_2S_POINT2CIRCLE;
+
+        return 2;
+    }
+    else if(out->d < o1->r + o2->r + LOW_THR) {
+        out->type = E_OBSPAIR_2S_INTERSECTION;
+            out_s->type = E_OBSPAIR_2S_INTERSECTION;
 
         return 2;
     }
@@ -276,6 +297,9 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
         out->s4.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
             out_s->s4.p1 = out->s4.p2;
 
+        out->type = E_OBSPAIR_4S_FULL;
+            out_s->type = E_OBSPAIR_4S_FULL;
+
         return 4;
     }
 
@@ -297,7 +321,7 @@ uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
 
         sqdistPt2Seg(&obs[i].c, s, &d, NULL);
 
-        if(d < (obs[i].r + LOW_THR)*(obs[i].r + LOW_THR))
+        if(d + 2*LOW_THR < obs[i].r*obs[i].r)
             return 0;
     }
 
@@ -353,11 +377,11 @@ printf("  dist %.2f\n", DIST(i, j));
                     aselts[B(j)][A(i)].active = 0;
                 }
 
-                if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
+                if(tgts[i][j].type == E_OBSPAIR_2S_POINT2CIRCLE) {
                     aselts[A(i)][B(j)].active = ok;
                     aselts[A(j)][A(i)].active = ok;
                 }
-                else if(nb == 2 && obs[j].r < LOW_THR) {    // point/circle case
+                else if(tgts[i][j].type == E_OBSPAIR_2S_CIRCLE2POINT) {
                     aselts[B(i)][A(j)].active = ok;
                     aselts[A(j)][A(i)].active = ok;
                 }
@@ -380,15 +404,15 @@ printf("  dist %.2f\n", DIST(i, j));
                     aselts[A(j)][A(i)].active = 0;
                 }
 
-                if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
+                if(tgts[i][j].type == E_OBSPAIR_2S_POINT2CIRCLE) {
                     aselts[A(i)][A(j)].active = ok;
                     aselts[B(j)][A(i)].active = ok;
                 }
-                else if(nb == 2 && obs[j].r < LOW_THR) {    // point/circle case
+                else if(tgts[i][j].type == E_OBSPAIR_2S_CIRCLE2POINT) {
                     aselts[A(i)][A(j)].active = ok;
                     aselts[A(j)][B(i)].active = ok;
                 }
-                else if(nb == 1) {  // point/point case
+                else if(tgts[i][j].type == E_OBSPAIR_1S_LINE) {
                     aselts[A(i)][A(j)].active = ok;
                     aselts[A(j)][A(i)].active = ok;
                 }
@@ -454,8 +478,12 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
                     continue;
             }
 
-            if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
+            if(tgts[o2][i].type == E_OBSPAIR_2S_INTERSECTION){
+#ifdef AS_DEBUG
+printf("      because of CW %i:", i);
+#endif
                 return 0; // bad arc
+            }
         }
     }
     else {  // counter clock wise
@@ -475,8 +503,12 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
                     continue;
             }
 
-            if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
+            if(tgts[o2][i].type == E_OBSPAIR_2S_INTERSECTION){
+#ifdef AS_DEBUG
+printf("      because of CCW %i:", i);
+#endif
                 return 0; // bad arc
+            }
         }
     }
 
