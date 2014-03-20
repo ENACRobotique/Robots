@@ -26,10 +26,10 @@ Obj_feu feu[16];
 uint8_t obs_updated[N] = {0};
 
 sObj_t listObj[NB_OBJ] = {
-	{.type = E_ARBRE, .numObj=0, .nbObs=1, .numObs[0]=START_ARBRE  ,																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{16. , 90.}, 2.,90. }, .entryPoint[1]={{16. , 50.}, 2.,270.}},
-	{.type = E_ARBRE, .numObj=1, .nbObs=1, .numObs[0]=START_ARBRE+1, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{50. , 16.}, 2.,180.}, .entryPoint[1]={{90. , 16.}, 2.,0.  }},
-	{.type = E_ARBRE, .numObj=2, .nbObs=1, .numObs[0]=START_ARBRE+2, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{210., 16.}, 2.,180.}, .entryPoint[1]={{250., 16.}, 2.,0.  }},
-	{.type = E_ARBRE, .numObj=3, .nbObs=1, .numObs[0]=START_ARBRE+3, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{284., 50.}, 2.,270.}, .entryPoint[1]={{284., 90.}, 2.,90. }},
+	{.type = E_ARBRE, .numObj=0, .nbObs=1, .numObs[0]=START_ARBRE  ,																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{16. , 97.}, 2.,90. }, .entryPoint[1]={{16. , 43.}, 2.,270.}},
+	{.type = E_ARBRE, .numObj=1, .nbObs=1, .numObs[0]=START_ARBRE+1, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{43. , 16.}, 2.,180.}, .entryPoint[1]={{97. , 16.}, 2.,0.  }},
+	{.type = E_ARBRE, .numObj=2, .nbObs=1, .numObs[0]=START_ARBRE+2, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{203., 16.}, 2.,180.}, .entryPoint[1]={{257., 16.}, 2.,0.  }},
+	{.type = E_ARBRE, .numObj=3, .nbObs=1, .numObs[0]=START_ARBRE+3, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{284., 43.}, 2.,270.}, .entryPoint[1]={{284., 97.}, 2.,90. }},
 	{.type = E_BAC,   .numObj=0, .nbObs=0, 															     				  			 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{230.,155.}, 2.,90. }},
 	{.type = E_BAC,   .numObj=1, .nbObs=0, 																 							 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{70. ,155.}, 2.,90. }},
 	{.type = E_FEU,   .numObj=0, .nbObs=1, .numObs[0]=START_FEU    ,																 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{40. , 90.}, 0.,0.  }},
@@ -97,11 +97,47 @@ void printObsActive(void)
 		printf("obs[%d].active=%d\n",i,obs[i].active);
 	printf("\n");
 	}
+/*
+int sgnFire(uint8_t num, sNum_t theta)
+	{
+	if(theta<0 || theta>120)
+		{
+		printf("Error in sgnFire theta<0 or theta>120 degre\n");
+		return(0);
+		}
+	switch(num)
+		{
+		case(1) :
+			if(theta<90) return(1);
+			else return(-1);
+			break;
+		case(2) :
+			return(-1);
+			break;
+		case(3) :
+			if(theta<30) return(-1);
+		}
+
+	}
+*/
+void createEPfire(sPt_t *pt, sNum_t theta, sNum_t r, int numObj)
+	{
+	int i;
+	printf("ent x=%f y%f\n", pt->x, pt->y);
+	for(i=0 ; i <3 ; i++)
+		{
+		listObj[numObj].entryPoint[i].c.x=r*cos(theta*M_PI/180.+i*2.*M_PI/3.)+pt->x;
+		listObj[numObj].entryPoint[i].c.y=r*sin(theta*M_PI/180.+i*2.*M_PI/3.)+pt->y;
+		printf("x=%f y=%f\n",r*cos(theta*M_PI/180.+i*2.*M_PI/3.)+pt->x,r*sin(theta*M_PI/180.+i*2.*M_PI/3.)+pt->y);
+		}
+	}
 
 void init_ele(void)
     {
     printf("Debut de l'initialisation des elements du jeu\n");
     int i, j;
+    sPt_t pt;
+
     //Initialisation des arbres
     for(i=0 ; i<4 ; i++)
     	{
@@ -126,7 +162,13 @@ void init_ele(void)
     	listObj[i].typeStruct = &feu[listObj[i].numObj];
         ((Obj_feu*)listObj[i].typeStruct)->pos=0;
         ((Obj_feu*)listObj[i].typeStruct)->nb_point=2;
+        listObj[i].nbEP=3;
+        pt.x=listObj[i].entryPoint[0].c.x;
+        pt.y=listObj[i].entryPoint[0].c.y;
+        createEPfire(&pt, 0 , R_ROBOT+8, i);
         }
+
+    printListObj();
     printf("Fin de l'initialisation des elements du jeu\n");
     }
 

@@ -14,7 +14,7 @@
 
 
 #define SEB 0
-#define COLOR 0 //0=red and 1=yellow
+#define COLOR 1 //0=red and 1=yellow
 #define DEBUG 1
 #define RESO_POS 2
 #define NB_OBJ 16
