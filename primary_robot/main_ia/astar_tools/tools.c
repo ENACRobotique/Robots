@@ -350,11 +350,167 @@ printf("fill_tgts_lnk executed in %uµs\n", micros() - start_us);
 #endif
 }
 
+#ifdef CHECK_LIMITS
+static inline void _southern_point_arc(const sPt_t *p1, const sPt_t *c, sNum_t r, int dir, const sPt_t *p2, const sNum_t *_cross, sPt_t *psouth){
+    int qp1, qp2, type;
+    sNum_t cross;
+
+    if(_cross){
+        cross = *_cross;
+    }
+    else{
+        sVec_t v1, v3;
+        convPts2Vec(c, p1, &v1);
+        convPts2Vec(c, p2, &v3);
+        crossVecs(&v1, &v3, &cross);
+    }
+
+    qp1 = QUADRANT(p1->x - c->x, p1->y - c->y);
+    qp2 = QUADRANT(p2->x - c->x, p2->y - c->y);
+
+    // preliminary, all cases: (Qi = quadrant of Pi, c = cross, S = south, My = minimum y, X = impossible case => may be replaced by S or My)
+    //            __CCW__   __C W__
+    //    Q1 Q2   c>0 c<0 | c>0 c<0
+    //    0  0    My  S   | S   My
+    //    0  1    My  X   | S   X
+    //    0  2    My  My  | S   S
+    //    0  3    X   S   | X   My
+    //    1  0    X   S   | X   My
+    //    1  1    My  S   | S   My
+    //    1  2    My  X   | S   X
+    //    1  3    S   S   | My  My
+    //    2  0    S   S   | My  My
+    //    2  1    X   S   | X   My
+    //    2  2    My  S   | S   My
+    //    2  3    S   X   | My  X
+    //    3  0    My  X   | S   X
+    //    3  0    My  My  | S   S
+    //    3  0    X   My  | X   S
+    //    3  0    My  S   | S   My
+    // with X replaced in order to have some generalizations
+    //            __CCW__   __C W__
+    //    Q1 Q2   c>0 c<0 | c>0 c<0
+    //    0  0    My  S   | S   My
+    //    0  1    My  My  | S   S
+    //    0  2    My  My  | S   S
+    //    0  3    My  S   | S   My
+    //    1  0    S   S   | My  My
+    //    1  1    My  S   | S   My
+    //    1  2    My  S   | S   My
+    //    1  3    S   S   | My  My
+    //    2  0    S   S   | My  My
+    //    2  1    My  S   | S   My
+    //    2  2    My  S   | S   My
+    //    2  3    S   S   | My  My
+    //    3  0    My  S   | S   My
+    //    3  0    My  My  | S   S
+    //    3  0    My  My  | S   S
+    //    3  0    My  S   | S   My
+    // generalizations:
+    //   * type(Q1, ...) == type(3-Q1, ...)
+    //   * type(Q2, ...) == type(3-Q2, ...)
+    //   * type(CW, ...) == !type(CCW, ...)
+
+    // 2 symmetries
+    if(qp1 > 1){
+        qp1 = 3 - qp1;
+    }
+    if(qp2 > 1){
+        qp2 = 3 - qp2;
+    }
+
+    if((!qp2 && cross < 0) || (qp1 && !qp2) || (qp1 && cross < 0)){
+        type = 0; // south point
+    }
+    else{
+        type = 1; // point with minimum y
+    }
+
+    if(!dir) type = !type;
+
+    if(!type){ // south point
+        psouth->x = c->x;
+        psouth->y = c->y - r;
+    }
+    else{ // point with minimum y
+        if(p1->y < p2->y){
+            *psouth = *p1;
+        }
+        else{
+            *psouth = *p2;
+        }
+
+    }
+}
+
+void southern_point_arc(const sPt_t *p1, iObs_t o, int dir, const sPt_t *p2, const sNum_t *_cross, sPt_t *psouth){
+    _southern_point_arc(p1, &obs[o].c, obs[o].r, dir, p2, _cross, psouth);
+}
+
+void eastern_point_arc(const sPt_t *_p1, iObs_t o, int dir, const sPt_t *_p2, const sNum_t *_cross, sPt_t *peast){
+    sPt_t c, p1, p2, psouth;
+
+    c.x = obs[o].c.y;
+    c.y = -obs[o].c.x;
+
+    p1.x = _p1->y;
+    p1.y = -_p1->x;
+
+    p2.x = _p2->y;
+    p2.y = -_p2->x;
+
+    _southern_point_arc(&p1, &c, obs[o].r, dir, &p2, _cross, &psouth);
+
+    peast->x = -psouth.y;
+    peast->y = psouth.x;
+}
+
+void western_point_arc(const sPt_t *_p1, iObs_t o, int dir, const sPt_t *_p2, const sNum_t *_cross, sPt_t *pwest){
+    sPt_t c, p1, p2, psouth;
+
+    c.x = -obs[o].c.y;
+    c.y = obs[o].c.x;
+
+    p1.x = -_p1->y;
+    p1.y = _p1->x;
+
+    p2.x = -_p2->y;
+    p2.y = _p2->x;
+
+    _southern_point_arc(&p1, &c, obs[o].r, dir, &p2, _cross, &psouth);
+
+    pwest->x = psouth.y;
+    pwest->y = -psouth.x;
+}
+
+
+void northern_point_arc(const sPt_t *_p1, iObs_t o, int dir, const sPt_t *_p2, const sNum_t *_cross, sPt_t *pnorth){
+    sPt_t c, p1, p2, psouth;
+
+    c.x = -obs[o].c.x;
+    c.y = -obs[o].c.y;
+
+    p1.x = -_p1->x;
+    p1.y = -_p1->y;
+
+    p2.x = -_p2->x;
+    p2.y = -_p2->y;
+
+    _southern_point_arc(&p1, &c, obs[o].r, dir, &p2, _cross, &psouth);
+
+    pnorth->x = -psouth.x;
+    pnorth->y = -psouth.y;
+}
+#endif
+
 uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iObs_t o3) {
     iObs_t i;
     sVec_t v1, v3;
     sLin_t l1, l3;
     sNum_t sc1, sc3, cross;
+#ifdef CHECK_LIMITS
+    sPt_t furthest_point;
+#endif
 
     // calc equations of the 2 lines
     convPts2Vec(&obs[o2].c, p2_1, &v1);
@@ -365,7 +521,35 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
 
     crossVecs(&v1, &v3, &cross);
 
-    // TODO check limits
+#ifdef CHECK_LIMITS
+    if(obs[o2].c.y - obs[o2].r < Y_MIN){
+        southern_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.y < Y_MIN){
+            return 0;
+        }
+    }
+
+    if(obs[o2].c.x + obs[o2].r > X_MAX){
+        eastern_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.x > X_MAX){
+            return 0;
+        }
+    }
+
+    if(obs[o2].c.x - obs[o2].r < X_MIN){
+        western_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.x < X_MIN){
+            return 0;
+        }
+    }
+
+    if(obs[o2].c.y + obs[o2].r > Y_MAX){
+        northern_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.y > Y_MAX){
+            return 0;
+        }
+    }
+#endif
 
     if(!dir) {  // clock wise
         for(i = 0; i < N; i++) {

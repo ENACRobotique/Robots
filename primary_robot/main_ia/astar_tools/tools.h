@@ -41,6 +41,8 @@
 #endif
 
 #define OUT(x, y) ((x) > X_MAX || (x) < X_MIN || (y) > Y_MAX || (y) < Y_MIN)
+// get quadrant from 0 to 3 in trigonometric rotation
+#define QUADRANT(x, y) ( (y) > 0?( (x) > 0?0:1 ):( (x) > 0?3:2 ) )
 
 // ==== common types ====
 
