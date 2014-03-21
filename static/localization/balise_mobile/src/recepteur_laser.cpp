@@ -49,8 +49,9 @@ void setup() {
   bn_init();
 
   bn_printDbg("start mobile 1");
-  bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
+  bn_attach(E_ROLE_SETUP,role_setup);
   bn_attach(E_PERIOD,&periodHandle);
+  setupFreeTest();
 }
 
 void loop() {
@@ -67,7 +68,7 @@ void loop() {
       time_prev_led= time;
       digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
-      bn_printfDbg((char*)"%lu, mem : %d\n",time/1000,freeMemory());
+      bn_printfDbg((char*)"%lu, mem : %d, unused %d\n",time/1000,freeMemory(),getFreeTest());
 #endif
     }
 
@@ -117,6 +118,12 @@ void loop() {
 
 //STATE MACHINE
     switch (state){
+        case S_BEGIN :
+            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
+                state=S_SYNC_ELECTION;
+                printf("begin election");
+            }
+            else break;
         case S_SYNC_ELECTION :
             if (prevState!=state) {
                 nbLas0=0;
@@ -126,6 +133,8 @@ void loop() {
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
             if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
                 chosenOne=(nbLas0<nbLas1?1:0);
+                bn_printDbg("end election\n");
+                state=S_SYNC_MEASURES;
             }
             else {
                 break;
@@ -142,11 +151,12 @@ void loop() {
             if (rxB && inMsg.header.type==E_SYNC_DATA){
                     rxB=0;
                 if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
-                    syncComputationFinal(&inMsg.payload.sync);
+                    bn_printDbg("syncComputation\n");
+//                    syncComputationFinal(&inMsg.payload.sync);
                     state=S_GAME;
                 }
                 else {
-                    syncComputationMsg(&inMsg.payload.sync);
+                    //syncComputationMsg(&inMsg.payload.sync);
                 }
             }
         	break;

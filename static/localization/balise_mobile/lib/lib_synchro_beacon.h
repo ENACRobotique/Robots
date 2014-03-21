@@ -12,8 +12,7 @@
 #include "lib_int_laser.h"
 #include "messages.h"
 
-
-#define SYNC_STRUCT_BUFF_SIZE       16          // Number of points to compute the average
+#define BUF_ABC_SIZE                10
 #define SYNC_LASER_ELECTION_TIME    2000000     // Time during which we will measure the best laser interruption to measure the clock drift (µs)
 #define SYNC_TIME_DURATION          10000000    // Duration of synchronization
 

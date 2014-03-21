@@ -11,7 +11,7 @@
 syncStruc syncParam={0,0,0};
 int32_t _offset;            // value to add to time to correct drift in microsecond (updated by updateSync)
 
-#define BUF_ABC_SIZE 10
+
 
 ABCStruct firstABC;
 ABCStruct bufABC[BUF_ABC_SIZE];

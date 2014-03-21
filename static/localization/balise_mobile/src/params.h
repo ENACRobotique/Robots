@@ -19,6 +19,6 @@ typedef enum{
 } mainState;
 
 
-#define DEBUG
+//#define DEBUG
 
 #endif /* PARAMS_H_ */

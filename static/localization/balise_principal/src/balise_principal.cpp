@@ -17,8 +17,9 @@
 #include "lib_domitille.h"
 #include "../../../communication/botNet/shared/bn_debug.h"
 #include "lib_sync_turret.h"
+#include "roles.h"
 
-mainState state=S_GAME;
+mainState state=S_SYNC_ELECTION;
 
 sDeviceInfo devicesInfo[D_AMOUNT];
 int iStates;
@@ -40,8 +41,8 @@ void setup(){
 
     bn_init();
 
-    bn_attach(E_DEBUG_SIGNALLING,&bn_debugUpdateAddr);
-    bn_printfDbg((char*)F("start turret, free mem : %d o\n"),freeMemory());
+    bn_attach(E_ROLE_SETUP,role_setup);
+    bn_printfDbg("start turret, free mem : %d o\n",freeMemory());
 
     pinMode(PIN_DBG_LED,OUTPUT);
 }
@@ -90,7 +91,7 @@ void loop(){
               else if (micros()-sw>ELECTION_TIME){
                   //switch to next state (beacon will switch automatically on reception of the first data packet)
                   state=S_SYNC_MEASURE;
-
+                  bn_printDbg("end election\n");
                   sw=micros();
               }
               break;  //
@@ -111,6 +112,7 @@ void loop(){
               else {
                   // at the end, change state
                   state=S_SYNC_END;
+                  bn_printDbg("end data collection\n");
               }
               break;
           case S_SYNC_END :
