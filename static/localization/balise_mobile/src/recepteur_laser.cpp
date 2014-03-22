@@ -25,7 +25,7 @@ plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detecion 
 volatile uint32_t laser_period=50000;       // in µs, to be confirmed by the main robot
 uint32_t sync_lastTurnDate_stored=0,sync_period_stored=0,sync_last_received=0;
 uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the laser structure
-int nbLas0=0, nbLas1=0;                     // count of laser interruption detected on channel n
+uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
 char chosenOne=8;                           // interruption chosen for synchronization
 
 
@@ -81,11 +81,11 @@ void loop() {
     //reading the eventual data from the lasers
     if (periodicLaser(&buf0,&laserStruct0)){
         lasStrRec0=timeMicros;
-        nbLas0++;
+        intLas0+=laserStruct0.thickness;
     }
     if (periodicLaser(&buf1,&laserStruct1)){
-        lasStrRec1=timeMicros;;
-        nbLas1++;
+        lasStrRec1=timeMicros;
+        intLas1+=laserStruct1.thickness;
     }
 
 
@@ -126,13 +126,14 @@ void loop() {
             else break;
         case S_SYNC_ELECTION :
             if (prevState!=state) {
-                nbLas0=0;
-                nbLas1=0;
+                // reset counters
+                intLas0=0;
+                intLas1=0;
                 prevState=state;
             }
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
             if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
-                chosenOne=(nbLas0<nbLas1?1:0);
+                chosenOne=(intLas0<intLas1?1:0);
                 bn_printDbg("end election\n");
                 state=S_SYNC_MEASURES;
             }
