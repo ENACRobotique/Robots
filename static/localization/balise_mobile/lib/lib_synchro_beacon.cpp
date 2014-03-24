@@ -82,7 +82,7 @@ void syncComputationMsg(sSyncPayload *pload){
     }
 
     // Check for corresponding index values, if yes computes ABCs and store it iterating sums
-    if (lastLaserMeasure.index==lastRxSyncData.index){
+    if (lastLaserMeasure.index==lastRxSyncData.index && lastLaserMeasure.localTime){
         syncABCCompute(lastLaserMeasure.localTime,lastRxSyncData.lastTurnDate,lastRxSyncData.period);
     }
 
@@ -100,22 +100,24 @@ void syncComputationLaser(plStruct *sLaser){
     if (sLaser->date==lastLaserMeasure.localTime) return;
 
     // if first value, do not update the index, but store value
-    if (!sLaser->date){
+    if (!firstLaserMeasure.localTime){
         // store only value in buffer
         lastLaserMeasure.localTime=sLaser->date;
+        lastLaserMeasure.index=lastRxSyncData.index;
 
         //duplicate it in lastLaserMeasure
         firstLaserMeasure=lastLaserMeasure;
     }
     else {
         // Computing the index : update for any missed detection, and for the last one
-        while ( (sLaser->date-lastLaserMeasure.localTime+tempIndex*lastRxSyncData.period) < lastRxSyncData.period>>1){
+        while ( ((int32_t)sLaser->date-(int32_t)(lastLaserMeasure.localTime+tempIndex*lastRxSyncData.period)) > (int32_t)lastRxSyncData.period>>1){
             tempIndex++;
         }
 
         // store it in buffer
         lastLaserMeasure.localTime=sLaser->date;
         lastLaserMeasure.index+=tempIndex;
+
 
         // Check for corresponding index values, if yes AND useful value, computes ABCs and store it iterating sums
         if (lastLaserMeasure.index==lastRxSyncData.index){
@@ -130,6 +132,7 @@ void syncComputationLaser(plStruct *sLaser){
  *
  */
 void syncABCCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){
+
 
     // avoid division by 0
     if (firstRxSyncData.period && period){
