@@ -113,6 +113,7 @@ void loop() {
     if ( laserStruct.thickness ) {
         lastLaserDetectMicros=laserStruct.date;
         lastLaserDetectMillis=laserStruct.date/1000;
+        bn_printfDbg("las %lu,%lu%,lu\n",laserStruct.deltaT,laserStruct.period,laserStruct.date);
     }
 
 
@@ -145,7 +146,7 @@ void loop() {
             if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
                 syncComputationLaser(&laserStruct0);
             }
-            else if(chosenOne==1 && laserStruct1.thickness && laserStruct0.period) {
+            else if(chosenOne==1 && laserStruct1.thickness && laserStruct1.period) {
                 syncComputationLaser(&laserStruct1);
             }
             // handling data broadcasted by turret
@@ -153,11 +154,11 @@ void loop() {
                     rxB=0;
                 if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
                     bn_printDbg("syncComputation\n");
-//                    syncComputationFinal(&inMsg.payload.sync);
+                    syncComputationFinal(&inMsg.payload.sync);
                     state=S_GAME;
                 }
                 else {
-                    //syncComputationMsg(&inMsg.payload.sync);
+                    syncComputationMsg(&inMsg.payload.sync);
                 }
             }
         	break;

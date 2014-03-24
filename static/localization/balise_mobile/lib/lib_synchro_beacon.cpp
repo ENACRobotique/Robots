@@ -7,6 +7,7 @@
 
 #include "lib_synchro_beacon.h"
 #include "Arduino.h"
+#include "../../../communication/botNet/shared/bn_debug.h"
 
 syncStruc syncParam={0,0,0};    // Synchronization parameters
 int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
@@ -18,10 +19,6 @@ float sum_ab=0,sum_ac=0,sum_bb=0,sum_bc=0,sum_cc=0;
 
 sSyncPayload firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
 syncMesStruc firstLaserMeasure={0,-2},lastLaserMeasure={0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
-
-
-int syncLocalIndex=-2;
-
 
 /* micros2s : local to synchronized time (microsecond).
  * Argument :
@@ -79,8 +76,8 @@ void syncComputationMsg(sSyncPayload *pload){
     if (!firstRxSyncData.period){
         firstRxSyncData=lastRxSyncData;
         // if first received, initialize
-        if (syncLocalIndex<0 && pload->index>=0){
-            syncLocalIndex=pload->index;
+        if (lastLaserMeasure.index<0 && pload->index>=0){
+            lastLaserMeasure.index=pload->index;
         }
     }
 
@@ -157,8 +154,8 @@ void syncABCCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){
  * Usage : feed syncComputationLaser and syncComputationMsg for long enough then call syncComputationFinal.
  */
 void syncComputationFinal(sSyncPayload *pload){
-    float det;
-    float delta;
+    float det=0;
+    float delta=0;
 
     syncComputationMsg(pload);
 
@@ -169,5 +166,6 @@ void syncComputationFinal(sSyncPayload *pload){
         if (delta!=0) syncParam.driftUpdatePeriod=fabs(1./delta);
         syncParam.inc=(delta>0?1:-1);
     }
+
 }
 
