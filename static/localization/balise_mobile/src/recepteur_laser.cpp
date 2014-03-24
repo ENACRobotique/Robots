@@ -26,7 +26,7 @@ volatile uint32_t laser_period=50000;       // in µs, to be confirmed by the ma
 uint32_t sync_lastTurnDate_stored=0,sync_period_stored=0,sync_last_received=0;
 uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the laser structure
 uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
-char chosenOne=8;                           // interruption chosen for synchronization
+char chosenOne=0;                           // interruption chosen for synchronization
 
 
 char debug_led=1;

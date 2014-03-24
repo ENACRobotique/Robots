@@ -25,13 +25,8 @@ typedef struct {
 typedef struct{
     uint32_t    localTime;
     int16_t     index;
-}syncMesStruc;
+}syncMesStruc; // synchronization measure structure
 
-typedef struct {
-    float A;    // Delta_n/Omega_n-Delta_m/Omega_m
-    float B;    // 1_n/Omega_n-1_m/Omega_m
-    float C;    // t_n/Omega_n-t_m/Omega_m
-}ABCStruct;
 
 enum {
     SYNC_OUT_OF_SYNC,
