@@ -9,8 +9,13 @@ int _pinInt;
 
 //number of revolution
 volatile unsigned int _nbTR=0;
-volatile uint32_t prev_int=0,last_TR=0,TR_period=0,TR_mean_period=0;
-#define FILTER_SHIFT 2
+volatile uint32_t prev_int=0,TR_mean_period=0,TR_lastDate=0;
+
+// records of laste turn informations (to compute angles)
+volatile int TR_iNext=0;    // where the next value will be written (by interruption)
+volatile sTurnInfo TR_InfoBuf[TR_INFO_BUFFER_SIZE]={{0}};
+
+
 volatile unsigned long filter_reg=0;
 
 #ifdef BLINK_1TR
@@ -18,12 +23,17 @@ volatile int led=0;
 #endif
 void domi_isr(){
     unsigned long time=micros();
-    if ( (time-prev_int)<32) {
-        TR_period=time-last_TR;
-        filter_reg= filter_reg- (filter_reg>>FILTER_SHIFT) +TR_period;
+    if ( (time-prev_int)<32) {      // because of the shape of the signal
+        uint32_t period=time-domi_lastTR();
+        TR_InfoBuf[TR_iNext].period=period;          // period of the previous turn
+        TR_InfoBuf[TR_iNext].date=TR_lastDate;
+        filter_reg= filter_reg- (filter_reg>>FILTER_SHIFT)+period;
         TR_mean_period=filter_reg>>FILTER_SHIFT;
-        last_TR=time;
         _nbTR++;
+
+        TR_iNext=(TR_iNext+1)%TR_INFO_BUFFER_SIZE;
+        TR_lastDate=time;// begin of the new turn
+
 #ifdef BLINK_1TR
         digitalWrite(13,1);
         delayMicroseconds(4);
@@ -49,5 +59,4 @@ void domi_init(int pinInt){
 void domi_deinit(){
     detachInterrupt(_pinInt-2); //particular case for arduino uno, cf reference
 }
-
 

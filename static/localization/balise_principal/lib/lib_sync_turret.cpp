@@ -15,7 +15,6 @@
 int sync_beginElection(bn_Address addr){
     sMsg outMsg;
     int ret=0;
-    uint32_t sw=0;
     outMsg.header.type=E_SYNC_DATA;
     outMsg.header.size=sizeof(sSyncPayload);
     outMsg.payload.sync.flag=SYNCF_BEGIN_ELECTION;
@@ -23,7 +22,7 @@ int sync_beginElection(bn_Address addr){
     outMsg.header.destAddr=ADDRX_MOBILE_1;
     if ((ret=bn_sendAck(&outMsg))<0) {
         //FIXME : better handle of beacon not available
-        bn_printfDbg((char *)F("addr %hx offline\n"),addr);
+        bn_printfDbg((char *)"addr %hx offline\n",addr);
         return ret;
     }
 
@@ -39,7 +38,7 @@ int sync_sendData(bn_Address addr){
     outMsg.payload.sync.flag=SYNCF_MEASURES;
     outMsg.payload.sync.index=domi_nbTR();
     outMsg.payload.sync.lastTurnDate=domi_lastTR();
-    outMsg.payload.sync.period=domi_period();
+    outMsg.payload.sync.period=domi_lastPeriod();
 
     return bn_send(&outMsg);
 }
@@ -53,7 +52,7 @@ int sync_sendEnd(bn_Address addr){
     outMsg.payload.sync.flag=SYNCF_END_MEASURES;
     outMsg.payload.sync.index=domi_nbTR();
     outMsg.payload.sync.lastTurnDate=domi_lastTR();
-    outMsg.payload.sync.period=domi_period();
+    outMsg.payload.sync.period=domi_lastPeriod();
 
     return bn_sendAck(&outMsg);
 }

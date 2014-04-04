@@ -18,11 +18,14 @@
 #include "../../../communication/botNet/shared/bn_debug.h"
 #include "lib_sync_turret.h"
 #include "roles.h"
+#include "loc_tools_turret.h"
+#include "../../../global_errors.h"
 
 mainState state=S_SYNC_ELECTION;
 
 sDeviceInfo devicesInfo[D_AMOUNT];
-int iStates;
+int iDevice;
+int lastIndex=0;    // to detect new turn in game state
 
 sMsg inMsg,outMsg;
 
@@ -52,6 +55,7 @@ void loop(){
 
     int rxB=0; //received bytes (size of inMsg when a message has been received)
     static unsigned long time_prev_period=0;
+
 
 #ifdef BLINK_1S
     static unsigned long time_prev_led=0;
@@ -83,72 +87,91 @@ void loop(){
     }
 #endif
 
-///////state machine
-      switch (state){
-          case S_SYNC_ELECTION :
-              if (!sw){
-                  //tell beacon(s) to begin election XXX check amount of beacon that respond correctly
-                  for (int i=0;i<D_AMOUNT;i++){
-                      if (sync_beginElection(devicesInfo[i].addr)>0) devicesInfo[i].state=DS_UNSYNCED;
-                  }
+    ///////state machine
+    switch (state){
 
-                  sw=micros();
-              }
-              //wait 2s
-              else if (micros()-sw>ELECTION_TIME){
-                  //switch to next state (beacon will switch automatically on reception of the first data packet)
-                  state=S_SYNC_MEASURE;
-                  bn_printDbg("end election\n");
-                  sw=micros();
-              }
-              break;  //
-          case S_SYNC_MEASURE:
-              //during the defined synchronization time
-              if (micros()-sw<SYNCRONIZATION_TIME){
-                  // $iStates (device to sync) send data if a new turn has been detected since the last time we have send data to this particular device
-                  if (domi_nbTR()!=devicesInfo[iStates].lastIndex){
-                      devicesInfo[iStates].lastIndex=domi_nbTR();
+    case S_SYNC_ELECTION :
+        if (!sw){
+            //tell beacon(s) to begin election
+            for (int i=0;i<D_AMOUNT;i++){
+                if (sync_beginElection(devicesInfo[i].addr)>0) devicesInfo[i].state=DS_UNSYNCED;
+            }
 
-                      //send data
-                      sync_sendData(devicesInfo[iStates].addr);
-                      //increase index for device selection
-                      iStates=(iStates+1)%D_AMOUNT;
-                  }
-              }
-              else {
-                  // at the end, change state
-                  state=S_SYNC_END;
-                  bn_printDbg("end data collection\n");
-              }
-              break;
-          case S_SYNC_END :
+            sw=micros();
+        }
+        //wait 2s
+        else if (micros()-sw>ELECTION_TIME){
+            //switch to next state (beacon will switch automatically on reception of the first data packet)
+            state=S_SYNC_MEASURE;
+            bn_printDbg("end election\n");
+            sw=micros();
+        }
+        break;  //
 
-              //send the SYNCF_END_MESURES
-              for (int i=0;i<D_AMOUNT;i++){
-                  if (sync_sendEnd(devicesInfo[i].addr)>0) devicesInfo[i].state=DS_GAME;
-              }
-              state=S_GAME;
-              break;
-          case S_GAME :
-              if (rxB){
-                  switch (inMsg.header.type){
-                  case E_MEASURE :
-                      switch (inMsg.header.srcAddr){
-                      case ADDRX_MOBILE_1 :
-                          break;
-                      case ADDRX_MOBILE_2 :
-                          break;
-                      case ADDRX_SECOND :
-                          break;
-                      default : break;
-                      }
-                      rxB=0;
-                      break;
+    case S_SYNC_MEASURE:
+        //during the defined synchronization time
+        if (micros()-sw<SYNCRONIZATION_TIME){
+            // $iStates (device to sync) send data if a new turn has been detected since the last time we have send data to this particular device
+            if (domi_nbTR()!=devicesInfo[iDevice].lastIndex){
+                devicesInfo[iDevice].lastIndex=domi_nbTR();
 
-                      default : break;
-                  }
-              }
-              break;
-          default : break;
-      }
+                //send data
+                sync_sendData(devicesInfo[iDevice].addr);
+                //increase index for device selection
+                iDevice=(iDevice+1)%D_AMOUNT;
+            }
+        }
+        else {
+            // at the end, change state
+            state=S_SYNC_END;
+            bn_printDbg("end data collection\n");
+        }
+        break;
+
+    case S_SYNC_END :
+        //send the SYNCF_END_MESURES
+        for (int i=0;i<D_AMOUNT;i++){
+            if (sync_sendEnd(devicesInfo[i].addr)>0) devicesInfo[i].state=DS_GAME;
+        }
+        state=S_GAME;
+        break;
+
+    case S_GAME :
+        // if new turn
+        if (lastIndex!=domi_nbTR()){
+            lastIndex=domi_nbTR();
+            // handle every payload eventually waiting
+            for (int i=0;i<D_AMOUNT;i++){
+                if ( handleMeasurePayload(&(devicesInfo[i].lastData),devicesInfo[i].addr)!=-ERR_TRY_AGAIN ) {
+                    memset(&devicesInfo[i].lastData,'0',sizeof(sMobileReportPayload));
+                }
+            }
+        }
+
+        //if message received
+        if (rxB){
+            switch (inMsg.header.type){
+            // if measure message received
+            case E_MEASURE :
+                switch (inMsg.header.srcAddr){
+                case ADDRX_MOBILE_1 :
+                    if ( handleMeasurePayload(&(devicesInfo[D_MOBILE_1].lastData),devicesInfo[D_MOBILE_1].addr)==-ERR_TRY_AGAIN ) {
+                        memcpy(&devicesInfo[D_MOBILE_1].lastData,&inMsg.payload.mobileReport,sizeof(sMobileReportPayload));
+                    }
+                    break;
+                case ADDRX_MOBILE_2 :
+                    break;
+                case ADDRX_SECOND :
+                    break;
+                default : break;
+                }
+                rxB=0;
+                break;
+
+                default : break;
+            }
+        }
+        break;
+    default : break;
+    }
 }
