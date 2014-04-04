@@ -133,11 +133,13 @@ void syncComputationLaser(plStruct *sLaser){
  */
 void syncABCCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){
 
+    //fixme DELETE
+    bn_printfDbg("%lu,%lu,%lu\n",t_local,t_turret,period);
 
     // avoid division by 0
     if (firstRxSyncData.period && period){
-        uint32_t Delta_n=firstLaserMeasure.localTime-firstRxSyncData.lastTurnDate;
-        uint32_t Delta_m=t_local-t_turret;
+        int32_t Delta_n=firstLaserMeasure.localTime-firstRxSyncData.lastTurnDate;
+        int32_t Delta_m=t_local-t_turret;
 
         // Computes ABC
         float A=(float)Delta_n/firstRxSyncData.period-(float)Delta_m/period;
@@ -165,10 +167,11 @@ void syncComputationFinal(sSyncPayload *pload){
     det=sum_bb*sum_cc-sum_bc*sum_bc;
     if (det!=0){ //todo : handle det==0
         syncParam.initialDelay=(sum_ab*sum_cc-sum_bc*sum_ac)/det;
-        delta=(-sum_bc*sum_bc+sum_ac*sum_bb)/det;
+        delta=(-sum_bc*sum_ab+sum_ac*sum_bb)/det;
         if (delta!=0) syncParam.driftUpdatePeriod=fabs(1./delta);
         syncParam.inc=(delta>0?1:-1);
     }
 
+    bn_printfDbg("det  %lu,Delta_init %lu, 1/delta=%c%lu",(uint32_t)det*1000000L,syncParam.initialDelay,(delta>0?'+':'-'),syncParam.driftUpdatePeriod);
 }
 

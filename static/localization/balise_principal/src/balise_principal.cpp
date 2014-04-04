@@ -65,8 +65,15 @@ void loop(){
     //eventual receiving && routine
     /*rxB=*/bn_receive(&inMsg);
 
-    time=millis();
-
+    //period broadcast : one by one TODO : broadcast
+    if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
+        time_prev_period = millis();
+        outMsg.header.destAddr=ADDRX_MOBILE_1; //FIXME : to everybody
+        outMsg.header.type=E_PERIOD;
+        outMsg.header.size=sizeof(outMsg.payload.period);
+        outMsg.payload.period=domi_meanPeriod();
+        bn_send(&outMsg);
+    }
     //blinking
 #ifdef BLINK_1S
     if((time - time_prev_led)>=10000) {
@@ -104,7 +111,6 @@ void loop(){
 
                       //send data
                       sync_sendData(devicesInfo[iStates].addr);
-
                       //increase index for device selection
                       iStates=(iStates+1)%D_AMOUNT;
                   }
@@ -124,16 +130,6 @@ void loop(){
               state=S_GAME;
               break;
           case S_GAME :
-              //period broadcast : one by one TODO : broadcast
-              if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
-                  time_prev_period = millis();
-                  outMsg.header.destAddr=ADDRX_MOBILE_1; //FIXME : to everybody
-                  outMsg.header.type=E_PERIOD;
-                  outMsg.header.size=sizeof(outMsg.payload.period);
-                  outMsg.payload.period=domi_meanPeriod();
-                  //bn_printfDbg("period send to %hx %lu, err : %d\n",outMsg.header.destAddr,outMsg.payload.period,sndVal);
-                  bn_send(&outMsg);
-              }
               if (rxB){
                   switch (inMsg.header.type){
                   case E_MEASURE :
