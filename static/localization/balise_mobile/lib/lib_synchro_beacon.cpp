@@ -8,14 +8,14 @@
 #include "lib_synchro_beacon.h"
 #include "Arduino.h"
 #include "../../../communication/botNet/shared/bn_debug.h"
+#include "params.h"
 
-syncStruc syncParam={0,0,0};    // Synchronization parameters
+syncStruc syncParam={0,HARDUPDATEPERIOD,HARDUPDATESIGN};    // Synchronization parameters
 int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
 
 
 // Iterative sums for least-square computation (sum_bb=sum(for i=0..N, b_i*b_i)...)
-float sum_ab=0,sum_ac=0,sum_bb=0,sum_bc=0,sum_cc=0;
-
+int64_t sum_OO=0,sum_D=0,sum_O=0,sum_OD=0,sum_ones=0;
 
 sSyncPayload firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
 syncMesStruc firstLaserMeasure={0,-2},lastLaserMeasure={0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
@@ -27,7 +27,6 @@ syncMesStruc firstLaserMeasure={0,-2},lastLaserMeasure={0,-2};   // Assumption :
  *  Synchronized date (expressed in microsecond)
  */
 uint32_t micros2s(uint32_t local){
-    updateSync();
     return local-_offset;
 }
 
@@ -38,7 +37,6 @@ uint32_t micros2s(uint32_t local){
  *  Synchronized date (expressed in millisecond)
  */
 uint32_t millis2s(uint32_t local){
-    updateSync();
     return local-(_offset/1000);
 }
 
@@ -83,7 +81,7 @@ void syncComputationMsg(sSyncPayload *pload){
 
     // Check for corresponding index values, if yes computes ABCs and store it iterating sums
     if (lastLaserMeasure.index==lastRxSyncData.index && lastLaserMeasure.localTime){
-        syncABCCompute(lastLaserMeasure.localTime,lastRxSyncData.lastTurnDate,lastRxSyncData.period);
+        syncIntermediateCompute(lastLaserMeasure.localTime,lastRxSyncData.lastTurnDate,lastRxSyncData.period);
     }
 
 }
@@ -121,57 +119,48 @@ void syncComputationLaser(plStruct *sLaser){
 
         // Check for corresponding index values, if yes AND useful value, computes ABCs and store it iterating sums
         if (lastLaserMeasure.index==lastRxSyncData.index){
-            syncABCCompute(lastLaserMeasure.localTime,lastRxSyncData.lastTurnDate,lastRxSyncData.period);
+            syncIntermediateCompute(lastLaserMeasure.localTime,lastRxSyncData.lastTurnDate,lastRxSyncData.period);
         }
     }
 
 
 }
 
-/* syncABCCompute : computes the A, B, and C terms and stores the relevant informations in iterated sums.
+/* syncABCCompute : performs intermediate computations and stores the relevant informations in iterated sums.
  *
  */
-void syncABCCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){
+void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){
 
-    //fixme DELETE
+#ifdef DEBUG_SYNC
     bn_printfDbg("%lu,%lu,%lu\n",t_local,t_turret,period);
+#endif
 
-    // avoid division by 0
-    if (firstRxSyncData.period && period){
-        int32_t Delta_n=firstLaserMeasure.localTime-firstRxSyncData.lastTurnDate;
-        int32_t Delta_m=t_local-t_turret;
-
-        // Computes ABC
-        float A=(float)Delta_n/firstRxSyncData.period-(float)Delta_m/period;
-        float B=(float)1./firstRxSyncData.period-(float)1./period;
-        float C=(float)firstLaserMeasure.localTime/firstRxSyncData.period-(float)t_local/period;
-
-        // compute & store the interesting values
-        sum_ab+=A*B;
-        sum_ac+=A*C;
-        sum_bb+=B*B;
-        sum_bc+=B*C;
-        sum_cc+=C*C;
-    }
+    int64_t Delta=t_local-t_turret;
+    sum_D+=Delta;
+    sum_O+=period;
+    sum_OD+=Delta*period;
+    sum_OO+=period*period;
+    sum_ones+=1;
 }
 
 /* SyncComputationFinal : Computes the sync parameters based on all the values recorded (least square method).
  * Usage : feed syncComputationLaser and syncComputationMsg for long enough then call syncComputationFinal.
  */
 void syncComputationFinal(sSyncPayload *pload){
-    float det=0;
-    float delta=0;
+    int64_t det=0;
 
     syncComputationMsg(pload);
 
-    det=sum_bb*sum_cc-sum_bc*sum_bc;
+    det=sum_ones*sum_OO-sum_O*sum_O;
     if (det!=0){ //todo : handle det==0
-        syncParam.initialDelay=(sum_ab*sum_cc-sum_bc*sum_ac)/det;
-        delta=(-sum_bc*sum_ab+sum_ac*sum_bb)/det;
-        if (delta!=0) syncParam.driftUpdatePeriod=fabs(1./delta);
-        syncParam.inc=(delta>0?1:-1);
+        syncParam.initialDelay=(sum_OO*sum_D-sum_O*sum_OD)/det;
+#ifdef DEBUG_SYNC
+        int64_t beta=(sum_ones*sum_OD-sum_D*sum_O)*1000/det;
+        bn_printfDbg("det  %llu,Delta_init %lu, beta*1000 =%llu",det,syncParam.initialDelay,beta);
+#endif
     }
 
-    bn_printfDbg("det  %lu,Delta_init %lu, 1/delta=%c%lu",(uint32_t)det*1000000L,syncParam.initialDelay,(delta>0?'+':'-'),syncParam.driftUpdatePeriod);
+    updateSync();
+
 }
 

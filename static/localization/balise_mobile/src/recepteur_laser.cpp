@@ -48,9 +48,9 @@ void setup() {
 
   bn_init();
 
-  bn_printDbg("start mobile 1");
   bn_attach(E_ROLE_SETUP,role_setup);
   bn_attach(E_PERIOD,&periodHandle);
+  bn_printDbg("start mobile 1\n");
   setupFreeTest();
 }
 
@@ -101,19 +101,20 @@ void loop() {
     }
     else if (laserStruct0.thickness && (timeMicros-lasStrRec0)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
 //        if ((timeMicros-lastLaserDetectMicros)>(laser_period>>2))
-            laserStruct=laserStruct0;
+        laserStruct=laserStruct0;
         memset(&laserStruct0,0,sizeof(plStruct));
     }
     else if (laserStruct1.thickness && (timeMicros-lasStrRec1)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
 //        if ((timeMicros-lastLaserDetectMicros)>(laser_period>>2))
-            laserStruct=laserStruct1;
+        laserStruct=laserStruct1;
         memset(&laserStruct1,0,sizeof(plStruct));
+
     }
 
     if ( laserStruct.thickness ) {
         lastLaserDetectMicros=laserStruct.date;
         lastLaserDetectMillis=laserStruct.date/1000;
-        bn_printfDbg("las %lu,%lu%,lu\n",laserStruct.deltaT,laserStruct.period,laserStruct.date);
+//        bn_printfDbg("las %lu,%lu, %lu\n",laserStruct.deltaT,laserStruct.period,laserStruct.date);
     }
 
 
@@ -141,6 +142,7 @@ void loop() {
             else {
                 break;
             }
+            /* no break */
         case S_SYNC_MEASURES:
             // laser data (if value is ours for sure (ie comes from a tracked measure XXX check if periodicLaser returns a struct compatible with that)
             if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){

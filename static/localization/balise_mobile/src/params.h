@@ -8,6 +8,7 @@
 #ifndef PARAMS_H_
 #define PARAMS_H_
 
+#include "node_cfg.h"
 
 typedef enum{
     S_BEGIN,
@@ -20,5 +21,11 @@ typedef enum{
 
 
 //#define DEBUG
+#define DEBUG_SYNC
+
+#if MYADDRX==ADDRX_MOBILE_1     // the beacon with a "1" written in red on the copper side of the PCB
+    #define HARDUPDATEPERIOD 0  // 129870    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
+    #define HARDUPDATESIGN   0  // -1        // sgn(delta)
+#endif
 
 #endif /* PARAMS_H_ */

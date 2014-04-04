@@ -12,9 +12,7 @@
 #include "lib_int_laser.h"
 #include "messages.h"
 
-#define BUF_ABC_SIZE                10
-#define SYNC_LASER_ELECTION_TIME    2000000     // Time during which we will measure the best laser interruption to measure the clock drift (µs)
-#define SYNC_TIME_DURATION          10000000    // Duration of synchronization
+
 
 typedef struct {
     int32_t initialDelay;  // Initial delay, Delta_i
@@ -68,10 +66,10 @@ void syncComputationMsg(sSyncPayload *pload);
  */
 void syncComputationLaser(plStruct *sLaser);
 
-/* Computes ABCs and store them appropriately.
+/* Computes intermediate sums and store them appropriately.
  *
  */
-void syncABCCompute(uint32_t t_local, uint32_t t_turret, uint32_t period);
+void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t period);
 
 /* SyncComputationFinal : Computes the sync parameters (least square).
  * Usage : feed syncComputationLaser with data received under the flag SYNCF_END_MEASURES.
