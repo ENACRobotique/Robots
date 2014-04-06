@@ -47,7 +47,7 @@ void updateSync(){
     uint32_t timeMicros=micros();
 
     if (!lastUpdate && !_offset && (syncParam.initialDelay || syncParam.driftUpdatePeriod)){      //only in the first call after successful synchronization
-        _offset=syncParam.initialDelay + (syncParam.driftUpdatePeriod?0:timeMicros/syncParam.driftUpdatePeriod)*syncParam.inc;
+        _offset=syncParam.initialDelay + (!(syncParam.driftUpdatePeriod)?0:timeMicros/syncParam.driftUpdatePeriod)*syncParam.inc;
         lastUpdate=timeMicros-(syncParam.driftUpdatePeriod?0:timeMicros%syncParam.driftUpdatePeriod);
     }
     else if(syncParam.driftUpdatePeriod) {
@@ -153,10 +153,14 @@ void syncComputationFinal(sSyncPayload *pload){
 
     det=sum_ones*sum_OO-sum_O*sum_O;
     if (det!=0){ //todo : handle det==0
+        sum_OO>>=10;
+        sum_OD>>=10;
+        det>>=10;
         syncParam.initialDelay=(sum_OO*sum_D-sum_O*sum_OD)/det;
 #ifdef DEBUG_SYNC
+        sum_O>>=10;
         int64_t beta=(sum_ones*sum_OD-sum_D*sum_O)*1000/det;
-        bn_printfDbg("det  %llu,Delta_init %lu, beta*1000 =%llu",det,syncParam.initialDelay,beta);
+        bn_printfDbg("det  %ld %ld,Delta_init %lu, beta =%ld°",(int32_t)(det>>32),(int32_t)det,syncParam.initialDelay,(int32_t)(beta*360)/1000);
 #endif
     }
 
