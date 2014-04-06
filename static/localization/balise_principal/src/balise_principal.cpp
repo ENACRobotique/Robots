@@ -33,6 +33,8 @@ unsigned long sw=0, sw2=0;
 
 void setup(){
 
+    setupFreeTest();
+
     // initializes the local state of the beacons to "off"
     for (int i=0;i<D_AMOUNT;i++) {
         devicesInfo[i].state=DS_OFF;
@@ -67,7 +69,7 @@ void loop(){
 ///////// must always be done, any state
 
     //eventual receiving && routine
-    /*rxB=*/bn_receive(&inMsg);
+    rxB=bn_receive(&inMsg);  // rxB>0 if message written in inMsg, <0 if error
 
     //period broadcast : one by one TODO : broadcast
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
@@ -142,20 +144,23 @@ void loop(){
             lastIndex=domi_nbTR();
             // handle every payload eventually waiting
             for (int i=0;i<D_AMOUNT;i++){
-                if ( handleMeasurePayload(&(devicesInfo[i].lastData),devicesInfo[i].addr)!=-ERR_TRY_AGAIN ) {
-                    memset(&devicesInfo[i].lastData,'0',sizeof(sMobileReportPayload));
+                if (devicesInfo[i].lastData.value){
+                    if ( handleMeasurePayload(&(devicesInfo[i].lastData),devicesInfo[i].addr)!=-ERR_TRY_AGAIN ) {
+                        memset(&devicesInfo[i].lastData,'0',sizeof(sMobileReportPayload));
+                    }
                 }
             }
         }
 
         //if message received
-        if (rxB){
+        if (rxB>0){
             switch (inMsg.header.type){
             // if measure message received
             case E_MEASURE :
+                int error;
                 switch (inMsg.header.srcAddr){
                 case ADDRX_MOBILE_1 :
-                    if ( handleMeasurePayload(&(devicesInfo[D_MOBILE_1].lastData),devicesInfo[D_MOBILE_1].addr)==-ERR_TRY_AGAIN ) {
+                    if ( (error=handleMeasurePayload(&(inMsg.payload.mobileReport),inMsg.header.srcAddr))==-ERR_TRY_AGAIN ) {
                         memcpy(&devicesInfo[D_MOBILE_1].lastData,&inMsg.payload.mobileReport,sizeof(sMobileReportPayload));
                     }
                     break;
@@ -173,5 +178,5 @@ void loop(){
         }
         break;
     default : break;
-    }
+    }// end state machine
 }
