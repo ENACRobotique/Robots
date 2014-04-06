@@ -74,6 +74,7 @@ void loop() {
 
 //MUST ALWAYS BE DONE (any state)
 
+    updateSync();
 
     // routine and receive
     rxB=bn_receive(&inMsg);
@@ -183,14 +184,14 @@ void loop() {
 				outMsg.header.destAddr=ADDRX_MAIN;
 				outMsg.header.type=E_MEASURE;
 				outMsg.header.size=sizeof(sMobileReportPayload);
-
         	    if (laserStruct.period) outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laserStruct.period);
         	    else outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laser_period);
-                outMsg.payload.mobileReport.date=laserStruct.date;
+                outMsg.payload.mobileReport.date=micros2s(laserStruct.date);
                 outMsg.payload.mobileReport.precision=laserStruct.precision;
                 outMsg.payload.mobileReport.sureness=laserStruct.sureness;
-				bn_send(&outMsg);
-//        	    bn_printfDbg((char*)"%lu, %lu, mes , %lu, delta ,%lu, thick,%lu\n",laser_period,laserStruct.period,outMsg.payload.measure.value,laserStruct.deltaT,laserStruct.thickness);
+
+                int error=bn_send(&outMsg);
+//        	    bn_printfDbg((char*)"%lu\t%lu\tmes %lu\tdelta %lu\tthick %lu\terr %d\n",laser_period,laserStruct.period,outMsg.payload.mobileReport.value,laserStruct.deltaT,laserStruct.thickness,error);
           }
           break;
         default : break;
