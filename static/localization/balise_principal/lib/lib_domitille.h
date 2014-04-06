@@ -10,7 +10,7 @@
 
 #include "stdint.h"
 
-#define FILTER_SHIFT 1
+#define FILTER_SHIFT 2
 
 #define TR_INFO_BUFFER_SIZE 4
 
@@ -33,6 +33,10 @@ void domi_isr();
 void domi_init(int pinInt);
 void domi_deinit();
 
+inline int domi_iCur(){
+    return (TR_iNext-1+TR_INFO_BUFFER_SIZE)%TR_INFO_BUFFER_SIZE;
+}
+
 inline int domi_nbTR(){
     return _nbTR;
 }
@@ -41,11 +45,11 @@ inline void domi_resetNbTR(){
     _nbTR=0;
 }
 inline unsigned long domi_lastTR(){
-    return TR_InfoBuf[TR_iNext-1].date;
+    return TR_InfoBuf[domi_iCur()].date;
 }
 
 inline unsigned long domi_lastPeriod(){
-    return TR_InfoBuf[TR_iNext-1].period;
+    return TR_InfoBuf[domi_iCur()].period;
 }
 
 inline unsigned long domi_meanPeriod(){

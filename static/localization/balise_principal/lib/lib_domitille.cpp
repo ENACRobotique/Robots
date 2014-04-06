@@ -21,12 +21,14 @@ volatile unsigned long filter_reg=0;
 #ifdef BLINK_1TR
 volatile int led=0;
 #endif
+
 void domi_isr(){
     unsigned long time=micros();
     if ( (time-prev_int)<32) {      // because of the shape of the signal
-        uint32_t period=time-domi_lastTR();
+        uint32_t period=time-TR_lastDate;
         TR_InfoBuf[TR_iNext].period=period;          // period of the previous turn
         TR_InfoBuf[TR_iNext].date=TR_lastDate;
+
         filter_reg= filter_reg- (filter_reg>>FILTER_SHIFT)+period;
         TR_mean_period=filter_reg>>FILTER_SHIFT;
         _nbTR++;
@@ -35,9 +37,8 @@ void domi_isr(){
         TR_lastDate=time;// begin of the new turn
 
 #ifdef BLINK_1TR
-        digitalWrite(13,1);
-        delayMicroseconds(4);
-        digitalWrite(13,0);
+        led^=1;
+        digitalWrite(13,led);
 #endif
     }
     prev_int=time;
