@@ -48,6 +48,10 @@ uint32_t micros2s(uint32_t local);
 uint32_t millis2s(uint32_t local);
 
 
+/* Return rank of highest bit
+ */
+int hbit(uint64_t val);
+
 /* updateSync : Updates the correction done by millis2s and micros2s
  * /!\ Must be called often (more often than 1/syncStruct.driftFactor microsecond)
  */

@@ -40,6 +40,17 @@ uint32_t millis2s(uint32_t local){
     return local-(_offset/1000);
 }
 
+/* Return rank of highest bit
+ */
+int hbit(uint64_t val){
+    int i=0;
+    while(val){
+        val=val>>1;
+        i++;
+    }
+    return i;
+}
+
 /* updateSync : Updates the correction done by millis2s and micros2s
  */
 void updateSync(){
@@ -126,21 +137,28 @@ void syncComputationLaser(plStruct *sLaser){
 
 }
 
+#define EVIL_SHIFT 10       // 10 : lucky value tested on only two sets of data. todo Must be tested on more data.
+
 /* syncABCCompute : performs intermediate computations and stores the relevant informations in iterated sums.
  *
  */
 void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){
 
-#ifdef DEBUG_SYNC
-    bn_printfDbg("%lu,%lu,%lu\n",t_local,t_turret,period);
-#endif
 
     int64_t Delta=t_local-t_turret;
-    sum_D+=Delta;
-    sum_O+=period;
-    sum_OD+=Delta*period;
-    sum_OO+=period*period;
-    sum_ones+=1;
+    if ( (hbit((uint64_t)(sum_D+Delta))+hbit((uint64_t)(sum_OO+period*period)))<(63+EVIL_SHIFT) && (hbit((uint64_t)(sum_O+period))+hbit((uint64_t)(sum_OD+period*Delta)))<(63+EVIL_SHIFT) ){
+#ifdef DEBUG_SYNC
+        bn_printfDbg("%lu,%lu,%lu\n",t_local,t_turret,period);
+#endif
+        sum_D+=Delta;
+        sum_O+=period;
+        sum_OD+=Delta*period;
+        sum_OO+=period*period;
+        sum_ones+=1;
+    }
+#ifdef DEBUG_SYNC
+    else bn_printfDbg("%lu,%lu,%lu,REJECTED(overflow)\n",t_local,t_turret,period);
+#endif
 }
 
 /* SyncComputationFinal : Computes the sync parameters based on all the values recorded (least square method).
@@ -152,17 +170,19 @@ void syncComputationFinal(sSyncPayload *pload){
     syncComputationMsg(pload);
 
     det=sum_ones*sum_OO-sum_O*sum_O;
+
+    det>>=EVIL_SHIFT;
     if (det!=0){ //todo : handle det==0
-        sum_OO>>=10;
-        sum_OD>>=10;
-        det>>=10;
+        sum_OO>>=EVIL_SHIFT;
+        sum_OD>>=EVIL_SHIFT;
         syncParam.initialDelay=(sum_OO*sum_D-sum_O*sum_OD)/det;
 #ifdef DEBUG_SYNC
-        sum_O>>=10;
+        sum_O>>=EVIL_SHIFT;
         int64_t beta=(sum_ones*sum_OD-sum_D*sum_O)*1000/det;
         bn_printfDbg("det  %ld %ld,Delta_init %lu, beta =%ld°",(int32_t)(det>>32),(int32_t)det,syncParam.initialDelay,(int32_t)(beta*360)/1000);
 #endif
     }
+#undef EVIL_SHIFT
 
     updateSync();
 
