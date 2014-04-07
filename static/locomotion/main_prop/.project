@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>linux_prop_simu</name>
+	<name>main_prop</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -32,22 +32,42 @@
 		<link>
 			<name>lib/Millis</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
+			<locationURI>copy_PARENT/core/linux/libraries/Millis</locationURI>
 		</link>
 		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/Timeout</locationURI>
+			<locationURI>copy_PARENT/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/botNet</locationURI>
+			<locationURI>copy_PARENT/communication/botNet</locationURI>
+		</link>
+		<link>
+			<name>lib/lpc2148</name>
+			<type>2</type>
+			<locationURI>copy_PARENT/core/lpc21xx/lpc2148</locationURI>
+		</link>
+		<link>
+			<name>lib/lpc_lib</name>
+			<type>2</type>
+			<locationURI>copy_PARENT/core/lpc21xx/lpc_lib</locationURI>
 		</link>
 		<link>
 			<name>lib/network_config</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/network_config</locationURI>
+			<locationURI>copy_PARENT1/network_config</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D/ClubRobot/github/static</value>
+		</variable>
+		<variable>
+			<name>copy_PARENT1</name>
+			<value>$%7BPARENT-1-copy_PARENT%7D</value>
+		</variable>
+	</variableList>
 </projectDescription>

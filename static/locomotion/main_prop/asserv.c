@@ -9,11 +9,21 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#ifdef ARCH_LPC21XX
+#include <lpc214x.h>
+#include "gpio.h"
+#include "pwm.h"
+#include "eint.h"
+#include "sys_time.h"
+#include "ime.h"
+#endif
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
 #include "../../../global_errors.h"
+#ifdef ARCH_X86_LINUX
 #include "millis.h"
+#endif
 #include "roles.h"
 
 #include "params.h"
@@ -23,6 +33,32 @@
 #include "asserv.h"
 
 #define SQR(v) ((long long)(v)*(v))
+
+#ifdef ARCH_LPC21XX
+volatile int _ticks_l=0, _ticks_r=0;
+
+void _isr_left() __attribute__ ((interrupt("IRQ")));
+void _isr_left() { // irq17
+    if(gpio_read(1, 16))
+        _ticks_l--;
+    else
+        _ticks_l++;
+
+    SCB_EXTINT = BIT(3); // acknowledges interrupt
+    VIC_VectAddr = (unsigned)0; // updates priority hardware
+}
+
+void _isr_right() __attribute__ ((interrupt("IRQ")));
+void _isr_right(){ // irq14
+    if(gpio_read(1, 17))
+        _ticks_r++;
+    else
+        _ticks_r--;
+
+    SCB_EXTINT = BIT(0); // acknowledges interrupt
+    VIC_VectAddr = (unsigned)0; // updates priority hardware
+}
+#endif
 
 //#define TIME_STATS
 
@@ -90,7 +126,6 @@ unsigned int start_us;
 #define TIME_STATS_SHIFT (3)
 #endif
 
-int _ticks_l=0, _ticks_r=0;
 int ticks_l, ticks_r;
 int consigne_l = 0;
 int consigne_r = 0;
@@ -101,10 +136,43 @@ long long tmp, dtime;
 int n_x, n_y, i;
 int alpha, dist, dist_tmp, dist_lim;
 
+void asserv_init(){
+#ifdef ARCH_LPC21XX
+    gpio_init_all();  // use fast GPIOs
+
+    pwm_init(0, 1024);  // 29.3kHz update rate => not audible
+
+    // sortie LED
+    gpio_output(1, 24);
+    gpio_write(1, 24, 0); // green LED on
+
+    gpio_output(0, 31);
+    gpio_write(0, 31, 0); // orange LED on
+
+    // entrées quadrature
+    gpio_input(1, 16);  // gauche
+    gpio_input(1, 17);  // droit
+
+    // interruptions codeurs
+    eint_init(_isr_right, _isr_left);
+#endif
+
+    motor_controller_init();
+
+#ifdef ARCH_LPC21XX
+    // init time management
+    sys_time_init();
+
+    global_IRQ_enable();
+#endif
+}
+
 int new_traj_el(sTrajElRaw_t *te){
     int error = 0;
 
+#ifdef ARCH_X86_LINUX
     printf("got traj step %i|%i\n", te->sid, te->tid);
+#endif
 
     if( curr_traj_insert_sid > 0 && te->tid == curr_tid ) { // we are currently following a trajectory and we got some new steps to add to this trajectory
         if( curr_traj_insert_sid < TRAJ_MAX_SIZE ) {
@@ -202,8 +270,15 @@ int new_asserv_step(){
 #endif
 
     // get current number of ticks per sampling period
-    ticks_l = motor_getticks(&motGauche)<<SHIFT; _ticks_l = 0; // (IpP<<SHIFT)
-    ticks_r = motor_getticks(&motDroit)<<SHIFT; _ticks_r = 0; // (IpP<<SHIFT)
+#ifdef ARCH_LPC21XX
+    global_IRQ_disable();  // prevent _ticks_? to be modified by an interruption caused by an increment
+    ticks_l = _ticks_l<<SHIFT; _ticks_l = 0; // (IpP<<SHIFT)
+    ticks_r = _ticks_r<<SHIFT; _ticks_r = 0; // (IpP<<SHIFT)
+    global_IRQ_enable();
+#elif defined(ARCH_X86_LINUX)
+    ticks_l = motor_getticks(&motGauche)<<SHIFT; // (IpP<<SHIFT)
+    ticks_r = motor_getticks(&motDroit)<<SHIFT; // (IpP<<SHIFT)
+#endif
 
     // update the motor speed
     // TODO: use the shifted data in the PID of the motor, really necessary?
