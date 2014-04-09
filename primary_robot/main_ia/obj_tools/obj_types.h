@@ -14,7 +14,7 @@
 
 
 #define SEB 0
-#define COLOR 1 //0=red and 1=yellow
+#define COLOR 0 //0=red and 1=yellow
 #define DEBUG 1
 #define RESO_POS 2
 #define NB_OBJ 16
@@ -24,6 +24,7 @@
 #define START_FEU 28
 #define START_ARBRE 1
 #define START_TORCHE_FIXE 20
+#define FIRE_RADIUS_EP 15
 
 
 typedef enum {ATTENTE , JEU , SHUT_DOWN} estate_t;
@@ -53,17 +54,22 @@ typedef struct
 
 
 //Structure arbre
-typedef struct         //TODO pointeur vers trajectoire programmer //TODO faire fonction calcul point d'acces optimal et calcul de la trajectoire
+typedef struct          //TODO pointeur vers trajectoire programmer //TODO faire fonction calcul point d'acces optimal et calcul de la trajectoire
 	{
-	uint8_t eFruit[6]; //définition : 0=violet non récolté, 1=récolté, 2=noir
-    uint8_t nb_point;  //nombre de point potentiel a vider
+	uint8_t eFruit[6];  //définition : 0=violet non récolté, 1=récolté, 2=noir
+    uint8_t nb_point;   //nombre de point potentiel a vider
+    int x;				//position of the tree axis x
+    int y;				//position of the tree axis y
+    uint8_t rot;		//0 no rotation else rotation
     } Obj_arbre;
 
 //Strucutre feu
 typedef struct
 	{
-	uint8_t pos;       //postition du feu TODO a définir
-    uint8_t nb_point;  //nombre de point potentiel a vider
+	sPt_t c; 			//center of the fire
+	uint8_t pos;       	// 1 = flat red, 2 = flat yellow, 3 = vertical, 4 = in fixed torch 5=other
+	sNum_t angle; 		// vertical or torch fixed in [0, 360°[ convention R|Y ->0°, flat in [0, 120°[
+    uint8_t nb_point;  	//nombre de point
     } Obj_feu;
 
 //Struture bac
@@ -98,6 +104,10 @@ extern void project_point(float xp, float yp, float rc, float xc, float yc, sPt_
 
 extern void printListObj(void);
 extern void printObsActive(void);
+
+extern void TransElTraj(sTrajEl_t *traj, int x, int y);
+extern void SymElTraj(sTrajEl_t *traj, int x, int y);
+extern void Rot90Traj(sTrajEl_t *traj);
 
 #endif
 

@@ -58,6 +58,8 @@ int main(int argc, char **argv){
     FILE *fd = NULL;
     sPt_t last_pos = {0., 0.};
     float last_theta = 0.;
+    float last_speed = 0.;
+    unsigned int prevPos = 0;
     int last_tid = 0;
     int i;
     enum{
@@ -200,9 +202,27 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
 
                 // updating position...
+                {
+                	sPt_t new_pos = {.x = msgIn.payload.pos.x, .y = msgIn.payload.pos.y};
+                	sNum_t d;
+
+                	if(prevPos){
+                		distPt2Pt(&last_pos, &new_pos, &d);
+
+                		last_speed = d*1000./(millis() - prevPos);
+                		speed=last_speed;
+
+                		//printf("%.2fcm/s\n", last_speed);
+                	}
+
+					prevPos = millis();
+                	last_pos = new_pos;
+                }
+
                 last_pos.x = msgIn.payload.pos.x;
                 last_pos.y = msgIn.payload.pos.y;
                 last_theta = msgIn.payload.pos.theta;
+                theta_robot = last_theta;
                 if(msgIn.payload.pos.tid > last_tid){
                     last_tid = msgIn.payload.pos.tid;
                 }
