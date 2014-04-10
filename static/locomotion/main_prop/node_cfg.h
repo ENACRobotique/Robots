@@ -10,10 +10,17 @@
 
 #include "network_cfg.h"
 
+#ifdef ARCH_LPC21XX
+#define MYADDRX 0
+#define MYADDRI ADDRI_MAIN_PROP
+#define MYADDRU 0
+#define MYADDRD 0
+#elif defined(ARCH_X86_LINUX)
 #define MYADDRX 0
 #define MYADDRI 0
 #define MYADDRU 0
 #define MYADDRD ADDRD_MAIN_PROP_SIMU
+#endif
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
 #define MYROLE ROLE_PROPULSION

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <signal.h> // ctrl+c for menu
 #include <getopt.h> // parameters parsing
 #include <termios.h> // terminal raw mode
@@ -14,10 +15,12 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../botNet/shared/bn_debug.h"
+#include "roles.h"
+
+#include "params.h"
 #include "../../global_errors.h"
 #include "node_cfg.h"
 
-#include "params.h"
 
 #include "controller.h"
 #include "asserv.h"
@@ -121,7 +124,8 @@ int main(int argc, char *argv[]){
         printf("Node ready.\n");
     }
 
-    motor_controller_init();
+    // hardware initialization
+    asserv_init();
 
     prevAsserv = millis();
 
