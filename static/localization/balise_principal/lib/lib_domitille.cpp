@@ -18,7 +18,7 @@ volatile sTurnInfo TR_InfoBuf[TR_INFO_BUFFER_SIZE]={{0}};
 
 volatile unsigned long filter_reg=0;
 
-#ifdef BLINK_1TR
+#if defined(BLINK_1TR)
 volatile int led=0;
 #endif
 
@@ -38,7 +38,7 @@ void domi_isr(){
 
 #ifdef BLINK_1TR
         led^=1;
-        digitalWrite(13,led);
+        digitalWrite(PIN_DBG_LED,led);
 #endif
     }
     prev_int=time;
