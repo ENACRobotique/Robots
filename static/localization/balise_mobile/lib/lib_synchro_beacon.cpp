@@ -40,7 +40,7 @@ uint32_t millis2s(uint32_t local){
     return local-(_offset/1000);
 }
 
-/* Return rank of highest bit
+/* Return rank of highest bit, or -1 if val==0
  */
 int hbit(uint64_t val){
     int i=0;
@@ -48,7 +48,7 @@ int hbit(uint64_t val){
         val=val>>1;
         i++;
     }
-    return i;
+    return i-1;
 }
 
 /* updateSync : Updates the correction done by millis2s and micros2s
@@ -139,7 +139,7 @@ void syncComputationLaser(plStruct *sLaser){
 
 #define EVIL_SHIFT 10       // 10 : lucky value tested on only two sets of data. todo Must be tested on more data.
 
-/* syncABCCompute : performs intermediate computations and stores the relevant informations in iterated sums.
+/* syncIntermediateCompute : performs intermediate computations and stores the relevant informations in iterated sums.
  *
  */
 void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t period){

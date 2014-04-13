@@ -48,7 +48,7 @@ uint32_t micros2s(uint32_t local);
 uint32_t millis2s(uint32_t local);
 
 
-/* Return rank of highest bit
+/* Return rank of highest bit, or -1 if val==0
  */
 int hbit(uint64_t val);
 
