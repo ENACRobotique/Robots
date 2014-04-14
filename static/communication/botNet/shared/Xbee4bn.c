@@ -70,7 +70,7 @@ int Xbee_setup(){
     //saves changes in non-volatile memory
     if ( (ret=Xbee_ATCmd("WR",frID,XBEE_ATCMD_SET,MYADDRX))<0 ) return ret;
 
-    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL*4))<0 ) return ret;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL*4L))<0 ) return ret;
     frID++;
 
     return 0;
