@@ -32,17 +32,17 @@
 		<link>
 			<name>lib/Millis</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/core/linux/libraries/Millis</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
 		</link>
 		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/tools/libraries/Timeout</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/communication/botNet</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/botNet</locationURI>
 		</link>
 		<link>
 			<name>lib/lpc2148</name>
@@ -57,7 +57,7 @@
 		<link>
 			<name>lib/network_config</name>
 			<type>2</type>
-			<locationURI>copy_PARENT1/network_config</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/network_config</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
