@@ -366,7 +366,7 @@ int bn_routine(){
  * Argument :
  *      msg : pointer to the memory area where the last message will be written
  * Return value :
- *      nb of bytes written
+ *      nb of bytes written to msg if a message has been received
  *      0 if nothing is available
  *      <0 on error
  */

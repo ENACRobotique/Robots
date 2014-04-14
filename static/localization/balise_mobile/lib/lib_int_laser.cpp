@@ -158,14 +158,14 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     return 1;
 
                 }
-                //else, "delay" periodicLaser
+                //else, "delay" periodicLaser and return to acquisition
                 else {
 
                     //"clear "the buffer and lastLaserDetection
                     bs->prevCall=time;
                     bs->lastDetect=0;
 
-                    //set the nextime and prevtime
+                    //set the nextime and prevtime and tolerated latency
                     bs->prevTime=time;
                     bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
                     bs->stage=0;
