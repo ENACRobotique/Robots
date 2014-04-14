@@ -81,15 +81,16 @@ void loop() {
 
     //reading the eventual data from the lasers
     if (periodicLaser(&buf0,&laserStruct0)){
-        lasStrRec0=timeMicros;
+        lasStrRec0=micros();
         intLas0+=laserStruct0.thickness;
     }
     if (periodicLaser(&buf1,&laserStruct1)){
-        lasStrRec1=timeMicros;
+        lasStrRec1=micros();
         intLas1+=laserStruct1.thickness;
     }
 
 
+    timeMicros=micros();
     //laser data pocessing
     if (laserStruct0.thickness && laserStruct1.thickness){ //case of two laser detected
         //return the the best signal (i.e. one with the biggest thickness)
@@ -100,14 +101,20 @@ void loop() {
         memset(&laserStruct0,0,sizeof(plStruct));
         memset(&laserStruct1,0,sizeof(plStruct));
     }
-    else if (laserStruct0.thickness && (timeMicros-lasStrRec0)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
-//        if ((timeMicros-lastLaserDetectMicros)>(laser_period>>2))
-        laserStruct=laserStruct0;
+    else if (laserStruct0.thickness && (micros()-lasStrRec0)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+        uint32_t micMDate=timeMicros-laserStruct0.date;
+        uint32_t micMLast=timeMicros-lastLaserDetectMicros;
+
+        if ((micMDate>micMLast?micMDate-micMLast:micMLast-micMDate)>(laser_period>>1))  laserStruct=laserStruct0;
         memset(&laserStruct0,0,sizeof(plStruct));
+//        memset(&laserStruct1,0,sizeof(plStruct));
     }
-    else if (laserStruct1.thickness && (timeMicros-lasStrRec1)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
-//        if ((timeMicros-lastLaserDetectMicros)>(laser_period>>2))
-        laserStruct=laserStruct1;
+    else if (laserStruct1.thickness && (micros()-lasStrRec1)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+        uint32_t micMDate=timeMicros-laserStruct1.date;
+        uint32_t micMLast=timeMicros-lastLaserDetectMicros;
+
+        if ((micMDate>micMLast?micMDate-micMLast:micMLast-micMDate)>(laser_period>>1)) laserStruct=laserStruct1;
+//        memset(&laserStruct0,0,sizeof(plStruct));
         memset(&laserStruct1,0,sizeof(plStruct));
 
     }
@@ -115,7 +122,6 @@ void loop() {
     if ( laserStruct.thickness ) {
         lastLaserDetectMicros=laserStruct.date;
         lastLaserDetectMillis=laserStruct.date/1000;
-//        bn_printfDbg("las %lu,%lu, %lu\n",laserStruct.deltaT,laserStruct.period,laserStruct.date);
     }
 
 
@@ -181,6 +187,9 @@ void loop() {
                 prevState=state;
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
+bn_printfDbg("%lu l %lu\t%lu %lu",micros(),laserStruct.period,micros2s(laserStruct.date),micros2s(lastLaserDetectMicros));
+
+
 				outMsg.header.destAddr=ADDRX_MAIN;
 				outMsg.header.type=E_MEASURE;
 				outMsg.header.size=sizeof(sMobileReportPayload);
@@ -190,8 +199,7 @@ void loop() {
                 outMsg.payload.mobileReport.precision=laserStruct.precision;
                 outMsg.payload.mobileReport.sureness=laserStruct.sureness;
 
-                int error=bn_send(&outMsg);
-//        	    bn_printfDbg((char*)"%lu\t%lu\tmes %lu\tdelta %lu\tthick %lu\terr %d\n",laser_period,laserStruct.period,outMsg.payload.mobileReport.value,laserStruct.deltaT,laserStruct.thickness,error);
+                bn_send(&outMsg);
           }
           break;
         default : break;
