@@ -10,6 +10,7 @@
 #include "../../../global_errors.h"
 #include "../../../communication/botNet/shared/bn_debug.h"
 #include "math.h"
+#include "Arduino.h"
 
 
 /* Converts a time value to a angle in radian, based on the last few recorded turns of the turret
@@ -21,12 +22,14 @@
  *
  */
 int time2rad(uint32_t time, float *ret){
-    int tempIndex;
+    int tempIndex=0;
     int tempIndexI=-1;
     int err=0;
     int tries=0;
     uint32_t tempPeriod=0,tempDate=0;
-
+#ifdef DEBUG_LOC
+    uint32_t earliest=0,oldest=0;
+#endif
     // to be sure that we will not be impaired by an update in interruption, we detect them
     while (tempIndexI!=TR_iNext && err!=-ERR_NOT_FOUND){       // Deadlock if we take more than 33ms to perform this block
         tempIndex=TR_iNext;
@@ -36,14 +39,18 @@ int time2rad(uint32_t time, float *ret){
 
 
         // sweep TR_infoBuf to find the appropriate time interval
-        while ( tries!=(TR_INFO_BUFFER_SIZE-1) && (TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period)<time){
+        while ( tries!=TR_INFO_BUFFER_SIZE && (TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period)<time){ //fixme overflow error (test instead  : "(time-TR_...date)<TR_...period" ?)
             tempIndex=(tempIndex+1)%TR_INFO_BUFFER_SIZE;
             tries++;
         }
         if (tries==0){ // if too late
             err=-ERR_NOT_FOUND;
         }
-        else if (tries==(TR_INFO_BUFFER_SIZE-1)) { // if too early
+        else if (tries==TR_INFO_BUFFER_SIZE) { // if too early
+#ifdef DEBUG_LOC
+            earliest=TR_InfoBuf[TR_iNext].date;
+            oldest=(TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period);
+#endif
             err=-ERR_TRY_AGAIN;
         }
         else {
@@ -51,11 +58,19 @@ int time2rad(uint32_t time, float *ret){
             tempDate=TR_InfoBuf[tempIndex].date;
         }
     }
-    if (err) return err;
+    if (err) {
+#ifdef DEBUG_LOC
+        bn_printfDbg((char*)"err %d early %lu old %lu time %lu\n",err,earliest,oldest,time);
+#endif
+        return err;
+    }
 
     // Compute the angle
     else {
         *ret=((time-tempDate)*2*M_PI/tempPeriod);
+#ifdef DEBUG_LOC
+        bn_printfDbg((char*)"%lu,%lu,%lu,%lu,%d°\n",micros(),TR_InfoBuf[tempIndex].date,TR_InfoBuf[tempIndex].period,time,(int)(*ret*180./M_PI));
+#endif
         return 0;
     }
 
@@ -77,7 +92,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     }
 
     // fixme send to actual IA
-    bn_printfDbg((char*)"%hx is at %lu mm %d  ", origin, pLoad->value, (int)angle*1000);
+//    bn_printfDbg((char*)"%hx is at %lu mm %d°", origin, pLoad->value, (int)(angle*180./M_PI));
     return 0;
 
 }
