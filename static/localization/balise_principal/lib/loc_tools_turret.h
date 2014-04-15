@@ -11,7 +11,7 @@
 #include "stdint.h"
 #include "messages.h"
 
-#define DEBUG_LOC
+//#define DEBUG_LOC
 
 /* Converts a time value to a angle in radian, based on the last few recorded turns of the turret
  * Argument :

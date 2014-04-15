@@ -92,7 +92,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     }
 
     // fixme send to actual IA
-//    bn_printfDbg((char*)"%hx is at %lu mm %d°", origin, pLoad->value, (int)(angle*180./M_PI));
+    bn_printfDbg((char*)"%hx is at %lu mm %d °", origin, pLoad->value, (int)(angle*180./M_PI));
     return 0;
 
 }

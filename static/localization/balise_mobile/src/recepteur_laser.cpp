@@ -64,11 +64,11 @@ void loop() {
 
     updateSync();
     //blink
-    if((time - time_prev_led)>=3000) {
+    if((time - time_prev_led)>=1000) {
       time_prev_led= time;
       digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
-      bn_printfDbg((char*)"%lu, mem : %d, unused %d\n",time/1000,freeMemory(),getFreeTest());
+      bn_printfDbg((char*)"%lu, mem : %d, unused %d %lu\n",micros(),freeMemory(),getFreeTest(),micros());
 #endif
     }
 
@@ -151,7 +151,7 @@ void loop() {
             }
             /* no break */
         case S_SYNC_MEASURES:
-            // laser data (if value is ours for sure (ie comes from a tracked measure XXX check if periodicLaser returns a struct compatible with that)
+            // laser data (if value is ours for sure (ie comes from a tracked measure)
             if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
                 syncComputationLaser(&laserStruct0);
             }
@@ -187,8 +187,6 @@ void loop() {
                 prevState=state;
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
-bn_printfDbg("%lu l %lu\t%lu %lu",micros(),laserStruct.period,micros2s(laserStruct.date),micros2s(lastLaserDetectMicros));
-
 
 				outMsg.header.destAddr=ADDRX_MAIN;
 				outMsg.header.type=E_MEASURE;
