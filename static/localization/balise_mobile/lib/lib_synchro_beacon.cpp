@@ -10,7 +10,7 @@
 #include "../../../communication/botNet/shared/bn_debug.h"
 #include "params.h"
 
-syncStruc syncParam={0,HARDUPDATEPERIOD,HARDUPDATESIGN};    // Synchronization parameters
+syncStruc syncParam={0,0,0};    // Synchronization parameters
 int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
 
 
@@ -58,8 +58,8 @@ void updateSync(){
     uint32_t timeMicros=micros();
 
     if (!lastUpdate && !_offset && (syncParam.initialDelay || syncParam.driftUpdatePeriod)){      //only in the first call after successful synchronization
-        _offset=syncParam.initialDelay + (!(syncParam.driftUpdatePeriod)?0:timeMicros/syncParam.driftUpdatePeriod)*syncParam.inc;
-        lastUpdate=timeMicros-(syncParam.driftUpdatePeriod?0:timeMicros%syncParam.driftUpdatePeriod);
+        _offset=syncParam.initialDelay;
+        lastUpdate=timeMicros;
     }
     else if(syncParam.driftUpdatePeriod) {
         if ((timeMicros-lastUpdate)>syncParam.driftUpdatePeriod){
@@ -176,6 +176,8 @@ void syncComputationFinal(sSyncPayload *pload){
         sum_OO>>=EVIL_SHIFT;
         sum_OD>>=EVIL_SHIFT;
         syncParam.initialDelay=(sum_OO*sum_D-sum_O*sum_OD)/det;
+        syncParam.driftUpdatePeriod=HARDUPDATEPERIOD;
+        syncParam.inc=HARDUPDATESIGN;
 #ifdef DEBUG_SYNC
         sum_O>>=EVIL_SHIFT;
         int64_t beta=(sum_ones*sum_OD-sum_D*sum_O)*1000/det;
