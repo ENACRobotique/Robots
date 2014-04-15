@@ -12,7 +12,7 @@
 
 #define FILTER_SHIFT 2
 
-#define TR_INFO_BUFFER_SIZE 4
+#define TR_INFO_BUFFER_SIZE 16
 
 typedef struct{
     uint32_t date;

@@ -24,7 +24,7 @@ volatile int led=0;
 
 void domi_isr(){
     unsigned long time=micros();
-    if ( (time-prev_int)<32) {      // because of the shape of the signal
+    if ( (time-prev_int)<20) {      // because of the shape of the signal
         uint32_t period=time-TR_lastDate;
         TR_InfoBuf[TR_iNext].period=period;          // period of the previous turn
         TR_InfoBuf[TR_iNext].date=TR_lastDate;
