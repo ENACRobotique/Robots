@@ -21,7 +21,7 @@ const char *eType2str(E_TYPE elem){
 
     /************************ user types start ************************/
     case E_SWITCH_CHANNEL :         return "SWITCH_CHANNEL";
-    case E_SYNC_EXPECTED_TIME :     return "SYNC_EXPECTED";
+    case E_SYNC_DATA :              return "SYNC_DATA";
     case E_SYNC_OK :                return "SYNC_OK";
     case E_PERIOD :                 return "PERIOD";
     case E_MEASURE :                return "MEASURE";

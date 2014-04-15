@@ -8,65 +8,60 @@
 #ifndef LIB_INT_LASER_H_
 #define LIB_INT_LASER_H_
 
+#include <stdint.h>
 
-
-//"return" structure for detectLaser
+//"return" structure for laserDetect
 typedef struct {
-    unsigned long deltaT;
-    unsigned long date;
-    unsigned long thickness; //thickness of the "small" impulsion
+    unsigned long deltaT;    // µs
+    unsigned long date;      // local µs
+    unsigned long thickness; // µs, thickness of the "small" impulsion
 }ldStruct;
 
 //"return" structure for periodicLaser
 typedef struct {
-	unsigned long deltaT;
-	unsigned long date;
-	unsigned long thickness;
-	int precision;
-	int sureness;
+	unsigned long deltaT;       // µs, delay between two laser small peaks
+	unsigned long date;         // local µs, when was the laser recorded last
+	unsigned long thickness;    // µs, thickness of the small laser peak /!\ thickness==0 <=> no laser detected
+	unsigned long period;       // µs, MEASURED period (0 if not applicable).
+	int precision;              // xxx TDB
+	long int sureness;          // TBD
 }plStruct;
 
 
 //structure associated to a particular pair of sensors
 typedef struct {
 	volatile unsigned long buf[8];
-	//index of the last value recorded
-	volatile int index;
-	// the laserDetect will only consider values recorded between prevCall and the current time
-	unsigned long prevCall;
-	//used by periodiclaser to detect at which state is this pair of sensor
-	int stage;
-	// authorized latency in tracking mode : +-lat/2 (µs)
-	unsigned long lat;
-	// prevTime & nextTime : used by periodicLaser for its time measurements (µs)
-	unsigned long prevTime;
-	//nextTime : in what time there is something to do (µs)
-	unsigned long nextTime;
-	//intNb : nb of the interrupt
-	int intNb;
+	volatile int index;             // index of the last value recorded
+	unsigned long prevCall;         // local µs,  the laserDetect will only consider values recorded between prevCall and the current time
+	unsigned long lastDetect;       // last date at which a laser was detected on this interrupt (0 if the previous try to detect was unsuccessful)
+	int stage;                      // used by periodiclaser to detect at which state is this pair of sensor
+	unsigned long lat;              // µs, authorized latency in tracking mode : +-lat/2
+	unsigned long prevTime;         // local µs, prevTime & nextTime : used by periodicLaser for its time measurements
+	unsigned long timeInc;          // µs,  : increment of time after which there is something to do
+	int intNb;                      // intNb : nb of the interrupt
 }bufStruct;
 
 
-extern unsigned long laser_period; //rotation period of the lasers
-//extern unsigned long lastDetect;
-extern bufStruct buf0;
-extern bufStruct buf1;
+extern volatile unsigned long laser_period; //rotation period of the lasers
+//extern unsigned long lastDetectTrack;
+extern bufStruct buf0;                      // must be initialized with the last field at 0
+extern bufStruct buf1;                      // must be initialized with the last field at 1
 
 
-//déclarations :
+//declarations :
 void laserIntInit(int irqnb);
 void laserIntDeinit();
 void laserIntHand0();
 void laserIntHand1();
 
 //laserDetect : check if the buffers have recorded a laser
-//return a dtdStruct if something was detected, 0 otherwise.
+//return a ldStruct if something was detected, 0 otherwise.
 // /!\ do not call too often
 ldStruct laserDetect(bufStruct *bs);
 
 //function to call periodically, ensures acquisition and tracking of our laser beam
 int periodicLaser(bufStruct *bs,plStruct *pRet);
 
-//float laser2dist(unsigned long delta);
+uint32_t delta2dist(unsigned long delta, unsigned long period);
 
 #endif /* LIB_INT_LASER_H_ */

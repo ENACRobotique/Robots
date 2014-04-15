@@ -60,17 +60,22 @@ int Xbee_setup(){
     frID++;
 
 
-    //writes A1 parameter on the xbee to match peer-to-peer use
+//writes MM parameter on the xbee to match peer-to-peer use
     if ( (ret=Xbee_ATCmd("MM",frID,XBEE_ATCMD_SET,2))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
 
+//writes RN parameter on the xbee to enable collision avoidance on first iteration of CSMA/CA
+    if ( (ret=Xbee_ATCmd("RN",frID,XBEE_ATCMD_SET,1))<0 ) return ret;
+
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
 
     //saves changes in non-volatile memory
     if ( (ret=Xbee_ATCmd("WR",frID,XBEE_ATCMD_SET,MYADDRX))<0 ) return ret;
 
-    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL*4))<0 ) return ret;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL*4L))<0 ) return ret;
     frID++;
 
     return 0;
