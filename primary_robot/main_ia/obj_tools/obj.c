@@ -262,7 +262,6 @@ int test_tirette()
     return 1;
     }
 
-
 void obj_step(){
 	int i,j;
     switch (state) {
@@ -318,6 +317,7 @@ void obj_step(){
 
             if((millis()-last_time2)>1000){
                 last_time2 = millis();
+                updateEntryPointTree();
                 printf("Position actuel : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
                 printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
             	}
@@ -370,6 +370,13 @@ int obj_init(){
 
     //Initialization of the game
     init_ele();
+
+    //Add bad fruit for simulation
+    ((Obj_arbre*)listObj[0].typeStruct)->eFruit[3]=2;
+    ((Obj_arbre*)listObj[1].typeStruct)->eFruit[0]=2;
+    ((Obj_arbre*)listObj[2].typeStruct)->eFruit[3]=2;
+    ((Obj_arbre*)listObj[3].typeStruct)->eFruit[4]=2;
+
 
     //Update all obstacle
     for(i=0;i<N;i++){

@@ -56,10 +56,12 @@ typedef struct
 //Structure arbre
 typedef struct          //TODO pointeur vers trajectoire programmer //TODO faire fonction calcul point d'acces optimal et calcul de la trajectoire
 	{
-	uint8_t eFruit[6];  //définition : 0=violet non récolté, 1=récolté, 2=noir
+	uint8_t eFruit[6];  //définition : 0=violet non récolté, 1=récolté, 2=noir : first top clock
     uint8_t nb_point;   //nombre de point potentiel a vider
     int x;				//position of the tree axis x
     int y;				//position of the tree axis y
+    sPt_t EntryPoint1;
+    sPt_t EntryPoint2;
     uint8_t rot;		//0 no rotation else rotation
     } Obj_arbre;
 
@@ -108,6 +110,8 @@ extern void printObsActive(void);
 extern void TransElTraj(sTrajEl_t *traj, int x, int y);
 extern void SymElTraj(sTrajEl_t *traj, int x, int y);
 extern void Rot90Traj(sTrajEl_t *traj);
+extern sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t or, sPt_t *p2_3);
+extern float sign(float x);
 
 #endif
 

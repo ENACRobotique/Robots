@@ -52,7 +52,7 @@ Obj_feu feu[16]={
 uint8_t obs_updated[N] = {0};
 
 sObj_t listObj[NB_OBJ] = {
-	{.type = E_ARBRE, .numObj=0, .nbObs=1, .numObs[0]=START_ARBRE  ,																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{16. , 97.}, 10.,90. }, .entryPoint[1]={{16. , 43.}, 10.,270.}},
+	{.type = E_ARBRE, .numObj=0, .nbObs=1, .numObs[0]=START_ARBRE  ,																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{16. , 97.}, 10.,90. }, .entryPoint[1]={{16. , 45.}, 10.,270.}},
 	{.type = E_ARBRE, .numObj=1, .nbObs=1, .numObs[0]=START_ARBRE+1, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{43. , 16.}, 10.,180.}, .entryPoint[1]={{97. , 16.}, 10.,0.  }},
 	{.type = E_ARBRE, .numObj=2, .nbObs=1, .numObs[0]=START_ARBRE+2, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{203., 16.}, 10.,180.}, .entryPoint[1]={{257., 16.}, 10.,0.  }},
 	{.type = E_ARBRE, .numObj=3, .nbObs=1, .numObs[0]=START_ARBRE+3, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{284., 43.}, 10.,270.}, .entryPoint[1]={{284., 97.}, 10.,90. }},
@@ -234,20 +234,20 @@ void Rot90Traj(sTrajEl_t *traj){
 	traj->obs.c.y = tempC;
 	}
 
-sNum_t arc_len2(sPt_t *p2_1, sObs_t *obs, int dir, sPt_t *p2_3) {
+sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t or, sPt_t *p2_3){
     sVec_t v1, v3;
     sNum_t d, c;
 
-    if(obs->r < LOW_THR)
+    if(fabs(or) < LOW_THR)
         return 0.;
 
-    convPts2Vec(&(obs->c), p2_1, &v1);
-    convPts2Vec(&(obs->c), p2_3, &v3);
+    convPts2Vec(oc, p2_1, &v1);
+    convPts2Vec(oc, p2_3, &v3);
 
     dotVecs(&v1, &v3, &d);
     crossVecs(&v1, &v3, &c);
 
-    d = d/(obs->r*obs->r);
+    d = d/(or*or);
     // d must be between -1 and 1 but because we do not use the true length of v1 and v3
     // (we use r instead to avoid some heavy calculations) it may be a little outside of this interval
     // so, let's just be sure we stay in this interval for acos to give a result
@@ -260,7 +260,7 @@ sNum_t arc_len2(sPt_t *p2_1, sObs_t *obs, int dir, sPt_t *p2_3) {
 
     d = acos(d);
 
-    if(!dir) {  // clock wise
+    if(or > 0.) {  // clock wise
         if(c > 0) {
             d = 2*M_PI - d;
         }
@@ -271,7 +271,7 @@ sNum_t arc_len2(sPt_t *p2_1, sObs_t *obs, int dir, sPt_t *p2_3) {
         }
     }
 
-    return d*obs->r;
+    return fabs(d*or);
 }
 
 void init_ele(void){
@@ -283,6 +283,11 @@ void init_ele(void){
     	listObj[i].typeStruct = &arbre[listObj[i].numObj];
     	((Obj_arbre*)listObj[i].typeStruct)->nb_point=10;                      //1 fruit pouri par arbre
     	for(j=0 ; j<6 ; j++) ((Obj_arbre*)listObj[i].typeStruct)->eFruit[j]=0; //par défaut tous les fruit sont bon
+    	}
+    //Add Entry Point in struct arbre
+    for(j=0 ; j<4 ; j++){
+    	arbre[j].EntryPoint1=listObj[j].entryPoint[0].c;
+    	arbre[j].EntryPoint2=listObj[j].entryPoint[1].c;
     	}
 
     //Initialisation des bacs
@@ -301,11 +306,6 @@ void init_ele(void){
         listObj[i].nbEP=3;
         createEPfire2(i);
         }
-
-    //Initialisation trajectoire arbre
-    tabEl[0].arc_len=arc_len2(&tabEl[0].p1, &tabEl[0].obs, 1, &tabEl[1].p1);
-    tabEl[1].arc_len=arc_len2(&tabEl[1].p1, &tabEl[1].obs, 0, &tabEl[2].p1);
-    tabEl[2].arc_len=arc_len2(&tabEl[2].p1, &tabEl[2].obs, 1, &tabEl[3].p1);
 
 	#if DEBUG
 		printListObj();
