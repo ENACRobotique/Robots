@@ -9,21 +9,24 @@
 #define OBJ_FCT_H_
 
 
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
 
 #include "obj.h"
 #include "obj_types.h"
-#include "stdio.h"
-#include "string.h"
-#include "math.h"
+#include "obj_fire.h"
 
-extern sTrajEl_t tabEl[];
-extern sTrajEl_t tabEl2[];
-extern sTrajEl_t tabEl3[];
 
-extern void obj_tree(iABObs_t obj);
-extern void obj_bac(iABObs_t obj);
-extern void obj_fire(iABObs_t obj);
-void updateEntryPointTree(void);
+void printListObj(void);
+void printObsActive(void);
+void init_ele(void);
+void send_robot(sPath_t path);
+int get_position( sPt_t *pos);
+float sign(float x);
+int test_in_obs(void);
+int test_tirette(void);
 
 #endif /* OBJ_FCT_H_ */

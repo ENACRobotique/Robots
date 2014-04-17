@@ -13,7 +13,6 @@
 #include "node_cfg.h"
 
 
-#define SEB 0
 #define COLOR 0 //0=red and 1=yellow
 #define DEBUG 1
 #define RESO_POS 2
@@ -81,11 +80,11 @@ typedef struct
     }Obj_bac;
 
 
-extern Obj_arbre arbre[4];
+extern Obj_arbre arbre[];
 extern Obj_bac bac;
-extern Obj_feu feu[16];
+extern Obj_feu feu[];
 
-extern uint8_t obs_updated[N];
+extern uint8_t obs_updated[];
 
 extern sObj_t listObj[];
 
@@ -93,25 +92,11 @@ extern sPt_t _current_pos;
 extern sPath_t path;
 extern long _start_time;
 extern long last_time;
-extern long last_time2;
+extern sPt_t pt_select;
+extern int mode_obj;
+extern sNum_t speed;
+extern sNum_t theta_robot;
 
-extern sNum_t ratio_arbre(void);
-extern sNum_t ratio_bac(void);
-
-extern void init_ele(void);
-extern void send_robot(sPath_t path);
-extern int get_position( sPt_t *pos);
-extern float sign(float x);
-extern void project_point(float xp, float yp, float rc, float xc, float yc, sPt_t *point);
-
-extern void printListObj(void);
-extern void printObsActive(void);
-
-extern void TransElTraj(sTrajEl_t *traj, int x, int y);
-extern void SymElTraj(sTrajEl_t *traj, int x, int y);
-extern void Rot90Traj(sTrajEl_t *traj);
-extern sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t or, sPt_t *p2_3);
-extern float sign(float x);
 
 #endif
 

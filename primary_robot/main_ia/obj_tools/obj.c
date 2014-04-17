@@ -1,42 +1,18 @@
-#include <time.h>
-#include <unistd.h>
-#include <math.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include "../botNet/shared/botNet_core.h"
-#include "../botNet/shared/bn_debug.h"
-#include "../../global_errors.h"
-#include "node_cfg.h"
-
-#include "a_star.h"
-#include "math_types.h"
-#include "math_ops.h"
-#include "tools.h"
-#include "obj_types.h"
-#include "obj_fct.h"
-#include "millis.h"
+#include "obj.h"
 
 
 #define CLAMP(m, v, M) MAX(m, MIN(v, M))
 
 
-sPt_t pt_select;
-int prio=0;
-int part=-1;
 estate_t state = ATTENTE;
-int temp=0;
+int temp=0; //Temporaire pour mettre en shutdown lorsque tous les objectifs sont finis
 int current_obj=-1;
-int mode_obj=0;
-sNum_t theta_robot=0.;
-sNum_t speed=0;
+long last_time2=0;
 
 
-void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r)
-	{
+void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r){
 	int i;
-	for(i=1 ; i<4 ; i++)
-		{
+	for(i=1 ; i<4 ; i++){
 		obs[N-i-1].c.x=pt->x+(r)*cos(theta*M_PI/180+i*M_PI_2);
 		obs[N-i-1].c.y=pt->y+(r)*sin(theta*M_PI/180+i*M_PI_2);
 		obs[N-i-1].active=1;
@@ -44,28 +20,24 @@ void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r)
 		}
 	}
 
-void updateNoHaftTurn(sNum_t theta, sPt_t *pt)
-	{
+void updateNoHaftTurn(sNum_t theta, sPt_t *pt){
 	int i;
 	sNum_t r;
 	r=speed/3;
 	if(r>15)r=15;
 
-	for(i=1 ; i<4 ; i++)
-		{
+	for(i=1 ; i<4 ; i++){
 		obs[N-i-4].c.x=pt->x+(r)*cos(theta*M_PI/180+i*M_PI_2);
 		obs[N-i-4].c.y=pt->y+(r)*sin(theta*M_PI/180+i*M_PI_2);
 		obs[N-i-4].active=1;
 		obs[N-i-4].r=r-0.5;
 		}
-	if(r<0.1)
-		{
+	if(r<0.1){
 		for(i=1 ; i<4 ; i++)obs[N-i-4].active=0;
 		}
 	}
 
-sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 et NB_OBJ
-    {
+sNum_t val_obj(int num){ //numeros de l'objectif dans listObj[] compris entre 0 et NB_OBJ
     printf("Debut val_obj avec num=%i\n",num);
 
     sNum_t speed=1;
@@ -75,20 +47,17 @@ sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 e
     sNum_t ratio = 0.;
 
     dist=listObj[num].dist;
-    if(dist==0)
-        {
+    if(dist==0){
         printf("Attention : distance nul\n"); //Erreur ou objectif atteint
         return (-1);
         }
     time=dist/speed;
-    if(time > (END_MATCH-(millis()-_start_time))) //temps restant insuffisant
-        {
+    if(time > (END_MATCH-(millis()-_start_time))){ //temps restant insuffisant
         listObj[num].active=0;
         return 0;
         }
 
-    switch(listObj[num].type)
-        {
+    switch(listObj[num].type){
         case E_FEU :
             printf("enum=%i => type=E_FEU, dist=%f\n",listObj[num].type,dist);
             point=((Obj_feu*)listObj[num].typeStruct)->nb_point;
@@ -124,20 +93,9 @@ sNum_t val_obj(int num) //numeros de l'objectif dans listObj[] compris entre 0 e
     return ratio;
     }
 
-int test_in_obs(void){ //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
-    //FIXME si le robot dans plusieurs obstable
-    int i;
-    for(i=1; i<N-1;i++){
-        if(obs[i].active==0)continue;
-        if( sqrt((obs[i].c.x-_current_pos.x)*(obs[i].c.x-_current_pos.x)+(obs[i].c.y-_current_pos.y)*(obs[i].c.y-_current_pos.y)) < obs[i].r){            printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y);
-            return i;
-            }
-        }
-    return 0;
-    }
 
-int8_t next_obj (void)
-    {
+
+int8_t next_obj (void){
     printf("Debut next_obj\n");
 
     sNum_t tmp_val = 0.;
@@ -155,8 +113,7 @@ int8_t next_obj (void)
 
     obs[N-1].active=1;
 
-    for(i = 0 ; i < NB_OBJ ; i++)
-        {
+    for(i = 0 ; i < NB_OBJ ; i++){
         if (listObj[i].active==0) continue; //test if  objective is still active
 
 		#if DEBUG
@@ -257,10 +214,7 @@ int8_t next_obj (void)
     return (tmp_inx);
     }
 
-int test_tirette()
-    {
-    return 1;
-    }
+
 
 void obj_step(){
 	int i,j;

@@ -8,14 +8,34 @@
 #ifndef OBJ_H_
 #define OBJ_H_
 
+
+#include <time.h>
+#include <unistd.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "../botNet/shared/botNet_core.h"
+#include "../botNet/shared/bn_debug.h"
+#include "../../global_errors.h"
+#include "node_cfg.h"
+
+#include "a_star.h"
 #include "math_types.h"
+#include "math_ops.h"
+#include "tools.h"
+#include "obj_types.h"
+#include "obj_fct.h"
 #include "millis.h"
+#include "obj_fire.h"
+#include "obj_fruit.h"
 
-void obj_step();
-int obj_init();
 
-extern sNum_t theta_robot;
-extern sNum_t speed;
-extern int mode_obj;
-extern sPt_t pt_select;
+void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
+void updateNoHaftTurn(sNum_t theta, sPt_t *pt);
+sNum_t val_obj(int num);
+int8_t next_obj (void);
+void obj_step(void);
+int obj_init(void);
+
 #endif /* OBJ_H_ */
