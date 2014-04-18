@@ -10,13 +10,20 @@
 
 #include "tools.h"
 
+
 void TransPt(sPt_t *traj, int x, int y);
 void Rot90Pt(sPt_t *traj);
 void SymPt(sPt_t *traj, int x, int y);
+
 void TransElTraj(sTrajEl_t *traj, int x, int y);
 void SymElTraj(sTrajEl_t *traj, int x, int y);
 void Rot90Traj(sTrajEl_t *traj);
+
 void project_point(sNum_t xp, sNum_t yp, sNum_t rc, sNum_t xc, sNum_t yc, sPt_t *point);
+
+void rotPt(sPt_t *p1, sNum_t theta, sPt_t *p2);
+void tranOrg(sPt_t *pRef, sPt_t *p1, sPt_t *p2);
+void chgRef(sPt_t *pRef, sNum_t theta, sPt_t *p1, sPt_t *p2 );
 
 
 #endif /* OBJ_GEOMETRY_TOOLS_H_ */

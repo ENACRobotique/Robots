@@ -103,3 +103,22 @@ void project_point(sNum_t xp, sNum_t yp, sNum_t rc, sNum_t xc, sNum_t yc, sPt_t 
 	}
 
 
+void rotPt(sPt_t *p1, sNum_t theta, sPt_t *p2){ //in two dimension
+	sNum_t mat[2][2]={{cos(theta), -sin(theta)},{sin(theta), cos(theta)}};
+
+	p2->x = (mat[0][0] + mat[0][1]) * p1->x;
+	p2->y = (mat[1][0] + mat[1][1]) * p1->y;
+	}
+
+void tranOrg(sPt_t *pRef, sPt_t *p1, sPt_t *p2){
+	p2->x = pRef->x + p1->x;
+	p2->y = pRef->y + p1->y;
+	}
+
+void chgRef(sPt_t *pRef, sNum_t theta, sPt_t *p1, sPt_t *p2 ){
+	sPt_t p3;
+	rotPt(p1, theta, &p3);
+	tranOrg(pRef, &p3, p2);
+	}
+
+
