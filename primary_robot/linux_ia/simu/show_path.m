@@ -86,7 +86,7 @@ pth = [
 
 x = 0:300;
 theta = 0:pi/50:2*pi;
-figure; hold on; axis('equal', [0 300 0 200]);
+figure; hold on; axis([0 300 0 200], 'equal');
 
 obs(:,3) = obs(:, 3) + obs(:, 4);
 

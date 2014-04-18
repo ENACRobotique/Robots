@@ -2,7 +2,7 @@
 
 #include "math_ops.h"
 
-inline ERROR normVec(sVec_t *v, sNum_t *n) {
+inline ERROR normVec(const sVec_t *v, sNum_t *n) {
     RET_IF_NOT_(v && n, ERR_BADPAR);
 
     *n = sqrt(v->x*v->x + v->y*v->y);
@@ -10,7 +10,7 @@ inline ERROR normVec(sVec_t *v, sNum_t *n) {
     return 0;
 }
 
-inline ERROR convPts2Vec(sPt_t *a, sPt_t *b, sVec_t *ab) {
+inline ERROR convPts2Vec(const sPt_t *a, const sPt_t *b, sVec_t *ab) {
     RET_IF_NOT_(a && b && ab, ERR_BADPAR);
 
     ab->x = b->x - a->x;
@@ -19,7 +19,7 @@ inline ERROR convPts2Vec(sPt_t *a, sPt_t *b, sVec_t *ab) {
     return 0;
 }
 
-inline ERROR convPts2Seg(sPt_t *a, sPt_t *b, sSeg_t *ab) {
+inline ERROR convPts2Seg(const sPt_t *a, const sPt_t *b, sSeg_t *ab) {
     RET_IF_NOT_(a && b && ab, ERR_BADPAR);
 
     ab->p1 = *a;
@@ -28,7 +28,7 @@ inline ERROR convPts2Seg(sPt_t *a, sPt_t *b, sSeg_t *ab) {
     return 0;
 }
 
-inline ERROR sqdistPt2Pt(sPt_t *p1, sPt_t *p2, sNum_t *d2) {
+inline ERROR sqdistPt2Pt(const sPt_t *p1, const sPt_t *p2, sNum_t *d2) {
     RET_IF_NOT_(p1 && p2 && d2, ERR_BADPAR);
 
     *d2 = (p2->x - p1->x)*(p2->x - p1->x) + (p2->y - p1->y)*(p2->y - p1->y);
@@ -36,7 +36,7 @@ inline ERROR sqdistPt2Pt(sPt_t *p1, sPt_t *p2, sNum_t *d2) {
     return 0;
 }
 
-inline ERROR distPt2Pt(sPt_t *p1, sPt_t *p2, sNum_t *d) {
+inline ERROR distPt2Pt(const sPt_t *p1, const sPt_t *p2, sNum_t *d) {
     RET_IF_NOT_(p1 && p2 && d, ERR_BADPAR);
 
     *d = sqrt((p2->x - p1->x)*(p2->x - p1->x) + (p2->y - p1->y)*(p2->y - p1->y));
@@ -44,7 +44,7 @@ inline ERROR distPt2Pt(sPt_t *p1, sPt_t *p2, sNum_t *d) {
     return 0;
 }
 
-inline ERROR dotVecs(sVec_t *v1, sVec_t *v2, sNum_t *d) {
+inline ERROR dotVecs(const sVec_t *v1, const sVec_t *v2, sNum_t *d) {
     RET_IF_NOT_(v1 && v2 && d, ERR_BADPAR);
 
     *d = v1->x*v2->x + v1->y*v2->y;
@@ -52,7 +52,7 @@ inline ERROR dotVecs(sVec_t *v1, sVec_t *v2, sNum_t *d) {
     return 0;
 }
 
-inline ERROR crossVecs(sVec_t *v1, sVec_t *v2, sNum_t *c) {
+inline ERROR crossVecs(const sVec_t *v1, const sVec_t *v2, sNum_t *c) {
     RET_IF_NOT_(v1 && v2 && c, ERR_BADPAR);
 
     *c = v1->x*v2->y - v1->y*v2->x;
@@ -60,7 +60,7 @@ inline ERROR crossVecs(sVec_t *v1, sVec_t *v2, sNum_t *c) {
     return 0;
 }
 
-ERROR convVecPt2Line(sVec_t *v, sPt_t *p, int norm, sLin_t *l) {
+ERROR convVecPt2Line(const sVec_t *v, const sPt_t *p, int norm, sLin_t *l) {
     RET_IF_NOT_(v && p && l, ERR_BADPAR);
 
     l->norm = !!norm;
@@ -106,7 +106,7 @@ ERROR normLine(sLin_t *l){
     return 0;
 }
 
-ERROR sqdistPt2Seg(sPt_t *p, sSeg_t *s, sNum_t *d, sPt_t *h) {
+ERROR sqdistPt2Seg(const sPt_t *p, const sSeg_t *s, sNum_t *d, sPt_t *h) {
     sNum_t l2, t;
     sVec_t p1p, p1p2;
     sPt_t proj;
@@ -149,7 +149,7 @@ ERROR sqdistPt2Seg(sPt_t *p, sSeg_t *s, sNum_t *d, sPt_t *h) {
     return sqdistPt2Pt(p, &proj, d);
 }
 
-ERROR distPt2Line(sPt_t *p, sLin_t *l, sNum_t *d) {
+ERROR distPt2Line(const sPt_t *p, sLin_t *l, sNum_t *d) {
     RET_IF_NOT_(p && l && d, ERR_BADPAR);
 
     RET_IF_ERR_(normLine(l));

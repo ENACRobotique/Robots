@@ -1,5 +1,6 @@
 #include "math_ops.h"
 #include <stdlib.h>
+#include <math.h>
 #include "a_star.h"
 
 //#define AS_DEBUG
@@ -28,6 +29,10 @@ void a_star(iABObs_t start, iABObs_t goal, sPath_t *path) {
         return;
 
     os_start = start;
+
+#ifdef AS_DEBUG
+printf("goal %u%c\n", O(goal), DIR(goal)?'b':'a');
+#endif
 
     for(i = 0; i < 2*N; i++) {
         _aselts[i].openset = 0;
@@ -61,6 +66,7 @@ printf("current %u%c\n", O(current), DIR(current)?'b':'a');
                 path->path[i].p1 = seg->p1;
                 path->path[i].p2 = seg->p2;
                 path->path[i].obs = obs[O(current)];
+                path->path[i].obs.r = fabs(path->path[i].obs.r)*(1-2*DIR(current)); // r>0 CW/A ; r<0 CCW/B
                 path->path[i].sid = i;
                 if(i)
                     path->path[i-1].arc_len = _aselts[current].arc_len;
@@ -161,5 +167,9 @@ printf("    nothing...\n");
     path->path_len = 0;
     path->dist = 0.;
     path->path = NULL;
+
+#ifdef AS_DEBUG
+printf("no solution\n");
+#endif
 }
 

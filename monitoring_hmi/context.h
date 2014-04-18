@@ -2,6 +2,7 @@
 #define _CONTEXT_H
 
 #include "draw_list.h"
+#include "video_draw_strings.h"
 
 typedef struct {
     int verbose;
@@ -10,7 +11,6 @@ typedef struct {
     int tid;
 
     // robot data
-    bn_Address prop_address;
     sPosList poslist;
     sTrajList trajlist;
 
@@ -21,6 +21,7 @@ typedef struct {
     float pos_wfactor;
     int pos_cur;
     unsigned char *pos_data[2];
+    sVDSContext vdsctx;
 
     // event data
     int mouse_event;

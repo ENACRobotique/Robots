@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 #endif
 #ifdef STATS_MAP
     FILE *flog;
-    int i, j, k;
+    int i, j, k, nb_conv;
     float s1, s2, M, tmp;
 #else
     sPt_t tmp;
@@ -55,10 +55,10 @@ int main(int argc, char *argv[]) {
     // (pts/m)
     #define DENSITY (30)
     // (m)
-    #define ERR (0.06)
+    #define ERR (.06)
 
-    fprintf(flog, "%u;%u;;;;\n", DENSITY*2+1, DENSITY*3+1);
-    fprintf(flog, "\"x\";\"y\";\"mean nb_cri\";\"mean uncertainty\";\"max uncertainty\";\"sample stddev\"\n");
+    fprintf(flog, "%u;%u;;;;;\n", DENSITY*2+1, DENSITY*3+1);
+    fprintf(flog, "\"x\";\"y\";\"mean nb_cri\";\"mean uncertainty\";\"max uncertainty\";\"sample stddev\";\"percent conv\"\n");
 
     for(i = 0; i <= DENSITY*2; i++) {
         x0.y = (float)i/(float)DENSITY;
@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
             s1 = 0.;
             s2 = 0.;
             nb_cri = 0;
+            nb_conv = 0;
 
             for(k = 0; k < 100; k++) {
                 simu_perception(&x0, &p);
@@ -78,18 +79,20 @@ int main(int argc, char *argv[]) {
                 x.x = x0.x + ERR*cos(dir);
                 x.y = x0.y + ERR*sin(dir);
 
-                neldermead(&x, 0.05, &p);
+                if(!neldermead(&x, 0.05, &p) /*|| 1*/){
+                    tmp = sqrt(SQR(x.y - x0.y) + SQR(x.x - x0.x));
 
-                tmp = sqrt(SQR(x.y - x0.y) + SQR(x.x - x0.x));
+                    if(!nb_conv || tmp > M)
+                        M = tmp;
 
-                if(!k || tmp > M)
-                    M = tmp;
+                    s1 += tmp;
+                    s2 += SQR(tmp);
 
-                s1 += tmp;
-                s2 += SQR(tmp);
+                    nb_conv++;
+                }
             }
 
-            fprintf(flog, "%.3f;%.3f;%.2f;%.4f;%.4f;%.5f\n", x0.x, x0.y, (float)nb_cri/(float)k, s1/(float)k, M, sqrt( ((float)k*s2 - SQR(s1)) / ((float)k*((float)k-1)) ));
+            fprintf(flog, "%.3f;%.3f;%.2f;%.4f;%.4f;%.5f;%.4f\n", x0.x, x0.y, (float)nb_cri/(float)k, s1/(float)nb_conv, M, sqrt( ((float)nb_conv*s2 - SQR(s1)) / ((float)nb_conv*((float)nb_conv-1)) ), (float)nb_conv/(float)k);
         }
     }
 

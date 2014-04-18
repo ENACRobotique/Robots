@@ -191,6 +191,7 @@ typedef struct __attribute__((packed)) {
 typedef struct __attribute__((packed)){
     uint8_t nb_obs;
     float r_robot;
+    float x_min, x_max, y_min, y_max;
 } sObsConfig;
 
 #define MAX_NB_OBSS_PER_MSG (6)

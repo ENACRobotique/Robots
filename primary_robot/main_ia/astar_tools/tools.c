@@ -4,59 +4,87 @@
 
 #include "tools.h"
 
+#ifdef AS_STATS
+#include "millis.h"
+#endif
+
 #define CHECK_LIMITS
 
 // array of physical obstacles (256B)
 sObs_t obs[] = {
     // départ
     {{0., 0.}, 0., 1, 1},
+
     // arbres
-    {{0.  , 70. }, R_ROBOT+15, 1, 0}, // 1
-    {{70. , 0.  }, R_ROBOT+15, 1, 0},
-    {{230., 0.  }, R_ROBOT+15, 1, 0},
-    {{300., 70. }, R_ROBOT+15, 1, 0},
+    {{0.  , 70. }, R_ROBOT+13, 1, 1}, // 1
+    {{70. , 0.  }, R_ROBOT+13, 1, 1},
+    {{230., 0.  }, R_ROBOT+13, 1, 1},
+    {{300., 70. }, R_ROBOT+13, 1, 1},
+
     // bac fruit
-    {{55. , 185.}, R_ROBOT+15, 1, 1}, // 5
-    {{75. , 185.}, R_ROBOT+15, 1, 1},
-    {{95. , 185.}, R_ROBOT+15, 1, 1},
-    {{42. , 172.}, R_ROBOT+ 4, 1, 1},
-    {{108., 172.}, R_ROBOT+ 4, 1, 1},
-    {{205., 185.}, R_ROBOT+15, 1, 1},
-    {{225., 185.}, R_ROBOT+15, 1, 1},
-    {{245., 185.}, R_ROBOT+15, 1, 1},
-    {{192., 172.}, R_ROBOT+ 4, 1, 1},
-    {{258., 172.}, R_ROBOT+ 4, 1, 1},
+    {{75. , 185.}, R_ROBOT+15, 1, 1},//5
+    {{42. , 185.}, R_ROBOT+4, 1, 1},
+    {{108. ,185.}, R_ROBOT+4, 1, 1},
+    {{42. , 172.}, R_ROBOT+4, 1, 1},
+    {{108., 172.}, R_ROBOT+4, 1, 1},
+
+    {{225., 185.}, R_ROBOT+15, 1, 1},//10
+    {{192., 185.}, R_ROBOT+4, 1, 1},
+    {{258., 185.}, R_ROBOT+4, 1, 1},
+    {{192., 172.}, R_ROBOT+4, 1, 1},
+    {{258., 172.}, R_ROBOT+4, 1, 1},
+
     // foyers
     {{0.  , 0.  }, R_ROBOT+25, 1, 1}, // 15
     {{300., 0.  }, R_ROBOT+25, 1, 1},
     {{150., 95. }, R_ROBOT+15, 1, 1},
+
     // torches mobile
     {{90. , 90. }, R_ROBOT+8, 1, 1}, // 18
     {{210., 90. }, R_ROBOT+8, 1, 1},
+
     // torches fixe
-    {{0.  , 120.}, R_ROBOT+5, 1, 1}, // 20
-    {{130., 0.  }, R_ROBOT+5, 1, 1},
-    {{170., 0.  }, R_ROBOT+5, 1, 1},
-    {{300., 120.}, R_ROBOT+5, 1, 1},
+    {{1.1  , 125.8}, R_ROBOT+1, 1, 1}, // 20
+    {{1.1  , 114.2}, R_ROBOT+1, 1, 1},
+    {{135.8, 1.1  }, R_ROBOT+1, 1, 1},
+    {{124.2, 1.1  }, R_ROBOT+1, 1, 1},
+    {{175.8, 1.1  }, R_ROBOT+1, 1, 1},
+    {{164.2, 1.1  }, R_ROBOT+1, 1, 1},
+    {{298.9, 125.8}, R_ROBOT+1, 1, 1},
+    {{298.9, 114.2}, R_ROBOT+1, 1, 1},
+
     // feux
-    {{40. , 90. }, R_ROBOT+7, 1, 1}, // 24
+    {{40. , 90. }, R_ROBOT+7, 1, 1},//28
     {{90. , 40. }, R_ROBOT+7, 1, 1},
-    {{90. , 140.}, R_ROBOT+7, 1, 1},
+    {{90. , 140.}, R_ROBOT+7, 1, 1},//30
     {{210., 40. }, R_ROBOT+7, 1, 1},
     {{210., 140.}, R_ROBOT+7, 1, 1},
     {{260., 90. }, R_ROBOT+7, 1, 1},
-    {{0.  , 120.}, R_ROBOT+7, 1, 1},
-    {{130., 0.  }, R_ROBOT+7, 1, 1},
-    {{170., 0.  }, R_ROBOT+7, 1, 1},
-    {{300., 120.}, R_ROBOT+7, 1, 1},
+
+    {{1.  , 120.}, R_ROBOT+2, 1, 1},
+    {{130., 1.  }, R_ROBOT+2, 1, 1},//35
+    {{170., 1.  }, R_ROBOT+2, 1, 1},
+    {{299., 120.}, R_ROBOT+2, 1, 1},
+
     {{90. , 90. }, R_ROBOT+7, 1, 1},
     {{90. , 90. }, R_ROBOT+7, 1, 1},
-    {{90. , 90. }, R_ROBOT+7, 1, 1},
+    {{90. , 90. }, R_ROBOT+7, 1, 1},//40
     {{210., 90. }, R_ROBOT+7, 1, 1},
     {{210., 90. }, R_ROBOT+7, 1, 1},
     {{210., 90. }, R_ROBOT+7, 1, 1},
+
+    //Cercles du robot anti-demi-tour
+    {{0., 0. }, 0, 0, 0},
+    {{0., 0. }, 0, 0, 0},//45
+    {{0., 0. }, 0, 0, 0},
+
+    //Cercles d'approches
+    {{0., 0. }, 0, 0, 0},//47
+    {{0., 0. }, 0, 0, 0},
+    {{0., 0. }, 0, 0, 0},
+
     // arrivée
-    {{0. , 0.}, 0, 0, 1} // 40
+    {{0. , 0.}, 0, 0, 1} //51
 };
 
 // tangents between physical obstacles (17kiB)
@@ -77,24 +105,38 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
     normVec(&o1o2, &out->d);
         out_s->d = out->d;
 
+    out->type = E_OBSPAIR_UNKNOWN;
+        out_s->type = E_OBSPAIR_UNKNOWN;
+
     if(!o1->active || !o2->active)
         return 0;
 
     if(out->d < 2*LOW_THR) {
-//        printf("concentric %u/%u\n", _o1, _o2);
+        out->type = E_OBSPAIR_0S_CONCENTRIC;
+            out_s->type = E_OBSPAIR_0S_CONCENTRIC;
+
         return 0;
     }
     else if(o1->r < LOW_THR && o2->r < LOW_THR) {
         out->s1.p1 = o1->c;
         out->s1.p2 = o2->c;
+        out->type = E_OBSPAIR_1S_LINE;
             out_s->s1.p1 = out->s1.p2;
             out_s->s1.p2 = out->s1.p1;
+            out_s->type = E_OBSPAIR_1S_LINE;
 
-//        printf("straight line %u/%u\n", _o1, _o2);
         return 1;
     }
-    else if(o1->r + out->d < o2->r + 4*LOW_THR || o2->r + out->d < o1->r + 4*LOW_THR) {
-//        printf("inside %u/%u\n", _o1, _o2);
+    else if(o1->r + out->d < o2->r + LOW_THR){
+        out->type = E_OBSPAIR_0S_SURROUNDED;
+            out_s->type = E_OBSPAIR_0S_SURROUNDS;
+
+        return 0;
+    }
+    else if(o2->r + out->d < o1->r + LOW_THR) {
+        out->type = E_OBSPAIR_0S_SURROUNDS;
+            out_s->type = E_OBSPAIR_0S_SURROUNDED;
+
         return 0;
     }
 
@@ -124,22 +166,29 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
     out->s2.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
         out_s->s1.p1 = out->s2.p2;
 
-    if(out->d < o1->r + o2->r + 4*LOW_THR) {
-        return 2;
-    }
-    else if(o1->r < LOW_THR) {
-        out->s3 = out->s1;
-        out->s4 = out->s2;
-            out_s->s4 = out_s->s1;
-            out_s->s3 = out_s->s2;
+    if(o1->r < LOW_THR) {
+            out->s3 = out->s1;
+            out->s4 = out->s2;
+            out->type = E_OBSPAIR_2S_POINT2CIRCLE;
+                out_s->s4 = out_s->s1;
+                out_s->s3 = out_s->s2;
+                out_s->type = E_OBSPAIR_2S_CIRCLE2POINT;
 
-        return 2;
+            return 2;
     }
     else if(o2->r < LOW_THR) {
         out->s4 = out->s1;
         out->s3 = out->s2;
+        out->type = E_OBSPAIR_2S_CIRCLE2POINT;
             out_s->s3 = out_s->s1;
             out_s->s4 = out_s->s2;
+            out_s->type = E_OBSPAIR_2S_POINT2CIRCLE;
+
+        return 2;
+    }
+    else if(out->d < o1->r + o2->r + LOW_THR) {
+        out->type = E_OBSPAIR_2S_INTERSECTION;
+            out_s->type = E_OBSPAIR_2S_INTERSECTION;
 
         return 2;
     }
@@ -164,6 +213,9 @@ static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o
         out->s4.p2.y = o2->c.y + o2->r*(-st*t.y - ct*n.y);
             out_s->s4.p1 = out->s4.p2;
 
+        out->type = E_OBSPAIR_4S_FULL;
+            out_s->type = E_OBSPAIR_4S_FULL;
+
         return 4;
     }
 
@@ -185,7 +237,7 @@ uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
 
         sqdistPt2Seg(&obs[i].c, s, &d, NULL);
 
-        if(d < (obs[i].r + LOW_THR)*(obs[i].r + LOW_THR))
+        if(d + 2*LOW_THR < obs[i].r*obs[i].r)
             return 0;
     }
 
@@ -196,6 +248,9 @@ uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
 void fill_tgts_lnk() {
     iObs_t i, j;
     uint8_t ok, nb;
+#ifdef AS_STATS
+    unsigned int start_us = micros();
+#endif
 
     for(i=0; i<N; i++) {
         for(j=i+1; j<N; j++) {
@@ -238,11 +293,11 @@ printf("  dist %.2f\n", DIST(i, j));
                     aselts[B(j)][A(i)].active = 0;
                 }
 
-                if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
+                if(tgts[i][j].type == E_OBSPAIR_2S_POINT2CIRCLE) {
                     aselts[A(i)][B(j)].active = ok;
                     aselts[A(j)][A(i)].active = ok;
                 }
-                else if(nb == 2 && obs[j].r < LOW_THR) {    // point/circle case
+                else if(tgts[i][j].type == E_OBSPAIR_2S_CIRCLE2POINT) {
                     aselts[B(i)][A(j)].active = ok;
                     aselts[A(j)][A(i)].active = ok;
                 }
@@ -265,15 +320,15 @@ printf("  dist %.2f\n", DIST(i, j));
                     aselts[A(j)][A(i)].active = 0;
                 }
 
-                if(nb == 2 && obs[i].r < LOW_THR) {    // point/circle case
+                if(tgts[i][j].type == E_OBSPAIR_2S_POINT2CIRCLE) {
                     aselts[A(i)][A(j)].active = ok;
                     aselts[B(j)][A(i)].active = ok;
                 }
-                else if(nb == 2 && obs[j].r < LOW_THR) {    // point/circle case
+                else if(tgts[i][j].type == E_OBSPAIR_2S_CIRCLE2POINT) {
                     aselts[A(i)][A(j)].active = ok;
                     aselts[A(j)][B(i)].active = ok;
                 }
-                else if(nb == 1) {  // point/point case
+                else if(tgts[i][j].type == E_OBSPAIR_1S_LINE) {
                     aselts[A(i)][A(j)].active = ok;
                     aselts[A(j)][A(i)].active = ok;
                 }
@@ -299,13 +354,173 @@ printf("  dist %.2f\n", DIST(i, j));
             }
         }
     }
+
+#ifdef AS_STATS
+printf("fill_tgts_lnk executed in %uµs\n", micros() - start_us);
+#endif
 }
+
+#ifdef CHECK_LIMITS
+static inline void _southern_point_arc(const sPt_t *p1, const sPt_t *c, sNum_t r, int dir, const sPt_t *p2, const sNum_t *_cross, sPt_t *psouth){
+    int qp1, qp2, type;
+    sNum_t cross;
+
+    if(_cross){
+        cross = *_cross;
+    }
+    else{
+        sVec_t v1, v3;
+        convPts2Vec(c, p1, &v1);
+        convPts2Vec(c, p2, &v3);
+        crossVecs(&v1, &v3, &cross);
+    }
+
+    qp1 = QUADRANT(p1->x - c->x, p1->y - c->y);
+    qp2 = QUADRANT(p2->x - c->x, p2->y - c->y);
+
+    // preliminary, all cases: (Qi = quadrant of Pi, c = cross, S = south, My = minimum y, X = impossible case => may be replaced by S or My)
+    //            __CCW__   __C W__
+    //    Q1 Q2   c>0 c<0 | c>0 c<0
+    //    0  0    My  S   | S   My
+    //    0  1    My  X   | S   X
+    //    0  2    My  My  | S   S
+    //    0  3    X   S   | X   My
+    //    1  0    X   S   | X   My
+    //    1  1    My  S   | S   My
+    //    1  2    My  X   | S   X
+    //    1  3    S   S   | My  My
+    //    2  0    S   S   | My  My
+    //    2  1    X   S   | X   My
+    //    2  2    My  S   | S   My
+    //    2  3    S   X   | My  X
+    //    3  0    My  X   | S   X
+    //    3  0    My  My  | S   S
+    //    3  0    X   My  | X   S
+    //    3  0    My  S   | S   My
+    // with X replaced in order to have some generalizations
+    //            __CCW__   __C W__
+    //    Q1 Q2   c>0 c<0 | c>0 c<0
+    //    0  0    My  S   | S   My
+    //    0  1    My  My  | S   S
+    //    0  2    My  My  | S   S
+    //    0  3    My  S   | S   My
+    //    1  0    S   S   | My  My
+    //    1  1    My  S   | S   My
+    //    1  2    My  S   | S   My
+    //    1  3    S   S   | My  My
+    //    2  0    S   S   | My  My
+    //    2  1    My  S   | S   My
+    //    2  2    My  S   | S   My
+    //    2  3    S   S   | My  My
+    //    3  0    My  S   | S   My
+    //    3  0    My  My  | S   S
+    //    3  0    My  My  | S   S
+    //    3  0    My  S   | S   My
+    // generalizations:
+    //   * type(Q1, ...) == type(3-Q1, ...)
+    //   * type(Q2, ...) == type(3-Q2, ...)
+    //   * type(CW, ...) == !type(CCW, ...)
+
+    // 2 symmetries
+    if(qp1 > 1){
+        qp1 = 3 - qp1;
+    }
+    if(qp2 > 1){
+        qp2 = 3 - qp2;
+    }
+
+    if((!qp2 && cross < 0) || (qp1 && !qp2) || (qp1 && cross < 0)){
+        type = 0; // south point
+    }
+    else{
+        type = 1; // point with minimum y
+    }
+
+    if(!dir) type = !type;
+
+    if(!type){ // south point
+        psouth->x = c->x;
+        psouth->y = c->y - r;
+    }
+    else{ // point with minimum y
+        if(p1->y < p2->y){
+            *psouth = *p1;
+        }
+        else{
+            *psouth = *p2;
+        }
+
+    }
+}
+
+void southern_point_arc(const sPt_t *p1, iObs_t o, int dir, const sPt_t *p2, const sNum_t *_cross, sPt_t *psouth){
+    _southern_point_arc(p1, &obs[o].c, obs[o].r, dir, p2, _cross, psouth);
+}
+
+void eastern_point_arc(const sPt_t *_p1, iObs_t o, int dir, const sPt_t *_p2, const sNum_t *_cross, sPt_t *peast){
+    sPt_t c, p1, p2, psouth;
+
+    c.x = obs[o].c.y;
+    c.y = -obs[o].c.x;
+
+    p1.x = _p1->y;
+    p1.y = -_p1->x;
+
+    p2.x = _p2->y;
+    p2.y = -_p2->x;
+
+    _southern_point_arc(&p1, &c, obs[o].r, dir, &p2, _cross, &psouth);
+
+    peast->x = -psouth.y;
+    peast->y = psouth.x;
+}
+
+void western_point_arc(const sPt_t *_p1, iObs_t o, int dir, const sPt_t *_p2, const sNum_t *_cross, sPt_t *pwest){
+    sPt_t c, p1, p2, psouth;
+
+    c.x = -obs[o].c.y;
+    c.y = obs[o].c.x;
+
+    p1.x = -_p1->y;
+    p1.y = _p1->x;
+
+    p2.x = -_p2->y;
+    p2.y = _p2->x;
+
+    _southern_point_arc(&p1, &c, obs[o].r, dir, &p2, _cross, &psouth);
+
+    pwest->x = psouth.y;
+    pwest->y = -psouth.x;
+}
+
+
+void northern_point_arc(const sPt_t *_p1, iObs_t o, int dir, const sPt_t *_p2, const sNum_t *_cross, sPt_t *pnorth){
+    sPt_t c, p1, p2, psouth;
+
+    c.x = -obs[o].c.x;
+    c.y = -obs[o].c.y;
+
+    p1.x = -_p1->x;
+    p1.y = -_p1->y;
+
+    p2.x = -_p2->x;
+    p2.y = -_p2->y;
+
+    _southern_point_arc(&p1, &c, obs[o].r, dir, &p2, _cross, &psouth);
+
+    pnorth->x = -psouth.x;
+    pnorth->y = -psouth.y;
+}
+#endif
 
 uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iObs_t o3) {
     iObs_t i;
     sVec_t v1, v3;
     sLin_t l1, l3;
     sNum_t sc1, sc3, cross;
+#ifdef CHECK_LIMITS
+    sPt_t furthest_point;
+#endif
 
     // calc equations of the 2 lines
     convPts2Vec(&obs[o2].c, p2_1, &v1);
@@ -316,7 +531,35 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
 
     crossVecs(&v1, &v3, &cross);
 
-    // TODO check limits
+#ifdef CHECK_LIMITS
+    if(obs[o2].c.y - obs[o2].r < Y_MIN){
+        southern_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.y < Y_MIN){
+            return 0;
+        }
+    }
+
+    if(obs[o2].c.x + obs[o2].r > X_MAX){
+        eastern_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.x > X_MAX){
+            return 0;
+        }
+    }
+
+    if(obs[o2].c.x - obs[o2].r < X_MIN){
+        western_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.x < X_MIN){
+            return 0;
+        }
+    }
+
+    if(obs[o2].c.y + obs[o2].r > Y_MAX){
+        northern_point_arc(p2_1, o2, dir, p2_3, &cross, &furthest_point);
+        if(furthest_point.y > Y_MAX){
+            return 0;
+        }
+    }
+#endif
 
     if(!dir) {  // clock wise
         for(i = 0; i < N; i++) {
@@ -335,8 +578,12 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
                     continue;
             }
 
-            if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
+            if(tgts[o2][i].type == E_OBSPAIR_2S_INTERSECTION){
+#ifdef AS_DEBUG
+printf("      because of CW %i:", i);
+#endif
                 return 0; // bad arc
+            }
         }
     }
     else {  // counter clock wise
@@ -356,8 +603,12 @@ uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iOb
                     continue;
             }
 
-            if(DIST(i, o2) < obs[i].r + obs[o2].r + LOW_THR)
+            if(tgts[o2][i].type == E_OBSPAIR_2S_INTERSECTION){
+#ifdef AS_DEBUG
+printf("      because of CCW %i:", i);
+#endif
                 return 0; // bad arc
+            }
         }
     }
 
@@ -377,16 +628,37 @@ sNum_t o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
     dotVecs(&v1, &v3, &d);
     crossVecs(&v1, &v3, &c);
 
-    d = acos(d/(obs[o2].r*obs[o2].r));
+#if defined(AS_DEBUG) && AS_DEBUG > 2
+dumpPt(p2_1,       "      in ");
+dumpPt(&obs[o2].c, "      c  ");
+printf(            "      r  =%.2f\n", obs[o2].r);
+dumpPt(p2_3,       "      out");
+dumpVec(&v1,       "      v1");
+dumpVec(&v3,       "      v3");
+printf(            "      v1^v3=%.3f ; v1.v3=%.3f\n", c, d);
+#endif
+
+    d = d/(obs[o2].r*obs[o2].r);
+    // d must be between -1 and 1 but because we do not use the true length of v1 and v3
+    // (we use r instead to avoid some heavy calculations) it may be a little outside of this interval
+    // so, let's just be sure we stay in this interval for acos to give a result
+    if(d > 1.) {
+        d = 1.;
+    }
+    else if(d < -1.) {
+        d = -1.;
+    }
+
+    d = acos(d);
 
     if(!dir) {  // clock wise
         if(c > 0) {
-            d += M_PI;
+            d = 2*M_PI - d;
         }
     }
     else {  // counter clock wise
         if(c < 0) {
-            d += M_PI;
+            d = 2*M_PI - d;
         }
     }
 

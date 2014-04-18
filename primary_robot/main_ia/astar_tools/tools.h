@@ -6,6 +6,13 @@
 #include "error.h"
 #include "math_types.h"
 
+
+//#define AS_DEBUG 1
+#define AS_STATS
+// warning, activating AS_DEBUG adds a lot of time to the time statistics (time to print the debug information)
+
+
+
 // ==== definitions ====
 
 /*
@@ -16,12 +23,12 @@
  *      b:counter-clockwise
  */
 
-#define LOW_THR ((sNum_t)0.01)
+#define LOW_THR ((sNum_t)0.001)
 
 #define R_SECU (5.)
 #define R_ROBOT (15.)
 
-#if 0
+#if 1
 #   define X_MIN (R_ROBOT)
 #   define X_MAX (300. - R_ROBOT)
 #   define Y_MIN (R_ROBOT)
@@ -34,6 +41,8 @@
 #endif
 
 #define OUT(x, y) ((x) > X_MAX || (x) < X_MIN || (y) > Y_MAX || (y) < Y_MIN)
+// get quadrant from 0 to 3 in trigonometric rotation
+#define QUADRANT(x, y) ( (y) > 0?( (x) > 0?0:1 ):( (x) > 0?3:2 ) )
 
 // ==== common types ====
 
@@ -73,7 +82,19 @@ typedef struct {
     sSeg_t s4;  // second internal (clock wise / a)
 
     sNum_t d; // distance between obstacles
-} sTgts_t;  // sizeof(sTgts_t)=68
+
+    enum{
+        E_OBSPAIR_UNKNOWN,
+        E_OBSPAIR_0S_CONCENTRIC,
+        E_OBSPAIR_1S_LINE,
+        E_OBSPAIR_0S_SURROUNDS,
+        E_OBSPAIR_0S_SURROUNDED,
+        E_OBSPAIR_2S_INTERSECTION,
+        E_OBSPAIR_2S_POINT2CIRCLE,
+        E_OBSPAIR_2S_CIRCLE2POINT,
+        E_OBSPAIR_4S_FULL
+    } type; // type of relation between those 2 obstacles
+} sTgts_t;  // sizeof(sTgts_t)=72
 
 // an index of obstacle between 0:N-1
 typedef int8_t iObs_t;
@@ -90,7 +111,7 @@ typedef int8_t iABObs_t;
 // between 0:N-1
 #define O(i) ((iObs_t)( ((iABObs_t)(i))>>1 ))
 
-// A* node (trajectopry from o1 to o2)
+// A* node (trajectory from o1 to o2)
 typedef struct {
     iABObs_t o1; // oriented object
     iABObs_t o2;
@@ -114,7 +135,7 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 // ==== global matrices ====
 
 // number of physical obstacles (16)
-#define N (41)
+#define N (51)
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
 extern sASEl_t aselts[N*2][N*2]; // 2Nx2N elements (an A* node is a trajectory from an iABObs_t to another)
@@ -143,14 +164,6 @@ static inline uint8_t check_arc(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
 }
 static inline sNum_t arc_len(iABObs_t o1, iABObs_t o2, iABObs_t o3) {
     return o_arc_len(&tgt(o1, o2)->p2, O(o2), DIR(o2), &tgt(o2, o3)->p1);
-}
-
-static inline void active_obs(iObs_t index){
-    obs[index].active = 1;
-}
-
-static inline void unactive_obs(iObs_t index){
-    obs[index].active = 0;
 }
 
 #endif

@@ -19,7 +19,7 @@
 #define LOW_THR ((sNum_t)0.01)
 
 #define R_SECU (5.)
-#define R_ROBOT (20.)
+#define R_ROBOT (15.)
 
 #if 0
 #   define X_MIN (R_ROBOT)
@@ -76,7 +76,7 @@ typedef int8_t iABObs_t;
 // ==== global matrices ====
 
 // number of physical obstacles (16)
-#define N (15)
+#define N (61)
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
 extern sLnk_t lnk[2*N][2*N]; // 2Nx2N links between logical obstacles (1kiB)

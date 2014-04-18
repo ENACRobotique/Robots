@@ -11,16 +11,16 @@
 
 ERROR main(int argc, char *argv[]) {
     uint8_t i, j;
-//    sTrajEl_t *p, prev; 
+//    sTrajEl_t *p, prev;
 //    sTrajEl_t* traj = NULL;
     sPath_t path;
 
     // entry point
     printf("N=%u\n", N);    // number of elements
 
-    printf("sizeof(obs) =%uB\n", sizeof(obs));
-    printf("sizeof(tgts)=%uB\n", sizeof(tgts));
-    printf("sizeof(lnk) =%uB\n", sizeof(lnk));
+    printf("sizeof(obs) =%luB (%luelts)\n", sizeof(obs), sizeof(obs)/sizeof(*obs));
+    printf("sizeof(tgts)=%luB\n", sizeof(tgts));
+    printf("sizeof(lnk) =%luB\n", sizeof(lnk));
 
     printf("\n");
 
@@ -58,6 +58,8 @@ ERROR main(int argc, char *argv[]) {
             printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, path.path[i].p1.x, path.path[i].p1.y, path.path[i].p2.x, path.path[i].p2.y,path.path[i].obs.c.x,path.path[i].obs.c.y, path.path[i].obs.r,path.path[i].arc_len,path.path[i].seg_len);
        }
 
+    printf("\n");
+
 #if 0
     printf("\n\nA* test\n");
     a_star(A(0), A(N-1), &path);
@@ -73,7 +75,7 @@ ERROR main(int argc, char *argv[]) {
         obs[0].c.x = 7.5;
         obs[0].c.y = 100.;
         obs[0].r = 0.;
-        
+
         obs[2].r = 8.;
         obs[3].r = 8.;
 

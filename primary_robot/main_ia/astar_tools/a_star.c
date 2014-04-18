@@ -3,10 +3,6 @@
 #include <math.h>
 #include "a_star.h"
 
-//#define AS_DEBUG 1
-#define AS_STATS
-// warning, activating AS_DEBUG adds a lot of time to the time statistics (time to print the debug information)
-
 #ifdef AS_STATS
 #include "millis.h"
 #endif
@@ -211,11 +207,11 @@ printf("    nothing...\n");
 #if defined(AS_DEBUG) && AS_DEBUG > 1
 printf("  openset:\n");
 tmp_g_score = 0.;
-for(i=0,curr = os_start; curr.o1 != ABNOELT; i++,curr = ASELT(curr).next){
+for(i = 0, curr = os_start; curr.o1 != ABNOELT; i++, curr = ASELT(curr).next){
     printf("   ");
-    for(j=0, prev = curr; prev.o1 != ABNOELT; j++,prev = ASELT(prev).prev){
+    for(j = 0, prev = curr; prev.o1 != ABNOELT; j++, prev = ASELT(prev).prev){
         printf(" [%02u%c->%02u%c]", O(prev.o1), DIR(prev.o1)?'b':'a', O(prev.o2), DIR(prev.o2)?'b':'a');
-        if(j>100){
+        if(j > 100){
             printf("\ninfinite loop j :/\n");
             while(1) sleep(1);
         }
@@ -224,12 +220,13 @@ for(i=0,curr = os_start; curr.o1 != ABNOELT; i++,curr = ASELT(curr).next){
     if(!ASELT(curr).openset){
         printf("error, in openset but not flag set\n");
     }
-    if(i>100){
+    if(i > 100){
         printf("infinite loop i :/\n");
         while(1) sleep(1);
     }
     tmp_g_score = ASELT(curr).f_score;
 }
+printf("  (%i elements in openset)\n", i);
 #endif
         }
     }

@@ -28,6 +28,32 @@ void video_draw_line(unsigned char *rgb, unsigned int w, unsigned int h, unsigne
     }
 }
 
+void video_draw_rectangle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x0, int y0, int x1, int y1, unsigned char r, unsigned char g, unsigned char b, unsigned char a){
+    video_draw_line(rgb, w, h, rowstride, x0, y0, x0, y1, r, g, b, a);
+    video_draw_line(rgb, w, h, rowstride, x0, y0, x1, y0, r, g, b, a);
+    video_draw_line(rgb, w, h, rowstride, x0, y1, x1, y1, r, g, b, a);
+    video_draw_line(rgb, w, h, rowstride, x1, y0, x1, y1, r, g, b, a);
+}
+
+void video_draw_filled_rectangle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x0, int y0, int x1, int y1, unsigned char r, unsigned char g, unsigned char b, unsigned char a){
+    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    int i;
+
+    if(dx > dy){
+        for(i = y0; i != y1; i += sy){
+            video_draw_line(rgb, w, h, rowstride, x0, i, x1, i, r, g, b, a);
+        }
+        video_draw_line(rgb, w, h, rowstride, x0, i, x1, i, r, g, b, a);
+    }
+    else{
+        for(i = x0; i != x1; i += sx){
+            video_draw_line(rgb, w, h, rowstride, i, y0, i, y1, r, g, b, a);
+        }
+        video_draw_line(rgb, w, h, rowstride, i, y0, i, y1, r, g, b, a);
+    }
+}
+
 void video_draw_cross(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x, int y, unsigned int size, unsigned char r, unsigned char g, unsigned char b, unsigned char a){
     video_draw_line(rgb, w, h, rowstride, x - size, y, x + size, y, r, g, b, a);
     video_draw_line(rgb, w, h, rowstride, x, y - size, x, y + size, r, g, b, a);
