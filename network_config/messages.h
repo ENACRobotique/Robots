@@ -72,6 +72,11 @@ typedef enum{
 //function returning a string corresponding to one element of the above enum. Must be managed by hand.
 const char *eType2str(E_TYPE elem);
 
+/************************ user payload definition start ************************/
+//user-defined payload types.
+//for simple payloads ( single variable or array), this step can be skipped
+//Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
+
 typedef struct __attribute__((packed)){ // 2bytes
     struct __attribute__((packed)){
         uint8_t first  :4;
@@ -101,11 +106,6 @@ typedef struct __attribute__((packed)){
         };
     } steps[];
 } sRoleSetupPayload;
-
-/************************ user payload definition start ************************/
-//user-defined payload types.
-//for simple payloads ( single variable or array), this step can be skipped
-//Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
 
 typedef struct __attribute__((__packed__)){
     uint32_t value;          //laser measured distance (in mm)
@@ -154,8 +154,8 @@ typedef struct {
     float u_a; // (cm)
     float u_b; // (cm)
 // trajectory steps
-    int tid; // trajectory identifier
-    int sid; // step identifier
+    int tid; // trajectory identifier               // FIXME int -> intxx_t
+    int sid; // step identifier                     // FIXME int -> intxx_t
     uint8_t ssid; // sub-step identifier (0:line, 1:circle)
 // identifier of the robot/element
     uint8_t id; // 0:prim, 1:sec, 2:adv_prim, 3:adv_sec
