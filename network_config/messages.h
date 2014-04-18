@@ -49,6 +49,7 @@ typedef enum{
     E_OBS_CFG,              // obstacle array config
     E_OBSS,                 // obstacles update (position & status update)
     E_GENERIC_POS,          // generic position
+    E_POS_QUERY,            // position query
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -161,32 +162,40 @@ typedef struct {
     uint8_t ssid; // sub-step identifier (0:line, 1:circle)
 // identifier of the robot/element
     uint8_t id; // 0:prim, 1:sec, 2:adv_prim, 3:adv_sec
-} sPosPayload;
+} sPosPayload; // TODO rename to E_PROP_STATUS, contains an E_GENERIC_POS
+
+typedef enum{
+    ELT_PRIMARY,
+    ELT_SECONDARY,
+    ELT_ADV_PRIMARY,
+    ELT_ADV_SEC,
+
+    NUM_E_ELEMENT
+} eElement;
 
 typedef struct __attribute__((packed)) {
 // position in frame (specified in field "frame")
     float x;            // (cm)
     float y;            // (cm)
     float theta;        // (rad)
-    uint32_t date;      // (µs)
+    uint32_t date;      // synchronized date (µs)
 // uncertainty (oriented rectangle)
     float u_theta;      // (rad)
     float u_a_angle;    // (rad) (orientation of the uncertainty rectangle along "a" axis)
     float u_a;          // (cm)
     float u_b;          // (cm)
 // identifier of the robot/element
-    enum{
-        POS_PRIMARY,
-        POS_SECONDARY,
-        POS_ADV_PRIMARY,
-        POS_ADV_SEC
-    } id :8;
+    eElement id :8;
     enum{
         FRAME_PLAYGROUND,
-        FRAME_MAIN
+        FRAME_PRIMARY
     } frame :8;
-
 }sGenericPos;
+
+typedef struct{
+    uint32_t date; // synchronized date (µs)
+    eElement id :8;
+} sPosQuery;
 
 typedef struct __attribute__((packed)){
     uint8_t nb_obs;
@@ -227,6 +236,7 @@ typedef struct __attribute__((packed)){
 
 
 
+
 /*
  * union defining the different possible payloads
  */
@@ -249,6 +259,8 @@ typedef union{
     sAsservStats asservStats;
     sObsConfig obsCfg;
     sObss obss;
+    sGenericPos genericPos;
+    sPosQuery posQuery;
 /************************ user payload stop ************************/
 
 }uPayload;
