@@ -251,6 +251,44 @@ int role_send(sMsg *msg){
     return ret;
 }
 
+int role_sendAck(sMsg *msg){
+    int ret = 0;
+
+#define SEND_BLOCK(act) \
+    do{                                                                     \
+        if((act)->sendTo.first){                                            \
+            msg->header.destAddr = role_get_addr((act)->sendTo.first);      \
+            ret = bn_sendAck(msg);                                          \
+            if(ret < 0)                                                     \
+                break;                                                      \
+        }                                                                   \
+        if((act)->sendTo.second){                                           \
+            msg->header.destAddr = role_get_addr((act)->sendTo.second);     \
+            ret = bn_sendAck(msg);                                          \
+            if(ret < 0)                                                     \
+                break;                                                      \
+        }                                                                   \
+    }while(0)
+
+    switch(msg->header.type){
+    case E_TRAJ:
+        SEND_BLOCK(ACT_MSG_TRAJ);
+        break;
+    case E_POS:
+        SEND_BLOCK(ACT_MSG_POS);
+        break;
+    case E_DEBUG:
+        SEND_BLOCK(ACT_MSG_DBG);
+        break;
+    default:
+        break;
+    }
+
+#undef SEND_BLOCK
+
+    return ret;
+}
+
 #if MYROLE
 
 int role_relay(sMsg *msg){
