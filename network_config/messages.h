@@ -47,7 +47,8 @@ typedef enum{
     E_ASSERV_STATS,         // control loop statistics
     E_GOAL,                 // asks the robot to go to this goal (x,y)
     E_OBS_CFG,              // obstacle array config
-    E_OBSS,                  // obstacles update (position & status update)
+    E_OBSS,                 // obstacles update (position & status update)
+    E_GENERIC_POS,          // generic position
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -120,6 +121,7 @@ typedef enum {
     SYNCF_END_MEASURES,
     SYNCF_OK
 } syncFlag;
+
 typedef struct __attribute__((__packed__)){
     uint32_t lastTurnDate;   //last turn date (in µs)
     uint32_t period;         //last measured period (instantaneous, measured at the same time as lastTurnDate, in µs)
@@ -160,6 +162,31 @@ typedef struct {
 // identifier of the robot/element
     uint8_t id; // 0:prim, 1:sec, 2:adv_prim, 3:adv_sec
 } sPosPayload;
+
+typedef struct __attribute__((packed)) {
+// position in frame (specified in field "frame")
+    float x;            // (cm)
+    float y;            // (cm)
+    float theta;        // (rad)
+    uint32_t date;      // (µs)
+// uncertainty (oriented rectangle)
+    float u_theta;      // (rad)
+    float u_a_angle;    // (rad) (orientation of the uncertainty rectangle along "a" axis)
+    float u_a;          // (cm)
+    float u_b;          // (cm)
+// identifier of the robot/element
+    enum{
+        POS_PRIMARY,
+        POS_SECONDARY,
+        POS_ADV_PRIMARY,
+        POS_ADV_SEC
+    } id :8;
+    enum{
+        FRAME_PLAYGROUND,
+        FRAME_MAIN
+    } frame :8;
+
+}sGenericPos;
 
 typedef struct __attribute__((packed)){
     uint8_t nb_obs;
