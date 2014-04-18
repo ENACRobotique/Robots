@@ -50,7 +50,7 @@ void setup() {
 
   bn_attach(E_ROLE_SETUP,role_setup);
   bn_attach(E_PERIOD,&periodHandle);
-  bn_printDbg("start mobile 1\n");
+  bn_printfDbg("start mobile %hx\n",MYADDR);
   setupFreeTest();
 }
 

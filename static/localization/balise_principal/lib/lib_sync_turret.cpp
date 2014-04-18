@@ -11,6 +11,7 @@
 #include "network_cfg.h"
 #include "Arduino.h"
 #include "lib_domitille.h"
+#include "params.h"
 
 int sync_beginElection(bn_Address addr){
     sMsg outMsg;
@@ -18,11 +19,13 @@ int sync_beginElection(bn_Address addr){
     outMsg.header.type=E_SYNC_DATA;
     outMsg.header.size=sizeof(sSyncPayload);
     outMsg.payload.sync.flag=SYNCF_BEGIN_ELECTION;
+    outMsg.header.destAddr=addr;
 
-    outMsg.header.destAddr=ADDRX_MOBILE_1;
     if ((ret=bn_sendAck(&outMsg))<0) {
+#ifdef DEBUG_SYNC
         //FIXME : better handle of beacon not available
-        bn_printfDbg((char *)"addr %hx offline\n",addr);
+        bn_printfDbg((char *)"addr %hx offline %d\n",addr,ret);
+#endif
         return ret;
     }
 

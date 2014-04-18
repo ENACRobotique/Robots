@@ -24,7 +24,7 @@
 mainState state=S_SYNC_ELECTION;
 
 sDeviceInfo devicesInfo[D_AMOUNT];
-int iDevice;
+int iDeviceSync=0,iDevicePeriodBcast=0;
 int lastIndex=0;    // to detect new turn in game state
 
 sMsg inMsg,outMsg;
@@ -41,13 +41,17 @@ void setup(){
         devicesInfo[i].lastIndex=-1;
     }
     devicesInfo[D_MOBILE_1].addr=ADDRX_MOBILE_1;
+    devicesInfo[D_MOBILE_2].addr=ADDRX_MOBILE_2;
+
     //fixme : do the same for the others
     domi_init(2);
 
     bn_init();
 
     bn_attach(E_ROLE_SETUP,role_setup);
+#ifdef DEBUG
     bn_printfDbg("start turret, free mem : %d o\n",freeMemory());
+#endif
 
     pinMode(PIN_DBG_LED,OUTPUT);
 }
@@ -74,12 +78,18 @@ void loop(){
     //period broadcast : one by one TODO : broadcast
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
         time_prev_period = millis();
-        outMsg.header.destAddr=ADDRX_MOBILE_1; //FIXME : to everybody
+
+        //bcast to current device
+        outMsg.header.destAddr=devicesInfo[iDevicePeriodBcast].addr;
         outMsg.header.type=E_PERIOD;
         outMsg.header.size=sizeof(outMsg.payload.period);
         outMsg.payload.period=domi_meanPeriod();
         bn_send(&outMsg);
+
+        //increment index for next device
+        iDevicePeriodBcast=(iDevicePeriodBcast+1)%D_AMOUNT;
     }
+
     //blinking
 #ifdef BLINK_1S
     if((time - time_prev_led)>=10000) {
@@ -114,13 +124,13 @@ void loop(){
         //during the defined synchronization time
         if (micros()-sw<SYNCRONIZATION_TIME){
             // $iStates (device to sync) send data if a new turn has been detected since the last time we have send data to this particular device
-            if (domi_nbTR()!=devicesInfo[iDevice].lastIndex){
-                devicesInfo[iDevice].lastIndex=domi_nbTR();
+            if (domi_nbTR()!=devicesInfo[iDeviceSync].lastIndex){
+                devicesInfo[iDeviceSync].lastIndex=domi_nbTR();
 
                 //send data
-                sync_sendData(devicesInfo[iDevice].addr);
+                sync_sendData(devicesInfo[iDeviceSync].addr);
                 //increase index for device selection
-                iDevice=(iDevice+1)%D_AMOUNT;
+                iDeviceSync=(iDeviceSync+1)%D_AMOUNT;
             }
         }
         else {
@@ -165,6 +175,9 @@ void loop(){
                     }
                     break;
                 case ADDRX_MOBILE_2 :
+                    if ( (error=handleMeasurePayload(&(inMsg.payload.mobileReport),inMsg.header.srcAddr))==-ERR_TRY_AGAIN ) {
+                        memcpy(&devicesInfo[D_MOBILE_2].lastData,&inMsg.payload.mobileReport,sizeof(sMobileReportPayload));
+                    }
                     break;
                 case ADDRX_SECOND :
                     break;

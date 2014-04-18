@@ -11,6 +11,7 @@
 #include "../../../communication/botNet/shared/bn_debug.h"
 #include "math.h"
 #include "Arduino.h"
+#include "params.h"
 
 
 /* Converts a time value to a angle in radian, based on the last few recorded turns of the turret
@@ -90,6 +91,9 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     if ((err=time2rad(pLoad->date,&angle))){
         return err;
     }
+
+    // robot's geometry correction
+    angle-=ANGLE_ZERO;
 
     // fixme send to actual IA
     bn_printfDbg((char*)"%hx is at %lu mm %d °", origin, pLoad->value, (int)(angle*180./M_PI));
