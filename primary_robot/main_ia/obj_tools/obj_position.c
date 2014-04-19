@@ -6,8 +6,11 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+#include <math.h>
 #include <messages.h>
 #include <roles.h>
+#include <malloc.h>
 #include <shared/botNet_core.h>
 #include <shared/message_header.h>
 #include "obj_position.h"
