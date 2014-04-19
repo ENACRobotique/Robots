@@ -17,5 +17,6 @@
 sNum_t seg_len(sPt_t *p1, sPt_t *p2);
 void path_len(sTrajEl_t tab[], int size);
 sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t or, sPt_t *p2_3);
+sNum_t distPath(sPath_t *path);
 
 #endif /* OBJ_PATH_TOOLS_H_ */

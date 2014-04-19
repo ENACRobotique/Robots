@@ -84,13 +84,9 @@ void init_ele(void){
 
 
 int get_position( sPt_t *pos){
-    if(obs[0].moved){
-        *pos = obs[0].c;
-        return 1;
-        }
-    else{
-        return 0;
-        }
+	*pos = obs[0].c;
+    obs_updated[0]++;
+	return 1;
     }
 
 float sign(float x){ //retourne -1 ou 1, 0 si nul
@@ -103,7 +99,8 @@ int test_in_obs(void){ //retourne le numéros de l'obstable si la position est a
     int i;
     for(i=1; i<N-1;i++){
         if(obs[i].active==0)continue;
-        if( sqrt((obs[i].c.x-_current_pos.x)*(obs[i].c.x-_current_pos.x)+(obs[i].c.y-_current_pos.y)*(obs[i].c.y-_current_pos.y)) < obs[i].r){            printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y);
+        if( sqrt((obs[i].c.x-_current_pos.x)*(obs[i].c.x-_current_pos.x)+(obs[i].c.y-_current_pos.y)*(obs[i].c.y-_current_pos.y)) < obs[i].r){
+        	printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
             return i;
             }
         }

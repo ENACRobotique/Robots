@@ -62,3 +62,12 @@ void path_len(sTrajEl_t tab[], int size){
 		}
 	tab[size-1].arc_len=0;
 	}
+
+sNum_t distPath(sPath_t *path){
+	int i;
+	sNum_t dist=0;
+	for(i = 0 ; i < path->path_len ; i++){
+		dist += path->path->seg_len + path->path->arc_len;
+		}
+	return dist;
+	}

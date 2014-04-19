@@ -1,5 +1,6 @@
 #include "obj.h"
 
+#include <math.h>
 
 #define CLAMP(m, v, M) MAX(m, MIN(v, M))
 
@@ -7,6 +8,9 @@
 estate_t state = ATTENTE;
 int temp=0; //Temporaire pour mettre en shutdown lorsque tous les objectifs sont finis
 int current_obj=-1;
+int prev_obj=-1;
+sPt_t prev_pos={0., 0.};
+sNum_t prev_len=0;
 long last_time2=0;
 
 
@@ -141,7 +145,7 @@ int8_t next_obj (void){
             fill_tgts_lnk(); //TODO optimisation car uniquement la position de fin change dans la boucle
             a_star(A(0), A(N-1), &path_loc);
 
-        	_current_pos=obs[0].c; //to be sure to have the real position if there was a projection just before
+        	obs[0].c=_current_pos; //to be sure to have the real position if there was a projection just before
 
 			#if DEBUG
             	printf("Pour obj=%i avec pa=%i dist=%f\n",i,j,path_loc.dist);
@@ -164,7 +168,7 @@ int8_t next_obj (void){
         if(k==0){
         	listObj[i].dist=0;
 			#if DEBUG
-				printf("No find path to achieve the objectivefor objective n°%d\n\n",i);
+				printf("No find path to achieve the objective for objective n°%d\n\n",i);
 			#endif
         	continue;
         	}
@@ -215,9 +219,58 @@ int8_t next_obj (void){
     }
 
 
+int same_obs (sObs_t *obs1, sObs_t *obs2){
+	printf("r1=%f r2=%f\n",obs1->r,obs2->r);
+    return ( obs1->r == obs2->r && obs1->c.x == obs2->c.x && obs1->c.y == obs2->c.y);
+	}
+
+int same_traj (sPath_t *traj1, sPath_t *traj2) {
+    unsigned int t1_ind = traj1->path_len;
+    unsigned int t2_ind = traj2->path_len;
+
+    if(traj1->path_len==0 || traj2->path_len==0)
+    	return 0;
+        printf("same_t 1.0\n");
+
+    while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminer
+        printf("same_t 2.0\n");
+        if (same_obs (&(traj1->path[t1_ind-1].obs), &(traj2->path[t2_ind-1].obs)) ){
+			t1_ind--;
+			t2_ind--;
+			}
+        else return 0;
+    }
+    printf("same_t 3.0\n");
+    if (!(same_obs (&(traj1->path[t1_ind].obs), &(traj2->path[t2_ind].obs))))
+        return 0;
+
+    if ((traj1->path[t1_ind].p2.x == traj2->path[t2_ind].p2.x) && (traj1->path[t1_ind].p2.y == traj2->path[t2_ind].p2.y))
+        return 0;
+    else
+    printf("same_t 4.0\n");
+    return 1 ;
+}
+
+int checkCurrentPath(void){
+	static sPath_t prev_path = {.path = NULL, .path_len=0};
+	int ret=-1;
+
+	//getchar();
+
+	printf("len1=%d et lan2=%d\n",path.path_len, prev_path.path_len);
+	ret=same_traj (&path, &prev_path);
+	prev_path=path;
+
+	return ret;
+	}
+
+
+
+
 
 void obj_step(){
 	int i,j;
+	int obj=-1;
     switch (state) {
     case ATTENTE :
         //                printf("Attente. time = %ld\n", millis()); // FIXME debug
@@ -241,17 +294,18 @@ void obj_step(){
         //Calculation of the next objective
         if( (((millis()-last_time)>1000) && (mode_obj==0))){
             printf("obs[0] suivi par next_obj(): x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
-            current_obj = next_obj();
-            if ( current_obj >= 0){  	//aucun objectif actif atteignable si -1
-                send_robot(path) ;		// Envoie au bas niveau la trajectoire courante
-                last_time=millis();
-            	}
-        	}
+            last_time=millis();
+
+            if( (obj = next_obj()) != -1 ){
+            	current_obj=obj;
+				if ( checkCurrentPath() == 0){
+					send_robot(path) ;
+					}
+				}
+			}
 
         //Update position
-        if(get_position(&_current_pos)){ //TODO A verifier
-            memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
-            obs_updated[0]++;
+        if(get_position(&_current_pos)){
 
             if(((i=test_in_obs())!=0) ){
                 project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);
@@ -278,8 +332,10 @@ void obj_step(){
         	}
 
         //If the select point is achieved
-        if ((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) || mode_obj==1){   //objectif atteint
-            switch ((listObj[current_obj]).type){ //Mise en place des procedure local en fonction de l'objectif
+        if (((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) ) || mode_obj==1){   //objectif atteint
+        	//printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
+        	//printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
+        	switch ((listObj[current_obj]).type){ //Mise en place des procedure local en fonction de l'objectif
 				case E_ARBRE :
 					obj_tree(current_obj);
 					break;
@@ -290,6 +346,8 @@ void obj_step(){
 					obj_fire(current_obj);
 					break;
 				default:
+					printf("Erreur current_obj\n");
+					getchar();
 					break;
 				}
         	}

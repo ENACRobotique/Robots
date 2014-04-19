@@ -93,7 +93,8 @@ void obj_fire(iABObs_t  obj){
 	static int state=0, theta=0; //for separate the init, loop and end
     int i;
     sTrajEl_t tabTemp[4];
-
+    //printf("obj fire n=%d\n", obj);
+     //getchar();
     switch(state){
 	    case 0:
 	        printf("Debut objectif feux\n\n");
@@ -101,8 +102,6 @@ void obj_fire(iABObs_t  obj){
 				obs[N-i-2].active=0;
 				obs_updated[N-i-2]++;
 	        	}
-	        obs[listObj[obj].numObs[0]].active=0;
-	        obs_updated[listObj[obj].numObs[0]]++;
 
 	        listObj[obj].active=0;
 
@@ -110,6 +109,9 @@ void obj_fire(iABObs_t  obj){
 				theta=listObj[obj].entryPoint[0].angleEP;
 		        memcpy(&tabTemp[0],&tabSeg[0], sizeof(tabSeg[0])*2);
 		        pt_select=listObj[obj].entryPoint[0].c;
+
+		        obs[listObj[obj].numObs[0]].active=0;
+		        obs_updated[listObj[obj].numObs[0]]++;
 
 				//Rotation du segment
 
@@ -136,10 +138,6 @@ void obj_fire(iABObs_t  obj){
 
 	            obs[N-1].c=pt_select;
 	            obs_updated[N-1]++;
-
-	            obs[obj+1].r=R_ROBOT + 5;
-	            obs_updated[obj+1]++;
-
 				}
 
             //generique fonction
