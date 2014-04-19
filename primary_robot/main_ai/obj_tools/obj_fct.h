@@ -28,5 +28,6 @@ int get_position( sPt_t *pos);
 float sign(float x);
 int test_in_obs(void);
 int test_tirette(void);
+void simuSecondary(void);
 
 #endif /* OBJ_FCT_H_ */

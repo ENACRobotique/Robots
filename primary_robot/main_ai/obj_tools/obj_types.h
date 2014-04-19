@@ -12,6 +12,7 @@
 #include "../../global_errors.h"
 #include "node_cfg.h"
 
+#define SPEED_SECONDARY 10 // (cm/s)
 
 #define COLOR 0 //0=red and 1=yellow
 #define DEBUG 1
@@ -20,9 +21,9 @@
 #define END_MATCH 180000 //in ms
 #define MAX_OBS_BY_OBJ 3
 #define MAX_EP_BY_OBJ 3
-#define START_FEU 28
-#define START_ARBRE 1
-#define START_TORCHE_FIXE 20
+#define START_FEU 29
+#define START_ARBRE 2
+#define START_TORCHE_FIXE 21
 #define FIRE_RADIUS_EP 15
 
 

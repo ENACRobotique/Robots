@@ -12,8 +12,9 @@
 
 // array of physical obstacles (256B)
 sObs_t obs[] = {
-    // départ
-    {{0., 0.}, 0., 1, 1},
+    // robots
+    {{0., 0.}, 0., 1, 1},   //primary
+    {{0., 0.}, 0., 1, 1},   //secondary
 
     // arbres
     {{0.  , 70. }, R_ROBOT+13, 1, 1}, // 1

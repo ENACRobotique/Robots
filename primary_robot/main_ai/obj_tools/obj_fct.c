@@ -111,6 +111,46 @@ int test_tirette(void){ //simulation
     return 1;
     }
 
+sPt_t trjS[4]={ //trajectory of the secondary robot
+    {10. , 190.},
+    {40. , 160.},
+    {135., 160.},
+    {135., 190.}
+    };
+
+int testPtInPt(sPt_t *p1, sPt_t *p2, int r){
+    return sqrt((p2->x - p1->x) * (p2->x - p1->x) + (p2->y - p1->y) * (p2->y - p1->y)) <= r ;
+    }
+
+void simuSecondary(void){ //TODO if a other robot on trajectory
+    static int state = 0;
+    static unsigned int lastTime = 0;
+    static sPt_t pos ;
+
+    unsigned int time = millis();
+    sNum_t theta;
+
+    if( lastTime == 0 ){
+        lastTime = millis();
+        pos = trjS[0];
+        }
+
+    if( state < (sizeof(trjS)/sizeof(*trjS) - 1)){
+        theta = atan2( (trjS[state+1].y - trjS[state].y), (trjS[state+1].x - trjS[state].x) );
+        pos.x += (SPEED_SECONDARY * (time - lastTime) * cos(theta))/1000;
+        pos.y += (SPEED_SECONDARY * (time - lastTime) * sin(theta))/1000;
+
+        if( testPtInPt(&pos, &trjS[state+1], 1) ){
+            state++ ;
+            }
+
+        obs[1].r = 10;
+        obs[1].c = pos;
+        obs_updated[1]++;
+
+        lastTime = millis();
+        }
+	}
 
 
 
