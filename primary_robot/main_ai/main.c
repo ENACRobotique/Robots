@@ -31,6 +31,7 @@
 
 #include "obj.h"
 #include "obj_types.h"
+#include "obj_positions.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -315,6 +316,9 @@ int main(int argc, char **argv){
                 if(ret < 0){
                     printf("bn_send(E_OBS_CFG) error #%i\n", -ret);
                 }
+                break;
+            case E_GENERIC_POS:
+                received_new_generic_pos(&msgIn.payload.genericPos);
                 break;
             default :
                 printf("\n");
