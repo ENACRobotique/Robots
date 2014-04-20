@@ -29,5 +29,6 @@ float sign(float x);
 int test_in_obs(void);
 int test_tirette(void);
 void simuSecondary(void);
+void posPrimary(void);
 
 #endif /* OBJ_FCT_H_ */

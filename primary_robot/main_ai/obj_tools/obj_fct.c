@@ -152,6 +152,27 @@ void simuSecondary(void){ //TODO if a other robot on trajectory
         }
 	}
 
+void posPrimary(void){
+    int i;
+    if(get_position(&_current_pos)){
+        if(((i=test_in_obs())!=0) ){
+            project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);
+            if(sqrt(pow(_current_pos.x-obs[0].c.x,2)+pow(_current_pos.y-obs[0].c.y,2)<2)){
+                memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
+                obs_updated[0]++;
+                }
+            else{
+                memcpy(&_current_pos,&obs[0].c, sizeof(obs[0].c));
+                obs_updated[0]++;
+                }
+            }
+        updateNoHaftTurn(theta_robot*180/M_PI, &obs[0].c);
+        obs_updated[N-5]++;
+        obs_updated[N-6]++;
+        obs_updated[N-7]++;
+        }
+    }
+
 
 
 

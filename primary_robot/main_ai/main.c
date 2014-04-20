@@ -146,7 +146,7 @@ int main(int argc, char **argv){
     msgOut.header.size = sizeof(msgOut.payload.pos);
 
     msgOut.payload.pos.id = 0;
-    msgOut.payload.pos.theta = 0;
+    msgOut.payload.pos.theta = theta_robot;
     msgOut.payload.pos.u_a = 0;
     msgOut.payload.pos.u_a_theta = 0;
     msgOut.payload.pos.u_b = 0;

@@ -269,8 +269,9 @@ int checkCurrentPath(void){
 
 
 void obj_step(){
-	int i,j;
+	int j;
 	int obj=-1;
+	sGenericPos *posPrimaryADV, *posSecondaryADV;
     switch (state) {
     case ATTENTE :
         //                printf("Attente. time = %ld\n", millis()); // FIXME debug
@@ -304,34 +305,26 @@ void obj_step(){
 				}
 			}
 
-        simuSecondary();
-
         //Update position
-        if(get_position(&_current_pos)){
+            simuSecondary();
+            posPrimary();
 
-            if(((i=test_in_obs())!=0) ){
-                project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);
-                if(sqrt(pow(_current_pos.x-obs[0].c.x,2)+pow(_current_pos.y-obs[0].c.y,2)<2)){
-                    memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
-                    obs_updated[0]++;
-                	}
-                else{
-                    memcpy(&_current_pos,&obs[0].c, sizeof(obs[0].c));
-                    obs_updated[0]++;
-                	}
-            	}
-            updateNoHaftTurn(theta_robot*180/M_PI, &obs[0].c);
-            obs_updated[N-5]++;
-            obs_updated[N-6]++;
-            obs_updated[N-7]++;
+            posPrimaryADV = getLastPGPosition(ELT_ADV_PRIMARY);
+            //obs[2].c.x = posPrimaryADV->x;
+            //obs[2].c.y = posPrimaryADV->y;
+            obs_updated[2]++;
 
-            if((millis()-last_time2)>1000){
-                last_time2 = millis();
-                updateEntryPointTree();
-                printf("Position actuel : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
-                printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
-            	}
-        	}
+            posSecondaryADV = getLastPGPosition(ELT_ADV_SEC);
+            //obs[3].c.x = posSecondaryADV->x;
+            //obs[3].c.y = posSecondaryADV->y;
+            obs_updated[3]++;
+
+        if((millis()-last_time2)>1000){
+            last_time2 = millis();
+            updateEntryPointTree();
+            printf("Position actuel : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
+            printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
+            }
 
         //If the select point is achieved
         if (((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) ) || mode_obj==1){   //objectif atteint
@@ -380,6 +373,7 @@ int obj_init(){
         obs[0].c.x=16.;
         obs[0].c.y=200. - 30.;
         }
+    theta_robot = -M_PI_2;
     _current_pos=obs[0].c;
 
     //Initialization of the game

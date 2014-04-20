@@ -103,8 +103,6 @@ void obj_fire(iABObs_t  obj){
 				obs_updated[N-i-2]++;
 	        	}
 
-	        listObj[obj].active=0;
-
 	        if(((Obj_feu*)listObj[obj].typeStruct)->pos==3){
 				theta=listObj[obj].entryPoint[0].angleEP;
 		        memcpy(&tabTemp[0],&tabSeg[0], sizeof(tabSeg[0])*2);
@@ -170,6 +168,7 @@ void obj_fire(iABObs_t  obj){
 		    pt_select.x=0;
 		    pt_select.y=0;
 		    listObj[obj].dist=0;
+            listObj[obj].active=0;
 		   break;
 	    default :
 	    	printf("Error in obj_tree : state != (0 || 1 || 2\n");

@@ -135,7 +135,7 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 // ==== global matrices ====
 
 // number of physical obstacles (16)
-#define N (52)
+#define N (54)
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
 extern sASEl_t aselts[N*2][N*2]; // 2Nx2N elements (an A* node is a trajectory from an iABObs_t to another)

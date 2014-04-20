@@ -221,8 +221,8 @@ void obj_tree(iABObs_t obj)
 			obs[N-1].c=pt_select;
 			obs_updated[N-1]++;
 
-			obs[obj+1].r=R_ROBOT + 5;
-			obs_updated[obj+1]++;
+			obs[listObj[obj].numObs[0]].r = R_ROBOT + 5;
+			obs_updated[listObj[obj].numObs[0]]++;
 
 			//generique fonction
 			last_time=millis();

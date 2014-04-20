@@ -15,6 +15,8 @@ sObs_t obs[] = {
     // robots
     {{0., 0.}, 0., 1, 1},   //primary
     {{0., 0.}, 0., 1, 1},   //secondary
+    {{0., 0.}, 20., 1, 1},   //primary adv
+    {{0., 0.}, 15., 1, 1},   //secondary adv
 
     // arbres
     {{0.  , 70. }, R_ROBOT+13, 1, 1}, // 1

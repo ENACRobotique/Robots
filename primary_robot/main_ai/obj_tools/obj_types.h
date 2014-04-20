@@ -18,12 +18,12 @@
 #define DEBUG 1
 #define RESO_POS 2
 #define NB_OBJ 16
-#define END_MATCH 180000 //in ms
+#define END_MATCH 90000 //in ms
 #define MAX_OBS_BY_OBJ 3
 #define MAX_EP_BY_OBJ 3
-#define START_FEU 29
-#define START_ARBRE 2
-#define START_TORCHE_FIXE 21
+#define START_FEU 31
+#define START_ARBRE 4
+#define START_TORCHE_FIXE 23
 #define FIRE_RADIUS_EP 15
 
 
