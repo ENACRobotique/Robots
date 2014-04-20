@@ -33,9 +33,9 @@
 #error "I²C address is odd, do you know what you do?"
 #endif
 
-#if (MYADDRX == ADDRX_MAIN || MYADDRI == ADDRI_MAIN_TURRET)
+#if (MYADDRX == ADDRX_MAIN_TURRET || MYADDRI == ADDRI_MAIN_TURRET)
 sRTableEntry rTable[]={
-    {SUBNETD_DEBUG, {IF_XBEE, ADDRX_DBGBRIDGE}},
+    {SUBNETD_DEBUG, {IF_I2C, ADDRI_MAIN_IO}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRI == ADDRI_MAIN_IO)
@@ -61,12 +61,12 @@ sRTableEntry rTable[]={
 };
 #elif (MYADDRX == ADDRX_REMOTE_IA)
 sRTableEntry rTable[]={
-    {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN}},
+    {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN_TURRET}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRX == ADDRX_DEBUG)
 sRTableEntry rTable[]={
-    {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN}},
+    {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN_TURRET}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRX == 0 && MYADDRI == ADDRI_MAIN_TURRET) //for tests purposes only
@@ -76,12 +76,14 @@ sRTableEntry rTable[]={
 #elif (MYADDRD == ADDRD_DEBUG2 || MYADDRD == ADDRD_DEBUG1 || MYADDRD == ADDRD_MAIN_PROP_SIMU || MYADDRD == ADDRD_MAIN_IA_SIMU || MYADDRD == ADDRD_MONITORING)
 sRTableEntry rTable[]={
     {SUBNETI_MAIN, {IF_UDP, ADDRD_DBGBRIDGE}},
+    {SUBNETU_DEBUG, {IF_UDP, ADDRD_DBGBRIDGE}},
     {SUBNETX, {IF_UDP, ADDRD_DBGBRIDGE}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
-#elif (MYADDRD == ADDRD_DBGBRIDGE)
+#elif (MYADDRD == ADDRD_DBGBRIDGE || MYADDRU == ADDRU_DBGBRIDGE)
 sRTableEntry rTable[]={
-    {SUBNETI_MAIN, {IF_XBEE, ADDRX_MAIN}},
+    {SUBNETX, {IF_UART, ADDRU_MAIN_IO}},
+    {SUBNETI_MAIN, {IF_UART, ADDRU_MAIN_IO}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #endif

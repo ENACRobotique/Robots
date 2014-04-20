@@ -43,15 +43,15 @@ extern "C" {
     #define SUBNETD_DEBUG   (4<<DEVICE_ADDR_SIZE)
 
 //xbee addresses
-    #define ADDRX_MAIN      ( BIT(0) | SUBNETX )
-    #define ADDRX_FIX       ( BIT(1) | SUBNETX )
-    #define ADDRX_MOBILE_1  ( BIT(2) | SUBNETX )
-    #define ADDRX_MOBILE_2  ( BIT(3) | SUBNETX )
-    #define ADDRX_SECOND    ( BIT(4) | SUBNETX )
-    #define ADDRX_DEBUG     ( BIT(5) | SUBNETX )
-    #define ADDRX_REMOTE_IA ( BIT(6) | SUBNETX )
-    #define ADDRX_DBGBRIDGE ( BIT(7) | SUBNETX )
-    #define ADDRX_BROADCAST ( 0xff   | SUBNETX )
+    #define ADDRX_MAIN_TURRET   ( BIT(0) | SUBNETX )
+    #define ADDRX_FIX           ( BIT(1) | SUBNETX )
+    #define ADDRX_MOBILE_1      ( BIT(2) | SUBNETX )
+    #define ADDRX_MOBILE_2      ( BIT(3) | SUBNETX )
+    #define ADDRX_SECOND        ( BIT(4) | SUBNETX )
+    #define ADDRX_DEBUG         ( BIT(5) | SUBNETX )
+    #define ADDRX_REMOTE_IA     ( BIT(6) | SUBNETX )
+    #define ADDRX_DBGBRIDGE     ( BIT(7) | SUBNETX )
+    #define ADDRX_BROADCAST     ( 0xff   | SUBNETX )
 
 //I2C addresses (least significant bit of I²C addresses must be unused)
     //subnet MAIN
@@ -63,6 +63,7 @@ extern "C" {
 //UART addresses
     #define ADDRU_DBGBRIDGE ( 1 | SUBNETU_DEBUG )
     #define ADDRU_DEBUG     ( 2 | SUBNETU_DEBUG )
+    #define ADDRU_MAIN_IO   ( 3 | SUBNETU_DEBUG )
 
 //UDP addresses
     #define ADDRD_DEBUG1           ( 1 | SUBNETD_DEBUG )

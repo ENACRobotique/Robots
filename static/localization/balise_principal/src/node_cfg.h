@@ -11,7 +11,7 @@
 #include "network_cfg.h"
 
 //network config
-#define MYADDRX ADDRX_MAIN
+#define MYADDRX ADDRX_MAIN_TURRET
 #define MYADDRI ADDRI_MAIN_TURRET
 #define MYADDRU 0
 #define MYADDRD 0
