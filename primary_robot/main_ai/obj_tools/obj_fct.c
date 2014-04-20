@@ -145,7 +145,6 @@ void simuSecondary(void){ //TODO if a other robot on trajectory
             state++ ;
             }
 
-        obs[1].r = 12;
         obs[1].c = pos;
         obs_updated[1]++;
 
@@ -186,17 +185,82 @@ void updateRatioObj(int numObj, int robot){ //robot = 1 to 3
 void checkRobot2Obj(void){
     int i, j, k;
     sNum_t dist;
+    static int tab[NB_OBJ][2] ={{0, 0}};
 
     for(i = 0 ; i < NB_OBJ ; i++){
+        if(tab[i][0]){
+            tab[i][0] = 0;
+            listObj[i].active = tab[i][1];
+            }
         for(j = 1 ; j < 4 ; j++){
             for(k = 0 ; k < listObj[i].nbObs ; k++){
                 distPt2Pt(&obs[listObj[i].numObs[k]].c, &obs[j].c, &dist);
                 if( (obs[listObj[i].numObs[k]].r + obs[j].r - R_ROBOT) > (dist - ERR_DIST) ){
                     updateRatioObj(i, j);
+                    tab[i][0] = 1;
+                    tab[i][1] = listObj[i].active;
+                    listObj[i].active = 0;
                     }
                 }
             }
         }
+    }
+
+int checkAdvOnRobot(void){
+    int i;
+    sNum_t dist;
+
+    for(i = 1 ; i < 3 ; i++){
+        distPt2Pt(&obs[i].c, &obs[0].c, &dist);
+        if( (obs[i].r + R_ROBOT) > (dist - ERR_DIST) ){
+            printf("On est dans un robot\n");
+            //getchar();
+            return 1;
+            }
+        }
+
+    return 0;
+    }
+
+int checkRobotBlock(void){
+    static sPt_t pos[10] ={{0., 0.}};
+    static int pt = 0;
+    static unsigned int lastTime = 0;
+    int i, cpt = 0;
+    sNum_t dist;
+
+    if( fabs(time_diff(millis(), lastTime)) > 200){
+        pos[pt] = obs[0].c;
+        pt++;
+        pt = pt%10;
+        for(i = 0 ; i < 10 ; i++){
+            distPt2Pt(&obs[0].c, &pos[i], &dist);
+            if(dist < 1.) cpt++;
+            }
+        if(cpt == 10){
+            printf("Warning robot block\n");
+            return 1;
+            }
+        lastTime = millis();
+        }
+
+    return 0;
+    }
+
+void stopRobot(void){
+    sPath_t path;
+    sTrajEl_t traj;
+
+    traj.p1 = obs[0].c;
+    traj.p2 = obs[0].c;
+    traj.arc_len = 0.;
+    traj.seg_len = 0.;
+    traj.sid = 0;
+
+    path.path_len = 1;
+    path.path = &traj;
+
+    send_robot(path);
     }
 
 

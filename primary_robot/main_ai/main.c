@@ -410,7 +410,7 @@ int main(int argc, char **argv){
         }
 
         // check if any obs has been updated => synchro with the monitoring interface
-        if(!send_obss_reset && (millis() - prevSendObs > 400)){
+        if(!send_obss_reset && (millis() - prevSendObs > 100)){
             prevSendObs = millis();
 
             for(i = 0; i < N; i++){

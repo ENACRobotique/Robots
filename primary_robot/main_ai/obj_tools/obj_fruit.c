@@ -232,6 +232,10 @@ void obj_tree(iABObs_t obj)
 			printf("start x=%f y=%f end x=%f y=%f\n",obs[0].c.x,obs[0].c.y,obs[N-1].c.x,obs[N-1].c.y);
 			break;
 		case 1:
+		    if( checkAdvOnRobot() ){
+		        stopRobot();
+		        mode_obj=0;
+		        }
 			if ((fabs(pt_select.x-_current_pos.x)<1 && fabs(pt_select.y-_current_pos.y)<1)){
 				state=2;
 				}

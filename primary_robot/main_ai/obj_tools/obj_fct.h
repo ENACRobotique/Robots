@@ -18,6 +18,7 @@
 #include "obj.h"
 #include "obj_types.h"
 #include "obj_fire.h"
+#include "obj_time_tools.h"
 
 
 void printListObj(void);
@@ -32,5 +33,8 @@ void simuSecondary(void);
 void posPrimary(void);
 void updateRatioObj(int numObj, int robot);
 void checkRobot2Obj(void);
+int checkAdvOnRobot(void);
+int checkRobotBlock(void);
+void stopRobot(void);
 
 #endif /* OBJ_FCT_H_ */

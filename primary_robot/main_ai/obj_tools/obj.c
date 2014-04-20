@@ -299,14 +299,16 @@ void obj_step(){
 
             if( (obj = next_obj()) != -1 ){
             	current_obj=obj;
-				if ( checkCurrentPath() == 0){
+				if ( checkCurrentPath() == 0 || checkRobotBlock() == 1){
 					send_robot(path) ;
 					}
 				}
 			}
 
         //Update position
-            simuSecondary();
+            if( (millis() - _start_time) > 2000){
+                simuSecondary();
+                }
             posPrimary();
 
             posPrimaryADV = getLastPGPosition(ELT_ADV_PRIMARY);
@@ -320,6 +322,9 @@ void obj_step(){
             obs_updated[3]++;
 
             checkRobot2Obj();
+            checkRobotBlock();
+
+
 
         if((millis()-last_time2)>1000){
             last_time2 = millis();
@@ -351,7 +356,7 @@ void obj_step(){
         break;
 
     case SHUT_DOWN:
-        printf ("SHUT_DOWN : time = %ld\n", (millis()-_start_time)/1000);
+        printf ("SHUT_DOWN : time = %d\n", (int) (millis()-_start_time)/1000);
         exit(1);
         //TODO arrêt total
         return;
@@ -369,11 +374,11 @@ int obj_init(){
     //Setting initial position
     if(COLOR==1){
         obs[0].c.x=300. - 16.;
-        obs[0].c.y=200. - 30.;
+        obs[0].c.y=200. - 40.;
         }
     else{
         obs[0].c.x=16.;
-        obs[0].c.y=200. - 30.;
+        obs[0].c.y=200. - 40.;
         }
     theta_robot = -M_PI_2;
     _current_pos=obs[0].c;
