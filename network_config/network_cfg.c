@@ -38,7 +38,7 @@ sRTableEntry rTable[]={
     {SUBNETD_DEBUG, {IF_I2C, ADDRI_MAIN_IO}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
-#elif (MYADDRI == ADDRI_MAIN_IO)
+#elif (MYADDRI == ADDRI_MAIN_IO || MYADDRU == ADDRU_MAIN_IO)
 sRTableEntry rTable[]={
     {SUBNETX, {IF_I2C, ADDRI_MAIN_TURRET}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}

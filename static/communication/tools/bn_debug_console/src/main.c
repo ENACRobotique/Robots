@@ -189,6 +189,38 @@ int main(int argc, char **argv){
                 while(isspace(cmd=getchar()));
 
                 switch (cmd){
+                case 'e':{
+                    sMsg msg = {{0}};
+                    static int us = 1200;
+                    us = 3000 - us;
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_SERVOS;
+                    msg.header.size = 2 + 3;
+                    msg.payload.servos.nb_servos = 1;
+                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
+                    msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
+                case 'f':{
+                    sMsg msg = {{0}};
+                    int us;
+
+                    printf("us: "); fflush(stdout);
+                    scanf("%i", &us);
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_SERVOS;
+                    msg.header.size = 2 + 3;
+                    msg.payload.servos.nb_servos = 1;
+                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
+                    msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
                 case 's' :  //sends debug address to distant node
                     do{
                         printf("enter destination address\n");
