@@ -30,5 +30,7 @@ int test_in_obs(void);
 int test_tirette(void);
 void simuSecondary(void);
 void posPrimary(void);
+void updateRatioObj(int numObj, int robot);
+void checkRobot2Obj(void);
 
 #endif /* OBJ_FCT_H_ */

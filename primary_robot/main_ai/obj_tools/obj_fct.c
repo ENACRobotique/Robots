@@ -21,6 +21,7 @@ void printListObj(void){
         printf("}, ");
         printf("dist=%f, ",listObj[i].dist);
         printf("active=%d, ",listObj[i].active);
+        printf("done=%f, ",listObj[i].done);
         printf("nbEP=%d, ",listObj[i].nbEP);
         printf("entryPoint={");
         for(j=0 ; j<listObj[i].nbEP ; j++){
@@ -130,7 +131,7 @@ void simuSecondary(void){ //TODO if a other robot on trajectory
     unsigned int time = millis();
     sNum_t theta;
 
-    if( lastTime == 0 ){
+    if( !lastTime ){
         lastTime = millis();
         pos = trjS[0];
         }
@@ -144,7 +145,7 @@ void simuSecondary(void){ //TODO if a other robot on trajectory
             state++ ;
             }
 
-        obs[1].r = 10;
+        obs[1].r = 12;
         obs[1].c = pos;
         obs_updated[1]++;
 
@@ -173,6 +174,30 @@ void posPrimary(void){
         }
     }
 
+void updateRatioObj(int numObj, int robot){ //robot = 1 to 3
+    static int mat[3][NB_OBJ] = {{0, 0}};  //3 is the number of other robot
+
+    if( !mat[robot-1][numObj] ){
+        listObj[numObj].done += (1 - listObj[numObj].done)/2;
+        mat[robot-1][numObj] = 1;
+        }
+    }
+
+void checkRobot2Obj(void){
+    int i, j, k;
+    sNum_t dist;
+
+    for(i = 0 ; i < NB_OBJ ; i++){
+        for(j = 1 ; j < 4 ; j++){
+            for(k = 0 ; k < listObj[i].nbObs ; k++){
+                distPt2Pt(&obs[listObj[i].numObs[k]].c, &obs[j].c, &dist);
+                if( (obs[listObj[i].numObs[k]].r + obs[j].r - R_ROBOT) > (dist - ERR_DIST) ){
+                    updateRatioObj(i, j);
+                    }
+                }
+            }
+        }
+    }
 
 
 

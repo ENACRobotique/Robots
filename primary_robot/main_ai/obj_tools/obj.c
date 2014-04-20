@@ -94,7 +94,7 @@ sNum_t val_obj(int num){ //numeros de l'objectif dans listObj[] compris entre 0 
         	return(-1);
         	break;
         }
-    return ratio;
+    return ratio * (1. - listObj[num].done);
     }
 
 
@@ -319,6 +319,8 @@ void obj_step(){
             //obs[3].c.y = posSecondaryADV->y;
             obs_updated[3]++;
 
+            checkRobot2Obj();
+
         if((millis()-last_time2)>1000){
             last_time2 = millis();
             updateEntryPointTree();
@@ -349,7 +351,7 @@ void obj_step(){
         break;
 
     case SHUT_DOWN:
-        printf ("SHUT_DOWN\n");
+        printf ("SHUT_DOWN : time = %ld\n", (millis()-_start_time)/1000);
         exit(1);
         //TODO arrêt total
         return;
@@ -379,11 +381,12 @@ int obj_init(){
     //Initialization of the game
     init_ele();
 
-    //Add bad fruit for simulation
+    //Change element for simulation
     ((Obj_arbre*)listObj[0].typeStruct)->eFruit[3]=2;
     ((Obj_arbre*)listObj[1].typeStruct)->eFruit[0]=2;
     ((Obj_arbre*)listObj[2].typeStruct)->eFruit[3]=2;
     ((Obj_arbre*)listObj[3].typeStruct)->eFruit[4]=2;
+    listObj[10].done=0.5;
 
 
     //Update all obstacle

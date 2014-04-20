@@ -55,22 +55,22 @@ Obj_feu feu[16]={
 
 
 sObj_t listObj[NB_OBJ] = {
-	{.type = E_ARBRE, .numObj=0, .nbObs=1, .numObs[0]=START_ARBRE  ,																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{16. , 97.}, 10.,90. }, .entryPoint[1]={{16. , 45.}, 10.,270.}},
-	{.type = E_ARBRE, .numObj=1, .nbObs=1, .numObs[0]=START_ARBRE+1, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{43. , 16.}, 10.,180.}, .entryPoint[1]={{97. , 16.}, 10.,0.  }},
-	{.type = E_ARBRE, .numObj=2, .nbObs=1, .numObs[0]=START_ARBRE+2, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{203., 16.}, 10.,180.}, .entryPoint[1]={{257., 16.}, 10.,0.  }},
-	{.type = E_ARBRE, .numObj=3, .nbObs=1, .numObs[0]=START_ARBRE+3, 																 .dist=0, .active=1, .nbEP=2, .entryPoint[0]={{284., 43.}, 10.,270.}, .entryPoint[1]={{284., 97.}, 10.,90. }},
-	{.type = E_BAC,   .numObj=0, .nbObs=0, 															     				  			 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{230.,155.}, 10.,270.}},
-	{.type = E_BAC,   .numObj=1, .nbObs=0, 																 							 .dist=0, .active=1, .nbEP=1, .entryPoint[0]={{70. ,155.}, 10.,270.}},
-	{.type = E_FEU,   .numObj=0, .nbObs=1, .numObs[0]=START_FEU    ,																 .dist=0, .active=1, .nbEP=1},
-	{.type = E_FEU,   .numObj=1, .nbObs=1, .numObs[0]=START_FEU+1  ,																 .dist=0, .active=1, .nbEP=1},
-	{.type = E_FEU,   .numObj=2, .nbObs=1, .numObs[0]=START_FEU+2  , 																 .dist=0, .active=1, .nbEP=1},
-	{.type = E_FEU,   .numObj=3, .nbObs=1, .numObs[0]=START_FEU+3  , 																 .dist=0, .active=1, .nbEP=1},
-	{.type = E_FEU,   .numObj=4, .nbObs=1, .numObs[0]=START_FEU+4  ,																 .dist=0, .active=1, .nbEP=1},
-	{.type = E_FEU,   .numObj=5, .nbObs=1, .numObs[0]=START_FEU+5  ,																 .dist=0, .active=1, .nbEP=1},
-	{.type = E_FEU,   .numObj=6, .nbObs=3, .numObs[0]=START_FEU+6  , .numObs[1]=START_TORCHE_FIXE  , .numObs[2]=START_TORCHE_FIXE+1, .dist=0, .active=0, .nbEP=1},
-	{.type = E_FEU,   .numObj=7, .nbObs=3, .numObs[0]=START_FEU+7  , .numObs[1]=START_TORCHE_FIXE+2, .numObs[2]=START_TORCHE_FIXE+3, .dist=0, .active=0, .nbEP=1},
-	{.type = E_FEU,   .numObj=8, .nbObs=3, .numObs[0]=START_FEU+8  , .numObs[1]=START_TORCHE_FIXE+4, .numObs[2]=START_TORCHE_FIXE+5, .dist=0, .active=0, .nbEP=1},
-	{.type = E_FEU,   .numObj=9, .nbObs=3, .numObs[0]=START_FEU+9  , .numObs[1]=START_TORCHE_FIXE+6, .numObs[2]=START_TORCHE_FIXE+7, .dist=0, .active=0, .nbEP=1},
+	{.type = E_ARBRE, .numObj=0, .nbObs=1, .numObs[0]=START_ARBRE  ,																 .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{16. , 97.}, 10.,90. }, .entryPoint[1]={{16. , 45.}, 10.,270.}},
+	{.type = E_ARBRE, .numObj=1, .nbObs=1, .numObs[0]=START_ARBRE+1, 																 .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{43. , 16.}, 10.,180.}, .entryPoint[1]={{97. , 16.}, 10.,0.  }},
+	{.type = E_ARBRE, .numObj=2, .nbObs=1, .numObs[0]=START_ARBRE+2, 																 .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{203., 16.}, 10.,180.}, .entryPoint[1]={{257., 16.}, 10.,0.  }},
+	{.type = E_ARBRE, .numObj=3, .nbObs=1, .numObs[0]=START_ARBRE+3, 																 .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{284., 43.}, 10.,270.}, .entryPoint[1]={{284., 97.}, 10.,90. }},
+	{.type = E_BAC,   .numObj=0, .nbObs=0, 															     				  			 .dist=0, .active=1, .done=0, .nbEP=1, .entryPoint[0]={{230.,155.}, 10.,270.}},
+	{.type = E_BAC,   .numObj=1, .nbObs=0, 																 							 .dist=0, .active=1, .done=0, .nbEP=1, .entryPoint[0]={{70. ,155.}, 10.,270.}},
+	{.type = E_FEU,   .numObj=0, .nbObs=1, .numObs[0]=START_FEU    ,																 .dist=0, .active=1, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=1, .nbObs=1, .numObs[0]=START_FEU+1  ,																 .dist=0, .active=1, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=2, .nbObs=1, .numObs[0]=START_FEU+2  , 																 .dist=0, .active=1, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=3, .nbObs=1, .numObs[0]=START_FEU+3  , 																 .dist=0, .active=1, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=4, .nbObs=1, .numObs[0]=START_FEU+4  ,																 .dist=0, .active=1, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=5, .nbObs=1, .numObs[0]=START_FEU+5  ,																 .dist=0, .active=1, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=6, .nbObs=3, .numObs[0]=START_FEU+6  , .numObs[1]=START_TORCHE_FIXE  , .numObs[2]=START_TORCHE_FIXE+1, .dist=0, .active=0, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=7, .nbObs=3, .numObs[0]=START_FEU+7  , .numObs[1]=START_TORCHE_FIXE+2, .numObs[2]=START_TORCHE_FIXE+3, .dist=0, .active=0, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=8, .nbObs=3, .numObs[0]=START_FEU+8  , .numObs[1]=START_TORCHE_FIXE+4, .numObs[2]=START_TORCHE_FIXE+5, .dist=0, .active=0, .done=0, .nbEP=1},
+	{.type = E_FEU,   .numObj=9, .nbObs=3, .numObs[0]=START_FEU+9  , .numObs[1]=START_TORCHE_FIXE+6, .numObs[2]=START_TORCHE_FIXE+7, .dist=0, .active=0, .done=0, .nbEP=1},
 	};
 
 

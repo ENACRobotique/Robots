@@ -25,6 +25,7 @@
 #define START_ARBRE 4
 #define START_TORCHE_FIXE 23
 #define FIRE_RADIUS_EP 15
+#define ERR_DIST 2.
 
 
 typedef enum {ATTENTE , JEU , SHUT_DOWN} estate_t;
@@ -47,6 +48,7 @@ typedef struct
 	uint8_t numObs[MAX_OBS_BY_OBJ];  	    //numeros des obstacles associer à l'objectif
 	sNum_t dist;            				//distance robot-objectif(EntryPoint le plus proche)
 	uint8_t active;        	 				//0=objectif fini 1=objectif non fini
+    sNum_t done;                           //proba déjà réaliser par un autre robot
 	uint8_t nbEP;          	 				//nombre de point d'accès de l'objectif
 	sObjPoint_t  entryPoint[MAX_EP_BY_OBJ]; //liste des point d'accès pour atteindre l'objectif
 	void   *typeStruct;         			//structure particuliere associer au type d'objectif
