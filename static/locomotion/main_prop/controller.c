@@ -9,6 +9,7 @@ PID_t vitMotGauche, vitMotDroit;
 motor_t motGauche, motDroit;
 
 //#define ASSERV_STATS
+//#define ASSERV_LOGS
 
 #ifdef ASSERV_STATS
 #include <string.h>
@@ -24,6 +25,11 @@ unsigned int prev_time = 0;
 unsigned int nb_seq = 0;
 #endif
 
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+#include <stdio.h>
+FILE *fdl = NULL;
+#endif
+
 void motor_controller_init() {
     // asserv
     pid_init(&vitMotGauche, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
@@ -35,6 +41,10 @@ void motor_controller_init() {
 
 #ifdef ASSERV_STATS
     prev_time = micros();
+#endif
+
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+    fdl = fopen("out_ctrlr.csv", "w+");
 #endif
 }
 
@@ -50,6 +60,10 @@ void motor_controller_update(int sPL, int pVL, int sPR, int pVR) {
         AS->steps[i_as].delta_t = t - prev_time;
         prev_time = t;
     }
+#endif
+
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+    if(fdl) fprintf(fdl, "%i,%i,%i,%i", sPL, sPR, pVL, pVR);
 #endif
 
     // limit acceleration (keeping ratio of errors constant)
@@ -69,6 +83,13 @@ void motor_controller_update(int sPL, int pVL, int sPR, int pVR) {
     // update PIDs
     valL = pid_update(&vitMotGauche, sPL, pVL);
     valR = pid_update(&vitMotDroit, sPR, pVR);
+
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+    if(fdl) {
+        fprintf(fdl, ",%i,%i,%i,%i\n", sPL, sPR, valL, valR);
+        fflush(fdl);
+    }
+#endif
 
     // send command to motors
     motor_update(&motGauche, valL);

@@ -61,6 +61,7 @@ void _isr_right(){ // irq14
 #endif
 
 //#define TIME_STATS
+//#define ASSERV_LOGS
 
 #define TRAJ_MAX_SIZE (16)
 
@@ -264,6 +265,10 @@ int send_pos(){
     return role_send(&msg);
 }
 
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+FILE *fout = NULL;
+#endif
+
 int new_asserv_step(){
 #ifdef TIME_STATS
     start_us = micros();
@@ -299,6 +304,10 @@ int new_asserv_step(){
     x += ((long long)v * ct)>>SHIFT;
     y += ((long long)v * st)>>SHIFT;
 
+#ifdef ARCH_X86_LINUX
+//    printf("%i,%i,%i,%i,%i,%i,%i\x1b[K\n", ticks_l, ticks_r, v, theta, isRPI, ct, st);
+#endif
+
     switch(state) {
     default:
     case S_WAIT:
@@ -327,6 +336,12 @@ int new_asserv_step(){
         gy = traj[curr_traj][curr_traj_step>>1].p2_y;
         /* no break, fall through to save 20ms */
     case S_RUN_TRAJ:
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+        if(!fout){
+            fout = fopen("out.csv", "w+");
+        }
+#endif
+
         // distance to the next goal
         dist = SQRT( (SQR(gy - y) + SQR(gx - x))>>SHIFT );
 
@@ -417,6 +432,13 @@ int new_asserv_step(){
                 tmp += (isRPI<<1);
             }
 
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+            if(fout){
+                fprintf(fout, "%u,0,%i,%i,%lli,%f,%f,%f\n", millis(), alpha, theta, tmp, RI2Rs(alpha), RI2Rs(theta), RI2Rs(tmp));
+                fflush(fout);
+            }
+#endif
+
             tmp>>=4; // gain
 
 #ifdef TIME_STATS
@@ -436,6 +458,30 @@ int new_asserv_step(){
         // update set point of each motor
         consigne_l = (((long long)_mul_l*(long long)consigne)>>SHIFT) - tmp; // (IpP<<SHIFT)
         consigne_r = (((long long)_mul_r*(long long)consigne)>>SHIFT) + tmp;
+
+#if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
+        if(fout){
+            long long tmp2;
+
+            if(curr_traj_step&1){
+                tmp2 = SQRT((SQR(x - traj[curr_traj][curr_traj_step>>1].c_x) + SQR(y - traj[curr_traj][curr_traj_step>>1].c_y))>>SHIFT) - abs(traj[curr_traj][curr_traj_step>>1].c_r);
+                if(traj[curr_traj][curr_traj_step>>1].c_r > 0){
+                    tmp2*=-1;
+                }
+            }
+            else{
+                long long a, b, c;
+                a = traj[curr_traj][curr_traj_step>>1].p2_y - traj[curr_traj][curr_traj_step>>1].p1_y;
+                b = traj[curr_traj][curr_traj_step>>1].p1_x - traj[curr_traj][curr_traj_step>>1].p2_x;
+                c = (-a*traj[curr_traj][curr_traj_step>>1].p1_x -b*traj[curr_traj][curr_traj_step>>1].p1_y)>>SHIFT;
+
+                tmp2 = (a*x + b*y + (c<<SHIFT))/SQRT((SQR(a) + SQR(b))>>SHIFT);
+            }
+
+            fprintf(fout, "%u,%i,%lli,%i,%i,%i,%lli,%i,%i,%i\n", millis(), curr_traj_step&1, tmp, _mul_l, _mul_r, consigne, tmp2, x, y, theta);
+            fflush(fout);
+        }
+#endif
         break;
     }
 
