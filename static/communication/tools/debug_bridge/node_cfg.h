@@ -30,6 +30,6 @@
 #define UART_READBYTE_TIMEOUT 100000    //in µs
 
 #define XBEE_UART_PATH "/dev/ttyUSB0"
-#define BN_UART_PATH "/dev/ttyACM0"
+#define BN_UART_PATH "/dev/rfcomm0"
 
 #endif /* NODE_CFG_H_ */

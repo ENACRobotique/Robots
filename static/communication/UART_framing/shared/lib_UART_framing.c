@@ -18,6 +18,7 @@
  *  To verify: Add all bytes (include checksum, but not the delimiter and length). If the checksum is correct, the sum will equal 0xFF.
  */
 
+#include <malloc.h>
 
 // config files
 #include "node_cfg.h"
@@ -35,6 +36,8 @@
 #error "in UART_framing lib, no known arch symbol defined"
 #endif
 
+int framebased = 0;
+
 /* UART_init initializes the UART hardware
  * Argument :
  *  device : /dev/tty???# (linux only)
@@ -44,6 +47,10 @@
  *  <0 : error
  */
 int UART_init(const char* device, uint32_t option){
+    if(option & E_FRAMEBASED){
+        framebased = 1;
+    }
+
 #ifdef ARCH_328P_ARDUINO
     return serialInit(option);
 #elif defined(ARCH_X86_LINUX)
@@ -72,31 +79,80 @@ int UART_deinit(){
  *  <=0 : error (ex : writing error, size too big)
  */
 int UART_writeFrame(const void *pt,int size){
-    uint8_t cSum=0; //checksum
-    int j=0;
+    uint8_t c,cSum=0; //checksum
+    int i,j=0;
     int ret;
 
     //check size :
-    if ( size >= (UART_MTU) ) return -ERR_UART_OVERSIZE;
+    if ( size > UART_MTU ) return -ERR_UART_OVERSIZE;
 
-    //write start byte
-    if ( (ret=serialWrite(UART_FRAME_START)) <= 0 ) return ret;
+    if(framebased){
+        uint8_t *buf = (uint8_t *)malloc(1+(size+3)*2); // worst case size
+        if(!buf){
+            return -ERR_INSUFFICIENT_MEMORY;
+        }
 
-    //write size
-    if ( (ret=serialWriteEscaped((uint8_t)(size>>8))) <= 0 ) return ret;   //MSB
-    if ( (ret=serialWriteEscaped((uint8_t)(size&0xff))) <= 0 ) return ret; //LSB
+        i=0;
 
-    //write data
-    for (j=0;j<size;j++){
-        if ( (ret=serialWriteEscaped(((uint8_t*)pt)[j])) <= 0 ) return ret;
-        cSum+=((uint8_t*)pt)[j];
+#define WRITE_ESCAPED(byte) do{\
+                    if ( byte == UART_FRAME_START || byte == UART_XOFF || byte == UART_XON || byte == UART_ESCAPE_CHAR ){\
+                        buf[i] = UART_ESCAPE_CHAR;\
+                        i++;\
+                        buf[i] = (byte)^UART_ESCAPE_MASK;\
+                        i++;\
+                    }\
+                    else{\
+                        buf[i] = (byte);\
+                        i++;\
+                    }\
+                }while(0)
+        //write start byte
+        buf[i] = UART_FRAME_START;
+        i++;
+
+        //write size
+        c=(uint8_t)(size>>8);
+        WRITE_ESCAPED(c);
+        c=(uint8_t)(size&0xff);
+        WRITE_ESCAPED(c);
+
+        //write data
+        for(j=0;j<size;j++){
+            c=((uint8_t*)pt)[j];
+            WRITE_ESCAPED(c);
+            cSum+=c;
+        }
+
+        //compute and write checksum
+        cSum=0xff-cSum;
+        WRITE_ESCAPED(cSum);
+#undef WRITE_ESCAPED
+
+        //actual sending of data
+        ret=serialWriteBytes(buf, i);
+        free(buf);
+        return ret==i?size:(ret<0?ret:0);
     }
+    else{
+        //write start byte
+        if ( (ret=serialWrite(UART_FRAME_START)) <= 0 ) return ret;
 
-    //compute and write checksum
-    cSum=0xff-cSum;
-    if ( (ret=serialWriteEscaped(cSum)) <= 0 ) return ret;
+        //write size
+        if ( (ret=serialWriteEscaped((uint8_t)(size>>8))) <= 0 ) return ret;   //MSB
+        if ( (ret=serialWriteEscaped((uint8_t)(size&0xff))) <= 0 ) return ret; //LSB
 
-    return size;
+        //write data
+        for (j=0;j<size;j++){
+            if ( (ret=serialWriteEscaped(((uint8_t*)pt)[j])) <= 0 ) return ret;
+            cSum+=((uint8_t*)pt)[j];
+        }
+
+        //compute and write checksum
+        cSum=0xff-cSum;
+        if ( (ret=serialWriteEscaped(cSum)) <= 0 ) return ret;
+
+        return size;
+    }
 }
 
 

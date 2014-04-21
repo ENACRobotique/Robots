@@ -32,7 +32,7 @@ int serialReadEscaped(uint8_t *byte, uint32_t timeout);
 #define UART_XON            0x11
 #define UART_XOFF           0x13
 
-#define UART_MTU            128
+#define UART_MTU            (128)
 
 #ifdef __cplusplus
 }
