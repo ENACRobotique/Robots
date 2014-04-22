@@ -12,19 +12,25 @@ pour arduino UNO
 
 #include "../../../communication/botNet/shared/bn_debug.h"
 
+#define DEBUG_LASER
+
 //globales
+#ifdef DEBUG_LASER
+bufStruct buf0={{0},0,0,0,3,0,0,0,0};
+bufStruct buf1={{0},0,0,0,3,0,0,0,1};
+#else
 bufStruct buf0={{0},0,0,0,0,0,0,0,0};
 bufStruct buf1={{0},0,0,0,0,0,0,0,1};
 
+#endif
 
 
 #define LASER_THICK_MIN 24    // in µs refined with measurement
 #define LASER_THICK_MAX 600 // in µs refined with measurement
 
 #define DEBOUNCETIME_INT_LASER 20  //measured
-#define DEBUG_LASER
 
-#define LAT_SHIFT 2 //in µs TODO : refine
+#define LAT_SHIFT 1 //in µs TODO : refine
 
 
 
@@ -52,6 +58,9 @@ void laserIntHand0(){ //interrupt handler, puts the time in the rolling buffer
         buf0.buf[buf0.index]=time;
         buf0.index++;
         buf0.index&=7;
+        digitalWrite(13,HIGH);
+        delayMicroseconds(10);
+        digitalWrite(13,LOW);
     }
 }
 
@@ -89,8 +98,6 @@ ldStruct laserDetect(bufStruct *bs){
     i--;
     nb++;
     }
-
-
     if ( nb>=4 ){
         // we just got enough data, set the new update time
         d1 = bufTemp[ilast&7]-bufTemp[(ilast-2)&7];
@@ -133,7 +140,6 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
     unsigned long int time=micros();
     ldStruct measure={0};
 
-
     if ( time-bs->prevTime >= bs->timeInc){
         switch (bs->stage){
             case 0 : { //acquisition
@@ -154,7 +160,9 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     pRet->thickness=measure.thickness;
                     pRet->sureness=laser_period;
                     pRet->precision=4; //in µs TODO
-
+#ifdef DEBUG_LASER
+                    bn_printfDbg("%lu acq->tra %lu %lu %lu\n",micros(),pRet->date,bs->lat,laser_period);
+#endif
                     return 1;
 
                 }
@@ -191,7 +199,9 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period-(bs->lat>>1);
                     bs->stage=2;
-//bn_printfDbg((char*)"mes %lu \t sur %ld",pRet->deltaT,pRet->sureness);
+#ifdef DEBUG_LASER
+                    bn_printfDbg("%lu tra->tra %lu %lu %lu\n",micros(),pRet->date,bs->lat,pRet->period);
+#endif
                     return 1;
                 }
                 else {
@@ -205,7 +215,9 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
 
                     bs->stage=0;
-
+#ifdef DEBUG_LASER
+                    bn_printfDbg("%lu tra->acq\n",micros());
+#endif
                     return 0;
 
                 }
@@ -221,10 +233,41 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
 
                 //return to stage 1
                 bs->stage=1;
-
                 return 0;
                 break;
             }
+#ifdef DEBUG_LASER
+            case 3 : { //debug case
+                static int nbdetected=0;
+                //laserdetect
+                measure=laserDetect(bs);
+                //if correct, goto tracking_clearing (stage 2), set the latency to LAT_INIT and the nextTime accordingly
+                if (measure.deltaT!=0){
+
+                    nbdetected++;
+                    pRet->period=0;
+                    pRet->deltaT=measure.deltaT;
+                    pRet->date=measure.date;
+                    pRet->thickness=measure.thickness;
+                    pRet->sureness=laser_period;
+                    pRet->precision=4; //in µs TODO
+                    bn_printfDbg("%lu acq->tra %lu %lu %lu %d\n",micros(),pRet->date,bs->lat,laser_period,nbdetected);
+
+                }
+
+                    //"clear "the buffer and lastLaserDetection
+                    bs->prevCall=time;
+                    bs->lastDetect=0;
+
+                    //set the nextime and prevtime and tolerated latency
+                    bs->prevTime=time;
+                    bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
+                    bs->stage=3;
+
+                    return 0;
+                break;
+            }
+#endif
             default : break;
         }
     }

@@ -156,7 +156,7 @@ void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t perio
         sum_OO+=period*period;
         sum_ones+=1;
     }
-#ifdef DEBUG_SYNC
+#ifdef DEBUG_SYNC_VALUES
     else bn_printfDbg("%lu,%lu,%lu,REJECTED(overflow)\n",t_local,t_turret,period);
 #endif
 }
