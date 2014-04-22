@@ -18,7 +18,9 @@
  *  To verify: Add all bytes (include checksum, but not the delimiter and length). If the checksum is correct, the sum will equal 0xFF.
  */
 
+#ifdef ARCH_X86_LINUX
 #include <malloc.h>
+#endif
 
 // config files
 #include "node_cfg.h"
@@ -36,7 +38,9 @@
 #error "in UART_framing lib, no known arch symbol defined"
 #endif
 
+#ifdef ARCH_X86_LINUX
 int framebased = 0;
+#endif
 
 /* UART_init initializes the UART hardware
  * Argument :
@@ -47,9 +51,11 @@ int framebased = 0;
  *  <0 : error
  */
 int UART_init(const char* device, uint32_t option){
+#ifdef ARCH_X86_LINUX
     if(option & E_FRAMEBASED){
         framebased = 1;
     }
+#endif
 
 #ifdef ARCH_328P_ARDUINO
     return serialInit(option);
@@ -79,13 +85,18 @@ int UART_deinit(){
  *  <=0 : error (ex : writing error, size too big)
  */
 int UART_writeFrame(const void *pt,int size){
-    uint8_t c,cSum=0; //checksum
-    int i,j=0;
+    uint8_t cSum=0; //checksum
+    int j=0;
     int ret;
+#ifdef ARCH_X86_LINUX
+    uint8_t c;
+    int i;
+#endif
 
     //check size :
     if ( size > UART_MTU ) return -ERR_UART_OVERSIZE;
 
+#ifdef ARCH_X86_LINUX
     if(framebased){
         uint8_t *buf = (uint8_t *)malloc(1+(size+3)*2); // worst case size
         if(!buf){
@@ -134,6 +145,7 @@ int UART_writeFrame(const void *pt,int size){
         return ret==i?size:(ret<0?ret:0);
     }
     else{
+#endif
         //write start byte
         if ( (ret=serialWrite(UART_FRAME_START)) <= 0 ) return ret;
 
@@ -152,7 +164,9 @@ int UART_writeFrame(const void *pt,int size){
         if ( (ret=serialWriteEscaped(cSum)) <= 0 ) return ret;
 
         return size;
+#ifdef ARCH_X86_LINUX
     }
+#endif
 }
 
 
