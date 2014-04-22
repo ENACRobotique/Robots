@@ -137,7 +137,10 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
             bn_pushInBufLast((sMsg*)&(stru.data.RX16Data.payload),IF_XBEE);
             byteRead=0;
         }
-    } while( !(stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
+        else if(byteRead < 0){
+            return byteRead;
+        }
+    } while( !(byteRead>0 && stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -ERR_XBEE_NOSTAT;
 

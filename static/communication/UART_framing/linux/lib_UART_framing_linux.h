@@ -19,13 +19,16 @@ extern "C" {
 
 enum emode{
     E_115200_8N2,   //useful hack for xbee @ 111111 bd
-    E_115200_8N1
+    E_115200_8N1,
+    E_FRAMEBASED = 1<<31
 };
 
 int serialInit(const char *device, uint32_t mode);
 int serialDeinit();
 int serialRead(uint8_t *byte,uint32_t timeout);
 int serialWrite(uint8_t byte);
+//int serialReadBytes(uint8_t *bytes, uint8_t size, uint32_t timeout);
+int serialWriteBytes(uint8_t *bytes, uint8_t size);
 
 //#define DEBUG_PRINT_HEX
 

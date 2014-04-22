@@ -20,13 +20,14 @@
 #include "../botNet/shared/bn_debug.h"
 #include "../botNet/shared/bn_utils.h"
 #include "../../global_errors.h"
+#include "../../core/linux/libraries/Millis/millis.h"
 #include "node_cfg.h"
 
 
-static int menu = 0;
+static int sigint = 0;
 
 void intHandler(int dummy) {
-    menu = 1;
+    sigint = 1;
 }
 
 void usage(char *cl){
@@ -42,13 +43,20 @@ void usage(char *cl){
 }
 
 int main(int argc, char **argv){
-    int quit=0,quitMenu=0,err;
+    int quit=0,quitMenu=0,err,benchmark=0;
     char oLF=1,verbose=1;           //booleans used for display options, add new line char if missing (default yes), pure console mode (default no)
     FILE *fd = NULL;
 
     sMsg msgIn;
-    char cmd;
+    char *p;
     bn_Address destAd;
+
+    // benchmark mode
+    bn_Address bench_dest_addr = 0;
+    int bench_sz_msg = 0, bench_period = 2, bench_nb_msg_lost = 0, bench_nb_msg_total = 0;
+    unsigned int prevBench;
+    unsigned int bench_time_ok = 0, bench_time_ko = 0;
+    #define BENCH_TIME_SHIFT (3)
 
     // arguments parsing
     while(1){
@@ -163,7 +171,7 @@ int main(int argc, char **argv){
         }
         else if (err < 0){
             if (err == -ERR_SYSERRNO && errno == EINTR){
-                menu=1;
+                sigint=1;
             }
             else{
                 fprintf(stderr, "bn_receive() error #%i\n", -err);
@@ -172,13 +180,43 @@ int main(int argc, char **argv){
         }
 
         //menu
-        if (menu){
+        if (sigint){
             quitMenu=0;
+
+            if(benchmark){
+                float period, period_ok, period_ko;
+
+                period = (float)bench_period;
+                period_ok = (float)bench_time_ok/((float)(1<<BENCH_TIME_SHIFT));
+                period_ko = (float)bench_time_ko/((float)(1<<BENCH_TIME_SHIFT));
+
+                if(period_ok > period){
+                    period = period_ok;
+
+                    printf("/!\\ Couldn't sustain the desired period /!\\\n");
+                }
+
+                benchmark=0;
+                quitMenu=1;
+
+                printf("%i/%i (%.2f%%) messages lost\n", bench_nb_msg_lost, bench_nb_msg_total, 100.*bench_nb_msg_lost/bench_nb_msg_total);
+                printf("mean ok time: %.2fms\n", period_ok);
+                printf("mean ko time: %.2fms\n", period_ko);
+                printf("%.2fbauds, %.2fbit/s, %.2fo/s\n",
+                        1000. *(bench_sz_msg + 2*sizeof(msgIn.header))*8. *(bench_nb_msg_total-bench_nb_msg_lost)/bench_nb_msg_total /period,
+                        1000. *bench_sz_msg*8.                            *(bench_nb_msg_total-bench_nb_msg_lost)/bench_nb_msg_total /period,
+                        1000. *bench_sz_msg                               *(bench_nb_msg_total-bench_nb_msg_lost)/bench_nb_msg_total /period
+                );
+            }
+
             while (!quitMenu){
+                char input[32];
+
                 printf("\ndebug reader menu\n");
                 printf("s : send debugger address\n");
                 printf("p : ping\n");
                 printf("t : traceroute\n");
+                printf("b : benchmark mode\n");
                 printf("i : info about this node\n");
                 printf("l : add/remove line return to debug strings if missing\n");
                 printf("v : increase verbosity\n");
@@ -186,9 +224,43 @@ int main(int argc, char **argv){
                 printf("r : return\n");
                 printf("q : quit\n");
 
-                while(isspace(cmd=getchar()));
+                err = !fgets(input, sizeof(input), stdin);
+                p = &input[0];
+                while(*p && isspace(*p)) p++;
 
-                switch (cmd){
+                switch (*p){
+                case 'e':{
+                    sMsg msg = {{0}};
+                    static int us = 1200;
+                    us = 3000 - us;
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_SERVOS;
+                    msg.header.size = 2 + 3;
+                    msg.payload.servos.nb_servos = 1;
+                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
+                    msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
+                case 'f':{
+                    sMsg msg = {{0}};
+                    int us;
+
+                    printf("us: "); fflush(stdout);
+                    scanf("%i", &us);
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_SERVOS;
+                    msg.header.size = 2 + 3;
+                    msg.payload.servos.nb_servos = 1;
+                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
+                    msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
                 case 's' :  //sends debug address to distant node
                     do{
                         printf("enter destination address\n");
@@ -197,24 +269,25 @@ int main(int argc, char **argv){
                             printf("error getting destination address\n");
                         }
                     }while(err != 1);
+                    while(getchar() != '\n');
                     if ( (err=bn_debugSendAddr(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;
                     }
                     else {
                         printf("error while sending : %d\n", err);
-
                     }
                     break;
                 case 'p' :
                     do{
-                         printf("enter destination address\n");
-                         err = scanf("%hx",&destAd);
-                         if (err != 1){
-                             printf("error getting destination address\n");
-                         }
-                     }while(err != 1);
-                     printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
+                        printf("enter destination address\n");
+                        err = scanf("%hx",&destAd);
+                        if (err != 1){
+                            printf("error getting destination address\n");
+                        }
+                    }while(err != 1);
+                    while(getchar() != '\n');
+                    printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
                     break;
                 case 't' :
                     {
@@ -227,6 +300,7 @@ int main(int argc, char **argv){
                                  printf("error getting destination address\n");
                              }
                         }while(err != 1);
+                        while(getchar() != '\n');
                         do{
                              printf("enter depth\n");
                              err = scanf("%i",&depth);
@@ -234,6 +308,7 @@ int main(int argc, char **argv){
                                  printf("error getting depth\n");
                              }
                         }while(err != 1 || depth <= 0);
+                        while(getchar() != '\n');
                         trInfo = (sTraceInfo *)malloc(depth * sizeof(sTraceInfo));
                         nbTraces=bn_traceroute(destAd,trInfo,depth,1000);
                         for (f=0;f<nbTraces;f++){
@@ -241,6 +316,35 @@ int main(int argc, char **argv){
                         }
                     }
                     break;
+                case 'b': // start benchmark mode
+                {
+                    do{
+                        printf("dest address: ");
+                        err = !fgets(input, sizeof(input), stdin);
+                        err = err?0:sscanf(input, "%hx", &bench_dest_addr);
+                    }while(err != 1);
+
+                    do{
+                        printf("msg size: ");
+                        err = !fgets(input, sizeof(input), stdin);
+                        err = err?0:sscanf(input, "%i", &bench_sz_msg);
+                    }while(err != 1 || bench_sz_msg < 0 || bench_sz_msg > BN_MAX_PDU - sizeof(msgIn.header));
+
+                    do{
+                        printf("msg period: ");
+                        err = !fgets(input, sizeof(input), stdin);
+                        err = err?0:sscanf(input, "%i", &bench_period);
+                    }while(err != 1 || bench_period < 2);
+
+                    bench_time_ok = 0;
+                    bench_time_ko = 0;
+                    bench_nb_msg_lost = 0;
+                    bench_nb_msg_total = 0;
+                    benchmark = 1;
+                    quitMenu = 1;
+                    prevBench = millis();
+                    break;
+                }
                 case 'i' :  //displays info about current node
 #if MYADDRX
                     printf("xBee address:\n");
@@ -285,7 +389,39 @@ int main(int argc, char **argv){
                 }
             }
 
-            menu=0;
+            sigint=0;
+        }
+
+        if(benchmark){
+            if(millis() - prevBench > bench_period){
+                sMsg msgOut = {{0}};
+
+                prevBench = millis();
+
+                msgOut.header.destAddr = bench_dest_addr;
+                msgOut.header.size = bench_sz_msg;
+                msgOut.header.type = E_DATA;
+
+                err = bn_sendAck(&msgOut);
+                if(err <= 0){
+                    if(!bench_nb_msg_lost){
+                        bench_time_ko = (millis() - prevBench)<<BENCH_TIME_SHIFT;
+                    }
+                    else{
+                        bench_time_ko = bench_time_ko - (bench_time_ko >> BENCH_TIME_SHIFT) + (millis() - prevBench);
+                    }
+                    bench_nb_msg_lost++;
+                }
+                else{
+                    if(!(bench_nb_msg_total - bench_nb_msg_lost)){
+                        bench_time_ok = (millis() - prevBench)<<BENCH_TIME_SHIFT;
+                    }
+                    else{
+                        bench_time_ok = bench_time_ok - (bench_time_ok >> BENCH_TIME_SHIFT) + (millis() - prevBench);
+                    }
+                }
+                bench_nb_msg_total++;
+            }
         }
 
     }

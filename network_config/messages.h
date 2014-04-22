@@ -50,6 +50,7 @@ typedef enum{
     E_OBSS,                 // obstacles update (position & status update)
     E_GENERIC_POS,          // generic position
     E_POS_QUERY,            // position query
+    E_SERVOS,               // servo messages
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -173,6 +174,14 @@ typedef enum{
     NUM_E_ELEMENT
 } eElement;
 
+typedef enum{
+    SERVO_PRIM_DOOR,
+    SERVO_PRIM_FIRE1,
+    SERVO_PRIM_FIRE2,
+
+    NUM_E_SERVO
+} eServos;
+
 typedef struct __attribute__((packed)) {
 // position in frame (specified in field "frame")
     float x;            // (cm)
@@ -231,6 +240,14 @@ typedef struct __attribute__((packed)){
     } steps[NB_ASSERV_STEPS_PER_MSG];
 } sAsservStats;
 
+typedef struct __attribute__((packed)){
+        uint16_t nb_servos; // must be <=18
+        struct __attribute__((packed)){
+                eServos id :8; // identifier of the servomotor
+                uint16_t us; // servo setpoint in µs
+        } servos[];
+} sServos;
+
 /************************ user payload definition stop ************************/
 
 
@@ -261,6 +278,7 @@ typedef union{
     sObss obss;
     sGenericPos genericPos;
     sPosQuery posQuery;
+    sServos servos;
 /************************ user payload stop ************************/
 
 }uPayload;
