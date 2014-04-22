@@ -76,6 +76,7 @@ int UDP_receive(sMsg *msg){
     }
 
 //    printf("received %i bytes from %hhu.%hhu.%hhu.%hhu:%hu\n", ret, ntohl(cli_addr.sin_addr.s_addr)>>24, ntohl(cli_addr.sin_addr.s_addr)>>16, ntohl(cli_addr.sin_addr.s_addr)>>8, ntohl(cli_addr.sin_addr.s_addr), ntohs(cli_addr.sin_port));
+//    printf("  msg type %s seq %hhu\n", eType2str(msg->header.type), msg->header.seqNum);
 
     return ret;
 }

@@ -1,8 +1,5 @@
 /*
  * node_cfg.h
- *
- *  Created on: 1 oct. 2013
- *      Author: quentin
  */
 
 #ifndef NODE_CFG_H_
@@ -11,9 +8,9 @@
 #include "network_cfg.h"
 
 //network config
-#define MYADDRX ADDRX_MAIN_TURRET
-#define MYADDRI ADDRI_MAIN_TURRET
-#define MYADDRU 0
+#define MYADDRX 0
+#define MYADDRI ADDRI_MAIN_IO
+#define MYADDRU ADDRU_MAIN_IO
 #define MYADDRD 0
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 

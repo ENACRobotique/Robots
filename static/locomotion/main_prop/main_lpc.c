@@ -23,8 +23,8 @@
 
 int main(int argc, char *argv[]){
     sMsg inMsg;
-    int ret, quit = 0;
-    unsigned int prevAsserv = 0, prevPos = 0, prevDbg = 0;
+    int ret, quit = 0, ledStatus = 0;
+    unsigned int prevAsserv = 0, prevPos = 0, prevDbg = 0, prevLed = 0;
 
     // botNet initialization
     bn_attach(E_ROLE_SETUP, role_setup);
@@ -81,6 +81,12 @@ int main(int argc, char *argv[]){
             prevDbg = millis();
 
             show_stats();
+        }
+
+        if(millis() - prevLed >= 500){
+            prevLed = millis();
+
+            gpio_write(0, 31, ledStatus^=1);
         }
     }
 
