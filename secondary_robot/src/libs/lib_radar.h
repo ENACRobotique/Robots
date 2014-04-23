@@ -16,28 +16,29 @@
 #define DEBUG_RADAR
 
 #define RAD_TIMER_1 70    //time between call for mesure and mesure reading (cf sensor datasheet)
-#define RAD_TIMER_2 180   //time between mesure reading and call for next mesure (cf servo sweeping speed)
+#define RAD_TIMER_2 0   //time between mesure reading and call for next mesure (cf servo sweeping speed)
 
 
-#define RAD_POS_MIN 57
-#define RAD_POS_MAX 117
-#define RAD_POS_INC 30  //must be a submiltiple of RAD_POS_MAX-RAD_POS_MIN && must be different from zero
-#define RAD_NB_POS  ( ((RAD_POS_MAX-RAD_POS_MIN)/RAD_POS_INC)+1 )
-#define RAD_NB_PTS  ( 4*RAD_NB_POS)
+#define RAD_POS_MIN 	0
+#define RAD_POS_MAX 	0
+#define RAD_POS_INC 	1  //must be a submultiple of RAD_POS_MAX-RAD_POS_MIN && must be different from zero (equal to 1 if no servo is usedà
+#define RAD_NB_POS  	1
+#define RAD_NB_PTS  	2
+#define RAD_NB_SENSORS 	2
 
 /* how are stored the values in C_rad and C_rad_limits (0° pointing toward the front of the robot, angles increasing clockwise):
-index  angle  direction
-0      202,5  rear-left
-1      157,5  rear-right
-2      112,5  right-front
-3      67,5   right-rear
-4      22,5   front-right
-5      337,5  front-left
-6      292,5  left-front
-7      247,5  left-rear*/
-void radarSetLim(uint16_t[8]);
+old index  angle  direction
+old 0      202,5  rear-left
+old 1      157,5  rear-right
+old 2      112,5  right-rear
+old 3      67,5   right-front
+old 4      22,5   front-right
+old 5      337,5  front-left
+old 6      292,5  left-front
+old 7      247,5  left-rear*/
+void radarSetLim(uint16_t[RAD_NB_POS]);
 
-void radarInitHard(int);
+void radarInitServo(int);
 
 //function to call periodically to refresh the values red by the radar
 void radarRefresh();
