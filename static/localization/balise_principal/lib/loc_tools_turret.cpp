@@ -5,10 +5,14 @@
  *      Author: quentin
  */
 
+extern "C"{
+#include "../../../../network_config/roles.h"
+}
 #include "loc_tools_turret.h"
 #include "lib_domitille.h"
 #include "../../../global_errors.h"
 #include "../../../communication/botNet/shared/bn_debug.h"
+#include "../../../communication/botNet/shared/botNet_core.h"
 #include "math.h"
 #include "Arduino.h"
 #include "params.h"
@@ -95,8 +99,19 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     // robot's geometry correction
     angle-=ANGLE_ZERO;
 
+    sMsg msg;
+    msg.header.size=sizeof(sGenericPos);
+    msg.header.type=E_GENERIC_POS;
+    msg.header.destAddr=role_get_addr(ROLE_IA);
+    msg.payload.genericPos.x=pLoad->value*sin(angle);
+    msg.payload.genericPos.y=pLoad->value*cos(angle);
+    msg.payload.genericPos.date=pLoad->date;        // todo : synchronize this with ia
+
+    bn_send(&msg);
+
     // fixme send to actual IA
-    bn_printfDbg((char*)"%hx is at %lu mm %d °", origin, pLoad->value, (int)(angle*180./M_PI));
+    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, (int)(angle*180./M_PI),(int)msg.payload.genericPos.x,(int)msg.payload.genericPos.y);
+
     return 0;
 
 }

@@ -66,7 +66,7 @@ void loop() {
     //blink
     if((time - time_prev_led)>=1000) {
       time_prev_led= time;
-      digitalWrite(PIN_DBG_LED,debug_led^=1);
+//      digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
       bn_printfDbg((char*)"%lu, mem : %d, unused %d %lu\n",micros(),freeMemory(),getFreeTest(),micros());
 #endif
@@ -188,7 +188,7 @@ void loop() {
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
 
-				outMsg.header.destAddr=ADDRX_MAIN;
+				outMsg.header.destAddr=ADDRX_MAIN_TURRET;
 				outMsg.header.type=E_MEASURE;
 				outMsg.header.size=sizeof(sMobileReportPayload);
         	    if (laserStruct.period) outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laserStruct.period);

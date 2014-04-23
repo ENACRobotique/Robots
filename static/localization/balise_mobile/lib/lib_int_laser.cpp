@@ -12,25 +12,32 @@ pour arduino UNO
 
 #include "../../../communication/botNet/shared/bn_debug.h"
 
-#define DEBUG_LASER
+//#define DEBUG_LASER
+
+enum {
+    ACQUISITION,
+    TRACKING,
+    TRACK_DELAY,
+    DEBUG_STAGE
+};
 
 //globales
-#ifdef DEBUG_LASER
-bufStruct buf0={{0},0,0,0,3,0,0,0,0};
-bufStruct buf1={{0},0,0,0,3,0,0,0,1};
+#ifdef DEBUG_LASER_SPECIAL_STAGE
+bufStruct buf0={{0},0,0,0,3,0,0,0,0,0};
+bufStruct buf1={{0},0,0,0,3,0,0,0,0,1};
 #else
-bufStruct buf0={{0},0,0,0,0,0,0,0,0};
-bufStruct buf1={{0},0,0,0,0,0,0,0,1};
+bufStruct buf0={{0},0,0,0,0,0,0,0,0,0};
+bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
 
 #endif
 
 
-#define LASER_THICK_MIN 24    // in µs refined with measurement
-#define LASER_THICK_MAX 600 // in µs refined with measurement
+#define LASER_THICK_MIN     24    // in µs refined with measurement
+#define LASER_THICK_MAX     600 // in µs refined with measurement
+#define LASER_MAX_MISSED    3
+#define LASER_DEBOUNCETIME  20  //measured
 
-#define DEBOUNCETIME_INT_LASER 20  //measured
-
-#define LAT_SHIFT 1 //in µs TODO : refine
+#define LAT_SHIFT 2 //in µs TODO : refine
 
 
 
@@ -54,24 +61,23 @@ void laserIntDeinit(){
 void laserIntHand0(){ //interrupt handler, puts the time in the rolling buffer
   //new! debouce, will hide any interruption happening less than DEBOUNCETIME µsec after the last registered interruption
     unsigned long time=micros();//mymicros();
-    if ( time > (buf0.buf[(buf0.index-1)&7]+DEBOUNCETIME_INT_LASER) ){
+    if ( time > (buf0.buf[(buf0.index-1)&7]+LASER_DEBOUNCETIME) ){
         buf0.buf[buf0.index]=time;
         buf0.index++;
         buf0.index&=7;
-        digitalWrite(13,HIGH);
-        delayMicroseconds(10);
-        digitalWrite(13,LOW);
     }
+    EIFR = BIT(0);
 }
 
 void laserIntHand1(){
   //new! debouce, will hide any interruption happening less than DEBOUNCETIME µsec after the last registered interruption
     unsigned long time=micros();//mymicros();
-    if ( time > (buf1.buf[(buf1.index-1)&7]+DEBOUNCETIME_INT_LASER) ){
+    if ( time > (buf1.buf[(buf1.index-1)&7]+LASER_DEBOUNCETIME) ){
         buf1.buf[buf1.index]=time;
         buf1.index++;
         buf1.index&=7;
     }
+    EIFR = BIT(1);
 }
 
 //returns the delta-T in µs and the time at which it was measured
@@ -108,7 +114,7 @@ ldStruct laserDetect(bufStruct *bs){
 
         //if the detected patter has not the good shape
         //xxx in this case we can only handle a whole pattern (we may be able to do it on 3)
-        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX || abs((d1-d2)*100)>(d1+d2)*10 ){
+        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX || labs((((long)d1)-((long)d2))*100)>(d1+d2)*10 ){
             ldStruct ret={0,0,0};
             return ret;
         }
@@ -142,17 +148,18 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
 
     if ( time-bs->prevTime >= bs->timeInc){
         switch (bs->stage){
-            case 0 : { //acquisition
+            case ACQUISITION : { //acquisition
                 //laserdetect
                 measure=laserDetect(bs);
                 //if correct, goto tracking_clearing (stage 2), set the latency to LAT_INIT and the nextTime accordingly
                 if (measure.deltaT!=0){
-                    bs->stage=2;
+                    bs->stage=TRACK_DELAY;
 
                     bs->lat=laser_period>>LAT_SHIFT;
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period- (bs->lat>>1);
                     bs->lastDetect=measure.date;
+                    bs->missed=0;
 
                     pRet->period=0;
                     pRet->deltaT=measure.deltaT;
@@ -176,13 +183,13 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     //set the nextime and prevtime and tolerated latency
                     bs->prevTime=time;
                     bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
-                    bs->stage=0;
+                    bs->stage=ACQUISITION;
 
                     return 0;
                 }
                 break;
             }
-            case 1 :{ //tracking
+            case TRACKING :{ //tracking
                 //laserdetect
                 measure=laserDetect(bs);
                 if (measure.deltaT!=0){
@@ -198,7 +205,8 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     bs->lat=laser_period>>LAT_SHIFT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN); todo refine
                     bs->prevTime=measure.date;
                     bs->timeInc=laser_period-(bs->lat>>1);
-                    bs->stage=2;
+                    bs->stage=TRACK_DELAY;
+                    bs->missed=0;
 #ifdef DEBUG_LASER
                     bn_printfDbg("%lu tra->tra %lu %lu %lu\n",micros(),pRet->date,bs->lat,pRet->period);
 #endif
@@ -206,24 +214,43 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                 }
                 else {
 
-                    //"clear "the buffer
-                    bs->prevCall=time;
-                    bs->lastDetect=0;
-
-                    bs->lat=laser_period>>2;  //bs->lat+LAT_INC;
-                    bs->prevTime=time;
-                    bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
-
-                    bs->stage=0;
+                    bs->missed++;
+                    // if not too much have been missed, keep going into tracking
+                    if (bs->missed<LASER_MAX_MISSED){
+                        bs->stage=TRACK_DELAY;
+                        //fixme
+                        bs->lat=laser_period>>LAT_SHIFT;    //MAX( bs->lat-LAT_DEINC,LAT_MIN); todo refine
+                        bs->prevTime=micros();
+                        bs->timeInc=laser_period-(bs->lat);
+                        bs->stage=TRACK_DELAY;
 #ifdef DEBUG_LASER
-                    bn_printfDbg("%lu tra->acq\n",micros());
+                        bn_printfDbg("%lu tra->tra missed %d\n",micros(),bs->missed);
 #endif
-                    return 0;
+                        return 0;
+                    }
+                    // otherwise, go back to acquisition
+                    else {
+                        //"clear "the buffer
+                        bs->prevCall=time;
+                        bs->lastDetect=0;
+
+                        bs->lat=laser_period>>LAT_SHIFT;  //bs->lat+LAT_INC;
+                        bs->prevTime=time;
+
+
+                        bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
+                        bs->stage=ACQUISITION;
+#ifdef DEBUG_LASER
+                        bn_printfDbg("%lu tra->acq\n",micros());
+#endif
+                        return 0;
+
+                    }
 
                 }
                 break;
             }
-            case 2 :{ // clear the buffer right before the beginning of the measurement time
+            case TRACK_DELAY :{ // clear the buffer right before the beginning of the measurement time
                 //"clear "the buffer
                 bs->prevCall=time;
 
@@ -231,13 +258,13 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                 bs->prevTime=time;
                 bs->timeInc=bs->lat;
 
-                //return to stage 1
-                bs->stage=1;
+                //return to stage traccking
+                bs->stage=TRACKING;
                 return 0;
                 break;
             }
-#ifdef DEBUG_LASER
-            case 3 : { //debug case
+#ifdef DEBUG_LASER_SPECIAL_STAGE
+            case DEBUG_STAGE : { //debug case
                 static int nbdetected=0;
                 //laserdetect
                 measure=laserDetect(bs);
@@ -262,7 +289,7 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
                     //set the nextime and prevtime and tolerated latency
                     bs->prevTime=time;
                     bs->timeInc=((3*laser_period)>>3); // NOT a period submultiple
-                    bs->stage=3;
+                    bs->stage=DEBUG_STAGE;
 
                     return 0;
                 break;

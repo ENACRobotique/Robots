@@ -38,6 +38,7 @@ typedef struct {
 	unsigned long lat;              // µs, authorized latency in tracking mode : +-lat/2
 	unsigned long prevTime;         // local µs, prevTime & nextTime : used by periodicLaser for its time measurements
 	unsigned long timeInc;          // µs,  : increment of time after which there is something to do
+	int missed;                     // number of missed detections
 	int intNb;                      // intNb : nb of the interrupt
 }bufStruct;
 
