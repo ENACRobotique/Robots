@@ -25,6 +25,7 @@ struct sPosListEl {
 };
 
 // TODO call handlers on position update
+posHandler handlersPG[NUM_E_ELEMENT] = {NULL};
 static sPosListEl *lastPGPositions[NUM_E_ELEMENT] = {NULL};
 static sPosListEl *lastPRPositions = NULL;
 
@@ -57,19 +58,15 @@ static sPosListEl *addSorted(sPosListEl *head, sPosListEl *el){
 
     for(prev = NULL, curr = head; curr && (!prev || comp(&prev->pos, &curr->pos)>0); prev = curr, curr = curr->next);
 
-    if(curr && prev){
+    if(prev){ // add after an element
         prev->next = el;
         el->next = curr;
 
         return head;
     }
-    else if(curr){
-        el->next = curr;
-
-        return el;
-    }
-
-    return head;
+    // add on first position
+    el->next = curr;
+    return el;
 }
 
 static sPosListEl *addHead(sPosListEl *head, sPosListEl *el){
@@ -106,19 +103,30 @@ void fromPRPG2PG(sGenericPos *srcPR, sGenericPos *srcPG, sGenericPos *dstPG){
 }
 
 void positions_maintenance(){
-    sPosListEl *tmp;
+//    sPosListEl *tmp;
     // TODO delete old items of the lists (for ex. older than 5seconds)
     // and retry asking primary position after timeout (only if this is the last PR pos of the element)
 
-    for(tmp = lastPRPositions; tmp; tmp = tmp->next){
-        if(tmp->pos.date){
+//    for(tmp = lastPRPositions; tmp; tmp = tmp->next){
+//        if(tmp->pos.date){
 // TODO compare but need synchronized time (as well as in obj_tim_tools.c, I'm going to do it... and come back here later)
-        }
-    }
+//        }
+//    }
+}
+
+posHandler setPGHandler(eElement id, posHandler h){
+    posHandler prevH;
+
+    assert(id >=0 && id < NUM_E_ELEMENT);
+
+    prevH = handlersPG[id];
+    handlersPG[id] = h;
+
+    return prevH;
 }
 
 int received_new_generic_pos(sGenericPos *pos){
-    sMsg outMsg;
+//    sMsg outMsg;
     int ret = 0;
     sPosListEl *tmp = NULL;
 
@@ -129,6 +137,7 @@ int received_new_generic_pos(sGenericPos *pos){
         lastPRPositions = addHead(lastPRPositions, newElData(pos));
 
         if(pos->id != ELT_PRIMARY){
+#if 0
             // search for a matching primary robot position
             for(tmp = lastPGPositions[ELT_PRIMARY]; tmp; tmp = tmp->next){
                 if(fabs(time_diff(tmp->pos.date, pos->date)) < SAME_DATE_THRESHOLD){
@@ -140,7 +149,6 @@ int received_new_generic_pos(sGenericPos *pos){
                     break;
                 }
             }
-
             // if couldn't find a matching primary robot position
             if(!tmp){
                 // ask matching position to the propulsion
@@ -156,11 +164,28 @@ int received_new_generic_pos(sGenericPos *pos){
                     return ret;
                 }
             }
+#else
+            sPosListEl *newPGEl = newEl();
+            tmp = lastPGPositions[ELT_PRIMARY];
+            if(newPGEl && tmp){
+                fromPRPG2PG(pos, &tmp->pos, &newPGEl->pos);
+                lastPGPositions[pos->id] = addSorted(lastPGPositions[pos->id], newPGEl);
+
+                if(handlersPG[pos->id]){
+                    handlersPG[pos->id](&newPGEl->pos);
+                }
+            }
+#endif
         }
         break;
     case FRAME_PLAYGROUND:
         lastPGPositions[pos->id] = addSorted(lastPGPositions[pos->id], newElData(pos));
 
+        if(handlersPG[pos->id]){
+            handlersPG[pos->id](pos);
+        }
+
+#if 0
         if(pos->id == ELT_PRIMARY){
             // search for a matching item with this received robot position
             for(tmp = lastPRPositions; tmp; tmp = tmp->next){
@@ -173,6 +198,7 @@ int received_new_generic_pos(sGenericPos *pos){
                 }
             }
         }
+#endif
         break;
     default:
         return -1;

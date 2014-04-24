@@ -52,6 +52,17 @@ void usage(char *cl){
     printf("\t--help,     -h, -?    prints this help\n");
 }
 
+void posUpdated(sGenericPos *p){
+    if(p->id != ELT_PRIMARY){
+        obs[p->id].active = 1;
+        obs[p->id].moved = 1;
+        obs[p->id].c.x = p->x;
+        obs[p->id].c.y = p->y;
+
+        obs_updated[p->id]++;
+    }
+}
+
 int main(int argc, char **argv){
     int ret;
     char verbose=1;
@@ -136,27 +147,40 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    ret = obj_init();
-    if(ret < 0){
-        printf("obj_init() error #%i\n", -ret);
-    }
+//    setPGHandler(ELT_PRIMARY, posUpdated);
+    setPGHandler(ELT_SECONDARY, posUpdated);
+    setPGHandler(ELT_ADV_PRIMARY, posUpdated);
+    setPGHandler(ELT_ADV_SEC, posUpdated);
 
-//    // sending initial position
-//    msgOut.header.type = E_POS;
-//    msgOut.header.size = sizeof(msgOut.payload.pos);
-//
-//    msgOut.payload.pos.id = 0;
-//    msgOut.payload.pos.theta = theta_robot;
-//    msgOut.payload.pos.u_a = 0;
-//    msgOut.payload.pos.u_a_theta = 0;
-//    msgOut.payload.pos.u_b = 0;
-//    msgOut.payload.pos.x = obs[0].c.x;
-//    msgOut.payload.pos.y = obs[0].c.y;
-//    printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
-//    ret = role_send(&msgOut);
-//    if(ret <= 0){
-//        printf("bn_sendAck(E_POS) error #%i\n", -ret);
-//    }
+    switch(eAIState){
+    case E_AI_AUTO:
+        ret = obj_init();
+        if(ret < 0){
+            printf("obj_init() error #%i\n", -ret);
+        }
+        break;
+    case E_AI_SLAVE:
+        obs[0].c.x = 300. - 15.5;
+        obs[0].c.y = 200. - 15.8;
+
+        // sending initial position
+        msgOut.header.type = E_POS;
+        msgOut.header.size = sizeof(msgOut.payload.pos);
+
+        msgOut.payload.pos.id = 0;
+        msgOut.payload.pos.theta = -M_PI/2;
+        msgOut.payload.pos.u_a = 0;
+        msgOut.payload.pos.u_a_theta = 0;
+        msgOut.payload.pos.u_b = 0;
+        msgOut.payload.pos.x = obs[0].c.x;
+        msgOut.payload.pos.y = obs[0].c.y;
+        printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
+        ret = role_sendAck(&msgOut);
+        if(ret <= 0){
+            printf("bn_sendAck(E_POS) error #%i\n", -ret);
+        }
+        break;
+    }
 
 #ifdef CTRLC_MENU
     signal(SIGINT, intHandler);
@@ -226,6 +250,23 @@ int main(int argc, char **argv){
                 theta_robot = last_theta;
                 if(msgIn.payload.pos.tid > last_tid){
                     last_tid = msgIn.payload.pos.tid;
+                }
+
+                {
+                    sGenericPos pos;
+
+                    pos.date = micros(); // XXX
+                    pos.frame = FRAME_PLAYGROUND;
+                    pos.id = ELT_PRIMARY;
+                    pos.theta = msgIn.payload.pos.theta;
+                    pos.u_a = 0.;
+                    pos.u_b = 0.;
+                    pos.u_a_angle = 0.;
+                    pos.u_theta = 0.;
+                    pos.x = msgIn.payload.pos.x;
+                    pos.y = msgIn.payload.pos.y;
+
+                    received_new_generic_pos(&pos);
                 }
 
                 if(curr_path.path && msgIn.payload.pos.tid == curr_path.tid){
@@ -475,6 +516,24 @@ int main(int argc, char **argv){
                 send_obss_reset = 0;
             }
         }
+
+//        if(millis() - prevGetPos > 200){
+//            sGenericPos *p;
+//
+//            prevGetPos = millis();
+//
+//            p = getLastPGPosition(ELT_ADV_PRIMARY);
+//            printf("ADV_PRIMARY %p\n", p);
+//
+//            p = getLastPGPosition(ELT_ADV_SEC);
+//            printf("ADV_SEC %p\n", p);
+//
+//            p = getLastPGPosition(ELT_PRIMARY);
+//            printf("PRIMARY %p\n", p);
+//
+//            p = getLastPGPosition(ELT_SECONDARY);
+//            printf("SECONDARY %p\n", p);
+//        }
 
         //menu
 #ifdef CTRLC_MENU

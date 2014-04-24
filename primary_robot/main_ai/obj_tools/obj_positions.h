@@ -13,8 +13,11 @@
 #define KEEP_OLD_THRESHOLD (5*1000*1000)
 #define PROP_ANSWER_TIMEOUT (2*1000*1000)
 
+typedef void (*posHandler)(sGenericPos *);
+
 sGenericPos *getLastPGPosition(eElement el);
 
+posHandler setPGHandler(eElement id, posHandler h);
 int received_new_generic_pos(sGenericPos *pos);
 void positions_maintenance();
 
