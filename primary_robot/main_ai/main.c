@@ -141,22 +141,22 @@ int main(int argc, char **argv){
         printf("obj_init() error #%i\n", -ret);
     }
 
-    // sending initial position
-    msgOut.header.type = E_POS;
-    msgOut.header.size = sizeof(msgOut.payload.pos);
-
-    msgOut.payload.pos.id = 0;
-    msgOut.payload.pos.theta = theta_robot;
-    msgOut.payload.pos.u_a = 0;
-    msgOut.payload.pos.u_a_theta = 0;
-    msgOut.payload.pos.u_b = 0;
-    msgOut.payload.pos.x = obs[0].c.x;
-    msgOut.payload.pos.y = obs[0].c.y;
-    printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
-    ret = role_send(&msgOut);
-    if(ret <= 0){
-        printf("bn_sendAck(E_POS) error #%i\n", -ret);
-    }
+//    // sending initial position
+//    msgOut.header.type = E_POS;
+//    msgOut.header.size = sizeof(msgOut.payload.pos);
+//
+//    msgOut.payload.pos.id = 0;
+//    msgOut.payload.pos.theta = theta_robot;
+//    msgOut.payload.pos.u_a = 0;
+//    msgOut.payload.pos.u_a_theta = 0;
+//    msgOut.payload.pos.u_b = 0;
+//    msgOut.payload.pos.x = obs[0].c.x;
+//    msgOut.payload.pos.y = obs[0].c.y;
+//    printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
+//    ret = role_send(&msgOut);
+//    if(ret <= 0){
+//        printf("bn_sendAck(E_POS) error #%i\n", -ret);
+//    }
 
 #ifdef CTRLC_MENU
     signal(SIGINT, intHandler);
@@ -319,6 +319,24 @@ int main(int argc, char **argv){
                 break;
             case E_GENERIC_POS:
                 received_new_generic_pos(&msgIn.payload.genericPos);
+                break;
+            case E_IHM_STATUS:
+                for(i = 0 ; i < (int)msgIn.payload.ihmStatus.nb_states ; i++){
+                    switch(msgIn.payload.ihmStatus.states[i].id){
+                        case IHM_STARTING_CORD:
+                            starting_cord = msgIn.payload.ihmStatus.states[i].state;
+                            printf("## scord: %i\n", starting_cord);
+                            break;
+                        case IHM_MODE_SWICTH:
+                            mode_switch = msgIn.payload.ihmStatus.states[i].state;
+                            printf("## smode: %i\n", mode_switch);
+                            break;
+                        case IHM_LED:
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 break;
             default :
                 printf("\n");

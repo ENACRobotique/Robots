@@ -109,7 +109,7 @@ int main(int argc, char *argv[]){
 #endif
             {
                 fprintf(stderr, "bn_receive() error #%i\n", -ret);
-                exit(1);
+//                exit(1);
             }
         }
 

@@ -52,6 +52,7 @@ typedef enum{
     E_POS_QUERY,            // position query
     E_SERVOS,               // servo messages
     E_IHM_STATUS,           // ihm status
+    E_SPEED_SETPOINT,
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -263,6 +264,10 @@ typedef struct __attribute__((packed)){
     } states[];
 } sIhmStatus;
 
+typedef struct{
+    float speed;
+} sSpeedSetPoint;
+
 /************************ user payload definition stop ************************/
 
 
@@ -295,6 +300,7 @@ typedef union{
     sPosQuery posQuery;
     sServos servos;
     sIhmStatus ihmStatus;
+    sSpeedSetPoint speedSP;
 /************************ user payload stop ************************/
 
 }uPayload;

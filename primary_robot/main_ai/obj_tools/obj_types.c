@@ -18,6 +18,9 @@ sPt_t _current_pos = {0., 0.};
 int mode_obj=0;
 sNum_t speed=0;
 sNum_t theta_robot=0.;
+int starting_cord = 0;
+int mode_switch = 0;
+int color = 0 ;//0=red and 1=yellow
 
 sPath_t path= {.dist = 0.,  .path = NULL };
 

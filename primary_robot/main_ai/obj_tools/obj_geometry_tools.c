@@ -96,7 +96,7 @@ void project_point(sNum_t xp, sNum_t yp, sNum_t rc, sNum_t xc, sNum_t yc, sPt_t 
 
 	d = n - fabs(r);
 
-	if(fabs(d) > 2.) printf("!!! far from the circle (%.2fcm)...\n", d);
+	if(fabs(d) > 3.) printf("!!! far from the circle (%.2fcm)...\n", d);
 
 	point->x = o_c.x + v.x*(fabs(r) + 0.1)/n+0.1*sign(v.x*(fabs(r) + 0.1)/n);
 	point->y = o_c.y + v.y*(fabs(r) + 0.1)/n+0.1*sign(v.y*(fabs(r) + 0.1)/n);

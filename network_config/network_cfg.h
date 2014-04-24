@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "../static/communication/botNet/shared/message_header.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -77,7 +78,11 @@ extern "C" {
 //default debug address :
     #define ADDR_MONITORING_DFLT    (ADDRD_MONITORING)
     #define ADDR_IA_DFLT            (ADDRD_MAIN_IA_SIMU)
+#if SIMU
     #define ADDR_PROP_DFLT          (ADDRD_MAIN_PROP_SIMU)
+#else
+    #define ADDR_PROP_DFLT          (ADDRI_MAIN_PROP)
+#endif
     #define ADDR_DEBUG_DFLT         (ADDRD_DEBUG1)
 
 /* Interface enum

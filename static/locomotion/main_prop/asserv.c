@@ -233,6 +233,11 @@ int new_traj_el(sTrajElRaw_t *te){
     return error;
 }
 
+int new_speed_setpoint(float speed){
+    d_consigne = speed;
+    return 0;
+}
+
 int new_pos(sPosPayload *pos){
     if(pos->id == 0) { // prim robot
         x = isD2I(pos->x); // (I<<SHIFT)

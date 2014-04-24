@@ -27,7 +27,7 @@ void init_ele(void);
 void send_robot(sPath_t path);
 int get_position( sPt_t *pos);
 float sign(float x);
-int test_in_obs(void);
+int test_in_obs(sPt_t *p);
 int test_tirette(void);
 void simuSecondary(void);
 void posPrimary(void);
@@ -36,5 +36,6 @@ void checkRobot2Obj(void);
 int checkAdvOnRobot(void);
 int checkRobotBlock(void);
 void stopRobot(void);
+void startColor(void);
 
 #endif /* OBJ_FCT_H_ */

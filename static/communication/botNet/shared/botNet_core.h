@@ -12,6 +12,7 @@
 // config files
 #include "network_cfg.h"
 #include "messages.h"
+#include "network_cfg.h"
 
 // other required libraries
 

@@ -139,7 +139,7 @@ void loop(){
     }
 
     if( (time -  timeStartingCord > 20) && flagStartingCord){
-        StartingCord = digitalRead(PIN_STARTING_CORD);
+        StartingCord = !digitalRead(PIN_STARTING_CORD);
 
         outMsg.header.destAddr = role_get_addr(ROLE_IA);
         outMsg.header.type = E_IHM_STATUS;
@@ -153,7 +153,7 @@ void loop(){
     }
 
     if( (time -  timeModeSwitch > 20) && flagModeSwitch){
-        ModeSwicth = digitalRead(PIN_MODE_SWICTH);
+        ModeSwicth = !digitalRead(PIN_MODE_SWICTH);
 
         outMsg.header.destAddr = role_get_addr(ROLE_IA);
         outMsg.header.type = E_IHM_STATUS;

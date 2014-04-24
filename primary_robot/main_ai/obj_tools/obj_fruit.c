@@ -30,11 +30,17 @@
 		{{20.3,23.7},{20.3, 23.7},{{15.2 , 23.7}, 0.  , 0., 1.}, 0. , 0., 3}
 		};
 
+	sTrajEl_t tabEl4[2]={
+        {{0.  ,  0.},{23. ,27.},{{0. , 0.}, 0. , 0., 1.}, 0. , 0., 0},
+        {{23. , 27.},{23., 27.},{{0. , 0.}, 0. , 0., 1.}, 0. , 0., 1}
+	    };
+
 // Defintion of the entry point of the trajectory for a tree in (0;0) vertical bottom to top right
 
-	sPt_t tabEP[2]={
+	sPt_t tabEP[3]={
 		{16, -27},
-		{20.3, -27}
+		{20.3, -27},
+		{23, -30}
 		};
 
 
@@ -42,8 +48,9 @@
 //Function for the entry point to a tree
 
 	int PATree(int num){ //return the code of the state tree (location bad fruit)
-		if(arbre[num].eFruit[0]== 2) return 31 ;
-		if(arbre[num].eFruit[3]== 2) return 20 ;
+	    if( (arbre[num].eFruit[0] == 2) && (arbre[num].eFruit[0] == 2) ) return 21;
+		if(arbre[num].eFruit[0] == 2) return 31;
+		if(arbre[num].eFruit[3] == 2) return 20;
 		else return 30;
 		}
 
@@ -66,6 +73,9 @@
 						if(j==1) tabTemp=tabEP[0];
 						else tabTemp=tabEP[1];
 						break;
+					case 21 :
+					    tabTemp=tabEP[2];
+					    break;
 					default :
 						printf("Error in switch in updateEntryPointTree\n");
 						getchar();
@@ -100,6 +110,9 @@ int getEntryPointTree(sPt_t *pt){ //Ex return 124, 431..
 		for( j=0 ; j<2 ; j++){
 			if(listObj[i].entryPoint[j].c.x==pt->x && listObj[i].entryPoint[j].c.y==pt->y){
 				if(j==0){
+				    if(arbre[i].eFruit[0]==2 && arbre[i].eFruit[3]==2){
+				        return i*100+1*10+2;
+				        }
 					if(arbre[i].eFruit[0]==2) return i*100+1*10+3;
 					else {
 						if(arbre[i].eFruit[3]==2) return i*100+0*10+2;
@@ -107,6 +120,9 @@ int getEntryPointTree(sPt_t *pt){ //Ex return 124, 431..
 						}
 					}
 				else{
+				    if(arbre[i].eFruit[0]==2 && arbre[i].eFruit[3]==2){
+				        return i*100+2*10+1;
+				    }
 					if(arbre[i].eFruit[3]==2) return i*100+2*10+0;
 					else {
 						if(arbre[i].eFruit[0]==2) return i*100+3*10+1;
@@ -166,6 +182,17 @@ void sendInitTrajTree(iABObs_t obj){
 				for(i=0; i<path.path_len ; i++) SymElTraj(tabTemp+i, 1, 0);
 				}
 			break;
+		case 12 :
+		case 21 :
+		    bac.nb_point=bac.nb_point+3;
+		    path.path_len=2;
+            if ((tabTemp = (sTrajEl_t *) malloc(sizeof(tabEl4[0])*path.path_len)) == NULL)
+                printf("Error : malloc()\n");
+            memcpy(tabTemp,&tabEl4[0], sizeof(tabEl4[0])*path.path_len);
+            if(idEntry==12){
+                for(i=0; i<path.path_len ; i++) SymElTraj(tabTemp+i, 1, 0);
+                }
+            break;
 		default :
 			printf("Error in switch in obj_tree\n");
 			getchar();

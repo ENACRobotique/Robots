@@ -14,8 +14,9 @@
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
-#define COLOR 0 //0=red and 1=yellow
+#define COLOR_SIMU 1 //0 red  1 yellow
 #define DEBUG 1
+#define SIMU 0
 #define RESO_POS 2
 #define NB_OBJ 16
 #define END_MATCH 90000 //in ms
@@ -28,7 +29,7 @@
 #define ERR_DIST 2.
 
 
-typedef enum {ATTENTE , JEU , SHUT_DOWN} estate_t;
+typedef enum {COLOR_SELECTION, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
 typedef enum {E_FEU, E_TORCHE_MOBILE, E_ARBRE, E_ARBRE_FOND , E_BAC, E_FOYER, E_TORCHE_FIXE} eObj_t;
 
 typedef struct
@@ -99,6 +100,10 @@ extern sPt_t pt_select;
 extern int mode_obj;
 extern sNum_t speed;
 extern sNum_t theta_robot;
+
+extern int starting_cord;
+extern int mode_switch;
+extern int color;
 
 
 #endif

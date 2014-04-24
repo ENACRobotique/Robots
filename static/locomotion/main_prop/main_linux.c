@@ -154,6 +154,10 @@ int main(int argc, char *argv[]){
             }
 
             switch(inMsg.header.type){
+            case E_SPEED_SETPOINT:
+                new_speed_setpoint(inMsg.payload.speedSP.speed);
+                printf("new setpoint=%.2fcm/s\n", inMsg.payload.speedSP.speed);
+                break;
             case E_TRAJ:
 //                bn_printDbg("got traj element");
 

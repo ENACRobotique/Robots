@@ -9,9 +9,9 @@
 
 
 
-sTrajEl_t tabSeg[2]={ //Segment for push a vertical fire
-	{{0.  ,  0.},{-10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
-	{{-10 ,  0.},{-10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
+sTrajEl_t tabSeg[2]={ //Segment to push a vertical fire
+	{{0.  ,  0.},{-20. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
+	{{-20 ,  0.},{-20. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
 	};
 
 
@@ -45,7 +45,7 @@ void createEPfire2(int numObj){
 			break;
 		case 3 :
 			listObj[numObj].nbEP=1;
-			if(COLOR==1)i=0;
+			if(color==1)i=0;
 			else i=1;
 
 			if((feu[numObj-6].angle>=180) && (i==1)) listObj[numObj].entryPoint[0].angleEP=feu[numObj-6].angle-180;

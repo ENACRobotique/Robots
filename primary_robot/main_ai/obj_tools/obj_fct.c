@@ -65,7 +65,7 @@ void init_ele(void){
     	listObj[i].typeStruct = &bac;
         ((Obj_bac*)listObj[i].typeStruct)->nb_point=0;
     	}
-    if(COLOR==1)listObj[4].active=0;
+    if(color==1)listObj[4].active=0;
     else listObj[5].active=0;
 
 
@@ -95,21 +95,82 @@ float sign(float x){ //retourne -1 ou 1, 0 si nul
     return x/fabs(x);
     }
 
-int test_in_obs(void){ //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
+int test_in_obs(sPt_t *p){ //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
     //FIXME si le robot dans plusieurs obstable
     int i;
+    sNum_t dist;
     for(i=1; i<N-1;i++){
         if(obs[i].active==0)continue;
-        if( sqrt((obs[i].c.x-_current_pos.x)*(obs[i].c.x-_current_pos.x)+(obs[i].c.y-_current_pos.y)*(obs[i].c.y-_current_pos.y)) < obs[i].r){
-        	printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
+        distPt2Pt(&obs[i].c, p, &dist);
+        if(  dist < obs[i].r){
+        	//printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
             return i;
             }
         }
     return 0;
     }
 
-int test_tirette(void){ //simulation
+int test_tirette(void){
+#if SIMU
     return 1;
+#endif
+    return starting_cord;
+    }
+
+void startColor(void){
+
+#if SIMU
+    color=COLOR_SIMU;
+#else
+    static int state = 0;
+    sMsg msgOut;
+
+    switch(state){
+        case 0 :
+            if(mode_switch == 0){ //Red color
+                state = 1;
+                color = 0;
+
+                msgOut.header.destAddr = ADDRI_MAIN_IO;
+                msgOut.header.type = E_IHM_STATUS;
+                msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
+
+                msgOut.payload.ihmStatus.nb_states = 1;
+                msgOut.payload.ihmStatus.states[0].id = IHM_LED;
+                msgOut.payload.ihmStatus.states[0].state = 1;
+
+                bn_send(&msgOut);
+                }
+            break;
+        case 1 :
+
+            if(mode_switch == 1){
+                state = 2;
+                }
+            break;
+        case 2 :
+            if(mode_switch == 0){ //Yellow color
+                state = 3;
+                color = 1;
+
+                msgOut.header.destAddr = ADDRI_MAIN_IO;
+                msgOut.header.type = E_IHM_STATUS;
+                msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
+
+                msgOut.payload.ihmStatus.nb_states = 1;
+                msgOut.payload.ihmStatus.states[0].id = IHM_LED;
+                msgOut.payload.ihmStatus.states[0].state = 2;
+
+                bn_send(&msgOut);
+                }
+            break;
+        case 3 :
+            if(mode_switch == 1){
+                state = 0;
+                }
+            break;
+        }
+#endif
     }
 
 sPt_t trjS[4]={ //trajectory of the secondary robot
@@ -155,7 +216,7 @@ void simuSecondary(void){ //TODO if a other robot on trajectory
 void posPrimary(void){
     int i;
     if(get_position(&_current_pos)){
-        if(((i=test_in_obs())!=0) ){
+        if(((i=test_in_obs(&_current_pos))!=0) ){
             project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);
             if(sqrt(pow(_current_pos.x-obs[0].c.x,2)+pow(_current_pos.y-obs[0].c.y,2)<2)){
                 memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
@@ -212,9 +273,8 @@ int checkAdvOnRobot(void){
 
     for(i = 1 ; i < 3 ; i++){
         distPt2Pt(&obs[i].c, &obs[0].c, &dist);
-        if( (obs[i].r + R_ROBOT) > (dist - ERR_DIST) ){
+        if( (obs[i].r) > (dist - ERR_DIST) ){
             printf("On est dans un robot\n");
-            //getchar();
             return 1;
             }
         }
@@ -238,7 +298,7 @@ int checkRobotBlock(void){
             if(dist < 1.) cpt++;
             }
         if(cpt == 10){
-            printf("Warning robot block\n");
+            //printf("Warning robot block\n");
             return 1;
             }
         lastTime = millis();
@@ -263,5 +323,6 @@ void stopRobot(void){
     send_robot(path);
     }
 
+//TODO Optimisation des deplacement du robot algarithme arbre recouvrant
 
 
