@@ -347,17 +347,24 @@ int new_asserv_step(){
         }
 #endif
 
-        // distance to the next goal
-        dist = SQRT( (SQR(gy - y) + SQR(gx - x))>>SHIFT );
-
         // distance needed to stop (knowing the current speed and with a margin of a factor 3!)
         dist_lim = (int)( ((long long)SQR(v)*3/(long long)AMAX)>>SHIFT );
 
         if(curr_traj_step&1) { // portion de cercle
+            int tp, tg;
+            long long prod;
+            tp = ATAN2(y - traj[curr_traj][curr_traj_step>>1].c_y, x - traj[curr_traj][curr_traj_step>>1].c_x); // (rad<<SHIFT)
+            tg = ATAN2(gy - traj[curr_traj][curr_traj_step>>1].c_y, gx - traj[curr_traj][curr_traj_step>>1].c_x); // (rad<<SHIFT)
+            prod = ((long long)(tp - tg))*((long long)traj[curr_traj][curr_traj_step>>1].c_r)>>SHIFT;
+            dist = abs(prod);
+
             consigne = MIN(traj[curr_traj][curr_traj_step>>1].arc_sp_max, d_consigne);
             // TODO (use arc_len - len_travelled)
         }
         else { // portion de segment
+            // distance to the next goal
+            dist = SQRT( (SQR(gy - y) + SQR(gx - x))>>SHIFT );
+
             consigne = d_consigne;
             for(
                     i = curr_traj_step>>1, dist_tmp = dist;

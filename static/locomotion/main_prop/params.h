@@ -18,7 +18,7 @@
 #define isRPI (iROUND(sRPI))  // (rad.I<<SHIFT)
 
 #define WDIAM (9.95)  // wheel diameter (cm)
-#define RDIAM (25.9)  // robot diameter (inter-wheels distance) (cm)
+#define RDIAM (26.)  // robot diameter (inter-wheels distance) (cm)
 
 #define SpP (0.02)  // seconds per sampling period
 #define IpR (10125.) // increments per revolution
