@@ -99,18 +99,20 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     // robot's geometry correction
     angle-=ANGLE_ZERO;
 
-    sMsg msg;
+    sMsg msg={{0}};
     msg.header.size=sizeof(sGenericPos);
     msg.header.type=E_GENERIC_POS;
     msg.header.destAddr=role_get_addr(ROLE_IA);
-    msg.payload.genericPos.x=pLoad->value*sin(angle);
-    msg.payload.genericPos.y=pLoad->value*cos(angle);
+
+    msg.payload.genericPos.x=(float)(pLoad->value)/10.*sin(angle);
+    msg.payload.genericPos.y=(float)(pLoad->value)/10.*cos(angle);
     msg.payload.genericPos.date=pLoad->date;        // todo : synchronize this with ia
+    msg.payload.genericPos.frame=msg.payload.genericPos.FRAME_PRIMARY;
+    msg.payload.genericPos.id=(origin==ADDRX_MOBILE_1?ELT_ADV_PRIMARY:ELT_ADV_SEC);
 
     bn_send(&msg);
 
-    // fixme send to actual IA
-    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, (int)(angle*180./M_PI),(int)msg.payload.genericPos.x,(int)msg.payload.genericPos.y);
+//    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, (int)(angle*180./M_PI),(int)msg.payload.genericPos.x,(int)msg.payload.genericPos.y);
 
     return 0;
 

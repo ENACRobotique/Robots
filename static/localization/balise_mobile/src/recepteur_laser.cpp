@@ -16,7 +16,7 @@
 
 
 unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;
-unsigned long time_prev_led=0, sw=0;
+unsigned long time_prev_led=0, sw=0, time_data_send=0;
 uint32_t time_prev_laser=0;
 
 
@@ -187,17 +187,19 @@ void loop() {
                 prevState=state;
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
+        	    if (time_data_send-millis()>=SENDING_PERIOD){
+        	        time_data_send=millis();
+                    outMsg.header.destAddr=ADDRX_MAIN_TURRET;
+                    outMsg.header.type=E_MEASURE;
+                    outMsg.header.size=sizeof(sMobileReportPayload);
+                    if (laserStruct.period) outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laserStruct.period);
+                    else outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laser_period);
+                    outMsg.payload.mobileReport.date=micros2s(laserStruct.date);
+                    outMsg.payload.mobileReport.precision=laserStruct.precision;
+                    outMsg.payload.mobileReport.sureness=laserStruct.sureness;
 
-				outMsg.header.destAddr=ADDRX_MAIN_TURRET;
-				outMsg.header.type=E_MEASURE;
-				outMsg.header.size=sizeof(sMobileReportPayload);
-        	    if (laserStruct.period) outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laserStruct.period);
-        	    else outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laser_period);
-                outMsg.payload.mobileReport.date=micros2s(laserStruct.date);
-                outMsg.payload.mobileReport.precision=laserStruct.precision;
-                outMsg.payload.mobileReport.sureness=laserStruct.sureness;
-
-                bn_send(&outMsg);
+                    bn_send(&outMsg);
+        	    }
           }
           break;
         default : break;
