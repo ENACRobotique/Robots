@@ -12,14 +12,14 @@
 
 #include "state_Menu_principal.h"
 #include "state_Menu_servo.h"
-#include "state_servo_selecteur.h"
+#include "state_servo_selecter1.h"
 #include "state_blink.h"
 
-Servo servotest;
+//Servo servotest;
 
-sState* testservo_selecteur(){
+sState* testservo_selecter1(){
 	static int memPosition=0;
-	int Position = (abs(myEnc.read())/2*5)%180;
+	int Position = (abs(myEnc.read()-deltaenc)/2*5)%185;
 
 	if(!digitalRead(SELECT))	//nécessite de valider avant que le servo ne se déplace
 		{
@@ -36,27 +36,29 @@ sState* testservo_selecteur(){
 		if(retour)
 		{
 			retour=0;
+			memenc=myEnc.read();
 			return(&sMenu_servo);
 		}
     return NULL;
 }
-void initservo_selecteur(sState *prev){
-	servotest.attach(9);
+void initservo_selecter1(sState *prev){
+	deltaenc=myEnc.read()-memenc;
+	servotest.attach(PIN_PWM_SERVO);
 
 }
-void deinitservo_selecteur(sState *next){
+void deinitservo_selecter1(sState *next){
 	servotest.detach();
 }
 
-void servo_selecteur(){
+void servo_selecter1(){
 
 }
 
-sState sservo_selecteur={
+sState sservo_selecter1={
     0,
-    &initservo_selecteur,
-    &deinitservo_selecteur,
-    &testservo_selecteur
+    &initservo_selecter1,
+    &deinitservo_selecter1,
+    &testservo_selecter1
 };
 
 

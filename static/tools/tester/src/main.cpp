@@ -12,13 +12,16 @@
 #include "states/state_blink.h"
 #include "states/state_Menu_principal.h"
 #include "states/state_Menu_servo.h"
-#include "states/state_servo_selecteur.h"
+//#include "states/state_servo_selecter1.h"
+#include "states/state_pwm.h"
 #include "Arduino.h"
 #include "Encoder.h"
 #include "Servo.h"
 
 #define NB_menu_servo 3
 int retour=0;
+int memenc=0;
+int deltaenc;
 sState *current = &sInitHard;
 unsigned long _matchStart;
 

@@ -28,6 +28,9 @@
 #define PIN_LED 13
 #define SELECT 5
 #define RETOUR 2
+#define PIN_PWM_SERVO 9
+
+#define PRECISION_MICROS 5	//précision pour le mode micros
 //#define PIN_ARM_LEFT 11
 //#define PIN_ARM_RIGHT 3
 #define PIN_COLOR 8
@@ -80,6 +83,8 @@
 extern unsigned long _matchStart;
 extern Servo armServoLeft,armServoRight;
 extern int retour;
+extern int memenc;
+extern int deltaenc;
 /*  end externs*********************************************/
 
 

@@ -13,13 +13,14 @@
 #include "state_Menu_principal.h"
 #include "state_Menu_servo.h"
 #include "state_blink.h"
-#include "state_servo_selecteur.h"
+#include "state_servo_selecter1.h"
+#include "state_servo_selecter2.h"
+#include "state_servo_micros.h"
 #define NB_menu_servo 3
 
 
 
-
-//Encoder myEnc(3, 4);
+Servo servotest;
 
 
 sState* testMenu_servo(){
@@ -41,12 +42,12 @@ sState* testMenu_servo(){
 
 		  if(!digitalRead(SELECT))
 		  {
+			while(!digitalRead(SELECT));
 		    switch (Position)
 		    {
-		        case 0:{ return(&sservo_selecteur1); break; }
-		        case 1:{ return(&sservo_selecteur2); break; }
-	//	        case 2:{ i2c(); break; }
-	//	        case 3:{ liaison_serie(); break; }
+		        case 0:{ return(&sservo_selecter2); break; }
+		        case 1:{ return(&sservo_selecter1); break; }
+		        case 2:{ return(&sservo_micros); break; }
 		        //default:
 		     }
 		  }

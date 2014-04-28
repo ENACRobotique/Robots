@@ -8,7 +8,8 @@
 #include "states/state_blink.h"
 #include "states/state_Menu_principal.h"
 #include "states/state_Menu_servo.h"
-#include "states/state_servo_selecteur.h"
+#include "states/state_servo_selecter1.h"
+#include "states/state_servo_selecter2.h"
 
 sState* reBlink(){
     return &sMenu_principal;
