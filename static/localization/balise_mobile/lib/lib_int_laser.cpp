@@ -10,7 +10,7 @@ pour arduino UNO
 #include "tools.h"
 #include "../src/params.h"
 
-#include "../../../communication/botNet/shared/bn_debug.h"
+#include "../../../communication/network_tools/bn_debug.h"
 
 //#define DEBUG_LASER
 
