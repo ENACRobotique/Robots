@@ -13,7 +13,7 @@
 #include "roles.h"
 
 // other required libraries
-#include "../../../global_errors.h"
+#include "../../global_errors.h"
 
 // botNet specific libraries
 #include "../botNet/shared/botNet_core.h"

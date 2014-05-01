@@ -123,5 +123,10 @@
 			<type>2</type>
 			<locationURI>PARENT-4-PROJECT_LOC/network_config</locationURI>
 		</link>
+		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/communication/network_tools/</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

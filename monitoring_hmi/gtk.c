@@ -8,7 +8,7 @@
 #include <gtk/gtk.h>
 
 #include "../botNet/shared/botNet_core.h"
-#include "../botNet/shared/bn_debug.h"
+#include "../network_tools/bn_debug.h"
 #include "../../global_errors.h"
 #include "roles.h"
 #include "node_cfg.h"

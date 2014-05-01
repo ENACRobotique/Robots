@@ -24,8 +24,8 @@
 #include "math_ops.h"
 
 #include "../botNet/shared/botNet_core.h"
-#include "../botNet/shared/bn_debug.h"
-#include "../botNet/shared/bn_utils.h"
+#include "../network_tools/bn_debug.h"
+#include "../network_tools/bn_utils.h"
 #include "../../global_errors.h"
 #include "node_cfg.h"
 

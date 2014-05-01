@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <shared/botNet_core.h>
-#include <shared/bn_debug.h>
+#include <bn_debug.h>
 #include <i2c.h>
 #include <gpio.h>
 #include <ime.h>

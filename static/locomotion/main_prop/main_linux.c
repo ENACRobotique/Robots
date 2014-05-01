@@ -14,7 +14,7 @@
 #include "millis.h" // millis()
 
 #include "../botNet/shared/botNet_core.h"
-#include "../botNet/shared/bn_debug.h"
+#include "../network_tools/bn_debug.h"
 #include "roles.h"
 
 #include "params.h"
