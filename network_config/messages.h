@@ -257,10 +257,10 @@ typedef struct __attribute__((packed)){
 } sServos;
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_states; // must be <=
+    uint16_t nb_states; // must be <=18
     struct __attribute__((packed)){
-        eIhmElement id :16;
-        uint16_t state; //
+        eIhmElement id :8; // identifier of the ihm element
+        uint16_t state; // status
     } states[];
 } sIhmStatus;
 
