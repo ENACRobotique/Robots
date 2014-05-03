@@ -5,7 +5,7 @@
 #include "i2c0.h"
 
 //#define I2C_DEBUG
-#define I2C_STATS
+//#define I2C_STATS
 
 #ifndef BIT
 #define BIT(b) (1<<(b))
@@ -308,6 +308,7 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
 #ifdef I2C_STATS
     stats.nb_unexpected_states++;
 #endif
+    /* no break */
   case 0x00:
 #ifdef I2C_STATS
     if(trans->type == I2CTransRx){

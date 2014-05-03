@@ -1,67 +1,97 @@
 #include <lpc214x.h>
 #include <stdlib.h>
-//#include <ctl_api.h>
+#include <stdint.h>
+#include "sys_time.h"
 
-static unsigned char *rxchar=NULL;
+#include "uart0.h"
 
-void UARTWriteChar(unsigned char ch) {
-  while ((UART0_LSR & 0x20) == 0);
-  UART0_THR = ch;
+typedef struct{
+    uint8_t cbuf[UART_CBUFF_SIZE];
+    uint8_t tail;
+    uint8_t head;
+} circular_buffer;
+
+volatile circular_buffer rxbuf = {{0}, 0, 0};
+
+// FIXME make circular_buffer for sends as well (with sends on interruptions)
+void UARTWriteChar(uint8_t ch){
+    while ((UART0_LSR & 0x20) == 0);
+    UART0_THR = ch;
 }
 
-unsigned char UARTReadChar(void) {
-  while ((UART0_LSR & 0x01) == 0);
-  return UART0_RBR;
+// blocking read
+uint8_t UARTReadChar(){
+    uint8_t c;
+
+    while(rxbuf.tail == rxbuf.head);
+
+    c = rxbuf.cbuf[rxbuf.tail];
+    rxbuf.tail = (rxbuf.tail + 1)%UART_CBUFF_SIZE;
+
+    return c;
 }
 
-int UARTReadAvailable(void) {
-  return UART0_LSR & 0x01;
+int UARTReadAvailable(){
+    return rxbuf.tail != rxbuf.head;
 }
 
-static void uartISR(void) {
-  /* Read IIR to clear interrupt and find out the cause */
-  unsigned iir = UART0_IIR;
+void uartISR() __attribute__((interrupt("IRQ")));
+void uartISR(){
+    // Read IIR to clear interrupt and find out the cause
+    unsigned iir = UART0_IIR;
+    unsigned char tmp;
 
-  /* Handle UART interrupt */
-  switch ((iir >> 1) & 0x7)
-    {
-      case 1:
-        /* THRE interrupt */
-        break;
-      case 2:
-        /* RDA interrupt */
-        if(rxchar)
-          *rxchar = UART0_RBR;
-        break;
-      case 3:
-        /* RLS interrupt */
-        break;
-      case 6:
-        /* CTI interrupt */
-        break;
-   }
+    if (!(iir & 0x1)){
+        // Handle UART interrupt
+        switch ((iir >> 1) & 0x7){
+        case 1:
+            // THRE interrupt
+            break;
+        case 2:
+            // RDA interrupt
+            tmp = (rxbuf.head+1)%UART_CBUFF_SIZE;
+
+            if(tmp != rxbuf.tail){
+                rxbuf.cbuf[rxbuf.head] = UART0_RBR;
+                rxbuf.head = tmp;
+            }
+            else{ // byte lost
+                // FIXME, build some error stats & tell user
+            }
+            break;
+        case 3:
+            // RLS interrupt, error condition detected
+            tmp = UART0_LSR; // read LSR to clear interrupt
+            // FIXME, build some error stats & tell user
+            break;
+        case 6:
+            // CTI interrupt
+            break;
+        }
+    }
+
+    VIC_VectAddr = (unsigned)0; // updates priority hardware
 }
 
-void uart0_init(unsigned int baud, unsigned char *rxc) {
-  /* Configure UART */
-  unsigned int divisor = liblpc2000_get_pclk(liblpc2000_get_cclk(OSCILLATOR_CLOCK_FREQUENCY)) / (16 * baud);
-  UART0_LCR = 0x83; /* 8 bit, 1 stop bit, no parity, enable DLAB */
-  UART0_DLL = divisor & 0xFF;
-  UART0_DLM = (divisor >> 8) & 0xFF;
-  UART0_LCR &= ~0x80; /* Disable DLAB */
-  PCB_PINSEL0 = (PCB_PINSEL0 & (~0xF)) | 0x5;
-  UART0_FCR = 1;
+unsigned int uart0_init(unsigned int baud){
+    VIC_IntEnClr = VIC_IntEnClr_UART0;
 
-  /* Setup UART RX interrupt */
-  ctl_set_isr(6, 0, CTL_ISR_TRIGGER_FIXED, uartISR, 0);
-  ctl_unmask_isr(6);
-  UART0_IER = 1;
+    // Configure UART
+    unsigned int divisor = PCLK / (16 * baud);
+    UART0_LCR = 0x83; // 8 bit, 1 stop bit, no parity, enable DLAB
+    UART0_DLL = divisor & 0xFF;
+    UART0_DLM = (divisor >> 8) & 0xFF;
+    UART0_LCR &= ~0x80; // Disable DLAB
+    PCB_PINSEL0 = (PCB_PINSEL0 & (~0xF)) | 0x5; // setup TXD0 and RXD0 pins
+    UART0_FCR = 1; // enable FIFO, interrupt is activated for each received character
 
-  rxchar=rxc;
-}
+    // Setup UART RX interrupt
+    VIC_VectCntl12 = VIC_VectCntl_ENABLE | VIC_Channel_UART0;
+    VIC_VectAddr12 = (unsigned int)uartISR;
+    VIC_IntSelect &= ~VIC_IntSelect_UART0; // IRQ (not FIQ)
+    VIC_IntEnable = VIC_IntEnable_UART0;
 
-void __putchar(int ch) {
-  if (ch == '\n')
-    UARTWriteChar('\r');
-  UARTWriteChar(ch);
+    UART0_IER = 1;
+
+    return PCLK / (16 * divisor);
 }
