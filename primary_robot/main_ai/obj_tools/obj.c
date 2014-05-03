@@ -464,10 +464,10 @@ void obj_step(){
 
         //If the select point is achieved
         if (((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) ) || mode_obj==1){   //objectif atteint
-        	printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
-        	printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
-        	printf("mode_obj=%d", mode_obj);
-        	switch ((listObj[current_obj]).type){ //Mise en place des procedure local en fonction de l'objectif
+        	//printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
+        	//printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
+        	//printf("mode_obj=%d", mode_obj);
+        	switch ((listObj[current_obj]).type){ //Mise en place des procédures local en fonction de l'objectif
 				case E_ARBRE :
 					obj_tree(current_obj);
 					break;

@@ -14,7 +14,7 @@
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
-#define COLOR_SIMU 0 //0 red  1 yellow
+#define COLOR_SIMU 1 //0 red  1 yellow
 #define DEBUG 1
 #define SIMU 1
 #define RESO_POS 2
@@ -23,6 +23,7 @@
 #define MAX_OBS_BY_OBJ 3
 #define MAX_EP_BY_OBJ 3
 #define START_FEU 31
+#define END_FEU 47
 #define START_ARBRE 4
 #define START_TORCHE_FIXE 23
 #define FIRE_RADIUS_EP 15
@@ -66,6 +67,7 @@ typedef struct          //TODO pointeur vers trajectoire programmer //TODO faire
     sPt_t EntryPoint1;
     sPt_t EntryPoint2;
     uint8_t rot;		//0 no rotation else rotation
+    sNum_t angle;
     } Obj_arbre;
 
 //Strucutre feu

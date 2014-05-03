@@ -54,6 +54,10 @@ void init_ele(void){
     	((Obj_arbre*)listObj[i].typeStruct)->nb_point=10;                      //1 fruit pouri par arbre
     	for(j=0 ; j<6 ; j++) ((Obj_arbre*)listObj[i].typeStruct)->eFruit[j]=0; //par défaut tous les fruit sont bon
     	}
+    ((Obj_arbre*)listObj[0].typeStruct)->angle = 90.;
+    ((Obj_arbre*)listObj[1].typeStruct)->angle = 180.;
+    ((Obj_arbre*)listObj[2].typeStruct)->angle = 180.;
+    ((Obj_arbre*)listObj[3].typeStruct)->angle = 270.;
     //Add Entry Point in struct arbre
     for(j=0 ; j<4 ; j++){
     	arbre[j].EntryPoint1=listObj[j].entryPoint[0].c;

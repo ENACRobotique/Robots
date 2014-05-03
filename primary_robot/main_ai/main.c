@@ -483,7 +483,7 @@ int main(int argc, char **argv){
         }
 
         // sending obstacles, up to MAX_NB_OBSS_PER_MSG per message
-        if(send_obss_reset && (millis() - prevSendObss > 50)){
+        if(send_obss_reset && (millis() - prevSendObss > 150)){
             prevSendObss = millis();
 
             msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
