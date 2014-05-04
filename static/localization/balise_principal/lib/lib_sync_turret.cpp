@@ -7,7 +7,7 @@
 
 #include "lib_sync_turret.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
-#include "../../../communication/botNet/shared/bn_debug.h"
+#include "../../../communication/network_tools/bn_debug.h"
 #include "network_cfg.h"
 #include "Arduino.h"
 #include "lib_domitille.h"

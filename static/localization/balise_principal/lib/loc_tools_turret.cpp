@@ -11,7 +11,7 @@ extern "C"{
 #include "loc_tools_turret.h"
 #include "lib_domitille.h"
 #include "../../../global_errors.h"
-#include "../../../communication/botNet/shared/bn_debug.h"
+#include "../../../communication/network_tools/bn_debug.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "math.h"
 #include "Arduino.h"
