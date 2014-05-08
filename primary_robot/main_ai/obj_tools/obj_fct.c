@@ -228,8 +228,21 @@ void simuSecondary(void){ //TODO if a other robot on trajectory
 
 void posPrimary(void){
     int i;
+    sPt_t pt;
+    sVec_t v;
+
     if(get_position(&_current_pos)){
         if(((i=test_in_obs(&_current_pos))!=0) ){
+            if( obs[i].moved == 1){
+                pt = obs[0].c;
+                projPtOnCircle(&obs[i].c, obs[i].r, &pt);
+                convPts2Vec(&pt, &obs[0].c, &v);
+
+                obs[i].c.x += v.x;
+                obs[i].c.y += v.y;
+
+                obs_updated[i]++;
+                }
             project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);
             if(sqrt(pow(_current_pos.x-obs[0].c.x,2)+pow(_current_pos.y-obs[0].c.y,2)<2)){
                 memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));
