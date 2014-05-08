@@ -354,3 +354,18 @@ ERROR sign(const float x, int *sg){
 
     return 0;
 }
+
+ERROR projPtOnCircle(const sPt_t *c, const sNum_t r, sPt_t *p){
+    sVec_t v = {0. ,0.};
+    sNum_t n;
+
+    RET_IF_NOT_(c && p, ERR_BADPAR);
+
+    convPts2Vec(c, p, &v);
+    normVec(&v, &n);
+
+    p->x = c->x + v.x*r/n;
+    p->y = c->y + v.y*r/n;
+
+    return 0;
+}

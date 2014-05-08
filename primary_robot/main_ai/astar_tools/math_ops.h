@@ -25,6 +25,7 @@ ERROR testPtOnArc(const sPt_t *p1, const sPt_t *p2 ,const sPt_t *c, sNum_t r, sP
 ERROR symPtprLine(const sPt_t *pt, sLin_t *l, sPt_t *ps);
 ERROR testPtInZone(const sPt_t pz[], int nb, const sPt_t *pt, int *ret);
 ERROR sign(const float x, int *sg);
+ERROR projPtOnCircle(const sPt_t *c, const sNum_t r, sPt_t *p);
 
 static inline void dumpVec(sVec_t *v, char *name) {
     printf("%s(%.2f,%.2f)\n", name, v->x, v->y);
