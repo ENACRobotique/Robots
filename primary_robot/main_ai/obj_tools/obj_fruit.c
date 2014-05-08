@@ -355,10 +355,10 @@ void obj_bac(iABObs_t obj){
                     bac.nb_point=0;
 
                     memcpy(&tabTemp[0],&tabBac[0], sizeof(tabBac[0])*2);
-                    tabTemp[0].p1 = obs[0].c;
-                    TransElTraj(&tabTemp[0], listObj[obj].entryPoint[0].c.x, listObj[obj].entryPoint[0].c.y);
-                    tabTemp[1].p1=tabTemp[0].p2;
-                    tabTemp[1].p2=tabTemp[0].p2;
+
+                    TransElTraj(&tabTemp[0], obs[0].c.x, obs[0].c.y);
+                    tabTemp[1].p1 = tabTemp[0].p1;
+                    tabTemp[1].p2 = tabTemp[0].p2;
                     pt_select = tabTemp[1].p2;
                     path.path=&tabTemp[0];
                     path.path_len=2;
