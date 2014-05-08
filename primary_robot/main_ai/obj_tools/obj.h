@@ -29,7 +29,7 @@
 #include "millis.h"
 #include "obj_fire.h"
 #include "obj_fruit.h"
-#include "obj_positions.h"
+#include "obj_statuses.h"
 
 
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);

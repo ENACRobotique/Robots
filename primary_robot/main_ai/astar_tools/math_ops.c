@@ -321,10 +321,10 @@ ERROR testPtInZone(const sPt_t pz[], int nb, const sPt_t *pt, int *ret){ //FIXME
         convPts2Line(&pz[i], &pz[(i+1)%(nb)], 0, &l[i]);
     }
 
-    sign(l[0].a * pt->x + l[0].b * pt->y +l[0].c, &sg_prev);
+    signum(l[0].a * pt->x + l[0].b * pt->y +l[0].c, &sg_prev);
 
     for( i = 1 ; i < nb ; i++){
-        sign( l[i].a * pt->x + l[i].b * pt->y +l[i].c, &sg);
+        signum( l[i].a * pt->x + l[i].b * pt->y +l[i].c, &sg);
         if( sg != sg_prev){
             *ret = 0;
             return 0;
@@ -335,7 +335,7 @@ ERROR testPtInZone(const sPt_t pz[], int nb, const sPt_t *pt, int *ret){ //FIXME
     return 0;
 }
 
-ERROR sign(const float x, int *sg){
+ERROR signum(const float x, int *sg){
 
     RET_IF_NOT_(sg, ERR_BADPAR);
 

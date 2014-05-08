@@ -288,7 +288,6 @@ int checkCurrentPath(void){
 void obj_step(){
 	int j, start = 0;
 	int obj=-1;
-	sGenericPos *posPrimaryADV, *posSecondaryADV;
     /*sTrajEl_t tabStart[2]={ //Segment for push a vertical fire
         {{0.  ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
         {{10 ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
@@ -439,16 +438,6 @@ void obj_step(){
                // simuSecondary();
                 }
             posPrimary();
-
-            posPrimaryADV = getLastPGPosition(ELT_ADV_PRIMARY);
-            //obs[2].c.x = posPrimaryADV->x;
-            //obs[2].c.y = posPrimaryADV->y;
-            obs_updated[2]++;
-
-            posSecondaryADV = getLastPGPosition(ELT_ADV_SEC);
-            //obs[3].c.x = posSecondaryADV->x;
-            //obs[3].c.y = posSecondaryADV->y;
-            obs_updated[3]++;
 
             checkRobot2Obj();
             checkRobotBlock();

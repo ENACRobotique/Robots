@@ -48,11 +48,11 @@ typedef enum{
     E_GOAL,                 // asks the robot to go to this goal (x,y)
     E_OBS_CFG,              // obstacle array config
     E_OBSS,                 // obstacles update (position & status update)
-    E_GENERIC_POS,          // generic position
     E_POS_QUERY,            // position query
     E_SERVOS,               // servo messages
     E_IHM_STATUS,           // ihm status
-    E_SPEED_SETPOINT,
+    E_SPEED_SETPOINT,       // speed setpoint
+    E_GENERIC_STATUS,       // generic status of an element
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -171,7 +171,8 @@ typedef enum{
     ELT_PRIMARY,
     ELT_SECONDARY,
     ELT_ADV_PRIMARY,
-    ELT_ADV_SEC,
+    ELT_ADV_SECONDARY,
+    ELT_FIRE,
 
     NUM_E_ELEMENT
 } eElement;
@@ -190,24 +191,62 @@ typedef enum{
     IHM_LED
 } eIhmElement;
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed)){
 // position in frame (specified in field "frame")
     float x;            // (cm)
     float y;            // (cm)
     float theta;        // (rad)
-    uint32_t date;      // synchronized date (µs)
-// uncertainty (oriented rectangle)
-    float u_theta;      // (rad)
-    float u_a_angle;    // (rad) (orientation of the uncertainty rectangle along "a" axis)
-    float u_a;          // (cm)
-    float u_b;          // (cm)
-// identifier of the robot/element
-    eElement id :8;
     enum{
         FRAME_PLAYGROUND,
         FRAME_PRIMARY
     } frame :8;
-}sGenericPos;
+} s2DPosAtt; // 2D position & attitude
+
+typedef struct __attribute__((packed)){
+// uncertainty (oriented 2D ellipse)
+    float theta;      // uncertainty of the 2D orientation (rad)
+    float a_angle;    // orientation of the uncertainty ellipse along "a" axis (rad)
+    float a_std;      // standard deviation along "a" axis (cm)
+    float b_std;      // standard deviation along "b" axis (cm)
+} s2DPAUncert;
+
+typedef struct __attribute__((packed)){
+    uint32_t date;      // synchronized date (µs)
+    eElement id :8;
+    union{
+        // generic way to access position (if present in type)
+        struct{
+            s2DPosAtt pos;
+            s2DPAUncert pos_u;
+        };
+
+        // in case of pos.id == ELT_PRIMARY
+        struct{
+            s2DPosAtt pos;
+            s2DPAUncert pos_u;
+
+            float speed; // (cm/s)
+
+            uint16_t tid; // trajectory identifier
+            uint8_t sid; // step identifier
+            uint8_t ssid; // sub-step identifier (0:line, 1:circle)
+        } prop_status;
+
+        // in case of pos.id == ELT_FIRE
+        struct{
+            s2DPosAtt pos;
+            s2DPAUncert pos_u;
+
+            enum{
+                FIRE_HORIZ_YELLOW,
+                FIRE_HORIZ_RED,
+                FIRE_VERTICAL,
+                FIRE_OBLIQUE,
+                FIRE_VERTICAL_TORCH
+            } state :8;
+        } fire_status;
+    };
+} sGenericStatus;
 
 typedef struct{
     uint32_t date; // synchronized date (µs)
@@ -267,7 +306,6 @@ typedef struct __attribute__((packed)){
 typedef struct{
     float speed;
 } sSpeedSetPoint;
-
 /************************ user payload definition stop ************************/
 
 
@@ -296,7 +334,7 @@ typedef union{
     sAsservStats asservStats;
     sObsConfig obsCfg;
     sObss obss;
-    sGenericPos genericPos;
+    sGenericStatus genericStatus;
     sPosQuery posQuery;
     sServos servos;
     sIhmStatus ihmStatus;

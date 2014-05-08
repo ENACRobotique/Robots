@@ -32,10 +32,10 @@ const char *eType2str(E_TYPE elem){
     case E_GOAL :                   return "GOAL";
     case E_OBS_CFG :                return "OBS_CFG";
     case E_OBSS :                   return "OBSS" ;
-    case E_GENERIC_POS :            return "GENERIC_POS" ;
     case E_POS_QUERY :              return "POS_QUERY" ;
     case E_SERVOS :                 return "SERVOS" ;
     case E_IHM_STATUS :             return "IHM_STATUS" ;
+    case E_GENERIC_STATUS :         return "GENERIC_STATUS" ;
     /************************ user types stop ************************/
 
     default :
