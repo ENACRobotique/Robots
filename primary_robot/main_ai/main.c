@@ -32,6 +32,9 @@
 #include "obj.h"
 #include "obj_types.h"
 #include "obj_statuses.h"
+#include "obj_positions.h"
+#include "obj_fire.h"
+
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -85,6 +88,26 @@ int main(int argc, char **argv){
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
     unsigned int prevSendObss = 0, prevSendObs = 0;
+
+
+ /*   //test a supprimer
+    sLin_t l={2., 1., -1000., 0};
+    sPt_t c={2.,2.};
+    sNum_t r=2.;
+    sPt_t pt1;
+    sPt_t pt2;
+
+    int df=interC2D(&l, &c, r, &pt1, &pt2);
+    printf("%d\n",df);
+    printf("pt1.x =%f\n", pt1.x);
+    printf("pt1.y =%f\n", pt1.y);
+    printf("pt2.x =%f\n", pt2.x);
+    printf("pt2.y =%f\n", pt2.y);
+    getchar();
+*/
+
+
+
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -391,7 +414,12 @@ int main(int argc, char **argv){
                 break;
             }
 
-            printf("pos %.2fcm, %.2fcm, %.1f°\x1b[u", last_pos.x, last_pos.y, last_theta*180./M_PI);
+            printf("pos %.2fcm, %.2fcm, %.1f°", last_pos.x, last_pos.y, last_theta*180./M_PI);
+            printf(", armLeft : ");
+            printServoPos(&armLeft);
+            printf(", armRight : ");
+            printServoPos(&armRight);
+            printf("\x1b[u");
             fflush(stdout);
         }
         else if (ret < 0){

@@ -7,7 +7,7 @@
 
 estate_t state = COLOR_SELECTION;
 int temp=0; //Temporaire pour mettre en shutdown lorsque tous les objectifs sont finis
-int current_obj=-1;
+
 int prev_obj=-1;
 sPt_t prev_pos={0., 0.};
 sNum_t prev_len=0;
@@ -442,8 +442,6 @@ void obj_step(){
             checkRobot2Obj();
             checkRobotBlock();
 
-
-
         if((millis()-last_time2)>1000){
             last_time2 = millis();
             updateEntryPointTree();
@@ -472,6 +470,8 @@ void obj_step(){
 					break;
 				}
         	}
+        objBonusFire();
+
         break;
 
     case SHUT_DOWN:

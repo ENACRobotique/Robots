@@ -13,6 +13,7 @@ inline ERROR sqdistPt2Pt(const sPt_t *p1, const sPt_t *p2, sNum_t *d2);
 inline ERROR distPt2Pt(const sPt_t *p1, const sPt_t *p2, sNum_t *d);
 inline ERROR dotVecs(const sVec_t *v1, const sVec_t *v2, sNum_t *d);
 inline ERROR crossVecs(const sVec_t *v1, const sVec_t *v2, sNum_t *c);
+inline ERROR rotVec(const sNum_t theta, sVec_t *v);
 ERROR convPts2Line(const sPt_t *p1, const sPt_t *p2, int norm, sLin_t *l);
 ERROR convVecPt2Line(const sVec_t *v, const sPt_t *p, int norm, sLin_t *l);
 ERROR normLine(sLin_t *l);
@@ -23,7 +24,7 @@ ERROR interCircle2Line(const sLin_t *l, const sPt_t *c, sNum_t r, int *nb, sPt_t
 ERROR testPtOnArc(const sPt_t *p1, const sPt_t *p2 ,const sPt_t *c, sNum_t r, sPt_t *p, int *ret);
 ERROR symPtprLine(const sPt_t *pt, sLin_t *l, sPt_t *ps);
 ERROR testPtInZone(const sPt_t pz[], int nb, const sPt_t *pt, int *ret);
-ERROR signum(const float x, int *sg);
+ERROR sign(const float x, int *sg);
 
 static inline void dumpVec(sVec_t *v, char *name) {
     printf("%s(%.2f,%.2f)\n", name, v->x, v->y);

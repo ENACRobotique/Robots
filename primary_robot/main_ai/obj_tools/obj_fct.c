@@ -7,7 +7,21 @@
 
 #include "obj_fct.h"
 
-
+void printServoPos(eServoPos_t *pos){
+    switch(*pos){
+        case CLOSE:
+            printf("CLOSE");
+            break;
+        case HALF_OPEN:
+            printf("HALF_OPEN");
+            break;
+        case OPEN:
+            printf("OPEN");
+            break;
+        default:
+            printf("Error in switch printServoPos\n");
+        }
+    }
 
 void printListObj(void){
     int i,j;
@@ -92,11 +106,6 @@ int get_position( sPt_t *pos){
 	*pos = obs[0].c;
     obs_updated[0]++;
 	return 1;
-    }
-
-float sign(float x){ //retourne -1 ou 1, 0 si nul
-    if(x==0) return 0;
-    return x/fabs(x);
     }
 
 int test_in_obs(sPt_t *p){ //retourne le numéros de l'obstable si la position est a l'interieur de celui ci

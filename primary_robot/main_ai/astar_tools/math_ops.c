@@ -60,6 +60,17 @@ inline ERROR crossVecs(const sVec_t *v1, const sVec_t *v2, sNum_t *c) {
     return 0;
 }
 
+inline ERROR rotVec(const sNum_t theta, sVec_t *v){
+    sVec_t vc = *v;
+
+    RET_IF_NOT_(v, ERR_BADPAR);
+
+    v->x = vc.x*cos(theta) - vc.y*sin(theta);
+    v->y = vc.x*sin(theta) + vc.y*cos(theta);
+
+    return 0;
+    }
+
 ERROR convPts2Line(const sPt_t *p1, const sPt_t *p2, int norm, sLin_t *l){
     RET_IF_NOT_(p1 && p2 && l, ERR_BADPAR);
 
@@ -321,10 +332,10 @@ ERROR testPtInZone(const sPt_t pz[], int nb, const sPt_t *pt, int *ret){ //FIXME
         convPts2Line(&pz[i], &pz[(i+1)%(nb)], 0, &l[i]);
     }
 
-    signum(l[0].a * pt->x + l[0].b * pt->y +l[0].c, &sg_prev);
+    sign(l[0].a * pt->x + l[0].b * pt->y +l[0].c, &sg_prev);
 
     for( i = 1 ; i < nb ; i++){
-        signum( l[i].a * pt->x + l[i].b * pt->y +l[i].c, &sg);
+        sign( l[i].a * pt->x + l[i].b * pt->y +l[i].c, &sg);
         if( sg != sg_prev){
             *ret = 0;
             return 0;
@@ -335,7 +346,7 @@ ERROR testPtInZone(const sPt_t pz[], int nb, const sPt_t *pt, int *ret){ //FIXME
     return 0;
 }
 
-ERROR signum(const float x, int *sg){
+ERROR sign(const float x, int *sg){
 
     RET_IF_NOT_(sg, ERR_BADPAR);
 
