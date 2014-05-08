@@ -26,5 +26,6 @@ sGenericStatus *getLastPGStatus(eElement el);
 statusHandler setPGHandler(eElement id, statusHandler h);
 int received_new_status(sGenericStatus *status);
 void statuses_maintenance();
+void setConfig(eElement el, sStatusHandlingConfig *cfg);
 
 #endif /* OBJ_POSITION_H_ */

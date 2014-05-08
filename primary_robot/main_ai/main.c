@@ -32,7 +32,6 @@
 #include "obj.h"
 #include "obj_types.h"
 #include "obj_statuses.h"
-#include "obj_positions.h"
 #include "obj_fire.h"
 
 
