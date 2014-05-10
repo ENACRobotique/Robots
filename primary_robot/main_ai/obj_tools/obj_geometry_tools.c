@@ -90,16 +90,18 @@ void project_point(sNum_t xp, sNum_t yp, sNum_t rc, sNum_t xc, sNum_t yc, sPt_t 
 	sPt_t o_p= {xp ,yp};
 	sVec_t v;
 	sNum_t r=rc, n, d;
+	int sg = 0;
 
 	convPts2Vec(&o_c, &o_p, &v);
 	normVec(&v, &n);
 
 	d = n - fabs(r);
 
-	if(fabs(d) > 6.) printf("!!! far from the circle (%.2fcm)...\n", d);
-
-	point->x = o_c.x + v.x*(fabs(r) + 0.1)/n+0.1*sign(v.x*(fabs(r) + 0.1)/n);
-	point->y = o_c.y + v.y*(fabs(r) + 0.1)/n+0.1*sign(v.y*(fabs(r) + 0.1)/n);
+	if(fabs(d) > 2.) printf("!!! far from the circle (%.2fcm)...\n", d);
+	sign(v.x*(fabs(r) + 0.1)/n, &sg);
+	point->x = o_c.x + v.x*(fabs(r) + 0.1)/n+0.1*sg;
+	sign(v.y*(fabs(r) + 0.1)/n, &sg);
+	point->y = o_c.y + v.y*(fabs(r) + 0.1)/n+0.1*sg;
 	}
 
 

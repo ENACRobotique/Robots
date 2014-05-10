@@ -31,7 +31,9 @@
 
 #include "obj.h"
 #include "obj_types.h"
-#include "obj_positions.h"
+#include "obj_statuses.h"
+#include "obj_fire.h"
+
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -52,14 +54,14 @@ void usage(char *cl){
     printf("\t--help,     -h, -?    prints this help\n");
 }
 
-void posUpdated(sGenericPos *p){
-    if(p->id != ELT_PRIMARY){
-        obs[p->id].active = 1;
-        obs[p->id].moved = 1;
-        obs[p->id].c.x = p->x;
-        obs[p->id].c.y = p->y;
+void posUpdated(sGenericStatus *status){
+    if(status->id != ELT_PRIMARY){
+        obs[status->id].active = 1;
+        obs[status->id].moved = 1;
+        obs[status->id].c.x = status->pos.x;
+        obs[status->id].c.y = status->pos.y;
 
-        obs_updated[p->id]++;
+        obs_updated[status->id]++;
     }
 }
 
@@ -85,6 +87,26 @@ int main(int argc, char **argv){
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
     unsigned int prevSendObss = 0, prevSendObs = 0;
+
+
+ /*   //test a supprimer
+    sLin_t l={2., 1., -1000., 0};
+    sPt_t c={2.,2.};
+    sNum_t r=2.;
+    sPt_t pt1;
+    sPt_t pt2;
+
+    int df=interC2D(&l, &c, r, &pt1, &pt2);
+    printf("%d\n",df);
+    printf("pt1.x =%f\n", pt1.x);
+    printf("pt1.y =%f\n", pt1.y);
+    printf("pt2.x =%f\n", pt2.x);
+    printf("pt2.y =%f\n", pt2.y);
+    getchar();
+*/
+
+
+
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -147,10 +169,16 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-//    setPGHandler(ELT_PRIMARY, posUpdated);
-    setPGHandler(ELT_SECONDARY, posUpdated);
-    setPGHandler(ELT_ADV_PRIMARY, posUpdated);
-    setPGHandler(ELT_ADV_SEC, posUpdated);
+    {
+        sStatusHandlingConfig cfg;
+        cfg.has_position = 1;
+        cfg.handlerPG = posUpdated;
+
+        // setConfig(ELT_PRIMARY, &cfg);
+        setConfig(ELT_SECONDARY, &cfg);
+        setConfig(ELT_ADV_PRIMARY, &cfg);
+        setConfig(ELT_ADV_SECONDARY, &cfg);
+    }
 
     switch(eAIState){
     case E_AI_AUTO:
@@ -253,20 +281,20 @@ int main(int argc, char **argv){
                 }
 
                 {
-                    sGenericPos pos;
+                    sGenericStatus status;
 
-                    pos.date = micros(); // XXX
-                    pos.frame = FRAME_PLAYGROUND;
-                    pos.id = ELT_PRIMARY;
-                    pos.theta = msgIn.payload.pos.theta;
-                    pos.u_a = 0.;
-                    pos.u_b = 0.;
-                    pos.u_a_angle = 0.;
-                    pos.u_theta = 0.;
-                    pos.x = msgIn.payload.pos.x;
-                    pos.y = msgIn.payload.pos.y;
+                    status.date = micros(); // XXX
+                    status.id = ELT_PRIMARY;
+                    status.prop_status.pos.frame = FRAME_PLAYGROUND;
+                    status.prop_status.pos.theta = msgIn.payload.pos.theta;
+                    status.prop_status.pos_u.a_std = 0.;
+                    status.prop_status.pos_u.b_std = 0.;
+                    status.prop_status.pos_u.a_angle = 0.;
+                    status.prop_status.pos_u.theta = 0.;
+                    status.prop_status.pos.x = msgIn.payload.pos.x;
+                    status.prop_status.pos.y = msgIn.payload.pos.y;
 
-                    received_new_generic_pos(&pos);
+                    received_new_status(&status);
                 }
 
                 if(curr_path.path && msgIn.payload.pos.tid == curr_path.tid){
@@ -358,8 +386,8 @@ int main(int argc, char **argv){
                     printf("bn_send(E_OBS_CFG) error #%i\n", -ret);
                 }
                 break;
-            case E_GENERIC_POS:
-                received_new_generic_pos(&msgIn.payload.genericPos);
+            case E_GENERIC_STATUS:
+                received_new_status(&msgIn.payload.genericStatus);
                 break;
             case E_IHM_STATUS:
                 for(i = 0 ; i < (int)msgIn.payload.ihmStatus.nb_states ; i++){
@@ -385,7 +413,12 @@ int main(int argc, char **argv){
                 break;
             }
 
-            printf("pos %.2fcm, %.2fcm, %.1f°\x1b[u", last_pos.x, last_pos.y, last_theta*180./M_PI);
+            printf("pos %.2fcm, %.2fcm, %.1f°", last_pos.x, last_pos.y, last_theta*180./M_PI);
+            printf(", armLeft : ");
+            printServoPos(&armLeft);
+            printf(", armRight : ");
+            printServoPos(&armRight);
+            printf("\x1b[u");
             fflush(stdout);
         }
         else if (ret < 0){
@@ -483,7 +516,7 @@ int main(int argc, char **argv){
         }
 
         // sending obstacles, up to MAX_NB_OBSS_PER_MSG per message
-        if(send_obss_reset && (millis() - prevSendObss > 50)){
+        if(send_obss_reset && (millis() - prevSendObss > 150)){
             prevSendObss = millis();
 
             msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);

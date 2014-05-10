@@ -7,7 +7,7 @@
 
 estate_t state = COLOR_SELECTION;
 int temp=0; //Temporaire pour mettre en shutdown lorsque tous les objectifs sont finis
-int current_obj=-1;
+
 int prev_obj=-1;
 sPt_t prev_pos={0., 0.};
 sNum_t prev_len=0;
@@ -288,7 +288,6 @@ int checkCurrentPath(void){
 void obj_step(){
 	int j, start = 0;
 	int obj=-1;
-	sGenericPos *posPrimaryADV, *posSecondaryADV;
     /*sTrajEl_t tabStart[2]={ //Segment for push a vertical fire
         {{0.  ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
         {{10 ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
@@ -440,20 +439,8 @@ void obj_step(){
                 }
             posPrimary();
 
-            posPrimaryADV = getLastPGPosition(ELT_ADV_PRIMARY);
-            //obs[2].c.x = posPrimaryADV->x;
-            //obs[2].c.y = posPrimaryADV->y;
-            obs_updated[2]++;
-
-            posSecondaryADV = getLastPGPosition(ELT_ADV_SEC);
-            //obs[3].c.x = posSecondaryADV->x;
-            //obs[3].c.y = posSecondaryADV->y;
-            obs_updated[3]++;
-
             checkRobot2Obj();
             checkRobotBlock();
-
-
 
         if((millis()-last_time2)>1000){
             last_time2 = millis();
@@ -464,10 +451,10 @@ void obj_step(){
 
         //If the select point is achieved
         if (((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) ) || mode_obj==1){   //objectif atteint
-        	printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
-        	printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
-        	printf("mode_obj=%d", mode_obj);
-        	switch ((listObj[current_obj]).type){ //Mise en place des procedure local en fonction de l'objectif
+        	//printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
+        	//printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
+        	//printf("mode_obj=%d", mode_obj);
+        	switch ((listObj[current_obj]).type){ //Mise en place des procédures local en fonction de l'objectif
 				case E_ARBRE :
 					obj_tree(current_obj);
 					break;
@@ -483,6 +470,8 @@ void obj_step(){
 					break;
 				}
         	}
+        objBonusFire();
+
         break;
 
     case SHUT_DOWN:

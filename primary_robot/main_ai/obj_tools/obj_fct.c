@@ -7,7 +7,21 @@
 
 #include "obj_fct.h"
 
-
+void printServoPos(eServoPos_t *pos){
+    switch(*pos){
+        case CLOSE:
+            printf("CLOSE");
+            break;
+        case HALF_OPEN:
+            printf("HALF_OPEN");
+            break;
+        case OPEN:
+            printf("OPEN");
+            break;
+        default:
+            printf("Error in switch printServoPos\n");
+        }
+    }
 
 void printListObj(void){
     int i,j;
@@ -54,6 +68,10 @@ void init_ele(void){
     	((Obj_arbre*)listObj[i].typeStruct)->nb_point=10;                      //1 fruit pouri par arbre
     	for(j=0 ; j<6 ; j++) ((Obj_arbre*)listObj[i].typeStruct)->eFruit[j]=0; //par défaut tous les fruit sont bon
     	}
+    ((Obj_arbre*)listObj[0].typeStruct)->angle = 90.;
+    ((Obj_arbre*)listObj[1].typeStruct)->angle = 180.;
+    ((Obj_arbre*)listObj[2].typeStruct)->angle = 180.;
+    ((Obj_arbre*)listObj[3].typeStruct)->angle = 270.;
     //Add Entry Point in struct arbre
     for(j=0 ; j<4 ; j++){
     	arbre[j].EntryPoint1=listObj[j].entryPoint[0].c;
@@ -88,11 +106,6 @@ int get_position( sPt_t *pos){
 	*pos = obs[0].c;
     obs_updated[0]++;
 	return 1;
-    }
-
-float sign(float x){ //retourne -1 ou 1, 0 si nul
-    if(x==0) return 0;
-    return x/fabs(x);
     }
 
 int test_in_obs(sPt_t *p){ //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
@@ -215,8 +228,21 @@ void simuSecondary(void){ //TODO if a other robot on trajectory
 
 void posPrimary(void){
     int i;
+    sPt_t pt;
+    sVec_t v;
+
     if(get_position(&_current_pos)){
         if(((i=test_in_obs(&_current_pos))!=0) ){
+            if( obs[i].moved == 1){
+                pt = obs[0].c;
+                projPtOnCircle(&obs[i].c, obs[i].r, &pt);
+                convPts2Vec(&pt, &obs[0].c, &v);
+
+                obs[i].c.x += v.x;
+                obs[i].c.y += v.y;
+
+                obs_updated[i]++;
+                }
             project_point(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x,obs[i].c.y, &_current_pos);
             if(sqrt(pow(_current_pos.x-obs[0].c.x,2)+pow(_current_pos.y-obs[0].c.y,2)<2)){
                 memcpy(&obs[0].c,&_current_pos, sizeof(obs[0].c));

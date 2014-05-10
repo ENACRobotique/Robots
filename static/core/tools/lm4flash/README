@@ -1,0 +1,8 @@
+This folder is an extract of a larger git repository, found at https://github.com/utzig/lm4tools.git.
+It includes only the lm4flash tool. 
+To use it, run "make" in this folder.
+
+Probably requiered dependency : libusb-1.0-0-dev (on debian)
+
+Original README found in origin_README.md
+

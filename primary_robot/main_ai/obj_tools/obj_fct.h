@@ -21,12 +21,12 @@
 #include "obj_time_tools.h"
 
 
+void printServoPos(eServoPos_t *pos);
 void printListObj(void);
 void printObsActive(void);
 void init_ele(void);
 void send_robot(sPath_t path);
 int get_position( sPt_t *pos);
-float sign(float x);
 int test_in_obs(sPt_t *p);
 int test_tirette(void);
 void simuSecondary(void);

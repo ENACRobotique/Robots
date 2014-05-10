@@ -135,7 +135,7 @@ int getEntryPointTree(sPt_t *pt){ //Ex return 124, 431..
 	return -1;
 	}
 
-void sendInitTrajTree(iABObs_t obj){
+int sendInitTrajTree(iABObs_t obj){
     int i, idEntryTree, numTree, idEntry;
     sTrajEl_t *tabTemp = NULL;
 
@@ -147,6 +147,8 @@ void sendInitTrajTree(iABObs_t obj){
 		getchar();
 		}
 	idEntry=idEntryTree%100;
+
+    checkFire(obj, idEntryTree);
 
 	switch(idEntry){
 		case 30 :
@@ -222,7 +224,57 @@ void sendInitTrajTree(iABObs_t obj){
 	send_robot(path) ;
 
 	free(tabTemp);
+    return idEntryTree;
 	}
+
+void  checkFire(int num_obj, int idEntryTree){
+    int i;
+    sNum_t dist;
+    printf("Start checkFire\n");
+    for( i = 0 ; i < NB_OBJ ; i++){
+        if( (listObj[i].type == E_FEU) && (((Obj_feu*)listObj[i].typeStruct)->pos == 3) ){
+            distPt2Pt(&obs[listObj[i].numObs[0]].c, &obs[listObj[num_obj].numObs[0]].c, &dist);
+            if( dist < 50. ){
+                printf("inf 50 checkFire : %d\n", (idEntryTree/10)%10);
+               switch((idEntryTree/10)%10){
+                   case 0 :
+                   case 1 :
+                       if( ((Obj_feu*)listObj[i].typeStruct)->angle == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                           if(color == 1){
+                               printf("Active bras gauche\n");
+                               //TODO actionner bras gauche
+                               }
+                           }
+                       printf("feu : %f, arbre :%f\n", ((Obj_feu*)listObj[i].typeStruct)->angle +180, ((Obj_arbre*)listObj[num_obj].typeStruct)->angle);
+                       if( fmodf(((Obj_feu*)listObj[i].typeStruct)->angle +180,360.) == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                           if(color == 0){
+                               printf("Active bras gauche\n");
+                               //TODO actionner bras gauche
+                               }
+                           }
+                       break;
+                   case 2 :
+                   case 3 :
+                       if( ((Obj_feu*)listObj[i].typeStruct)->angle == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                           if(color == 0){
+                               printf("Active bras droit\n");
+                               //TODO actionner bras droit
+                               }
+                           }
+                       if( fmodf(((Obj_feu*)listObj[i].typeStruct)->angle +180,360.) == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                           if(color == 1){
+                               printf("Active bras droit\n");
+                               //TODO actionner bras droit
+                               }
+                           }
+                       break;
+
+               }
+
+                }
+            }
+        }
+    }
 
 
 //standard function objective
@@ -230,7 +282,7 @@ void sendInitTrajTree(iABObs_t obj){
 void obj_tree(iABObs_t obj)
 	{
 	static int state=0; //for separate the init, loop and end
-	int i;
+	int i, num_obs_in;
 
 	switch(state){
 		case 0:
@@ -273,6 +325,11 @@ void obj_tree(iABObs_t obj)
 			pt_select.x=0;
 			pt_select.y=0;
 			listObj[obj].dist=0;
+			//for no discontinuity of the end obj because of fire
+			num_obs_in =  test_in_obs(&obs[0].c);
+			if( (START_FEU <= num_obs_in) && (num_obs_in <= END_FEU) ){
+			    obs[num_obs_in].active = 0; //FIXME
+			    }
 		   break;
 		default :
 			printf("Error in obj_tree : state != (0 || 1 || 2\n");
@@ -298,10 +355,10 @@ void obj_bac(iABObs_t obj){
                     bac.nb_point=0;
 
                     memcpy(&tabTemp[0],&tabBac[0], sizeof(tabBac[0])*2);
-                    tabTemp[0].p1 = obs[0].c;
-                    TransElTraj(&tabTemp[0], listObj[obj].entryPoint[0].c.x, listObj[obj].entryPoint[0].c.y);
-                    tabTemp[1].p1=tabTemp[0].p2;
-                    tabTemp[1].p2=tabTemp[0].p2;
+
+                    TransElTraj(&tabTemp[0], obs[0].c.x, obs[0].c.y);
+                    tabTemp[1].p1 = tabTemp[0].p1;
+                    tabTemp[1].p2 = tabTemp[0].p2;
                     pt_select = tabTemp[1].p2;
                     path.path=&tabTemp[0];
                     path.path_len=2;
