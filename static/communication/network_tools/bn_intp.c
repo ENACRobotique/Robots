@@ -34,7 +34,7 @@ void bn_intp_msgHandle(sMsg *msg){
 
     uint32_t tempDT=msg->payload.intp.time-msg->payload.intp.prevTime;
 
-    if (prevMessageIndex==(msg->payload.intp.index-1) && msg->payload.intp.time-msg && msg->payload.intp.prevTime){
+    if (prevMessageIndex==(msg->payload.intp.index-1) && msg->payload.intp.time && msg->payload.intp.prevTime){
         if (bn_intp_minDT==0 || bn_intp_minDT>(tempDT)){ // if better value than previous one
             bn_intp_MicrosOffset=prevMessageDate-(tempDT>>1);
             bn_intp_minDT=tempDT;
@@ -52,7 +52,7 @@ void bn_intp_msgHandle(sMsg *msg){
  *  retries : number of synchronization message to send.
  * Return value :
  *  >0 if synchronization happened correctly on the master side (amount of pair of sychronization messages acked)
- *  <0 otherwise (see global_errors.h).
+ *  <0 otherwise (see global_errors.h), or details in the code here.
  */
 int bn_intp_sync(bn_Address slave, int retries){
     sMsg tempMsg={{0}};
@@ -60,7 +60,7 @@ int bn_intp_sync(bn_Address slave, int retries){
     uint32_t time0=0,time1=0;
     int i=0;
     int prevAcked=0,nbAcked=0,nbSucces=0;
-    int ret;
+    int ret=0;
 
     tempMsg.header.destAddr=slave;
     tempMsg.header.type=E_INTP;
@@ -69,7 +69,7 @@ int bn_intp_sync(bn_Address slave, int retries){
     for (i=0; i<retries; i++){
 
         tempMsg.payload.intp.index=tempIndex;   // set the index
-        tempMsg.payload.intp.prevTime=time1;    // set the date of the previous sending
+        tempMsg.payload.intp.prevTime=time1;    // set the date of the previous sending (if it is 0, the message will be considered as the first one)
         time0=micros();
         tempMsg.payload.intp.time=time0;        // set the date of the current sending
 
@@ -77,7 +77,7 @@ int bn_intp_sync(bn_Address slave, int retries){
 
         time1=time0;
 
-        if (ret==1 && prevAcked) nbSucces++; // synchro is successful if at least 2 messages have been acked (any retries may improve precision)
+        if (ret==1 && prevAcked) nbSucces++; // synchro is successful if at least 2 successive messages have been acked (any retries may improve precision)
         else if (ret==1) {
             prevAcked=1;
             nbAcked++;
@@ -87,7 +87,7 @@ int bn_intp_sync(bn_Address slave, int retries){
     }
 
     if (nbSucces>0) return nbSucces;
-    else if (!nbAcked) return ret;      // no cak at all ? slave device is probably off
+    else if (!nbAcked) return ret;      // no ak at all ? slave device is probably off, return last error code
     else return -ERR_TRY_AGAIN;         // no success but some acks ? well, network very busy, you may retry and pray to have more luck.
 
 }
