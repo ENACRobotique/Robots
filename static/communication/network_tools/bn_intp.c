@@ -37,7 +37,7 @@ void bn_intp_msgHandle(sMsg *msg){
     if (prevMessageIndex==(msg->payload.intp.index-1) && msg->payload.intp.time && msg->payload.intp.prevTime){
         if (bn_intp_minDT==0 || bn_intp_minDT>(tempDT)){ // if better value than previous one
             bn_intp_MicrosOffset=prevMessageDate-(tempDT>>1);
-            bn_intp_minDT=tempDT;
+            bn_intp_minDT=(tempDT?tempDT:1);
         }
     }
 
