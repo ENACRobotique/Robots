@@ -100,15 +100,23 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     angle-=ANGLE_ZERO;
 
     sMsg msg={{0}};
-    msg.header.size=sizeof(sGenericPos);
-    msg.header.type=E_GENERIC_POS;
+    msg.header.size=sizeof(sGenericStatus);
+    msg.header.type=E_GENERIC_STATUS;
     msg.header.destAddr=role_get_addr(ROLE_IA);
 
-    msg.payload.genericPos.x=(float)(pLoad->value)/10.*sin(angle);
-    msg.payload.genericPos.y=(float)(pLoad->value)/10.*cos(angle);
-    msg.payload.genericPos.date=pLoad->date;        // todo : synchronize this with ia
-    msg.payload.genericPos.frame=msg.payload.genericPos.FRAME_PRIMARY;
-    msg.payload.genericPos.id=(origin==ADDRX_MOBILE_1?ELT_ADV_PRIMARY:ELT_ADV_SEC);
+    msg.payload.genericStatus.date=pLoad->date;        // todo : synchronize this with ia
+    msg.payload.genericStatus.id=(origin==ADDRX_MOBILE_1?ELT_ADV_PRIMARY:ELT_ADV_SECONDARY);
+
+    msg.payload.genericStatus.adv_status.pos.x=(float)(pLoad->value)/10.*sin(angle);
+    msg.payload.genericStatus.adv_status.pos.y=(float)(pLoad->value)/10.*cos(angle);
+    msg.payload.genericStatus.adv_status.pos.theta=0;
+    msg.payload.genericStatus.adv_status.pos.frame=msg.payload.genericStatus.adv_status.pos.FRAME_PRIMARY;
+
+    msg.payload.genericStatus.adv_status.pos_u.a_angle=-1;
+    msg.payload.genericStatus.adv_status.pos_u.a_std=-1;
+    msg.payload.genericStatus.adv_status.pos_u.b_std=-1;
+    msg.payload.genericStatus.adv_status.pos_u.theta=-1;
+
 
     bn_send(&msg);
 

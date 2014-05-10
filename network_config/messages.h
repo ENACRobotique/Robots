@@ -240,6 +240,12 @@ typedef struct __attribute__((packed)){
             uint8_t ssid; // sub-step identifier (0:line, 1:circle)
         } prop_status;
 
+        // in case of pos.id == ELT_ADV_*
+        struct{
+            s2DPosAtt pos;
+            s2DPAUncert pos_u;
+        } adv_status;
+
         // in case of pos.id == ELT_FIRE
         struct{
             s2DPosAtt pos;

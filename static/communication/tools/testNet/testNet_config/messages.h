@@ -31,6 +31,7 @@ typedef enum{
     E_PING,
     E_TRACEROUTE_REQUEST,   // traceroute request
     E_TRACEROUTE_RESPONSE,  // traceroute response
+    E_INTP,
 
 /************************ user types start ************************/
     E_CBR_CTRL,
@@ -91,6 +92,13 @@ typedef struct __attribute__((packed)){
     } steps[];
 } sRoleSetupPayload;
 
+//Specific payloads
+typedef struct __attribute__((packed)){
+    uint8_t     index;  // index of the current message (n)
+    uint32_t    time;  // date of sending of the current message (n) in the master's clock
+    uint32_t    prevTime;  // date of sending of the previous message (n-1) in the master's clock
+}sINTP;
+
 /************************ user payload definition start ************************/
 //user-defined payload types.
 //for simple payloads ( single variable or array), this step can be skipped
@@ -127,6 +135,7 @@ typedef union{
     uint8_t data[BN_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
     uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
     sAckPayload ack;
+    sINTP intp;
 
 /************************ user payload start ************************/
 //the user-defined payloads from above must be added here. The simple ones can be directly added here
