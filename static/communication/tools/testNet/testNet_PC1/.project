@@ -55,6 +55,11 @@
 			<locationURI>PARENT-4-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
 		</link>
 		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/network_tools/</locationURI>
+		</link>
+		<link>
 			<name>lib/testNet_config</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/testNet_config</locationURI>

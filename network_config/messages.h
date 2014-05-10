@@ -53,6 +53,7 @@ typedef enum{
     E_IHM_STATUS,           // ihm status
     E_SPEED_SETPOINT,       // speed setpoint
     E_GENERIC_STATUS,       // generic status of an element
+    E_INTP,                 // bn_intp synchronization message /!\ must be moved outside user types section at next messages reorganization.
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -76,6 +77,13 @@ typedef enum{
 
 //function returning a string corresponding to one element of the above enum. Must be managed by hand.
 const char *eType2str(E_TYPE elem);
+
+//Specific payloads
+typedef struct __attribute__((packed)){
+    uint8_t     index;  // index of the current message (n)
+    uint32_t    time;  // date of sending of the current message (n) in the master's clock
+    uint32_t    prevTime;  // date of sending of the previous message (n-1) in the master's clock
+}sINTP;
 
 /************************ user payload definition start ************************/
 //user-defined payload types.
@@ -321,6 +329,7 @@ typedef union{
     uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
     sAckPayload ack;
     sRoleSetupPayload roleSetup;
+    sINTP   intp;
 
 /************************ user payload start ************************/
 //the user-defined payloads from above must be added here. The simple ones can be directly added here

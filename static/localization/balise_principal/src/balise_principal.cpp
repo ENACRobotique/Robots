@@ -15,7 +15,7 @@
 #include "params.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "lib_domitille.h"
-#include "../../../communication/botNet/shared/bn_debug.h"
+#include "../../../communication/network_tools/bn_debug.h"
 #include "lib_sync_turret.h"
 #include "roles.h"
 #include "loc_tools_turret.h"

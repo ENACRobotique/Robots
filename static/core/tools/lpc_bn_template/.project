@@ -54,6 +54,11 @@
 			<type>2</type>
 			<locationURI>PARENT-3-copy_PARENT12/network_config</locationURI>
 		</link>
+		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/communication/network_tools/</locationURI>
+		</link>
 	</linkedResources>
 	<variableList>
 		<variable>

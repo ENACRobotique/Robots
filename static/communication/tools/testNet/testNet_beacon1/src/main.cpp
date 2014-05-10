@@ -14,7 +14,7 @@
 
 #include "messages.h"
 #include "../../../botNet/shared/botNet_core.h"
-#include "../../../botNet/shared/bn_debug.h"
+#include "../../../network_tools/bn_debug.h"
 #include "../../../botNet/shared/Xbee4bn.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"

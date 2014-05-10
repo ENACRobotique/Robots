@@ -12,7 +12,7 @@
 #include "network_cfg.h"
 #include "MemoryFree.h"
 #include "lib_synchro_beacon.h"
-#include "../../../communication/botNet/shared/bn_debug.h"
+#include "../../../communication/network_tools/bn_debug.h"
 
 
 unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;

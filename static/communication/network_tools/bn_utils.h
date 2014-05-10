@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include "botNet_core.h"
+#include "../botNet/shared/botNet_core.h"
 
 typedef struct{
     bn_Address addr;

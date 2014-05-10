@@ -10,7 +10,7 @@
 #include <messages.h>
 //#include "network_cfg.h"
 
-#include "../../../static/communication/botNet/shared/bn_debug.h"
+#include "../../../static/communication/network_tools/bn_debug.h"
 #include "../../../static/communication/botNet/shared/botNet_core.h"
 #include "../../../static/communication/botNet/shared/message_header.h"
 #include "../../../static/core/arduino/libraries/Servo/Servo.h"

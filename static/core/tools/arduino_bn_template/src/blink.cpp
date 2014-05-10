@@ -11,7 +11,7 @@
 #include "messages.h"
 #include "network_cfg.h"
 #include "../static/communication/botNet/shared/botNet_core.h"
-#include "../static/communication/botNet/shared/bn_debug.h"
+#include "../static/communication/network_tools/bn_debug.h"
 
 #define PIN_DBG_LED (13)
 

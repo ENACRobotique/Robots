@@ -16,7 +16,10 @@
 // botNet specific libraries
 #include "botNet_core.h"
 #include "bn_checksum.h"
-#include "bn_debug.h"
+#if (defined(DEBUG_PC_ACK) || defined(DEBUG_PC_RT) || defined(DEBUG_PC_BUF))
+#include "../../network_tools/bn_debug.h"
+#endif
+
 #if MYADDRX !=0
 #   include "Xbee4bn.h"
 #endif

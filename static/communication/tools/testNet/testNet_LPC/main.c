@@ -8,7 +8,7 @@
 #include <ime.h>
 #include <sys_time.h>
 #include "shared/botNet_core.h"
-#include "shared/bn_debug.h"
+#include "bn_debug.h"
 
 int main(void) {
     unsigned int prevLed = 0;
