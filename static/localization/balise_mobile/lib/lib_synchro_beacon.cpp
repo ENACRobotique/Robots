@@ -7,7 +7,7 @@
 
 #include "lib_synchro_beacon.h"
 #include "Arduino.h"
-#include "../../../communication/botNet/shared/bn_debug.h"
+#include "../../../communication/network_tools/bn_debug.h"
 #include "params.h"
 
 syncStruc syncParam={0,0,0};    // Synchronization parameters
