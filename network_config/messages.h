@@ -353,7 +353,7 @@ typedef union{
     sPosQuery posQuery;
     sServos servos;
     sIhmStatus ihmStatus;
-    sSpeedSetPoint speedSP;
+    sSpeedSetPoint speedSetPoint;
 /************************ user payload stop ************************/
 
 }uPayload;

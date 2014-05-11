@@ -213,6 +213,7 @@ int main(int argc, char **argv){
                 char input[32];
 
                 printf("\ndebug reader menu\n");
+                printf("d : send speed setpoint to the primary robot\n");
                 printf("s : send debugger address\n");
                 printf("p : ping\n");
                 printf("t : traceroute\n");
@@ -257,6 +258,22 @@ int main(int argc, char **argv){
                     msg.payload.servos.nb_servos = 1;
                     msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
                     msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
+                case 'd':{ // sends new setpoint to the propulsion // FIXME: use sGenericStatus
+                    sMsg msg = {{0}};
+
+                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.type = E_SPEED_SETPOINT;
+                    msg.header.size = sizeof(msg.payload.speedSetPoint);
+
+                    do{
+                        printf("speed (cm/s): ");
+                        err = !fgets(input, sizeof(input), stdin);
+                        err = err?0:sscanf(input, "%f", &msg.payload.speedSetPoint.speed);
+                    }while(err != 1 || msg.payload.speedSetPoint.speed < -150. || msg.payload.speedSetPoint.speed > 150.);
 
                     bn_send(&msg);
                     break;

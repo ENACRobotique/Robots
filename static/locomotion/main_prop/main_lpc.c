@@ -43,6 +43,9 @@ int main(int argc, char *argv[]){
             role_relay(&inMsg); // relay any received message if asked to
 
             switch(inMsg.header.type){
+            case E_SPEED_SETPOINT:
+                new_speed_setpoint(inMsg.payload.speedSetPoint.speed);
+                break;
             case E_TRAJ:
                 new_traj_el(&inMsg.payload.traj);
                 break;
