@@ -30,6 +30,7 @@
 									<listOptionValue builtIn="false" value="gcc"/>
 									<listOptionValue builtIn="false" value="ARM_MATH_CM4"/>
 									<listOptionValue builtIn="false" value="TARGET_IS_BLIZZARD_RA1"/>
+									<listOptionValue builtIn="false" value="F_CPU=80000000"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.paths.101516892" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lm4f}&quot;"/>
@@ -55,9 +56,21 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.987392998.2125023251" name="wiring.c" rcbsApplicability="disable" resourcePath="lm4f/time.c" toolsToInvoke="cdt.managedbuild.tool.gnu.cross.c.compiler.851783142.7398505">
+						<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.851783142.7398505" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.851783142">
+							<option id="gnu.c.compiler.option.preprocessor.def.symbols.415002606" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<listOptionValue builtIn="false" value="PART_LM4F120H5QR"/>
+								<listOptionValue builtIn="false" value="gcc"/>
+								<listOptionValue builtIn="false" value="ARM_MATH_CM4"/>
+								<listOptionValue builtIn="false" value="TARGET_IS_BLIZZARD_RA1"/>
+								<listOptionValue builtIn="false" value="F_CPU=80000000"/>
+							</option>
+							<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.248330451" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="lm4f" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lm4f"/>
+						<entry excluding="main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lm4f"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -86,6 +99,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1979447596" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.1542258454" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.1239788384" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1027676201" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="F_CPU=80000000L"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1797123469" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.95096844" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
@@ -107,7 +123,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="lm4f" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lm4f"/>
+						<entry excluding="main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lm4f"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

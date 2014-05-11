@@ -37,8 +37,10 @@
 #include "inc/hw_types.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
+#include "driverlib/rom.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/timer.h"
+#include "time.h"
 
 #include "inc/lm4f120h5qr.h"
 
@@ -50,64 +52,47 @@
 int main(void) {
     volatile unsigned long ulLoop;
 
+    timerInit();
+
     //
     // Enable the GPIO port that is used for the on-board LED.
-    //
-    SYSCTL_RCGC2_R = SYSCTL_RCGC2_GPIOF;
-
-    //
-    // Do a dummy read to insert a few cycles after enabling the peripheral.
-    //
-    ulLoop = SYSCTL_RCGC2_R;
-
-    //
-    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
-    // enable the GPIO pin for digital function.
     //
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
 
     // Delay for a bit (cf previous function documentation)
-    for(ulLoop = 0; ulLoop < 5; ulLoop++)
-    {
-    }
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+    for(ulLoop = 0; ulLoop < 5; ulLoop++);
 
-//    GPIO_PORTF_DIR_R = 0x08;
-//    GPIO_PORTF_DEN_R = 0x08;
+    //
+    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
+    //
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
 
     //
     // Loop forever.
     //
     while(1)
     {
+
+#define DUR 100
         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3,0x0E);
 
-        for(ulLoop = 0; ulLoop < 1000000; ulLoop++)
-        {
-        }
+        delay(DUR);
 
         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3,0x02);
 
-        for(ulLoop = 0; ulLoop < 100000; ulLoop++)
-        {
-        }
+        delay(DUR);
 
         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3,0x04);
 
-        for(ulLoop = 0; ulLoop < 100000; ulLoop++)
-        {
-        }
+        delay(DUR);
 
         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_2|GPIO_PIN_3,0x08);
 
-        for(ulLoop = 0; ulLoop < 100000; ulLoop++)
-        {
-        }
+        delay(DUR);
 
         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_3,0x00);
 
-        for(ulLoop = 0; ulLoop < 1000000; ulLoop++)
-        {
-        }
+        delay(DUR);
     }
+
 }
