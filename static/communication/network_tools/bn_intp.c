@@ -69,8 +69,6 @@ void bn_intp_msgHandle(sMsg *msg){
             if (bn_intp_minDT==0 || bn_intp_minDT>tempDT){ // if better value than previous one
                 bn_intp_MicrosOffset=prevMessageDate-msg->payload.intp.time+(tempDT>>1);
                 bn_intp_minDT=(tempDT?tempDT:1);
-
-                printf("sync: off%u dt%u\n", bn_intp_MicrosOffset, bn_intp_minDT);
             }
         }
 
