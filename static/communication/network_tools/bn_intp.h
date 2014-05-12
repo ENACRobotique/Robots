@@ -17,8 +17,8 @@
 extern "C" {
 #endif
 
-extern int32_t bn_intp_MicrosOffset;
-extern int32_t bn_intp_minDT;
+extern uint32_t bn_intp_MicrosOffset;
+extern uint32_t bn_intp_minDT;
 
 /* bn_intpMsgHandle : handles synchronization messages from master.
  * MUST be bn_attached on every slave to messages of type E_INTP (done in bn_intp_install)
@@ -29,7 +29,7 @@ void bn_intp_msgHandle(sMsg *msg);
 /* bn_intp_install : install the intp slave handle
  * MUST be called on every slave.
  */
-inline int bn_intp_install(){
+static inline int bn_intp_install(){
     return bn_attach(E_INTP,bn_intp_msgHandle);
 }
 
@@ -38,7 +38,7 @@ inline int bn_intp_install(){
  *  micros : date to convert
  * Return value : converted date
  */
-inline uint32_t bn_intp_micros2s(uint32_t micros){
+static inline uint32_t bn_intp_micros2s(uint32_t micros){
     return micros-bn_intp_MicrosOffset;
 }
 
@@ -47,7 +47,7 @@ inline uint32_t bn_intp_micros2s(uint32_t micros){
  *  0 if unsynchronized
  *  anything else if synchronized
  */
-inline int bn_intp_isSync(){
+static inline int bn_intp_isSync(){
     return bn_intp_minDT;
 }
 
@@ -55,7 +55,7 @@ inline int bn_intp_isSync(){
  * Argument :
  *  slave : address of the device to synchronize (must have bn_intp installed, cf bn_intp_install)
  * Return value :
- *  >0 if synchronization has succeed (amount of pair of sychronization messages acked).
+ *  >0 if synchronization has succeed (amount of pair of synchronization messages acked).
  *  <0 otherwise (see global_errors.h).
  */
 int bn_intp_sync(bn_Address slave, int retries);
