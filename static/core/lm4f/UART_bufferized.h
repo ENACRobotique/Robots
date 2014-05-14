@@ -8,7 +8,6 @@
 #ifndef BUFFERIZED_UART1_H_
 #define BUFFERIZED_UART1_H_
 
-#include "lib_UART_framing_lm4fxx.h"
 #include "driverlib/uart.h"
 #include "inc/hw_memmap.h"
 

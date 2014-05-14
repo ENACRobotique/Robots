@@ -10,6 +10,8 @@
 
 #include "network_cfg.h"
 #include "inc/lm4f120h5qr.h"
+#include "driverlib/gpio.h"
+#include "inc/hw_memmap.h"
 
 #define MYADDRX ADDRX_FIX
 #define MYADDRI 0

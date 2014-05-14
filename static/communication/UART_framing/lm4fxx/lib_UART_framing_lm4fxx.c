@@ -48,7 +48,6 @@ int serialDeinit(){
  */
 int serialRead(uint8_t *byte,uint32_t timeout){
     unsigned long int sw=micros();
-    int c;
 
     if (timeout){
         while ( (micros()-sw) <= timeout ) {
@@ -77,8 +76,8 @@ int serialRead(uint8_t *byte,uint32_t timeout){
  *  <0 on error
  */
 int serialWrite(uint8_t byte){
-    if (uartb_writeChar(byte)) return 1;
-    return -ERR_UART_WRITE_BYTE;
+    uartb_writeChar(byte);
+    return 1;
 }
 
 #endif

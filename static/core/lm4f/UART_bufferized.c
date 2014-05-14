@@ -6,6 +6,7 @@
  */
 
 #include "UART_bufferized.h"
+#include <stdint.h>
 
 
 typedef struct{
