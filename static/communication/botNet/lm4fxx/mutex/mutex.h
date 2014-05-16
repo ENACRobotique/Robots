@@ -21,7 +21,7 @@ inline void mutexLock(){
 }
 
 inline void mutexUnlock(){
-    if(SREG_save) IntMasterEnable();
+    if(!SREG_save) IntMasterEnable();
 }
 
 #endif

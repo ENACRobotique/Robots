@@ -6,7 +6,12 @@
  */
 
 #include "UART_bufferized.h"
+#include "driverlib/sysctl.h"
 #include <stdint.h>
+#include "driverlib/pin_map.h"
+#include "driverlib/gpio.h"
+#include "inc/hw_ints.h"
+#include "driverlib/interrupt.h"
 
 
 typedef struct{
@@ -18,6 +23,17 @@ typedef struct{
 volatile circular_buffer rxbuf = {{0}, 0, 0};
 
 void uartb_init(unsigned long speed){
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+
+    GPIOPinTypeUART(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1);
+
+    GPIOPinConfigure(GPIO_PB0_U1RX);
+    GPIOPinConfigure(GPIO_PB1_U1TX);
+
+    SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
+
+    SysCtlPeripheralEnable(UART_BUFFERIZED_PERIF);
+
     // Initialize the UART. Set the baud rate, number of data bits, turn off
     // parity, number of stop bits, and stick mode.
     UARTConfigSetExpClk(UART_BUFFERIZED_BASE, SysCtlClockGet(), speed, UART_BUFFERIZED_FLAGS);
@@ -32,15 +48,17 @@ void uartb_init(unsigned long speed){
     UARTFIFOLevelSet(UART_BUFFERIZED_BASE,UART_FIFO_TX7_8,UART_FIFO_RX7_8);
 
     // Flush characters. Spin here until bus is empty
-    while(UARTCharGetNonBlocking(UART_BUFFERIZED_BASE)>=0);
+//    while(UARTCharGetNonBlocking(UART_BUFFERIZED_BASE)>=0);
 
     // Register UART interrupt
     UARTIntRegister(UART_BUFFERIZED_BASE,uartb_intHandler);
 
-
     // Enable UART interruptions
+    IntEnable(INT_UART1);
+    UARTIntDisable(UART_BUFFERIZED_BASE,UART_INT_TX);
     UARTIntEnable(UART_BUFFERIZED_BASE,UART_INT_RT|UART_INT_RX);
 
+//    IntMasterEnable();
 }
 
 void uartb_deinit(){
@@ -57,7 +75,7 @@ void uartb_intHandler(){
     UARTIntClear(UART_BUFFERIZED_BASE,intStatus);
 
     // if it is on RX fifo limit or RX timeout, put these bits in circular buffer
-    if (intStatus==(UART_INT_RT | UART_INT_RX)){
+    if (intStatus==UART_INT_RT || intStatus==UART_INT_RX){
         UARTIntDisable(UART_BUFFERIZED_BASE,(UART_INT_RT | UART_INT_RX));
         while (UARTCharsAvail(UART_BUFFERIZED_BASE)){
             // RDA interrupt

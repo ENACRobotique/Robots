@@ -15,6 +15,8 @@
 
 void Xbee_rst(){
 #if defined(XBEE_RST_PIN) && defined(XBEE_RST_PORT)
+    // Enable the GPIO port that is used for to reset the Xbee.
+    SysCtlPeripheralEnable(XBEE_RST_PERIF);
     GPIOPinTypeGPIOOutput(XBEE_RST_PORT,XBEE_RST_PIN);
     GPIOPinWrite(XBEE_RST_PORT,XBEE_RST_PIN,XBEE_RST_PIN);
     delay(10);
