@@ -189,6 +189,8 @@ typedef enum{
     SERVO_PRIM_DOOR,
     SERVO_PRIM_FIRE1,
     SERVO_PRIM_FIRE2,
+    SERVO_PRIM_ARM_LEFT,
+    SERVO_PRIM_ARM_RIGHT,
 
     NUM_E_SERVO
 } eServos;

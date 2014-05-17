@@ -14,7 +14,7 @@
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
-#define COLOR_SIMU 0 //0 red  1 yellow
+#define COLOR_SIMU 1 //0 red  1 yellow
 #define DEBUG 1
 #define SIMU 1
 #define RESO_POS 2
@@ -36,8 +36,7 @@ typedef enum {WAIT_MES, ACTIVE, FREE} eStateObj_t;
 typedef enum {ARM_LEFT, ARM_RIGHT} eServoLoc_t;
 typedef enum {CLOSE, HALF_OPEN, OPEN} eServoPos_t;
 
-typedef struct
-	{
+typedef struct{
 	sPt_t c;
     float radiusEP;				//taille des 3 cercle d'approche
     int angleEP;				//angle d'approche entre 0 et 360
@@ -45,8 +44,7 @@ typedef struct
 
 
 //Struture d'un objetif
-typedef struct
-	{
+typedef struct{
 	eObj_t  type;           				//type d'objectif
 	eStateObj_t state;
 	uint8_t numObj;         				//numéros de l'objectif en fonction du type
@@ -62,8 +60,7 @@ typedef struct
 
 
 //Structure arbre
-typedef struct          //TODO pointeur vers trajectoire programmer //TODO faire fonction calcul point d'acces optimal et calcul de la trajectoire
-	{
+typedef struct{          //TODO pointeur vers trajectoire programmer //TODO faire fonction calcul point d'acces optimal et calcul de la trajectoire
 	uint8_t eFruit[6];  //définition : 0=violet non récolté, 1=récolté, 2=noir : first top clock
     uint8_t nb_point;   //nombre de point potentiel a vider
     int x;				//position of the tree axis x
@@ -75,8 +72,7 @@ typedef struct          //TODO pointeur vers trajectoire programmer //TODO faire
     } Obj_arbre;
 
 //Strucutre feu
-typedef struct
-	{
+typedef struct{
 	sPt_t c; 			//center of the fire
 	uint8_t pos;       	// 1 = flat red, 2 = flat yellow, 3 = vertical, 4 = in fixed torch 5=other
 	sNum_t angle; 		// vertical or torch fixed in [0, 360°[ convention R|Y ->0°, flat in [0, 120°[
@@ -84,11 +80,17 @@ typedef struct
     } Obj_feu;
 
 //Struture bac
-typedef struct
-	{
+typedef struct{
     uint8_t nb_point;
     }Obj_bac;
 
+typedef struct{
+    eServos id;
+    uint16_t u1;      //min servo in millisecond
+    uint16_t a1;      //min servo in radian
+    uint16_t u2;
+    uint16_t a2;
+    }sServo_t;
 
 extern Obj_arbre arbre[];
 extern Obj_bac bac;

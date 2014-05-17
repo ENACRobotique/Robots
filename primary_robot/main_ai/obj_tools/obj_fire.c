@@ -7,6 +7,8 @@
 
 #include "obj_fire.h"
 
+#include "obj_com.h"
+
 
 eServoPos_t armLeft = CLOSE, armRight = CLOSE;
 
@@ -113,7 +115,6 @@ void obj_fire(iABObs_t  obj){
 		        obs_updated[listObj[obj].numObs[0]]++;
 
 				//Rotation du segment
-
 				tabTemp[0].p2.x= -10*cos(theta*M_PI/180);
 				tabTemp[0].p2.y= -10*sin(theta*M_PI/180);
 
@@ -214,15 +215,18 @@ printf("len path : %d\n",path->path_len);
 
 
 void cmdServo(eServoLoc_t loc, eServoPos_t pos){
-    switch(loc){ //TODO
+    switch(loc){
         case ARM_LEFT :
             armLeft = pos;
             switch(pos){
                 case CLOSE :
+                    sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 0); //FIXME
                     break;
                 case HALF_OPEN :
+                    sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 90); //FIXME
                     break;
                 case OPEN :
+                    sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 180); //FIXME
                     break;
                 }
             break;
@@ -230,10 +234,13 @@ void cmdServo(eServoLoc_t loc, eServoPos_t pos){
             armRight = pos;
             switch(pos){
                 case CLOSE :
+                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 0); //FIXME
                     break;
                 case HALF_OPEN :
+                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 90); //FIXME
                     break;
                 case OPEN :
+                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 180); //FIXME
                     break;
                 }
             break;

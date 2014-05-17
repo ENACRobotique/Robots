@@ -10,7 +10,12 @@
 
 #include <math.h>
 #include "../botNet/shared/botNet_core.h"
+#include "obj_types.h"
 
+sServo_t listServo[2]={ //TODO other servo
+    {SERVO_PRIM_ARM_LEFT,  650, 0, 2400, 180},
+    {SERVO_PRIM_ARM_RIGHT, 650, 0, 2400, 180},
+    };
 
 void send_robot(sPath_t path){
     sMsg outMsg = {{0}};
@@ -45,8 +50,31 @@ void send_robot(sPath_t path){
         }
     }
 
-void sendPosServo(eServos s, uint16_t us){
+int sendPosServo(eServos s, uint16_t us, uint16_t a){ // us or a = -1 if no use
     sMsg msg = {{0}};
+    sPt_t p1, p2;
+    sLin_t l;
+    int i=0;
+
+    if( ((us == -1) && (a == -1)) || ((us != -1) && (a != -1)) ){
+            return -1;
+            }
+
+    if(a != -1){
+        while(s != listServo[i].id){
+            i++;
+            if( i > sizeof(listServo)) break;
+            }
+        p1.x = listServo[i].a1;
+        p1.y = listServo[i].u1;
+        p2.x = listServo[i].a2;
+        p2.y = listServo[i].u2;
+        convPts2Line(&p1, &p2, 0, &l);
+
+        if(l.b == 0) return -1;
+
+        us = -(l.a*a + l.c)/l.b;
+        }
 
     msg.header.destAddr = ADDRI_MAIN_IO;
     msg.header.type = E_SERVOS;
@@ -56,6 +84,8 @@ void sendPosServo(eServos s, uint16_t us){
     msg.payload.servos.servos[0].us = us;
 
     bn_send(&msg);
+
+    return 1;
 
     }
 
