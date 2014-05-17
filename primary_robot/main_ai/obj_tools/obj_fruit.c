@@ -7,6 +7,8 @@
 
 #include "obj_fruit.h"
 
+#include "obj_com.h"
+
 
 //Definition of all different trajectory we need for collect the fruits in the trees
 
@@ -337,73 +339,85 @@ void obj_tree(iABObs_t obj)
 		}
 	}
 
-sTrajEl_t tabBac[2]={ //Segment to push a vertical fire
-    {{0. ,  0.},{0. , 20.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
-    {{0. , 20.},{0. , 20.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
-    };
 
 void obj_bac(iABObs_t obj){
-    sTrajEl_t tabTemp[2];
+    sVec_t v;
     sMsg msgOut;
     static int state = 0 ;
-            switch(state){
-                case 0 :
-                    listObj[obj].active=0;
-                    mode_obj=1;
-                  //  obs[listObj[obj].numObs[0]].active=0;
-                    obs_updated[listObj[obj].numObs[0]]++;
-                    bac.nb_point=0;
 
-                    memcpy(&tabTemp[0],&tabBac[0], sizeof(tabBac[0])*2);
+    switch(state){
+        case 0 :
+            listObj[obj].active=0;
+            mode_obj=1;
+            //obs[listObj[obj].numObs[0]].active=0;
+            obs_updated[listObj[obj].numObs[0]]++;
+            bac.nb_point=0;
 
-                    TransElTraj(&tabTemp[0], obs[0].c.x, obs[0].c.y);
-                    tabTemp[1].p1 = tabTemp[0].p1;
-                    tabTemp[1].p2 = tabTemp[0].p2;
-                    pt_select = tabTemp[1].p2;
-                    path.path=&tabTemp[0];
-                    path.path_len=2;
-                    send_robot(path) ;
-                    state=1;
+            v.x = 0.;
+            v.y = 20.;
+            sendSeg(NULL, &v);
 
-                    break;
-                case 1 :
-                    if ((fabs(pt_select.x-_current_pos.x)<1 && fabs(pt_select.y-_current_pos.y)<1)){
-                        state=2;
-                        }
-                    break;
-                case 2 :
+            pt_select.x = obs[0].c.x + v.x;
+            pt_select.y = obs[0].c.y + v.y;
 
-                    msgOut.header.type = E_POS;
-                    msgOut.header.size = sizeof(msgOut.payload.pos);
+            state=1;
 
-                    msgOut.payload.pos.id = 0;
-                    msgOut.payload.pos.u_a = 0;
-                    msgOut.payload.pos.u_a_theta = 0;
-                    msgOut.payload.pos.u_b = 0;
-                    msgOut.payload.pos.theta = theta_robot;
-                    msgOut.payload.pos.x = obs[0].c.x;
-                    msgOut.payload.pos.y = 157.;
-                    obs[0].c.y=157.;
-                    _current_pos.y = obs[0].c.y;
-                    printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
+            break;
+        case 1 :
+            if ((fabs(pt_select.x-_current_pos.x)<1 && fabs(pt_select.y-_current_pos.y)<1)){
+                state=2;
+                }
+            break;
+        case 2 :
+            msgOut.header.type = E_POS;
+            msgOut.header.size = sizeof(msgOut.payload.pos);
 
-                    role_send(&msgOut);
-                    mode_obj=0;
-                    pt_select.x=0;
-                    pt_select.y=0;
-                    listObj[obj].dist=0;
-                    listObj[obj].active=0;
-                    state=0;
-                    #if DEBUG
-                        printf("Objectif : bac fini\n\n\n");
-                    #endif
+            msgOut.payload.pos.id = 0;
+            msgOut.payload.pos.u_a = 0;
+            msgOut.payload.pos.u_a_theta = 0;
+            msgOut.payload.pos.u_b = 0;
+            msgOut.payload.pos.theta = theta_robot;
+            msgOut.payload.pos.x = obs[0].c.x;
+            msgOut.payload.pos.y = 157.;
+            obs[0].c.y=157.;
+            _current_pos.y = obs[0].c.y;
+            printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
 
+            role_send(&msgOut);
 
-                    break;
-                default:
-                    printf("Error : switch bac\n");
-                    getchar();
-            }
+            newSpeed(-20.);
+            v.x = 0.;
+            v.y = -10.;
+            sendSeg(NULL, &v);
+
+            pt_select.x = obs[0].c.x + v.x;
+            pt_select.y = obs[0].c.y + v.y;
+
+            state = 3;
+            break;
+        case 3 :
+            if ((fabs(pt_select.x-_current_pos.x)<1 && fabs(pt_select.y-_current_pos.y)<1)){
+                state=4;
+                }
+            break;
+        case 4 :
+            newSpeed(20.);
+
+            mode_obj=0;
+            pt_select.x=0;
+            pt_select.y=0;
+            listObj[obj].dist=0;
+            listObj[obj].active=0;
+            state=0;
+            #if DEBUG
+                printf("Objectif : bac fini\n\n\n");
+            #endif
+
+            break;
+        default:
+            printf("Error : switch bac\n");
+            getchar();
+    }
 
     /*
     static int state=0; //for separate the init, loop and end

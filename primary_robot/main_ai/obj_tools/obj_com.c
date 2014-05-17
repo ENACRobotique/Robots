@@ -8,8 +8,12 @@
 
 #include "obj_com.h"
 
+#include <math.h>
+#include "../botNet/shared/botNet_core.h"
+
+
 void send_robot(sPath_t path){
-    sMsg outMsg;
+    sMsg outMsg = {{0}};
     int i, ret ;
     static int tid = 0;
     tid++;
@@ -39,4 +43,70 @@ void send_robot(sPath_t path){
 
             usleep(1000);
         }
+    }
+
+void sendPosServo(eServos s, uint16_t us){
+    sMsg msg = {{0}};
+
+    msg.header.destAddr = ADDRI_MAIN_IO;
+    msg.header.type = E_SERVOS;
+    msg.header.size = 2 + 3;
+    msg.payload.servos.nb_servos = 1;
+    msg.payload.servos.servos[0].id = s;
+    msg.payload.servos.servos[0].us = us;
+
+    bn_send(&msg);
+
+    }
+
+int newSpeed(float speed){
+    sMsg msg = {{0}};
+
+    if( fabs(speed) > 150.){
+        return -1;
+        }
+
+    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+    msg.header.type = E_SPEED_SETPOINT;
+    msg.header.size = sizeof(msg.payload.speedSetPoint);
+    msg.payload.speedSetPoint.speed = speed;
+
+    bn_send(&msg);
+
+    return 1;
+    }
+
+
+
+int sendSeg(const sPt_t *p, const sVec_t *v){ //the robot goes directly to the point or the vector
+    sPath_t path;
+    sTrajEl_t traj[2]={
+        {{0. , 0.},{0. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
+        {{0. , 0.},{0. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
+        };
+
+    if( ((p == NULL) && (v == NULL)) || ((p != NULL) && (v != NULL)) ){
+        return -1;
+        }
+
+    if(p != NULL){
+        traj[0].p1 = obs[0].c;
+        traj[0].p2 = *p;
+        traj[1].p1 = traj[0].p2;
+        traj[1].p2 = traj[0].p2;
+        }
+
+    if(v != NULL){
+        traj[0].p1 = obs[0].c;
+        traj[0].p2.x = obs[0].c.x + v->x;
+        traj[0].p2.y = obs[0].c.y + v->y;
+        traj[1].p1 = traj[0].p2;
+        traj[1].p2 = traj[0].p2;
+        }
+
+    path.path = &traj[0];
+    path.path_len=2;
+    send_robot(path);
+
+    return 1;
     }
