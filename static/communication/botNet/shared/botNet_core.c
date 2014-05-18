@@ -468,7 +468,7 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
 #endif
 
 #if MYADDRI!=0
-    if ((msg->header.destAddr&SUBNET_MASK) == (MYADDRI&SUBNET_MASK) ) {
+    if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRI & SUBNET_MASK) ) {
         if (ifFrom!=IF_I2C ) {
             routeInfo->ifTo=IF_I2C;
             routeInfo->nextHop=msg->header.destAddr;

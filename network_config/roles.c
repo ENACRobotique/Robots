@@ -180,17 +180,19 @@ bn_Address role_get_addr(uint8_t role){
 
 uint8_t role_get_role(bn_Address address){
     switch(address){
-    case ADDRD_MONITORING:
+    case ADDRD1_MONITORING:
         return ROLE_MONITORING;
-    case ADDRD_MAIN_IA_SIMU:
+    case ADDRD1_MAIN_IA_SIMU:
+    case ADDRD2_MAIN_AI:
+    case ADDRU2_MAIN_AI:
         return ROLE_IA;
-    case ADDRD_MAIN_PROP_SIMU:
+    case ADDRD1_MAIN_PROP_SIMU:
     case ADDRI_MAIN_PROP:
+    case ADDRU2_MAIN_PROP:
         return ROLE_PROPULSION;
-    case ADDRD_DEBUG1:
-    case ADDRD_DEBUG2:
-    case ADDRD_DEBUG3:
-    case ADDRU_DEBUG:
+    case ADDRD1_DEBUG1:
+    case ADDRD1_DEBUG2:
+    case ADDRD1_DEBUG3:
     case ADDRX_DEBUG:
         return ROLE_DEBUG;
     default:
