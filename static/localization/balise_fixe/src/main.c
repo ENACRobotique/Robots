@@ -39,18 +39,18 @@ int main(void) {
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2);
 
 
-//    bn_attach(E_ROLE_SETUP,role_setup);
+    bn_attach(E_ROLE_SETUP,role_setup);
 
     if ((ret=bn_init())<0){
         light=0x02;
     }
 
-    bn_printDbg("stellaris started");
 
     // Loop forever.
     while(1){
         bn_receive(NULL);
 
+//        bn_printDbg("stellaris started");
 #define DUR 100
         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,light);
         delay(DUR);
@@ -61,6 +61,5 @@ int main(void) {
         delay(DUR);
 
     }
-
 
 }
