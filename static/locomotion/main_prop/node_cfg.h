@@ -13,7 +13,7 @@
 #ifdef ARCH_LPC21XX
 #define MYADDRX 0
 #define MYADDRI ADDRI_MAIN_PROP
-#define MYADDRU 0
+#define MYADDRU ADDRU2_MAIN_PROP
 #define MYADDRD 0
 #elif defined(ARCH_X86_LINUX)
 #define MYADDRX 0

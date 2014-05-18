@@ -1,5 +1,5 @@
 /*
- * netrwork_cfg.c
+ * network_cfg.c
  *
  *  Created on: 28 mai 2013
  *      Author: quentin
@@ -22,10 +22,10 @@
 #if MYADDRI && ((MYADDRI & SUBNET_MASK) != SUBNETI_MAIN)
 #error "MYADDRI not on I²C subnet"
 #endif
-#if MYADDRU && ((MYADDRU & SUBNET_MASK) != SUBNETU1_DEBUG) && ((MYADDRU & SUBNET_MASK) != SUBNETU2_DEBUG)
+#if MYADDRU && ((MYADDRU & SUBNET_MASK) != SUBNETU1_DEBUG) && ((MYADDRU & SUBNET_MASK) != SUBNETU2_MAIN)
 #error "MYADDRU not on UART subnet"
 #endif
-#if MYADDRD && ((MYADDRD & SUBNET_MASK) != SUBNETD1_DEBUG) && ((MYADDRD & SUBNET_MASK) != SUBNETD2_DEBUG)
+#if MYADDRD && ((MYADDRD & SUBNET_MASK) != SUBNETD1_DEBUG) && ((MYADDRD & SUBNET_MASK) != SUBNETD2_MAIN)
 #error "MYADDRD not on UDP subnet"
 #endif
 
