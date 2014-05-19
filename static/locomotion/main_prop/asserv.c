@@ -33,6 +33,7 @@
 #include "asserv.h"
 
 #define SQR(v) ((long long)(v)*(v))
+#define SIGN(v) (((v)>0) - ((v)<0))
 
 #ifdef ARCH_LPC21XX
 volatile int _ticks_l=0, _ticks_r=0;
@@ -234,7 +235,7 @@ int new_traj_el(sTrajElRaw_t *te){
 }
 
 int new_speed_setpoint(float speed){
-    d_consigne = speed;
+    d_consigne = isDpS2IpP(speed);
     return 0;
 }
 
@@ -358,14 +359,14 @@ int new_asserv_step(){
             prod = ((long long)(tp - tg))*((long long)traj[curr_traj][curr_traj_step>>1].c_r)>>SHIFT;
             dist = abs(prod);
 
-            consigne = MIN(traj[curr_traj][curr_traj_step>>1].arc_sp_max, d_consigne);
+            consigne = SIGN(d_consigne)*MIN(traj[curr_traj][curr_traj_step>>1].arc_sp_max, abs(d_consigne));
             // TODO (use arc_len - len_travelled)
         }
         else { // portion de segment
             // distance to the next goal
             dist = SQRT( (SQR(gy - y) + SQR(gx - x))>>SHIFT );
 
-            consigne = d_consigne;
+            consigne = abs(d_consigne);
             for(
                     i = curr_traj_step>>1, dist_tmp = dist;
                     i < curr_traj_insert_sid && dist_tmp < dist_lim;
@@ -373,10 +374,13 @@ int new_asserv_step(){
                     traj_conv(&traj[curr_traj][i]),
                     dist_tmp += traj[curr_traj][i].seg_len + traj[curr_traj][i-1].arc_len
             ) {
-                dtime = llabs(((long long)v - (long long)traj[curr_traj][i].arc_sp_max)*3/(long long)AMAX);
+                dtime = llabs(((long long)abs(v) - (long long)traj[curr_traj][i].arc_sp_max)*3/(long long)AMAX);
                 if(dtime>0){
                     consigne = MIN(consigne, (int)( ((long long)dist_tmp<<SHIFT)/(long long)dtime ));
                 }
+            }
+            if(d_consigne < 0){
+                consigne = -consigne;
             }
         }
 
@@ -403,6 +407,11 @@ int new_asserv_step(){
                     // set speed a priori
                     _mul_l = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r + isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
                     _mul_r = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r - isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
+                    if(consigne < 0){
+                        int temp = _mul_l;
+                        _mul_l = _mul_r;
+                        _mul_r = temp;
+                    }
                 }
                 else {
                     // straight line
@@ -435,6 +444,10 @@ int new_asserv_step(){
             // get principal absolute angle from current position to target
             alpha = iD2I(RDIAM)*ATAN2(gy - y, gx - x);
 
+            if(consigne < 0){
+                alpha += isRPI;
+            }
+
             // get relative angle to target :  absolute angle to target - current absolute orientation
             tmp =  alpha - theta;  // (rad.I<<SHIFT)
             if(tmp > isRPI) {
@@ -464,7 +477,7 @@ int new_asserv_step(){
         //        }
 
         if(abs(tmp) > abs(consigne)>>2){
-            consigne = (SQR(consigne)>>2)/abs(tmp);
+            consigne = SIGN(consigne)*(SQR(consigne)>>2)/abs(tmp);
         }
 
         // update set point of each motor
