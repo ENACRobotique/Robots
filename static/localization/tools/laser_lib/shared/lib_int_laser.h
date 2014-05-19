@@ -10,6 +10,18 @@
 
 #include <stdint.h>
 
+#ifdef ARCH_328P_ARDUINO
+#include "arduino/lib_laser_arduino.h"
+#endif
+
+
+#define LASER_THICK_MIN     24    // in µs refined with measurement
+#define LASER_THICK_MAX     600 // in µs refined with measurement
+#define LASER_MAX_MISSED    3
+#define LASER_DEBOUNCETIME  20  //measured
+
+#define LAT_SHIFT 2 //in µs TODO : refine
+
 //"return" structure for laserDetect
 typedef struct {
     unsigned long deltaT;    // µs
@@ -52,8 +64,7 @@ extern bufStruct buf1;                      // must be initialized with the last
 //declarations :
 void laserIntInit(int irqnb);
 void laserIntDeinit();
-void laserIntHand0();
-void laserIntHand1();
+
 
 //laserDetect : check if the buffers have recorded a laser
 //return a ldStruct if something was detected, 0 otherwise.

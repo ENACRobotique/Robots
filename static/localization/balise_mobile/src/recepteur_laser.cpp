@@ -4,14 +4,14 @@
 
 #include "Arduino.h"
 
-#include "lib_int_laser.h"
+#include "shared/lib_int_laser.h"
 //#include "lib_time.h"
 #include "messages.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "params.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"
-#include "lib_synchro_beacon.h"
+#include "shared/lib_synchro_beacon.h"
 #include "../../../communication/network_tools/bn_debug.h"
 
 
