@@ -222,6 +222,21 @@ typedef struct __attribute__((packed)){
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
+    uint8_t nbpt;
+    eElement id :8;
+    s2DPosAtt pos[8];
+    s2DPAUncert pos_u[8];
+    union{
+        // in case of pos.id == ELT_FIRE
+        struct{
+            uint8_t nbfire;
+            uint8_t nbtorch;
+        } fire_zone;
+    };
+}sGenericZone;
+
+typedef struct __attribute__((packed)){
+    uint32_t date;      // synchronized date (µs)
     eElement id :8;
     union{
         // generic way to access position (if present in type)
