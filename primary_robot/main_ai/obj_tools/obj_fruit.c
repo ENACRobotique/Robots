@@ -50,9 +50,9 @@
 //Function for the entry point to a tree
 
 	int PATree(int num){ //return the code of the state tree (location bad fruit)
-	    if( (arbre[num].eFruit[0] == 2) && (arbre[num].eFruit[0] == 2) ) return 21;
-		if(arbre[num].eFruit[0] == 2) return 31;
-		if(arbre[num].eFruit[3] == 2) return 20;
+	    if( (listObj[num].utype.tree.eFruit[0] == 2) && (listObj[num].utype.tree.eFruit[0] == 2) ) return 21; //FIXME ??
+		if(listObj[num].utype.tree.eFruit[0] == 2) return 31;
+		if(listObj[num].utype.tree.eFruit[3] == 2) return 20;
 		else return 30;
 		}
 
@@ -85,18 +85,20 @@
 				if(j==0) SymPt(&tabTemp, 1, 0);
 				switch(num){
 					case 0 :
-						TransPt(&tabTemp, ((Obj_arbre*)listObj[num].typeStruct)->x, ((Obj_arbre*)listObj[num].typeStruct)->y);
+						TransPt(&tabTemp, listObj[num].utype.tree.x, listObj[num].utype.tree.y);
 						break;
 					case 1 :
 					case 2 :
 						Rot90Pt(&tabTemp);
-						TransPt(&tabTemp, ((Obj_arbre*)listObj[num].typeStruct)->x, ((Obj_arbre*)listObj[num].typeStruct)->y);
+						TransPt(&tabTemp, listObj[num].utype.tree.x, listObj[num].utype.tree.y);
 						break;
 					case 3 :
 						SymPt(&tabTemp, 1, 1);
-						TransPt(&tabTemp, ((Obj_arbre*)listObj[num].typeStruct)->x, ((Obj_arbre*)listObj[num].typeStruct)->y);
+						TransPt(&tabTemp, listObj[num].utype.tree.x, listObj[num].utype.tree.y);
 						break;
 					}
+				//printf("y: %d", listObj[num].utype.tree.y);
+				//getchar();
 				listObj[num].entryPoint[j].c=tabTemp;
 				}
 			}
@@ -110,24 +112,24 @@ int getEntryPointTree(sPt_t *pt){ //Ex return 124, 431..
 
 	for( i=0 ; i<4 ; i++){
 		for( j=0 ; j<2 ; j++){
-			if(listObj[i].entryPoint[j].c.x==pt->x && listObj[i].entryPoint[j].c.y==pt->y){
+			if(listObj[i].entryPoint[j].c.x == pt->x && listObj[i].entryPoint[j].c.y == pt->y){
 				if(j==0){
-				    if(arbre[i].eFruit[0]==2 && arbre[i].eFruit[3]==2){
+				    if(listObj[i].utype.tree.eFruit[0]==2 && listObj[i].utype.tree.eFruit[3]==2){
 				        return i*100+1*10+2;
 				        }
-					if(arbre[i].eFruit[0]==2) return i*100+1*10+3;
+					if(listObj[i].utype.tree.eFruit[0]==2) return i*100+1*10+3;
 					else {
-						if(arbre[i].eFruit[3]==2) return i*100+0*10+2;
+						if(listObj[i].utype.tree.eFruit[3]==2) return i*100+0*10+2;
 						else return i*100+0*10+3;
 						}
 					}
 				else{
-				    if(arbre[i].eFruit[0]==2 && arbre[i].eFruit[3]==2){
+				    if(listObj[i].utype.tree.eFruit[0]==2 && listObj[i].utype.tree.eFruit[3]==2){
 				        return i*100+2*10+1;
 				    }
-					if(arbre[i].eFruit[3]==2) return i*100+2*10+0;
+					if(listObj[i].utype.tree.eFruit[3]==2) return i*100+2*10+0;
 					else {
-						if(arbre[i].eFruit[0]==2) return i*100+3*10+1;
+						if(listObj[i].utype.tree.eFruit[0]==2) return i*100+3*10+1;
 						else return i*100+3*10+0;
 						}
 					}
@@ -155,8 +157,8 @@ int sendInitTrajTree(iABObs_t obj){
 	switch(idEntry){
 		case 30 :
 		case 03 :
-			bac.nb_point=bac.nb_point+4; //FIXME si le robot ne peut pas terminer l'arbre
-			path.path_len=4;
+			basket.nb_point = basket.nb_point + 4; //FIXME si le robot ne peut pas terminer l'arbre
+			path.path_len = 4;
 			if ((tabTemp = (sTrajEl_t *) malloc(sizeof(tabEl[0])*path.path_len)) == NULL)
 				printf("Error : malloc()\n");
 			memcpy(tabTemp,&tabEl[0], sizeof(tabEl[0])*path.path_len);
@@ -166,8 +168,8 @@ int sendInitTrajTree(iABObs_t obj){
 			break;
 		case 20 :
 		case 13 :
-			bac.nb_point=bac.nb_point+3;
-			path.path_len=3;
+			basket.nb_point = basket.nb_point + 3;
+			path.path_len = 3;
 			if ((tabTemp = (sTrajEl_t *) malloc(sizeof(tabEl2[0])*path.path_len)) == NULL)
 				printf("Error : malloc()\n");
 			memcpy(tabTemp,&tabEl2[0], sizeof(tabEl2[0])*path.path_len);
@@ -177,7 +179,7 @@ int sendInitTrajTree(iABObs_t obj){
 			break;
 		case 31 :
 		case 02 :
-			bac.nb_point=bac.nb_point+3;
+			basket.nb_point = basket.nb_point + 3;
 			path.path_len=4;
 			if ((tabTemp = (sTrajEl_t *) malloc(sizeof(tabEl3[0])*path.path_len)) == NULL)
 				printf("Error : malloc()\n");
@@ -188,8 +190,8 @@ int sendInitTrajTree(iABObs_t obj){
 			break;
 		case 12 :
 		case 21 :
-		    bac.nb_point=bac.nb_point+3;
-		    path.path_len=2;
+		    basket.nb_point = basket.nb_point + 3;
+		    path.path_len = 2;
             if ((tabTemp = (sTrajEl_t *) malloc(sizeof(tabEl4[0])*path.path_len)) == NULL)
                 printf("Error : malloc()\n");
             memcpy(tabTemp,&tabEl4[0], sizeof(tabEl4[0])*path.path_len);
@@ -205,16 +207,16 @@ int sendInitTrajTree(iABObs_t obj){
 	for(i=0; i<path.path_len ; i++){
 		switch(numTree){
 			case 0 :
-				TransElTraj(tabTemp+i, ((Obj_arbre*)listObj[obj].typeStruct)->x, ((Obj_arbre*)listObj[obj].typeStruct)->y);
+				TransElTraj(tabTemp+i, listObj[obj].utype.tree.x, listObj[obj].utype.tree.y);
 				break;
 			case 1 :
 			case 2 :
 				Rot90Traj(tabTemp+i);
-				TransElTraj(tabTemp+i, ((Obj_arbre*)listObj[obj].typeStruct)->x, ((Obj_arbre*)listObj[obj].typeStruct)->y);
+				TransElTraj(tabTemp+i, listObj[obj].utype.tree.x, listObj[obj].utype.tree.y);
 				break;
 			case 3 :
 				SymElTraj(tabTemp+i, 1, 1);
-				TransElTraj(tabTemp+i, ((Obj_arbre*)listObj[obj].typeStruct)->x, ((Obj_arbre*)listObj[obj].typeStruct)->y);
+				TransElTraj(tabTemp+i, listObj[obj].utype.tree.x, listObj[obj].utype.tree.y);
 				break;
 			}
 		}
@@ -229,26 +231,27 @@ int sendInitTrajTree(iABObs_t obj){
     return idEntryTree;
 	}
 
+
 void  checkFire(int num_obj, int idEntryTree){
     int i;
     sNum_t dist;
     printf("Start checkFire\n");
     for( i = 0 ; i < NB_OBJ ; i++){
-        if( (listObj[i].type == E_FEU) && (((Obj_feu*)listObj[i].typeStruct)->pos == 3) ){
+        if( (listObj[i].etype == E_FEU) && (listObj[i].utype.fire.pos == 3) ){
             distPt2Pt(&obs[listObj[i].numObs[0]].c, &obs[listObj[num_obj].numObs[0]].c, &dist);
             if( dist < 50. ){
                 printf("inf 50 checkFire : %d\n", (idEntryTree/10)%10);
                switch((idEntryTree/10)%10){
                    case 0 :
                    case 1 :
-                       if( ((Obj_feu*)listObj[i].typeStruct)->angle == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                       if( listObj[i].utype.fire.angle == listObj[num_obj].utype.tree.angle){
                            if(color == 1){
                                printf("Active bras gauche\n");
                                //TODO actionner bras gauche
                                }
                            }
-                       printf("feu : %f, arbre :%f\n", ((Obj_feu*)listObj[i].typeStruct)->angle +180, ((Obj_arbre*)listObj[num_obj].typeStruct)->angle);
-                       if( fmodf(((Obj_feu*)listObj[i].typeStruct)->angle +180,360.) == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                       printf("feu : %f, arbre :%f\n", listObj[i].utype.fire.angle +180, listObj[num_obj].utype.tree.angle);
+                       if( fmodf(listObj[i].utype.fire.angle +180,360.) == listObj[num_obj].utype.tree.angle){
                            if(color == 0){
                                printf("Active bras gauche\n");
                                //TODO actionner bras gauche
@@ -257,13 +260,13 @@ void  checkFire(int num_obj, int idEntryTree){
                        break;
                    case 2 :
                    case 3 :
-                       if( ((Obj_feu*)listObj[i].typeStruct)->angle == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                       if( listObj[i].utype.fire.angle == listObj[num_obj].utype.tree.angle){
                            if(color == 0){
                                printf("Active bras droit\n");
                                //TODO actionner bras droit
                                }
                            }
-                       if( fmodf(((Obj_feu*)listObj[i].typeStruct)->angle +180,360.) == ((Obj_arbre*)listObj[num_obj].typeStruct)->angle){
+                       if( fmodf(listObj[i].utype.fire.angle +180,360.) == listObj[num_obj].utype.tree.angle){
                            if(color == 1){
                                printf("Active bras droit\n");
                                //TODO actionner bras droit
@@ -351,7 +354,7 @@ void obj_bac(iABObs_t obj){
             mode_obj=1;
             //obs[listObj[obj].numObs[0]].active=0;
             obs_updated[listObj[obj].numObs[0]]++;
-            bac.nb_point=0;
+            basket.nb_point=0;
 
             v.x = 0.;
             v.y = 20.;

@@ -27,7 +27,7 @@ void printListObj(void){
     int i,j;
     printf("ListObj :\n");
     for(i=0 ; i<NB_OBJ ; i++){
-        printf("type=%d, ",listObj[i].type);
+        printf("type=%d, ",listObj[i].etype);
         printf("numObj=%d, ",listObj[i].numObj);
         printf("nbObs=%d, ",listObj[i].nbObs);
         printf("numObs={");
@@ -64,24 +64,16 @@ void init_ele(void){
 
     //Initialisation des arbres
     for(i=0 ; i<4 ; i++){
-    	listObj[i].typeStruct = &arbre[listObj[i].numObj];
-    	((Obj_arbre*)listObj[i].typeStruct)->nb_point=10;                      //1 fruit pouri par arbre
-    	for(j=0 ; j<6 ; j++) ((Obj_arbre*)listObj[i].typeStruct)->eFruit[j]=0; //par défaut tous les fruit sont bon
-    	}
-    ((Obj_arbre*)listObj[0].typeStruct)->angle = 90.;
-    ((Obj_arbre*)listObj[1].typeStruct)->angle = 180.;
-    ((Obj_arbre*)listObj[2].typeStruct)->angle = 180.;
-    ((Obj_arbre*)listObj[3].typeStruct)->angle = 270.;
-    //Add Entry Point in struct arbre
-    for(j=0 ; j<4 ; j++){
-    	arbre[j].EntryPoint1=listObj[j].entryPoint[0].c;
-    	arbre[j].EntryPoint2=listObj[j].entryPoint[1].c;
+    	listObj[i].utype.tree.nb_point=10;
+    	listObj[i].entryPoint[0].radiusEP = RADIUS_ENTRY_POINT_TREE;
+        listObj[i].entryPoint[1].radiusEP = RADIUS_ENTRY_POINT_TREE;
+    	for(j=0 ; j<6 ; j++) listObj[i].utype.tree.eFruit[j]=0;   //default all fruits are good
     	}
 
     //Initialisation des bacs
     for(i=4 ; i<6 ; i++){
-    	listObj[i].typeStruct = &bac;
-        ((Obj_bac*)listObj[i].typeStruct)->nb_point=0;
+    	//listObj[i].typeStruct = &bac;
+        listObj[i].utype.basket.nb_point=0;
     	}
     if(color==1)listObj[4].active=0;
     else listObj[5].active=0;
@@ -89,8 +81,8 @@ void init_ele(void){
 
     //Initialisation des feux
     for(i=6 ; i<16 ; i++){
-    	listObj[i].typeStruct = &feu[listObj[i].numObj];
-        ((Obj_feu*)listObj[i].typeStruct)->nb_point=2;
+    	//listObj[i].typeStruct = &feu[listObj[i].numObj];
+        listObj[i].utype.fire.nb_point=2;
         listObj[i].nbEP=3;
         createEPfire2(i);
         }
@@ -99,6 +91,7 @@ void init_ele(void){
 		printListObj();
 	#endif
     printf("Fin de l'initialisation des elements du jeu\n");
+    //getchar();
     }
 
 
