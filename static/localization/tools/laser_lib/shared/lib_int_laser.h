@@ -10,6 +10,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef ARCH_328P_ARDUINO
 #include "arduino/lib_laser_arduino.h"
 #endif
@@ -57,12 +61,19 @@ typedef struct {
 
 extern volatile unsigned long laser_period; //rotation period of the lasers
 //extern unsigned long lastDetectTrack;
+#ifdef ARCH_328P_ARDUINO
 extern bufStruct buf0;                      // must be initialized with the last field at 0
 extern bufStruct buf1;                      // must be initialized with the last field at 1
-
+#endif
+#ifdef ARCH_LM4FXX
+extern bufStruct buf0;                      // must be initialized with the last field at 0
+extern bufStruct buf1;                      // must be initialized with the last field at 1
+extern bufStruct buf2;                      // must be initialized with the last field at 2
+extern bufStruct buf3;                      // must be initialized with the last field at 3
+#endif
 
 //declarations :
-void laserIntInit(int irqnb);
+void laserIntInit();
 void laserIntDeinit();
 
 
@@ -75,5 +86,7 @@ ldStruct laserDetect(bufStruct *bs);
 int periodicLaser(bufStruct *bs,plStruct *pRet);
 
 uint32_t delta2dist(unsigned long delta, unsigned long period);
-
+#ifdef __cplusplus
+    }
+#endif
 #endif /* LIB_INT_LASER_H_ */

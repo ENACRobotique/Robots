@@ -7,14 +7,20 @@ pour arduino UNO
 
 #ifdef ARCH_328P_ARDUINO
 #include "Arduino.h"
+#elif defined(ARCH_LM4FXX)
+#include "time.h"
+#include <stdlib.h>
 #endif
 #include "lib_int_laser.h"
-#include "tools.h"
 #include "../src/params.h"
 
 #include "../../../communication/network_tools/bn_debug.h"
 
 //#define DEBUG_LASER
+
+#ifndef MIN
+#define MIN(m, n) (m)>(n)?(n):(m)
+#endif
 
 enum {
     ACQUISITION,
@@ -32,6 +38,14 @@ enum {
     bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
 
     #endif
+#endif
+#ifdef ARCH_LM4FXX
+    //globales
+    bufStruct buf0={{0},0,0,0,0,0,0,0,0,0};
+    bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
+    bufStruct buf2={{0},0,0,0,0,0,0,0,0,2};
+    bufStruct buf3={{0},0,0,0,0,0,0,0,0,3};
+
 #endif
 /*
 laserIntInit :
@@ -75,7 +89,7 @@ ldStruct laserDetect(bufStruct *bs){
     //looking for the index of first value updated since the last "interesting" call of laserDetect
     nb=0;
     i=ilast;
-    while( nb<8 && long(bufTemp[i&7] - prevCall)>0 ) {
+    while( nb<8 && (long)(bufTemp[i&7] - prevCall)>0 ) {
     i--;
     nb++;
     }
@@ -96,7 +110,7 @@ ldStruct laserDetect(bufStruct *bs){
         else {
             bs->prevCall=t;
 
-            ldStruct ret={(d1+d2)>>1, (bufTemp[(ilast-3)&7]+bufTemp[(ilast)&7])>>1, min( t1, t2 )};
+            ldStruct ret={(d1+d2)>>1, (bufTemp[(ilast-3)&7]+bufTemp[(ilast)&7])>>1, MIN( t1, t2 )};
             return ret ;
         }
 

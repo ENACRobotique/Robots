@@ -41,8 +41,7 @@ inline void periodHandle(sMsg *msg){
 
 
 void setup() {
-  laserIntInit(0);
-  laserIntInit(1);
+  laserIntInit();
 
   pinMode(13,OUTPUT);
 
