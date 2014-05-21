@@ -106,6 +106,25 @@ int newSpeed(float speed){
     return 1;
     }
 
+void setPos(sPt_t *p){
+    sMsg msg;
+    msg.header.type = E_POS;
+    msg.header.size = sizeof(msg.payload.pos);
+
+    msg.payload.pos.id = 0;
+    msg.payload.pos.u_a = 0;
+    msg.payload.pos.u_a_theta = 0;
+    msg.payload.pos.u_b = 0;
+    msg.payload.pos.theta = theta_robot;
+    msg.payload.pos.x = p->x;
+    msg.payload.pos.y = p->y;
+    obs[0].c.x = p->x;
+    obs[0].c.y = p->y;
+    _current_pos = obs[0].c;
+
+    role_send(&msg);
+    }
+
 
 
 int sendSeg(const sPt_t *p, const sVec_t *v){ //the robot goes directly to the point or the vector

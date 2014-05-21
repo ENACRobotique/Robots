@@ -286,7 +286,7 @@ int checkCurrentPath(void){
 
 
 void obj_step(){
-	int j, start = 0;
+	int j;
 	int obj=-1;
     /*sTrajEl_t tabStart[2]={ //Segment for push a vertical fire
         {{0.  ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
@@ -308,17 +308,19 @@ void obj_step(){
 #if SIMU
             color = COLOR_SIMU ;
 #endif
-            state = WAIT_STARTING_CORD;
+            state = INIT;
             //Setting initial position
             if(color==1){
                 obs[0].c.x = 300. - 15.5;
-                obs[0].c.y = 200. - 15.8;
+                obs[0].c.y = 200. - 20; //15.8
+                theta_robot = M_PI;
                 }
             else{
                 obs[0].c.x = 15.5;
-                obs[0].c.y = 200. - 15.8;
+                obs[0].c.y = 200. - 20; //15.8
+                theta_robot = 0;
                 }
-            theta_robot = -M_PI_2;
+
             _current_pos=obs[0].c;
 
             msgOut.header.type = E_POS;
@@ -343,6 +345,24 @@ void obj_step(){
 
         startColor();
         break;
+
+    case INIT :
+        if(initTraj() == 1) {
+            state = WAIT_STARTING_CORD;
+            //Initialization of the game
+            init_ele();
+            //Change element for simulation
+            //listObj[0].utype.tree.eFruit[0]=2;
+            //listObj[0].utype.tree.eFruit[3]=2;
+            //listObj[1].utype.tree.eFruit[0]=2;
+            //listObj[1].utype.tree.eFruit[3]=2;
+            listObj[2].utype.tree.eFruit[0]=2;
+            listObj[2].utype.tree.eFruit[3]=2;
+            listObj[3].utype.tree.eFruit[0]=2;
+            listObj[3].utype.tree.eFruit[3]=2;
+            }
+        break;
+
     case WAIT_STARTING_CORD:
 #if SIMU
         state = WAIT;
@@ -358,17 +378,6 @@ void obj_step(){
         	state = JEU;
         	_start_time = millis();
         	last_time=_start_time;
-            //Initialization of the game
-            init_ele();
-            //Change element for simulation
-            //listObj[0].utype.tree.eFruit[0]=2;
-            //listObj[0].utype.tree.eFruit[3]=2;
-            //listObj[1].utype.tree.eFruit[0]=2;
-            //listObj[1].utype.tree.eFruit[3]=2;
-            listObj[2].utype.tree.eFruit[0]=2;
-            listObj[2].utype.tree.eFruit[3]=2;
-            listObj[3].utype.tree.eFruit[0]=2;
-            listObj[3].utype.tree.eFruit[3]=2;
         	}
         break;
    /* case INIT_POS:

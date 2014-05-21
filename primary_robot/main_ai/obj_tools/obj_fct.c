@@ -7,6 +7,8 @@
 
 #include "obj_fct.h"
 
+#include "obj_com.h"
+
 void printServoPos(eServoPos_t *pos){
     switch(*pos){
         case CLOSE:
@@ -49,6 +51,14 @@ void printListObj(void){
     printf("\n");
     }
 
+void printPath(sPath_t *path){
+    int i;
+
+    for(i = 0 ; i < path->path_len ; i++){
+        printf("{{%f, %f},{%f, %f},{{%f, %f}, %f, %d , %d, %d}, %f , %f, %d}\n", path->path[i].p1.x, path->path[i].p1.y, path->path[i].p2.x, path->path[i].p2.y, path->path[i].obs.c.x,path->path[i].obs.c.y, path->path->obs.r, path->path->obs.moved, path->path[i].obs.active, path->path[i].obs.state, path->path[i].arc_len, path->path[i].seg_len, path->path[i].sid );
+        }
+    }
+
 void printObsActive(void){
 	int i;
 	printf("Liste des obs[i].active :\n");
@@ -56,6 +66,141 @@ void printObsActive(void){
 		printf("obs[%d].active=%d\n",i,obs[i].active);
 	printf("\n");
 	}
+
+int initTraj(void){
+    sVec_t v;
+    sPath_t path;
+    sPt_t p;
+    static int state = 0;
+  /*  sTrajEl_t trajRed[2]={
+        {{0. , 0.},{12.9 + 5. , 0.},{{12.9 + 5. ,  0.}, 0. , 0., 1.}, 0. , 0., 0},
+        {{12.9 + 18., 0.},{12.9 + 18., 0.},{{12.9 + 18. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
+        };*/
+    sTrajEl_t trajRed[2]={
+        {{0.       , 0.},{12.9 + 3., 0.},{{12.9 + 3. ,  0.}, 5. , 0., 1.}, 0. , 0., 0},
+        {{12.9 + 8., 0.},{12.9 + 8., 0.},{{12.9 + 8. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
+        };
+    sTrajEl_t trajYellow[2]={
+        {{0.              , 0.},{300. - 12.9 - 3., 0.},{{300. - 12.9 - 3. ,  0.}, -5. , 0., 1.}, 0. , 0., 0},
+        {{300. - 12.9 - 8., 0.},{300. - 12.9 - 8., 0.},{{300. - 12.9 - 8. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
+        };
+    sTrajEl_t traj[2];
+
+    switch(state){
+        case 0 :
+        if(color == 1){ //yellow
+            v.x = 20;
+            v.y = 0;
+            }
+        else{
+            v.x = -20;
+            v.y = 0;
+            }
+        newSpeed(- LOW_SPEED);
+        sendSeg(NULL, &v);
+        pt_select.x = obs[0].c.x + v.x;
+        pt_select.y = obs[0].c.y + v.y;
+        state = 1;
+        break;
+
+        case 1:
+            if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
+                if(color == 1) p.x = 300. - 12.9;
+                else p.x = 12.9;
+                p.y = obs[0].c.y;
+                setPos(&p);
+                state = 2;
+                }
+            break;
+
+        case 2 :
+            if( color == 1){ //yellow
+                memcpy(traj, trajYellow, sizeof(trajYellow));
+                }
+            else{
+                memcpy(traj, trajRed, sizeof(trajRed));
+                }
+//printf("cur .x = %f .y=%f\n",obs[0].c.x, obs[0].c.y);
+
+            traj[0].p1 = obs[0].c;
+            traj[0].p2.y = obs[0].c.y;
+            traj[0].obs.c.y = obs[0].c.y - 5.;
+            traj[1].p1.y = obs[0].c.y - 5.;
+            traj[1].p2.y = obs[0].c.y - 10.;
+            traj[1].obs.c.y = obs[0].c.y - 10.;
+
+
+            newSpeed(LOW_SPEED);
+            path_len(traj, 2);
+            traj[1].seg_len = 3.;
+            path.path_len = 2;
+            path.path = traj;
+
+            send_robot(path);
+            pt_select = traj[1].p2;
+
+            state = 3;
+            break;
+
+        case 3 :
+            if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
+                state = 4;
+                }
+            break;
+
+        case 4 :
+            v.x = 0;
+            v.y = 30;
+            newSpeed(- LOW_SPEED);
+            sendSeg(NULL, &v);
+            pt_select.x = obs[0].c.x + v.x;
+            pt_select.y = obs[0].c.y + v.y;
+
+            state = 5;
+            break;
+
+        case 5 :
+            if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
+                p.x = obs[0].c.x;
+                p.y = 200 - 12.9;
+                setPos(&p);
+                state = 6;
+                }
+            break;
+
+        case 6:
+            v.x = 0;
+            v.y = -40;
+            newSpeed(LOW_SPEED);
+            sendSeg(NULL, &v);
+            pt_select.x = obs[0].c.x + v.x;
+            pt_select.y = obs[0].c.y + v.y;
+
+            state = 7;
+            break;
+
+        case 7 :
+            if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
+                state = 8;
+                pt_select.x = 0;
+                pt_select.y = 0;
+                newSpeed(NOMINAL_SPEED);
+                _current_pos = obs[0].c;
+                }
+            break;
+        default :
+            printf("Error in swich\n");
+            getchar();
+            break;
+        }
+
+    if(state == 8){
+        state = 0;
+        return 1;
+        }
+    else return 0;
+
+    }
 
 
 void init_ele(void){
@@ -69,6 +214,7 @@ void init_ele(void){
         listObj[i].entryPoint[1].radiusEP = RADIUS_ENTRY_POINT_TREE;
     	for(j=0 ; j<6 ; j++) listObj[i].utype.tree.eFruit[j]=0;   //default all fruits are good
     	}
+    updateEntryPointTree();
 
     //Initialisation des bacs
     for(i=4 ; i<6 ; i++){

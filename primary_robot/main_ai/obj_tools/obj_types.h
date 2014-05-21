@@ -14,7 +14,7 @@
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
-#define COLOR_SIMU 0 //0 red  1 yellow
+#define COLOR_SIMU 1 //0 red  1 yellow
 #define DEBUG 1
 #define SIMU 1
 #define RESO_POS 2
@@ -29,9 +29,11 @@
 #define FIRE_RADIUS_EP 15
 #define ERR_DIST 2.
 #define RADIUS_ENTRY_POINT_TREE 6
+#define NOMINAL_SPEED 20
+#define LOW_SPEED 10
 
 
-typedef enum {COLOR_SELECTION, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
+typedef enum {COLOR_SELECTION, INIT, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
 typedef enum {E_FEU, E_TORCHE_MOBILE, E_ARBRE, E_ARBRE_FOND , E_BAC, E_FOYER, E_TORCHE_FIXE} eObj_t;
 typedef enum {WAIT_MES, ACTIVE, FREE} eStateObj_t;
 typedef enum {ARM_LEFT, ARM_RIGHT} eServoLoc_t;
