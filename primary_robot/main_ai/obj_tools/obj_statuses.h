@@ -21,11 +21,13 @@ typedef struct{
     // TODO add list maintenance parameters
 } sStatusHandlingConfig;
 
+sGenericStatus *getLastStatus(eElement el);
 sGenericStatus *getLastPGStatus(eElement el);
-
-statusHandler setPGHandler(eElement id, statusHandler h);
-int received_new_status(sGenericStatus *status);
+void fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *srcPAPG, s2DPAUncert *srcUPG, s2DPosAtt *dstPAPG, s2DPAUncert *dstUPG);
 void statuses_maintenance();
+sStatusHandlingConfig *getConfig(eElement el);
 void setConfig(eElement el, sStatusHandlingConfig *cfg);
+statusHandler setPGHandler(eElement el, statusHandler h);
+int received_new_status(sGenericStatus *status);
 
 #endif /* OBJ_POSITION_H_ */

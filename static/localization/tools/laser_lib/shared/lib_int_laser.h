@@ -10,6 +10,22 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef ARCH_328P_ARDUINO
+#include "arduino/lib_laser_arduino.h"
+#endif
+
+
+#define LASER_THICK_MIN     24    // in µs refined with measurement
+#define LASER_THICK_MAX     600 // in µs refined with measurement
+#define LASER_MAX_MISSED    3
+#define LASER_DEBOUNCETIME  20  //measured
+
+#define LAT_SHIFT 2 //in µs TODO : refine
+
 //"return" structure for laserDetect
 typedef struct {
     unsigned long deltaT;    // µs
@@ -45,15 +61,21 @@ typedef struct {
 
 extern volatile unsigned long laser_period; //rotation period of the lasers
 //extern unsigned long lastDetectTrack;
+#ifdef ARCH_328P_ARDUINO
 extern bufStruct buf0;                      // must be initialized with the last field at 0
 extern bufStruct buf1;                      // must be initialized with the last field at 1
-
+#endif
+#ifdef ARCH_LM4FXX
+extern bufStruct buf0;                      // must be initialized with the last field at 0
+extern bufStruct buf1;                      // must be initialized with the last field at 1
+extern bufStruct buf2;                      // must be initialized with the last field at 2
+extern bufStruct buf3;                      // must be initialized with the last field at 3
+#endif
 
 //declarations :
-void laserIntInit(int irqnb);
+void laserIntInit();
 void laserIntDeinit();
-void laserIntHand0();
-void laserIntHand1();
+
 
 //laserDetect : check if the buffers have recorded a laser
 //return a ldStruct if something was detected, 0 otherwise.
@@ -64,5 +86,7 @@ ldStruct laserDetect(bufStruct *bs);
 int periodicLaser(bufStruct *bs,plStruct *pRet);
 
 uint32_t delta2dist(unsigned long delta, unsigned long period);
-
+#ifdef __cplusplus
+    }
+#endif
 #endif /* LIB_INT_LASER_H_ */

@@ -1,3 +1,5 @@
+//Modified by Quentin on 2014-05-16
+
 /*
 * Copyright (c) 2012, Mauro Scomparin
 * All rights reserved.
@@ -29,6 +31,9 @@
 * Version:		1.0.0.
 * Description:	LM4F120H5QR startup code.
 */
+
+
+#include <stddef.h>
 
 //-----------------------------------------------------------------------------
 // 							 Functions declarations

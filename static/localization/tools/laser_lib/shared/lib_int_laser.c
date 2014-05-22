@@ -5,14 +5,22 @@ gestion des interruptions provenant des capteurs
 pour arduino UNO
 ****************************************************************/
 
+#ifdef ARCH_328P_ARDUINO
 #include "Arduino.h"
+#elif defined(ARCH_LM4FXX)
+#include "time.h"
+#include <stdlib.h>
+#endif
 #include "lib_int_laser.h"
-#include "tools.h"
 #include "../src/params.h"
 
 #include "../../../communication/network_tools/bn_debug.h"
 
 //#define DEBUG_LASER
+
+#ifndef MIN
+#define MIN(m, n) (m)>(n)?(n):(m)
+#endif
 
 enum {
     ACQUISITION,
@@ -20,27 +28,25 @@ enum {
     TRACK_DELAY,
     DEBUG_STAGE
 };
+#ifdef ARCH_328P_ARDUINO
+    //globales
+    #ifdef DEBUG_LASER_SPECIAL_STAGE
+    bufStruct buf0={{0},0,0,0,3,0,0,0,0,0};
+    bufStruct buf1={{0},0,0,0,3,0,0,0,0,1};
+    #else
+    bufStruct buf0={{0},0,0,0,0,0,0,0,0,0};
+    bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
 
-//globales
-#ifdef DEBUG_LASER_SPECIAL_STAGE
-bufStruct buf0={{0},0,0,0,3,0,0,0,0,0};
-bufStruct buf1={{0},0,0,0,3,0,0,0,0,1};
-#else
-bufStruct buf0={{0},0,0,0,0,0,0,0,0,0};
-bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
+    #endif
+#endif
+#ifdef ARCH_LM4FXX
+    //globales
+    bufStruct buf0={{0},0,0,0,0,0,0,0,0,0};
+    bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
+    bufStruct buf2={{0},0,0,0,0,0,0,0,0,2};
+    bufStruct buf3={{0},0,0,0,0,0,0,0,0,3};
 
 #endif
-
-
-#define LASER_THICK_MIN     24    // in µs refined with measurement
-#define LASER_THICK_MAX     600 // in µs refined with measurement
-#define LASER_MAX_MISSED    3
-#define LASER_DEBOUNCETIME  20  //measured
-
-#define LAT_SHIFT 2 //in µs TODO : refine
-
-
-
 /*
 laserIntInit :
   arguments : 0 ou 1 (numéro de l'interruption
@@ -48,37 +54,20 @@ laserIntInit :
 "attache" les interruptions associées aux couples de capteurs
 */
 void laserIntInit(int irqnb) {
-  pinMode(irqnb+2,INPUT);  // trick for the arduino UNO only
-  attachInterrupt(irqnb, !irqnb?laserIntHand0:laserIntHand1 ,CHANGE);
+#ifdef ARCH_328P_ARDUINO
+    laser_arduino_Intinit();
+#endif
+
 }
     
 //do I really have to do a description ? Anyway, it probably won't be used.
 void laserIntDeinit(){
-  detachInterrupt(0);
-  detachInterrupt(1);
+#ifdef ARCH_328P_ARDUINO
+    laser_arduino_Intinit();
+#endif
 }
 
-void laserIntHand0(){ //interrupt handler, puts the time in the rolling buffer
-  //new! debouce, will hide any interruption happening less than DEBOUNCETIME µsec after the last registered interruption
-    unsigned long time=micros();//mymicros();
-    if ( time > (buf0.buf[(buf0.index-1)&7]+LASER_DEBOUNCETIME) ){
-        buf0.buf[buf0.index]=time;
-        buf0.index++;
-        buf0.index&=7;
-    }
-    EIFR = BIT(0);
-}
 
-void laserIntHand1(){
-  //new! debouce, will hide any interruption happening less than DEBOUNCETIME µsec after the last registered interruption
-    unsigned long time=micros();//mymicros();
-    if ( time > (buf1.buf[(buf1.index-1)&7]+LASER_DEBOUNCETIME) ){
-        buf1.buf[buf1.index]=time;
-        buf1.index++;
-        buf1.index&=7;
-    }
-    EIFR = BIT(1);
-}
 
 //returns the delta-T in µs and the time at which it was measured
 ldStruct laserDetect(bufStruct *bs){
@@ -100,7 +89,7 @@ ldStruct laserDetect(bufStruct *bs){
     //looking for the index of first value updated since the last "interesting" call of laserDetect
     nb=0;
     i=ilast;
-    while( nb<8 && long(bufTemp[i&7] - prevCall)>0 ) {
+    while( nb<8 && (long)(bufTemp[i&7] - prevCall)>0 ) {
     i--;
     nb++;
     }
@@ -121,7 +110,7 @@ ldStruct laserDetect(bufStruct *bs){
         else {
             bs->prevCall=t;
 
-            ldStruct ret={(d1+d2)>>1, (bufTemp[(ilast-3)&7]+bufTemp[(ilast)&7])>>1, min( t1, t2 )};
+            ldStruct ret={(d1+d2)>>1, (bufTemp[(ilast-3)&7]+bufTemp[(ilast)&7])>>1, MIN( t1, t2 )};
             return ret ;
         }
 

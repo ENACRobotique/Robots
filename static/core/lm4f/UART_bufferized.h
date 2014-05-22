@@ -11,6 +11,9 @@
 #include "driverlib/uart.h"
 #include "inc/hw_memmap.h"
 
+#include "driverlib/sysctl.h"
+
+#define UART_BUFFERIZED_PERIF SYSCTL_PERIPH_UART1
 #define UART_BUFFERIZED_BASE  UART1_BASE
 #define UART_BUFFERIZED_FLAGS (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE)
 #define UART_BUFFERIZED_CBUFF_SIZE  128

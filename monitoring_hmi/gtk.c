@@ -472,6 +472,11 @@ int main(int argc, char *argv[]) {
     ctx.pos_data[1] = malloc(CTX_BUFSZ(&ctx));
     ctx.pos_cur = 0;
 
+    x_min = 0.;
+    y_min = 0.;
+    x_max = ctx.pos_maxx;
+    y_max = ctx.pos_maxy;
+
     bn_attach(E_ROLE_SETUP, role_setup);
 
     ret = bn_init();

@@ -34,6 +34,7 @@ typedef enum{
     E_PING,
     E_TRACEROUTE_REQUEST,   // traceroute request
     E_TRACEROUTE_RESPONSE,  // traceroute response
+    E_INTP,                 // bn_intp synchronization message
 
 /************************ user types start ************************/
     E_SWITCH_CHANNEL,       // switch channel message
@@ -53,7 +54,6 @@ typedef enum{
     E_IHM_STATUS,           // ihm status
     E_SPEED_SETPOINT,       // speed setpoint
     E_GENERIC_STATUS,       // generic status of an element
-    E_INTP,                 // bn_intp synchronization message /!\ must be moved outside user types section at next messages reorganization.
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -353,7 +353,7 @@ typedef union{
     sPosQuery posQuery;
     sServos servos;
     sIhmStatus ihmStatus;
-    sSpeedSetPoint speedSP;
+    sSpeedSetPoint speedSetPoint;
 /************************ user payload stop ************************/
 
 }uPayload;
