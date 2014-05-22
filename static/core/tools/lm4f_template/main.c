@@ -97,6 +97,7 @@ int main(void) {
 
 
     // Hack to enable the use of PF0 : (from http://codeandlife.com/2012/10/16/ti-stellaris-launchpad-test-run/ )
+    // cf http://users.ece.utexas.edu/~valvano/Volume1/E-Book/C6_MicrocontrollerPorts.htm (right under table 6.2)
     // Unlock PF0 so we can change it to a GPIO input
     // Once we have enabled (unlocked) the commit register then re-lock it
     // to prevent further changes.  PF0 is muxed with NMI thus a special case.

@@ -33,6 +33,15 @@ typedef struct {
     unsigned long thickness; // µs, thickness of the "small" impulsion
 }ldStruct;
 
+//"return" structure for laserDetect (in interruption use)
+typedef struct {
+    unsigned long deltaT;    // µs
+    unsigned long date;      // local µs
+    unsigned long thickness; // µs, thickness of the "small" impulsion
+    unsigned long prevDate;
+}ildStruct;
+
+
 //"return" structure for periodicLaser
 typedef struct {
 	unsigned long deltaT;       // µs, delay between two laser small peaks
@@ -55,7 +64,7 @@ typedef struct {
 	unsigned long prevTime;         // local µs, prevTime & nextTime : used by periodicLaser for its time measurements
 	unsigned long timeInc;          // µs,  : increment of time after which there is something to do
 	int missed;                     // number of missed detections
-	int intNb;                      // intNb : nb of the interrupt
+//	int intNb;                      // intNb : nb of the interrupt (linked to the physical pinout
 }bufStruct;
 
 
@@ -66,10 +75,20 @@ extern bufStruct buf0;                      // must be initialized with the last
 extern bufStruct buf1;                      // must be initialized with the last field at 1
 #endif
 #ifdef ARCH_LM4FXX
-extern bufStruct buf0;                      // must be initialized with the last field at 0
-extern bufStruct buf1;                      // must be initialized with the last field at 1
-extern bufStruct buf2;                      // must be initialized with the last field at 2
-extern bufStruct buf3;                      // must be initialized with the last field at 3
+
+enum {
+    LAS_INT_0,
+    LAS_INT_1,
+    LAS_INT_2,
+    LAS_INT_3,
+
+    LAS_INT_TOTAL,
+};
+
+extern bufStruct buf[LAS_INT_TOTAL];
+extern ildStruct ildTable[LAS_INT_TOTAL];
+extern plStruct pl[LAS_INT_TOTAL];
+
 #endif
 
 //declarations :
@@ -86,6 +105,7 @@ ldStruct laserDetect(bufStruct *bs);
 int periodicLaser(bufStruct *bs,plStruct *pRet);
 
 uint32_t delta2dist(unsigned long delta, unsigned long period);
+
 #ifdef __cplusplus
     }
 #endif
