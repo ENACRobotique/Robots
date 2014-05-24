@@ -14,6 +14,8 @@
 #include "roles.h"
 #include "inc/lm4f120h5qr.h"
 
+#include "lib_int_laser.h"
+
 #include <stdlib.h>
 
 #ifndef BIT
@@ -28,7 +30,8 @@ void __error__(char *pcFilename, unsigned long ulLine){
 
 // main function.
 int main(void) {
-    unsigned char light =0x04;
+    unsigned char light =0x04,led=0;
+    static uint32_t prevLed=0;
     int ret;
 
     timerInit();
@@ -46,19 +49,19 @@ int main(void) {
     }
 
 
+    laserIntInit();
+
     // Loop forever.
     while(1){
         bn_receive(NULL);
 
-//        bn_printDbg("stellaris started");
-#define DUR 100
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,light);
-        delay(DUR);
-        bn_receive(NULL);
+        if ((millis()-prevLed)>1000){
+            prevLed=millis();
+            led^=light;
+            GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,led);
+            bn_printDbg("stellaris blink");
+        }
 
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,0x00);
-
-        delay(DUR);
 
     }
 

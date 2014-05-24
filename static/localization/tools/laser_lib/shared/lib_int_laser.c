@@ -52,7 +52,7 @@ laserIntInit :
   valeur de retour : rien
 "attache" les interruptions associées aux couples de capteurs
 */
-void laserIntInit(int irqnb) {
+void laserIntInit() {
 #ifdef ARCH_328P_ARDUINO
     laser_arduino_Intinit();
 #elif defined(ARCH_LM4FXX)
@@ -111,7 +111,7 @@ ldStruct laserDetect(bufStruct *bs){
 
         //if the detected patter has not the good shape
         //xxx in this case we can only handle a whole pattern (we may be able to do it on 3)
-        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX || labs((((long)d1)-((long)d2))*100)>(d1+d2)*10 ){
+        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX || labs((((long)d1)-((long)d2))*100)>(d1+d2)*10 || d1>2000 || d2>2000){
             ldStruct ret={0,0,0};
             return ret;
         }

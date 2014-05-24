@@ -42,6 +42,7 @@
 								</option>
 								<option id="gnu.c.compiler.option.include.paths.101516892" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_fixe/lm4f}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/laser_lib/shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_fixe/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_fixe/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_fixe/lib/network_config}&quot;"/>
