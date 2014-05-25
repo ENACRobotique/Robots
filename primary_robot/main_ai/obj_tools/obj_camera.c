@@ -164,7 +164,7 @@ void getStatusFire(void){
 
     msgOut.header.destAddr = ADDRD2_MAIN_VIDEO;
     msgOut.header.type = E_GENERIC_STATUS;
-    msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.genericStatus.fire_status); //FIXME
+    msgOut.header.size = 5 + sizeof(msgOut.payload.genericStatus.fire_status);
 
     msgOut.payload.genericStatus.id = ELT_FIRE;
 

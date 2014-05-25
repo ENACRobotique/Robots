@@ -81,11 +81,12 @@ extern "C" {
 
 //UDP addresses (SUBNETD2_MAIN)
     #define ADDRD2_MAIN_AI              ( 1 | SUBNETD2_MAIN )
+    #define ADDRD2_MAIN_VIDEO           ( 2 | SUBNETD2_MAIN )
 
 //default debug address :
     #define ADDR_MONITORING_DFLT    (ADDRD1_MONITORING)
     #define ADDR_IA_DFLT            (ADDRD1_MAIN_IA_SIMU)
-#if 1
+#if 0
     #define ADDR_PROP_DFLT          (ADDRD1_MAIN_PROP_SIMU)
 #else
     #define ADDR_PROP_DFLT          (ADDRI_MAIN_PROP)
