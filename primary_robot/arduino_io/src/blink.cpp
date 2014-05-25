@@ -21,7 +21,11 @@ typedef struct {
         int pin;
 } sServoData;
 sServoData servosTable[] = {
-        {Servo(), SERVO_PRIM_DOOR, 7}
+        {Servo(), SERVO_PRIM_DOOR, 10},
+        {Servo(), SERVO_PRIM_FIRE1, 8},
+        {Servo(), SERVO_PRIM_FIRE2, 9},
+        {Servo(), SERVO_PRIM_ARM_LEFT, 6},
+        {Servo(), SERVO_PRIM_ARM_RIGHT, 7},
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
