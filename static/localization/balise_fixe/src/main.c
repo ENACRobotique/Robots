@@ -129,11 +129,7 @@ void __error__(char *pcFilename, unsigned long ulLine){
  * }
  */
 
-// return apporximated position from the two last positions
-void approxPos(sPt_t *Z1, sPt_t *Z2, sPt_t *res){
-	res->x = 2*Z2->x - Z1->x;
-	res->y = 2*Z2->y - Z1->y;
-}
+
 // main function.
 int main(void) {
     unsigned char light =0x04;
