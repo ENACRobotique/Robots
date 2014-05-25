@@ -50,7 +50,7 @@ void send_robot(sPath_t path){
         }
     }
 
-int sendPosServo(eServos s, uint16_t us, uint16_t a){ // us or a = -1 if no use
+int sendPosServo(eServos s, int16_t us, int16_t a){ // us or a = -1 if no use
     sMsg msg = {{0}};
     sPt_t p1, p2;
     sLin_t l;
@@ -61,9 +61,10 @@ int sendPosServo(eServos s, uint16_t us, uint16_t a){ // us or a = -1 if no use
             }
 
     if(a != -1){
+        i = 0;
         while(s != listServo[i].id){
             i++;
-            if( i > sizeof(listServo)) break;
+            if( i > sizeof(listServo)/sizeof(*listServo)) break;
             }
         p1.x = listServo[i].a1;
         p1.y = listServo[i].u1;
@@ -106,7 +107,7 @@ int newSpeed(float speed){
     return 1;
     }
 
-void setPos(sPt_t *p){
+void setPos(sPt_t *p, sNum_t theta){
     sMsg msg;
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
@@ -115,11 +116,12 @@ void setPos(sPt_t *p){
     msg.payload.pos.u_a = 0;
     msg.payload.pos.u_a_theta = 0;
     msg.payload.pos.u_b = 0;
-    msg.payload.pos.theta = theta_robot;
+    msg.payload.pos.theta = theta;
     msg.payload.pos.x = p->x;
     msg.payload.pos.y = p->y;
     obs[0].c.x = p->x;
     obs[0].c.y = p->y;
+    theta_robot = theta;
     _current_pos = obs[0].c;
 
     role_send(&msg);

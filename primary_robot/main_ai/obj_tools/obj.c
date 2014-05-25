@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+#include "obj_com.h"
+
 #define CLAMP(m, v, M) MAX(m, MIN(v, M))
 
 
@@ -288,6 +290,7 @@ int checkCurrentPath(void){
 void obj_step(){
 	int j;
 	int obj=-1;
+
     /*sTrajEl_t tabStart[2]={ //Segment for push a vertical fire
         {{0.  ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
         {{10 ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
@@ -308,6 +311,9 @@ void obj_step(){
 #if SIMU
             color = COLOR_SIMU ;
 #endif
+            sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 180);
+            sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 0);
+            sendPosServo(SERVO_PRIM_DOOR, -1, 700);
             state = INIT;
             //Setting initial position
             if(color==1){

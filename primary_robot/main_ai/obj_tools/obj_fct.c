@@ -71,6 +71,7 @@ int initTraj(void){
     sVec_t v;
     sPath_t path;
     sPt_t p;
+    sNum_t theta;
     static int state = 0;
   /*  sTrajEl_t trajRed[2]={
         {{0. , 0.},{12.9 + 5. , 0.},{{12.9 + 5. ,  0.}, 0. , 0., 1.}, 0. , 0., 0},
@@ -89,11 +90,11 @@ int initTraj(void){
     switch(state){
         case 0 :
         if(color == 1){ //yellow
-            v.x = 20;
+            v.x = 10;
             v.y = 0;
             }
         else{
-            v.x = -20;
+            v.x = -10;
             v.y = 0;
             }
         newSpeed(- LOW_SPEED);
@@ -105,10 +106,16 @@ int initTraj(void){
 
         case 1:
             if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
-                if(color == 1) p.x = 300. - 12.9;
-                else p.x = 12.9;
+                if(color == 1){ // yellow
+                    p.x = 300. - 12.9;
+                    theta = M_PI;
+                }
+                else{ // red
+                    p.x = 12.9;
+                    theta = 0.;
+                }
                 p.y = obs[0].c.y;
-                setPos(&p);
+                setPos(&p, theta);
                 state = 2;
                 }
             break;
@@ -163,14 +170,14 @@ int initTraj(void){
             if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
                 p.x = obs[0].c.x;
                 p.y = 200 - 12.9;
-                setPos(&p);
+                setPos(&p, -M_PI_2);
                 state = 6;
                 }
             break;
 
         case 6:
             v.x = 0;
-            v.y = -40;
+            v.y = -20;
             newSpeed(LOW_SPEED);
             sendSeg(NULL, &v);
             pt_select.x = obs[0].c.x + v.x;

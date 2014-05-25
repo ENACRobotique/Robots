@@ -10,6 +10,7 @@
 #include "obj_com.h"
 
 
+
 eServoPos_t armLeft = CLOSE, armRight = CLOSE;
 
 sTrajEl_t tabSeg[2]={ //Segment to push a vertical fire
@@ -234,13 +235,13 @@ void cmdServo(eServoLoc_t loc, eServoPos_t pos){
             armRight = pos;
             switch(pos){
                 case CLOSE :
-                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 0); //FIXME
+                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 180); //FIXME
                     break;
                 case HALF_OPEN :
                     sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 90); //FIXME
                     break;
                 case OPEN :
-                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 180); //FIXME
+                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 0); //FIXME
                     break;
                 }
             break;
