@@ -109,6 +109,9 @@ int main(int argc, char *argv[]){
 #endif
             {
                 fprintf(stderr, "bn_receive() error #%i\n", -ret);
+                if(ret == -ERR_SYSERRNO){
+                    fprintf(stderr, "errno=%i\n", errno);
+                }
 //                exit(1);
             }
         }
