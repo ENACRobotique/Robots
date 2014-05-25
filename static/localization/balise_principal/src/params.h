@@ -57,6 +57,7 @@ typedef struct{
 
 //#define DEBUG
 //#define DEBUG_SYNC
+//#define DEBUG_CALIBRATION
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
