@@ -181,6 +181,7 @@ typedef enum{
     ELT_ADV_PRIMARY,
     ELT_ADV_SECONDARY,
     ELT_FIRE,
+    ELT_ZONE,
 
     NUM_E_ELEMENT
 } eElement;
@@ -219,21 +220,6 @@ typedef struct __attribute__((packed)){
     float a_std;      // standard deviation along "a" axis (cm)
     float b_std;      // standard deviation along "b" axis (cm)
 } s2DPAUncert;
-
-typedef struct __attribute__((packed)){
-    uint32_t date;      // synchronized date (µs)
-    uint8_t nbpt;
-    eElement id :8;
-    s2DPosAtt pos[8];
-    s2DPAUncert pos_u[8];
-    union{
-        // in case of pos.id == ELT_FIRE
-        struct{
-            uint8_t nbfire;
-            uint8_t nbtorch;
-        } fire_zone;
-    };
-}sGenericZone;
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
@@ -276,6 +262,15 @@ typedef struct __attribute__((packed)){
                 FIRE_VERTICAL_TORCH
             } state :8;
         } fire_status;
+
+        // in case of pos.id == ELT_ZONE
+        struct{
+            s2DPosAtt pos;
+            s2DPAUncert pos_u;
+            uint8_t nbpt;
+            uint8_t nbfire;
+            uint8_t nbtorch;
+        } zone_status;
     };
 } sGenericStatus;
 
