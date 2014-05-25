@@ -21,6 +21,28 @@
 #include "controller.h"
 #include "asserv.h"
 
+// pins usage with PCB_IA_C2014R2:
+//    UART0
+//        TXD0    P0.0    EXT1.1      BOTNET          !PWM1
+//        RXD0    P0.1    EXT1.2      BOTNET          !PWM3 ~EINT0
+//    I²C0
+//        SCL0    P0.2    EXT1.3      BOTNET
+//        SDA0    P0.3    EXT1.4      BOTNET          ~EINT1
+//    EINT*
+//        EINT0   P0.16   EXT1.17     ENC_A RIGHT
+//        EINT3   P0.20   EXT1.21     ENC_A LEFT
+//    PWM*
+//        PWM5    P0.21   EXT1.22     SPEED LEFT
+//        PWM2    P0.7    EXT1.8      SPEED RIGHT     ~EINT2
+//    GPIO*
+//        OUT     P1.24   EXT2.13     Green LED
+//        OUT     P0.31   EXT2.4      Orange LED
+//        OUT     P0.19   EXT1.20     DIR LEFT
+//        OUT     P0.5    EXT1.6      DIR RIGHT
+//        IN      P0.22   EXT1.23     ENC_B LEFT
+//        IN      P0.18   EXT1.19     ENC_B RIGHT
+// for more details, see Features2Pins.txt file
+
 int main(int argc, char *argv[]){
     sMsg inMsg;
     int ret, quit = 0, ledStatus = 0;

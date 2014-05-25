@@ -6,7 +6,8 @@
 #define BIT(b) (1<<(b))
 #endif
 
-void t0_isr() {
+#if 0
+void t0_isr() { // XXX missing irq nature
 /*  if(T0_IR&BIT(0)) {
     // match0
   }*/
@@ -14,6 +15,7 @@ void t0_isr() {
   T0_IR = T0_IR;  // ack interrupts
   VIC_VectAddr = 0;  // update priority hardware
 }
+#endif
 
 void sys_time_init() {
   // timer0 disable and reset

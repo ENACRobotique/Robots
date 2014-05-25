@@ -40,7 +40,7 @@ volatile int _ticks_l=0, _ticks_r=0;
 
 void _isr_left() __attribute__ ((interrupt("IRQ")));
 void _isr_left() { // irq17
-    if(gpio_read(1, 16))
+    if(gpio_read(0, 22))
         _ticks_l--;
     else
         _ticks_l++;
@@ -51,7 +51,7 @@ void _isr_left() { // irq17
 
 void _isr_right() __attribute__ ((interrupt("IRQ")));
 void _isr_right(){ // irq14
-    if(gpio_read(1, 17))
+    if(gpio_read(0, 18))
         _ticks_r++;
     else
         _ticks_r--;
@@ -152,11 +152,21 @@ void asserv_init(){
     gpio_write(0, 31, 0); // orange LED on
 
     // entrées quadrature
-    gpio_input(1, 16);  // gauche
-    gpio_input(1, 17);  // droit
+    gpio_input(0, 22);  // gauche
+    gpio_input(0, 18);  // droit
 
     // interruptions codeurs
-    eint_init(_isr_right, _isr_left);
+    eint_disable(EINT0);
+    eint_assign(EINT0_P0_16);
+    eint_mode(EINT0, EINT_RISING_EDGE);
+    eint_register(EINT0, _isr_right, 2);
+    eint_enable(EINT0);
+
+    eint_disable(EINT3);
+    eint_assign(EINT3_P0_20);
+    eint_mode(EINT3, EINT_RISING_EDGE);
+    eint_register(EINT3, _isr_left, 3);
+    eint_enable(EINT3);
 #endif
 
     motor_controller_init();

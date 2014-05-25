@@ -1,0 +1,35 @@
+UART0
+    TXD0    P0.0    EXT1.1      !PWM1
+    RXD0    P0.1    EXT1.2      !PWM3 ~EINT0
+UART1
+    TXD1    P0.8    EXT1.9      !PWM4
+    RXD1    P0.9    EXT1.10     !PWM6 ~EINT3
+    RTS1    P0.10   EXT1.11
+    CTS1    P0.11   EXT1.12     !I²C1
+    DSR1    P0.12   EXT1.13
+    DTR1    P0.13   EXT1.14
+    DCD1    P0.14   EXT1.15     !I²C1 ~EINT1
+    RI1     P0.15   EXT1.16     ~EINT2
+EINT*
+    EINT0   P0.1    EXT1.2      !UART0 !PWM3
+            P0.16   EXT1.17
+    EINT1   P0.3    EXT1.4      !I²C0
+            P0.14   EXT1.15     !I²C1 ~UART1
+    EINT2   P0.7    EXT1.8      !PWM2
+            P0.15   EXT1.16     ~UART1
+    EINT3   P0.9    EXT1.10     !UART1 !PWM6
+            P0.20   EXT1.21
+            P0.30   EXT2.3
+PWM*
+    PWM1    P0.0    EXT1.1      !UART0
+    PWM2    P0.7    EXT1.8      ~EINT2
+    PWM3    P0.1    EXT1.2      !UART0 ~EINT0
+    PWM4    P0.8    EXT1.9      !UART1
+    PWM5    P0.21   EXT1.22
+    PWM6    P0.9    EXT1.10     !UART1 ~EINT3
+I²C0
+    SCL0    P0.2    EXT1.3
+    SDA0    P0.3    EXT1.4      ~EINT1
+I²C1
+    SCL1    P0.11   EXT1.12     ~UART1
+    SDA1    P0.14   EXT1.15     ~UART1 ~EINT1
