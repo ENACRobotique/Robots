@@ -175,6 +175,9 @@ int main(int argc, char **argv){
             }
             else{
                 fprintf(stderr, "bn_receive() error #%i\n", -err);
+                if(err == -ERR_SYSERRNO){
+                    fprintf(stderr, "errno=%i\n", errno);
+                }
                 exit(1);
             }
         }
