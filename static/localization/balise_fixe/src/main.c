@@ -15,6 +15,9 @@
 #include "inc/lm4f120h5qr.h"
 
 #include "lib_int_laser.h"
+#include "lib_synchro_beacon.h"
+
+#include "params.h"
 
 #include <stdlib.h>
 
@@ -26,6 +29,11 @@ void __error__(char *pcFilename, unsigned long ulLine){
     while(1);
 }
 
+uint32_t laser_period=0;
+
+inline void periodHandle(sMsg *msg){
+    if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
+}
 
 
 // main function.
@@ -43,6 +51,8 @@ int main(void) {
 
 
     bn_attach(E_ROLE_SETUP,role_setup);
+    bn_attach(E_PERIOD,&periodHandle);
+    bn_printfDbg("start fixed, addr %hx\n",MYADDR);
 
     if ((ret=bn_init())<0){
         light=0x02;
@@ -52,17 +62,86 @@ int main(void) {
     laserIntInit();
 
     // Loop forever.
+    mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;
+
+/*********************** loop ************************/
     while(1){
-        bn_receive(NULL);
+        sMsg inMsg={{0}};
+
+        int rxB=bn_receive(&inMsg);
+
+        updateSync();
 
         if ((millis()-prevLed)>1000){
             prevLed=millis();
             led^=light;
             GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,led);
-            bn_printDbg("stellaris blink");
+#ifdef DEBUG
+            bn_printfDbg("%lu stellaris blink",millis());
+#endif
         }
+//STATE MACHINE
+        switch (state){
+            case S_BEGIN :
+                if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
+                    state=S_SYNC_ELECTION;
+#ifdef VERBOSE_SYNC
+                    bn_printDbg("begin election");
+#endif
+                }
+                else break;
+                /* no break */
+            case S_SYNC_ELECTION :
+                if (prevState!=state) {
+                    // reset counters
+//                    intLas0=0;
+//                    intLas1=0;
+                    prevState=state;
+                }
+                // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
+                if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
+//                    chosenOne=(intLas0<intLas1?1:0);
+#ifdef VERBOSE_SYNC
+                    bn_printDbg("end election\n");
+#endif
+                    state=S_SYNC_MEASURES;
+                }
+                else {
+                    break;
+                }
+                /* no break */
+            case S_SYNC_MEASURES:
+                // laser data (if value is ours for sure (ie comes from a tracked measure)
+//                if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
+//                    syncComputationLaser(&laserStruct0);
+//                }
+//                else if(chosenOne==1 && laserStruct1.thickness && laserStruct1.period) {
+//                    syncComputationLaser(&laserStruct1);
+//                }
+                // handling data broadcasted by turret
+                if (rxB && inMsg.header.type==E_SYNC_DATA){
+                        rxB=0;
+                    if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
+#ifdef VERBOSE_SYNC
+                        bn_printDbg("syncComputation\n");
+#endif
+                        syncComputationFinal(&inMsg.payload.sync);
+                        state=S_GAME;
+                    }
+                    else {
+                        syncComputationMsg(&inMsg.payload.sync);
+                    }
+                }
+                break;
+            case S_GAME :
+                //fixme call the nelder-mead.
+              break;
+            default : break;
+        }//switch
+        prevState=state;
 
 
-    }
+
+    } // while 1
 
 }

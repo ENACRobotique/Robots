@@ -68,7 +68,7 @@ typedef struct {
 }bufStruct;
 
 
-extern volatile unsigned long laser_period; //rotation period of the lasers
+extern uint32_t laser_period; //rotation period of the lasers
 //extern unsigned long lastDetectTrack;
 #ifdef ARCH_328P_ARDUINO
 extern bufStruct buf0;                      // must be initialized with the last field at 0
