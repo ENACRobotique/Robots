@@ -110,6 +110,8 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 	idx[1] = (taille + index - 2)%taille;
 	idx[2] = (taille + index - 1)%taille;
 
+	bn_printfDbg("%lu,%lu,%lu;%lu,%lu,%lu;%lu,%lu,%lu\n", buffer[idx[0]].deltaT, buffer[idx[1]].deltaT, buffer[idx[2]].deltaT, buffer[idx[0]].period/1000, buffer[idx[1]].period/1000, buffer[idx[2]].period/1000, buffer[idx[0]].date, buffer[idx[1]].date, buffer[idx[2]].date);
+
 	// Initialisation
 
 	switch(state){
@@ -151,12 +153,12 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 				// cas RED
 				if (test_result){
 					init_globals(RED, &x0);
-
+					bn_printDbg("red case\n");
 				}
 				// cas YELLOW
 				else{
-
 					init_globals(YELLOW, &x0);
+                    bn_printDbg("yellow case\n");
 				}
 				state = PLAY;
 				for(i=0 ; i<2;i++){
@@ -185,10 +187,11 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 					LastPos[1].pt = x0;
 					LastPos[1].date = buffer[idx[2]].date;
 
-					//TODO renvoi position
+					//renvoi position
 					sMsg msg_out;
 
 						// Header
+					msg_out.header.destAddr = role_get_addr(ROLE_IA);
 					msg_out.header.type = E_GENERIC_STATUS;
 					msg_out.header.size = sizeof(sGenericStatus);
 
@@ -203,7 +206,12 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 					msg_out.payload.genericStatus.pos_u.a_angle = 0;
 					msg_out.payload.genericStatus.pos_u.theta = -1;
 
-					rolesend(msg_out);
+//					bn_send(&msg_out);
+#ifdef DEBUG_POS
+					bn_printfDbg("date %lu, x: %d, y: %d\n",msg_out.payload.genericStatus.date,(int)x0.x,(int)x0.y);
+#endif
+
+
 				}else{
 					LastPos[0] = LastPos[1];
 				}

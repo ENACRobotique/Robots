@@ -29,6 +29,7 @@ typedef enum{
 //#define DEBUG
 //#define DEBUG_SYNC
 //#define DEBUG_SYNC_VALUES
+#define DEBUG_POS
 #define VERBOSE_SYNC
 
 #if MYADDRX==ADDRX_FIX

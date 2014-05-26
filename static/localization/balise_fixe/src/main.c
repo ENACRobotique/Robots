@@ -21,7 +21,7 @@
 #include <driverlib/fpu.h>
 #include "tools.h"
 #include <string.h>
-
+#include "absolutepos.h"
 
 #include "lib_int_laser.h"
 #include "lib_synchro_beacon.h"
@@ -35,9 +35,6 @@
 #define BIT(a) (1<<a)
 #endif
 
-typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
-
-//plStruct plTable[LAS_INT_TOTAL]={0};
 #define MEAS_BUF_SIZE 8
 sMeasures measuresBuf[MEAS_BUF_SIZE]={{0}};
 int measuresIndex=0,prevMeasuresIndex=0;
@@ -97,7 +94,8 @@ int main(void) {
 
     laserIntInit();
 
-    mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;
+    //mainState state=S_SYNC_ELECTION, prevState=S_BEGIN; fixme todo xxx
+    mainState state=S_GAME, prevState=S_BEGIN;
 
 /*********************** loop ************************/
     while(1){
@@ -158,14 +156,6 @@ int main(void) {
             memset(&stat_tempPl,0,sizeof(stat_tempPl));
         }
 
-        if (((MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE)>=1){
-            int k;
-            for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
-                int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
-                bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
-
-            }
-        }
         //STATE MACHINE
         switch (state){
             case S_BEGIN :
@@ -185,6 +175,13 @@ int main(void) {
                 }
                 // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
                 if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
+                    int k;
+                    int maxTh=0;
+                    for (k=0; k<LAS_INT_TOTAL; k++){
+                        if (lasCount[k]>maxTh){
+
+                        }
+                    }
 //                    chosenOne=(intLas0<intLas1?1:0);
 #ifdef VERBOSE_SYNC
                     bn_printDbg("end election\n");
@@ -219,11 +216,20 @@ int main(void) {
                 }
                 break;
             case S_GAME :
-                //fixme call the nelder-mead.
+                if (((MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE)>=1){
+#ifdef DEBUG
+                    int k;
+                    for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
+                        int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
+                        bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
+                    }
+#endif
+                    absolutepos(measuresBuf,measuresIndex,MEAS_BUF_SIZE);
+                    prevState=state;
+                }
               break;
             default : break;
         }//switch
-        prevState=state;
 
         prevMeasuresIndex=measuresIndex;
     } // while 1
