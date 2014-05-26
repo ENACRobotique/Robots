@@ -57,31 +57,31 @@ sNum_t val_obj(int num){ //numeros de l'objectif dans listObj[] compris entre 0 
         }
     time=dist/speed;
     if(time > (END_MATCH-(millis()-_start_time))){ //temps restant insuffisant
-        listObj[num].active=0;
+        listObj[num].active = 0;
         return 0;
         }
 
-    switch(listObj[num].type){
+    switch(listObj[num].etype){
         case E_FEU :
-            printf("enum=%i => type=E_FEU, dist=%f\n",listObj[num].type,dist);
-            point=((Obj_feu*)listObj[num].typeStruct)->nb_point;
-            ratio=point/time*100;
+            printf("enum=%i => type=E_FEU, dist=%f\n",listObj[num].etype,dist);
+            point = listObj[num].utype.fire.nb_point;
+            ratio = point/time*100;
             break;
 
         case E_TORCHE_MOBILE :
             break;
 
         case E_ARBRE :
-            printf("enum=%i => type=E_ARBRE, dist=%f\n",listObj[num].type,dist);
-            point=((Obj_arbre*)listObj[num].typeStruct)->nb_point;
-            ratio=point/time*1000+ratio_arbre() ;
+            printf("enum=%i => type=E_ARBRE, dist=%f\n",listObj[num].etype,dist);
+            point = listObj[num].utype.tree.nb_point;
+            ratio = point/time*1000+ratio_arbre() ;
             printf("ratio_arbre()=%f et n=%d\n",ratio_arbre(),num);
             break;
 
         case E_BAC :
-            printf("enum=%i => type=E_BAC, dist=%f\n",listObj[num].type,dist);
-            point=((Obj_bac*)listObj[num].typeStruct)->nb_point;
-            ratio=point/time*1000+ratio_bac();
+            printf("enum=%i => type=E_BAC, dist=%f\n",listObj[num].etype,dist);
+            point = listObj[num].utype.basket.nb_point;
+            ratio = point/time*1000+ratio_bac();
             break;
 
         case E_FOYER :
@@ -286,7 +286,7 @@ int checkCurrentPath(void){
 
 
 void obj_step(){
-	int j, start = 0;
+	int j;
 	int obj=-1;
     /*sTrajEl_t tabStart[2]={ //Segment for push a vertical fire
         {{0.  ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
@@ -308,17 +308,19 @@ void obj_step(){
 #if SIMU
             color = COLOR_SIMU ;
 #endif
-            state = WAIT_STARTING_CORD;
+            state = INIT;
             //Setting initial position
             if(color==1){
                 obs[0].c.x = 300. - 15.5;
-                obs[0].c.y = 200. - 15.8;
+                obs[0].c.y = 200. - 20; //15.8
+                theta_robot = M_PI;
                 }
             else{
                 obs[0].c.x = 15.5;
-                obs[0].c.y = 200. - 15.8;
+                obs[0].c.y = 200. - 20; //15.8
+                theta_robot = 0;
                 }
-            theta_robot = -M_PI_2;
+
             _current_pos=obs[0].c;
 
             msgOut.header.type = E_POS;
@@ -343,6 +345,24 @@ void obj_step(){
 
         startColor();
         break;
+
+    case INIT :
+        if(initTraj() == 1) {
+            state = WAIT_STARTING_CORD;
+            //Initialization of the game
+            init_ele();
+            //Change element for simulation
+            //listObj[0].utype.tree.eFruit[0]=2;
+            //listObj[0].utype.tree.eFruit[3]=2;
+            //listObj[1].utype.tree.eFruit[0]=2;
+            //listObj[1].utype.tree.eFruit[3]=2;
+            listObj[2].utype.tree.eFruit[0]=2;
+            listObj[2].utype.tree.eFruit[3]=2;
+            listObj[3].utype.tree.eFruit[0]=2;
+            listObj[3].utype.tree.eFruit[3]=2;
+            }
+        break;
+
     case WAIT_STARTING_CORD:
 #if SIMU
         state = WAIT;
@@ -358,17 +378,6 @@ void obj_step(){
         	state = JEU;
         	_start_time = millis();
         	last_time=_start_time;
-            //Initialization of the game
-            init_ele();
-            //Change element for simulation
-            ((Obj_arbre*)listObj[0].typeStruct)->eFruit[0]=2;
-            ((Obj_arbre*)listObj[0].typeStruct)->eFruit[3]=2;
-            ((Obj_arbre*)listObj[1].typeStruct)->eFruit[0]=2;
-            ((Obj_arbre*)listObj[1].typeStruct)->eFruit[3]=2;
-            ((Obj_arbre*)listObj[2].typeStruct)->eFruit[0]=2;
-            ((Obj_arbre*)listObj[2].typeStruct)->eFruit[3]=2;
-            ((Obj_arbre*)listObj[3].typeStruct)->eFruit[0]=2;
-            ((Obj_arbre*)listObj[3].typeStruct)->eFruit[3]=2;
         	}
         break;
    /* case INIT_POS:
@@ -433,6 +442,7 @@ void obj_step(){
 				}
 			}
 
+
         //Update position
             if( (millis() - _start_time) > 2000){
                // simuSecondary();
@@ -442,19 +452,21 @@ void obj_step(){
             checkRobot2Obj();
             checkRobotBlock();
 
-        if((millis()-last_time2)>1000){
+       if((millis()-last_time2)>1000){
             last_time2 = millis();
             updateEntryPointTree();
             printf("Position actuel : x=%f et y=%f\n", _current_pos.x,_current_pos.y);
             printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
             }
 
+
+
         //If the select point is achieved
         if (((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) ) || mode_obj==1){   //objectif atteint
         	//printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
         	//printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
         	//printf("mode_obj=%d", mode_obj);
-        	switch ((listObj[current_obj]).type){ //Mise en place des procédures local en fonction de l'objectif
+        	switch ((listObj[current_obj]).etype){ //Mise en place des procédures local en fonction de l'objectif
 				case E_ARBRE :
 					obj_tree(current_obj);
 					break;
@@ -470,7 +482,9 @@ void obj_step(){
 					break;
 				}
         	}
+
         objBonusFire();
+
 
         break;
 
@@ -492,10 +506,6 @@ int obj_init(){
         printf("N isn't correct, byebye\n");
         exit(1);
     	}
-
-
-
-
 
     listObj[8].done=0.5;
     listObj[10].done=0.5;

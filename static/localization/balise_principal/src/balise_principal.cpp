@@ -44,7 +44,7 @@ void setup(){
     devicesInfo[D_MOBILE_2].addr=ADDRX_MOBILE_2;
 
     //fixme : do the same for the others
-    domi_init(2);
+    domi_init(2,9);
 
     bn_init();
 
@@ -92,10 +92,13 @@ void loop(){
 
     //blinking
 #ifdef BLINK_1S
-    if((time - time_prev_led)>=10000) {
+    if((time - time_prev_led)>=1000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
+#ifdef DEBUG
+    bn_printfDbg("%lu period %lu",micros(),domi_meanPeriod());
 //        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
+#endif
     }
 #endif
 
@@ -104,6 +107,8 @@ void loop(){
 
     case S_SYNC_ELECTION :
         if (!sw){
+            // set speed to high
+            domi_setspeed(SPEED_HIGH);
             //tell beacon(s) to begin election
             for (int i=0;i<D_AMOUNT;i++){
                 if (sync_beginElection(devicesInfo[i].addr)>0) devicesInfo[i].state=DS_UNSYNCED;
@@ -117,10 +122,13 @@ void loop(){
             state=S_SYNC_MEASURE;
             bn_printDbg("end election\n");
             sw=micros();
+            // set speed
+            domi_setspeed(SPEED_20HZ);
         }
         break;  //
 
     case S_SYNC_MEASURE:
+
         //during the defined synchronization time
         if (micros()-sw<SYNCRONIZATION_TIME){
             // $iStates (device to sync) send data if a new turn has been detected since the last time we have send data to this particular device

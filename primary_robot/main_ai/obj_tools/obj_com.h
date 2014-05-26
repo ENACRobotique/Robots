@@ -16,5 +16,10 @@
 
 
 void send_robot(sPath_t path);
+int sendPosServo(eServos s, uint16_t us, uint16_t a);
+int newSpeed(float speed);
+int sendSeg(const sPt_t *p, const sVec_t *v);
+int newSpeed(float speed);
+void setPos(sPt_t *p);
 
 #endif /* OBJ_COM_H_ */

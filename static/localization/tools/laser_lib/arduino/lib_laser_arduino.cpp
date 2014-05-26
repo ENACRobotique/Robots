@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#ifdef ARCH_328P_ARDUINO
+
 #include "Arduino.h"
 #include "../shared/lib_int_laser.h"
 #include "../src/params.h"
@@ -45,3 +47,5 @@ void laser_arduino_Intdeinit(){
     detachInterrupt(0);
     detachInterrupt(1);
 }
+
+#endif

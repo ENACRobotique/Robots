@@ -7,7 +7,7 @@
 
 #include "lib_synchro_beacon.h"
 
-#ifdef ARCH_ARDUINO_328P
+#ifdef ARCH_328P_ARDUINO
 #include "Arduino.h"
 #endif
 #ifdef ARCH_LM4FXX

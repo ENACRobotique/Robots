@@ -37,5 +37,6 @@ int checkAdvOnRobot(void);
 int checkRobotBlock(void);
 void stopRobot(void);
 void startColor(void);
+int initTraj(void);
 
 #endif /* OBJ_FCT_H_ */

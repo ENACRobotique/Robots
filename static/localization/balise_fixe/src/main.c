@@ -20,7 +20,14 @@
 #include "inc/lm4f120h5qr.h"
 #include <driverlib/fpu.h>
 #include "tools.h"
+#include <string.h>
 
+
+#include "lib_int_laser.h"
+#include "lib_synchro_beacon.h"
+
+#include "params.h"
+#include "perception.h"
 
 #include <stdlib.h>
 
@@ -30,114 +37,44 @@
 
 typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
 
-/*
- * !!! ATTENTION !!!
- * 	tab[1] pour acceder à un el
- * 	-2 mod 3 = -2
- *copier neldermead and co
- */
-/*
- *  typedef struct {
- *		unsigned long deltaT;       // µs, delay between two laser small peaks
- *	 	unsigned long date;         // local µs, when was the laser recorded last
- *		unsigned long thickness;    // µs, thickness of the small laser peak /!\ thickness==0 <=> no laser detected
- *		unsigned long period;       // µs, MEASURED period (0 if not applicable).
- *		int precision;              // xxx TDB
- *		long int sureness;          // TBD
- *	}plStruct;
- */
+//plStruct plTable[LAS_INT_TOTAL]={0};
+#define MEAS_BUF_SIZE 8
+sMeasures measuresBuf[MEAS_BUF_SIZE]={{0}};
+int measuresIndex=0,prevMeasuresIndex=0;
+plStruct stat_tempPl;
 
-/*
-typedef union{
-    uint8_t raw[BN_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
-    uint8_t data[BN_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
-    uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
-    sAckPayload ack;
-    sRoleSetupPayload roleSetup;
-    sINTP   intp;
+void pushMeasure(plStruct *pl,eBeacon beacon){
+    measuresBuf[measuresIndex].beacon=beacon;
+    measuresBuf[measuresIndex].date=pl->date;
+    measuresBuf[measuresIndex].deltaT=pl->deltaT;
+    measuresBuf[measuresIndex].period=pl->period;
+    measuresBuf[measuresIndex].u_date=pl->precision;
 
- *********************** user payload start ***********************
-//the user-defined payloads from above must be added here. The simple ones can be directly added here
-//Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
-    uint8_t channel;
-    uint32_t period;
-    sTrajElRaw_t traj;
-    sPosPayload pos;
-    sMobileReportPayload mobileReport;
-    sSyncPayload sync;
-    sAsservStats asservStats;
-    sObsConfig obsCfg;
-    sObss obss;
-    sGenericStatus genericStatus;
-    sPosQuery posQuery;
-    sServos servos;
-    sIhmStatus ihmStatus;
-    sSpeedSetPoint speedSP;
- *********************** user payload stop ***********************
+    measuresIndex=(measuresIndex + 1 ) % MEAS_BUF_SIZE;
 
-}uPayload;
-
-
-//final message structure
-typedef struct{
-    sGenericHeader header;
-    uPayload payload;
-}sMsg;*/
+}
 
 void __error__(char *pcFilename, unsigned long ulLine){
     while(1);
 }
 
-/* XXX buffer = tableau de plStruc ou plStruc*
- *
- * 	?type buffer[BUFFER_LENGTH];
- *
- */
+uint32_t laser_period=50000;
+uint32_t lasCount[LAS_INT_TOTAL]={0};       // sum of all laser interruption thickness detected on channel n
+char chosenOne=0;                           // interruption chosen for synchronization (with highest sum of all thicknesses)
 
-
-
-	/* (laser tourne en sens horaire)
-	 *
-	 * cas rouge
-	 * 2--/--------------\--|
-	 * |R/                \J|
-	 * |/                  \3    => 1 2 3
-	 * |                    |
-	 * 1--------------------|
-	 *
-	 * cas jaune
-	 * |--/--------------\--2
-	 * |R/                \J|
-	 * 3/                  \|    => 3 2 1
-	 * |                    |
-	 * |--------------------1
-	 *
-	 * ^
-	 * |--/--------------\--|
-	 * Y R                J |
-	 * |/                  \|
-	 * |                    |
-	 * |--------------------X->
-	 *
-	 *
-	 */
-// computes sPerception from 3 plStruc TODO
-
-/*sPerception calcPerception( buffertype * header){
- *
- * }
- */
-
+inline void periodHandle(sMsg *msg){
+    if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
+}
 
 // main function.
 int main(void) {
-    unsigned char light =0x04;
+    unsigned char light =0x04,led=0;
+    static uint32_t prevLed=0;
     int ret;
 
 	FPUEnable();
-	EBaliseState state = INIT;
-//	sPt_t LastPos[2];
-//	sPt_t x0;
+
+	timerInit();
 
 	// Initialisation
 
@@ -148,106 +85,147 @@ int main(void) {
 
 
     bn_attach(E_ROLE_SETUP,role_setup);
+//    bn_attach(E_PERIOD,&periodHandle);
+
 
     if ((ret=bn_init())<0){
         light=0x02;
     }
 
+    bn_printDbg("fixed start\n");
+//    bn_printfDbg("start fixed, addr %hx\n",MYADDR);
 
-    // Loop forever.
+    laserIntInit();
+
+    mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;
+
+/*********************** loop ************************/
     while(1){
-        bn_receive(NULL);
+        sMsg inMsg={{0}};
 
-//        bn_printDbg("stellaris started");
-#define DUR 100
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,light);
-        delay(DUR);
-        bn_receive(NULL);
+        int rxB=bn_receive(&inMsg);
 
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,0x00);
+        updateSync();
 
-        delay(DUR);
+        if ((millis()-prevLed)>1000){
+            prevLed=millis();
+            led^=light;
+            GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,led);
+#ifdef DEBUG
+//            bn_printfDbg("%lu stellaris blink",millis());
+#endif
+        }
 
+        // reading eventual new values
+        int j;
+        for (j=0; j<LAS_INT_TOTAL; j++ ){
+            plStruct tempPl={0};
 
-		switch(state){
-		case INIT:
-			// wait for 3 available info
-			/* if (buffer[(head - 3)&BUFFER_LENGTH]->num_balise != 0) {
-			 * 		state = COLORDETEC;
-			 * }
-			 */
-			break;
-		case COLORDETEC:
-			// Determine team's color
-	/*
-	 * 		// current head back_up
-	 * 		int hd_tmp = head;
-	 *
-	 * 		//test that the 3 last informations are from different beacons
-	 * 		if (BIT(buffer.(hd_tmp)->num_balise)
-	 * 			+ BIT(buffer.((hd_tmp - 1)&BUFFER_LENGTH)->num_balise)
-	 * 			+ BIT(buffer.((hd_tmp - 2)&BUFFER_LENGTH)->num_balise)
-	 * 			= 7){
-	 *
-	 * 			//test if all beacon were shot in the same lasor rotation period
-	 * 			if( (buffer.(hd_tmp)->t - buffer.((hd_tmp - 2)&BUFFER_LENGTH)->t) < T_laser){
-	 * 				int test_result = 1;
-	 * 				/*
-	 * 				 *if team red possible beacon number orders
-	 * 				 *  1 2 3 ; 2 3 1; 3 1 2
-	 * 				 *
-	 * 				 * if team yellow
-	 * 				 *	3 2 1 ; 2 1 3; 1 3 2
-	 * 				 *
-	 * 				 * test verified by red orders and not by yellow ones
-	 * 				 *  n.(i) [3] < n.(i+1)
-	 * 				 * /
-	 * 				for(i = hd_tmp - 2; i <hd_tmp; i++){
-	 * 					team_color = 1;
-	 * 					test_result = test_result & ( (buffer.(i)->num_balise % 3 )< buffer.(i+1)->num_balise
-	 * 				}
-	 * 				if (test_result){
-	 * 					TODO team  RED
-	 * 				}
-	 * 				else{
-	 * 					TODO team YELLOW
-	 * 				}
-	 * 				state = PLAY;
-	 * 				for(i=0 ; i<2;i++){
-	 * 					ask_position_to_base_roulante -> LastPos TODO
-	 * 				}
-	 * 		}
-	 */
-			break;
-		case PLAY:
-		/* // current head back_up
-		 * int hd_tmp = head;
-		 *
-		 * //test that the 3 last informations are from different beacons
-		 * if (BIT(buffer.(hd_tmp)->num_balise)
-		 * 		+ BIT(buffer.((hd_tmp - 1)&BUFFER_LENGTH)->num_balise)
-		 * 		+ BIT(buffer.((hd_tmp - 2)&BUFFER_LENGTH)->num_balise)
-		 * 		= 7){
-		 *
-		 * 		//test if all beacon were shot in the same lasor rotation period
-		 * 		if( (buffer.(hd_tmp)->t - buffer.((hd_tmp - 2)&BUFFER_LENGTH)->t) < T_laser){
-		 * 			sPerception perception = calcPerception(hd_tmp);
-		 * 			x0 = approxPos(LastPos[0],LastPos[1]);
-		 * 			if (neldermead(&x0, RANGE, perception){
-		 * 				LastPos[0] = LastPos[1];
-		 * 				LastPos[1] = *x0;
-		 * 				TODO renvoi position
-		 * 			}else{
-		 * 				LastPos[0] = LastPos[1];
-		 * 				LastPos[1] = ??? XXX TBD XXX
-		 * 			}
-		 * 		}
-		 * 	}
+            if (ildTable[j].deltaT && newLaserMeasure(&ildTable[j],&tempPl)){
+//                bn_printfDbg("int %d, dt %lu th %lu per %lu",j,tempPl.deltaT,tempPl.thickness,tempPl.period);
 
-		 */
-			break;
+                switch (j){
+                case LAS_INT_0 :
+                    pushMeasure(&tempPl,BEACON_2);
+                    break;
+                case LAS_INT_1 :
+                    pushMeasure(&tempPl,BEACON_1);
+                    break;
+                case LAS_INT_2 :
+                case LAS_INT_3 :
+                    if ( stat_tempPl.deltaT && (tempPl.date-stat_tempPl.date)< (laser_period>>5)){
+                        if (tempPl.thickness<stat_tempPl.thickness){
+                            pushMeasure(&stat_tempPl,BEACON_3);
 
-		}
-    }
+                        }
+                        else {
+                            pushMeasure(&tempPl,BEACON_3);
+                        }
+                        memset(&stat_tempPl,0,sizeof(stat_tempPl));
+                    }
+                    else{
+                        stat_tempPl=tempPl;
+                    }
+                    break;
+                default : break;
+                }
+                lasCount[j]+=tempPl.thickness;
+                ildTable[j].deltaT=0;
+            }
+        }
+        if ( stat_tempPl.deltaT && (micros()-stat_tempPl.date)>(laser_period>>5)){
+            pushMeasure(&stat_tempPl,BEACON_3);
+            memset(&stat_tempPl,0,sizeof(stat_tempPl));
+        }
+
+        if (((MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE)>=1){
+            int k;
+            for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
+                int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
+                bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
+
+            }
+        }
+        //STATE MACHINE
+        switch (state){
+            case S_BEGIN :
+                if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
+                    state=S_SYNC_ELECTION;
+#ifdef VERBOSE_SYNC
+                    bn_printDbg("begin election");
+#endif
+                }
+                else break;
+                /* no break */
+            case S_SYNC_ELECTION :
+                if (prevState!=state) {
+                    // reset counters
+                    memset(lasCount,0,sizeof(lasCount));
+                    prevState=state;
+                }
+                // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
+                if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
+//                    chosenOne=(intLas0<intLas1?1:0);
+#ifdef VERBOSE_SYNC
+                    bn_printDbg("end election\n");
+#endif
+                    state=S_SYNC_MEASURES;
+                }
+                else {
+                    break;
+                }
+                /* no break */
+            case S_SYNC_MEASURES:
+                // laser data (if value is ours for sure (ie comes from a tracked measure)
+//                if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
+//                    syncComputationLaser(&laserStruct0);
+//                }
+//                else if(chosenOne==1 && laserStruct1.thickness && laserStruct1.period) {
+//                    syncComputationLaser(&laserStruct1);
+//                }
+                // handling data broadcasted by turret
+                if (rxB && inMsg.header.type==E_SYNC_DATA){
+                        rxB=0;
+                    if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
+#ifdef VERBOSE_SYNC
+                        bn_printDbg("syncComputation\n");
+#endif
+                        syncComputationFinal(&inMsg.payload.sync);
+                        state=S_GAME;
+                    }
+                    else {
+                        syncComputationMsg(&inMsg.payload.sync);
+                    }
+                }
+                break;
+            case S_GAME :
+                //fixme call the nelder-mead.
+              break;
+            default : break;
+        }//switch
+        prevState=state;
+
+        prevMeasuresIndex=measuresIndex;
+    } // while 1
 }
 

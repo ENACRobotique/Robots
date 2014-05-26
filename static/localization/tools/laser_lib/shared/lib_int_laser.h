@@ -15,7 +15,9 @@ extern "C" {
 #endif
 
 #ifdef ARCH_328P_ARDUINO
-#include "arduino/lib_laser_arduino.h"
+#include "../arduino/lib_laser_arduino.h"
+#elif defined(ARCH_LM4FXX)
+#include "../lm4fxx/lib_laser_lm4fxx.h"
 #endif
 
 
@@ -32,6 +34,15 @@ typedef struct {
     unsigned long date;      // local µs
     unsigned long thickness; // µs, thickness of the "small" impulsion
 }ldStruct;
+
+//"return" structure for laserDetect (in interruption use)
+typedef struct {
+    unsigned long deltaT;    // µs
+    unsigned long date;      // local µs
+    unsigned long thickness; // µs, thickness of the "small" impulsion
+    unsigned long prevDate;
+}ildStruct;
+
 
 //"return" structure for periodicLaser
 typedef struct {
@@ -55,21 +66,30 @@ typedef struct {
 	unsigned long prevTime;         // local µs, prevTime & nextTime : used by periodicLaser for its time measurements
 	unsigned long timeInc;          // µs,  : increment of time after which there is something to do
 	int missed;                     // number of missed detections
-	int intNb;                      // intNb : nb of the interrupt
+//	int intNb;                      // intNb : nb of the interrupt (linked to the physical pinout
 }bufStruct;
 
 
-extern volatile unsigned long laser_period; //rotation period of the lasers
+extern uint32_t laser_period; //rotation period of the lasers
 //extern unsigned long lastDetectTrack;
 #ifdef ARCH_328P_ARDUINO
 extern bufStruct buf0;                      // must be initialized with the last field at 0
 extern bufStruct buf1;                      // must be initialized with the last field at 1
 #endif
 #ifdef ARCH_LM4FXX
-extern bufStruct buf0;                      // must be initialized with the last field at 0
-extern bufStruct buf1;                      // must be initialized with the last field at 1
-extern bufStruct buf2;                      // must be initialized with the last field at 2
-extern bufStruct buf3;                      // must be initialized with the last field at 3
+
+enum {
+    LAS_INT_0,
+    LAS_INT_1,
+    LAS_INT_2,
+    LAS_INT_3,
+
+    LAS_INT_TOTAL,
+};
+
+extern bufStruct buf[LAS_INT_TOTAL];
+extern ildStruct ildTable[LAS_INT_TOTAL];
+
 #endif
 
 //declarations :
@@ -82,11 +102,15 @@ void laserIntDeinit();
 // /!\ do not call too often
 ldStruct laserDetect(bufStruct *bs);
 
-//function to call periodically, ensures acquisition and tracking of our laser beam
+//function to call periodically, ensures acquisition and tracking of our laser beam : do not use when working with interruption
 int periodicLaser(bufStruct *bs,plStruct *pRet);
+
+// newLaserMeasure : only when working with interruption
+int newLaserMeasure(ildStruct *ilds, plStruct *plo);
 
 uint32_t delta2dist(unsigned long delta, unsigned long period);
 float delta2distf(unsigned long delta, unsigned long period);
+
 #ifdef __cplusplus
     }
 #endif

@@ -10,6 +10,7 @@ pour arduino UNO
 #elif defined(ARCH_LM4FXX)
 #include "time.h"
 #include <stdlib.h>
+#include "../lm4fxx/lib_laser_lm4fxx.h"
 #endif
 #include "lib_int_laser.h"
 #include "../src/params.h"
@@ -31,31 +32,31 @@ enum {
 #ifdef ARCH_328P_ARDUINO
     //globales
     #ifdef DEBUG_LASER_SPECIAL_STAGE
-    bufStruct buf0={{0},0,0,0,3,0,0,0,0,0};
-    bufStruct buf1={{0},0,0,0,3,0,0,0,0,1};
+    bufStruct buf0={{0},0,0,0,3,0,0,0,0};
+    bufStruct buf1={{0},0,0,0,3,0,0,0,0};
     #else
-    bufStruct buf0={{0},0,0,0,0,0,0,0,0,0};
-    bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
+    bufStruct buf0={{0},0,0,0,0,0,0,0,0};
+    bufStruct buf1={{0},0,0,0,0,0,0,0,0};
 
     #endif
 #endif
 #ifdef ARCH_LM4FXX
     //globales
-    bufStruct buf0={{0},0,0,0,0,0,0,0,0,0};
-    bufStruct buf1={{0},0,0,0,0,0,0,0,0,1};
-    bufStruct buf2={{0},0,0,0,0,0,0,0,0,2};
-    bufStruct buf3={{0},0,0,0,0,0,0,0,0,3};
+    bufStruct buf[LAS_INT_TOTAL]={{{0}}};
+    ildStruct ildTable[LAS_INT_TOTAL]={{0}};
 
 #endif
 /*
 laserIntInit :
-  arguments : 0 ou 1 (numéro de l'interruption
+  arguments : rien
   valeur de retour : rien
 "attache" les interruptions associées aux couples de capteurs
 */
-void laserIntInit(int irqnb) {
+void laserIntInit() {
 #ifdef ARCH_328P_ARDUINO
     laser_arduino_Intinit();
+#elif defined(ARCH_LM4FXX)
+    laser_lm4fxx_init();
 #endif
 
 }
@@ -71,17 +72,24 @@ void laserIntDeinit(){
 
 //returns the delta-T in µs and the time at which it was measured
 ldStruct laserDetect(bufStruct *bs){
-    unsigned long prevCall, t = micros();
-    unsigned long bufTemp[8], d1, d2;
+    uint32_t prevCall, t = micros();
+#ifdef ARCH_LM4FXX                  // different way of using laserDetect (in interruption), so little alteration in order to make it work
+    uint32_t *bufTemp=bs->buf;
+#elif defined(ARCH_328P_ARDUINO)
+    uint32_t bufTemp[8];
+#endif
+    uint32_t d1, d2;
     int i=8, ilast=0, nb;
 
     //noInterrupts();
 
     prevCall=bs->prevCall;
+#if defined(ARCH_328P_ARDUINO)
     do {
         i--;
         bufTemp[i]=bs->buf[i];
     } while(i);
+#endif
     ilast=bs->index-1;//index of the last value written in the rolling buffer
 
     //interrupts();
@@ -103,13 +111,12 @@ ldStruct laserDetect(bufStruct *bs){
 
         //if the detected patter has not the good shape
         //xxx in this case we can only handle a whole pattern (we may be able to do it on 3)
-        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX || labs((((long)d1)-((long)d2))*100)>(d1+d2)*10 ){
+        if ( t1 < LASER_THICK_MIN || t1 > LASER_THICK_MAX || t2<LASER_THICK_MIN || t2>LASER_THICK_MAX || labs((((long)d1)-((long)d2))*100)>(d1+d2)*10 || d1>2000 || d2>2000){
             ldStruct ret={0,0,0};
             return ret;
         }
         else {
             bs->prevCall=t;
-
             ldStruct ret={(d1+d2)>>1, (bufTemp[(ilast-3)&7]+bufTemp[(ilast)&7])>>1, MIN( t1, t2 )};
             return ret ;
         }
@@ -119,10 +126,9 @@ ldStruct laserDetect(bufStruct *bs){
     }
     ldStruct ret={0,0,0};
     return ret;
-
 }
 
-/* Function co call periodically to poll if any new laser value
+/* Function co call periodically to poll if any new laser value (do not use with interruption)
  * Argument :
  *  bs : pointer to the buffer structure to test
  *  pRet : pointer to the return structure. This latter is not modified if there is no new value
@@ -290,8 +296,37 @@ int periodicLaser(bufStruct *bs,plStruct *pRet){
 return 0;
 }
 
+
+/* newLaserMeasure : only when working with interruption
+ * To be called anytime, reads a buffer filled by interruption and returns the latest value, if there has been an update.
+ * Arguments :
+ *  ilds : pointer to the structure that should be read
+ *  plo : pointer to the structure where we will write
+ * return value :
+ *  1 if something was detected
+ *  0 otherwise
+ */
+int newLaserMeasure(ildStruct *ilds, plStruct *plo){
+
+    uint32_t tempDate=0;
+
+    if (ilds->thickness){
+        while (tempDate!=ilds->date){ // to cope with being interrupted
+            tempDate=ilds->date;
+            plo->date=ilds->date;
+            plo->deltaT=ilds->deltaT;
+            plo->thickness=ilds->thickness;
+            plo->precision=4; // xxx improve
+            //todo : better foe laser avoidance ( date-previous [period] = 0 +- smtg )
+            plo->period=(ilds->date-ilds->prevDate)<(laser_period+(laser_period>>1))?(ilds->date-ilds->prevDate):0;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 /* delta2dist : converts delta-T and period in distance in mm
- * TODO : re-write it to take into account measured period
+ *
  */
 uint32_t delta2dist(unsigned long delta, unsigned long period){
     uint32_t temp2=delta2distf(delta,period);
