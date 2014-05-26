@@ -99,6 +99,7 @@ int main(void) {
 
 /*********************** loop ************************/
     while(1){
+        plStruct plTable[LAS_INT_TOTAL]={{0}};
         sMsg inMsg={{0}};
 
         int rxB=bn_receive(&inMsg);
@@ -117,37 +118,36 @@ int main(void) {
         // reading eventual new values
         int j;
         for (j=0; j<LAS_INT_TOTAL; j++ ){
-            plStruct tempPl={0};
 
-            if (ildTable[j].deltaT && newLaserMeasure(&ildTable[j],&tempPl)){
-//                bn_printfDbg("int %d, dt %lu th %lu per %lu",j,tempPl.deltaT,tempPl.thickness,tempPl.period);
+            if (ildTable[j].deltaT && newLaserMeasure(&ildTable[j],&plTable[j])){
+//                bn_printfDbg("int %d, dt %lu th %lu per %lu",j,plTable[j].deltaT,plTable[j].thickness,plTable[j].period);
 
                 switch (j){
                 case LAS_INT_0 :
-                    pushMeasure(&tempPl,BEACON_2);
+                    pushMeasure(&plTable[j],BEACON_2);
                     break;
                 case LAS_INT_1 :
-                    pushMeasure(&tempPl,BEACON_1);
+                    pushMeasure(&plTable[j],BEACON_1);
                     break;
                 case LAS_INT_2 :
                 case LAS_INT_3 :
-                    if ( stat_tempPl.deltaT && (tempPl.date-stat_tempPl.date)< (laser_period>>5)){
-                        if (tempPl.thickness<stat_tempPl.thickness){
+                    if ( stat_tempPl.deltaT && (plTable[j].date-stat_tempPl.date)< (laser_period>>5)){
+                        if (plTable[j].thickness<stat_tempPl.thickness){
                             pushMeasure(&stat_tempPl,BEACON_3);
 
                         }
                         else {
-                            pushMeasure(&tempPl,BEACON_3);
+                            pushMeasure(&plTable[j],BEACON_3);
                         }
                         memset(&stat_tempPl,0,sizeof(stat_tempPl));
                     }
                     else{
-                        stat_tempPl=tempPl;
+                        stat_tempPl=plTable[j];
                     }
                     break;
                 default : break;
                 }
-                lasCount[j]+=tempPl.thickness;
+                lasCount[j]+=plTable[j].thickness;
                 ildTable[j].deltaT=0;
             }
         }
@@ -179,10 +179,10 @@ int main(void) {
                     int maxTh=0;
                     for (k=0; k<LAS_INT_TOTAL; k++){
                         if (lasCount[k]>maxTh){
-
+                            maxTh=lasCount[k];
+                            chosenOne=k;
                         }
                     }
-//                    chosenOne=(intLas0<intLas1?1:0);
 #ifdef VERBOSE_SYNC
                     bn_printDbg("end election\n");
 #endif
@@ -194,12 +194,9 @@ int main(void) {
                 /* no break */
             case S_SYNC_MEASURES:
                 // laser data (if value is ours for sure (ie comes from a tracked measure)
-//                if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
-//                    syncComputationLaser(&laserStruct0);
-//                }
-//                else if(chosenOne==1 && laserStruct1.thickness && laserStruct1.period) {
-//                    syncComputationLaser(&laserStruct1);
-//                }
+                if ( plTable[chosenOne].thickness && plTable[chosenOne].period){
+                    syncComputationLaser(&plTable[chosenOne]);
+                }
                 // handling data broadcasted by turret
                 if (rxB && inMsg.header.type==E_SYNC_DATA){
                         rxB=0;

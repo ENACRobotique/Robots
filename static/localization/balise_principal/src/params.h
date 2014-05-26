@@ -19,7 +19,7 @@ typedef enum{
 } mainState;
 
 typedef enum{   //flags/ID for devices to sync
-//    D_FIX,
+    D_FIX,
     D_MOBILE_1,
     D_MOBILE_2,
 //    D_SECONDARY,
