@@ -5,8 +5,13 @@
  *      Author: ThomasDq
  */
 
-#include "absolutepos.h"
-#include "params.h"
+#include <absolutepos.h>
+#include <lib_synchro_beacon.h>
+#include <messages.h>
+#include <network_cfg.h>
+#include <params.h>
+
+#include "../../../communication/botNet/shared/message_header.h"
 
 typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
 EBaliseState state = INIT;
@@ -15,14 +20,7 @@ EBaliseState state = INIT;
 /*
  * TODO calcperception
  * TODO sendmessage (sendrole)
- *  typedef struct {
- *		unsigned long deltaT;       // µs, delay between two laser small peaks
- *	 	unsigned long date;         // local µs, when was the laser recorded last
- *		unsigned long thickness;    // µs, thickness of the small laser peak /!\ thickness==0 <=> no laser detected
- *		unsigned long period;       // µ:s, MEASURED period (0 if not applicable).
- *		int precision;              // xx/x TDB
- *		long int sureness;          // TBD
- *	}plStruct;
+
  */
 
 /*
@@ -188,7 +186,24 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 					LastPos[1].date = buffer[idx[2]].date;
 
 					//TODO renvoi position
+					sMsg msg_out;
 
+						// Header
+					msg_out.header.type = E_GENERIC_STATUS;
+					msg_out.header.size = sizeof(sGenericStatus);
+
+						// Payload
+					msg_out.payload.genericStatus.date = micros2s(buffer[idx[2]].date);
+					msg_out.payload.genericStatus.id = ELT_PRIMARY;
+					msg_out.payload.genericStatus.pos.x = x0.x;
+					msg_out.payload.genericStatus.pos.y = x0.y;
+					msg_out.payload.genericStatus.pos.frame = FRAME_PLAYGROUND;
+					msg_out.payload.genericStatus.pos_u.a_std = 0;
+					msg_out.payload.genericStatus.pos_u.b_std = 0;
+					msg_out.payload.genericStatus.pos_u.a_angle = 0;
+					msg_out.payload.genericStatus.pos_u.theta = -1;
+
+					rolesend(msg_out);
 				}else{
 					LastPos[0] = LastPos[1];
 				}

@@ -4,7 +4,7 @@
 #include "lib_int_laser.h"
 
 float calcAngle(sMeasures *mes1, sMeasures *mes2){
-	float ret = (mes2->date - mes1->date)/mes2->period*M_2_PI;
+	float ret = (mes2->date - mes1->date)/mes2->period*M_TWOPI;
 	return ret;
 }
 
@@ -17,7 +17,7 @@ void calcPerception(sPerception *p, sMeasures *mes1, sMeasures *mes2, sMeasures 
 	// angles inter-balises (rad)
 	p->a12 = calcAngle(mes1,mes2);
 	p->a23 = calcAngle(mes2,mes3);
-	p->a31 = M_2_PI - calcAngle(mes1,mes3);
+	p->a31 = M_TWOPI - calcAngle(mes1,mes3);
 
 	estim_incertitude(p);
 
