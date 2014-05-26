@@ -20,12 +20,14 @@
 #include "inc/lm4f120h5qr.h"
 #include <driverlib/fpu.h>
 #include "tools.h"
+#include <string.h>
 
 
 #include "lib_int_laser.h"
 #include "lib_synchro_beacon.h"
 
 #include "params.h"
+#include "perception.h"
 
 #include <stdlib.h>
 
@@ -36,65 +38,30 @@
 //XXX #define RANGE
 typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
 
-/*
- * !!! ATTENTION !!!
- * 	tab[1] pour acceder à un el
- * 	-2 mod 3 = -2
- *copier neldermead and co
- */
-/*
- *  typedef struct {
- *		unsigned long deltaT;       // µs, delay between two laser small peaks
- *	 	unsigned long date;         // local µs, when was the laser recorded last
- *		unsigned long thickness;    // µs, thickness of the small laser peak /!\ thickness==0 <=> no laser detected
- *		unsigned long period;       // µs, MEASURED period (0 if not applicable).
- *		int precision;              // xxx TDB
- *		long int sureness;          // TBD
- *	}plStruct;
- */
+//plStruct plTable[LAS_INT_TOTAL]={0};
+#define MEAS_BUF_SIZE 8
+sMeasures measuresBuf[MEAS_BUF_SIZE]={{0}};
+int measuresIndex=0,prevMeasuresIndex=0;
+plStruct stat_tempPl;
 
-/*
-typedef union{
-    uint8_t raw[BN_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
-    uint8_t data[BN_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
-    uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
-    sAckPayload ack;
-    sRoleSetupPayload roleSetup;
-    sINTP   intp;
+void pushMeasure(plStruct *pl,eBeacon beacon){
+    measuresBuf[measuresIndex].beacon=beacon;
+    measuresBuf[measuresIndex].date=pl->date;
+    measuresBuf[measuresIndex].deltaT=pl->deltaT;
+    measuresBuf[measuresIndex].period=pl->period;
+    measuresBuf[measuresIndex].u_date=pl->precision;
 
- *********************** user payload start ***********************
-//the user-defined payloads from above must be added here. The simple ones can be directly added here
-//Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
-    uint8_t channel;
-    uint32_t period;
-    sTrajElRaw_t traj;
-    sPosPayload pos;
-    sMobileReportPayload mobileReport;
-    sSyncPayload sync;
-    sAsservStats asservStats;
-    sObsConfig obsCfg;
-    sObss obss;
-    sGenericStatus genericStatus;
-    sPosQuery posQuery;
-    sServos servos;
-    sIhmStatus ihmStatus;
-    sSpeedSetPoint speedSP;
- *********************** user payload stop ***********************
+    measuresIndex=(measuresIndex + 1 ) % MEAS_BUF_SIZE;
 
-}uPayload;
-
-
-//final message structure
-typedef struct{
-    sGenericHeader header;
-    uPayload payload;
-}sMsg;*/
+}
 
 void __error__(char *pcFilename, unsigned long ulLine){
     while(1);
 }
 
-uint32_t laser_period=0;
+uint32_t laser_period=50000;
+uint32_t lasCount[LAS_INT_TOTAL]={0};       // sum of all laser interruption thickness detected on channel n
+char chosenOne=0;                           // interruption chosen for synchronization (with highest sum of all thicknesses)
 
 inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
@@ -107,9 +74,8 @@ int main(void) {
     int ret;
 
 	FPUEnable();
-	EBaliseState state = INIT;
-//	sPt_t LastPos[2];
-//	sPt_t x0;
+
+	timerInit();
 
 	// Initialisation
 
@@ -120,17 +86,18 @@ int main(void) {
 
 
     bn_attach(E_ROLE_SETUP,role_setup);
-    bn_attach(E_PERIOD,&periodHandle);
-    bn_printfDbg("start fixed, addr %hx\n",MYADDR);
+//    bn_attach(E_PERIOD,&periodHandle);
+
 
     if ((ret=bn_init())<0){
         light=0x02;
     }
 
+    bn_printDbg("fixed start\n");
+//    bn_printfDbg("start fixed, addr %hx\n",MYADDR);
 
     laserIntInit();
 
-    // Loop forever.
     mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;
 
 /*********************** loop ************************/
@@ -146,10 +113,61 @@ int main(void) {
             led^=light;
             GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2,led);
 #ifdef DEBUG
-            bn_printfDbg("%lu stellaris blink",millis());
+//            bn_printfDbg("%lu stellaris blink",millis());
 #endif
         }
-//STATE MACHINE
+
+        // reading eventual new values
+        int j;
+        for (j=0; j<LAS_INT_TOTAL; j++ ){
+            plStruct tempPl={0};
+
+            if (ildTable[j].deltaT && newLaserMeasure(&ildTable[j],&tempPl)){
+//                bn_printfDbg("int %d, dt %lu th %lu per %lu",j,tempPl.deltaT,tempPl.thickness,tempPl.period);
+
+                switch (j){
+                case LAS_INT_0 :
+                    pushMeasure(&tempPl,BEACON_2);
+                    break;
+                case LAS_INT_1 :
+                    pushMeasure(&tempPl,BEACON_1);
+                    break;
+                case LAS_INT_2 :
+                case LAS_INT_3 :
+                    if ( stat_tempPl.deltaT && (tempPl.date-stat_tempPl.date)< (laser_period>>5)){
+                        if (tempPl.thickness<stat_tempPl.thickness){
+                            pushMeasure(&stat_tempPl,BEACON_3);
+
+                        }
+                        else {
+                            pushMeasure(&tempPl,BEACON_3);
+                        }
+                        memset(&stat_tempPl,0,sizeof(stat_tempPl));
+                    }
+                    else{
+                        stat_tempPl=tempPl;
+                    }
+                    break;
+                default : break;
+                }
+                lasCount[j]+=tempPl.thickness;
+                ildTable[j].deltaT=0;
+            }
+        }
+        if ( stat_tempPl.deltaT && (micros()-stat_tempPl.date)>(laser_period>>5)){
+            pushMeasure(&stat_tempPl,BEACON_3);
+            memset(&stat_tempPl,0,sizeof(stat_tempPl));
+        }
+
+        if (((MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE)>=1){
+            int k;
+            for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
+                int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
+                bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
+
+            }
+        }
+        //STATE MACHINE
         switch (state){
             case S_BEGIN :
                 if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
@@ -163,8 +181,7 @@ int main(void) {
             case S_SYNC_ELECTION :
                 if (prevState!=state) {
                     // reset counters
-//                    intLas0=0;
-//                    intLas1=0;
+                    memset(lasCount,0,sizeof(lasCount));
                     prevState=state;
                 }
                 // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
@@ -209,8 +226,7 @@ int main(void) {
         }//switch
         prevState=state;
 
-
-
+        prevMeasuresIndex=measuresIndex;
     } // while 1
 }
 

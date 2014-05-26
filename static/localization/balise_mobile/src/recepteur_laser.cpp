@@ -21,9 +21,8 @@ uint32_t time_prev_laser=0;
 
 
 
-plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detecion infos
+plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detection infos
 uint32_t laser_period=50000;       // in µs, to be confirmed by the main robot
-uint32_t sync_lastTurnDate_stored=0,sync_period_stored=0,sync_last_received=0;
 uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the laser structure
 uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
 char chosenOne=0;                           // interruption chosen for synchronization

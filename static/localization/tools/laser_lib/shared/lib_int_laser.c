@@ -43,7 +43,7 @@ enum {
 #ifdef ARCH_LM4FXX
     //globales
     bufStruct buf[LAS_INT_TOTAL]={{{0}}};
-    ildStruct ildTable[LAS_INT_TOTAL]={0};
+    ildStruct ildTable[LAS_INT_TOTAL]={{0}};
 
 #endif
 /*
@@ -316,8 +316,8 @@ int newLaserMeasure(ildStruct *ilds, plStruct *plo){
             plo->date=ilds->date;
             plo->deltaT=ilds->deltaT;
             plo->thickness=ilds->thickness;
+            plo->precision=4; // xxx improve
             //todo : better foe laser avoidance ( date-previous [period] = 0 +- smtg )
-            //fixme : add bn_attach of periodupdate
             plo->period=(ilds->date-ilds->prevDate)<(laser_period+(laser_period>>1))?(ilds->date-ilds->prevDate):0;
         }
         return 1;

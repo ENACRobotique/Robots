@@ -15,7 +15,9 @@ extern "C" {
 #endif
 
 #ifdef ARCH_328P_ARDUINO
-#include "arduino/lib_laser_arduino.h"
+#include "../arduino/lib_laser_arduino.h"
+#elif defined(ARCH_LM4FXX)
+#include "../lm4fxx/lib_laser_lm4fxx.h"
 #endif
 
 
@@ -87,7 +89,6 @@ enum {
 
 extern bufStruct buf[LAS_INT_TOTAL];
 extern ildStruct ildTable[LAS_INT_TOTAL];
-extern plStruct pl[LAS_INT_TOTAL];
 
 #endif
 
@@ -101,8 +102,11 @@ void laserIntDeinit();
 // /!\ do not call too often
 ldStruct laserDetect(bufStruct *bs);
 
-//function to call periodically, ensures acquisition and tracking of our laser beam
+//function to call periodically, ensures acquisition and tracking of our laser beam : do not use when working with interruption
 int periodicLaser(bufStruct *bs,plStruct *pRet);
+
+// newLaserMeasure : only when working with interruption
+int newLaserMeasure(ildStruct *ilds, plStruct *plo);
 
 uint32_t delta2dist(unsigned long delta, unsigned long period);
 float delta2distf(unsigned long delta, unsigned long period);

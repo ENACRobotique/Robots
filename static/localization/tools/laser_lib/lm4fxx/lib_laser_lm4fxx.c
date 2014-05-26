@@ -15,14 +15,14 @@
 #include "lib_laser_lm4fxx.h"
 #include "time.h"
 
-//#define BLINK_LASERDETECT
+#define BLINK_LASERDETECT
 
 
 void ld2ilds(bufStruct* bs, ildStruct *ret){
     ldStruct templd;
     templd=laserDetect(bs);
     if (templd.thickness){
-        ret->prevDate=templd.date;
+        ret->prevDate=ret->date;
         ret->date=templd.date;
         ret->deltaT=templd.deltaT;
         ret->thickness=templd.thickness;
@@ -112,8 +112,8 @@ void portDGPIOIntHandler(){
 }
 
 /* interrupts :
- *      beacon 1 : PDO / int 0
- *      beacon 2 : PA4 / int 1
+ *      beacon 1 : PA4 / int 1
+ *      beacon 2 : PDO / int 0
  *      beacon 3 : PA2 && PA3 / int 2 & 3
  */
 void laser_lm4fxx_init(){
