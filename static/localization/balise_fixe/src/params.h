@@ -19,6 +19,10 @@ typedef enum{
     S_GAME            // Game mode
 } mainState;
 
+typedef enum{
+	RED,
+	YELLOW
+}sideColor;
 
 #define SENDING_PERIOD 1100 //in ms
 
@@ -59,6 +63,6 @@ typedef struct {
 
 extern sGlobParams glob_params;
 
-void init_globals();
+void init_globals(sideColor c, sPt_t *x0);
 
 #endif /* PARAMS_H_ */

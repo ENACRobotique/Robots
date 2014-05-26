@@ -28,7 +28,6 @@
 #define BIT(a) (1<<a)
 #endif
 
-//XXX #define RANGE
 typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
 
 /*

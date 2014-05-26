@@ -6,13 +6,15 @@
  */
 
 #include "absolutepos.h"
-
+#include "params.h"
 
 typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
 EBaliseState state = INIT;
 
 
 /*
+ * TODO calcperception
+ * TODO sendmessage (sendrole)
  *  typedef struct {
  *		unsigned long deltaT;       // µs, delay between two laser small peaks
  *	 	unsigned long date;         // local µs, when was the laser recorded last
@@ -142,19 +144,21 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 				 * if team yellow
 				 *	3 2 1 ; 2 1 3; 1 3 2
 				 *
-				 * test verified by red orders and not by yellow ones
+				 * test verified by red possible orders and not by yellow ones
 				 *  n.(i) [3] < n.(i+1)
 				 */
 				for( i = 0; i <3; i++){
 					test_result = test_result & ( (buffer[idx[i]].beacon % 3) < buffer[idx[(i+1)%3]].beacon);
 				}
+				// cas RED
 				if (test_result){
-					x0.x = 190 ; // XXX C'est pas bô
-					x0.y = 10;
+					init_globals(RED, &x0);
+
 				}
+				// cas YELLOW
 				else{
-					x0.x = 190 ; // XXX C'est pas bô
-					x0.y = 290;
+
+					init_globals(YELLOW, &x0);
 				}
 				state = PLAY;
 				for(i=0 ; i<2;i++){
@@ -175,13 +179,16 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 			if( (buffer[idx[2]].date - buffer[idx[0]].date)
 					< (buffer[idx[0]].period + (buffer[idx[0]].period>>1))
 			){
-				sPerception perception = calcPerception(&(buffer[idx[2]]),&(buffer[idx[1]]),&buffer[idx[0]]);
+				sPerception perception;
+				calcPerception(&perception,&(buffer[idx[0]]),&(buffer[idx[1]]),&buffer[idx[2]]);
 				approxPos( buffer[idx[2]].date, &LastPos[0],&LastPos[1], &x0);
 				if (neldermead(&x0, RANGE, &perception)){
 					LastPos[0] = LastPos[1];
 					LastPos[1].pt = x0;
 					LastPos[1].date = buffer[idx[2]].date;
+
 					//TODO renvoi position
+
 				}else{
 					LastPos[0] = LastPos[1];
 				}

@@ -2,12 +2,15 @@
 #define _TOOLS_H
 
 #define SQR(v) ((v)*(v))
+
+#ifndef MIN
 #define MIN(a, b) ((a)>(b)?(b):(a))
 #define MAX(a, b) ((a)>(b)?(a):(b))
+#endif
 
 typedef struct {
-    float x;
-    float y;
+	float x;
+	float y;
 } sPt_t;
 typedef sPt_t sVec_t;
 

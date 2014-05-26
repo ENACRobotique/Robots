@@ -39,7 +39,7 @@ typedef struct {
     eBeacon beacon;             // beacon identifier
 }sMeasures;
 
-sPerception calcPerception( sMeasures *mes1, sMeasures *mes2, sMeasures *mes3);
+void calcPerception(sPerception *p, sMeasures *mes1, sMeasures *mes2, sMeasures *mes3);
 
 void simu_perception(sPt_t *x, sPerception *p);
 void estim_incertitude(sPerception *p);
