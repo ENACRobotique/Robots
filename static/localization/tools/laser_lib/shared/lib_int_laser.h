@@ -105,6 +105,7 @@ ldStruct laserDetect(bufStruct *bs);
 int periodicLaser(bufStruct *bs,plStruct *pRet);
 
 uint32_t delta2dist(unsigned long delta, unsigned long period);
+float delta2distf(unsigned long delta, unsigned long period);
 
 #ifdef __cplusplus
     }
