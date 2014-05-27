@@ -32,6 +32,8 @@ int main(void) {
     // allow interrupt requests
     global_IRQ_enable();
 
+    bn_attach(E_ROLE_SETUP, role_setup);
+
     // superbus init
     bn_init();
     unsigned int bd = uart0_init(9600);

@@ -52,6 +52,8 @@
 #elif defined(ARCH_LPC21XX)
     #include <stdarg.h>
     #include "../lpc21xx/mutex/mutex.h"
+#elif defined(ARCH_LM4FXX)
+    #include "../lm4fxx/mutex/mutex.h"
 #else
 #error "please Define The Architecture Symbol, You Bloody Bastard"
 #endif

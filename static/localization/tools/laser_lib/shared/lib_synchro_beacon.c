@@ -6,9 +6,16 @@
  */
 
 #include "lib_synchro_beacon.h"
+
+#ifdef ARCH_328P_ARDUINO
 #include "Arduino.h"
+#endif
+#ifdef ARCH_LM4FXX
+#include "time.h"
+#endif
 #include "../../../communication/network_tools/bn_debug.h"
 #include "params.h"
+
 
 syncStruc syncParam={0,0,0};    // Synchronization parameters
 int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)

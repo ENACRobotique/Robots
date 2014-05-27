@@ -14,6 +14,9 @@
 
 #define TR_INFO_BUFFER_SIZE 16
 
+#define SPEED_HIGH  200
+#define SPEED_20HZ  46
+
 typedef struct{
     uint32_t date;
     uint32_t period;
@@ -30,8 +33,9 @@ extern volatile sTurnInfo TR_InfoBuf[TR_INFO_BUFFER_SIZE];
 
 //prototypes
 void domi_isr();
-void domi_init(int pinInt);
+void domi_init(int pinInt, int pinSpeed);
 void domi_deinit();
+void domi_setspeed(int speed);
 
 inline int domi_iCur(){
     return (TR_iNext-1+TR_INFO_BUFFER_SIZE)%TR_INFO_BUFFER_SIZE;

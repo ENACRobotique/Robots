@@ -17,6 +17,8 @@
 #include "../../../core/linux/libraries/Millis/millis.h"
 #elif defined(ARCH_LPC21XX)
 #include <sys_time.h>
+#elif defined(ARCH_LM4FXX)
+#include "time.h"
 #else
 #error "no ARCH_XXX symbol defined"
 #endif

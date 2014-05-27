@@ -9,6 +9,10 @@
 #ifndef LIB_SYNCHRO_H_
 #define LIB_SYNCHRO_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "lib_int_laser.h"
 #include "messages.h"
 
@@ -80,5 +84,8 @@ void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t perio
  */
 void syncComputationFinal(sSyncPayload *pload);
 
+#ifdef __cplusplus
+    }
+#endif
 
 #endif /* LIB_SYNCHRO_H_ */

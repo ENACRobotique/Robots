@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#ifdef ARCH_328P_ARDUINO
+
 #include "Arduino.h"
 #include "node_cfg.h"
 
@@ -20,3 +22,4 @@ void Xbee_rst(){
     return ;
 }
 
+#endif

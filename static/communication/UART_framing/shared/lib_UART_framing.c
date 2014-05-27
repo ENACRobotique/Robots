@@ -36,6 +36,8 @@
 #include "../linux/lib_UART_framing_linux.h"
 #elif defined(ARCH_LPC21XX)
 #include "../lpc21xx/lib_UART_framing_lpc21xx.h"
+#elif defined(ARCH_LM4FXX)
+#include "../lm4fxx/lib_UART_framing_lm4fxx.h"
 #else
 #error "in UART_framing lib, no known arch symbol defined"
 #endif
@@ -63,6 +65,8 @@ int UART_init(const char* device, uint32_t option){
     return serialInit(option);
 #elif defined(ARCH_X86_LINUX)
     return serialInit(device,option);
+#elif defined(ARCH_LM4FXX)
+    return serialInit(option);
 #endif
     return -1;
 }

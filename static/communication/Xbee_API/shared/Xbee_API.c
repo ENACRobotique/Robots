@@ -192,6 +192,9 @@ int Xbee_init(){
 #elif defined(ARCH_328P_ARDUINO)
     Xbee_rst();
     ret=UART_init(NULL,111111);
+#elif defined(ARCH_LM4FXX)
+    Xbee_rst();
+    ret=UART_init(NULL,111111);
 #else
 #error "no arch defined for Xbee4sb.c, or arch no available (yet)"
 #endif

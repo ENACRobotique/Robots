@@ -60,7 +60,7 @@ sRTableEntry rTable[]={
     {SUBNETD2_MAIN,  {IF_UART, ADDRU2_MAIN_AI}},
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
-#elif (MYADDRX == ADDRX_MOBILE_1 || MYADDRX == ADDRX_MOBILE_2 || MYADDRX == ADDRX_DEBUG)
+#elif (MYADDRX == ADDRX_MOBILE_1 || MYADDRX == ADDRX_MOBILE_2 || MYADDRX == ADDRX_DEBUG || MYADDRX == ADDRX_FIX)
 // project "balise_mobile" OR debug node
 sRTableEntry rTable[]={
     {SUBNETI_MAIN,   {IF_XBEE, ADDRX_MAIN_TURRET}},

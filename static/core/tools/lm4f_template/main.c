@@ -37,8 +37,10 @@
 #include "inc/hw_types.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
+#include "driverlib/rom.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/timer.h"
+#include "time.h"
 
 #include "inc/lm4f120h5qr.h"
 
@@ -46,68 +48,93 @@
 #define BIT(a) (1<<a)
 #endif
 
+#define DEBOUNCE_DELAY 10
+
+void sw1Interrupt(){
+    static int state=0xff;
+    GPIOPinIntClear(GPIO_PORTF_BASE,GPIO_PIN_4); // must be done "early", takes several cycle to be accomplished, cf doc)
+    delay(DEBOUNCE_DELAY); //debounce
+
+    if (!GPIOPinRead(GPIO_PORTF_BASE,GPIO_PIN_4)) {
+        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_2,state);
+        state^=0xff;
+    }
+}
+
+void sw2Interrupt(){
+    static int state=0;
+    GPIOPinIntClear(GPIO_PORTF_BASE,GPIO_PIN_0); // must be done "early", takes several cycle to be accomplished, cf doc)
+    delay(DEBOUNCE_DELAY);
+
+    if (!GPIOPinRead(GPIO_PORTF_BASE,GPIO_PIN_0))  {
+        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_3,state);
+        state^=0xff;
+    }
+
+}
+
+void portFIntHandler(){
+    long read=GPIOPinRead(GPIO_PORTF_BASE,GPIO_PIN_0|GPIO_PIN_4);
+    if ( !(read & GPIO_PIN_4) ) sw1Interrupt();
+    if ( !(read & GPIO_PIN_0) ) sw2Interrupt();
+}
+
 // main function.
 int main(void) {
     volatile unsigned long ulLoop;
 
-    //
-    // Enable the GPIO port that is used for the on-board LED.
-    //
-    SYSCTL_RCGC2_R = SYSCTL_RCGC2_GPIOF;
+    timerInit();
 
-    //
-    // Do a dummy read to insert a few cycles after enabling the peripheral.
-    //
-    ulLoop = SYSCTL_RCGC2_R;
-
-    //
-    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
-    // enable the GPIO pin for digital function.
-    //
+    // Enable the GPIO port that is used for the on-board LEDs.
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
 
     // Delay for a bit (cf previous function documentation)
-    for(ulLoop = 0; ulLoop < 5; ulLoop++)
-    {
-    }
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+    for(ulLoop = 0; ulLoop < 5; ulLoop++);
 
-//    GPIO_PORTF_DIR_R = 0x08;
-//    GPIO_PORTF_DEN_R = 0x08;
+
+    // Enable the GPIO pins as output for the LEDs (PF1-3).
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+
+
+    // Hack to enable the use of PF0 : (from http://codeandlife.com/2012/10/16/ti-stellaris-launchpad-test-run/ )
+    // cf http://users.ece.utexas.edu/~valvano/Volume1/E-Book/C6_MicrocontrollerPorts.htm (right under table 6.2)
+    // Unlock PF0 so we can change it to a GPIO input
+    // Once we have enabled (unlocked) the commit register then re-lock it
+    // to prevent further changes.  PF0 is muxed with NMI thus a special case.
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY_DD;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_CR) |= 0x01;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = 0;
+
+    // Enable as input the GPIO pins for switch 1 & 2 (PF4 et PF0)
+    GPIOPinTypeGPIOInput( GPIO_PORTF_BASE,GPIO_PIN_0|GPIO_PIN_4);
+
+    // Set up pull-up resistors
+    GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_0|GPIO_PIN_4,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
+
+    // Set them as interrupt trigerring, on rising edge
+    GPIOIntTypeSet(GPIO_PORTF_BASE,GPIO_PIN_0|GPIO_PIN_4,GPIO_FALLING_EDGE);
+
+    // Register the interrupt handler for port F
+    GPIOPortIntRegister(GPIO_PORTF_BASE,portFIntHandler);
+
+    // Enable the interrupts
+    GPIOPinIntEnable(GPIO_PORTF_BASE,GPIO_PIN_0|GPIO_PIN_4);
+
 
     //
     // Loop forever.
     //
     while(1)
     {
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3,0x0E);
 
-        for(ulLoop = 0; ulLoop < 1000000; ulLoop++)
-        {
-        }
+#define DUR 100
+        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1,0x02);
 
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3,0x02);
+        delay(DUR);
 
-        for(ulLoop = 0; ulLoop < 100000; ulLoop++)
-        {
-        }
+        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1,0x00);
 
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3,0x04);
-
-        for(ulLoop = 0; ulLoop < 100000; ulLoop++)
-        {
-        }
-
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_2|GPIO_PIN_3,0x08);
-
-        for(ulLoop = 0; ulLoop < 100000; ulLoop++)
-        {
-        }
-
-        GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_3,0x00);
-
-        for(ulLoop = 0; ulLoop < 1000000; ulLoop++)
-        {
-        }
+        delay(DUR);
     }
+
 }
