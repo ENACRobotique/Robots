@@ -506,12 +506,52 @@ void obj_step(){
 	}
 
 int obj_init(){
-	int i;
+	int i, ret, state = 0;
 
     if(sizeof(obs)/sizeof(*obs) != N){
         printf("N isn't correct, byebye\n");
         exit(1);
     	}
+
+    //ping all address
+#if !SIMU
+    while(1){
+        switch(state){
+            case 0:
+                if( (ret = bn_ping(ADDRU2_MAIN_PROP)) > 0){
+                    state = 1;
+                    }
+                printf("Ping main prop : %d\n", ret);
+                break;
+            case 1:
+                if( (ret = bn_ping(ADDRU1_MAIN_IO)) > 0){
+                    state = 2;
+                    }
+                printf("Ping main io : %d\n", ret);
+                break;
+            case 2:
+                if( (ret = bn_ping(ADDRX_MOBILE_1)) > 0){
+                    state = 3;
+                    }
+                printf("Ping mobile 1 : %d\n", ret);
+                break;
+            case 3:
+                if( (ret = bn_ping(ADDRX_MOBILE_2)) > 0){
+                    state = 4;
+                    }
+                printf("Ping mobile 2 : %d\n", ret);
+                break;
+            case 4:
+                if( (ret = bn_ping(ADDRX_FIX)) > 0){
+                    state = 5;
+                    }
+                printf("Ping fix : %d\n", ret);
+                break;
+
+            }
+        if(state == 5) break;
+        }
+#endif
 
     listObj[8].done=0.5;
     listObj[10].done=0.5;
