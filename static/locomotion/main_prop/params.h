@@ -48,4 +48,9 @@
 #define RI2R(RI) ((RI)/D2I(RDIAM))
 #define RI2Rs(RIs) RI2R((RIs)/dSHIFT)
 
+// rad to increments
+#define R2I(R) ((R)/M_TWOPI*IpR)
+#define iR2I(R) iROUND(R2I(R)) // (I)
+#define isR2I(R) isROUND(R2I(R)) // (I<<SHIFT)
+
 #endif
