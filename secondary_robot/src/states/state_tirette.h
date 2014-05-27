@@ -12,5 +12,4 @@
 
 extern sState sTirette;
 
-
 #endif /* STATE_TIRETTE_H_ */
