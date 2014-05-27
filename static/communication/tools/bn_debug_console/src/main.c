@@ -146,6 +146,18 @@ int main(int argc, char **argv){
                     }
                 }
                 break;
+            case E_POS_STATS :
+                {
+                    int i;
+                    sPosStats *ps = &msgIn.payload.posStats;
+                    printf("seq %hu\n", ps->nb_seq);
+                    if(fd) fprintf(fd, "seq %hu\n", ps->nb_seq);
+                    for(i=0; i<NB_POS_STEPS_PER_MSG; i++){
+                        printf("~%hu,%.2f,%.2f,%.2f\n", ps->steps[i].delta_t, ((float)ps->steps[i].x)/4., ((float)ps->steps[i].y)/4., ((float)ps->steps[i].theta)/10.);
+//                        if(fd) fprintf(fd, "~%hu,%hi,%hi,%hi,%hi,%hi,%hi\n", ps->steps[i].delta_t, ps->steps[i].ticks_l, ps->steps[i].consigne_l, ps->steps[i].out_l, ps->steps[i].ticks_r, as->steps[i].consigne_r, as->steps[i].out_r);
+                    }
+                }
+                break;
             case E_DEBUG :
                 printf("%s",msgIn.payload.debug);
                 if(fd) fprintf(fd,"%s",msgIn.payload.debug);

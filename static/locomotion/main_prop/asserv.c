@@ -63,6 +63,7 @@ void _isr_right(){ // irq14
 
 //#define TIME_STATS
 //#define ASSERV_LOGS
+//#define POS_STATS
 
 #define TRAJ_MAX_SIZE (16)
 
@@ -138,6 +139,14 @@ long long tmp, dtime;
 int n_x, n_y, i;
 int alpha, dist, dist_tmp, dist_lim;
 
+#ifdef POS_STATS
+sMsg ps_outMsg;
+#define PS (&ps_outMsg.payload.posStats)
+int ps_i = 0;
+unsigned int ps_prevTime = 0;
+unsigned int ps_nbSeq = 0;
+#endif
+
 void asserv_init(){
 #ifdef ARCH_LPC21XX
     gpio_init_all();  // use fast GPIOs
@@ -176,6 +185,10 @@ void asserv_init(){
     sys_time_init();
 
     global_IRQ_enable();
+#endif
+
+#ifdef POS_STATS
+    ps_prevTime = micros();
 #endif
 }
 
@@ -290,6 +303,14 @@ int new_asserv_step(){
     start_us = micros();
 #endif
 
+#ifdef POS_STATS
+    {
+        unsigned int t = micros();
+        PS->steps[ps_i].delta_t = t - ps_prevTime;
+        ps_prevTime = t;
+    }
+#endif
+
     // get current number of ticks per sampling period
 #ifdef ARCH_LPC21XX
     global_IRQ_disable();  // prevent _ticks_? to be modified by an interruption caused by an increment
@@ -319,6 +340,34 @@ int new_asserv_step(){
     // update position
     x += ((long long)v * ct)>>SHIFT;
     y += ((long long)v * st)>>SHIFT;
+
+#ifdef POS_STATS
+    {
+        int it;
+
+        PS->steps[ps_i].x = iROUND(40.*I2Ds((float)x));
+        PS->steps[ps_i].y = iROUND(40.*I2Ds((float)y));
+
+        it = theta < 0 ? theta + (isRPI<<1) : theta;
+        PS->steps[ps_i].theta = iROUND(10.*RI2Rs((float)it)*180./PI);
+
+        if(ps_i >= NB_POS_STEPS_PER_MSG-1){
+            ps_i = 0;
+            PS->nb_seq = ps_nbSeq++;
+
+            ps_outMsg.header.destAddr = role_get_addr(ROLE_DEBUG);
+            if(ps_outMsg.header.destAddr){
+                ps_outMsg.header.type = E_POS_STATS;
+                ps_outMsg.header.size = sizeof(ps_outMsg.payload.posStats);
+
+                bn_send(&ps_outMsg);
+            }
+        }
+        else{
+            ps_i++;
+        }
+    }
+#endif
 
 #ifdef ARCH_X86_LINUX
 //    printf("%i,%i,%i,%i,%i,%i,%i\x1b[K\n", ticks_l, ticks_r, v, theta, isRPI, ct, st);

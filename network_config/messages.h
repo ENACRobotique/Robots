@@ -54,6 +54,7 @@ typedef enum{
     E_IHM_STATUS,           // ihm status
     E_SPEED_SETPOINT,       // speed setpoint
     E_GENERIC_STATUS,       // generic status of an element
+    E_POS_STATS,            // position statistics (packed)
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -303,6 +304,17 @@ typedef struct __attribute__((packed)){
     } steps[NB_ASSERV_STEPS_PER_MSG];
 } sAsservStats;
 
+#define NB_POS_STEPS_PER_MSG (7)
+typedef struct __attribute__((packed)){
+    uint16_t nb_seq;
+    struct __attribute__((packed)){ // 7bytes
+        unsigned short delta_t; // (µs)
+        uint16_t x :14; // 0-16383 (quarter of mm)
+        uint16_t y :14; // 0-16383 (quarter of mm)
+        uint16_t theta :12; // 0-4095 (tenth of °)
+    }steps[NB_POS_STEPS_PER_MSG];
+} sPosStats;
+
 typedef struct __attribute__((packed)){
     uint16_t nb_servos; // must be <=18
     struct __attribute__((packed)){
@@ -349,6 +361,7 @@ typedef union{
     sMobileReportPayload mobileReport;
     sSyncPayload sync;
     sAsservStats asservStats;
+    sPosStats posStats;
     sObsConfig obsCfg;
     sObss obss;
     sGenericStatus genericStatus;

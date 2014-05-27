@@ -14,8 +14,7 @@ motor_t motGauche, motDroit;
 #ifdef ASSERV_STATS
 #include <string.h>
 #include "shared/botNet_core.h"
-#include "shared/bn_debug.h"
-#include "millis.h"
+#include "sys_time.h"
 #include "messages.h"
 
 sMsg outMsg;
