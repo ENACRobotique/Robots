@@ -57,7 +57,7 @@ void __error__(char *pcFilename, unsigned long ulLine){
 
 uint32_t laser_period=50000;
 uint32_t lasCount[LAS_INT_TOTAL]={0};       // sum of all laser interruption thickness detected on channel n
-char chosenOne=0;                           // interruption chosen for synchronization (with highest sum of all thicknesses)
+int chosenOne=0;                           // interruption chosen for synchronization (with highest sum of all thicknesses)
 
 inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;

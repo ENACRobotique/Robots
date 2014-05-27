@@ -35,10 +35,6 @@ inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
 }
 
-
-
-
-
 void setup() {
   laserIntInit();
 
@@ -120,6 +116,10 @@ void loop() {
     if ( laserStruct.thickness ) {
         lastLaserDetectMicros=laserStruct.date;
         lastLaserDetectMillis=laserStruct.date/1000;
+        delay(8);
+#ifdef DEBUG_PRINTLASER
+        bn_printfDbg("date %lu per %lu\n",laserStruct.date,laserStruct.period);
+#endif
     }
 
 
@@ -133,6 +133,7 @@ void loop() {
 #endif
             }
             else break;
+            /* no break */
         case S_SYNC_ELECTION :
             if (prevState!=state) {
                 // reset counters
@@ -164,10 +165,11 @@ void loop() {
             if (rxB && inMsg.header.type==E_SYNC_DATA){
                     rxB=0;
                 if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
-#ifdef VERBOSE_SYNC
-                    bn_printDbg("syncComputation\n");
-#endif
                     syncComputationFinal(&inMsg.payload.sync);
+                    updateSync();
+#ifdef VERBOSE_SYNC
+                    bn_printfDbg("syncComputation : %lu\n",micros2s(micros()));
+#endif
                     state=S_GAME;
                 }
                 else {

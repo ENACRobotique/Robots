@@ -47,7 +47,7 @@ typedef struct{
 #define ELECTION_TIME       2000000  // in µs, duration during which the beacon choose their laser interruption
 #define SYNCRONIZATION_TIME 10000000 // in µs
 
-#define ANGLE_ZERO      3.97935 //value (in rad) to substract from the angle measured to match with this year robot's geometry (2014 : 228°)
+#define ANGLE_ZERO      3.63028415//3.97935 //value (in rad) to substract from the angle measured to match with this year robot's geometry (2014 : 228°)
 // fixme : we can not determine yet if the rotation is clockwise or anticlockwise. The above value is valid only for clockwise
 
 #define PIN_RST_XBEE    5
@@ -57,6 +57,7 @@ typedef struct{
 
 //#define DEBUG
 //#define DEBUG_SYNC
+//#define DEBUG_LOC
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
