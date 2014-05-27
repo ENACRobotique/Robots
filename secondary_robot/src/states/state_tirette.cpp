@@ -32,7 +32,6 @@ sState* testTirette()
         if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajRedInit;
         else return &sTrajYellowInit;
     	}
-
     return 0;
 	}
 

@@ -37,7 +37,6 @@ void initHard(sState *prev){
     //launcher
     pinMode(PIN_LAUNCHER_1,OUTPUT);
     pinMode(PIN_LAUNCHER_2,OUTPUT);
-
     pinMode(PIN_LAUNCHER_NET,OUTPUT);
     launcherServoUp.attach(PIN_LAUNCHER_1);
     launcherServoUp.write(LAUNCHER_UP_POS_0);

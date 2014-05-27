@@ -5,7 +5,7 @@
 #include "../params.h"
 #include "state_pause.h"
 #include "state_funny.h"
-#include "lib_radar.h"
+#include "lib_radar2.h"
 #include "lib_move.h"
 #include "state_tirette.h"
 

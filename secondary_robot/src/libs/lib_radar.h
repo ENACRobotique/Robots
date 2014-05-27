@@ -11,7 +11,7 @@
 #include "Arduino.h"
 #include "Servo.h"
 #include "lib_us.h"
-
+/*
 //defines
 #define DEBUG_RADAR
 
@@ -49,5 +49,5 @@ uint16_t radarCloser();
 //returns the number of range measures shorter than the limit defined in C_rad_limits
 //(for the direction assiciated to each measure).
 int radarIntrusion();
-
+*/
 #endif /* LIB_RADAR_H_ */
