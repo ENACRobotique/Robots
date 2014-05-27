@@ -16,6 +16,7 @@
 #include "eint.h"
 #include "sys_time.h"
 #include "ime.h"
+#include "backlash.h"
 #endif
 
 #include "../botNet/shared/botNet_core.h"
@@ -59,6 +60,8 @@ void _isr_right(){ // irq14
     SCB_EXTINT = BIT(0); // acknowledges interrupt
     VIC_VectAddr = (unsigned)0; // updates priority hardware
 }
+
+sBackLash blLeft, blRight;
 #endif
 
 //#define TIME_STATS
@@ -176,6 +179,10 @@ void asserv_init(){
     eint_mode(EINT3, EINT_RISING_EDGE);
     eint_register(EINT3, _isr_left, 3);
     eint_enable(EINT3);
+
+    // backlash compensation
+    backlash_init(&blLeft, iR2I(7.295*PI/180.), 2);
+    backlash_init(&blRight, iR2I(1.574*PI/180.), 2);
 #endif
 
     motor_controller_init();
@@ -317,6 +324,9 @@ int new_asserv_step(){
     ticks_l = _ticks_l<<SHIFT; _ticks_l = 0; // (IpP<<SHIFT)
     ticks_r = _ticks_r<<SHIFT; _ticks_r = 0; // (IpP<<SHIFT)
     global_IRQ_enable();
+
+    ticks_l = backlash_update(&blLeft, ticks_l);
+    ticks_r = backlash_update(&blRight, ticks_r);
 #elif defined(ARCH_X86_LINUX)
     ticks_l = motor_getticks(&motGauche)<<SHIFT; // (IpP<<SHIFT)
     ticks_r = motor_getticks(&motDroit)<<SHIFT; // (IpP<<SHIFT)
