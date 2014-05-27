@@ -21,7 +21,7 @@
 #include <driverlib/fpu.h>
 #include "tools.h"
 #include <string.h>
-
+#include "absolutepos.h"
 
 #include "lib_int_laser.h"
 #include "lib_synchro_beacon.h"
@@ -35,10 +35,6 @@
 #define BIT(a) (1<<a)
 #endif
 
-//XXX #define RANGE
-typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
-
-//plStruct plTable[LAS_INT_TOTAL]={0};
 #define MEAS_BUF_SIZE 8
 sMeasures measuresBuf[MEAS_BUF_SIZE]={{0}};
 int measuresIndex=0,prevMeasuresIndex=0;
@@ -61,7 +57,7 @@ void __error__(char *pcFilename, unsigned long ulLine){
 
 uint32_t laser_period=50000;
 uint32_t lasCount[LAS_INT_TOTAL]={0};       // sum of all laser interruption thickness detected on channel n
-char chosenOne=0;                           // interruption chosen for synchronization (with highest sum of all thicknesses)
+int chosenOne=0;                           // interruption chosen for synchronization (with highest sum of all thicknesses)
 
 inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
@@ -98,10 +94,12 @@ int main(void) {
 
     laserIntInit();
 
-    mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;
+    //mainState state=S_SYNC_ELECTION, prevState=S_BEGIN; fixme todo xxx
+    mainState state=S_GAME, prevState=S_BEGIN;
 
 /*********************** loop ************************/
     while(1){
+        plStruct plTable[LAS_INT_TOTAL]={{0}};
         sMsg inMsg={{0}};
 
         int rxB=bn_receive(&inMsg);
@@ -120,37 +118,36 @@ int main(void) {
         // reading eventual new values
         int j;
         for (j=0; j<LAS_INT_TOTAL; j++ ){
-            plStruct tempPl={0};
 
-            if (ildTable[j].deltaT && newLaserMeasure(&ildTable[j],&tempPl)){
-//                bn_printfDbg("int %d, dt %lu th %lu per %lu",j,tempPl.deltaT,tempPl.thickness,tempPl.period);
+            if (ildTable[j].deltaT && newLaserMeasure(&ildTable[j],&plTable[j])){
+//                bn_printfDbg("int %d, dt %lu th %lu per %lu",j,plTable[j].deltaT,plTable[j].thickness,plTable[j].period);
 
                 switch (j){
                 case LAS_INT_0 :
-                    pushMeasure(&tempPl,BEACON_2);
+                    pushMeasure(&plTable[j],BEACON_2);
                     break;
                 case LAS_INT_1 :
-                    pushMeasure(&tempPl,BEACON_1);
+                    pushMeasure(&plTable[j],BEACON_1);
                     break;
                 case LAS_INT_2 :
                 case LAS_INT_3 :
-                    if ( stat_tempPl.deltaT && (tempPl.date-stat_tempPl.date)< (laser_period>>5)){
-                        if (tempPl.thickness<stat_tempPl.thickness){
+                    if ( stat_tempPl.deltaT && (plTable[j].date-stat_tempPl.date)< (laser_period>>5)){
+                        if (plTable[j].thickness<stat_tempPl.thickness){
                             pushMeasure(&stat_tempPl,BEACON_3);
 
                         }
                         else {
-                            pushMeasure(&tempPl,BEACON_3);
+                            pushMeasure(&plTable[j],BEACON_3);
                         }
                         memset(&stat_tempPl,0,sizeof(stat_tempPl));
                     }
                     else{
-                        stat_tempPl=tempPl;
+                        stat_tempPl=plTable[j];
                     }
                     break;
                 default : break;
                 }
-                lasCount[j]+=tempPl.thickness;
+                lasCount[j]+=plTable[j].thickness;
                 ildTable[j].deltaT=0;
             }
         }
@@ -159,14 +156,6 @@ int main(void) {
             memset(&stat_tempPl,0,sizeof(stat_tempPl));
         }
 
-        if (((MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE)>=1){
-            int k;
-            for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
-                int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
-                bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
-
-            }
-        }
         //STATE MACHINE
         switch (state){
             case S_BEGIN :
@@ -186,7 +175,14 @@ int main(void) {
                 }
                 // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
                 if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
-//                    chosenOne=(intLas0<intLas1?1:0);
+                    int k;
+                    int maxTh=0;
+                    for (k=0; k<LAS_INT_TOTAL; k++){
+                        if (lasCount[k]>maxTh){
+                            maxTh=lasCount[k];
+                            chosenOne=k;
+                        }
+                    }
 #ifdef VERBOSE_SYNC
                     bn_printDbg("end election\n");
 #endif
@@ -198,12 +194,9 @@ int main(void) {
                 /* no break */
             case S_SYNC_MEASURES:
                 // laser data (if value is ours for sure (ie comes from a tracked measure)
-//                if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
-//                    syncComputationLaser(&laserStruct0);
-//                }
-//                else if(chosenOne==1 && laserStruct1.thickness && laserStruct1.period) {
-//                    syncComputationLaser(&laserStruct1);
-//                }
+                if ( plTable[chosenOne].thickness && plTable[chosenOne].period){
+                    syncComputationLaser(&plTable[chosenOne]);
+                }
                 // handling data broadcasted by turret
                 if (rxB && inMsg.header.type==E_SYNC_DATA){
                         rxB=0;
@@ -220,11 +213,20 @@ int main(void) {
                 }
                 break;
             case S_GAME :
-                //fixme call the nelder-mead.
+                if (((MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE)>=1){
+#ifdef DEBUG
+                    int k;
+                    for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
+                        int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
+                        bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
+                    }
+#endif
+                    absolutepos(measuresBuf,measuresIndex,MEAS_BUF_SIZE);
+                    prevState=state;
+                }
               break;
             default : break;
         }//switch
-        prevState=state;
 
         prevMeasuresIndex=measuresIndex;
     } // while 1

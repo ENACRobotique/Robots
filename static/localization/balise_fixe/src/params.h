@@ -19,12 +19,17 @@ typedef enum{
     S_GAME            // Game mode
 } mainState;
 
+typedef enum{
+	RED,
+	YELLOW
+}sideColor;
 
 #define SENDING_PERIOD 1100 //in ms
 
 //#define DEBUG
 //#define DEBUG_SYNC
 //#define DEBUG_SYNC_VALUES
+#define DEBUG_POS
 #define VERBOSE_SYNC
 
 #if MYADDRX==ADDRX_FIX
@@ -56,6 +61,6 @@ typedef struct {
 
 extern sGlobParams glob_params;
 
-void init_globals();
+void init_globals(sideColor c, sPt_t *x0);
 
 #endif /* PARAMS_H_ */

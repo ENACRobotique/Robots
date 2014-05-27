@@ -5,62 +5,23 @@
  *      Author: ThomasDq
  */
 
-#include "absolutepos.h"
+#include <absolutepos.h>
+#include <lib_synchro_beacon.h>
+#include <messages.h>
+#include <network_cfg.h>
+#include <params.h>
 
+#include "../../../communication/botNet/shared/message_header.h"
 
 typedef enum{INIT,COLORDETEC,PLAY} EBaliseState;
 EBaliseState state = INIT;
 
 
 /*
- *  typedef struct {
- *		unsigned long deltaT;       // µs, delay between two laser small peaks
- *	 	unsigned long date;         // local µs, when was the laser recorded last
- *		unsigned long thickness;    // µs, thickness of the small laser peak /!\ thickness==0 <=> no laser detected
- *		unsigned long period;       // µ:s, MEASURED period (0 if not applicable).
- *		int precision;              // xx/x TDB
- *		long int sureness;          // TBD
- *	}plStruct;
+ * TODO calcperception
+ * TODO sendmessage (sendrole)
+
  */
-
-/*
-typedef union{
-    uint8_t raw[BN_MAX_PDU-sizeof(sGenericHeader)];		//only used to access data/data modification in low layer
-    uint8_t data[BN_MAX_PDU-sizeof(sGenericHeader)];	//arbitrary data, actual size given by the "size" field of the header
-    uint8_t debug[BN_MAX_PDU-sizeof(sGenericHeader)];   //debug string, actual size given by the "size" field of the header
-    sAckPayload ack;
-    sRoleSetupPayload roleSetup;
-    sINTP   intp;
-
- *********************** user payload start ***********************
-//the user-defined payloads from above must be added here. The simple ones can be directly added here
-//Warning : the user has to make sure that these payloads are not too big (cf BN_MAX_PDU)
-    uint8_t channel;
-    uint32_t period;
-    sTrajElRaw_t traj;
-    sPosPayload pos;
-    sMobileReportPayload mobileReport;
-    sSyncPayload sync;
-    sAsservStats asservStats;
-    sObsConfig obsCfg;
-    sObss obss;
-    sGenericStatus genericStatus;
-    sPosQuery posQuery;
-    sServos servos;
-    sIhmStatus ihmStatus;
-    sSpeedSetPoint speedSP;
- *********************** user payload stop ***********************
-
-}uPayload;
-
-
-//final message structure
-typedef struct{
-    sGenericHeader header;
-    uPayload payload;
-}sMsg;*/
-
-
 
 
 /* (laser tourne en sens horaire)
@@ -99,16 +60,40 @@ void approxPos(unsigned long current_date, sDatedPt_t *Z1, sDatedPt_t *Z2, sPt_t
 	res->y = Z2->pt.y + (current_date - Z2->date) / (Z2->date - Z1->date) * (Z2->pt.y - Z1->pt.y);
 }
 
-
 void absolutepos(sMeasures*buffer,int index, int taille) {
 
 	sDatedPt_t LastPos[2];
 	sPt_t x0;
 	int i;
 	int idx[3];
+
+#define SWAG_SWAP(i, j)\
+	do{\
+		int tmp;\
+		tmp = idx[i];\
+		idx[i] = idx[j];\
+		idx[j] = tmp;\
+	}while(0)
+
+	// Sorting of index XXX
+
 	idx[0] = (taille + index - 3)%taille;
 	idx[1] = (taille + index - 2)%taille;
 	idx[2] = (taille + index - 1)%taille;
+
+
+	if(buffer[idx[0]].date > buffer[idx[1]].date){
+		SWAG_SWAP(0,1);
+	}
+	if(buffer[idx[1]].date > buffer[idx[2]].date){
+		SWAG_SWAP(1,2);
+		if(buffer[idx[0]].date > buffer[idx[1]].date){
+			SWAG_SWAP(0,1);
+
+		}
+	}
+
+	bn_printfDbg("%lu,%lu,%lu;%lu,%lu,%lu;%lu,%lu,%lu\n", buffer[idx[0]].deltaT, buffer[idx[1]].deltaT, buffer[idx[2]].deltaT, buffer[idx[0]].period/1000, buffer[idx[1]].period/1000, buffer[idx[2]].period/1000, buffer[idx[0]].date, buffer[idx[1]].date, buffer[idx[2]].date);
 
 	// Initialisation
 
@@ -126,14 +111,14 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 		// current head back_up
 
 		//test that the 3 last informations are from different beacons
-		if (BIT(buffer[idx[1]].beacon)
+		if (BIT(buffer[idx[0]].beacon)
+				+ BIT(buffer[idx[1]].beacon)
 				+ BIT(buffer[idx[2]].beacon)
-				+ BIT(buffer[idx[3]].beacon)
 				== 7){
 
 			//test if all beacon were shot in the same lasor rotation period
-			if( (buffer[idx[3]].date - buffer[idx[1]].date)
-					< (buffer[idx[3]].period + (buffer[idx[3]].period>>1)) ){
+			if( (buffer[idx[2]].date - buffer[idx[0]].date)
+					< (buffer[idx[2]].period + (buffer[idx[2]].period>>1)) ){
 				int test_result = 1;
 				/*
 				 *if team red possible beacon number orders
@@ -142,19 +127,21 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 				 * if team yellow
 				 *	3 2 1 ; 2 1 3; 1 3 2
 				 *
-				 * test verified by red orders and not by yellow ones
+				 * test verified by red possible orders and not by yellow ones
 				 *  n.(i) [3] < n.(i+1)
 				 */
 				for( i = 0; i <3; i++){
 					test_result = test_result & ( (buffer[idx[i]].beacon % 3) < buffer[idx[(i+1)%3]].beacon);
 				}
+				// cas RED
 				if (test_result){
-					x0.x = 190 ; // XXX C'est pas bô
-					x0.y = 10;
+					init_globals(RED, &x0);
+					bn_printDbg("red case\n");
 				}
+				// cas YELLOW
 				else{
-					x0.x = 190 ; // XXX C'est pas bô
-					x0.y = 290;
+					init_globals(YELLOW, &x0);
+					bn_printDbg("yellow case\n");
 				}
 				state = PLAY;
 				for(i=0 ; i<2;i++){
@@ -175,13 +162,39 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 			if( (buffer[idx[2]].date - buffer[idx[0]].date)
 					< (buffer[idx[0]].period + (buffer[idx[0]].period>>1))
 			){
-				sPerception perception = calcPerception(&(buffer[idx[2]]),&(buffer[idx[1]]),&buffer[idx[0]]);
+				sPerception perception;
+				calcPerception(&perception,&(buffer[idx[0]]),&(buffer[idx[1]]),&buffer[idx[2]]);
 				approxPos( buffer[idx[2]].date, &LastPos[0],&LastPos[1], &x0);
 				if (neldermead(&x0, RANGE, &perception)){
 					LastPos[0] = LastPos[1];
 					LastPos[1].pt = x0;
 					LastPos[1].date = buffer[idx[2]].date;
-					//TODO renvoi position
+
+					//renvoi position
+					sMsg msg_out;
+
+					// Header
+					msg_out.header.destAddr = role_get_addr(ROLE_IA);
+					msg_out.header.type = E_GENERIC_STATUS;
+					msg_out.header.size = sizeof(sGenericStatus);
+
+					// Payload
+					msg_out.payload.genericStatus.date = micros2s(buffer[idx[2]].date);
+					msg_out.payload.genericStatus.id = ELT_PRIMARY;
+					msg_out.payload.genericStatus.pos.x = x0.x;
+					msg_out.payload.genericStatus.pos.y = x0.y;
+					msg_out.payload.genericStatus.pos.frame = FRAME_PLAYGROUND;
+					msg_out.payload.genericStatus.pos_u.a_std = 0;
+					msg_out.payload.genericStatus.pos_u.b_std = 0;
+					msg_out.payload.genericStatus.pos_u.a_angle = 0;
+					msg_out.payload.genericStatus.pos_u.theta = -1;
+
+					//					bn_send(&msg_out);
+#ifdef DEBUG_POS
+					bn_printfDbg("date %lu, x: %d, y: %d\n",msg_out.payload.genericStatus.date,(int)x0.x,(int)x0.y);
+#endif
+
+
 				}else{
 					LastPos[0] = LastPos[1];
 				}
@@ -192,6 +205,8 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 
 		}
 	}
+
+#undef SWAG_SWAP
 }
 
 

@@ -8,16 +8,6 @@
 #ifndef ABSOLUTEPOS_H_
 #define ABSOLUTEPOS_H_
 
-#include "inc/hw_ints.h"
-#include "inc/hw_gpio.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_sysctl.h"
-#include "inc/hw_types.h"
-#include "driverlib/gpio.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/rom.h"
-#include "driverlib/interrupt.h"
-#include "driverlib/timer.h"
 #include "time.h"
 #include "neldermead.h"
 #include "stdint.h"
@@ -36,4 +26,8 @@
 #define BIT(a) (1<<a)
 #endif
 #define RANGE 0.05
+
+
+void absolutepos(sMeasures*buffer,int index, int taille);
+
 #endif /* ABSOLUTEPOS_H_ */

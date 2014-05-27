@@ -25,7 +25,8 @@ typedef enum{
 //#define DEBUG
 //#define DEBUG_SYNC
 //#define DEBUG_SYNC_VALUES
-#define VERBOSE_SYNC
+//#define VERBOSE_SYNC
+//#define DEBUG_PRINTLASER
 
 #if MYADDRX==ADDRX_MOBILE_1             // the beacon with a "1" written in red on the PCB
     #define HARDUPDATEPERIOD  129870    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
