@@ -89,24 +89,6 @@ int main(int argc, char **argv){
     unsigned int prevSendObss = 0, prevSendObs = 0;
 
 
- /*   //test a supprimer
-    sLin_t l={2., 1., -1000., 0};
-    sPt_t c={2.,2.};
-    sNum_t r=2.;
-    sPt_t pt1;
-    sPt_t pt2;
-
-    int df=interC2D(&l, &c, r, &pt1, &pt2);
-    printf("%d\n",df);
-    printf("pt1.x =%f\n", pt1.x);
-    printf("pt1.y =%f\n", pt1.y);
-    printf("pt2.x =%f\n", pt2.x);
-    printf("pt2.y =%f\n", pt2.y);
-    getchar();
-*/
-
-
-
 
 #ifdef CTRLC_MENU
     char cmd;

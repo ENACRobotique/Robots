@@ -53,7 +53,7 @@ sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t or, sPt_t *p2_3){
 }
 
 
-void path_len(sTrajEl_t tab[], int size){
+void path_len(sTrajEl_t tab[], int size){//FIXME last traj with leng seg
 	int i;
 
 	for(i=0; i<size-1 ; i++){

@@ -182,6 +182,7 @@ typedef enum{
     ELT_ADV_PRIMARY,
     ELT_ADV_SECONDARY,
     ELT_FIRE,
+    ELT_ZONE,
 
     NUM_E_ELEMENT
 } eElement;
@@ -262,6 +263,15 @@ typedef struct __attribute__((packed)){
                 FIRE_VERTICAL_TORCH
             } state :8;
         } fire_status;
+
+        // in case of pos.id == ELT_ZONE
+        struct{
+            s2DPosAtt pos;
+            s2DPAUncert pos_u;
+            uint8_t nbpt;
+            uint8_t nbfire;
+            uint8_t nbtorch;
+        } zone_status;
     };
 } sGenericStatus;
 

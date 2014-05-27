@@ -53,7 +53,7 @@ typedef struct {
 
     uint8_t moved:4;
     uint8_t active:4;
-    uint8_t state; //0 occuper, 1 libre
+    uint8_t state; //0 free
 } sObs_t;   // sizeof(sObs_t)=16
 
 typedef struct {
