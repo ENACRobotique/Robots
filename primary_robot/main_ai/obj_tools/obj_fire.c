@@ -37,58 +37,60 @@ void createEPfire2(int numObj){
 	int i;
 	printf("numObj=%d et pos=%d\n", numObj, listObj[numObj].utype.fire.pos);
 
-	switch(listObj[numObj].utype.fire.pos){
-		case 1 :
-		case 2 :
-			listObj[numObj].nbEP = 3;
-			for(i=0;i<3;i++){
-				listObj[numObj].entryPoint[i].angleEP = listObj[numObj].utype.fire.angle+120*i;
-				listObj[numObj].entryPoint[i].c.x=(R_ROBOT+8)*cos(listObj[numObj].entryPoint[i].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.x;
-				listObj[numObj].entryPoint[i].c.y=(R_ROBOT+8)*sin(listObj[numObj].entryPoint[i].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.y;
-				listObj[numObj].entryPoint[i].radiusEP=FIRE_RADIUS_EP;
-				}
-			break;
-		case 3 :
-			listObj[numObj].nbEP=1;
-			if(color==1)i=0;
-			else i=1;
+	if( listObj[numObj].utype.fire.nb_point != 4){
+        switch(listObj[numObj].utype.fire.pos){
+            case 1 :
+            case 2 :
+                listObj[numObj].nbEP = 3;
+                for(i=0;i<3;i++){
+                    listObj[numObj].entryPoint[i].angleEP = listObj[numObj].utype.fire.angle+120*i;
+                    listObj[numObj].entryPoint[i].c.x=(R_ROBOT+8)*cos(listObj[numObj].entryPoint[i].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.x;
+                    listObj[numObj].entryPoint[i].c.y=(R_ROBOT+8)*sin(listObj[numObj].entryPoint[i].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.y;
+                    listObj[numObj].entryPoint[i].radiusEP=FIRE_RADIUS_EP;
+                    }
+                break;
+            case 3 :
+                listObj[numObj].nbEP=1;
+                if(color==1)i=0;
+                else i=1;
 
-			if((listObj[numObj].utype.fire.angle>=180) && (i==1)) listObj[numObj].entryPoint[0].angleEP=listObj[numObj].utype.fire.angle-180;
-			else listObj[numObj].entryPoint[0].angleEP=listObj[numObj].utype.fire.angle+180*i;
-			listObj[numObj].entryPoint[0].c.x=(R_ROBOT+8)*cos(listObj[numObj].entryPoint[0].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.x;
-			listObj[numObj].entryPoint[0].c.y=(R_ROBOT+8)*sin(listObj[numObj].entryPoint[0].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.y;
-			listObj[numObj].entryPoint[0].radiusEP=FIRE_RADIUS_EP;
+                if((listObj[numObj].utype.fire.angle>=180) && (i==1)) listObj[numObj].entryPoint[0].angleEP=listObj[numObj].utype.fire.angle-180;
+                else listObj[numObj].entryPoint[0].angleEP=listObj[numObj].utype.fire.angle+180*i;
+                listObj[numObj].entryPoint[0].c.x=(R_ROBOT+8)*cos(listObj[numObj].entryPoint[0].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.x;
+                listObj[numObj].entryPoint[0].c.y=(R_ROBOT+8)*sin(listObj[numObj].entryPoint[0].angleEP*M_PI/180.)+listObj[numObj].utype.fire.c.y;
+                listObj[numObj].entryPoint[0].radiusEP=FIRE_RADIUS_EP;
 
-			break;
-		case 4 :
-			listObj[numObj].nbEP=1;
-			listObj[numObj].entryPoint[0].radiusEP=FIRE_RADIUS_EP;
-			if(listObj[numObj].utype.fire.c.x==1.){
-				listObj[numObj].entryPoint[0].c.x=20.;
-				listObj[numObj].entryPoint[0].c.y=120.;
-				listObj[numObj].entryPoint[0].angleEP=0.;
-				}
-			if(listObj[numObj].utype.fire.c.x==130.){
-				listObj[numObj].entryPoint[0].c.x=130.;
-				listObj[numObj].entryPoint[0].c.y=20.;
-				listObj[numObj].entryPoint[0].angleEP=90.;
-				}
-			if(listObj[numObj].utype.fire.c.x==170.){
-				listObj[numObj].entryPoint[0].c.x=170.;
-				listObj[numObj].entryPoint[0].c.y=20.;
-				listObj[numObj].entryPoint[0].angleEP=90.;
-				}
-			if(listObj[numObj].utype.fire.c.x==299.){
-				listObj[numObj].entryPoint[0].c.x=280.;
-				listObj[numObj].entryPoint[0].c.y=120.;
-				listObj[numObj].entryPoint[0].angleEP=180.;
-				}
-			break;
-		default :
-			printf("Error in switch createEPfire\n");
-			getchar();
-			break;
-		}
+                break;
+            case 4 :
+                listObj[numObj].nbEP=1;
+                listObj[numObj].entryPoint[0].radiusEP=FIRE_RADIUS_EP;
+                if(listObj[numObj].utype.fire.c.x==1.){
+                    listObj[numObj].entryPoint[0].c.x=20.;
+                    listObj[numObj].entryPoint[0].c.y=120.;
+                    listObj[numObj].entryPoint[0].angleEP=0.;
+                    }
+                if(listObj[numObj].utype.fire.c.x==130.){
+                    listObj[numObj].entryPoint[0].c.x=130.;
+                    listObj[numObj].entryPoint[0].c.y=20.;
+                    listObj[numObj].entryPoint[0].angleEP=90.;
+                    }
+                if(listObj[numObj].utype.fire.c.x==170.){
+                    listObj[numObj].entryPoint[0].c.x=170.;
+                    listObj[numObj].entryPoint[0].c.y=20.;
+                    listObj[numObj].entryPoint[0].angleEP=90.;
+                    }
+                if(listObj[numObj].utype.fire.c.x==299.){
+                    listObj[numObj].entryPoint[0].c.x=280.;
+                    listObj[numObj].entryPoint[0].c.y=120.;
+                    listObj[numObj].entryPoint[0].angleEP=180.;
+                    }
+                break;
+            default :
+                printf("Error in switch createEPfire\n");
+                getchar();
+                break;
+            }
+        }
 	}
 
 
@@ -248,7 +250,7 @@ void cmdServo(eServoLoc_t loc, eServoPos_t pos){
         }
     }
 
-int testPtInSseg(const sSeg_t *s, const sPt_t *p){
+int testPtInSeg(const sSeg_t *s, const sPt_t *p){
     sNum_t d1, d2;
 
     distPt2Pt(&s->p1, &s->p2, &d1);
@@ -287,10 +289,10 @@ int checkSeg(const sSeg_t *s2, sPt_t *prev_pos, int j){
         }
 
     //check if the point it belongs to the segments
-    if(!testPtInSseg(s2, &pt)){
+    if(!testPtInSeg(s2, &pt)){
         return 0;
         }
-    if(!testPtInSseg(&s1, &pt)){
+    if(!testPtInSeg(&s1, &pt)){
         return 0;
         }
 
@@ -311,13 +313,19 @@ int checkSeg(const sSeg_t *s2, sPt_t *prev_pos, int j){
 int objBonusFire(void){
     int i, j, k, ac;
     static int first = 0;
-    sPt_t p[4]; //A, B, C, D
-    sSeg_t s2, seg;
+    sPt_t p[4], pt; //A, B, C, D
+    sSeg_t s2, seg, s3, s4;
     static sPt_t prev_pos ={0., 0.};
-    sLin_t l;
+    sLin_t l, l1, l2;
     static int ser_active_i = -1;
     static int ser_active_j = -1;
     static int time_prev = 0;
+    static int ser_active_i2 = -1;
+    static int ser_active_j2 = -1;
+    static int time_prev2 = 0;
+    sNum_t c;
+    sVec_t v1, v2;
+    int nb;
 
 
     if(first == 0){ //initialization
@@ -337,6 +345,17 @@ int objBonusFire(void){
             }
         ser_active_i = -1;
         ser_active_j = -1;
+        }
+
+    if( (((int)millis() - time_prev2) > 3000) && (ser_active_i2 != -1) ){ //security
+        if( ser_active_j2 == 0){
+            cmdServo(ARM_RIGHT, CLOSE);
+            }
+        else{
+            cmdServo(ARM_LEFT, CLOSE);
+            }
+        ser_active_i2 = -1;
+        ser_active_j2 = -1;
         }
 
     if((obs[0].c.x == prev_pos.x) && (obs[0].c.y == prev_pos.y) ){ //no new position
@@ -460,6 +479,52 @@ int objBonusFire(void){
                     listObj[i].utype.fire.pos = 1;
                     }
                 }
+            }
+        if((listObj[i].etype == E_FEU) && (listObj[i].active == 1) && (listObj[i].utype.fire.pos == 4) ){
+            seg.p1.x = obs[listObj[i].numObs[0]].c.x;
+            seg.p1.y = obs[listObj[i].numObs[0]].c.y;
+            seg.p2.x = obs[listObj[i].numObs[0]].c.x + BZ*cos(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI_2+ M_PI*ac);
+            seg.p2.y = obs[listObj[i].numObs[0]].c.y + BZ*sin(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI_2+ M_PI*ac);
+
+            //printf("p1.x = %f et p1.y = %f\n", seg.p1.x, seg.p1.y);
+            //printf("p2.x = %f et p2.y = %f\n", seg.p2.x, seg.p2.y);
+
+            convPts2Line(&seg.p1, &seg.p2, 0, &l1);
+            convPts2Line(&obs[0].c, &prev_pos, 0, &l2);
+
+            interLine2Line(&l1, &l2, &nb, &pt);
+
+            if(nb != 1) continue;
+
+            convPts2Seg(&seg.p1, &seg.p2, &s3);
+            convPts2Seg(&obs[0].c, &prev_pos, &s4);
+
+            if(testPtInSeg(&s3, &pt) != 1) continue;
+            if(testPtInSeg(&s4, &pt) != 1) continue;
+
+            convPts2Vec(&seg.p1, &seg.p2, &v1);
+            convPts2Vec(&obs[0].c, &prev_pos, &v2);
+
+            crossVecs(&v1, &v2, &c);
+
+            if( c < 0){
+                cmdServo(ARM_LEFT, OPEN);
+                ser_active_j2 = 1;
+                }
+            else{
+                cmdServo(ARM_RIGHT, OPEN);
+                ser_active_j2 = 0;
+                }
+            ser_active_i2 = i;
+            time_prev2 = millis() - 2000;
+            listObj[i].active = 0;
+            if(color == 1){
+                listObj[i].utype.fire.pos = 2;
+                }
+            else{
+                listObj[i].utype.fire.pos = 1;
+                }
+
             }
         }
 

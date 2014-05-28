@@ -240,6 +240,15 @@ void init_ele(void){
         createEPfire2(i);
         }
 
+    if(color == RED){
+        listObj[13].active = 0;
+        listObj[15].active = 0;
+        }
+    else{
+        listObj[12].active = 0;
+        listObj[14].active = 0;
+        }
+
 	#if DEBUG
 		printListObj();
 	#endif
