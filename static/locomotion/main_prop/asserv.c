@@ -96,6 +96,7 @@ int curr_traj_step; // current step of the current trajectory (0:curr_traj_inser
 volatile int curr_traj_insert_sid = 0; // index at which data will be inserted in the current trajectory
 volatile int next_traj_insert_sid = 0; // index at which data will be inserted in the next trajectory
 volatile uint16_t curr_tid, next_tid; // current and next trajectory identifiers
+PID_t posLeft, posRight;
 
 void traj_conv(sTrajEl_t *t) {
     if(!t->is_ok) {
@@ -116,7 +117,7 @@ void traj_conv(sTrajEl_t *t) {
 }
 
 int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
-int gx, gy; // goal (I<<SHIFT)
+int gx, gy, gtheta; // goal (I<<SHIFT)
 int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
 enum {
@@ -186,6 +187,9 @@ void asserv_init(){
 #endif
 
     motor_controller_init();
+
+    pid_init(&posLeft, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
+    pid_init(&posRight, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
 
 #ifdef ARCH_LPC21XX
     // init time management
@@ -386,8 +390,15 @@ int new_asserv_step(){
     switch(state) {
     default:
     case S_WAIT:
-        consigne_l = 0;
-        consigne_r = 0;
+        { // position control loop
+            int thet = theta - (isRPI>>1);
+            int yL = (thet>>1) + y;
+            int yR = -(thet>>1) + y;
+
+            // update PIDs
+            consigne_l = pid_update(&posLeft, gy, yL);
+            consigne_r = pid_update(&posRight, gy, yR);
+        }
         break;
 
     case S_CHG_TRAJ:
