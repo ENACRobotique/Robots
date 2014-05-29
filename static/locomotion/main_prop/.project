@@ -42,7 +42,7 @@
 		<link>
 			<name>lib/UART_framing</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/UART_framing</location>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/UART_framing</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>

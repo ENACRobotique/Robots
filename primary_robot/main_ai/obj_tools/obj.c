@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "obj_com.h"
+#include "main.h"
 
 #define CLAMP(m, v, M) MAX(m, MIN(v, M))
 
@@ -284,12 +285,99 @@ int checkCurrentPath(void){
 	}
 
 
+void set_traj(sPath_t *p, iABObs_t l[], int nb){
+    int i;
+    p->path = (sTrajEl_t *)calloc(nb - 1, sizeof(sTrajEl_t));
+    p->path_len = nb - 1;
+    // p->dist // TODO
+    // p->path_len // TODO
 
+    for(i = 0; i < nb - 1; i++){
+        sSeg_t *s = tgt(l[i], l[i+1]);
+
+        p->path[i].p1 = s->p1;
+        p->path[i].p2 = s->p2;
+        distPt2Pt(&s->p1, &s->p2, &p->path[i].seg_len);
+
+        p->path[i].obs.active = 1;
+        p->path[i].obs.c = obs[O(l[i+1])].c;
+        p->path[i].obs.moved = 1;
+        p->path[i].obs.r = fabs(obs[O(l[i+1])].r)*(1 - 2*DIR(l[i+1]));
+        if(i == nb - 1){
+            p->path[i].arc_len = 0.;
+        }
+        else{
+            p->path[i].arc_len = arc_len(l[i], l[i+1], l[i+2]);
+        }
+
+
+        p->path[i].sid = i;
+    }
+}
 
 
 void obj_step(){
-	int j;
+	int i, j;
 	int obj=-1;
+    sObs_t obsRed[] = {
+        // robots
+        {{0., 0.}, 0., 1, 1},   //primary
+        {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
+        {{0., 0.}, R_ROBOT+20., 1, 1, 1},   //primary adv
+        {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
+
+        // trajectory
+        {{ 15., 120.}, 10, 0, 1, 1}, // 4
+        {{ 35., 50. }, 10, 0, 1, 1},
+        {{ 50., 35. }, 10, 0, 1, 1},
+        {{250., 35. }, 10, 0, 1, 1},
+        {{265., 50. }, 10, 0, 1, 1},//8
+        {{265., 95. }, 10, 0, 1, 1},
+        {{245., 160.},10, 0, 1, 1},
+        {{235., 200.}, 0, 0, 1, 1},//11
+        };
+    iABObs_t obs_list_Red[] = {
+        A(0), // r=0
+        A(4),
+        B(5),
+        B(6),
+        B(7),
+        B(8),
+        B(9),
+        A(10),
+        A(11)// r=0
+        };
+
+    sObs_t obsYellow[] = {
+        // robots
+        {{0., 0.}, 0., 1, 1},   //primary
+        {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
+        {{0., 0.}, R_ROBOT+20., 1, 1, 1},   //primary adv
+        {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
+
+        // trajectory
+        {{300. - 15., 120.}, 10, 0, 1, 1}, // 4
+        {{300. - 35., 50. }, 10, 0, 1, 1},
+        {{300. - 50., 35. }, 10, 0, 1, 1},
+        {{300. -250., 35. }, 10, 0, 1, 1},
+        {{300. -265., 50. }, 10, 0, 1, 1},//8
+        {{300. -265., 95. }, 10, 0, 1, 1},
+        {{300. -245., 160.},10, 0, 1, 1},
+        {{300. -235., 200.}, 0, 0, 1, 1},//11
+        };
+    iABObs_t obs_list_Yellow[] = {
+        A(0), // r=0
+        B(4),
+        A(5),
+        A(6),
+        A(7),
+        A(8),
+        A(9),
+        B(10),
+        A(11)// r=0
+    };
+
+    static iABObs_t obs_list[32];
 
     /*sTrajEl_t tabStart[2]={ //Segment for push a vertical fire
         {{0.  ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
@@ -317,11 +405,19 @@ void obj_step(){
             state = INIT;
             //Setting initial position
             if(color==1){
+                #if PROG_TRAJ
+                memcpy(obs, obsYellow, sizeof(obsYellow));
+                memcpy(obs_list, obs_list_Yellow, sizeof(obs_list_Yellow));
+                #endif
                 obs[0].c.x = 300. - 15.5;
                 obs[0].c.y = 200. - 20; //15.8
                 theta_robot = M_PI;
                 }
             else{
+                #if PROG_TRAJ
+                memcpy(obs, obsRed, sizeof(obsRed));
+                memcpy(obs_list, obs_list_Red, sizeof(obs_list_Red));
+                #endif
                 obs[0].c.x = 15.5;
                 obs[0].c.y = 200. - 20; //15.8
                 theta_robot = 0;
@@ -384,6 +480,15 @@ void obj_step(){
         	state = JEU;
         	_start_time = millis();
         	last_time=_start_time;
+
+#if PROG_TRAJ
+            fill_tgts_lnk();
+
+            set_traj(&curr_path, obs_list, 9);
+            curr_path.tid = ++last_tid;
+            curr_traj_extract_sid = 0;
+#endif
+
         	}
         break;
    /* case INIT_POS:
@@ -428,6 +533,50 @@ void obj_step(){
     case JEU :
         if(millis()-_start_time > END_MATCH) state = SHUT_DOWN;
 
+#if PROG_TRAJ
+            sGenericStatus *stPr = getLastPGStatus(ELT_PRIMARY); sPt_t ptPr;
+            sGenericStatus *stAPr = getLastPGStatus(ELT_ADV_PRIMARY); sPt_t ptAPr;
+            sGenericStatus *stASc = getLastPGStatus(ELT_ADV_SECONDARY); sPt_t ptASc;
+            sNum_t d, dot;
+            sVec_t v1, v2;
+
+            if(stPr){
+                ptPr.x = stPr->prop_status.pos.x;
+                ptPr.y = stPr->prop_status.pos.y;
+
+                if(stAPr){
+                    ptAPr.x = stAPr->prop_status.pos.x;
+                    ptAPr.y = stAPr->prop_status.pos.y;
+
+                    distPt2Pt(&ptPr, &ptAPr, &d);
+                    v1.x = cos(stPr->prop_status.pos.theta);
+                    v1.y = sin(stPr->prop_status.pos.theta);
+                    convPts2Vec(&ptPr, &ptAPr, &v2);
+                    dotVecs(&v1, &v2, &dot);
+
+                    if(d < 50 && dot > 0.6*d){
+// TODO
+                        printf("CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+                    }
+                }
+
+                if(stASc){
+                    ptASc.x = stASc->prop_status.pos.x;
+                    ptASc.y = stASc->prop_status.pos.y;
+
+                    distPt2Pt(&ptPr, &ptASc, &d);
+                    v1.x = cos(stPr->prop_status.pos.theta);
+                    v1.y = sin(stPr->prop_status.pos.theta);
+                    convPts2Vec(&ptPr, &ptASc, &v2);
+                    dotVecs(&v1, &v2, &dot);
+
+                    if(d < 40 && dot > 0.6*d){
+// TODO
+                        printf("CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+                    }
+                }
+            }
+#else
         //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
         temp=0;
         for(j=0 ; j<NB_OBJ ; j++){
@@ -458,6 +607,7 @@ void obj_step(){
             checkRobot2Obj();
             checkRobotBlock();
 
+
        if((millis()-last_time2)>1000){
             last_time2 = millis();
             updateEntryPointTree();
@@ -465,13 +615,14 @@ void obj_step(){
             printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
             }
 
-
+#endif
 
         //If the select point is achieved
         if (((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) ) || mode_obj==1){   //objectif atteint
         	//printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
         	//printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
         	//printf("mode_obj=%d", mode_obj);
+
         	switch ((listObj[current_obj]).etype){ //Mise en place des procédures local en fonction de l'objectif
 				case E_ARBRE :
 					obj_tree(current_obj);
@@ -537,24 +688,26 @@ int obj_init(){
                 break;
             case 3:
                 if( (ret = bn_ping(ADDRX_MOBILE_2)) > 0){
-                    state = 4;
+                    state = 5; // XXX
                     }
                 printf("Ping mobile 2 : %d\n", ret);
                 break;
-            case 4:
-                if( (ret = bn_ping(ADDRX_FIX)) > 0){
-                    state = 5;
-                    }
-                printf("Ping fix : %d\n", ret);
-                break;
+//            case 4:
+//                if( (ret = bn_ping(ADDRX_FIX)) > 0){
+//                    state = 5;
+//                    }
+//                printf("Ping fix : %d\n", ret);
+//                break;
 
             }
         if(state == 5) break;
         }
 #endif
 */
+#if !PROG_TRAJ
     listObj[8].done=0.5;
     listObj[10].done=0.5;
+#endif
    // starting_cord = 1; //tirette simulation
     mode_switch = 0;
 
@@ -564,9 +717,11 @@ int obj_init(){
         obs_updated[i]++;
     	}
 
+#if !PROG_TRAJ
 	#if DEBUG
 		printListObj();
 	#endif
+#endif
 
     return 0;
 	}

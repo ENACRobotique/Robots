@@ -3,6 +3,7 @@
 
 #include<time.h>
 
+#include "math_types.h"
 #include "tools.h"
 #include "a_star.h"
 #include "math_ops.h"
@@ -14,16 +15,22 @@
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
-#define COLOR_SIMU 0 //0 red  1 yellow
+#define COLOR_SIMU 1 //0 red  1 yellow
 #define DEBUG 1
-#define SIMU 1 //modify network_cfg.h
+#define SIMU 0 //modify network_cfg.h
+#define PROG_TRAJ 1 //1 active
 #define RESO_POS 2
 #define NB_OBJ 16
 #define END_MATCH 90000 //in ms
 #define MAX_OBS_BY_OBJ 3
 #define MAX_EP_BY_OBJ 3
+#if PROG_TRAJ
+#define START_FEU 12
+#define END_FEU 22
+#else
 #define START_FEU 31
 #define END_FEU 47
+#endif
 #define START_ARBRE 4
 #define START_TORCHE_FIXE 23
 #define FIRE_RADIUS_EP 15

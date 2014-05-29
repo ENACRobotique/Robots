@@ -226,7 +226,7 @@ void cmdServo(eServoLoc_t loc, eServoPos_t pos){
                     sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 0); //FIXME
                     break;
                 case HALF_OPEN :
-                    sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 90); //FIXME
+                    sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 110); //FIXME
                     break;
                 case OPEN :
                     sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 180); //FIXME
@@ -240,7 +240,7 @@ void cmdServo(eServoLoc_t loc, eServoPos_t pos){
                     sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 180); //FIXME
                     break;
                 case HALF_OPEN :
-                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 90); //FIXME
+                    sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 70); //FIXME
                     break;
                 case OPEN :
                     sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 0); //FIXME
@@ -480,7 +480,7 @@ int objBonusFire(void){
                     }
                 }
             }
-        if((listObj[i].etype == E_FEU) && (listObj[i].active == 1) && (listObj[i].utype.fire.pos == 4) ){
+   /*     if((listObj[i].etype == E_FEU) && (listObj[i].active == 1) && (listObj[i].utype.fire.pos == 4) ){
             seg.p1.x = obs[listObj[i].numObs[0]].c.x;
             seg.p1.y = obs[listObj[i].numObs[0]].c.y;
             seg.p2.x = obs[listObj[i].numObs[0]].c.x + BZ*cos(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI_2+ M_PI*ac);
@@ -525,7 +525,7 @@ int objBonusFire(void){
                 listObj[i].utype.fire.pos = 1;
                 }
 
-            }
+            }*/
         }
 
     prev_pos = obs[0].c;

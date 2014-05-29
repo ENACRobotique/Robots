@@ -34,6 +34,7 @@
 #include "obj_statuses.h"
 #include "obj_fire.h"
 
+#include "main.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -42,6 +43,10 @@ void intHandler(int dummy) {
     menu = 1;
 }
 #endif
+
+sPath_t curr_path = {.path = NULL};
+int curr_traj_extract_sid = -1;
+int last_tid = 0;
 
 void usage(char *cl){
     printf("main ia\n");
@@ -61,6 +66,8 @@ void posUpdated(sGenericStatus *status){
         obs[status->id].c.x = status->pos.x;
         obs[status->id].c.y = status->pos.y;
 
+//        printf("PosUpdated %i\n", status->id);
+
         obs_updated[status->id]++;
     }
 }
@@ -74,15 +81,13 @@ int main(int argc, char **argv){
     float last_theta = 0.;
     float last_speed = 0.;
     unsigned int prevPos = 0;
-    int last_tid = 0;
     int i;
     enum{
         E_AI_SLAVE,
         E_AI_AUTO
     } eAIState = E_AI_SLAVE;
     // traj mgmt
-    sPath_t new_path = {.path = NULL}, curr_path = {.path = NULL};
-    int curr_traj_extract_sid = -1;
+    sPath_t new_path = {.path = NULL};
     unsigned int prevSendTraj = 0;
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
@@ -154,9 +159,11 @@ int main(int argc, char **argv){
     {
         sStatusHandlingConfig cfg;
         cfg.has_position = 1;
-        cfg.handlerPG = posUpdated;
 
-        // setConfig(ELT_PRIMARY, &cfg);
+        cfg.handlerPG = NULL;
+        setConfig(ELT_PRIMARY, &cfg);
+
+        cfg.handlerPG = posUpdated;
         setConfig(ELT_SECONDARY, &cfg);
         setConfig(ELT_ADV_PRIMARY, &cfg);
         setConfig(ELT_ADV_SECONDARY, &cfg);
@@ -370,6 +377,7 @@ int main(int argc, char **argv){
                 break;
             case E_GENERIC_STATUS:
                 received_new_status(&msgIn.payload.genericStatus);
+                printf("pos:%.2f,%.2f\n", msgIn.payload.genericStatus.adv_status.pos.x, msgIn.payload.genericStatus.adv_status.pos.y);
                 break;
             case E_IHM_STATUS:
                 for(i = 0 ; i < (int)msgIn.payload.ihmStatus.nb_states ; i++){
