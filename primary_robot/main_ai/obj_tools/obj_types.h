@@ -41,7 +41,7 @@
 #define NB_MAX_PT_ZONE 10
 
 
-typedef enum {COLOR_SELECTION, INIT, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
+typedef enum {COLOR_SELECTION, INIT, WAITING, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
 typedef enum {E_FEU, E_TORCHE_MOBILE, E_ARBRE, E_ARBRE_FOND , E_BAC, E_FOYER, E_TORCHE_FIXE} eObj_t;
 typedef enum {WAIT_MES, ACTIVE, FREE} eStateObj_t;
 typedef enum {ARM_LEFT, ARM_RIGHT} eServoLoc_t;

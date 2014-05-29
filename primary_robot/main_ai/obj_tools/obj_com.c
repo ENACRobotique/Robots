@@ -84,7 +84,7 @@ int sendPosServo(eServos s, int16_t us, int16_t a){ // us or a = -1 if no use
     msg.payload.servos.servos[0].id = s;
     msg.payload.servos.servos[0].us = us;
 
-    bn_send(&msg);
+    while( (bn_send(&msg)) <= 0);
 
     return 1;
 
@@ -102,7 +102,7 @@ int newSpeed(float speed){
     msg.header.size = sizeof(msg.payload.speedSetPoint);
     msg.payload.speedSetPoint.speed = speed;
 
-    bn_send(&msg);
+    while( (bn_send(&msg)) <= 0);
 
     return 1;
     }
@@ -124,7 +124,7 @@ void setPos(sPt_t *p, sNum_t theta){
     theta_robot = theta;
     _current_pos = obs[0].c;
 
-    role_send(&msg);
+    while( (bn_send(&msg)) <= 0);
     }
 
 

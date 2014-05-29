@@ -72,9 +72,8 @@ int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, lim
 unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord, timeLimitSwitchRight, timeLimitSwitchLeft;
 
 void loop(){
+    int ret;
     time = millis();
-
-
 
     if(bn_receive(&inMsg) > 0){
         switch(inMsg.header.type){
@@ -104,7 +103,7 @@ void loop(){
                 outMsg.payload.ihmStatus.states[2].id = IHM_LED;
                 outMsg.payload.ihmStatus.states[2].state = Led;
 
-                bn_send(&outMsg);
+                while( (ret = bn_send(&outMsg)) <= 0);
             }
             else{
                 for(i = 0; i < (int)inMsg.payload.ihmStatus.nb_states; i++){
@@ -157,7 +156,8 @@ void loop(){
         outMsg.payload.ihmStatus.nb_states = 1;
         outMsg.payload.ihmStatus.states[0].id = IHM_STARTING_CORD;
         outMsg.payload.ihmStatus.states[0].state = StartingCord;
-        bn_send(&outMsg);
+
+        while( (ret = bn_send(&outMsg)) <= 0);
 
         flagStartingCord = 0;
     }
@@ -171,7 +171,7 @@ void loop(){
         outMsg.payload.ihmStatus.nb_states = 1;
         outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWICTH;
         outMsg.payload.ihmStatus.states[0].state = ModeSwicth;
-        bn_send(&outMsg);
+        while( (ret = bn_send(&outMsg)) <= 0);
 
         flagModeSwitch = 0;
     }
@@ -188,7 +188,7 @@ void loop(){
             outMsg.payload.ihmStatus.nb_states = 1;
             outMsg.payload.ihmStatus.states[0].id = IHM_LIMIT_SWITCH_RIGHT;
             outMsg.payload.ihmStatus.states[0].state = limitSwitchRight;
-            bn_send(&outMsg);
+            while( (ret = bn_send(&outMsg)) <= 0);
         }
     }
 
@@ -204,7 +204,7 @@ void loop(){
             outMsg.payload.ihmStatus.nb_states = 1;
             outMsg.payload.ihmStatus.states[0].id = IHM_LIMIT_SWITCH_LEFT;
             outMsg.payload.ihmStatus.states[0].state = limitSwitchLeft;
-            bn_send(&outMsg);
+            while( (ret = bn_send(&outMsg)) <= 0);
         }
     }
 }

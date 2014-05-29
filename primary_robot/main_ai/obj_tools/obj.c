@@ -335,7 +335,7 @@ void obj_step(){
         {{250., 35. }, 10, 0, 1, 1},
         {{265., 50. }, 10, 0, 1, 1},//8
         {{265., 95. }, 10, 0, 1, 1},
-        {{245., 160.},10, 0, 1, 1},
+        {{245., 160.}, 10, 0, 1, 1},
         {{235., 200.}, 0, 0, 1, 1},//11
         };
     iABObs_t obs_list_Red[] = {
@@ -364,7 +364,7 @@ void obj_step(){
         {{300. -250., 35. }, 10, 0, 1, 1},
         {{300. -265., 50. }, 10, 0, 1, 1},//8
         {{300. -265., 95. }, 10, 0, 1, 1},
-        {{300. -245., 160.},10, 0, 1, 1},
+        {{300. -245., 160.}, 10, 0, 1, 1},
         {{300. -235., 200.}, 0, 0, 1, 1},//11
         };
     iABObs_t obs_list_Yellow[] = {
@@ -403,7 +403,7 @@ void obj_step(){
 #endif
             sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 180);
             sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 0);
-            sendPosServo(SERVO_PRIM_DOOR, -1, 700);
+            sendPosServo(SERVO_PRIM_DOOR, -1, 560);
             state = INIT;
             //Setting initial position
             if(color==1){
@@ -479,7 +479,7 @@ void obj_step(){
     case WAIT:
         //                printf("Attente. time = %ld\n", millis()); // FIXME debug
         if(test_tirette()){
-        	state = JEU;
+        	state = WAITING;
         	_start_time = millis();
         	last_time=_start_time;
 
@@ -532,6 +532,12 @@ void obj_step(){
 
         break;
 */
+
+    case WAITING:
+       if(millis() - _start_time> 2000){
+           state = JEU;
+           }
+       break;
     case JEU :
         if(millis()-_start_time > END_MATCH) state = SHUT_DOWN;
 
@@ -580,7 +586,7 @@ void obj_step(){
             }
 
             if(switch_left == 1 && switch_right ==1){
-                sendPosServo(SERVO_PRIM_DOOR, 560, NULL);
+                sendPosServo(SERVO_PRIM_DOOR, 560, -1);
                 }
 #else
         //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
