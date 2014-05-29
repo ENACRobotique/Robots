@@ -392,6 +392,12 @@ int main(int argc, char **argv){
                             break;
                         case IHM_LED:
                             break;
+                        case IHM_LIMIT_SWITCH_LEFT:
+                            switch_left = msgIn.payload.ihmStatus.states[i].state;
+                            break;
+                        case IHM_LIMIT_SWITCH_RIGHT:
+                            switch_right = msgIn.payload.ihmStatus.states[i].state;
+                            break;
                         default:
                             break;
                     }

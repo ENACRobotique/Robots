@@ -16,6 +16,8 @@ sPt_t prev_pos={0., 0.};
 sNum_t prev_len=0;
 long last_time2=0;
 
+int switch_left = 0, switch_right = 0;
+
 
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r){
 	int i;
@@ -576,6 +578,10 @@ void obj_step(){
                     }
                 }
             }
+
+            if(switch_left == 1 && switch_right ==1){
+                sendPosServo(SERVO_PRIM_DOOR, 560, NULL);
+                }
 #else
         //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
         temp=0;
