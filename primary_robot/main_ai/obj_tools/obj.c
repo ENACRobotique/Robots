@@ -458,6 +458,49 @@ void obj_step(){
             checkRobot2Obj();
             checkRobotBlock();
 
+#if PROG_TRAJ
+            sGenericStatus *stPr = getLastPGStatus(ELT_PRIMARY); sPt_t ptPr;
+            sGenericStatus *stAPr = getLastPGStatus(ELT_ADV_PRIMARY); sPt_t ptAPr;
+            sGenericStatus *stASc = getLastPGStatus(ELT_ADV_SECONDARY); sPt_t ptASc;
+            sNum_t d, dot;
+            sVec_t v1, v2;
+
+            if(stPr){
+                ptPr.x = stPr->prop_status.pos.x;
+                ptPr.y = stPr->prop_status.pos.y;
+
+                if(stAPr){
+                    ptAPr.x = stAPr->prop_status.pos.x;
+                    ptAPr.y = stAPr->prop_status.pos.y;
+
+                    distPt2Pt(&ptPr, &ptAPr, &d);
+                    v1.x = cos(stPr->prop_status.pos.theta);
+                    v1.y = sin(stPr->prop_status.pos.theta);
+                    convPts2Vec(&ptPr, &ptAPr, &v2);
+                    dotVecs(&v1, &v2, &dot);
+
+                    if(d < 50 && dot > 0.6*d){
+// TODO
+                    }
+                }
+
+                if(stASc){
+                    ptASc.x = stASc->prop_status.pos.x;
+                    ptASc.y = stASc->prop_status.pos.y;
+
+                    distPt2Pt(&ptPr, &ptASc, &d);
+                    v1.x = cos(stPr->prop_status.pos.theta);
+                    v1.y = sin(stPr->prop_status.pos.theta);
+                    convPts2Vec(&ptPr, &ptASc, &v2);
+                    dotVecs(&v1, &v2, &dot);
+
+                    if(d < 40 && dot > 0.6*d){
+// TODO
+                    }
+                }
+            }
+#endif
+
        if((millis()-last_time2)>1000){
             last_time2 = millis();
             updateEntryPointTree();
@@ -553,8 +596,10 @@ int obj_init(){
         }
 #endif
 */
+#if !PROG_TRAJ
     listObj[8].done=0.5;
     listObj[10].done=0.5;
+#endif
    // starting_cord = 1; //tirette simulation
     mode_switch = 0;
 
@@ -564,9 +609,11 @@ int obj_init(){
         obs_updated[i]++;
     	}
 
+#if !PROG_TRAJ
 	#if DEBUG
 		printListObj();
 	#endif
+#endif
 
     return 0;
 	}
