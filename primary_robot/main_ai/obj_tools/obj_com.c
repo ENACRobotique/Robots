@@ -11,6 +11,7 @@
 #include <math.h>
 #include "../botNet/shared/botNet_core.h"
 #include "obj_types.h"
+#include "main.h"
 
 sServo_t listServo[2]={ //TODO other servo
     {SERVO_PRIM_ARM_LEFT,  650, 0, 2400, 180},
@@ -20,8 +21,7 @@ sServo_t listServo[2]={ //TODO other servo
 void send_robot(sPath_t path){
     sMsg outMsg = {{0}};
     int i, ret ;
-    static int tid = 0;
-    tid++;
+    last_tid++;
     if(path.path)
         for(i = 0; i < path.path_len; i++) {
             printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, path.path[i].p1.x, path.path[i].p1.y, path.path[i].p2.x, path.path[i].p2.y,path.path[i].obs.c.x,path.path[i].obs.c.y, path.path[i].obs.r,path.path[i].arc_len,path.path[i].seg_len);
@@ -41,7 +41,7 @@ void send_robot(sPath_t path){
             outMsg.payload.traj.arc_len = path.path[i].arc_len;
 
             outMsg.payload.traj.sid = i;
-            outMsg.payload.traj.tid = tid;
+            outMsg.payload.traj.tid = last_tid;
 
             ret = role_send(&outMsg);
             if(ret < 0) printf("role_send(E_TRAJ) failed #%i\n", -ret);

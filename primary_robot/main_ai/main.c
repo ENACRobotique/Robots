@@ -34,6 +34,7 @@
 #include "obj_statuses.h"
 #include "obj_fire.h"
 
+#include "main.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -42,6 +43,10 @@ void intHandler(int dummy) {
     menu = 1;
 }
 #endif
+
+sPath_t curr_path = {.path = NULL};
+int curr_traj_extract_sid = -1;
+int last_tid = 0;
 
 void usage(char *cl){
     printf("main ia\n");
@@ -76,15 +81,13 @@ int main(int argc, char **argv){
     float last_theta = 0.;
     float last_speed = 0.;
     unsigned int prevPos = 0;
-    int last_tid = 0;
     int i;
     enum{
         E_AI_SLAVE,
         E_AI_AUTO
     } eAIState = E_AI_SLAVE;
     // traj mgmt
-    sPath_t new_path = {.path = NULL}, curr_path = {.path = NULL};
-    int curr_traj_extract_sid = -1;
+    sPath_t new_path = {.path = NULL};
     unsigned int prevSendTraj = 0;
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
