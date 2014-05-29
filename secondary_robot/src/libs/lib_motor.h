@@ -13,8 +13,13 @@
 
 //#define DEBUG_MOTOR
 
+
+
+
 void motorInitHard(int pinDir,int pinPWM);
 void motAsser();
+void motAsserTemp();
+
 
 extern int _motCon;
 inline void motSetCon(int motSpeed){
