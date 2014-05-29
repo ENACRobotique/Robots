@@ -17,6 +17,7 @@
 #define COLOR_SIMU 0 //0 red  1 yellow
 #define DEBUG 1
 #define SIMU 1 //modify network_cfg.h
+#define PROG_TRAJ 1 //1 active
 #define RESO_POS 2
 #define NB_OBJ 16
 #define END_MATCH 90000 //in ms
