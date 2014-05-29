@@ -21,11 +21,11 @@ typedef struct {
         int pin;
 } sServoData;
 sServoData servosTable[] = {
-        {Servo(), SERVO_PRIM_DOOR, 10},
-        {Servo(), SERVO_PRIM_FIRE1, 8},
-        {Servo(), SERVO_PRIM_FIRE2, 9},
-        {Servo(), SERVO_PRIM_ARM_LEFT, 6},
-        {Servo(), SERVO_PRIM_ARM_RIGHT, 7},
+        {Servo(), SERVO_PRIM_DOOR, 10},     //5
+        {Servo(), SERVO_PRIM_FIRE1, 8},     //3
+        {Servo(), SERVO_PRIM_FIRE2, 9},     //4
+        {Servo(), SERVO_PRIM_ARM_LEFT, 6},  //1
+        {Servo(), SERVO_PRIM_ARM_RIGHT, 7}, //2
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
@@ -33,6 +33,9 @@ sServoData servosTable[] = {
 #define PIN_STARTING_CORD (2)
 #define PIN_LED_1 (4)
 #define PIN_LED_2 (5)
+
+#define PIN_LIMIT_SWITCH_RIGHT (A2)
+#define PIN_LIMIT_SWITCH_LEFT (A3)
 
 void fctModeSwitch(void);
 void fctStartingCord(void);
@@ -44,6 +47,8 @@ void setup(){
     pinMode(PIN_DBG_LED, OUTPUT);
     pinMode(PIN_LED_1, OUTPUT);
     pinMode(PIN_LED_2, OUTPUT);
+    pinMode(PIN_LIMIT_SWITCH_RIGHT, INPUT);
+    pinMode(PIN_LIMIT_SWITCH_LEFT, INPUT);
 
     attachInterrupt(0, fctStartingCord, CHANGE);
     attachInterrupt(1, fctModeSwitch, CHANGE);
@@ -63,7 +68,8 @@ void setup(){
 
 sMsg inMsg, outMsg;
 int ledState = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwicth = 0, StartingCord = 0, Led = 0;
-unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord;
+int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, limitSwitchLeft = 0;
+unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord, timeLimitSwitchRight, timeLimitSwitchLeft;
 
 void loop(){
     time = millis();
@@ -168,6 +174,38 @@ void loop(){
         bn_send(&outMsg);
 
         flagModeSwitch = 0;
+    }
+
+    if( (time -  timeLimitSwitchRight) > 20 ){
+        limitSwitchRight = digitalRead(PIN_MODE_SWICTH);
+
+        if(limitSwitchRight != prevLimitSwitchRight){
+            prevLimitSwitchRight = limitSwitchRight;
+
+            outMsg.header.destAddr = role_get_addr(ROLE_IA);
+            outMsg.header.type = E_IHM_STATUS;
+            outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+            outMsg.payload.ihmStatus.nb_states = 1;
+            outMsg.payload.ihmStatus.states[0].id = IHM_LIMIT_SWITCH_RIGHT;
+            outMsg.payload.ihmStatus.states[0].state = limitSwitchRight;
+            bn_send(&outMsg);
+        }
+    }
+
+    if( (time -  timeLimitSwitchLeft) > 20 ){
+        limitSwitchLeft = digitalRead(PIN_MODE_SWICTH);
+
+        if(limitSwitchLeft != prevLimitSwitchLeft){
+            prevLimitSwitchLeft = limitSwitchLeft;
+
+            outMsg.header.destAddr = role_get_addr(ROLE_IA);
+            outMsg.header.type = E_IHM_STATUS;
+            outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+            outMsg.payload.ihmStatus.nb_states = 1;
+            outMsg.payload.ihmStatus.states[0].id = IHM_LIMIT_SWITCH_LEFT;
+            outMsg.payload.ihmStatus.states[0].state = limitSwitchLeft;
+            bn_send(&outMsg);
+        }
     }
 }
 
