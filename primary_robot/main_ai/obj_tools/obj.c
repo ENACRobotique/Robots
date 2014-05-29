@@ -403,7 +403,7 @@ void obj_step(){
 #endif
             sendPosServo(SERVO_PRIM_ARM_RIGHT, -1, 180);
             sendPosServo(SERVO_PRIM_ARM_LEFT, -1, 0);
-            sendPosServo(SERVO_PRIM_DOOR, -1, 560);
+            sendPosServo(SERVO_PRIM_DOOR, -1, 500);
             state = INIT;
             //Setting initial position
             if(color==1){
@@ -534,7 +534,7 @@ void obj_step(){
 */
 
     case WAITING:
-       if(millis() - _start_time> 2000){
+       if(millis() - _start_time > 2000){
            state = JEU;
            }
        break;
@@ -586,7 +586,7 @@ void obj_step(){
             }
 
             if(switch_left == 1 && switch_right ==1){
-                sendPosServo(SERVO_PRIM_DOOR, 560, -1);
+                sendPosServo(SERVO_PRIM_DOOR, 1800, -1);
                 }
 #else
         //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
