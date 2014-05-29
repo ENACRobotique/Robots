@@ -358,10 +358,10 @@ void obj_step(){
             //Initialization of the game
             init_ele();
             //Change element for simulation
-            //listObj[0].utype.tree.eFruit[0]=2;
-            //listObj[0].utype.tree.eFruit[3]=2;
-            //listObj[1].utype.tree.eFruit[0]=2;
-            //listObj[1].utype.tree.eFruit[3]=2;
+            listObj[0].utype.tree.eFruit[0]=2;
+            listObj[0].utype.tree.eFruit[3]=2;
+            listObj[1].utype.tree.eFruit[0]=2;
+            listObj[1].utype.tree.eFruit[3]=2;
             listObj[2].utype.tree.eFruit[0]=2;
             listObj[2].utype.tree.eFruit[3]=2;
             listObj[3].utype.tree.eFruit[0]=2;
@@ -512,7 +512,7 @@ int obj_init(){
         printf("N isn't correct, byebye\n");
         exit(1);
     	}
-
+/*
     //ping all address
 #if !SIMU
     while(1){
@@ -552,7 +552,7 @@ int obj_init(){
         if(state == 5) break;
         }
 #endif
-
+*/
     listObj[8].done=0.5;
     listObj[10].done=0.5;
    // starting_cord = 1; //tirette simulation

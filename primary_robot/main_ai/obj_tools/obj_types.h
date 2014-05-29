@@ -14,9 +14,9 @@
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
-#define COLOR_SIMU 1 //0 red  1 yellow
+#define COLOR_SIMU 0 //0 red  1 yellow
 #define DEBUG 1
-#define SIMU 0
+#define SIMU 0 //modify network_cfg.h
 #define RESO_POS 2
 #define NB_OBJ 16
 #define END_MATCH 90000 //in ms
@@ -39,6 +39,7 @@ typedef enum {E_FEU, E_TORCHE_MOBILE, E_ARBRE, E_ARBRE_FOND , E_BAC, E_FOYER, E_
 typedef enum {WAIT_MES, ACTIVE, FREE} eStateObj_t;
 typedef enum {ARM_LEFT, ARM_RIGHT} eServoLoc_t;
 typedef enum {CLOSE, HALF_OPEN, OPEN} eServoPos_t;
+typedef enum {RED, YELLOW} eColor_t;
 
 typedef struct{
 	sPt_t c;
@@ -112,7 +113,7 @@ extern sNum_t theta_robot;
 
 extern int starting_cord;
 extern int mode_switch;
-extern int color;
+extern eColor_t color;
 extern int current_obj;
 
 
