@@ -12,17 +12,18 @@ Simple version, with only 2 positions (we cover the whole surroundings of the ro
 Servo servoRad; // servo object for the servomotor handling the radar rotation
 uint16_t C_rad[ RAD_NB_PTS ]; //last range values read
 uint16_t C_rad_limit[ RAD_NB_PTS ]; //limit values for each sensing direction, under which the robot shall stop (opponent avoidance)
+
 /* how are stored the values in C_rad and C_rad_limits (0° pointing toward the front of the robot, angles increasing clockwise):
-index  angle  direction
-0      202,5  rear-left
-1      157,5  rear-right
-2      112,5  right-rear
-3      67,5   right-front
-4      22,5   front-right
-5      337,5  front-left
-6      292,5  left-front
-7      247,5  left-rear*/
-///!\ valid for min=65 && max=110
+old index  angle  direction
+old 0      202,5  rear-left
+old 1      157,5  rear-right
+old 2      112,5  right-rear
+old 3      67,5   right-front
+old 4      22,5   front-right
+old 5      337,5  front-left
+old 6      292,5  left-front
+old 7      247,5  left-rear/
+///!\ valid for min=65 && max=110 */
 
 void radarSetLim(uint16_t limits[RAD_NB_PTS]){
     memcpy(C_rad_limit,limits,sizeof(uint16_t)*RAD_NB_PTS);
@@ -30,7 +31,8 @@ void radarSetLim(uint16_t limits[RAD_NB_PTS]){
 
 //initialises the pin for the servo, the servo and its first position.
 //REQUIRES : Wire.begin()
-void radarInitHard(int pinRadarServo){
+// only useful when a servo is used,  do not call otherwise
+void radarInitServo(int pinRadarServo){
     pinMode(pinRadarServo,OUTPUT);
 	servoRad.attach(pinRadarServo);
 	servoRad.write(RAD_POS_MIN);
@@ -47,20 +49,26 @@ if(etat_rad) {
         if ((time-time_prev_rad)>=RAD_TIMER_1+RAD_TIMER_1/2) time_prev_rad=time-RAD_TIMER_1; //to avoid problems due to long loop
         time_prev_rad = time_prev_rad + RAD_TIMER_1;
 
-        // get the 4 ranges
-        for(int nb = 0; nb<4; nb++) {
-        C_rad[ (pos_rad-RAD_POS_MIN)/RAD_POS_INC + (3-nb)*RAD_NB_POS] = getRangeResult(nb);
+        // get the ranges
+        for(int nb = 0; nb<RAD_NB_SENSORS; nb++) {
+        C_rad[ (pos_rad-RAD_POS_MIN)/RAD_POS_INC + (RAD_NB_SENSORS-1-nb)*RAD_NB_POS] = getRangeResult(nb);
         }
-        //move the servo
-        if(sens_rad && pos_rad < RAD_POS_MAX) {
-              pos_rad = pos_rad + RAD_POS_INC;
-              if(pos_rad == RAD_POS_MAX) sens_rad = 0;
-            }
-        else if(!sens_rad && pos_rad > RAD_POS_MIN) {
-          pos_rad = pos_rad - RAD_POS_INC;
-          if(pos_rad == RAD_POS_MIN) sens_rad = 1;
+        if(servoRad.attached()){
+			//move the servo
+			if(sens_rad && pos_rad < RAD_POS_MAX)
+				{
+				 pos_rad = pos_rad + RAD_POS_INC;
+				 if(pos_rad == RAD_POS_MAX) sens_rad = 0;
+				}
+			else if(!sens_rad && pos_rad > RAD_POS_MIN)
+			{
+			  pos_rad = pos_rad - RAD_POS_INC;
+			  if(pos_rad == RAD_POS_MIN) sens_rad = 1;
+			}
+        	servoRad.write(pos_rad);
         }
-        servoRad.write(pos_rad);
+
+
         etat_rad = 0;
 #ifdef DEBUG_RADAR
 int i;
@@ -79,8 +87,8 @@ Serial.println(" ");
       if ((time-time_prev_rad)>=RAD_TIMER_2+(RAD_TIMER_2)/2) time_prev_rad=time-RAD_TIMER_2; //to avoid problems due to long loop
       time_prev_rad = time_prev_rad + RAD_TIMER_2;
  
-      // start the 4 ranges
-      for(int nb = 0; nb<4; nb++) {
+      // start the ranges
+      for(int nb = 0; nb<RAD_NB_SENSORS; nb++) {
         startRange(nb);
       }
       etat_rad = 1;
@@ -108,3 +116,4 @@ int radarIntrusion(){
   }
   return nb; 
 }
+

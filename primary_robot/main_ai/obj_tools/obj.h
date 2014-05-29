@@ -40,4 +40,6 @@ int8_t next_obj (void);
 void obj_step(void);
 int obj_init(void);
 
+extern int switch_left, switch_right;
+
 #endif /* OBJ_H_ */

@@ -9,8 +9,10 @@
 #include "lib_move.h"
 
 //globals
-int _servo_zero=0;
+
 Servo _dirServo;
+
+int _servo_zero=0;
 
 //macros
 #ifndef CLAMP

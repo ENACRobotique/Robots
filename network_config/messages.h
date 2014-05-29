@@ -200,6 +200,8 @@ typedef enum{
 typedef enum{
     IHM_STARTING_CORD,
     IHM_MODE_SWICTH,
+    IHM_LIMIT_SWITCH_RIGHT,
+    IHM_LIMIT_SWITCH_LEFT,
     IHM_LED
 } eIhmElement;
 
