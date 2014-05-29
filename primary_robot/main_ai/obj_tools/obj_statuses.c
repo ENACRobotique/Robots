@@ -223,7 +223,10 @@ int received_new_status(sGenericStatus *status){
             }
             break;
         case FRAME_PLAYGROUND:
-            elts[status->id].lastPGstatuses = addSorted(elts[status->id].lastPGstatuses, newElData(status));
+//            elts[status->id].lastPGstatuses = addSorted(elts[status->id].lastPGstatuses, newElData(status));
+            elts[status->id].lastPGstatuses = addHead(elts[status->id].lastPGstatuses, newElData(status));
+
+//            printf("received PG %i (%.2f,%.2f)\n\n\n", status->id, status->pos.x, status->pos.y);
 
             if(elts[status->id].cfg.handlerPG){
                 elts[status->id].cfg.handlerPG(status);

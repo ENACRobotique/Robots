@@ -330,7 +330,7 @@ void obj_step(){
 
         // trajectory
         {{ 15., 120.}, 10, 0, 1, 1}, // 4
-        {{ 35., 50. }, 10, 0, 1, 1},
+        {{ 25., 50. }, 0, 0, 1, 1},
         {{ 50., 35. }, 10, 0, 1, 1},
         {{250., 35. }, 10, 0, 1, 1},
         {{265., 50. }, 10, 0, 1, 1},//8
@@ -342,12 +342,12 @@ void obj_step(){
         A(0), // r=0
         A(4),
         B(5),
-        B(6),
-        B(7),
-        B(8),
-        B(9),
-        A(10),
-        A(11)// r=0
+//        B(6),
+//        B(7),
+//        B(8),
+//        B(9),
+//        A(10),
+//        A(11)// r=0
         };
 
     sObs_t obsYellow[] = {
@@ -359,7 +359,7 @@ void obj_step(){
 
         // trajectory
         {{300. - 15., 120.}, 10, 0, 1, 1}, // 4
-        {{300. - 35., 50. }, 10, 0, 1, 1},
+        {{300. - 25., 50. }, 0, 0, 1, 1},
         {{300. - 50., 35. }, 10, 0, 1, 1},
         {{300. -250., 35. }, 10, 0, 1, 1},
         {{300. -265., 50. }, 10, 0, 1, 1},//8
@@ -371,12 +371,12 @@ void obj_step(){
         A(0), // r=0
         B(4),
         A(5),
-        A(6),
-        A(7),
-        A(8),
-        A(9),
-        B(10),
-        A(11)// r=0
+//        A(6),
+//        A(7),
+//        A(8),
+//        A(9),
+//        B(10),
+//        A(11)// r=0
     };
 
     static iABObs_t obs_list[32];
@@ -486,7 +486,7 @@ void obj_step(){
 #if PROG_TRAJ
             fill_tgts_lnk();
 
-            set_traj(&curr_path, obs_list, 9);
+            set_traj(&curr_path, obs_list, 3);
             curr_path.tid = ++last_tid;
             curr_traj_extract_sid = 0;
 #endif
@@ -547,6 +547,7 @@ void obj_step(){
             sGenericStatus *stASc = getLastPGStatus(ELT_ADV_SECONDARY); sPt_t ptASc;
             sNum_t d, dot;
             sVec_t v1, v2;
+            int contact = 0;
 
             if(stPr){
                 ptPr.x = stPr->prop_status.pos.x;
@@ -565,6 +566,8 @@ void obj_step(){
                     if(d < 50 && dot > 0.6*d){
 // TODO
                         printf("CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+
+                        contact = 1;
                     }
                 }
 
@@ -581,7 +584,31 @@ void obj_step(){
                     if(d < 40 && dot > 0.6*d){
 // TODO
                         printf("CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+
+                        contact = 1;
                     }
+                }
+
+                if(contact){
+                    sMsg outMsg = {{0}};
+
+                    outMsg.header.type = E_TRAJ;
+                    outMsg.header.size = sizeof(outMsg.payload.traj);
+                    outMsg.payload.traj.p1_x = ptPr.x;
+                    outMsg.payload.traj.p1_y = ptPr.y;
+                    outMsg.payload.traj.p2_x = ptPr.x;
+                    outMsg.payload.traj.p2_y = ptPr.y;
+                    outMsg.payload.traj.seg_len = 0.;
+
+                    outMsg.payload.traj.c_x = ptPr.x;
+                    outMsg.payload.traj.c_y = ptPr.y;
+                    outMsg.payload.traj.c_r = 0.;
+                    outMsg.payload.traj.arc_len = 0.;
+
+                    outMsg.payload.traj.sid = 0;
+                    outMsg.payload.traj.tid = ++last_tid;
+
+                    while(role_sendAck(&outMsg)<=0);
                 }
             }
 
