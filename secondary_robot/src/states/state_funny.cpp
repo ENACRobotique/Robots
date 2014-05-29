@@ -13,24 +13,32 @@
 #include "state_funny.h"
 #include "lib_move.h"
 
+
+
 sState* testFunny(){
     if ((millis()-_matchStart) > TIME_FUNNY_STOP ) return &sDead;
+
+
+    if ((millis()-_matchStart) > TIME_MATCH_STOP)
+    	launcherServoNet.write(LAUNCHER_NET_POS_1);
     return 0;
 }
-void initFunny(sState *prev){
-    armServoLeft.write(ARM_LEFT_DOWN);
-    armServoRight.write(ARM_RIGHT_DOWN);
-    digitalWrite(PIN_FUNNY,HIGH);
-    move(0,0);
-}
-void deinitFunny(sState *next){
-    digitalWrite(PIN_FUNNY,LOW);
-}
-void funny(){
-    //todo : wave your arms!!!
-}
+void initFunny(sState *prev)
+	{
+	move(0,0);
+	launcherServoUp.write(40);
+
+	launcherServoDown.write(30);
+
+
+	}
+void deinitFunny(sState *next)
+	{
+
+	}
+
 sState sFunny={
-    BIT(E_FUNNY)|BIT(E_MOTOR),
+    BIT(E_MOTOR),
     &initFunny,
     &deinitFunny,
     &testFunny

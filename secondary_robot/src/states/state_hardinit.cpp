@@ -29,33 +29,31 @@ void initHard(sState *prev){
     odoInitHard(PIN_ODO_INT,PIN_ODO_SEN);
 
     //radar
-    radarInitHard(PIN_RAD_SERVO);
     Wire.begin();
 
     //line following/detector
     //Wire.begin(); already done
 
-    //funny
-    pinMode( PIN_FUNNY , OUTPUT);
-    digitalWrite(PIN_FUNNY,LOW);
-
-    //arms
-    pinMode(PIN_ARM_LEFT,OUTPUT);
-    pinMode(PIN_ARM_RIGHT,OUTPUT);
-    armServoLeft.attach(PIN_ARM_LEFT);
-    armServoLeft.write(ARM_LEFT_UP);
-    armServoRight.attach(PIN_ARM_RIGHT);
-    armServoRight.write(ARM_RIGHT_UP);
+    //launcher
+    pinMode(PIN_LAUNCHER_1,OUTPUT);
+    pinMode(PIN_LAUNCHER_2,OUTPUT);
+    pinMode(PIN_LAUNCHER_NET,OUTPUT);
+    launcherServoUp.attach(PIN_LAUNCHER_1);
+    launcherServoUp.write(LAUNCHER_UP_POS_0);
+    launcherServoDown.attach(PIN_LAUNCHER_2);
+    launcherServoDown.write(LAUNCHER_DOWN_POS_0);
+    launcherServoNet.attach(PIN_LAUNCHER_NET);
+    launcherServoNet.write(LAUNCHER_NET_POS_0);
 
 
     //wall
-    wallInitHard(PIN_SHARP_LEFT,PIN_SHARP_RIGHT);
+    wallInitHard(PIN_SHARP_FRONT_RIGHT ,PIN_SHARP_BACK_RIGHT,PIN_SHARP_FRONT_LEFT  ,PIN_SHARP_BACK_LEFT);
 
     //tirette
-    pinMode( PIN_TIRETTE,INPUT);
+    pinMode( PIN_TIRETTE,INPUT_PULLUP);
 
     //"color" (start side) button
-    pinMode(PIN_COLOR,INPUT);
+    pinMode(PIN_COLOR,INPUT_PULLUP);
 
     //led pin
     pinMode( PIN_LED , OUTPUT);

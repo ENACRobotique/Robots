@@ -12,12 +12,14 @@
 #include "states/state_hardinit.h"
 #include "states/state_blink.h"
 #include "Arduino.h"
-#include "lib_radar.h"
+#include "lib_radar2.h"
 #include "lib_motor.h"
 #include "lib_wall.h"
+#include "lib_line.h"
 
 
-Servo armServoLeft,armServoRight;
+
+Servo launcherServoUp,launcherServoDown, launcherServoNet;
 
 sState *current=&sInitHard;
 
@@ -42,7 +44,6 @@ void setup(){
 }
 
 
-
 void loop(){
 
 #ifdef DEBUG
@@ -59,6 +60,7 @@ void loop(){
     if (current->flag & BIT(E_WALL)  ) periodicWall();
     if (current->flag & BIT(E_RADAR) ) radarRefresh();
     if (current->flag & BIT(E_MOTOR) ) motAsser();
+    if (current->flag & BIT(E_LINE) )  asserLine();
 
     sState *next;
     if (current->testFunction){
@@ -70,3 +72,5 @@ void loop(){
     }
 
 }
+
+
