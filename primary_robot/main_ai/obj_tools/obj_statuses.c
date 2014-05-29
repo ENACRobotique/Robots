@@ -202,9 +202,18 @@ int received_new_status(sGenericStatus *status){
     #else // XXX approximation: uses last known position of the primary robot instead of the time-matching one
                 sStatusListEl *newPGEl = newEl();
                 tmp = elts[ELT_PRIMARY].lastPGstatuses;
+
+//                printf("lastPrimPGstatus=%p\n", tmp);
+
                 if(newPGEl && tmp){
                     fromPRPG2PG(&status->pos, &status->pos_u, &tmp->status.pos, &tmp->status.pos_u, &newPGEl->status.pos, &newPGEl->status.pos_u);
+                    newPGEl->status.date = status->date;
+                    newPGEl->status.id = status->id;
                     elts[status->id].lastPGstatuses = addSorted(elts[status->id].lastPGstatuses, newPGEl);
+
+//                    printf("lastPRstatus={%.2f,%.2f}\n", status->pos.x, status->pos.y);
+//                    printf("lastPrimPGstatus={%.2f,%.2f}\n", tmp->status.pos.x, tmp->status.pos.y);
+//                    printf("lastNew(%i)PGstatus={%.2f,%.2f}\n", status->id, newPGEl->status.pos.x, newPGEl->status.pos.y);
 
                     if(elts[status->id].cfg.handlerPG){
                         elts[status->id].cfg.handlerPG(&newPGEl->status);

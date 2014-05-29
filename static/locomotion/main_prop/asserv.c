@@ -30,6 +30,7 @@
 #include "params.h"
 #include "controller.h"
 #include "trigo.h"
+#include "pid.h"
 
 #include "asserv.h"
 
@@ -67,6 +68,7 @@ sBackLash blLeft, blRight;
 //#define TIME_STATS
 //#define ASSERV_LOGS
 //#define POS_STATS
+//#define POS_USE_PID
 
 #define TRAJ_MAX_SIZE (16)
 
@@ -96,7 +98,9 @@ int curr_traj_step; // current step of the current trajectory (0:curr_traj_inser
 volatile int curr_traj_insert_sid = 0; // index at which data will be inserted in the current trajectory
 volatile int next_traj_insert_sid = 0; // index at which data will be inserted in the next trajectory
 volatile uint16_t curr_tid, next_tid; // current and next trajectory identifiers
+#ifdef POS_USE_PID
 PID_t posLeft, posRight;
+#endif
 
 void traj_conv(sTrajEl_t *t) {
     if(!t->is_ok) {
@@ -116,8 +120,8 @@ void traj_conv(sTrajEl_t *t) {
     }
 }
 
-int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
-int gx, gy, gtheta; // goal (I<<SHIFT)
+int x = 0, y = 0, theta = 0; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
+int gx = 0, gy = 0, gtheta = 0; // goal (I<<SHIFT)
 int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
 enum {
@@ -182,14 +186,16 @@ void asserv_init(){
     eint_enable(EINT3);
 
     // backlash compensation
-    backlash_init(&blLeft, iR2I(7.295*PI/180.), 2);
-    backlash_init(&blRight, iR2I(1.574*PI/180.), 2);
+    backlash_init(&blLeft, iR2I(7.295*PI/180.), 0);
+    backlash_init(&blRight, iR2I(1.574*PI/180.), 0);
 #endif
 
     motor_controller_init();
 
-    pid_init(&posLeft, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
-    pid_init(&posRight, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
+#ifdef POS_USE_PID
+    pid_init(&posLeft, 1<<(SHIFT_PID-8), /*(2*2/1)<<(SHIFT_PID-3)*/0, /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
+    pid_init(&posRight, 1<<(SHIFT_PID-8), /*(2*2/1)<<(SHIFT_PID-3)*/0, /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
+#endif
 
 #ifdef ARCH_LPC21XX
     // init time management
@@ -278,6 +284,12 @@ int new_pos(sPosPayload *pos){
         x = isD2I(pos->x); // (I<<SHIFT)
         y = isD2I(pos->y); // (I<<SHIFT)
         theta = isROUND( D2I(RDIAM)*pos->theta ); // (rad.I<<SHIFT)
+
+        if(state == S_WAIT){
+            gx = x;
+            gy = y;
+            gtheta = theta;
+        }
     }
 
     return 0;
@@ -329,8 +341,8 @@ int new_asserv_step(){
     ticks_r = _ticks_r<<SHIFT; _ticks_r = 0; // (IpP<<SHIFT)
     global_IRQ_enable();
 
-    ticks_l = backlash_update(&blLeft, ticks_l);
-    ticks_r = backlash_update(&blRight, ticks_r);
+//    ticks_l = backlash_update(&blLeft, ticks_l>>SHIFT)<<SHIFT;
+//    ticks_r = backlash_update(&blRight, ticks_r>>SHIFT)<<SHIFT;
 #elif defined(ARCH_X86_LINUX)
     ticks_l = motor_getticks(&motGauche)<<SHIFT; // (IpP<<SHIFT)
     ticks_r = motor_getticks(&motDroit)<<SHIFT; // (IpP<<SHIFT)
@@ -338,6 +350,9 @@ int new_asserv_step(){
 
     // update the motor speed
     // TODO: use the shifted data in the PID of the motor, really necessary?
+#if defined(ARCH_X86_LINUX)
+//    printf("c_l=%i, c_r=%i, t_l=%i, t_r=%i\n\n", consigne_l, consigne_r, ticks_l, ticks_r);
+#endif
     motor_controller_update(consigne_l>>SHIFT, ticks_l>>SHIFT, consigne_r>>SHIFT, ticks_r>>SHIFT);
 
     // update speed and course
@@ -391,13 +406,39 @@ int new_asserv_step(){
     default:
     case S_WAIT:
         { // position control loop
-            int thet = theta - (isRPI>>1);
-            int yL = (thet>>1) + y;
-            int yR = -(thet>>1) + y;
+            // x (I<<SHIFT), y (I<<SHIFT), theta (rad.I<<SHIFT), ct (1<<SHIFT), st (1<<SHIFT), gx (I<<SHIFT), gy (I<<SHIFT), gtheta (rad.I<<SHIFT)
 
+            int d = ((long)(gx - x)*(long)ct + (long)(gy - y)*(long)st)>>SHIFT;
+            int distL = ((theta - gtheta)>>1) + d;
+            int distR = ((gtheta - theta)>>1) + d;
+
+#ifdef POS_USE_PID
             // update PIDs
-            consigne_l = pid_update(&posLeft, gy, yL);
-            consigne_r = pid_update(&posRight, gy, yR);
+            consigne_l = pid_update(&posLeft, 0, distL>>SHIFT);
+            consigne_r = pid_update(&posRight, 0, distR>>SHIFT);
+#else
+            consigne_l = distL>>2;
+            consigne_r = distR>>2;
+#endif
+
+#if 0 && defined(ARCH_X86_LINUX)
+            printf("\n\nx=%.2f, y=%.2f, theta=%.2f°, gx=%.2f, gy=%.2f, gtheta=%.2f°, d=%i, dL=%i, dR=%i, c_l=%i, c_r=%i\n\n", I2Ds(x), I2Ds(y), RI2Rs(theta)*180./PI, I2Ds(gx), I2Ds(gy), RI2Rs(gtheta)*180./PI, d>>SHIFT, distL>>SHIFT, distR>>SHIFT, consigne_l, consigne_r);
+            {
+                static FILE *flog = NULL;
+                if(!flog){
+                    flog = fopen("flog.csv", "wb+");
+
+                    if(flog){
+                        fprintf(flog, "x,y,theta,ct,st,gx,gy,gtheta,d,dL,dR\n");
+                    }
+                }
+
+                if(flog){
+                    fprintf(flog, "%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", I2Ds(x), I2Ds(y), RI2Rs(theta)*180./PI, ((float)ct)/dSHIFT, ((float)st)/dSHIFT, I2Ds(gx), I2Ds(gy), RI2Rs(gtheta)*180./PI, I2Ds(d), I2Ds(distL), I2Ds(distR));
+                    fflush(flog);
+                }
+            }
+#endif
         }
         break;
 
@@ -466,9 +507,12 @@ int new_asserv_step(){
 
         if(dist < isD2I(1)) { // we are near the goal
             if(!(curr_traj_step&1) && abs(traj[curr_traj][curr_traj_step>>1].c_r) < isD2I(1)) { // no next step
-                consigne_l = 0;
-                consigne_r = 0;
                 state = S_WAIT;
+
+                gx = traj[curr_traj][curr_traj_step>>1].p2_x;
+                gy = traj[curr_traj][curr_traj_step>>1].p2_y;
+                gtheta = iD2I(RDIAM)*ATAN2(traj[curr_traj][curr_traj_step>>1].p2_y - traj[curr_traj][curr_traj_step>>1].p1_y, traj[curr_traj][curr_traj_step>>1].p2_x - traj[curr_traj][curr_traj_step>>1].p1_x);
+
                 return 0;
             }
             else {

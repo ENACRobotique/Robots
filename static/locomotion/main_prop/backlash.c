@@ -10,6 +10,8 @@
 
 #include "backlash.h"
 
+#define SIGN(v) (((v)>0) - ((v)<0))
+
 void backlash_init(sBackLash *bl, int position_max, int acceleration_hysteresis){
     assert(bl);
     assert(position_max >= 0);
@@ -79,7 +81,10 @@ int backlash_update(sBackLash *bl, int motor_incr /* speed (IpP) */){
         else{
             bl->position = new_position;
 
-            wheel_incr = bl->last_contact_wheel_incr; // assume no friction
+            // mechanical friction: at least 5% per period
+            bl->last_contact_wheel_incr -= (bl->last_contact_wheel_incr/20)?:SIGN(bl->last_contact_wheel_incr);
+
+            wheel_incr = bl->last_contact_wheel_incr;
         }
 
         break;
