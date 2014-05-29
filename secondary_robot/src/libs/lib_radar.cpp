@@ -5,7 +5,7 @@ Simple version, with only 2 positions (we cover the whole surroundings of the ro
 
 */
 
-/*#include "lib_radar.h"
+#include "lib_radar.h"
 
 
 //globals
