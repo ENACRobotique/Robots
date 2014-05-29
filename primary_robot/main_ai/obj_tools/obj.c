@@ -537,16 +537,16 @@ int obj_init(){
                 break;
             case 3:
                 if( (ret = bn_ping(ADDRX_MOBILE_2)) > 0){
-                    state = 4;
+                    state = 5; // XXX
                     }
                 printf("Ping mobile 2 : %d\n", ret);
                 break;
-            case 4:
-                if( (ret = bn_ping(ADDRX_FIX)) > 0){
-                    state = 5;
-                    }
-                printf("Ping fix : %d\n", ret);
-                break;
+//            case 4:
+//                if( (ret = bn_ping(ADDRX_FIX)) > 0){
+//                    state = 5;
+//                    }
+//                printf("Ping fix : %d\n", ret);
+//                break;
 
             }
         if(state == 5) break;

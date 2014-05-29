@@ -61,6 +61,8 @@ void posUpdated(sGenericStatus *status){
         obs[status->id].c.x = status->pos.x;
         obs[status->id].c.y = status->pos.y;
 
+//        printf("PosUpdated %i\n", status->id);
+
         obs_updated[status->id]++;
     }
 }
@@ -154,9 +156,11 @@ int main(int argc, char **argv){
     {
         sStatusHandlingConfig cfg;
         cfg.has_position = 1;
-        cfg.handlerPG = posUpdated;
 
-        // setConfig(ELT_PRIMARY, &cfg);
+        cfg.handlerPG = NULL;
+        setConfig(ELT_PRIMARY, &cfg);
+
+        cfg.handlerPG = posUpdated;
         setConfig(ELT_SECONDARY, &cfg);
         setConfig(ELT_ADV_PRIMARY, &cfg);
         setConfig(ELT_ADV_SECONDARY, &cfg);
@@ -370,6 +374,7 @@ int main(int argc, char **argv){
                 break;
             case E_GENERIC_STATUS:
                 received_new_status(&msgIn.payload.genericStatus);
+                printf("pos:%.2f,%.2f\n", msgIn.payload.genericStatus.adv_status.pos.x, msgIn.payload.genericStatus.adv_status.pos.y);
                 break;
             case E_IHM_STATUS:
                 for(i = 0 ; i < (int)msgIn.payload.ihmStatus.nb_states ; i++){
