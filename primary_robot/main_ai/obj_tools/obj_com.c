@@ -43,8 +43,10 @@ void send_robot(sPath_t path){
             outMsg.payload.traj.sid = i;
             outMsg.payload.traj.tid = last_tid;
 
-            ret = role_send(&outMsg);
-            if(ret < 0) printf("role_send(E_TRAJ) failed #%i\n", -ret);
+            do{
+                ret = role_sendAck(&outMsg);
+                if(ret < 0) printf("role_send(E_TRAJ) failed #%i\n", -ret);
+            }while(ret <= 0);
 
             usleep(1000);
         }
@@ -102,7 +104,10 @@ int newSpeed(float speed){
     msg.header.size = sizeof(msg.payload.speedSetPoint);
     msg.payload.speedSetPoint.speed = speed;
 
-    bn_send(&msg);
+    int ret;
+    do{
+        ret = bn_sendAck(&msg);
+    }while(ret <= 0);
 
     return 1;
     }

@@ -277,6 +277,33 @@ int main(int argc, char **argv){
                     bn_send(&msg);
                     break;
                 }
+                case 'g':{
+                    sMsg msg = {{0}};
+                    int us;
+                    int id;
+
+                    printf(" 0:SERVO_PRIM_DOOR\n");
+                    printf(" 1:SERVO_PRIM_FIRE1\n");
+                    printf(" 2:SERVO_PRIM_FIRE2\n");
+                    printf(" 3:SERVO_PRIM_ARM_LEFT\n");
+                    printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
+
+                    printf("id: "); fflush(stdout);
+                    scanf("%i", &id);
+
+                    printf("us: "); fflush(stdout);
+                    scanf("%i", &us);
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_SERVOS;
+                    msg.header.size = 2 + 3;
+                    msg.payload.servos.nb_servos = 1;
+                    msg.payload.servos.servos[0].id = id;
+                    msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
                 case 'd':{ // sends new setpoint to the propulsion // FIXME: use sGenericStatus
                     sMsg msg = {{0}};
 
