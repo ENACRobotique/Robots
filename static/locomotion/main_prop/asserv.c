@@ -409,8 +409,15 @@ int new_asserv_step(){
             // x (I<<SHIFT), y (I<<SHIFT), theta (rad.I<<SHIFT), ct (1<<SHIFT), st (1<<SHIFT), gx (I<<SHIFT), gy (I<<SHIFT), gtheta (rad.I<<SHIFT)
 
             int d = ((long)(gx - x)*(long)ct + (long)(gy - y)*(long)st)>>SHIFT;
-            int distL = ((theta - gtheta)>>1) + d;
-            int distR = ((gtheta - theta)>>1) + d;
+            int diff_theta = theta - gtheta;
+
+            if(diff_theta > isRPI)
+                diff_theta -= (isRPI<<1);
+            else if(diff_theta < -isRPI)
+                diff_theta += (isRPI<<1);
+
+            int distL = (diff_theta>>1) + d;
+            int distR = -(diff_theta>>1) + d;
 
 #ifdef POS_USE_PID
             // update PIDs
