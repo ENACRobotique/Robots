@@ -20,7 +20,7 @@ sServo_t listServo[2]={ //TODO other servo
 
 void send_robot(sPath_t path){
     sMsg outMsg = {{0}};
-    int i, ret ;
+    int i, ret;
     last_tid++;
     if(path.path)
         for(i = 0; i < path.path_len; i++) {
@@ -43,10 +43,8 @@ void send_robot(sPath_t path){
             outMsg.payload.traj.sid = i;
             outMsg.payload.traj.tid = last_tid;
 
-            do{
-                ret = role_sendAck(&outMsg);
-                if(ret < 0) printf("role_send(E_TRAJ) failed #%i\n", -ret);
-            }while(ret <= 0);
+            ret = role_sendRetry(&outMsg, MAX_RETRIES);
+            if(ret < 0) printf("role_sendRetry(E_TRAJ) failed #%i\n", -ret);
 
             usleep(1000);
         }
@@ -86,10 +84,9 @@ int sendPosServo(eServos s, int16_t us, int16_t a){ // us or a = -1 if no use
     msg.payload.servos.servos[0].id = s;
     msg.payload.servos.servos[0].us = us;
 
-    while( (bn_send(&msg)) <= 0);
+    bn_sendRetry(&msg, MAX_RETRIES);
 
     return 1;
-
     }
 
 int newSpeed(float speed){
@@ -104,10 +101,7 @@ int newSpeed(float speed){
     msg.header.size = sizeof(msg.payload.speedSetPoint);
     msg.payload.speedSetPoint.speed = speed;
 
-    int ret;
-    do{
-        ret = bn_sendAck(&msg);
-    }while(ret <= 0);
+    bn_sendRetry(&msg, MAX_RETRIES);
 
     return 1;
     }
@@ -129,7 +123,7 @@ void setPos(sPt_t *p, sNum_t theta){
     theta_robot = theta;
     _current_pos = obs[0].c;
 
-    while( (bn_send(&msg)) <= 0);
+    bn_sendRetry(&msg, MAX_RETRIES);
     }
 
 

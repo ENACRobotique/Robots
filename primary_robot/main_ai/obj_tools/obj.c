@@ -439,10 +439,10 @@ void obj_step(){
             msgOut.payload.pos.y = obs[0].c.y;
             printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
 
-            ret = role_send(&msgOut);
+            ret = role_sendRetry(&msgOut, MAX_RETRIES);
             if(ret <= 0){
-                printf("bn_sendAck(E_POS) error #%i\n", -ret);
-                getchar();
+                printf("bn_sendRetry(E_POS) error #%i\n", -ret);
+//                getchar();
                 }
 
             }
@@ -608,7 +608,7 @@ void obj_step(){
                     outMsg.payload.traj.sid = 0;
                     outMsg.payload.traj.tid = ++last_tid;
 
-                    while(role_sendAck(&outMsg)<=0);
+                    role_sendRetry(&outMsg, MAX_RETRIES);
                 }
             }
 

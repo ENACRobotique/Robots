@@ -491,12 +491,10 @@ int main(int argc, char **argv){
             msgOut.payload.traj.sid     = curr_traj_extract_sid++;
             msgOut.payload.traj.tid     = curr_path.tid;
 
-            do{
-                ret = role_sendAck(&msgOut);
-                if(ret < 0){
-                    printf("role_send(E_TRAJ) error #%i\n", -ret);
-                }
-            }while(ret <= 0);
+            ret = role_sendRetry(&msgOut);
+            if(ret < 0){
+                printf("role_send(E_TRAJ) error #%i\n", -ret);
+            }
         }
 
         // check if any obs has been updated => synchro with the monitoring interface

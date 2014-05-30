@@ -307,7 +307,7 @@ void startColor(void){
                 msgOut.payload.ihmStatus.states[0].id = IHM_LED;
                 msgOut.payload.ihmStatus.states[0].state = 1;
 
-                bn_send(&msgOut);
+                bn_sendRetry(&msgOut, MAX_RETRIES);
                 }
             break;
         case 1 :
@@ -329,7 +329,7 @@ void startColor(void){
                 msgOut.payload.ihmStatus.states[0].id = IHM_LED;
                 msgOut.payload.ihmStatus.states[0].state = 2;
 
-                bn_send(&msgOut);
+                bn_sendRetry(&msgOut, MAX_RETRIES);
                 }
             break;
         case 3 :

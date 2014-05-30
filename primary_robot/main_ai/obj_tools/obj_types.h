@@ -39,6 +39,7 @@
 #define NOMINAL_SPEED 20
 #define LOW_SPEED 10
 #define NB_MAX_PT_ZONE 10
+#define MAX_RETRIES 5
 
 
 typedef enum {COLOR_SELECTION, INIT, WAITING, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;

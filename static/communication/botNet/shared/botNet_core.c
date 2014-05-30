@@ -126,6 +126,18 @@ int bn_init(){
     return 0;
 }
 
+/*
+ * TODO
+ */
+int bn_sendRetry(sMsg *msg, int retries){
+    int ret;
+
+    do{
+        ret = bn_sendAck(msg);
+    }while(ret<=0 && --retries>0);
+
+    return ret;
+}
 
 /*
  * bn_send : handles the "classic" sending of a message over the SuperBus network (no ack nor broadcast)
