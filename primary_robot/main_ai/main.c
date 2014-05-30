@@ -491,7 +491,7 @@ int main(int argc, char **argv){
             msgOut.payload.traj.sid     = curr_traj_extract_sid++;
             msgOut.payload.traj.tid     = curr_path.tid;
 
-            ret = role_sendRetry(&msgOut);
+            ret = role_sendRetry(&msgOut, MAX_RETRIES);
             if(ret < 0){
                 printf("role_send(E_TRAJ) error #%i\n", -ret);
             }
