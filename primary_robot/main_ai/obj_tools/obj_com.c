@@ -106,7 +106,7 @@ int newSpeed(float speed){
     return 1;
     }
 
-void setPos(sPt_t *p, sNum_t theta){
+int setPos(sPt_t *p, sNum_t theta){
     sMsg msg;
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
@@ -123,39 +123,42 @@ void setPos(sPt_t *p, sNum_t theta){
     theta_robot = theta;
     _current_pos = obs[0].c;
 
-    bn_sendRetry(&msg, MAX_RETRIES);
+    return bn_sendAck(&msg);
     }
-
-
 
 int sendSeg(const sPt_t *p, const sVec_t *v){ //the robot goes directly to the point or the vector
     sPath_t path;
-    sTrajEl_t traj[2]={
-        {{0. , 0.},{0. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
-        {{0. , 0.},{0. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
-        };
+    sTrajEl_t t = {{0}};
 
     if( ((p == NULL) && (v == NULL)) || ((p != NULL) && (v != NULL)) ){
         return -1;
         }
 
     if(p != NULL){
-        traj[0].p1 = obs[0].c;
-        traj[0].p2 = *p;
-        traj[1].p1 = traj[0].p2;
-        traj[1].p2 = traj[0].p2;
+        t.p1 = obs[0].c;
+        t.p2 = *p;
+        distPt2Pt(&t.p1, &t.p2, &t.seg_len);
+
+        t.obs.c = t.p2;
+        t.obs.r = 0.;
+        t.arc_len = 0.;
+        t.sid = 0;
         }
 
     if(v != NULL){
-        traj[0].p1 = obs[0].c;
-        traj[0].p2.x = obs[0].c.x + v->x;
-        traj[0].p2.y = obs[0].c.y + v->y;
-        traj[1].p1 = traj[0].p2;
-        traj[1].p2 = traj[0].p2;
-        }
+        t.p1 = obs[0].c;
+        t.p2.x = t.p1.x + v->x;
+        t.p2.y = t.p1.y + v->y;
+        distPt2Pt(&t.p1, &t.p2, &t.seg_len);
 
-    path.path = &traj[0];
-    path.path_len=2;
+        t.obs.c = t.p2;
+        t.obs.r = 0.;
+        t.arc_len = 0.;
+        t.sid = 0;
+    }
+
+    path.path = &t;
+    path.path_len = 1;
     send_robot(path);
 
     return 1;

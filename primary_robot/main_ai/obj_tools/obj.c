@@ -17,7 +17,7 @@ sNum_t prev_len=0;
 long last_time2=0;
 
 int switch_left = 0, switch_right = 0;
-
+sWaitPos waiting_pos = {0};
 
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r){
 	int i;
@@ -404,7 +404,6 @@ void obj_step(){
             sendPosServo(SERVO_PRIM_ARM_RIGHT, 2400, -1);
             sendPosServo(SERVO_PRIM_ARM_LEFT, 600, -1);
             sendPosServo(SERVO_PRIM_DOOR, 500, -1);
-            state = INIT;
             //Setting initial position
             if(color==1){
                 #if PROG_TRAJ
@@ -437,6 +436,12 @@ void obj_step(){
             msgOut.payload.pos.theta = theta_robot;
             msgOut.payload.pos.x = obs[0].c.x;
             msgOut.payload.pos.y = obs[0].c.y;
+
+            waiting_pos.next = INIT;
+            waiting_pos.pos = obs[0].c;
+            waiting_pos.theta = theta_robot;
+            state = WAITING_POS;
+
             printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
 
             ret = role_sendRetry(&msgOut, MAX_RETRIES);
@@ -449,6 +454,17 @@ void obj_step(){
 
         startColor();
         break;
+
+    case WAITING_POS:{
+        sNum_t dist;
+
+        distPt2Pt(&waiting_pos.pos, &obs[0].c, &dist);
+
+        if(dist <= 1. /* XXX test theta aswell */){
+            state = waiting_pos.next;
+        }
+        break;
+    }
 
     case INIT :
         if(initTraj() == 1) {

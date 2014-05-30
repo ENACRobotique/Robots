@@ -73,17 +73,18 @@ int initTraj(void){
     sPt_t p;
     sNum_t theta;
     static int state = 0;
+    static sWaitPos waiting_pos = {0};
   /*  sTrajEl_t trajRed[2]={
         {{0. , 0.},{12.9 + 5. , 0.},{{12.9 + 5. ,  0.}, 0. , 0., 1.}, 0. , 0., 0},
         {{12.9 + 18., 0.},{12.9 + 18., 0.},{{12.9 + 18. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
         };*/
     sTrajEl_t trajRed[2]={
-        {{0.       , 0.},{12.9 + 3-2., 0.},{{12.9 + 3.-2. ,  0.}, 5. , 0., 1.}, 0. , 0., 0},
-        {{12.9 + 8.-2., 0.},{12.9 + 8.-2., 0.},{{12.9 + 8.-2. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
+        {{0.            , 0.},{12.9 + 3. - 2., 0.},{{12.9 + 3. - 2. ,  0.}, 5. , 0., 1.}, 0. , 0., 0},
+        {{12.9 + 8. - 2., 0.},{12.9 + 8. - 2., 0.},{{12.9 + 8. - 2. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
         };
     sTrajEl_t trajYellow[2]={
-        {{0.              , 0.},{300. - 12.9 - 3., 0.},{{300. - 12.9 - 3. ,  0.}, -5. , 0., 1.}, 0. , 0., 0},
-        {{300. - 12.9 - 8., 0.},{300. - 12.9 - 8., 0.},{{300. - 12.9 - 8. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
+        {{0.                  , 0.},{300. - 12.9 - 3. + 2., 0.},{{300. - 12.9 - 3. + 2.,  0.}, -5. , 0., 1.}, 0. , 0., 0},
+        {{300. - 12.9 - 8 + 2., 0.},{300. - 12.9 - 8. + 2., 0.},{{300. - 12.9 - 8. + 2.,  0.}, 0. , 0., 1.}, 0. , 0., 1},
         };
     sTrajEl_t traj[2];
 
@@ -115,10 +116,27 @@ int initTraj(void){
                     theta = 0.;
                 }
                 p.y = obs[0].c.y;
+
+                waiting_pos.next = 2;
+                waiting_pos.pos = p;
+                waiting_pos.theta = theta;
+
                 setPos(&p, theta);
-                state = 2;
+                state = 10;
                 }
             break;
+
+        case 10: // waiting pos
+        {
+            sNum_t dist;
+
+            distPt2Pt(&waiting_pos.pos, &obs[0].c, &dist);
+
+            if(dist <= 1.  /* XXX test theta aswell */){
+                state = waiting_pos.next;
+            }
+            break;
+        }
 
         case 2 :
             if( color == 1){ //yellow
@@ -170,14 +188,32 @@ int initTraj(void){
             if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
                 p.x = obs[0].c.x;
                 p.y = 200 - 12.9;
-                setPos(&p, -M_PI_2);
-                state = 6;
+                theta = -M_PI_2;
+                setPos(&p, theta);
+
+                waiting_pos.next = 6;
+                waiting_pos.pos = p;
+                waiting_pos.theta = theta;
+
+                state = 50;
                 }
             break;
 
+        case 50: // waiting pos
+        {
+            sNum_t dist;
+
+            distPt2Pt(&waiting_pos.pos, &obs[0].c, &dist);
+
+            if(dist <= 1. /* XXX test theta aswell */){
+                state = waiting_pos.next;
+            }
+            break;
+        }
+
         case 6:
             v.x = 0;
-            v.y = -20;
+            v.y = -2;
             newSpeed(LOW_SPEED);
             sendSeg(NULL, &v);
             pt_select.x = obs[0].c.x + v.x;

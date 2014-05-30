@@ -20,6 +20,6 @@ int sendPosServo(eServos s, int16_t us, int16_t a);
 int newSpeed(float speed);
 int sendSeg(const sPt_t *p, const sVec_t *v);
 int newSpeed(float speed);
-void setPos(sPt_t *p, sNum_t theta);
+int setPos(sPt_t *p, sNum_t theta);
 
 #endif /* OBJ_COM_H_ */
