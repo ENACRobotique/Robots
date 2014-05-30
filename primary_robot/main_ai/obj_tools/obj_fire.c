@@ -226,7 +226,7 @@ void cmdServo(eServoLoc_t loc, eServoPos_t pos){
                     sendPosServo(SERVO_PRIM_ARM_LEFT, 600, -1); //FIXME
                     break;
                 case HALF_OPEN :
-                    sendPosServo(SERVO_PRIM_ARM_LEFT, 1450, -1); //FIXME
+                    sendPosServo(SERVO_PRIM_ARM_LEFT, 1850, -1); //FIXME
                     break;
                 case OPEN :
                     sendPosServo(SERVO_PRIM_ARM_LEFT, 2200, -1); //FIXME
@@ -240,7 +240,7 @@ void cmdServo(eServoLoc_t loc, eServoPos_t pos){
                     sendPosServo(SERVO_PRIM_ARM_RIGHT, 2400, -1); //FIXME
                     break;
                 case HALF_OPEN :
-                    sendPosServo(SERVO_PRIM_ARM_RIGHT, 1450, -1); //FIXME
+                    sendPosServo(SERVO_PRIM_ARM_RIGHT, 1100, -1); //FIXME
                     break;
                 case OPEN :
                     sendPosServo(SERVO_PRIM_ARM_RIGHT, 800, -1); //FIXME
