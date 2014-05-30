@@ -394,9 +394,11 @@ int main(int argc, char **argv){
                             break;
                         case IHM_LIMIT_SWITCH_LEFT:
                             switch_left = msgIn.payload.ihmStatus.states[i].state;
+                            printf("## lswitch: %i\n", switch_left);
                             break;
                         case IHM_LIMIT_SWITCH_RIGHT:
                             switch_right = msgIn.payload.ihmStatus.states[i].state;
+                            printf("## rswitch: %i\n", switch_right);
                             break;
                         default:
                             break;
