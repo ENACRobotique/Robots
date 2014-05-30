@@ -336,7 +336,7 @@ int objBonusFire(void){
         return 0;
         }
 
-    if( (((int)millis() - time_prev) > 3000) && (ser_active_i != -1) ){ //security
+    if( (((int)millis() - time_prev) > 4000) && (ser_active_i != -1) ){ //security
         if( ser_active_j == 0){
             cmdServo(ARM_RIGHT, CLOSE);
             }
@@ -414,10 +414,14 @@ int objBonusFire(void){
 
                 //A first line fire already detect
                 if( (ser_active_i == i) && (ser_active_j == j) ){
-                    seg.p1.x = obs[listObj[i].numObs[0]].c.x + EZ*cos(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI*ac);
+                  /*seg.p1.x = obs[listObj[i].numObs[0]].c.x + EZ*cos(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI*ac);
                     seg.p1.y = obs[listObj[i].numObs[0]].c.y + EZ*sin(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI*ac);
                     seg.p2.x = obs[listObj[i].numObs[0]].c.x + BD*cos(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI*ac);
                     seg.p2.y = obs[listObj[i].numObs[0]].c.y + BD*sin(listObj[i].utype.fire.angle*M_PI/180 + M_PI_2 + M_PI*ac);
+                  */seg.p1.x = obs[listObj[i].numObs[0]].c.x + sqrt(5*5 + EZ*EZ)*cos(listObj[i].utype.fire.angle*M_PI/180 + atan2(EZ, 5) + M_PI_2 + M_PI*ac);
+                    seg.p1.y = obs[listObj[i].numObs[0]].c.y + sqrt(5*5 + EZ*EZ)*sin(listObj[i].utype.fire.angle*M_PI/180 + atan2(EZ, 5) + M_PI_2 + M_PI*ac);
+                    seg.p2.x = obs[listObj[i].numObs[0]].c.x + sqrt(5*5 + BD*BD)*cos(listObj[i].utype.fire.angle*M_PI/180 + atan2(BD, 5) + M_PI_2 + M_PI*ac);
+                    seg.p2.y = obs[listObj[i].numObs[0]].c.y + sqrt(5*5 + BD*BD)*sin(listObj[i].utype.fire.angle*M_PI/180 + atan2(BD, 5) + M_PI_2 + M_PI*ac);
 
                     if(j == 0){
                         symPtprLine(&seg.p1, &l, &seg.p1);
