@@ -323,7 +323,7 @@ void obj_step(){
 	int obj=-1;
     sObs_t obsRed[] = {
         // robots
-        {{0., 0.}, 0., 1, 1},   //primary
+        {{0., 0.}, 0., 1, 1, 1},   //primary
         {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
         {{0., 0.}, R_ROBOT+20., 1, 1, 1},   //primary adv
         {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv

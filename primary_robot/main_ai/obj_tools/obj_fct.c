@@ -74,6 +74,7 @@ int initTraj(void){
     sNum_t theta;
     static int state = 0;
     static sWaitPos waiting_pos = {0};
+    static unsigned long setpos_start = 0;
   /*  sTrajEl_t trajRed[2]={
         {{0. , 0.},{12.9 + 5. , 0.},{{12.9 + 5. ,  0.}, 0. , 0., 1.}, 0. , 0., 0},
         {{12.9 + 18., 0.},{12.9 + 18., 0.},{{12.9 + 18. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
@@ -98,6 +99,7 @@ int initTraj(void){
             v.x = -10;
             v.y = 0;
             }
+        setpos_start = 0;
         newSpeed(- LOW_SPEED);
         sendSeg(NULL, &v);
         pt_select.x = obs[0].c.x + v.x;
@@ -107,23 +109,31 @@ int initTraj(void){
 
         case 1:
             if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
-                if(color == 1){ // yellow
-                    p.x = 300. - 12.9;
-                    theta = M_PI;
+                if(!setpos_start){
+                    setpos_start = millis();
+                    break;
                 }
-                else{ // red
-                    p.x = 12.9;
-                    theta = 0.;
-                }
-                p.y = obs[0].c.y;
+                else{
+                    if(millis() - setpos_start > 200){
+                        if(color == 1){ // yellow
+                            p.x = 300. - 12.9;
+                            theta = M_PI;
+                        }
+                        else{ // red
+                            p.x = 12.9;
+                            theta = 0.;
+                        }
+                        p.y = obs[0].c.y;
 
-                waiting_pos.next = 2;
-                waiting_pos.pos = p;
-                waiting_pos.theta = theta;
+                        waiting_pos.next = 2;
+                        waiting_pos.pos = p;
+                        waiting_pos.theta = theta;
 
-                setPos(&p, theta);
-                state = 10;
+                        setPos(&p, theta);
+                        state = 10;
+                    }
                 }
+            }
             break;
 
         case 10: // waiting pos
@@ -178,6 +188,7 @@ int initTraj(void){
             v.y = 30;
             newSpeed(- LOW_SPEED);
             sendSeg(NULL, &v);
+            setpos_start = 0;
             pt_select.x = obs[0].c.x + v.x;
             pt_select.y = obs[0].c.y + v.y;
 
@@ -186,17 +197,25 @@ int initTraj(void){
 
         case 5 :
             if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
-                p.x = obs[0].c.x;
-                p.y = 200 - 12.9;
-                theta = -M_PI_2;
-                setPos(&p, theta);
-
-                waiting_pos.next = 6;
-                waiting_pos.pos = p;
-                waiting_pos.theta = theta;
-
-                state = 50;
+                if(!setpos_start){
+                    setpos_start = millis();
+                    break;
                 }
+                else{
+                    if(millis() - setpos_start > 200){
+                        p.x = obs[0].c.x;
+                        p.y = 200 - 12.9;
+                        theta = -M_PI_2;
+                        setPos(&p, theta);
+
+                        waiting_pos.next = 6;
+                        waiting_pos.pos = p;
+                        waiting_pos.theta = theta;
+
+                        state = 50;
+                    }
+                }
+            }
             break;
 
         case 50: // waiting pos
@@ -541,5 +560,4 @@ void stopRobot(void){
     }
 
 //TODO Optimisation des deplacement du robot algarithme arbre recouvrant
-
 

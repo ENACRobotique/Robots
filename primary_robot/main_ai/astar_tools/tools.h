@@ -135,8 +135,8 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 // ==== global matrices ====
 
 // number of physical obstacles (16)
-#if PROG_TRAJ
-#define N (22)
+#if 1
+#define N (23)
 #else
 #define N (54)
 #endif

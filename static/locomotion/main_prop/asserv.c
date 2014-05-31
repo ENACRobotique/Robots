@@ -518,7 +518,20 @@ int new_asserv_step(){
 
                 gx = traj[curr_traj][curr_traj_step>>1].p2_x;
                 gy = traj[curr_traj][curr_traj_step>>1].p2_y;
-                gtheta = iD2I(RDIAM)*ATAN2(traj[curr_traj][curr_traj_step>>1].p2_y - traj[curr_traj][curr_traj_step>>1].p1_y, traj[curr_traj][curr_traj_step>>1].p2_x - traj[curr_traj][curr_traj_step>>1].p1_x);
+                if(abs(traj[curr_traj][curr_traj_step>>1].seg_len) < isD2I(1)){ // no segment in current traj step
+                    if((curr_traj_step>>1) == 0){ // only one step
+                        gtheta = theta;
+                    }
+                    else{ // get angle with previous traj step
+                        gtheta = iD2I(RDIAM)*ATAN2(traj[curr_traj][curr_traj_step>>1].p1_y - traj[curr_traj][(curr_traj_step>>1)-1].c_y, traj[curr_traj][curr_traj_step>>1].p1_x - traj[curr_traj][(curr_traj_step>>1)-1].c_x) - (isRPI>>1)*SIGN(traj[curr_traj][(curr_traj_step>>1)-1].c_r);
+                    }
+                }
+                else{ // get angle from segment
+                    gtheta = iD2I(RDIAM)*ATAN2(traj[curr_traj][curr_traj_step>>1].p2_y - traj[curr_traj][curr_traj_step>>1].p1_y, traj[curr_traj][curr_traj_step>>1].p2_x - traj[curr_traj][curr_traj_step>>1].p1_x);
+                }
+                if(d_consigne < 0){ // in case of backward motion
+                    gtheta = gtheta + isRPI;
+                }
 
                 return 0;
             }
