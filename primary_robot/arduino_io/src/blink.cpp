@@ -177,7 +177,7 @@ void loop(){
     }
 
     if( (time -  timeLimitSwitchRight) > 20 ){
-        limitSwitchRight = digitalRead(PIN_MODE_SWICTH);
+        limitSwitchRight = digitalRead(PIN_LIMIT_SWITCH_RIGHT);
 
         if(limitSwitchRight != prevLimitSwitchRight){
             prevLimitSwitchRight = limitSwitchRight;
@@ -193,7 +193,7 @@ void loop(){
     }
 
     if( (time -  timeLimitSwitchLeft) > 20 ){
-        limitSwitchLeft = digitalRead(PIN_MODE_SWICTH);
+        limitSwitchLeft = digitalRead(PIN_LIMIT_SWITCH_LEFT);
 
         if(limitSwitchLeft != prevLimitSwitchLeft){
             prevLimitSwitchLeft = limitSwitchLeft;
