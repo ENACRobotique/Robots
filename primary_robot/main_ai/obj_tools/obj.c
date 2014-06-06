@@ -329,10 +329,10 @@ void obj_step(){
         {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
 
         // trajectory
-        {{ 15., 120.}, 10, 0, 1, 1}, // 4
-        {{ 35., 50. }, 10, 0, 1, 1},
+        {{ 35., 120.}, 10, 0, 1, 1}, // 4
+        {{ 50., 70. }, 0, 0, 1, 1},
         {{ 50., 35. }, 10, 0, 1, 1},
-        {{250., 25. }, 0, 0, 1, 1},
+        {{250., 35. }, 10, 0, 1, 1},
         {{265., 50. }, 10, 0, 1, 1},//8
         {{265., 95. }, 10, 0, 1, 1},
         {{245., 160.}, 10, 0, 1, 1},
@@ -340,10 +340,10 @@ void obj_step(){
         };
     iABObs_t obs_list_Red[] = {
         A(0), // r=0
-        A(4),
-        B(5),
-        B(6),
-        B(7),
+        B(4),
+        A(5),
+//        B(6),
+//        B(7),
 //        B(8),
 //        B(9),
 //        A(10),
@@ -358,10 +358,10 @@ void obj_step(){
         {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
 
         // trajectory
-        {{300. - 15., 120.}, 10, 0, 1, 1}, // 4
-        {{300. - 35., 50. }, 10, 0, 1, 1},
+        {{300. - 35., 120.}, 10, 0, 1, 1}, // 4
+        {{300. - 50., 70. }, 0, 0, 1, 1},
         {{300. - 50., 35. }, 10, 0, 1, 1},
-        {{300. -250., 25. }, 0, 0, 1, 1},
+        {{300. -250., 35. }, 10, 0, 1, 1},
         {{300. -265., 50. }, 10, 0, 1, 1},//8
         {{300. -265., 95. }, 10, 0, 1, 1},
         {{300. -245., 160.}, 10, 0, 1, 1},
@@ -369,10 +369,10 @@ void obj_step(){
         };
     iABObs_t obs_list_Yellow[] = {
         A(0), // r=0
-        B(4),
+        A(4),
         A(5),
-        A(6),
-        A(7),
+//        A(6),
+//        A(7),
 //        A(8),
 //        A(9),
 //        B(10),
@@ -405,23 +405,32 @@ void obj_step(){
             sendPosServo(SERVO_PRIM_ARM_LEFT, 600, -1);
             sendPosServo(SERVO_PRIM_DOOR, 500, -1);
             //Setting initial position
+//        sPt_t p;
+//        if(color == 1){//yellow
+//            p.x = 300. - 20.;
+//        }
+//        else{
+//            p.x = 20.;
+//        }
+//        p.y = 200. - 12.9;
+//        setPos(&p, -M_PI_2);
             if(color==1){
                 #if PROG_TRAJ
                 memcpy(obs, obsYellow, sizeof(obsYellow));
                 memcpy(obs_list, obs_list_Yellow, sizeof(obs_list_Yellow));
                 #endif
-                obs[0].c.x = 300. - 15.5;
-                obs[0].c.y = 200. - 20; //15.8
-                theta_robot = M_PI;
+                obs[0].c.x = 300. - 20.;
+                obs[0].c.y = 200. - 13.; //15.8
+                theta_robot = -M_PI_2;
                 }
             else{
                 #if PROG_TRAJ
                 memcpy(obs, obsRed, sizeof(obsRed));
                 memcpy(obs_list, obs_list_Red, sizeof(obs_list_Red));
                 #endif
-                obs[0].c.x = 15.5;
-                obs[0].c.y = 200. - 20; //15.8
-                theta_robot = 0;
+                obs[0].c.x = 20.;
+                obs[0].c.y = 200. - 13.; //15.8
+                theta_robot = -M_PI_2;
                 }
 
             _current_pos=obs[0].c;
@@ -467,20 +476,23 @@ void obj_step(){
     }
 
     case INIT :
-        if(initTraj() == 1) {
+    {
+    }
+
             state = WAIT_STARTING_CORD;
-            //Initialization of the game
-            init_ele();
-            //Change element for simulation
-            listObj[0].utype.tree.eFruit[0]=2;
-            listObj[0].utype.tree.eFruit[3]=2;
-            listObj[1].utype.tree.eFruit[0]=2;
-            listObj[1].utype.tree.eFruit[3]=2;
-            listObj[2].utype.tree.eFruit[0]=2;
-            listObj[2].utype.tree.eFruit[3]=2;
-            listObj[3].utype.tree.eFruit[0]=2;
-            listObj[3].utype.tree.eFruit[3]=2;
-            }
+//        if(initTraj() == 1) {
+//            //Initialization of the game
+//            init_ele();
+//            //Change element for simulation
+//            listObj[0].utype.tree.eFruit[0]=2;
+//            listObj[0].utype.tree.eFruit[3]=2;
+//            listObj[1].utype.tree.eFruit[0]=2;
+//            listObj[1].utype.tree.eFruit[3]=2;
+//            listObj[2].utype.tree.eFruit[0]=2;
+//            listObj[2].utype.tree.eFruit[3]=2;
+//            listObj[3].utype.tree.eFruit[0]=2;
+//            listObj[3].utype.tree.eFruit[3]=2;
+//            }
         break;
 
     case WAIT_STARTING_CORD:
@@ -545,7 +557,7 @@ void obj_step(){
 #if PROG_TRAJ
             fill_tgts_lnk();
 
-            set_traj(&curr_path, obs_list, 5);
+            set_traj(&curr_path, obs_list, 3);
             curr_path.tid = ++last_tid;
             curr_traj_extract_sid = 0;
 #endif
@@ -626,7 +638,7 @@ void obj_step(){
                 }
             }
 
-            if(switch_left == 1 && switch_right ==1){
+            if(switch_left == 1 || switch_right ==1){
                 sendPosServo(SERVO_PRIM_DOOR, 1800, -1);
                 }
 #else
