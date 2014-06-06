@@ -313,19 +313,19 @@ int checkSeg(const sSeg_t *s2, sPt_t *prev_pos, int j){
 int objBonusFire(void){
     int i, j, k, ac;
     static int first = 0;
-    sPt_t p[4], pt; //A, B, C, D
-    sSeg_t s2, seg, s3, s4;
+    sPt_t p[4];//, pt; //A, B, C, D
+    sSeg_t s2, seg; //s3, s4;
     static sPt_t prev_pos ={0., 0.};
-    sLin_t l, l1, l2;
+    sLin_t l; //l1, l2;
     static int ser_active_i = -1;
     static int ser_active_j = -1;
     static int time_prev = 0;
     static int ser_active_i2 = -1;
     static int ser_active_j2 = -1;
     static int time_prev2 = 0;
-    sNum_t c;
-    sVec_t v1, v2;
-    int nb;
+//    sNum_t c;
+//    sVec_t v1, v2;
+//    int nb;
 
 
     if(first == 0){ //initialization

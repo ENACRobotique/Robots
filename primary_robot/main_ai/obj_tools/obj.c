@@ -319,8 +319,8 @@ void set_traj(sPath_t *p, iABObs_t l[], int nb){
 
 
 void obj_step(){
-	int i, j;
-	int obj=-1;
+//	int i, j;
+//	int obj=-1;
     sObs_t obsRed[] = {
         // robots
         {{0., 0.}, 0., 1, 1, 1},   //primary
@@ -722,7 +722,7 @@ void obj_step(){
 	}
 
 int obj_init(){
-	int i, ret, state = 0;
+	int i; //ret, state = 0;
 
     if(sizeof(obs)/sizeof(*obs) != N){
         printf("N isn't correct, byebye\n");
