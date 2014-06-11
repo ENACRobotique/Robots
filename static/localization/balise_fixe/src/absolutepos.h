@@ -8,19 +8,7 @@
 #ifndef ABSOLUTEPOS_H_
 #define ABSOLUTEPOS_H_
 
-#include "time.h"
-#include "neldermead.h"
-#include "stdint.h"
-#include "perception.h"
-#include "../../communication/botNet/shared/botNet_core.h"
-#include "../../communication/network_tools/bn_debug.h"
-#include "roles.h"
-#include "inc/lm4f120h5qr.h"
-#include <driverlib/fpu.h>
-#include "tools.h"
-
-
-#include <stdlib.h>
+#include <perception.h>
 
 #ifndef BIT
 #define BIT(a) (1<<a)

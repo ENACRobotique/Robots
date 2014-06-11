@@ -1,38 +1,25 @@
-#define BUFFER_LENGTH 8
 
-#include "inc/hw_ints.h"
-#include "inc/hw_gpio.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_sysctl.h"
-#include "inc/hw_types.h"
-#include "driverlib/gpio.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/rom.h"
-#include "driverlib/interrupt.h"
-#include "driverlib/timer.h"
-#include "time.h"
-#include "neldermead.h"
-#include "stdint.h"
-#include "perception.h"
-#include "../../communication/botNet/shared/botNet_core.h"
-#include "../../communication/network_tools/bn_debug.h"
-#include "roles.h"
-#include "inc/lm4f120h5qr.h"
+#include <absolutepos.h>
 #include <driverlib/fpu.h>
-#include "tools.h"
+#include <driverlib/gpio.h>
+#include <driverlib/sysctl.h>
+#include <inc/hw_memmap.h>
+#include <lib_int_laser.h>
+#include <lib_synchro_beacon.h>
+#include <messages.h>
+#include <params.h>
+#include <perception.h>
+#include <roles.h>
+#include <stdint.h>
 #include <string.h>
-#include "absolutepos.h"
+#include <time.h>
 
-#include "lib_int_laser.h"
-#include "lib_synchro_beacon.h"
-
-#include "params.h"
-#include "perception.h"
-
-#include <stdlib.h>
+#include "../../../communication/botNet/shared/botNet_core.h"
+#include "../../../communication/botNet/shared/message_header.h"
+#include "../../../communication/network_tools/bn_debug.h"
 
 #ifndef BIT
-#define BIT(a) (1<<a)
+#define BIT(a) (1<<(a))
 #endif
 
 #define MEAS_BUF_SIZE 8
@@ -48,7 +35,6 @@ void pushMeasure(plStruct *pl,eBeacon beacon){
     measuresBuf[measuresIndex].u_date=pl->precision;
 
     measuresIndex=(measuresIndex + 1 ) % MEAS_BUF_SIZE;
-
 }
 
 void __error__(char *pcFilename, unsigned long ulLine){
@@ -218,7 +204,7 @@ int main(void) {
                     int k;
                     for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
                         int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
-                        bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
+//                        bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
                     }
 #endif
                     absolutepos(measuresBuf,measuresIndex,MEAS_BUF_SIZE);

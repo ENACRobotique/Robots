@@ -4,15 +4,13 @@
 #include "lib_int_laser.h"
 
 float calcAngle(sMeasures *mes1, sMeasures *mes2){
-	float ret = (mes2->date - mes1->date)/mes2->period*M_TWOPI;
-	return ret;
+	return (float)(mes2->date - mes1->date)/(float)mes2->period*M_TWOPI;
 }
 
 void calcPerception(sPerception *p, sMeasures *mes1, sMeasures *mes2, sMeasures *mes3){
-
-	p->d1 = delta2distf(mes1->deltaT,mes1->period);
-	p->d2 = delta2distf(mes2->deltaT,mes2->period);
-	p->d3 = delta2distf(mes3->deltaT,mes3->period);
+	p->d1 = delta2distf(mes1->deltaT,mes1->period)/1000.;
+	p->d2 = delta2distf(mes2->deltaT,mes2->period)/1000.;
+	p->d3 = delta2distf(mes3->deltaT,mes3->period)/1000.;
 
 	// angles inter-balises (rad)
 	p->a12 = calcAngle(mes1,mes2);
@@ -20,7 +18,6 @@ void calcPerception(sPerception *p, sMeasures *mes1, sMeasures *mes2, sMeasures 
 	p->a31 = M_TWOPI - calcAngle(mes1,mes3);
 
 	estim_incertitude(p);
-
 }
 
 void simu_perception(sPt_t *x, sPerception *p) {
@@ -28,9 +25,9 @@ void simu_perception(sPt_t *x, sPerception *p) {
 		return;
 
 	// distances
-	p->d1 = sqrt(SQR(x->x - glob_params.B1.x) + SQR(x->y - glob_params.B1.y));
-	p->d2 = sqrt(SQR(x->x - glob_params.B2.x) + SQR(x->y - glob_params.B2.y));
-	p->d3 = sqrt(SQR(x->x - glob_params.B3.x) + SQR(x->y - glob_params.B3.y));
+	p->d1 = sqrt(SQR(x->x - glob_params.B1.x) + SQR(x->y - glob_params.B1.y));  // (m)
+	p->d2 = sqrt(SQR(x->x - glob_params.B2.x) + SQR(x->y - glob_params.B2.y));  // (m)
+	p->d3 = sqrt(SQR(x->x - glob_params.B3.x) + SQR(x->y - glob_params.B3.y));  // (m)
 
 	// angles
 	p->a12 = acos((SQR(p->d1) + SQR(p->d2) - SQR(glob_params.D12))/(2*p->d1*p->d2));   // (rad)

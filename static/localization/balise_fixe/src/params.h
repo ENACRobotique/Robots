@@ -8,7 +8,8 @@
 #ifndef PARAMS_H_
 #define PARAMS_H_
 
-#include "node_cfg.h"
+#include <network_cfg.h>
+#include <node_cfg.h>
 
 typedef enum{
     S_BEGIN,

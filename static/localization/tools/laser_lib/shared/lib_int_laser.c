@@ -307,7 +307,6 @@ return 0;
  *  0 otherwise
  */
 int newLaserMeasure(ildStruct *ilds, plStruct *plo){
-
     uint32_t tempDate=0;
 
     if (ilds->thickness){
@@ -334,5 +333,12 @@ uint32_t delta2dist(unsigned long delta, unsigned long period){
 }
 
 float delta2distf(unsigned long delta, unsigned long period){
-    return ((float)8.006/(((float)delta/(float)period) - (float)0.001127));//<-eureqa-ifed equation //25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2) (formula found by geometry)
+    if(period){
+        float den = (float)delta/(float)period - 0.001127;
+        if(den){
+            return 8.006 / den; //<-eureqa-ifed equation //25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2) (formula found by geometry)
+        }
+    }
+
+    return 0.;
 }
