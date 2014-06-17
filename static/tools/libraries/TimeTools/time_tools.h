@@ -47,19 +47,21 @@ typedef struct __attribute__((packed)){
     __sTime _t;
 } sPeriod;
 
+#define _DC(d) ((sDate)(d))
+#define _PC(p) ((sPeriod)(p))
 #define TIME_CTOR() {{._v = 0, ._tr = E_TIMEREF_NONE, ._tu = E_TIMEUNIT_NONE}}
 #define TD_LoUs_CTOR(v) {{._v = (int32_t)(v), ._tr = E_TIMEREF_LOCAL, ._tu = E_TIMEUNIT_MICROS}}
 #define TD_LoMs_CTOR(v) {{._v = (int32_t)(v), ._tr = E_TIMEREF_LOCAL, ._tu = E_TIMEUNIT_MILLIS}}
 #define TD_GlUs_CTOR(v) {{._v = (int32_t)(v), ._tr = E_TIMEREF_GLOBAL, ._tu = E_TIMEUNIT_MICROS}}
 #define TD_GlMs_CTOR(v) {{._v = (int32_t)(v), ._tr = E_TIMEREF_GLOBAL, ._tu = E_TIMEUNIT_MILLIS}}
-#define TD_VALID(d) ((d)._t._tr != E_TIMEREF_NONE && (d)._t._tu != E_TIMEUNIT_NONE)
-#define TD_GET(d) ((uint32_t)(d)._t._v)
+#define TD_VALID(d) (_DC(d)._t._tr != E_TIMEREF_NONE && _DC(d)._t._tu != E_TIMEUNIT_NONE)
+#define TD_GET(d) ((uint32_t)(_DC(d)._t._v))
 #define TD_GET_LoUs(d) TD_GET(tD_conv_LoUs(d))
 #define TD_GET_LoMs(d) TD_GET(tD_conv_LoMs(d))
 #define TD_GET_GlUs(d) TD_GET(tD_conv_GlUs(d))
 #define TD_GET_GlMs(d) TD_GET(tD_conv_GlMs(d))
-#define TP_GET(p) ((p)._t._v)
-#define TD_GETDIFF(d1, d2) TD_GET(tD_diff((d1), (d2)))
+#define TP_GET(p) (_PC(p)._t._v)
+#define TD_GETDIFF(d1, d2) TP_GET(tD_diff((d1), (d2)))
 
 // basic methods definition
 static inline sDate tD_new(){
