@@ -8,63 +8,65 @@
 #include <math.h>
 #include <pos_history.h>
 
-// TODO be careful of date overflow
 // TODO implement uncertainty mixing
 
-struct {
-    sGenericStatus s;
-    uint8_t valid;
-} ph_cbuf[NB_PREVIOUS_POSITIONS] = {{{0}, 0}};
+sPHPos ph_cbuf[NB_PREVIOUS_POSITIONS] = {{{0}, TIME_CTOR()}};
 uint8_t ph_newest = 0;
+#define S(i) (ph_cbuf[(i)].s)
+#define T(i) (ph_cbuf[(i)].t)
+#define T_VALID(i) TD_VALID(T(i))
+#define OF(i) ((NB_PREVIOUS_POSITIONS + (i))%NB_PREVIOUS_POSITIONS)
 
-int ph_get_pos(sGenericStatus *s, uint32_t date){
-    uint8_t before = ph_newest, after = (ph_newest + NB_PREVIOUS_POSITIONS - 1)%NB_PREVIOUS_POSITIONS, next;
-    sGenericStatus *sb, *sa;
-    uint32_t dtb, dta, dt;
+int ph_get_pos(sGenericStatus *s, sDate date){
+    uint8_t before, after, next;
+    sPHPos *phBefore, *phAfter;
+    sPeriod periodBefore, periodAfter, periodFull;
 
     // find position just before the date provided
-    next = (before + 1)%NB_PREVIOUS_POSITIONS;
-    while((!ph_cbuf[before].valid || (int32_t)(date - ph_cbuf[next].s.date) > 0) && next != ph_newest){
+    before = ph_newest;
+    next = OF(before + 1);
+    while((!T_VALID(before) || !T_VALID(next) || TD_GETDIFF(T(next), date) < 0) && next != ph_newest){
         before = next;
-        next = (before + 1)%NB_PREVIOUS_POSITIONS;
+        next = OF(before + 1);
     }
-    if(!ph_cbuf[before].valid || !(ph_cbuf[before].s.date < date)){
+    if(next == ph_newest){ // can't find position
         return -1;
     }
-    sb = &ph_cbuf[before].s;
-    dtb = date - sb->date;
+    phBefore = &ph_cbuf[before];
+    periodBefore = tD_diff(date, phBefore->t); // in µs
 
     // find position just after the date provided
-    next = (after + NB_PREVIOUS_POSITIONS - 1)%NB_PREVIOUS_POSITIONS;
-    while((!ph_cbuf[after].valid || ph_cbuf[next].s.date > date) && next != ph_newest){
+    after = OF(ph_newest - 1);
+    next = OF(after - 1);
+    while((!T_VALID(after) || !T_VALID(next) || TD_GETDIFF(date, T(next)) < 0) && next != ph_newest){
         after = next;
-        next = (after + NB_PREVIOUS_POSITIONS - 1)%NB_PREVIOUS_POSITIONS;
+        next = OF(after - 1);
     }
-    if(!ph_cbuf[after].valid || !(ph_cbuf[after].s.date > date)){
+    if(next == ph_newest){
         return -1;
     }
-    sa = &ph_cbuf[after].s;
-    dta = sa->date - date;
+    phAfter = &ph_cbuf[after];
+    periodAfter = tD_diff(phAfter->t, date); // in µs
 
-    dt = sa->date - sb->date;
+    periodFull = tD_diff(phAfter->t, phBefore->t); // in µs
 
     // linear interpolation of positions and attitude to find new one
-    s->date = date;
-    s->id = sb->id;
+    s->date = TD_GET_GlUs(date);
+    s->id = phBefore->s.id;
     s->prop_status.pos.frame = FRAME_PLAYGROUND;
-    s->prop_status.pos.x = (sa->prop_status.pos.x * (float)dtb + sb->prop_status.pos.x * (float)dta)/(float)dt;
-    s->prop_status.pos.y = (sa->prop_status.pos.y * (float)dtb + sb->prop_status.pos.y * (float)dta)/(float)dt;
+    s->prop_status.pos.x = (phAfter->s.prop_status.pos.x * (float)TP_GET(periodBefore) + phBefore->s.prop_status.pos.x * (float)TP_GET(periodAfter))/(float)TP_GET(periodFull);
+    s->prop_status.pos.y = (phAfter->s.prop_status.pos.y * (float)TP_GET(periodBefore) + phBefore->s.prop_status.pos.y * (float)TP_GET(periodAfter))/(float)TP_GET(periodFull);
     {
-        float tb = sb->prop_status.pos.theta;
-        float ta = sa->prop_status.pos.theta;
+        float tb = phBefore->s.prop_status.pos.theta;
+        float ta = phAfter->s.prop_status.pos.theta;
 
-        while(fabs(tb - (ta + M_TWOPI)) < fabs(tb - ta)){
-            ta += M_TWOPI;
+        while(fabs(tb - (ta + 2.*M_PI)) < fabs(tb - ta)){
+            ta += 2.*M_PI;
         }
-        while(fabs(tb - (ta - M_TWOPI)) < fabs(tb - ta)){
-            ta -= M_TWOPI;
+        while(fabs(tb - (ta - 2.*M_PI)) < fabs(tb - ta)){
+            ta -= 2.*M_PI;
         }
-        s->prop_status.pos.theta = (ta * (float)dtb + tb * (float)dta)/(float)dt;
+        s->prop_status.pos.theta = (ta * (float)TP_GET(periodBefore) + tb * (float)TP_GET(periodAfter))/(float)TP_GET(periodFull);
     }
 
     return 0;
