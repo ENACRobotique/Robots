@@ -151,6 +151,7 @@
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/linux_prop_simu"/>
 		</configuration>
+		<configuration configurationName="lpc-Debug"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">

@@ -121,6 +121,7 @@ void traj_conv(sTrajEl_t *t) {
 }
 
 int x = 0, y = 0, theta = 0; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
+unsigned int t_pos = 0; // time corresponding to the position
 int gx = 0, gy = 0, gtheta = 0; // goal (I<<SHIFT)
 int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
@@ -296,7 +297,7 @@ int new_pos(sPosPayload *pos){
 }
 
 int send_pos(){
-    sMsg msg;
+    sMsg msg = {{0}};
 
 //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
     msg.header.type = E_POS;
@@ -315,6 +316,24 @@ int send_pos(){
     }
 
     return role_send(&msg);
+}
+
+void get_pos(s2DPosAtt *p, s2DPAUncert *p_u, unsigned int *p_t){
+    if(p){
+        p->frame = FRAME_PLAYGROUND;
+        p->x = I2Ds(x);
+        p->y = I2Ds(y);
+        p->theta = RI2Rs(theta);
+    }
+
+    if(p_u){
+        // TODO
+        memset(p_u, 0, sizeof(*p_u));
+    }
+
+    if(p_t){
+        *p_t = t_pos;
+    }
 }
 
 #if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
@@ -347,6 +366,8 @@ int new_asserv_step(){
     ticks_l = motor_getticks(&motGauche)<<SHIFT; // (IpP<<SHIFT)
     ticks_r = motor_getticks(&motDroit)<<SHIFT; // (IpP<<SHIFT)
 #endif
+
+    t_pos = micros();
 
     // update the motor speed
     // TODO: use the shifted data in the PID of the motor, really necessary?
@@ -551,7 +572,7 @@ int new_asserv_step(){
                     // set speed a priori
                     _mul_l = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r + isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
                     _mul_r = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r - isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
-                    if(consigne < 0){
+                    if(d_consigne < 0){
                         int temp = _mul_l;
                         _mul_l = _mul_r;
                         _mul_r = temp;
@@ -588,7 +609,7 @@ int new_asserv_step(){
             // get principal absolute angle from current position to target
             alpha = iD2I(RDIAM)*ATAN2(gy - y, gx - x);
 
-            if(consigne < 0){
+            if(d_consigne < 0){
                 alpha += isRPI;
             }
 
