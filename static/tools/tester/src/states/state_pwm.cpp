@@ -28,8 +28,10 @@ sState* testpwm(){
 
 		if(Position!=memPosition)
 		{
-			String affich="pos= "+String(Position)+"/255";
-			Serial.println(affich);
+			char affich[16];
+			snprintf(affich,17,"Pos= %d /255",Position);
+			afficher(affich);
+
 			memPosition=Position;
 		}
 

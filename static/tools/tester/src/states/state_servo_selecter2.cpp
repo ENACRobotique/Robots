@@ -25,8 +25,10 @@ sState* testservo_selecter2(){
 
 	if(Position!=memPosition)
 	{
-		String affich="Angle= "+String(Position);
-		Serial.println(affich);
+
+		char affich[16];
+		snprintf(affich,17,"Angle= %d",Position);
+		afficher(affich);
 		memPosition=Position;
 	}
 

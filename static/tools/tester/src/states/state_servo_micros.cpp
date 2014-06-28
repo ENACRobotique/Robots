@@ -19,7 +19,7 @@
 
 sState* testservo_micros(){
 	static int memMicros=0;
-	int Micros = (abs(myEnc.read())/2*PRECISION_MICROS)%1800+500;
+	int Micros = (abs(myEnc.read())/2*PRECISION_MICROS)%2200+500;
 
 //	if(!digitalRead(SELECT))	//nécessite de valider avant que le servo ne se déplace
 //		{
@@ -29,8 +29,9 @@ sState* testservo_micros(){
 
 		if(Micros!=memMicros)
 		{
-			String affich="delay= "+String(Micros)+" us";
-			Serial.println(affich);
+			char affich[16];
+			snprintf(affich,17,"delay= %dus",Micros);
+			afficher(affich);
 			memMicros=Micros;
 		}
 

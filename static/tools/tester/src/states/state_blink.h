@@ -8,6 +8,8 @@
 #ifndef STATE_BLINK_H_
 #define STATE_BLINK_H_
 
+#include <state_types.h>
+
 
 
 extern sState sBlink;

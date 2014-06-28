@@ -25,9 +25,9 @@ Servo servotest;
 
 sState* testMenu_servo(){
 	const char *menu_servo[] = {
-		  "SELECTEUR tps reel",
-		  "SELECTEUR validation",
-		  "MICROS",
+		  "ANGLE tps reel",
+		  "ANGLE validation",
+		  "MICROSECONDES",
 		};
 
 
@@ -62,7 +62,7 @@ sState* testMenu_servo(){
     return NULL;
 }
 void initMenu_servo(sState *prev){
-	afficher("SERVOS");
+	afficher("ANGLE tps reel");
 
 }
 void deinitMenu_servo(sState *next){

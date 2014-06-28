@@ -15,7 +15,7 @@
 #include "state_servo_selecter1.h"
 #include "state_blink.h"
 
-//Servo servotest;
+
 
 sState* testservo_selecter1(){
 	static int memPosition=0;
@@ -28,8 +28,9 @@ sState* testservo_selecter1(){
 
 		if(Position!=memPosition)
 		{
-			String affich="Angle= "+String(Position);
-			Serial.println(affich);
+			char affich[16];
+			snprintf(affich,17,"Angle= %d",Position);
+			afficher(affich);
 			memPosition=Position;
 		}
 

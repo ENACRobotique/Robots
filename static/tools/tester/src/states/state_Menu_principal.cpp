@@ -5,20 +5,22 @@
  *      Author: quentin
  */
 
-#include "Arduino.h"
-#include "../params.h"
-#include "../tools.h"
-#include "state_types.h"
-
+#include <Arduino.h>
+#include <Encoder.h>
+#include <params.h>
+#include <state_blink.h>
+#include <state_Menu_servo.h>
+#include <state_pwm.h>
+#include <state_types.h>
+#include <stddef.h>
+//#include "../tools.h"
 #include "state_Menu_principal.h"
-#include "state_Menu_servo.h"
-#include "state_blink.h"
-#include "state_servo_selecter1.h"
-#include "state_servo_selecter2.h"
-#include "state_pwm.h"
+//#include "state_servo_selecter1.h"
+//#include "state_servo_selecter2.h"
+
+#include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
+
 #define NB_menu_principal 4
-
-
 
 Encoder myEnc(3, 4);
 

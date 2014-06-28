@@ -8,7 +8,9 @@
 #ifndef STATE_MENU_SERVO_H_
 #define STATE_MENU_SERVO_H_
 
-#include "Encoder.h"
+#include <state_types.h>
+#include <Servo.h>
+//#include "Encoder.h"
 
 //extern Encoder myEnc;
 

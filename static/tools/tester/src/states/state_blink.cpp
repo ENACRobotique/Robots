@@ -5,12 +5,15 @@
  *      Author: quentin
  */
 
-#include "Arduino.h"
-#include "../params.h"
-#include "../tools.h"
-#include "state_types.h"
+#include <Arduino.h>
+#include <params.h>
+#include <state_types.h>
+#include <stddef.h>
+#include <tools.h>
+#include "state_blink.h"
 
-//int retour;
+#include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
+LiquidCrystal lcd(6, 7, 8, 10, 11, 12);
 
 sState* testBlink(){
     return NULL;
@@ -49,9 +52,11 @@ sState sBlink={
 
 
 
-void afficher(const char* chaine) //fonction à faire (juste un exemple pr le pc)
+void afficher(const char * chaine)
 {
-  Serial.println(chaine);
+	  lcd.clear();
+	  lcd.home();
+	  lcd.write(chaine);
 }
 
 void ret()

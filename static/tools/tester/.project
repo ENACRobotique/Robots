@@ -38,6 +38,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/Encoder</locationURI>
 		</link>
 		<link>
+			<name>arduinolib/LiquidCrystal</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/LiquidCrystal</locationURI>
+		</link>
+		<link>
 			<name>arduinolib/Servo</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/Servo</locationURI>
@@ -48,10 +53,4 @@
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/Wire</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-2-ECLIPSE_HOME%7D/mnt/data/Documents/Robots-master</value>
-		</variable>
-	</variableList>
 </projectDescription>
