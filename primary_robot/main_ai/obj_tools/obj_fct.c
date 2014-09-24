@@ -71,31 +71,35 @@ int initTraj(void){
     sVec_t v;
     sPath_t path;
     sPt_t p;
+    sNum_t theta;
     static int state = 0;
+    static sWaitPos waiting_pos = {0};
+    static unsigned long setpos_start = 0;
   /*  sTrajEl_t trajRed[2]={
         {{0. , 0.},{12.9 + 5. , 0.},{{12.9 + 5. ,  0.}, 0. , 0., 1.}, 0. , 0., 0},
         {{12.9 + 18., 0.},{12.9 + 18., 0.},{{12.9 + 18. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
         };*/
     sTrajEl_t trajRed[2]={
-        {{0.       , 0.},{12.9 + 3., 0.},{{12.9 + 3. ,  0.}, 5. , 0., 1.}, 0. , 0., 0},
-        {{12.9 + 8., 0.},{12.9 + 8., 0.},{{12.9 + 8. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
+        {{0.            , 0.},{12.9 + 3. - 2., 0.},{{12.9 + 3. - 2. ,  0.}, 5. , 0., 1.}, 0. , 0., 0},
+        {{12.9 + 8. - 2., 0.},{12.9 + 8. - 2., 0.},{{12.9 + 8. - 2. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
         };
     sTrajEl_t trajYellow[2]={
-        {{0.              , 0.},{300. - 12.9 - 3., 0.},{{300. - 12.9 - 3. ,  0.}, -5. , 0., 1.}, 0. , 0., 0},
-        {{300. - 12.9 - 8., 0.},{300. - 12.9 - 8., 0.},{{300. - 12.9 - 8. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
+        {{0.                   , 0.},{300. - 12.9 - 3. + 2., 0.},{{300. - 12.9 - 3. + 2. ,  0.}, -5. , 0., 1.}, 0. , 0., 0},
+        {{300. - 12.9 - 8. + 2., 0.},{300. - 12.9 - 8. + 2., 0.},{{300. - 12.9 - 8. + 2. ,  0.}, 0. , 0., 1.}, 0. , 0., 1},
         };
     sTrajEl_t traj[2];
 
     switch(state){
         case 0 :
         if(color == 1){ //yellow
-            v.x = 20;
+            v.x = 10;
             v.y = 0;
             }
         else{
-            v.x = -20;
+            v.x = -10;
             v.y = 0;
             }
+        setpos_start = 0;
         newSpeed(- LOW_SPEED);
         sendSeg(NULL, &v);
         pt_select.x = obs[0].c.x + v.x;
@@ -105,13 +109,44 @@ int initTraj(void){
 
         case 1:
             if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
-                if(color == 1) p.x = 300. - 12.9;
-                else p.x = 12.9;
-                p.y = obs[0].c.y;
-                setPos(&p);
-                state = 2;
+                if(!setpos_start){
+                    setpos_start = millis();
+                    break;
                 }
+                else{
+                    if(millis() - setpos_start > 200){
+                        if(color == 1){ // yellow
+                            p.x = 300. - 12.9;
+                            theta = M_PI;
+                        }
+                        else{ // red
+                            p.x = 12.9;
+                            theta = 0.;
+                        }
+                        p.y = obs[0].c.y;
+
+                        waiting_pos.next = 2;
+                        waiting_pos.pos = p;
+                        waiting_pos.theta = theta;
+
+                        setPos(&p, theta);
+                        state = 10;
+                    }
+                }
+            }
             break;
+
+        case 10: // waiting pos
+        {
+            sNum_t dist;
+
+            distPt2Pt(&waiting_pos.pos, &obs[0].c, &dist);
+
+            if(dist <= 1.  /* XXX test theta aswell */){
+                state = waiting_pos.next;
+            }
+            break;
+        }
 
         case 2 :
             if( color == 1){ //yellow
@@ -153,6 +188,7 @@ int initTraj(void){
             v.y = 30;
             newSpeed(- LOW_SPEED);
             sendSeg(NULL, &v);
+            setpos_start = 0;
             pt_select.x = obs[0].c.x + v.x;
             pt_select.y = obs[0].c.y + v.y;
 
@@ -161,16 +197,42 @@ int initTraj(void){
 
         case 5 :
             if ((fabs(obs[0].c.x - pt_select.x) < 1. && fabs(obs[0].c.y - pt_select.y) < 1.)){
-                p.x = obs[0].c.x;
-                p.y = 200 - 12.9;
-                setPos(&p);
-                state = 6;
+                if(!setpos_start){
+                    setpos_start = millis();
+                    break;
                 }
+                else{
+                    if(millis() - setpos_start > 200){
+                        p.x = obs[0].c.x;
+                        p.y = 200 - 12.9;
+                        theta = -M_PI_2;
+                        setPos(&p, theta);
+
+                        waiting_pos.next = 6;
+                        waiting_pos.pos = p;
+                        waiting_pos.theta = theta;
+
+                        state = 50;
+                    }
+                }
+            }
             break;
+
+        case 50: // waiting pos
+        {
+            sNum_t dist;
+
+            distPt2Pt(&waiting_pos.pos, &obs[0].c, &dist);
+
+            if(dist <= 1. /* XXX test theta aswell */){
+                state = waiting_pos.next;
+            }
+            break;
+        }
 
         case 6:
             v.x = 0;
-            v.y = -40;
+            v.y = -2;
             newSpeed(LOW_SPEED);
             sendSeg(NULL, &v);
             pt_select.x = obs[0].c.x + v.x;
@@ -233,6 +295,15 @@ void init_ele(void){
         createEPfire2(i);
         }
 
+    if(color == RED){
+        listObj[13].active = 0;
+        listObj[15].active = 0;
+        }
+    else{
+        listObj[12].active = 0;
+        listObj[14].active = 0;
+        }
+
 	#if DEBUG
 		printListObj();
 	#endif
@@ -291,7 +362,7 @@ void startColor(void){
                 msgOut.payload.ihmStatus.states[0].id = IHM_LED;
                 msgOut.payload.ihmStatus.states[0].state = 1;
 
-                bn_send(&msgOut);
+                bn_sendRetry(&msgOut, MAX_RETRIES);
                 }
             break;
         case 1 :
@@ -313,7 +384,7 @@ void startColor(void){
                 msgOut.payload.ihmStatus.states[0].id = IHM_LED;
                 msgOut.payload.ihmStatus.states[0].state = 2;
 
-                bn_send(&msgOut);
+                bn_sendRetry(&msgOut, MAX_RETRIES);
                 }
             break;
         case 3 :
@@ -489,5 +560,4 @@ void stopRobot(void){
     }
 
 //TODO Optimisation des deplacement du robot algarithme arbre recouvrant
-
 

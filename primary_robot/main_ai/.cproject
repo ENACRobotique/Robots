@@ -85,4 +85,5 @@
 			<resource resourceType="PROJECT" workspacePath="/main_ia"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

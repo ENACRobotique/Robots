@@ -6,7 +6,6 @@
 #include "error.h"
 #include "math_types.h"
 
-
 //#define AS_DEBUG 1
 #define AS_STATS
 // warning, activating AS_DEBUG adds a lot of time to the time statistics (time to print the debug information)
@@ -136,7 +135,12 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 // ==== global matrices ====
 
 // number of physical obstacles (16)
+#if 1
+#define N (23)
+#else
 #define N (54)
+#endif
+
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
 extern sASEl_t aselts[N*2][N*2]; // 2Nx2N elements (an A* node is a trajectory from an iABObs_t to another)

@@ -3,6 +3,7 @@
 
 #include<time.h>
 
+#include "math_types.h"
 #include "tools.h"
 #include "a_star.h"
 #include "math_ops.h"
@@ -16,14 +17,20 @@
 
 #define COLOR_SIMU 1 //0 red  1 yellow
 #define DEBUG 1
-#define SIMU 1
+#define SIMU 0 //modify network_cfg.h
+#define PROG_TRAJ 1 //1 active
 #define RESO_POS 2
 #define NB_OBJ 16
 #define END_MATCH 90000 //in ms
 #define MAX_OBS_BY_OBJ 3
 #define MAX_EP_BY_OBJ 3
+#if PROG_TRAJ
+#define START_FEU 12
+#define END_FEU 22
+#else
 #define START_FEU 31
 #define END_FEU 47
+#endif
 #define START_ARBRE 4
 #define START_TORCHE_FIXE 23
 #define FIRE_RADIUS_EP 15
@@ -31,13 +38,21 @@
 #define RADIUS_ENTRY_POINT_TREE 6
 #define NOMINAL_SPEED 20
 #define LOW_SPEED 10
+#define NB_MAX_PT_ZONE 10
+#define MAX_RETRIES 5
 
-
-typedef enum {COLOR_SELECTION, INIT, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
+typedef enum {COLOR_SELECTION, INIT, WAITING_POS, WAITING, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
 typedef enum {E_FEU, E_TORCHE_MOBILE, E_ARBRE, E_ARBRE_FOND , E_BAC, E_FOYER, E_TORCHE_FIXE} eObj_t;
 typedef enum {WAIT_MES, ACTIVE, FREE} eStateObj_t;
 typedef enum {ARM_LEFT, ARM_RIGHT} eServoLoc_t;
 typedef enum {CLOSE, HALF_OPEN, OPEN} eServoPos_t;
+typedef enum {RED, YELLOW} eColor_t;
+
+typedef struct{
+    estate_t next;
+    sPt_t pos;
+    sNum_t theta;
+} sWaitPos;
 
 typedef struct{
 	sPt_t c;
@@ -111,7 +126,7 @@ extern sNum_t theta_robot;
 
 extern int starting_cord;
 extern int mode_switch;
-extern int color;
+extern eColor_t color;
 extern int current_obj;
 
 

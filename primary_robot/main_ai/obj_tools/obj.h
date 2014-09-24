@@ -17,6 +17,7 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../network_tools/bn_debug.h"
+#include "../network_tools/bn_utils.h"
 #include "../../global_errors.h"
 #include "node_cfg.h"
 
@@ -38,5 +39,7 @@ sNum_t val_obj(int num);
 int8_t next_obj (void);
 void obj_step(void);
 int obj_init(void);
+
+extern int switch_left, switch_right;
 
 #endif /* OBJ_H_ */

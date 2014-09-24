@@ -2,6 +2,9 @@
 
 #include <math.h>
 
+#include "obj_com.h"
+#include "main.h"
+
 #define CLAMP(m, v, M) MAX(m, MIN(v, M))
 
 
@@ -13,6 +16,8 @@ sPt_t prev_pos={0., 0.};
 sNum_t prev_len=0;
 long last_time2=0;
 
+int switch_left = 0, switch_right = 0;
+sWaitPos waiting_pos = {0};
 
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r){
 	int i;
@@ -282,12 +287,101 @@ int checkCurrentPath(void){
 	}
 
 
+void set_traj(sPath_t *p, iABObs_t l[], int nb){
+    int i;
+    p->path = (sTrajEl_t *)calloc(nb - 1, sizeof(sTrajEl_t));
+    p->path_len = nb - 1;
+    // p->dist // TODO
+    // p->path_len // TODO
 
+    for(i = 0; i < nb - 1; i++){
+        sSeg_t *s = tgt(l[i], l[i+1]);
+
+        p->path[i].p1 = s->p1;
+        p->path[i].p2 = s->p2;
+        distPt2Pt(&s->p1, &s->p2, &p->path[i].seg_len);
+
+        p->path[i].obs.active = 1;
+        p->path[i].obs.c = obs[O(l[i+1])].c;
+        p->path[i].obs.moved = 1;
+        p->path[i].obs.r = fabs(obs[O(l[i+1])].r)*(1 - 2*DIR(l[i+1]));
+        if(i == nb - 1){
+            p->path[i].arc_len = 0.;
+        }
+        else{
+            p->path[i].arc_len = arc_len(l[i], l[i+1], l[i+2]);
+        }
+
+
+        p->path[i].sid = i;
+    }
+}
 
 
 void obj_step(){
-	int j;
-	int obj=-1;
+//	int i, j;
+//	int obj=-1;
+    sObs_t obsRed[] = {
+        // robots
+        {{0., 0.}, 0., 1, 1, 1},   //primary
+        {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
+        {{0., 0.}, R_ROBOT+20., 1, 1, 1},   //primary adv
+        {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
+
+        // trajectory
+        {{ 35., 120.}, 10, 0, 1, 1}, // 4
+       // {{ 50., 70. }, 0, 0, 1, 1},
+        {{ 35., 50. }, 10, 0, 1, 1},
+        {{ 50., 35. }, 10, 0, 1, 1},
+        {{250., 35. }, 10, 0, 1, 1},
+        {{265., 50. }, 10, 0, 1, 1},//8
+        {{265., 95. }, 10, 0, 1, 1},
+        {{245., 160.}, 10, 0, 1, 1},
+        {{235., 200.}, 0, 0, 1, 1},//11
+        };
+    iABObs_t obs_list_Red[] = {
+        A(0), // r=0
+        B(4),
+        A(5),
+        B(6),
+        B(7),
+        B(8),
+        B(9),
+        A(10),
+        A(11)// r=0
+        };
+
+    sObs_t obsYellow[] = {
+        // robots
+        {{0., 0.}, 0., 1, 1},   //primary
+        {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
+        {{0., 0.}, R_ROBOT+20., 1, 1, 1},   //primary adv
+        {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
+
+        // trajectory
+        {{300. - 35., 120.}, 10, 0, 1, 1}, // 4
+        {{300. - 35., 50. }, 10, 0, 1, 1},
+        {{300. - 50., 35. }, 10, 0, 1, 1},
+        {{300. -250., 35. }, 10, 0, 1, 1},
+        {{300. -265., 50. }, 10, 0, 1, 1},//8
+        {{300. -265., 95. }, 10, 0, 1, 1},
+        {{300. -245., 160.}, 10, 0, 1, 1},
+        {{300. -235., 200.}, 0, 0, 1, 1},//11
+        };
+    iABObs_t obs_list_Yellow[] = {
+        A(0), // r=0
+        A(4),
+        A(5),
+        A(6),
+        A(7),
+        A(8),
+        A(9),
+        B(10),
+        A(11)// r=0
+    };
+
+    static iABObs_t obs_list[32];
+
     /*sTrajEl_t tabStart[2]={ //Segment for push a vertical fire
         {{0.  ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
         {{10 ,  0.},{10. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
@@ -308,17 +402,36 @@ void obj_step(){
 #if SIMU
             color = COLOR_SIMU ;
 #endif
-            state = INIT;
+            sendPosServo(SERVO_PRIM_ARM_RIGHT, 2400, -1);
+            sendPosServo(SERVO_PRIM_ARM_LEFT, 600, -1);
+            sendPosServo(SERVO_PRIM_DOOR, 500, -1);
             //Setting initial position
+//        sPt_t p;
+//        if(color == 1){//yellow
+//            p.x = 300. - 20.;
+//        }
+//        else{
+//            p.x = 20.;
+//        }
+//        p.y = 200. - 12.9;
+//        setPos(&p, -M_PI_2);
             if(color==1){
-                obs[0].c.x = 300. - 15.5;
-                obs[0].c.y = 200. - 20; //15.8
-                theta_robot = M_PI;
+                #if PROG_TRAJ
+                memcpy(obs, obsYellow, sizeof(obsYellow));
+                memcpy(obs_list, obs_list_Yellow, sizeof(obs_list_Yellow));
+                #endif
+                obs[0].c.x = 300. - 20.;
+                obs[0].c.y = 200. - 13.; //15.8
+                theta_robot = -M_PI_2;
                 }
             else{
-                obs[0].c.x = 15.5;
-                obs[0].c.y = 200. - 20; //15.8
-                theta_robot = 0;
+                #if PROG_TRAJ
+                memcpy(obs, obsRed, sizeof(obsRed));
+                memcpy(obs_list, obs_list_Red, sizeof(obs_list_Red));
+                #endif
+                obs[0].c.x = 20.;
+                obs[0].c.y = 200. - 13.; //15.8
+                theta_robot = -M_PI_2;
                 }
 
             _current_pos=obs[0].c;
@@ -333,12 +446,18 @@ void obj_step(){
             msgOut.payload.pos.theta = theta_robot;
             msgOut.payload.pos.x = obs[0].c.x;
             msgOut.payload.pos.y = obs[0].c.y;
+
+            waiting_pos.next = INIT;
+            waiting_pos.pos = obs[0].c;
+            waiting_pos.theta = theta_robot;
+            state = WAITING_POS;
+
             printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta*180./M_PI);
 
-            ret = role_send(&msgOut);
+            ret = role_sendRetry(&msgOut, MAX_RETRIES);
             if(ret <= 0){
-                printf("bn_sendAck(E_POS) error #%i\n", -ret);
-                getchar();
+                printf("bn_sendRetry(E_POS) error #%i\n", -ret);
+//                getchar();
                 }
 
             }
@@ -346,21 +465,35 @@ void obj_step(){
         startColor();
         break;
 
+    case WAITING_POS:{
+        sNum_t dist;
+
+        distPt2Pt(&waiting_pos.pos, &obs[0].c, &dist);
+
+        if(dist <= 1. /* XXX test theta aswell */){
+            state = waiting_pos.next;
+        }
+        break;
+    }
+
     case INIT :
-        if(initTraj() == 1) {
+    {
+    }
+
             state = WAIT_STARTING_CORD;
-            //Initialization of the game
-            init_ele();
-            //Change element for simulation
-            //listObj[0].utype.tree.eFruit[0]=2;
-            //listObj[0].utype.tree.eFruit[3]=2;
-            //listObj[1].utype.tree.eFruit[0]=2;
-            //listObj[1].utype.tree.eFruit[3]=2;
-            listObj[2].utype.tree.eFruit[0]=2;
-            listObj[2].utype.tree.eFruit[3]=2;
-            listObj[3].utype.tree.eFruit[0]=2;
-            listObj[3].utype.tree.eFruit[3]=2;
-            }
+//        if(initTraj() == 1) {
+//            //Initialization of the game
+//            init_ele();
+//            //Change element for simulation
+//            listObj[0].utype.tree.eFruit[0]=2;
+//            listObj[0].utype.tree.eFruit[3]=2;
+//            listObj[1].utype.tree.eFruit[0]=2;
+//            listObj[1].utype.tree.eFruit[3]=2;
+//            listObj[2].utype.tree.eFruit[0]=2;
+//            listObj[2].utype.tree.eFruit[3]=2;
+//            listObj[3].utype.tree.eFruit[0]=2;
+//            listObj[3].utype.tree.eFruit[3]=2;
+//            }
         break;
 
     case WAIT_STARTING_CORD:
@@ -375,7 +508,7 @@ void obj_step(){
     case WAIT:
         //                printf("Attente. time = %ld\n", millis()); // FIXME debug
         if(test_tirette()){
-        	state = JEU;
+        	state = WAITING;
         	_start_time = millis();
         	last_time=_start_time;
         	}
@@ -419,9 +552,97 @@ void obj_step(){
 
         break;
 */
+
+    case WAITING:
+       if(millis() - _start_time > 2000){
+#if PROG_TRAJ
+            fill_tgts_lnk();
+
+            set_traj(&curr_path, obs_list, 9);
+            curr_path.tid = ++last_tid;
+            curr_traj_extract_sid = 0;
+#endif
+           state = JEU;
+           }
+       break;
     case JEU :
         if(millis()-_start_time > END_MATCH) state = SHUT_DOWN;
 
+#if PROG_TRAJ
+            sGenericStatus *stPr = getLastPGStatus(ELT_PRIMARY); sPt_t ptPr;
+            sGenericStatus *stAPr = getLastPGStatus(ELT_ADV_PRIMARY); sPt_t ptAPr;
+            sGenericStatus *stASc = getLastPGStatus(ELT_ADV_SECONDARY); sPt_t ptASc;
+            sNum_t d, dot;
+            sVec_t v1, v2;
+            int contact = 0;
+
+            if(stPr){
+                ptPr.x = stPr->prop_status.pos.x;
+                ptPr.y = stPr->prop_status.pos.y;
+
+                if(stAPr){
+                    ptAPr.x = stAPr->prop_status.pos.x;
+                    ptAPr.y = stAPr->prop_status.pos.y;
+
+                    distPt2Pt(&ptPr, &ptAPr, &d);
+                    v1.x = cos(stPr->prop_status.pos.theta);
+                    v1.y = sin(stPr->prop_status.pos.theta);
+                    convPts2Vec(&ptPr, &ptAPr, &v2);
+                    dotVecs(&v1, &v2, &dot);
+
+                    if(d < 50 && dot > 0.6*d){
+// TODO
+                        printf("CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+
+                        contact = 1;
+                    }
+                }
+
+                if(stASc){
+                    ptASc.x = stASc->prop_status.pos.x;
+                    ptASc.y = stASc->prop_status.pos.y;
+
+                    distPt2Pt(&ptPr, &ptASc, &d);
+                    v1.x = cos(stPr->prop_status.pos.theta);
+                    v1.y = sin(stPr->prop_status.pos.theta);
+                    convPts2Vec(&ptPr, &ptASc, &v2);
+                    dotVecs(&v1, &v2, &dot);
+
+                    if(d < 40 && dot > 0.6*d){
+// TODO
+                        printf("CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+
+                        contact = 1;
+                    }
+                }
+
+                if(contact){
+                    sMsg outMsg = {{0}};
+
+                    outMsg.header.type = E_TRAJ;
+                    outMsg.header.size = sizeof(outMsg.payload.traj);
+                    outMsg.payload.traj.p1_x = ptPr.x;
+                    outMsg.payload.traj.p1_y = ptPr.y;
+                    outMsg.payload.traj.p2_x = ptPr.x;
+                    outMsg.payload.traj.p2_y = ptPr.y;
+                    outMsg.payload.traj.seg_len = 0.;
+
+                    outMsg.payload.traj.c_x = ptPr.x;
+                    outMsg.payload.traj.c_y = ptPr.y;
+                    outMsg.payload.traj.c_r = 0.;
+                    outMsg.payload.traj.arc_len = 0.;
+
+                    outMsg.payload.traj.sid = 0;
+                    outMsg.payload.traj.tid = ++last_tid;
+
+                    role_sendRetry(&outMsg, MAX_RETRIES);
+                }
+            }
+
+            if((switch_left == 1) && (!switch_right ==1)){
+                sendPosServo(SERVO_PRIM_DOOR, 1800, -1);
+                }
+#else
         //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
         temp=0;
         for(j=0 ; j<NB_OBJ ; j++){
@@ -452,6 +673,7 @@ void obj_step(){
             checkRobot2Obj();
             checkRobotBlock();
 
+
        if((millis()-last_time2)>1000){
             last_time2 = millis();
             updateEntryPointTree();
@@ -459,13 +681,14 @@ void obj_step(){
             printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
             }
 
-
+#endif
 
         //If the select point is achieved
         if (((fabs(pt_select.x-_current_pos.x)<RESO_POS && fabs(pt_select.y-_current_pos.y)<RESO_POS) ) || mode_obj==1){   //objectif atteint
         	//printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
         	//printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
         	//printf("mode_obj=%d", mode_obj);
+
         	switch ((listObj[current_obj]).etype){ //Mise en place des procédures local en fonction de l'objectif
 				case E_ARBRE :
 					obj_tree(current_obj);
@@ -500,15 +723,57 @@ void obj_step(){
 	}
 
 int obj_init(){
-	int i;
+	int i; //ret, state = 0;
 
     if(sizeof(obs)/sizeof(*obs) != N){
         printf("N isn't correct, byebye\n");
         exit(1);
     	}
+/*
+    //ping all address
+#if !SIMU
+    while(1){
+        switch(state){
+            case 0:
+                if( (ret = bn_ping(ADDRU2_MAIN_PROP)) > 0){
+                    state = 1;
+                    }
+                printf("Ping main prop : %d\n", ret);
+                break;
+            case 1:
+                if( (ret = bn_ping(ADDRU1_MAIN_IO)) > 0){
+                    state = 2;
+                    }
+                printf("Ping main io : %d\n", ret);
+                break;
+            case 2:
+                if( (ret = bn_ping(ADDRX_MOBILE_1)) > 0){
+                    state = 3;
+                    }
+                printf("Ping mobile 1 : %d\n", ret);
+                break;
+            case 3:
+                if( (ret = bn_ping(ADDRX_MOBILE_2)) > 0){
+                    state = 5; // XXX
+                    }
+                printf("Ping mobile 2 : %d\n", ret);
+                break;
+//            case 4:
+//                if( (ret = bn_ping(ADDRX_FIX)) > 0){
+//                    state = 5;
+//                    }
+//                printf("Ping fix : %d\n", ret);
+//                break;
 
+            }
+        if(state == 5) break;
+        }
+#endif
+*/
+#if !PROG_TRAJ
     listObj[8].done=0.5;
     listObj[10].done=0.5;
+#endif
    // starting_cord = 1; //tirette simulation
     mode_switch = 0;
 
@@ -518,9 +783,11 @@ int obj_init(){
         obs_updated[i]++;
     	}
 
+#if !PROG_TRAJ
 	#if DEBUG
 		printListObj();
 	#endif
+#endif
 
     return 0;
 	}

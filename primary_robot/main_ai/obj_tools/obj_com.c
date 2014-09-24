@@ -11,6 +11,7 @@
 #include <math.h>
 #include "../botNet/shared/botNet_core.h"
 #include "obj_types.h"
+#include "main.h"
 
 sServo_t listServo[2]={ //TODO other servo
     {SERVO_PRIM_ARM_LEFT,  650, 0, 2400, 180},
@@ -19,9 +20,8 @@ sServo_t listServo[2]={ //TODO other servo
 
 void send_robot(sPath_t path){
     sMsg outMsg = {{0}};
-    int i, ret ;
-    static int tid = 0;
-    tid++;
+    int i, ret;
+    last_tid++;
     if(path.path)
         for(i = 0; i < path.path_len; i++) {
             printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, path.path[i].p1.x, path.path[i].p1.y, path.path[i].p2.x, path.path[i].p2.y,path.path[i].obs.c.x,path.path[i].obs.c.y, path.path[i].obs.r,path.path[i].arc_len,path.path[i].seg_len);
@@ -41,16 +41,26 @@ void send_robot(sPath_t path){
             outMsg.payload.traj.arc_len = path.path[i].arc_len;
 
             outMsg.payload.traj.sid = i;
-            outMsg.payload.traj.tid = tid;
+            outMsg.payload.traj.tid = last_tid;
 
-            ret = role_send(&outMsg);
-            if(ret < 0) printf("role_send(E_TRAJ) failed #%i\n", -ret);
+            if((ret=role_sendRetry(&outMsg, MAX_RETRIES))<=0){
+                printf("role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+            }
 
             usleep(1000);
         }
     }
 
-int sendPosServo(eServos s, uint16_t us, uint16_t a){ // us or a = -1 if no use
+void stop_robot(void){
+    sTrajEl_t traj = {{obs[0].c.x, obs[0].c.y}, {obs[0].c.x, obs[0].c.y}, {{obs[0].c.x, obs[0].c.y}, 0, 0, 1}, 0, 0, 0};
+    sPath_t path;
+
+    path.path = &traj;
+    path.path_len = 1;
+    send_robot(path);
+    }
+
+int sendPosServo(eServos s, int16_t us, int16_t a){ // us or a = -1 if no use
     sMsg msg = {{0}};
     sPt_t p1, p2;
     sLin_t l;
@@ -61,9 +71,10 @@ int sendPosServo(eServos s, uint16_t us, uint16_t a){ // us or a = -1 if no use
             }
 
     if(a != -1){
+        i = 0;
         while(s != listServo[i].id){
             i++;
-            if( i > sizeof(listServo)) break;
+            if( i > sizeof(listServo)/sizeof(*listServo)) break;
             }
         p1.x = listServo[i].a1;
         p1.y = listServo[i].u1;
@@ -83,10 +94,9 @@ int sendPosServo(eServos s, uint16_t us, uint16_t a){ // us or a = -1 if no use
     msg.payload.servos.servos[0].id = s;
     msg.payload.servos.servos[0].us = us;
 
-    bn_send(&msg);
+    bn_sendRetry(&msg, MAX_RETRIES);
 
     return 1;
-
     }
 
 int newSpeed(float speed){
@@ -101,13 +111,15 @@ int newSpeed(float speed){
     msg.header.size = sizeof(msg.payload.speedSetPoint);
     msg.payload.speedSetPoint.speed = speed;
 
-    bn_send(&msg);
+    if(bn_sendRetry(&msg, MAX_RETRIES)<=0){
+        printf("bn_sendRetry(E_SPEED_SETPOINT) failed!\n");
+    }
 
     return 1;
     }
 
-void setPos(sPt_t *p){
-    sMsg msg;
+int setPos(sPt_t *p, sNum_t theta){
+    sMsg msg = {{0}};
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
 
@@ -115,46 +127,54 @@ void setPos(sPt_t *p){
     msg.payload.pos.u_a = 0;
     msg.payload.pos.u_a_theta = 0;
     msg.payload.pos.u_b = 0;
-    msg.payload.pos.theta = theta_robot;
+    msg.payload.pos.theta = theta;
     msg.payload.pos.x = p->x;
     msg.payload.pos.y = p->y;
     obs[0].c.x = p->x;
     obs[0].c.y = p->y;
+    theta_robot = theta;
     _current_pos = obs[0].c;
 
-    role_send(&msg);
+    if(role_sendRetry(&msg, MAX_RETRIES)<=0){
+        printf("bn_sendRetry(E_POS) failed!\n");
     }
 
-
+    return 0;
+    }
 
 int sendSeg(const sPt_t *p, const sVec_t *v){ //the robot goes directly to the point or the vector
     sPath_t path;
-    sTrajEl_t traj[2]={
-        {{0. , 0.},{0. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 0.},
-        {{0. , 0.},{0. , 0.},{{0. ,0.}, 0. , 0., 1.}, 0. , 0., 1.}
-        };
+    sTrajEl_t t = {{0}};
 
     if( ((p == NULL) && (v == NULL)) || ((p != NULL) && (v != NULL)) ){
         return -1;
         }
 
     if(p != NULL){
-        traj[0].p1 = obs[0].c;
-        traj[0].p2 = *p;
-        traj[1].p1 = traj[0].p2;
-        traj[1].p2 = traj[0].p2;
+        t.p1 = obs[0].c;
+        t.p2 = *p;
+        distPt2Pt(&t.p1, &t.p2, &t.seg_len);
+
+        t.obs.c = t.p2;
+        t.obs.r = 0.;
+        t.arc_len = 0.;
+        t.sid = 0;
         }
 
     if(v != NULL){
-        traj[0].p1 = obs[0].c;
-        traj[0].p2.x = obs[0].c.x + v->x;
-        traj[0].p2.y = obs[0].c.y + v->y;
-        traj[1].p1 = traj[0].p2;
-        traj[1].p2 = traj[0].p2;
-        }
+        t.p1 = obs[0].c;
+        t.p2.x = t.p1.x + v->x;
+        t.p2.y = t.p1.y + v->y;
+        distPt2Pt(&t.p1, &t.p2, &t.seg_len);
 
-    path.path = &traj[0];
-    path.path_len=2;
+        t.obs.c = t.p2;
+        t.obs.r = 0.;
+        t.arc_len = 0.;
+        t.sid = 0;
+    }
+
+    path.path = &t;
+    path.path_len = 1;
     send_robot(path);
 
     return 1;
