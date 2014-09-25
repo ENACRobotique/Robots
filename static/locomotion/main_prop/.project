@@ -40,6 +40,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
+			<name>lib/UART_framing</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/UART_framing</locationURI>
+		</link>
+		<link>
 			<name>lib/botNet</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/communication/botNet</locationURI>

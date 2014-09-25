@@ -12,8 +12,8 @@
 
 #define MYADDRX 0 //ADDRX_DBGBRIDGE
 #define MYADDRI 0
-#define MYADDRU ADDRU_DBGBRIDGE
-#define MYADDRD ADDRD_DBGBRIDGE
+#define MYADDRU ADDRU1_DBGBRIDGE
+#define MYADDRD ADDRD1_DBGBRIDGE
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
 #define MYROLE 0
@@ -30,6 +30,7 @@
 #define UART_READBYTE_TIMEOUT 100000    //in µs
 
 #define XBEE_UART_PATH "/dev/ttyUSB0"
-#define BN_UART_PATH "/dev/rfcomm0"
+//#define BN_UART_PATH "/dev/rfcomm0"
+#define BN_UART_PATH "/dev/ttyUSB0"
 
 #endif /* NODE_CFG_H_ */

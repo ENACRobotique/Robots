@@ -16,6 +16,7 @@
 #include "eint.h"
 #include "sys_time.h"
 #include "ime.h"
+#include "backlash.h"
 #endif
 
 #include "../botNet/shared/botNet_core.h"
@@ -29,6 +30,7 @@
 #include "params.h"
 #include "controller.h"
 #include "trigo.h"
+#include "pid.h"
 
 #include "asserv.h"
 
@@ -40,7 +42,7 @@ volatile int _ticks_l=0, _ticks_r=0;
 
 void _isr_left() __attribute__ ((interrupt("IRQ")));
 void _isr_left() { // irq17
-    if(gpio_read(1, 16))
+    if(gpio_read(0, 22))
         _ticks_l--;
     else
         _ticks_l++;
@@ -51,7 +53,7 @@ void _isr_left() { // irq17
 
 void _isr_right() __attribute__ ((interrupt("IRQ")));
 void _isr_right(){ // irq14
-    if(gpio_read(1, 17))
+    if(gpio_read(0, 18))
         _ticks_r++;
     else
         _ticks_r--;
@@ -59,10 +61,14 @@ void _isr_right(){ // irq14
     SCB_EXTINT = BIT(0); // acknowledges interrupt
     VIC_VectAddr = (unsigned)0; // updates priority hardware
 }
+
+sBackLash blLeft, blRight;
 #endif
 
 //#define TIME_STATS
 //#define ASSERV_LOGS
+//#define POS_STATS
+//#define POS_USE_PID
 
 #define TRAJ_MAX_SIZE (16)
 
@@ -92,6 +98,9 @@ int curr_traj_step; // current step of the current trajectory (0:curr_traj_inser
 volatile int curr_traj_insert_sid = 0; // index at which data will be inserted in the current trajectory
 volatile int next_traj_insert_sid = 0; // index at which data will be inserted in the next trajectory
 volatile uint16_t curr_tid, next_tid; // current and next trajectory identifiers
+#ifdef POS_USE_PID
+PID_t posLeft, posRight;
+#endif
 
 void traj_conv(sTrajEl_t *t) {
     if(!t->is_ok) {
@@ -111,8 +120,8 @@ void traj_conv(sTrajEl_t *t) {
     }
 }
 
-int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
-int gx, gy; // goal (I<<SHIFT)
+int x = 0, y = 0, theta = 0; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
+int gx = 0, gy = 0, gtheta = 0; // goal (I<<SHIFT)
 int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
 enum {
@@ -138,6 +147,14 @@ long long tmp, dtime;
 int n_x, n_y, i;
 int alpha, dist, dist_tmp, dist_lim;
 
+#ifdef POS_STATS
+sMsg ps_outMsg;
+#define PS (&ps_outMsg.payload.posStats)
+int ps_i = 0;
+unsigned int ps_prevTime = 0;
+unsigned int ps_nbSeq = 0;
+#endif
+
 void asserv_init(){
 #ifdef ARCH_LPC21XX
     gpio_init_all();  // use fast GPIOs
@@ -152,20 +169,43 @@ void asserv_init(){
     gpio_write(0, 31, 0); // orange LED on
 
     // entrées quadrature
-    gpio_input(1, 16);  // gauche
-    gpio_input(1, 17);  // droit
+    gpio_input(0, 22);  // gauche
+    gpio_input(0, 18);  // droit
 
     // interruptions codeurs
-    eint_init(_isr_right, _isr_left);
+    eint_disable(EINT0);
+    eint_assign(EINT0_P0_16);
+    eint_mode(EINT0, EINT_RISING_EDGE);
+    eint_register(EINT0, _isr_right, 2);
+    eint_enable(EINT0);
+
+    eint_disable(EINT3);
+    eint_assign(EINT3_P0_20);
+    eint_mode(EINT3, EINT_RISING_EDGE);
+    eint_register(EINT3, _isr_left, 3);
+    eint_enable(EINT3);
+
+    // backlash compensation
+    backlash_init(&blLeft, iR2I(7.295*PI/180.), 0);
+    backlash_init(&blRight, iR2I(1.574*PI/180.), 0);
 #endif
 
     motor_controller_init();
+
+#ifdef POS_USE_PID
+    pid_init(&posLeft, 1<<(SHIFT_PID-8), /*(2*2/1)<<(SHIFT_PID-3)*/0, /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
+    pid_init(&posRight, 1<<(SHIFT_PID-8), /*(2*2/1)<<(SHIFT_PID-3)*/0, /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
+#endif
 
 #ifdef ARCH_LPC21XX
     // init time management
     sys_time_init();
 
     global_IRQ_enable();
+#endif
+
+#ifdef POS_STATS
+    ps_prevTime = micros();
 #endif
 }
 
@@ -244,6 +284,12 @@ int new_pos(sPosPayload *pos){
         x = isD2I(pos->x); // (I<<SHIFT)
         y = isD2I(pos->y); // (I<<SHIFT)
         theta = isROUND( D2I(RDIAM)*pos->theta ); // (rad.I<<SHIFT)
+
+        if(state == S_WAIT){
+            gx = x;
+            gy = y;
+            gtheta = theta;
+        }
     }
 
     return 0;
@@ -280,12 +326,23 @@ int new_asserv_step(){
     start_us = micros();
 #endif
 
+#ifdef POS_STATS
+    {
+        unsigned int t = micros();
+        PS->steps[ps_i].delta_t = t - ps_prevTime;
+        ps_prevTime = t;
+    }
+#endif
+
     // get current number of ticks per sampling period
 #ifdef ARCH_LPC21XX
     global_IRQ_disable();  // prevent _ticks_? to be modified by an interruption caused by an increment
     ticks_l = _ticks_l<<SHIFT; _ticks_l = 0; // (IpP<<SHIFT)
     ticks_r = _ticks_r<<SHIFT; _ticks_r = 0; // (IpP<<SHIFT)
     global_IRQ_enable();
+
+//    ticks_l = backlash_update(&blLeft, ticks_l>>SHIFT)<<SHIFT;
+//    ticks_r = backlash_update(&blRight, ticks_r>>SHIFT)<<SHIFT;
 #elif defined(ARCH_X86_LINUX)
     ticks_l = motor_getticks(&motGauche)<<SHIFT; // (IpP<<SHIFT)
     ticks_r = motor_getticks(&motDroit)<<SHIFT; // (IpP<<SHIFT)
@@ -293,6 +350,9 @@ int new_asserv_step(){
 
     // update the motor speed
     // TODO: use the shifted data in the PID of the motor, really necessary?
+#if defined(ARCH_X86_LINUX)
+//    printf("c_l=%i, c_r=%i, t_l=%i, t_r=%i\n\n", consigne_l, consigne_r, ticks_l, ticks_r);
+#endif
     motor_controller_update(consigne_l>>SHIFT, ticks_l>>SHIFT, consigne_r>>SHIFT, ticks_r>>SHIFT);
 
     // update speed and course
@@ -310,6 +370,34 @@ int new_asserv_step(){
     x += ((long long)v * ct)>>SHIFT;
     y += ((long long)v * st)>>SHIFT;
 
+#ifdef POS_STATS
+    {
+        int it;
+
+        PS->steps[ps_i].x = iROUND(40.*I2Ds((float)x));
+        PS->steps[ps_i].y = iROUND(40.*I2Ds((float)y));
+
+        it = theta < 0 ? theta + (isRPI<<1) : theta;
+        PS->steps[ps_i].theta = iROUND(10.*RI2Rs((float)it)*180./PI);
+
+        if(ps_i >= NB_POS_STEPS_PER_MSG-1){
+            ps_i = 0;
+            PS->nb_seq = ps_nbSeq++;
+
+            ps_outMsg.header.destAddr = role_get_addr(ROLE_DEBUG);
+            if(ps_outMsg.header.destAddr){
+                ps_outMsg.header.type = E_POS_STATS;
+                ps_outMsg.header.size = sizeof(ps_outMsg.payload.posStats);
+
+                bn_send(&ps_outMsg);
+            }
+        }
+        else{
+            ps_i++;
+        }
+    }
+#endif
+
 #ifdef ARCH_X86_LINUX
 //    printf("%i,%i,%i,%i,%i,%i,%i\x1b[K\n", ticks_l, ticks_r, v, theta, isRPI, ct, st);
 #endif
@@ -317,8 +405,48 @@ int new_asserv_step(){
     switch(state) {
     default:
     case S_WAIT:
-        consigne_l = 0;
-        consigne_r = 0;
+        { // position control loop
+            // x (I<<SHIFT), y (I<<SHIFT), theta (rad.I<<SHIFT), ct (1<<SHIFT), st (1<<SHIFT), gx (I<<SHIFT), gy (I<<SHIFT), gtheta (rad.I<<SHIFT)
+
+            int d = ((long)(gx - x)*(long)ct + (long)(gy - y)*(long)st)>>SHIFT;
+            int diff_theta = theta - gtheta;
+
+            if(diff_theta > isRPI)
+                diff_theta -= (isRPI<<1);
+            else if(diff_theta < -isRPI)
+                diff_theta += (isRPI<<1);
+
+            int distL = (diff_theta>>1) + d;
+            int distR = -(diff_theta>>1) + d;
+
+#ifdef POS_USE_PID
+            // update PIDs
+            consigne_l = pid_update(&posLeft, 0, distL>>SHIFT);
+            consigne_r = pid_update(&posRight, 0, distR>>SHIFT);
+#else
+            consigne_l = distL>>2;
+            consigne_r = distR>>2;
+#endif
+
+#if 0 && defined(ARCH_X86_LINUX)
+            printf("\n\nx=%.2f, y=%.2f, theta=%.2f°, gx=%.2f, gy=%.2f, gtheta=%.2f°, d=%i, dL=%i, dR=%i, c_l=%i, c_r=%i\n\n", I2Ds(x), I2Ds(y), RI2Rs(theta)*180./PI, I2Ds(gx), I2Ds(gy), RI2Rs(gtheta)*180./PI, d>>SHIFT, distL>>SHIFT, distR>>SHIFT, consigne_l, consigne_r);
+            {
+                static FILE *flog = NULL;
+                if(!flog){
+                    flog = fopen("flog.csv", "wb+");
+
+                    if(flog){
+                        fprintf(flog, "x,y,theta,ct,st,gx,gy,gtheta,d,dL,dR\n");
+                    }
+                }
+
+                if(flog){
+                    fprintf(flog, "%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", I2Ds(x), I2Ds(y), RI2Rs(theta)*180./PI, ((float)ct)/dSHIFT, ((float)st)/dSHIFT, I2Ds(gx), I2Ds(gy), RI2Rs(gtheta)*180./PI, I2Ds(d), I2Ds(distL), I2Ds(distR));
+                    fflush(flog);
+                }
+            }
+#endif
+        }
         break;
 
     case S_CHG_TRAJ:
@@ -386,9 +514,25 @@ int new_asserv_step(){
 
         if(dist < isD2I(1)) { // we are near the goal
             if(!(curr_traj_step&1) && abs(traj[curr_traj][curr_traj_step>>1].c_r) < isD2I(1)) { // no next step
-                consigne_l = 0;
-                consigne_r = 0;
                 state = S_WAIT;
+
+                gx = traj[curr_traj][curr_traj_step>>1].p2_x;
+                gy = traj[curr_traj][curr_traj_step>>1].p2_y;
+                if(abs(traj[curr_traj][curr_traj_step>>1].seg_len) < isD2I(1)){ // no segment in current traj step
+                    if((curr_traj_step>>1) == 0){ // only one step
+                        gtheta = theta;
+                    }
+                    else{ // get angle with previous traj step
+                        gtheta = iD2I(RDIAM)*ATAN2(traj[curr_traj][curr_traj_step>>1].p1_y - traj[curr_traj][(curr_traj_step>>1)-1].c_y, traj[curr_traj][curr_traj_step>>1].p1_x - traj[curr_traj][(curr_traj_step>>1)-1].c_x) - (isRPI>>1)*SIGN(traj[curr_traj][(curr_traj_step>>1)-1].c_r);
+                    }
+                }
+                else{ // get angle from segment
+                    gtheta = iD2I(RDIAM)*ATAN2(traj[curr_traj][curr_traj_step>>1].p2_y - traj[curr_traj][curr_traj_step>>1].p1_y, traj[curr_traj][curr_traj_step>>1].p2_x - traj[curr_traj][curr_traj_step>>1].p1_x);
+                }
+                if(d_consigne < 0){ // in case of backward motion
+                    gtheta = gtheta + isRPI;
+                }
+
                 return 0;
             }
             else {

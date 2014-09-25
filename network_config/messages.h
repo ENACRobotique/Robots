@@ -54,6 +54,7 @@ typedef enum{
     E_IHM_STATUS,           // ihm status
     E_SPEED_SETPOINT,       // speed setpoint
     E_GENERIC_STATUS,       // generic status of an element
+    E_POS_STATS,            // position statistics (packed)
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -181,6 +182,7 @@ typedef enum{
     ELT_ADV_PRIMARY,
     ELT_ADV_SECONDARY,
     ELT_FIRE,
+    ELT_ZONE,
 
     NUM_E_ELEMENT
 } eElement;
@@ -198,7 +200,9 @@ typedef enum{
 typedef enum{
     IHM_STARTING_CORD,
     IHM_MODE_SWICTH,
-    IHM_LED
+    IHM_LED,
+    IHM_LIMIT_SWITCH_RIGHT,
+    IHM_LIMIT_SWITCH_LEFT
 } eIhmElement;
 
 typedef struct __attribute__((packed)){
@@ -219,21 +223,6 @@ typedef struct __attribute__((packed)){
     float a_std;      // standard deviation along "a" axis (cm)
     float b_std;      // standard deviation along "b" axis (cm)
 } s2DPAUncert;
-
-typedef struct __attribute__((packed)){
-    uint32_t date;      // synchronized date (µs)
-    uint8_t nbpt;
-    eElement id :8;
-    s2DPosAtt pos[8];
-    s2DPAUncert pos_u[8];
-    union{
-        // in case of pos.id == ELT_FIRE
-        struct{
-            uint8_t nbfire;
-            uint8_t nbtorch;
-        } fire_zone;
-    };
-}sGenericZone;
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
@@ -276,6 +265,15 @@ typedef struct __attribute__((packed)){
                 FIRE_VERTICAL_TORCH
             } state :8;
         } fire_status;
+
+        // in case of pos.id == ELT_ZONE
+        struct{
+            s2DPosAtt pos;
+            s2DPAUncert pos_u;
+            uint8_t nbpt;
+            uint8_t nbfire;
+            uint8_t nbtorch;
+        } zone_status;
     };
 } sGenericStatus;
 
@@ -317,6 +315,17 @@ typedef struct __attribute__((packed)){
         short out_r :12;
     } steps[NB_ASSERV_STEPS_PER_MSG];
 } sAsservStats;
+
+#define NB_POS_STEPS_PER_MSG (7)
+typedef struct __attribute__((packed)){
+    uint16_t nb_seq;
+    struct __attribute__((packed)){ // 7bytes
+        unsigned short delta_t; // (µs)
+        uint16_t x :14; // 0-16383 (quarter of mm)
+        uint16_t y :14; // 0-16383 (quarter of mm)
+        uint16_t theta :12; // 0-4095 (tenth of °)
+    }steps[NB_POS_STEPS_PER_MSG];
+} sPosStats;
 
 typedef struct __attribute__((packed)){
     uint16_t nb_servos; // must be <=18
@@ -364,6 +373,7 @@ typedef union{
     sMobileReportPayload mobileReport;
     sSyncPayload sync;
     sAsservStats asservStats;
+    sPosStats posStats;
     sObsConfig obsCfg;
     sObss obss;
     sGenericStatus genericStatus;

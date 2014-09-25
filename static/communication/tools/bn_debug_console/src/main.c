@@ -146,6 +146,18 @@ int main(int argc, char **argv){
                     }
                 }
                 break;
+            case E_POS_STATS :
+                {
+                    int i;
+                    sPosStats *ps = &msgIn.payload.posStats;
+                    printf("seq %hu\n", ps->nb_seq);
+                    if(fd) fprintf(fd, "seq %hu\n", ps->nb_seq);
+                    for(i=0; i<NB_POS_STEPS_PER_MSG; i++){
+                        printf("~%hu,%.2f,%.2f,%.2f\n", ps->steps[i].delta_t, ((float)ps->steps[i].x)/4., ((float)ps->steps[i].y)/4., ((float)ps->steps[i].theta)/10.);
+//                        if(fd) fprintf(fd, "~%hu,%hi,%hi,%hi,%hi,%hi,%hi\n", ps->steps[i].delta_t, ps->steps[i].ticks_l, ps->steps[i].consigne_l, ps->steps[i].out_l, ps->steps[i].ticks_r, as->steps[i].consigne_r, as->steps[i].out_r);
+                    }
+                }
+                break;
             case E_DEBUG :
                 printf("%s",msgIn.payload.debug);
                 if(fd) fprintf(fd,"%s",msgIn.payload.debug);
@@ -175,6 +187,9 @@ int main(int argc, char **argv){
             }
             else{
                 fprintf(stderr, "bn_receive() error #%i\n", -err);
+                if(err == -ERR_SYSERRNO){
+                    fprintf(stderr, "errno=%i\n", errno);
+                }
                 exit(1);
             }
         }
@@ -257,6 +272,33 @@ int main(int argc, char **argv){
                     msg.header.size = 2 + 3;
                     msg.payload.servos.nb_servos = 1;
                     msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
+                    msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
+                case 'g':{
+                    sMsg msg = {{0}};
+                    int us;
+                    int id;
+
+                    printf(" 0:SERVO_PRIM_DOOR\n");
+                    printf(" 1:SERVO_PRIM_FIRE1\n");
+                    printf(" 2:SERVO_PRIM_FIRE2\n");
+                    printf(" 3:SERVO_PRIM_ARM_LEFT\n");
+                    printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
+
+                    printf("id: "); fflush(stdout);
+                    scanf("%i", &id);
+
+                    printf("us: "); fflush(stdout);
+                    scanf("%i", &us);
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_SERVOS;
+                    msg.header.size = 2 + 3;
+                    msg.payload.servos.nb_servos = 1;
+                    msg.payload.servos.servos[0].id = id;
                     msg.payload.servos.servos[0].us = us;
 
                     bn_send(&msg);
