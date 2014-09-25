@@ -397,7 +397,7 @@ int objBonusFire(void){
                         continue;
                         }
 
-                    printf("prev_pos.x = %f, prev_pos.y=%f\n", prev_pos.x, prev_pos.y);
+                    printf("prev_pos.x = %f, prev_pos.y=%f\n", prev_pos.x, prev_pos.y);  //FIXME prev_pos.y false in simulation with the first vertical fire
                     printf("pos.x = %f, pos.y=%f\n", obs[0].c.x, obs[0].c.y);
                     printf("i=%d j=%d\n",i,j);
 

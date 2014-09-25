@@ -334,16 +334,16 @@ int test_in_obs(sPt_t *p){ //retourne le numéros de l'obstable si la position e
     }
 
 int test_tirette(void){
-#if SIMU
-    return 1;
-#endif
+    #if SIMU
+        return 1;
+    #endif
     return starting_cord;
-    }
+}
 
 void startColor(void){
 
 #if SIMU
-    color=COLOR_SIMU;
+    color = COLOR_SIMU;
 #else
     static int state = 0;
     sMsg msgOut;

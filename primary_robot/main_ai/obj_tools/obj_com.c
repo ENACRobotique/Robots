@@ -119,6 +119,7 @@ int newSpeed(float speed){
     }
 
 int setPos(sPt_t *p, sNum_t theta){
+    int ret;
     sMsg msg = {{0}};
     msg.header.type = E_POS;
     msg.header.size = sizeof(msg.payload.pos);
@@ -135,12 +136,15 @@ int setPos(sPt_t *p, sNum_t theta){
     theta_robot = theta;
     _current_pos = obs[0].c;
 
-    if(role_sendRetry(&msg, MAX_RETRIES)<=0){
-        printf("bn_sendRetry(E_POS) failed!\n");
+    if((ret = role_sendRetry(&msg, MAX_RETRIES)) <= 0){
+        printf("bn_sendRetry(E_POS) error #%i\n", -ret);
+    }
+    else{
+        printf("Sending position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msg.payload.pos.id, msg.payload.pos.x, msg.payload.pos.y, msg.payload.pos.theta*180./M_PI);
     }
 
     return 0;
-    }
+}
 
 int sendSeg(const sPt_t *p, const sVec_t *v){ //the robot goes directly to the point or the vector
     sPath_t path;

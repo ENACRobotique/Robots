@@ -15,9 +15,9 @@
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
-#define COLOR_SIMU 1 //0 red  1 yellow
+#define COLOR_SIMU RED //0 red  1 yellow
 #define DEBUG 1
-#define SIMU 0 //modify network_cfg.h
+#define SIMU 1 //modify network_cfg.h
 #define PROG_TRAJ 1 //1 active
 #define RESO_POS 2
 #define NB_OBJ 16
@@ -41,7 +41,7 @@
 #define NB_MAX_PT_ZONE 10
 #define MAX_RETRIES 5
 
-typedef enum {COLOR_SELECTION, INIT, WAITING_POS, WAITING, WAIT_STARTING_CORD, WAIT, JEU , SHUT_DOWN} estate_t;
+typedef enum {COLOR_SELECTION, WAITING_POS, WAIT_STARTING_CORD, WAIT_START, WAIT_SECONDARY, GAME , SHUT_DOWN} estate_t;
 typedef enum {E_FEU, E_TORCHE_MOBILE, E_ARBRE, E_ARBRE_FOND , E_BAC, E_FOYER, E_TORCHE_FIXE} eObj_t;
 typedef enum {WAIT_MES, ACTIVE, FREE} eStateObj_t;
 typedef enum {ARM_LEFT, ARM_RIGHT} eServoLoc_t;

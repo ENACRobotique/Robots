@@ -82,10 +82,7 @@ int main(int argc, char **argv){
     float last_speed = 0.;
     unsigned int prevPos = 0;
     int i;
-    enum{
-        E_AI_SLAVE,
-        E_AI_AUTO
-    } eAIState = E_AI_SLAVE;
+    eAIState_t eAIState = E_AI_SLAVE;
     // traj mgmt
     sPath_t new_path = {.path = NULL};
     unsigned int prevSendTraj = 0;
@@ -119,6 +116,9 @@ int main(int argc, char **argv){
         case 'm':
             if(!strcasecmp(optarg, "slave")){
                 eAIState = E_AI_SLAVE;
+            }
+            else if(!strcasecmp(optarg, "prog")){
+                eAIState = E_AI_PROG;
             }
             else if(!strcasecmp(optarg, "auto")){
                 eAIState = E_AI_AUTO;
@@ -171,7 +171,8 @@ int main(int argc, char **argv){
 
     switch(eAIState){
     case E_AI_AUTO:
-        ret = obj_init();
+    case E_AI_PROG:
+        ret = obj_init(eAIState);
         if(ret < 0){
             printf("obj_init() error #%i\n", -ret);
         }
@@ -464,7 +465,8 @@ int main(int argc, char **argv){
             }
             break;
         case E_AI_AUTO:
-            obj_step();
+        case E_AI_PROG:
+            obj_step(eAIState);
             break;
         default:
             break;
