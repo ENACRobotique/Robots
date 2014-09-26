@@ -321,14 +321,13 @@ void obj_step(eAIState_t AIState){
 
     sObs_t obsRed[] = {
         // robots
-        {{0., 0.}, 0., 1, 1, 1},   //primary
+        {{0., 0.}, 0., 1, 1, 1},            //primary
         {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
         {{0., 0.}, R_ROBOT+20., 1, 1, 1},   //primary adv
         {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
 
         // trajectory
-        {{ 35., 120.}, 10, 0, 1, 1}, // 4
-       // {{ 50., 70. }, 0, 0, 1, 1},
+        {{ 15., 120.}, 10, 0, 1, 1}, // 4
         {{ 35., 50. }, 10, 0, 1, 1},
         {{ 50., 35. }, 10, 0, 1, 1},
         {{250., 35. }, 10, 0, 1, 1},
@@ -339,8 +338,8 @@ void obj_step(eAIState_t AIState){
         };
     iABObs_t obs_list_Red[] = {
         A(0), // r=0
-        B(4),
-        A(5),
+        A(4),
+        B(5),
         B(6),
         B(7),
         B(8),
@@ -351,13 +350,13 @@ void obj_step(eAIState_t AIState){
 
     sObs_t obsYellow[] = {
         // robots
-        {{0., 0.}, 0., 1, 1},   //primary
+        {{0., 0.}, 0., 1, 1},               //primary
         {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
         {{0., 0.}, R_ROBOT+20., 1, 1, 1},   //primary adv
         {{0., 0.}, R_ROBOT+15., 1, 1, 1},   //secondary adv
 
         // trajectory
-        {{300. - 35., 120.}, 10, 0, 1, 1}, // 4
+        {{300. - 15., 120.}, 10, 0, 1, 1}, // 4
         {{300. - 35., 50. }, 10, 0, 1, 1},
         {{300. - 50., 35. }, 10, 0, 1, 1},
         {{300. -250., 35. }, 10, 0, 1, 1},
@@ -368,7 +367,7 @@ void obj_step(eAIState_t AIState){
         };
     iABObs_t obs_list_Yellow[] = {
         A(0), // r=0
-        A(4),
+        B(4),
         A(5),
         A(6),
         A(7),
