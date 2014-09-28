@@ -38,7 +38,7 @@ void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
 void updateNoHaftTurn(sNum_t theta, sPt_t *pt);
 sNum_t val_obj(int num);
 int8_t next_obj (void);
-void obj_step(eAIState_t AIState);
+int obj_step(eAIState_t AIState);
 int obj_init(eAIState_t AIState);
 
 extern int switch_left, switch_right;

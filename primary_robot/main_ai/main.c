@@ -15,6 +15,15 @@
 #include <string.h>
 #include <getopt.h> // parameters parsing
 #include <errno.h>
+#include <assert.h>
+
+#ifdef __linux__
+#define TRAJ_OUTPUT
+#endif
+
+#ifdef TRAJ_OUTPUT
+#include <yaml.h>
+#endif
 
 #include "millis.h"
 
@@ -54,6 +63,9 @@ void usage(char *cl){
     printf("Options:\n");
     printf("\t--mode,     -m        AI mode (slave | auto)\n");
     printf("\t--log-file, -f        output log file of received messages (overwritten)\n");
+#ifdef TRAJ_OUTPUT
+    printf("\t--log-traj, -t        output trajectory to file (overwritten)\n");
+#endif
     printf("\t--verbose,  -v        increases verbosity\n");
     printf("\t--quiet,    -q        not verbose\n");
     printf("\t--help,     -h, -?    prints this help\n");
@@ -76,7 +88,7 @@ int main(int argc, char **argv){
     int ret;
     char verbose=1;
     sMsg msgIn, msgOut = {{0}};
-    FILE *fd = NULL;
+    FILE *fd_log = NULL;
     sPt_t last_pos = {0., 0.};
     float last_theta = 0.;
     float last_speed = 0.;
@@ -89,27 +101,43 @@ int main(int argc, char **argv){
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
     unsigned int prevSendObss = 0, prevSendObs = 0;
+#ifdef TRAJ_OUTPUT
+    FILE *fd_traj = NULL;
+    yaml_emitter_t traj_emitter;
+    yaml_event_t traj_event;
 
-
+    assert(yaml_emitter_initialize(&traj_emitter));
+    assert(yaml_alias_event_initialize(&traj_event, ""));
+#endif
 
 #ifdef CTRLC_MENU
     char cmd;
     bn_Address destAd;
-    int quit=0,quitMenu=0;
+    int quitMenu=0;
 #endif
+    int quit = 0;
 
     // arguments parsing
     while(1){
         static struct option long_options[] = {
                 {"mode",            required_argument,  NULL, 'm'},
                 {"log-file",        required_argument,  NULL, 'f'},
+#ifdef TRAJ_OUTPUT
+                {"log-traj",        required_argument,  NULL, 't'},
+#endif
                 {"verbose",         no_argument,        NULL, 'v'},
                 {"quiet",           no_argument,        NULL, 'q'},
                 {"help",            no_argument,        NULL, 'h'},
                 {NULL,              0,                  NULL, 0}
         };
 
-        int c = getopt_long(argc, argv, "m:f:vqh?", long_options, NULL);
+        char shortops[] = "m:f:"
+#ifdef TRAJ_OUTPUT
+            "t:"
+#endif
+            "vqh?";
+
+        int c = getopt_long(argc, argv, shortops, long_options, NULL);
         if(c == -1)
             break;
         switch(c){
@@ -125,12 +153,20 @@ int main(int argc, char **argv){
             }
             break;
         case 'f':
-            if(fd){
-                fclose(fd);
+            if(fd_log){
+                fclose(fd_log);
             }
-            fd = fopen(optarg, "wb+");
+            fd_log = fopen(optarg, "wb+");
             break;
-        case 'v':
+#ifdef TRAJ_OUTPUT
+        case 't':
+            if(fd_traj){
+                fclose(fd_traj);
+            }
+            fd_traj = fopen(optarg, "wb+");
+            break;
+#endif
+            case 'v':
             verbose++;
             break;
         case 'q':
@@ -168,6 +204,19 @@ int main(int argc, char **argv){
         setConfig(ELT_ADV_PRIMARY, &cfg);
         setConfig(ELT_ADV_SECONDARY, &cfg);
     }
+
+#ifdef TRAJ_OUTPUT
+    yaml_emitter_set_output_file(&traj_emitter, fd_traj);
+
+    assert(yaml_stream_start_event_initialize(&traj_event, YAML_UTF8_ENCODING));
+    assert(yaml_emitter_emit(&traj_emitter, &traj_event));
+
+    assert(yaml_document_start_event_initialize(&traj_event, NULL, NULL, NULL, 1));
+    assert(yaml_emitter_emit(&traj_emitter, &traj_event));
+
+    assert(yaml_mapping_start_event_initialize(&traj_event, NULL, NULL, 1, YAML_BLOCK_MAPPING_STYLE));
+    assert(yaml_emitter_emit(&traj_emitter, &traj_event));
+#endif
 
     switch(eAIState){
     case E_AI_AUTO:
@@ -208,12 +257,7 @@ int main(int argc, char **argv){
 #endif
 
     //main loop
-#ifdef CTRLC_MENU
-    while (!quit)
-#else
-    while(1)
-#endif
-    {
+    while (!quit) {
 #ifdef CTRLC_MENU
         int nbTraces,f; //for traceroute display
 #endif
@@ -232,17 +276,17 @@ int main(int argc, char **argv){
             if (verbose>=1) {
                 if(msgIn.header.type != E_POS)
                 printf("message received from %s (%03hx), type : %s (%hhu)  ", role_string(role_get_role(msgIn.header.srcAddr)), msgIn.header.srcAddr, eType2str(msgIn.header.type), msgIn.header.type);
-                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
+                if(fd_log) fprintf(fd_log,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
             }
             switch (msgIn.header.type){
             case E_DEBUG :
                 printf("%s",msgIn.payload.debug);
-                if(fd) fprintf(fd,"%s",msgIn.payload.debug);
+                if(fd_log) fprintf(fd_log,"%s",msgIn.payload.debug);
                 break;
             case E_POS :
 //                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
 //                printf("\n");
-                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
+                if(fd_log) fprintf(fd_log,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
 
                 // updating position...
                 {
@@ -336,7 +380,7 @@ int main(int argc, char **argv){
                 break;
             case E_GOAL :
                 printf("robot%hhu@(%.2fcm,%.2fcm,%.2f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
-                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
+                if(fd_log) fprintf(fd_log,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
 
                 switch(eAIState){
                 case E_AI_SLAVE:
@@ -408,7 +452,7 @@ int main(int argc, char **argv){
                 break;
             default :
                 printf("\n");
-                if(fd) fprintf(fd, "\n");
+                if(fd_log) fprintf(fd_log, "\n");
                 break;
             }
 
@@ -466,7 +510,9 @@ int main(int argc, char **argv){
             break;
         case E_AI_AUTO:
         case E_AI_PROG:
-            obj_step(eAIState);
+            if(obj_step(eAIState)){
+                quit = 1;
+            }
             break;
         default:
             break;
@@ -477,6 +523,14 @@ int main(int argc, char **argv){
             prevSendTraj = millis();
 
             printf("traj step: p1 x%.2f y%.2f, p2 x%.2f y%.2f, s_l%.2f; obs x%.2f y%.2f r%.2f, a_l%.2f\n", curr_path.path[curr_traj_extract_sid].p1.x, curr_path.path[curr_traj_extract_sid].p1.y, curr_path.path[curr_traj_extract_sid].p2.x, curr_path.path[curr_traj_extract_sid].p2.y, curr_path.path[curr_traj_extract_sid].seg_len, curr_path.path[curr_traj_extract_sid].obs.c.x, curr_path.path[curr_traj_extract_sid].obs.c.y, curr_path.path[curr_traj_extract_sid].obs.r, curr_path.path[curr_traj_extract_sid].arc_len);
+
+#ifdef TRAJ_OUTPUT
+            char tab[64];
+            sprintf(tab, "sid:%i", curr_traj_extract_sid);
+
+            yaml_scalar_event_initialize(&traj_event, NULL, "test", tab, strlen(tab), 0, 0, YAML_PLAIN_SCALAR_STYLE);
+            yaml_emitter_emit(&traj_emitter, &traj_event);
+#endif
 
             msgOut.header.type = E_TRAJ;
             msgOut.header.size = sizeof(msgOut.payload.traj);
@@ -495,6 +549,7 @@ int main(int argc, char **argv){
             msgOut.payload.traj.sid     = curr_traj_extract_sid++;
             msgOut.payload.traj.tid     = curr_path.tid;
 
+            //TODO save history
             ret = role_sendRetry(&msgOut, MAX_RETRIES);
             if(ret < 0){
                 printf("role_send(E_TRAJ) error #%i\n", -ret);
@@ -709,7 +764,22 @@ int main(int argc, char **argv){
 #endif
     }
 
-    if (fd) fclose(fd);
+#ifdef TRAJ_OUTPUT
+    assert(yaml_mapping_end_event_initialize(&traj_event));
+    assert(yaml_emitter_emit(&traj_emitter, &traj_event));
+
+    assert(yaml_document_end_event_initialize(&traj_event, 1));
+    assert(yaml_emitter_emit(&traj_emitter, &traj_event));
+
+    assert(yaml_stream_end_event_initialize(&traj_event));
+    assert(yaml_emitter_emit(&traj_emitter, &traj_event));
+
+    assert(yaml_emitter_flush(&traj_emitter));
+
+    if (fd_traj) fclose(fd_traj);
+#endif
+
+    if (fd_log) fclose(fd_log);
     printf("bye\n");
 
     return 0;

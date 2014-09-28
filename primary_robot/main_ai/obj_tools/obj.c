@@ -316,7 +316,7 @@ void set_traj(sPath_t *p, iABObs_t l[], int nb){
 }
 
 
-void obj_step(eAIState_t AIState){
+int obj_step(eAIState_t AIState){
     int j, obj = -1;
 
     sObs_t obsRed[] = {
@@ -620,13 +620,13 @@ void obj_step(eAIState_t AIState){
 
     case SHUT_DOWN:
         printf ("SHUT_DOWN : time = %d\n", (int) (millis()-_start_time)/1000);
-        exit(1);
-        //TODO arrêt total
-        return;
+        return 1;
         break;
     default:
         break;
 		}
+
+    return 0;
 	}
 
 int obj_init(eAIState_t AIState){
