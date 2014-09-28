@@ -15,7 +15,7 @@ sPt_t prev_pos={0., 0.};
 sNum_t prev_len=0;
 long last_time2=0;
 
-int switch_left = 0, switch_right = 0;
+int switch_left = 0, switch_right = 1;
 sWaitPos waiting_pos = {0};
 
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r){
