@@ -5,11 +5,11 @@
  *      Author: ludo6431
  */
 
-#include <assert.h>
+#include <malloc.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <yaml.h>
-#include <malloc.h>
 
 int main() {
     FILE *fd_traj;
