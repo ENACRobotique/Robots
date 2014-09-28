@@ -60,7 +60,7 @@ void loop() {
     //blink
     if((time - time_prev_led)>=1000) {
       time_prev_led= time;
-//      digitalWrite(PIN_DBG_LED,debug_led^=1);
+      digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
       bn_printfDbg((char*)"%lu, mem : %d, unused %d %lu\n",micros(),freeMemory(),getFreeTest(),micros());
 #endif
@@ -193,7 +193,7 @@ void loop() {
                 prevState=state;
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
-        	    if (time_data_send-millis()>=SENDING_PERIOD){
+        	    if (millis()-time_data_send>=SENDING_PERIOD){
         	        time_data_send=millis();
                     outMsg.header.destAddr=ADDRX_MAIN_TURRET;
                     outMsg.header.type=E_MEASURE;
@@ -203,8 +203,11 @@ void loop() {
                     outMsg.payload.mobileReport.date=micros2s(laserStruct.date);
                     outMsg.payload.mobileReport.precision=laserStruct.precision;
                     outMsg.payload.mobileReport.sureness=laserStruct.sureness;
-
+#ifdef DEBUG_CALIBRATION
+                    bn_printfDbg("d, %lu, p, %lu, t, %lu",laserStruct.deltaT,laserStruct.period,laserStruct.thickness);
+#else
                     bn_send(&outMsg);
+#endif
         	    }
           }
           break;

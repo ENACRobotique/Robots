@@ -45,6 +45,7 @@ void setup(){
     devicesInfo[D_FIX].addr=ADDRX_FIX;
 
     //fixme : do the same for the others
+
     domi_init(2,9);
 
     bn_init();
@@ -93,12 +94,26 @@ void loop(){
 
     //blinking
 #ifdef BLINK_1S
-    if((time - time_prev_led)>=1000) {
+    if((time - time_prev_led)>=10000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
     bn_printfDbg("%lu period %lu",micros(),domi_meanPeriod());
 //        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
+#endif
+#ifdef DEBUG_CALIBRATION
+    static int setSpeed=0;
+    switch (setSpeed){
+    case 0 : setSpeed=1;
+        domi_setspeed(SPEED_HIGH);
+        break;
+    case 1 : setSpeed=2;
+        domi_setspeed(SPEED_20HZ);
+        break;
+    case 2 : setSpeed=0;
+        domi_setspeed(SPEED_SLOW);
+        break;
+    }
 #endif
     }
 #endif
