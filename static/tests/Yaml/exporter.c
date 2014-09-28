@@ -12,6 +12,7 @@
 #include <malloc.h>
 
 int main() {
+    FILE *fd_traj;
     char tab[64];
     yaml_emitter_t traj_emitter;
     yaml_event_t traj_event;
@@ -19,7 +20,7 @@ int main() {
 
 #define ERR_CHECK(ret) do { if(!(ret)){ printf("error %s (%i)\n", traj_emitter.problem, traj_emitter.error); } } while(0)
 
-    FILE *fd_traj = fopen("traj.yml", "wb+");
+    fd_traj = fopen("traj.yml", "wb+");
     if(!fd_traj){
         perror("fopen");
         exit(1);
@@ -49,11 +50,11 @@ int main() {
                 sprintf(tab, "sid:%i", i);
 
                 // key
-                ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, "clef", 4, 1, 0, YAML_PLAIN_SCALAR_STYLE));
+                ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, (yaml_char_t*)"clef", 4, 1, 0, YAML_PLAIN_SCALAR_STYLE));
                 ERR_CHECK(yaml_emitter_emit(&traj_emitter, &traj_event));
 
                 // value
-                ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, tab, strlen(tab), 1, 0, YAML_PLAIN_SCALAR_STYLE));
+                ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, (yaml_char_t*)tab, strlen(tab), 1, 0, YAML_PLAIN_SCALAR_STYLE));
                 ERR_CHECK(yaml_emitter_emit(&traj_emitter, &traj_event));
             }
             ERR_CHECK(yaml_mapping_end_event_initialize(&traj_event));
@@ -65,7 +66,7 @@ int main() {
             ERR_CHECK(yaml_emitter_emit(&traj_emitter, &traj_event));
             {
                 // key
-                ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, "clef", 4, 1, 0, YAML_PLAIN_SCALAR_STYLE));
+                ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, (yaml_char_t*)"clef", 4, 1, 0, YAML_PLAIN_SCALAR_STYLE));
                 ERR_CHECK(yaml_emitter_emit(&traj_emitter, &traj_event));
 
                 // value
@@ -75,7 +76,7 @@ int main() {
                 for (i = 0; i < 10; i++) {
                     sprintf(tab, "sid:%i", i);
 
-                    ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, tab, strlen(tab), 1, 0, YAML_PLAIN_SCALAR_STYLE));
+                    ERR_CHECK(yaml_scalar_event_initialize(&traj_event, NULL, NULL, (yaml_char_t*)tab, strlen(tab), 1, 0, YAML_PLAIN_SCALAR_STYLE));
                     ERR_CHECK(yaml_emitter_emit(&traj_emitter, &traj_event));
                 }
                 ERR_CHECK(yaml_sequence_end_event_initialize(&traj_event));
