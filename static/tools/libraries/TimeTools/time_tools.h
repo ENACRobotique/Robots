@@ -55,6 +55,8 @@ typedef struct __attribute__((packed)){
 // periods
 #define __PC(p) ((sPeriod)(p))
 #define TP_CTOR() {._v = 0}
+#define TP_Us_CTOR(v) {._v = (v)}
+#define TP_Ms_CTOR(v) {._v = (v)*1000}
 #define TP_GET_Us(p) (__PC(p)._v)
 #define TP_GET_Ms(p) (TP_GET_Us(p)/1000)
 #define TD_DIFF_Us(d1, d2) TP_GET_Us(tD_diff((d1), (d2)))
@@ -91,6 +93,21 @@ static inline sDate tD_newNow_Lo(){
     ret._v = micros();
     ret._tr = E_TIMEREF_LOCAL;
     return ret;
+}
+
+static inline sDate tD_addPeriod(sDate d, sPeriod p){
+    d._v += p._v;
+    return d;
+}
+
+static inline sDate tD_addUs(sDate d, int32_t us){
+    d._v += us;
+    return d;
+}
+
+static inline sDate tD_addMs(sDate d, int32_t ms){
+    d._v += ms*1000;
+    return d;
 }
 
 static inline sPeriod tP_new(){
