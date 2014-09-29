@@ -18,19 +18,19 @@
 
 typedef struct {
     sGenericStatus s;
-    sDate t;
+    sDate d;
 } sPHPos;
 extern sPHPos ph_cbuf[NB_PREVIOUS_POSITIONS];
 extern uint8_t ph_newest;
 
 static inline sPHPos *ph_get_new_slot_pointer(){
-    ph_cbuf[ph_newest].t = tD_new(); // i.e.: new == invalid
+    ph_cbuf[ph_newest].d = tD_new(); // i.e.: new == invalid
 
     return &ph_cbuf[ph_newest];
 }
 
 static inline void ph_incr_new_slot_pointer(){
-    ph_cbuf[ph_newest].t = tD_conv_LoUs(ph_cbuf[ph_newest].t);
+    ph_cbuf[ph_newest].d = tD_conv_Lo(ph_cbuf[ph_newest].d);
 
     ph_newest = (ph_newest + 1)%NB_PREVIOUS_POSITIONS;
 }
@@ -39,7 +39,7 @@ static inline void ph_enqueue(sGenericStatus *s, sDate t){
     sPHPos *new = ph_get_new_slot_pointer();
 
     memcpy(&new->s, s, sizeof(*new));
-    new->t = t;
+    new->d = t;
 
     ph_incr_new_slot_pointer();
 }
