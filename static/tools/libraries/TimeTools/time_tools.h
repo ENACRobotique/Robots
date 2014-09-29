@@ -100,6 +100,11 @@ static inline sDate tD_addPeriod(sDate d, sPeriod p){
     return d;
 }
 
+static inline sDate tD_subPeriod(sDate d, sPeriod p){
+    d._v -= p._v;
+    return d;
+}
+
 static inline sDate tD_addUs(sDate d, int32_t us){
     d._v += us;
     return d;

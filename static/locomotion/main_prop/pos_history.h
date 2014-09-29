@@ -14,7 +14,9 @@
 #include <time_tools.h>
 
 // keep history of about 500ms (at a rate of one position per 20ms)
-#define NB_PREVIOUS_POSITIONS (500/20)
+// +1 because we have n-1 intervals in between n points
+// +1 because we sacrifice one element to avoid managing the number of elements
+#define NB_PREVIOUS_POSITIONS (500/20 + 1 + 1)
 
 typedef struct {
     sGenericStatus s;

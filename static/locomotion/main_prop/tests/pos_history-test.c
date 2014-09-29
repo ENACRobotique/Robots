@@ -8,14 +8,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 
 #include "pos_history.h"
 
 //#define OUT
+#define NB_STEPS (50)
+#define PH_MEMORY_PERIOD (500) // (ms)
 
 int main(int argc, char *argv[]){
     sPeriod p = TP_Ms_CTOR(20); // 20 ms period
-    sDate start = TD_LoUs_CTOR(UINT32_MAX - 700500);//tD_newNow_Lo();
+    sDate start = TD_LoUs_CTOR(UINT32_MAX - 700500), end; // start defined so that the date overflows
+    const sPeriod ph_MEM_PERIOD = TP_Ms_CTOR(PH_MEMORY_PERIOD);
 
     sDate d;
     sGenericStatus s;
@@ -30,7 +34,8 @@ int main(int argc, char *argv[]){
     }
 #endif
 
-    for(d = start, i = 0; i < 50; d = tD_addPeriod(d, p), i++){
+    // generate linear trajectory
+    for(d = start, i = 0; i < NB_STEPS; d = tD_addPeriod(d, p), i++){
         printf("d:%.3fs\n", (float)TD_GET_LoUs(d)/1000000.);
 
         s.date = TD_GET_GlUs(d);
@@ -47,24 +52,38 @@ int main(int argc, char *argv[]){
         printf("\tx:%.2fcm, y:%.2fcm, theta:%.2f°\n", s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
 
 #ifdef OUT
-        fprintf(out, "%u;%.1f;%.1f;%.1f\n", s.date, s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
+        fprintf(out, "%u;%.1f;%.1f;%.1f\n", TD_GET_LoUs(d), s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
 #endif
 
         ph_enqueue(&s, d);
+
+        if(i == NB_STEPS - 1){
+            end = d;
+        }
     }
 
-    d = tD_addUs(start, 3000);
+    // try to query position in the past
+    d = tD_addUs(start, 3000); // force desynchro
 
-    for(i = 0; i < 50; d = tD_addPeriod(tD_addUs(d, (rand()&1023)-512), p), i++){
+    start = tD_subPeriod(end, ph_MEM_PERIOD); // we do not store a position before end
+
+    for(i = 0; i < NB_STEPS; d = tD_addPeriod(tD_addUs(d, (rand()&1023)-512), p), i++){
         printf("d:%.3fs\n", (float)TD_GET_LoUs(d)/1000000.);
 
         if(ph_get_pos(&s, d)){
             printf("\tcan't find position!\n");
+
+            // assert out of range of memory
+            assert(TD_DIFF_Us(d, start) < 0 || TD_DIFF_Us(d, end) > 0);
+
             continue;
         }
 
+        // assert inside range of memory
+        assert(TD_DIFF_Us(d, start) >= 0 && TD_DIFF_Us(d, end) <= 0);
+
 #ifdef OUT
-        fprintf(out, "%u;%.1f;%.1f;%.1f\n", s.date, s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
+        fprintf(out, "%u;%.1f;%.1f;%.1f\n", TD_GET_LoUs(d), s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
 #endif
 
         printf("\tx:%.2fcm, y:%.2fcm, theta:%.2f°\n", s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
