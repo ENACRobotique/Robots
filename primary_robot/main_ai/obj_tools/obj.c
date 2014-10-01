@@ -630,54 +630,62 @@ void obj_step(eAIState_t AIState){
 	}
 
 int obj_init(eAIState_t AIState){
-	int i;
+	int i, state = 0, ret;
 
     if(sizeof(obs)/sizeof(*obs) != N){
         printf("N isn't correct, byebye\n");
         exit(1);
     }
 
-/*
-    //ping all address //TODO
 #if !SIMU
     while(1){
         switch(state){
+            //Minimum necessary
             case 0:
-                if( (ret = bn_ping(ADDRU2_MAIN_PROP)) > 0){
+                if( (ret = bn_ping(ADDRD1_DBGBRIDGE)) >= 0){
                     state = 1;
-                    }
-                printf("Ping main prop : %d\n", ret);
+                }
+                printf("Ping debug bridge : %d\n", ret);
                 break;
             case 1:
-                if( (ret = bn_ping(ADDRU1_MAIN_IO)) > 0){
+                if( (ret = bn_ping(ADDRU1_MAIN_IO)) >= 0){
                     state = 2;
                     }
                 printf("Ping main io : %d\n", ret);
                 break;
             case 2:
-                if( (ret = bn_ping(ADDRX_MOBILE_1)) > 0){
+                if( (ret = bn_ping(ADDRU2_MAIN_PROP)) >= 0){
                     state = 3;
                     }
+                printf("Ping main prop : %d\n", ret);
+                break;
+           //Optional (for the moment)
+            case 3:
+                if( (ret = bn_ping(ADDRD1_MONITORING)) < 0){
+                    printf("Warning : Monitoring is not connected - ");
+                    }
+                state = 4;
+                printf("Ping monitoring : %d\n", ret);
+                break;
+            case 4:
+                if( (ret = bn_ping(ADDRX_MOBILE_1)) < 0){
+                    printf("Warning : Mobile 1 is not connected - ");
+                    }
+                state = 5;
                 printf("Ping mobile 1 : %d\n", ret);
                 break;
-            case 3:
-                if( (ret = bn_ping(ADDRX_MOBILE_2)) > 0){
-                    state = 5; // XXX
+            case 5:
+                if( (ret = bn_ping(ADDRX_MOBILE_2)) < 0){
+                    printf("Warning : Mobile 2 is not connected - ");
                     }
+                state = 6;
                 printf("Ping mobile 2 : %d\n", ret);
                 break;
-//            case 4:
-//                if( (ret = bn_ping(ADDRX_FIX)) > 0){
-//                    state = 5;
-//                    }
-//                printf("Ping fix : %d\n", ret);
-//                break;
 
             }
-        if(state == 5) break;
+        if(state == 6) break;
         }
 #endif
-*/
 
     mode_switch = 0; //FIXME role ?
 
