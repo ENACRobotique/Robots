@@ -90,8 +90,6 @@ int main() {
 			#ifdef DVLPT_BOARD
 			int c = (3*gpio_read(BK_SWTCH3, PIN_SWTCH3) + 4*gpio_read(BK_SWTCH4, PIN_SWTCH4));
 			speedCons = mPerS2IncPerT(c * MAX_SPEED/7);
-			if(c >= 3 && c < 4) blindLED(BK_GREEN_LED_BOARD, PIN_GREEN_LED_BOARD, 1000, 400, 0);
-			if(c >= 4) blindLED(BK_ORANGE_LED_BOARD, PIN_ORANGE_LED_BOARD, 1000, 400, 0);
 			#else
 			// TODO
 			#endif
@@ -116,8 +114,7 @@ int main() {
 #ifdef ENCODER
 			controlMotor(pwmCmd, dirCons, Drive);
 #else
-//			controlMotor(c*PWM_RANGE/7, dirCons, Drive);
-			controlMotor(600, dirCons, Drive);
+			controlMotor(c*PWM_RANGE/7, dirCons, Drive);
 #endif
 		}
 

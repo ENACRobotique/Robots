@@ -17,6 +17,8 @@
 #define BK_DBG3  0
 #define PIN_DBG4 16
 #define BK_DBG4  0
+#define PIN_DBG5 18
+#define BK_DBG5  0
 
 
 

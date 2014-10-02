@@ -43,17 +43,27 @@
 		#define PIN_RX 9
 		#define BK_RX  0
 	//// Pins for small switch
-		#define PIN_SWTCH1 13
+		#define PIN_SWTCH1 11
 		#define BK_SWTCH1  0
 		#define PIN_SWTCH2 15
 		#define BK_SWTCH2  0
-		#define PIN_SWTCH3 17
+		#define PIN_SWTCH3 21
 		#define BK_SWTCH3  0
-		#define PIN_SWTCH4 19
+		#define PIN_SWTCH4 23
 		#define BK_SWTCH4  0
+		#define PIN_SWTCH5 17
+		#define BK_SWTCH5  1
+		#define PIN_SWTCH6 19
+		#define BK_SWTCH6  1
+		#define PIN_SWTCH7 21
+		#define BK_SWTCH7  1
+		#define PIN_SWTCH8 23
+		#define BK_SWTCH8  1
 	//// Pins for bootstrap (Load capacitors to on transistor)
-		#define PIN_BSTRP 18
-		#define BK_BSTRP  0
+		#define PIN_BSTRP1 31
+		#define BK_BSTRP1  1
+		#define PIN_BSTRP1 29
+		#define BK_BSTRP1  1
 
 
 // Definition of pins to determine the direction of motor
