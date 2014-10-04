@@ -11,10 +11,28 @@
 
 
 
+/* The H bridge
+ * 						|+
+ * 			____________|___________
+ * 			|						|
+ * 			|						|
+ * 			_/ Q_H1					_/ Q_H2
+ * 			|						|
+ * 			|	   +--> Trigo		|
+ * 			|___Mot1        Mot2____|
+ * 			|	  <--+ Notrigo		|
+ * 			|						|
+ * 			_/ Q_L1			    	_/ Q_L2
+ * 			|						|
+ * 			|_______________________|
+ *				-		|
+ *						|-
+ */
+
 volatile float speedCons; // Consign wheel speed in inc/T
 float speed_mes; // Wheel speed in inc/T
 float speedCmd; // Speed command for motor
-volatile int dirCons; // Consign wheel direction
+volatile eMotorDir dirCons; // Consign wheel direction
 int timeStartLoop;
 unsigned int prevLEDMillis = 0;
 int stateLED = 0;
@@ -23,6 +41,7 @@ int stateLED = 0;
 int main() {
 	dirCons = 0;
 	int pwmCmd = 200;	// Value between 0 and pwm_range
+	eMotorOperation motOp = Drive;
 #ifdef ENCODER
 	int prevTime = 0;
 	int irqCptRef = 0;
@@ -32,8 +51,8 @@ int main() {
 	//// Initialization
 		gpio_init_all();
 		// Command bridges
-		gpio_output(BK_IN2, PIN_IN2); // IN2 out
-		gpio_output(BK_IN1, PIN_IN1); // IN1 out
+		gpio_output(BK_SD2, PIN_SD2); // IN2 out
+		gpio_output(BK_SD1, PIN_SD1); // IN1 out
 		// Debug
 		gpios_debg_output();
 		// Small switch
@@ -41,6 +60,10 @@ int main() {
 		gpio_input(BK_SWTCH2, PIN_SWTCH2);
 		gpio_input(BK_SWTCH3, PIN_SWTCH3);
 		gpio_input(BK_SWTCH4, PIN_SWTCH4);
+		gpio_input(BK_SWTCH5, PIN_SWTCH5);
+		gpio_input(BK_SWTCH6, PIN_SWTCH6);
+		gpio_input(BK_SWTCH7, PIN_SWTCH7);
+		gpio_input(BK_SWTCH8, PIN_SWTCH8);
 		// LED
 		gpio_output(1, 24);   // writes to output {1,24}
 		gpio_output(0, 31);  // writes to output {0,31}
@@ -63,16 +86,35 @@ int main() {
 	while (1) { // ############## Loop ############################################
 		sys_time_update();
 
-		if((millis() - timeStartLoop) >= 0){
+//		if((millis() - timeStartLoop) >= 0){
 //			timeStartLoop += T_ASSER;
-			timeStartLoop = millis();
-			if((millis() - timeStartLoop) > T_ASSER/2){
-				timeStartLoop = millis();
-				continue;
-			}
+//			timeStartLoop = millis();
+//			if((millis() - timeStartLoop) > T_ASSER/2){
+//				timeStartLoop = millis();
+//				continue;
+//			}
+
 			// Get direction
 			#ifdef DVLPT_BOARD
 			dirCons = READ_DIR_ASKED;
+
+			// Get motor operation
+			switch(gpio_read(BK_SWTCH7, PIN_SWTCH7) + gpio_read(BK_SWTCH8, PIN_SWTCH8)){
+			case 0:
+				motOp = Drive;
+				break;
+			case 1:
+				motOp = FreeWheel;
+				break;
+			case 2:
+				motOp = Braking;
+				break;
+			case 3: // Unattributed
+				break;
+			default:
+				DEBUG_5_ON;
+				break;
+			}
 
 			#else
 			// TODO
@@ -88,8 +130,12 @@ int main() {
 
 			// Get speed consign
 			#ifdef DVLPT_BOARD
-			int c = (3*gpio_read(BK_SWTCH3, PIN_SWTCH3) + 4*gpio_read(BK_SWTCH4, PIN_SWTCH4));
-			speedCons = mPerS2IncPerT(c * MAX_SPEED/7);
+			int c = (/*gpio_read(BK_SWTCH1, PIN_SWTCH1) +*/ 2*gpio_read(BK_SWTCH2, PIN_SWTCH2) + 4*gpio_read(BK_SWTCH3, PIN_SWTCH3) + 8 *gpio_read(BK_SWTCH4, PIN_SWTCH4));
+			speedCons = mPerS2IncPerT(c * MAX_SPEED/15);
+			if(gpio_read(BK_SWTCH2, PIN_SWTCH2) == 1)
+				DEBUG_4_ON;
+			else
+				DEBUG_4_OFF;
 			#else
 			// TODO
 			#endif
@@ -114,9 +160,9 @@ int main() {
 #ifdef ENCODER
 			controlMotor(pwmCmd, dirCons, Drive);
 #else
-			controlMotor(c*PWM_RANGE/7, dirCons, Drive);
+			controlMotor(c*PWM_RANGE/7, dirCons, motOp);
 #endif
-		}
+//		}
 
 	} // ############## End loop ############################################
 }

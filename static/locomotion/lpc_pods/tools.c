@@ -19,6 +19,9 @@ float incPerT2mPerS(float incPerT){
 
 
 void blindLED(int bk, int pin, int delay_on /*ms*/, int delay_off/*ms*/, int nbr_it /*0 = Infinite time*/){
+	// TODO
+	// Avoid locking function
+
 	// Pins LED on board: 1.24 or 0.31
 
 	static unsigned prevTime = 0;

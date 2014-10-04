@@ -5,16 +5,18 @@
 
 // Tests or methods of operation
 	#define DVLPT_BOARD
+//#define LOW_CONSUMPTION
 //	#define ENCODER
+
 
 ////// Pins LPC
 	//// Pins for motor control
 		// IN1
-		#define PIN_IN1 29
-		#define BK_IN1  0
+		#define PIN_SD1 29
+		#define BK_SD1  0
 		// IN2
-		#define PIN_IN2 28
-		#define BK_IN2  0
+		#define PIN_SD2 28
+		#define BK_SD2  0
 		// PWM1
 		#define PIN_PMW1 0
 		#define BK_PWM1  0
@@ -62,15 +64,15 @@
 	//// Pins for bootstrap (Load capacitors to on transistor)
 		#define PIN_BSTRP1 31
 		#define BK_BSTRP1  1
-		#define PIN_BSTRP1 29
-		#define BK_BSTRP1  1
+		#define PIN_BSTRP2 29
+		#define BK_BSTRP2  1
 
 
 // Definition of pins to determine the direction of motor
-#define IN1_ON gpio_write(BK_IN1, PIN_IN1, 1)
-#define IN1_OFF gpio_write(BK_IN1, PIN_IN1, 0)
-#define IN2_ON gpio_write(BK_IN2, PIN_IN2, 1)
-#define IN2_OFF gpio_write(BK_IN2, PIN_IN2, 0)
+#define SD1_ON gpio_write(BK_SD1, PIN_SD1, 1)
+#define SD1_OFF gpio_write(BK_SD1, PIN_SD1, 0)
+#define SD2_ON gpio_write(BK_SD2, PIN_SD2, 1)
+#define SD2_OFF gpio_write(BK_SD2, PIN_SD2, 0)
 
 #define IN1_VALUE gpio_read(BK_IN1, PIN_IN1)
 #define IN2_VALUE gpio_read(BK_IN2, PIN_IN2)
@@ -81,12 +83,12 @@
 #define ChannelA gpio_read(BK_CNL_A, PIN_CNL_A)
 #define ChannelB gpio_read(BK_CNL_B, PIN_CNL_B)
 
-#define sensTrigo {IN1_ON; IN2_OFF; DEBUG_1_ON; DEBUG_2_OFF;}
-#define sensHorai {IN1_OFF; IN2_ON; DEBUG_2_ON; DEBUG_1_OFF;}
-#define brake { IN1_OFF; IN2_OFF;}
+//#define sensTrigo {IN1_ON; IN2_OFF; DEBUG_1_ON; DEBUG_2_OFF;}
+//#define sensHorai {IN1_OFF; IN2_ON; DEBUG_2_ON; DEBUG_1_OFF;}
+//#define brake { IN1_OFF; IN2_OFF;}
 
 #ifdef DVLPT_BOARD
-#define READ_DIR_ASKED gpio_read(BK_SWTCH1, PIN_SWTCH1);
+#define READ_DIR_ASKED gpio_read(BK_SWTCH5, PIN_SWTCH5);
 #else
 // TODO
 #endif
@@ -96,7 +98,7 @@
 //// Params for motor control
 // Charge capacitor
 #define PERIOD_DCHT_CAPA 8000 // period of motor control µs
-#define PERIOD_CHGT_CAPA  10 // period of overload capacitor in us
+#define PERIOD_CHGT_CAPA  1 // period of overload capacitor in us
 
 //// Params motor-reductor
 #define REDUCT (676./49.)
