@@ -37,7 +37,7 @@ void intp_sync_handler(sMsg *msg){
     bn_intp_msgHandle(msg);
 
     if(bn_intp_isSync()){
-        tD_setLo2GlMsOffset(bn_intp_MicrosOffset);
+        tD_setLo2GlUsOffset(bn_intp_MicrosOffset);
     }
 }
 
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]){
                 slot->s.date = bn_intp_micros2s(p_t); // global time
                 slot->s.id = ELT_PRIMARY;
 
-                slot->t = tD_newFrom_LoUs(p_t);
+                slot->d = tD_newFrom_LoUs(p_t);
 
                 ph_incr_new_slot_pointer();
             }
