@@ -28,13 +28,14 @@ int main(int argc, char *argv[]){
     srand(0); // deterministic
 
 #ifdef OUT
-    FILE *out = fopen("out.csv", "wb+");
+    FILE *out = fopen("pos_history-test.csv", "wb+");
     if(!out){
         exit(1);
     }
 #endif
 
     // generate linear trajectory
+    printf("## generating sampled trajectory:\n");
     for(d = start, i = 0; i < NB_STEPS; d = tD_addPeriod(d, p), i++){
         printf("d:%.3fs\n", (float)TD_GET_LoUs(d)/1000000.);
 
@@ -63,6 +64,7 @@ int main(int argc, char *argv[]){
     }
 
     // try to query position in the past
+    printf("## getting trajectory back at different times:\n");
     d = tD_addUs(start, 3000); // force desynchro
 
     startMem = tD_subPeriod(endMem, ph_MEM_PERIOD); // we only store a position between start and endMem
@@ -74,13 +76,13 @@ int main(int argc, char *argv[]){
             printf("\tcan't find position!\n");
 
             // assert out of range of memory
-            assert(TD_DIFF_Us(d, start) < 0 || TD_DIFF_Us(d, endMem) > 0);
+            assert(TD_DIFF_Us(d, startMem) < 0 || TD_DIFF_Us(d, endMem) > 0);
 
             continue;
         }
 
         // assert inside range of memory
-        assert(TD_DIFF_Us(d, start) >= 0 && TD_DIFF_Us(d, endMem) <= 0);
+        assert(TD_DIFF_Us(d, startMem) >= 0 && TD_DIFF_Us(d, endMem) <= 0);
 
 #ifdef OUT
         fprintf(out, "%u;%.1f;%.1f;%.1f\n", TD_GET_LoUs(d), s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
