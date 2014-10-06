@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-#define BN_MAX_PDU 64 //max size of a message, including header AND payload.
+#define BN_MAX_PDU (64) //max size of a message, including header AND payload.
 
 /* bn_Address : on 16 bytes,
  * cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
@@ -24,7 +24,7 @@ typedef struct {
     bn_Address destAddr;
     bn_Address srcAddr;
     uint8_t size : 7;           //size of the payload
-    uint8_t ack  : 1;           //acknowledgement flag. If set, the message must be acknoledged (positively or negatively)
+    uint8_t ack  : 1;           //acknowledgment flag. If set, the message must be acknowledged (positively or negatively)
     uint8_t type;               //type of the message
     uint8_t typeVersion : 4;    //version of the type enum for the sender node. Increased at every change in this enum.
     uint8_t seqNum : 4;         //sequence number
