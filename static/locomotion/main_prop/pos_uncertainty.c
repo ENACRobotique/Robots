@@ -68,6 +68,8 @@ void pos_uncertainty_mix(sGenericStatus *i1, sGenericStatus *i2, sGenericStatus 
     // necessary verifications
     assert(i1 && i2 && o);
     assert(elementHasPosition(i1->id));
+    assert(i1->pos.frame == FRAME_PLAYGROUND);
+    assert(i1->pos.frame == i2->pos.frame);
     assert(i1->id == i2->id);
     assert(i1->date == i2->date);
 
