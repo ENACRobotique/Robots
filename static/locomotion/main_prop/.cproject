@@ -58,7 +58,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="tests|lib/UART_framing|lib/lpc2148|lib/lpc_lib|main_lpc.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="main_tests.c|tests|lib/UART_framing|lib/lpc2148|lib/lpc_lib|main_lpc.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -135,7 +135,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="tests|main_linux.c|lib/Millis|lib/botNet/shared/Xbee4bn.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="main_tests.c|tests|main_linux.c|lib/Millis|lib/botNet/shared/Xbee4bn.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

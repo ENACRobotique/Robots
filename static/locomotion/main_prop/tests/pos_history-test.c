@@ -5,18 +5,21 @@
  *      Author: ludo6431
  */
 
+#include <assert.h>
+#include <math.h>
+#include <messages-elements.h>
+#include <messages-position.h>
+#include <messages-statuses.h>
+#include <pos_history.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-
-#include "pos_history.h"
+#include "pos_history-test.h"
 
 //#define OUT
 #define NB_STEPS (50)
 #define PH_MEMORY_PERIOD (500) // (ms)
 
-int main(int argc, char *argv[]){
+void testmain_pos_history(){
     sPeriod p = TP_Ms_CTOR(20); // 20 ms period
     sDate start = TD_LoUs_CTOR(UINT32_MAX - 700500); // start defined so that the date overflows
     const sPeriod ph_MEM_PERIOD = TP_Ms_CTOR(PH_MEMORY_PERIOD);
@@ -84,6 +87,8 @@ int main(int argc, char *argv[]){
         // assert inside range of memory
         assert(TD_DIFF_Us(d, startMem) >= 0 && TD_DIFF_Us(d, endMem) <= 0);
 
+        // TODO verify linear interpolation (pos & pos_u)
+
 #ifdef OUT
         fprintf(out, "%u;%.1f;%.1f;%.1f\n", TD_GET_LoUs(d), s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
 #endif
@@ -94,6 +99,4 @@ int main(int argc, char *argv[]){
 #ifdef OUT
     fclose(out);
 #endif
-
-    return 0;
 }

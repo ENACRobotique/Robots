@@ -6,9 +6,8 @@
  */
 
 #include <math.h>
+#include <messages-position.h>
 #include <pos_history.h>
-
-// TODO implement uncertainty mixing
 
 sPHPos ph_cbuf[NB_PREVIOUS_POSITIONS] = {{{0}, TD_CTOR()}};
 uint8_t ph_newest = 0;
@@ -68,6 +67,22 @@ int ph_get_pos(sGenericStatus *s, sDate date){
         }
         s->prop_status.pos.theta = (ta * (float)TP_GET_Us(periodBefore) + tb * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
     }
+
+    s->prop_status.pos_u.a_var = (phAfter->s.prop_status.pos_u.a_var * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos_u.a_var * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    s->prop_status.pos_u.b_var = (phAfter->s.prop_status.pos_u.b_var * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos_u.b_var * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    {
+        float tb = phBefore->s.prop_status.pos_u.a_angle;
+        float ta = phAfter->s.prop_status.pos_u.a_angle;
+
+        while(fabs(tb - (ta + 2.*M_PI)) < fabs(tb - ta)){
+            ta += 2.*M_PI;
+        }
+        while(fabs(tb - (ta - 2.*M_PI)) < fabs(tb - ta)){
+            ta -= 2.*M_PI;
+        }
+        s->prop_status.pos_u.a_angle = (ta * (float)TP_GET_Us(periodBefore) + tb * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    }
+    s->prop_status.pos_u.theta = (phAfter->s.prop_status.pos_u.theta * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos_u.theta * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
 
     return 0;
 }

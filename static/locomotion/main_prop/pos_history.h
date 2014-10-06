@@ -8,7 +8,7 @@
 #ifndef POS_HISTORY_H_
 #define POS_HISTORY_H_
 
-#include <messages.h>
+#include <messages-statuses.h>
 #include <stdint.h>
 #include <string.h>
 #include <time_tools.h>
