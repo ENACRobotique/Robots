@@ -51,6 +51,15 @@ void send_robot(sPath_t path){
         }
     }
 
+void stop_robot(void){
+    sTrajEl_t traj = {{obs[0].c.x, obs[0].c.y}, {obs[0].c.x, obs[0].c.y}, {{obs[0].c.x, obs[0].c.y}, 0, 0, 1}, 0, 0, 0};
+    sPath_t path;
+
+    path.path = &traj;
+    path.path_len = 1;
+    send_robot(path);
+    }
+
 int sendPosServo(eServos s, int16_t us, int16_t a){ // us or a = -1 if no use
     sMsg msg = {{0}};
     sPt_t p1, p2;

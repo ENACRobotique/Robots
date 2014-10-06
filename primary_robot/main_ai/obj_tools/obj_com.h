@@ -21,5 +21,6 @@ int newSpeed(float speed);
 int sendSeg(const sPt_t *p, const sVec_t *v);
 int newSpeed(float speed);
 int setPos(sPt_t *p, sNum_t theta);
+void stop_robot(void);
 
 #endif /* OBJ_COM_H_ */

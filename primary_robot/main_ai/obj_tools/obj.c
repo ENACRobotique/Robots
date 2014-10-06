@@ -330,7 +330,8 @@ void obj_step(){
 
         // trajectory
         {{ 35., 120.}, 10, 0, 1, 1}, // 4
-        {{ 50., 70. }, 0, 0, 1, 1},
+       // {{ 50., 70. }, 0, 0, 1, 1},
+        {{ 35., 50. }, 10, 0, 1, 1},
         {{ 50., 35. }, 10, 0, 1, 1},
         {{250., 35. }, 10, 0, 1, 1},
         {{265., 50. }, 10, 0, 1, 1},//8
@@ -342,12 +343,12 @@ void obj_step(){
         A(0), // r=0
         B(4),
         A(5),
-//        B(6),
-//        B(7),
-//        B(8),
-//        B(9),
-//        A(10),
-//        A(11)// r=0
+        B(6),
+        B(7),
+        B(8),
+        B(9),
+        A(10),
+        A(11)// r=0
         };
 
     sObs_t obsYellow[] = {
@@ -359,7 +360,7 @@ void obj_step(){
 
         // trajectory
         {{300. - 35., 120.}, 10, 0, 1, 1}, // 4
-        {{300. - 50., 70. }, 0, 0, 1, 1},
+        {{300. - 35., 50. }, 10, 0, 1, 1},
         {{300. - 50., 35. }, 10, 0, 1, 1},
         {{300. -250., 35. }, 10, 0, 1, 1},
         {{300. -265., 50. }, 10, 0, 1, 1},//8
@@ -371,12 +372,12 @@ void obj_step(){
         A(0), // r=0
         A(4),
         A(5),
-//        A(6),
-//        A(7),
-//        A(8),
-//        A(9),
-//        B(10),
-//        A(11)// r=0
+        A(6),
+        A(7),
+        A(8),
+        A(9),
+        B(10),
+        A(11)// r=0
     };
 
     static iABObs_t obs_list[32];
@@ -557,7 +558,7 @@ void obj_step(){
 #if PROG_TRAJ
             fill_tgts_lnk();
 
-            set_traj(&curr_path, obs_list, 3);
+            set_traj(&curr_path, obs_list, 9);
             curr_path.tid = ++last_tid;
             curr_traj_extract_sid = 0;
 #endif
@@ -638,7 +639,7 @@ void obj_step(){
                 }
             }
 
-            if(switch_left == 1 || switch_right ==1){
+            if((switch_left == 1) && (!switch_right ==1)){
                 sendPosServo(SERVO_PRIM_DOOR, 1800, -1);
                 }
 #else
