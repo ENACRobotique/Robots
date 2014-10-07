@@ -9,6 +9,7 @@
 #define CONTEXT_H_
 
 #include <gtk/gtk.h>
+#include "messages-statuses.h"
 
 typedef struct {
     // gui
@@ -21,7 +22,13 @@ typedef struct {
 
     // mouse interaction
     gboolean pressed;
-    double x, y;
+    double press_x, press_y;
+    gboolean moved;
+    double move_x, move_y;
+
+    // test
+    sGenericStatus i1;
+    sGenericStatus i2;
 } sContext;
 
 
