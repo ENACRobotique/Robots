@@ -110,12 +110,12 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
 
             // fixed ellipse (RED)
             cairo_set_source_rgb(cr, 1, 0, 0);
-            cairo_ellipse(cr, ctx->i1.pos.x, ctx->i1.pos.y, sqrt(ctx->i1.pos_u.a_var), sqrt(ctx->i1.pos_u.b_var), ctx->i1.pos_u.a_angle);
+            cairo_ellipse(cr, ctx->i1.pos.x, ctx->i1.pos.y, 2*sqrt(ctx->i1.pos_u.a_var), 2*sqrt(ctx->i1.pos_u.b_var), ctx->i1.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
 
             // ellipse following mouse pointer and rotating with respect to the time (GREEN)
             cairo_set_source_rgb(cr, 0, 1, 0);
-            cairo_ellipse(cr, ctx->i2.pos.x, ctx->i2.pos.y, sqrt(ctx->i2.pos_u.a_var), sqrt(ctx->i2.pos_u.b_var), ctx->i2.pos_u.a_angle);
+            cairo_ellipse(cr, ctx->i2.pos.x, ctx->i2.pos.y, 2*sqrt(ctx->i2.pos_u.a_var), 2*sqrt(ctx->i2.pos_u.b_var), ctx->i2.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
 
             // actual multiplication
@@ -123,19 +123,19 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
 
             // result of the multiplication of the 2 previous 2D gaussians (BLUE)
             cairo_set_source_rgb(cr, 0, 0, 1);
-            cairo_ellipse(cr, o.pos.x, o.pos.y, sqrt(o.pos_u.a_var), sqrt(o.pos_u.b_var), o.pos_u.a_angle);
+            cairo_ellipse(cr, o.pos.x, o.pos.y, 2*sqrt(o.pos_u.a_var), 2*sqrt(o.pos_u.b_var), o.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
         }
 
-        // draw some moving text
-        cairo_move_to(cr, 100.0, 50.0 + 5. * cos((double) millis() / 200.));
-        cairo_save(cr);
-        cairo_scale(cr, 1, -1);
-        cairo_set_source_rgb(cr, 0.5 + 0.5 * cos((double) millis() / 250.), 0, 0);
-        cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-        cairo_set_font_size(cr, 40.0 + 5. * sin((double) millis() / 150.));
-        cairo_show_text(cr, "Disziplin ist Macht.");
-        cairo_restore(cr);
+//        // draw some moving text
+//        cairo_move_to(cr, 100.0, 50.0 + 5. * cos((double) millis() / 200.));
+//        cairo_save(cr);
+//        cairo_scale(cr, 1, -1);
+//        cairo_set_source_rgb(cr, 0.5 + 0.5 * cos((double) millis() / 250.), 0, 0);
+//        cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+//        cairo_set_font_size(cr, 40.0 + 5. * sin((double) millis() / 150.));
+//        cairo_show_text(cr, "Disziplin ist Macht.");
+//        cairo_restore(cr);
     }
 
     return FALSE;
