@@ -15,13 +15,32 @@
 #include <math.h>
 #include "millis.h"
 
-typedef struct {
-    GtkWidget *window;
-    GtkWidget *drawing_area;
-    gint da_width, da_height;
+#include "context.h"
 
-    double wld_width, wld_height;
-} sContext;
+#include "cairo_tools.h"
+
+static gboolean on_button_event(GtkWidget *widget, GdkEvent *event, sContext *ctx) {
+    if (event->type == GDK_BUTTON_PRESS) {
+//        printf("button pos : x%.2f, y%.2f\n", event->button.x, event->button.y);
+
+        ctx->x = event->button.x;
+        ctx->y = event->button.y;
+        ctx->pressed = TRUE;
+    }
+    else if (event->type == GDK_MOTION_NOTIFY) {
+        //        printf("button pos : x%.2f, y%.2f\n", event->button.x, event->button.y);
+
+        ctx->x = event->motion.x;
+        ctx->y = event->motion.y;
+        ctx->pressed = TRUE;
+    }
+
+    if(ctx->pressed){
+        invalidate_all(ctx);
+    }
+
+    return TRUE;
+}
 
 static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
     { // prepare transformation for playground to fit in window not stretched
@@ -64,6 +83,20 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
         cairo_rectangle(cr, 0., 0., ctx->wld_width, ctx->wld_height);
         cairo_stroke(cr);
 
+        // draw previous click
+        {
+            if (ctx->pressed) {
+                cairo_device_to_user(cr, &ctx->x, &ctx->y);
+                ctx->pressed = FALSE;
+            }
+
+            cairo_arc(cr, ctx->x, ctx->y, 5, 0, 2 * M_PI);
+            cairo_stroke(cr);
+
+            cairo_ellipse(cr, ctx->x, ctx->y, 10, 2, (double) millis() / 1000.);
+            cairo_stroke(cr);
+        }
+
         // draw some moving text
         cairo_move_to(cr, 100.0, 50.0 + 5. * cos((double) millis() / 200.));
         cairo_save(cr);
@@ -76,15 +109,6 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
     }
 
     return FALSE;
-}
-
-gboolean invalidate(sContext *ctx) {
-    // for now, invalidate all
-    GdkRectangle rect = { .x = 0, .y = 0, .width = ctx->da_width, .height = ctx->da_height };
-
-    gdk_window_invalidate_rect(gtk_widget_get_window(ctx->drawing_area), &rect, 1);
-
-    return TRUE; // continue to be called
 }
 
 int main(int argc, char *argv[]) {
@@ -101,7 +125,11 @@ int main(int argc, char *argv[]) {
     ctx.drawing_area = gtk_drawing_area_new();
     gtk_container_add(GTK_CONTAINER(ctx.window), ctx.drawing_area);
 
+    gtk_widget_add_events(ctx.drawing_area, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
+
     g_signal_connect(G_OBJECT(ctx.drawing_area), "draw", G_CALLBACK(on_draw_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "button-press-event", G_CALLBACK(on_button_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "motion-notify-event", G_CALLBACK(on_button_event), &ctx);
     g_signal_connect(ctx.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_window_set_position(GTK_WINDOW(ctx.window), GTK_WIN_POS_CENTER);
@@ -110,7 +138,7 @@ int main(int argc, char *argv[]) {
 
     gtk_widget_show_all(ctx.window);
 
-    g_timeout_add(1000 / 25, (GSourceFunc) invalidate, &ctx); // 25Hz
+    g_timeout_add(1000 / 25, (GSourceFunc) invalidate_all, &ctx); // 25Hz
 
     gtk_main();
 
