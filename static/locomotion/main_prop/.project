@@ -35,6 +35,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
 		</link>
 		<link>
+			<name>lib/PosTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/PosTools</locationURI>
+		</link>
+		<link>
 			<name>lib/TimeTools</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/TimeTools</locationURI>

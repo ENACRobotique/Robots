@@ -5,8 +5,8 @@
  *      Author: ludo6431
  */
 
-#ifndef POS_HISTORY_H_
-#define POS_HISTORY_H_
+#ifndef LIB_POSTOOLS_POS_HISTORY_H_
+#define LIB_POSTOOLS_POS_HISTORY_H_
 
 #include <messages-statuses.h>
 #include <stdint.h>
@@ -48,4 +48,4 @@ static inline void ph_enqueue(sGenericStatus *s, sDate t){
 
 int ph_get_pos(sGenericStatus *s, sDate date);
 
-#endif /* POS_HISTORY_H_ */
+#endif /* LIB_POSTOOLS_POS_HISTORY_H_ */

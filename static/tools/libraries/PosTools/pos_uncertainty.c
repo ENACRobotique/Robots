@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <math.h>
 #include <messages-elements.h>
+#include <messages-position.h>
 #include <messages-statuses.h>
 #include "pos_uncertainty.h"
 

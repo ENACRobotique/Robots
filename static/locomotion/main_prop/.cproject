@@ -36,6 +36,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Millis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Timeout}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/PosTools}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/TimeTools}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}&quot;"/>
 								</option>
@@ -101,6 +102,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Timeout}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/PosTools}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/TimeTools}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1890250953" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
@@ -177,6 +179,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Millis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Timeout}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/PosTools}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/TimeTools}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}&quot;"/>
 								</option>
