@@ -9,25 +9,33 @@
  */
 
 // example from http://zetcode.com/gfx/cairo/cairobackends/
-
 #include <cairo.h>
 #include <gtk/gtk.h>
-
-static void do_drawing(cairo_t *);
+#include <stdio.h>
+#include <math.h>
+#include "millis.h"
 
 static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
-    do_drawing(cr);
+    cairo_set_source_rgb(cr, 0.5+0.5*cos((double)millis()/250.), 0, 0);
+    cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, 40.0 + 5.*sin((double)millis()/150.));
+
+    cairo_move_to(cr, 10.0, 50.0 + 5.*cos((double)millis()/200.));
+    cairo_show_text(cr, "Disziplin ist Macht.");
 
     return FALSE;
 }
 
-static void do_drawing(cairo_t *cr) {
-    cairo_set_source_rgb(cr, 0, 0, 0);
-    cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, 40.0);
+gint invalidate(GtkWidget *darea) {
+    gint width, height;
+    width = gtk_widget_get_allocated_width(darea);
+    height = gtk_widget_get_allocated_height(darea);
 
-    cairo_move_to(cr, 10.0, 50.0);
-    cairo_show_text(cr, "Disziplin ist Macht.");
+    GdkRectangle rect = { .x = 0, .y = 0, .width = width, .height = height };
+
+    gdk_window_invalidate_rect(gtk_widget_get_window(darea), &rect, 1);
+
+    return 1; // continue to be called
 }
 
 int main(int argc, char *argv[]) {
@@ -49,6 +57,8 @@ int main(int argc, char *argv[]) {
     gtk_window_set_title(GTK_WINDOW(window), "GTK window");
 
     gtk_widget_show_all(window);
+
+    g_timeout_add(1000/30, (GSourceFunc)invalidate, darea); // 30Hz
 
     gtk_main();
 

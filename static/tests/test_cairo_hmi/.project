@@ -23,4 +23,46 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>lib</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>lib/Millis</name>
+			<type>2</type>
+			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/core/linux/libraries/Millis</location>
+		</link>
+		<link>
+			<name>lib/PosTools</name>
+			<type>2</type>
+			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/PosTools</location>
+		</link>
+		<link>
+			<name>lib/TimeTools</name>
+			<type>2</type>
+			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/TimeTools</location>
+		</link>
+		<link>
+			<name>lib/Timeout</name>
+			<type>2</type>
+			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/Timeout</location>
+		</link>
+		<link>
+			<name>lib/botNet</name>
+			<type>2</type>
+			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/botNet</location>
+		</link>
+		<link>
+			<name>lib/network_config</name>
+			<type>2</type>
+			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/network_config</location>
+		</link>
+		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/network_tools</location>
+		</link>
+	</linkedResources>
 </projectDescription>
