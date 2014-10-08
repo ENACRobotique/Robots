@@ -16,6 +16,7 @@
 
 #define SPEED_HIGH  200
 #define SPEED_20HZ  46
+#define SPEED_SLOW  33
 
 typedef struct{
     uint32_t date;
