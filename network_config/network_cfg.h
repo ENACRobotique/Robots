@@ -91,7 +91,7 @@ extern "C" {
 #else
     #define ADDR_PROP_DFLT          (ADDRI_MAIN_PROP)
 #endif
-    #define ADDR_DEBUG_DFLT         (ADDRD1_DEBUG1)
+    #define ADDR_DEBUG_DFLT         (ADDRX_DEBUG)
 
 /* Interface enum
  *
