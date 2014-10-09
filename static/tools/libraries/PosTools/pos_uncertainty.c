@@ -45,17 +45,16 @@ void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
 //                      Y = sin(an)*x + cos(an)*y
 
     float k = 4*(i->a*i->c - i->b*i->b); // 1/(var_x*var_y)
+    float tmp_sqrt = sqrtf((i->a - i->c)*(i->a - i->c) + 4*i->b*i->b);
 
-    if(i->c > i->a){
-        *var_x = (i->a + i->c + sqrt((i->a + i->c)*(i->a + i->c) - k))/k;
+    if(i->c < i->a){
+        tmp_sqrt = - tmp_sqrt;
     }
-    else{
-        *var_x = (i->a + i->c - sqrt((i->a + i->c)*(i->a + i->c) - k))/k;
-    }
+    *var_x = (i->a + i->c + tmp_sqrt)/k;
+    *var_y = (i->a + i->c - tmp_sqrt)/k;
 
-    *var_y = 1/(k*(*var_x));
-    float sin_2a = 4*i->b/(k*(*var_x - *var_y));
-    *an = asin(sin_2a)/2;
+    float sin_2a = 2*i->b/tmp_sqrt;
+    *an = asinf(sin_2a)/2;
 }
 
 void gstatus2internal(sGenericStatus *i, s2DPUncert_internal *o){
