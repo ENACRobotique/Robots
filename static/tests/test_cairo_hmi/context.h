@@ -16,6 +16,7 @@ typedef struct {
     GtkWidget *window;
     GtkWidget *drawing_area;
     gint da_width, da_height;
+    GtkWidget *console;
 
     // world
     double wld_width, wld_height;

@@ -32,37 +32,37 @@
 		<link>
 			<name>lib/Millis</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/core/linux/libraries/Millis</location>
+			<locationURI>PARENT-2-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
 		</link>
 		<link>
 			<name>lib/PosTools</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/PosTools</location>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/PosTools</locationURI>
 		</link>
 		<link>
 			<name>lib/TimeTools</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/TimeTools</location>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/TimeTools</locationURI>
 		</link>
 		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/Timeout</location>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/botNet</location>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/botNet</locationURI>
 		</link>
 		<link>
 			<name>lib/network_config</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/network_config</location>
+			<locationURI>PARENT-3-PROJECT_LOC/network_config</locationURI>
 		</link>
 		<link>
 			<name>lib/network_tools</name>
 			<type>2</type>
-			<location>/home/ludo6431/Documents/ENAC/ClubRobot/github/static/communication/network_tools</location>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/network_tools</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

@@ -40,6 +40,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/PosTools</locationURI>
 		</link>
 		<link>
+			<name>lib/TestTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/TestTools</locationURI>
+		</link>
+		<link>
 			<name>lib/TimeTools</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/TimeTools</locationURI>

@@ -9,19 +9,19 @@
 #include <math.h>
 #include <messages-elements.h>
 #include <messages-position.h>
-#include <messages-statuses.h>
+
+#define POS_UNCERTAINTY_INTERNALS
 #include "pos_uncertainty.h"
+
+#define MAX(a, b) ((a)>(b)?(a):(b))
+#define MIN(a, b) ((a)>(b)?(b):(a))
+#define CLAMP(m, v, M) MAX((m), MIN((v), (M)))
 
 void pos_uncertainty_step_update(sGenericStatus *prev, sGenericStatus *next){
     // TODO
 }
 
 // see static/locomotion/simu for design files
-
-typedef struct{
-    float a, b, c;
-    float x, y; // (cm)
-} s2DPUncert_internal;
 
 void varxya2abc(float var_x, float var_y, float ca, float sa, s2DPUncert_internal *o){
 // Converts rotated 2D gaussian to quadratic form coefficients
@@ -54,11 +54,11 @@ void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
     *var_y = (i->a + i->c - tmp_sqrt)/k;
 
     float sin_2a = 2*i->b/tmp_sqrt;
-    *an = asinf(sin_2a)/2;
+    *an = asinf(CLAMP(-1., sin_2a, 1.))/2;
 }
 
 void gstatus2internal(sGenericStatus *i, s2DPUncert_internal *o){
-    varxya2abc(i->pos_u.a_var, i->pos_u.b_var, cos(i->pos_u.a_angle), sin(i->pos_u.a_angle), o);
+    varxya2abc(i->pos_u.a_var, i->pos_u.b_var, cosf(i->pos_u.a_angle), sinf(i->pos_u.a_angle), o);
     o->x = i->pos.x;
     o->y = i->pos.y;
 }
@@ -99,4 +99,5 @@ void pos_uncertainty_mix(sGenericStatus *i1, sGenericStatus *i2, sGenericStatus 
     o->id = i1->id;
     o->date = i1->date;
     internal2gstatus(&nw, o);
+    o->pos.frame = FRAME_PLAYGROUND;
 }

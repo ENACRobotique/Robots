@@ -7,9 +7,9 @@ function [ a, b, c ] = varxya2abc( var_x, var_y, ca, sa )
 %                      sin(an) = sa
 %   output: f(x, y) = ax² + 2bxy + cy²
 
-a = ca^2/(2*var_x) + sa^2/(2*var_y);
-b = ca*sa*(-1/var_x + 1/var_y)/2;
-c = sa^2/(2*var_x) + ca^2/(2*var_y);
+a = ca.^2./(2*var_x) + sa.^2./(2*var_y);
+b = ca.*sa.*(-1./var_x + 1./var_y)/2;
+c = sa.^2./(2*var_x) + ca.^2./(2*var_y);
 
 end
 

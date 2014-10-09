@@ -13,6 +13,7 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "millis.h"
 #include "time_tools.h"
 #include "pos_uncertainty.h"
@@ -33,7 +34,7 @@ static gboolean on_button_event(GtkWidget *widget, GdkEvent *event, sContext *ct
         ctx->moved = TRUE;
     }
 
-    if(ctx->pressed || ctx->moved){ // ask redraw
+    if (ctx->pressed || ctx->moved) { // ask redraw
         invalidate_all(ctx);
     }
 
@@ -86,6 +87,24 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
             if (ctx->pressed) {
                 cairo_device_to_user(cr, &ctx->press_x, &ctx->press_y);
                 ctx->pressed = FALSE;
+
+
+                {
+                    char text[32];
+
+                    double a = (double) millis() / 1000.; // trick to avoid precision pb with double 2 float conversion (millis() may be big!!)
+                    a -= 2 * M_PI * (int) (a / (2 * M_PI));
+
+                    sprintf(text, "x:%.2f, y:%.2f, theta=%.2f\n", ctx->i2.pos.x, ctx->i2.pos.y, a*180./M_PI);
+                    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctx->console));
+                    if(buffer != NULL){
+                        gtk_text_buffer_insert_at_cursor(buffer, text, strlen(text));
+                    }
+                    GtkTextIter iter;
+                    gtk_text_buffer_get_end_iter(buffer, &iter);
+                    gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(ctx->console), &iter, 0, FALSE, 0, 0);
+                }
+
             }
 
             cairo_arc(cr, ctx->press_x, ctx->press_y, 5, 0, 2 * M_PI);
@@ -127,15 +146,7 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
             cairo_stroke(cr);
         }
 
-//        // draw some moving text
-//        cairo_move_to(cr, 100.0, 50.0 + 5. * cos((double) millis() / 200.));
-//        cairo_save(cr);
-//        cairo_scale(cr, 1, -1);
-//        cairo_set_source_rgb(cr, 0.5 + 0.5 * cos((double) millis() / 250.), 0, 0);
-//        cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-//        cairo_set_font_size(cr, 40.0 + 5. * sin((double) millis() / 150.));
-//        cairo_show_text(cr, "Disziplin ist Macht.");
-//        cairo_restore(cr);
+        cairo_text(cr, 100, 15, 5, "100,15");
     }
 
     return FALSE;
@@ -175,7 +186,22 @@ int main(int argc, char *argv[]) {
     ctx.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     ctx.drawing_area = gtk_drawing_area_new();
-    gtk_container_add(GTK_CONTAINER(ctx.window), ctx.drawing_area);
+    ctx.console = gtk_text_view_new();
+
+    {
+        GtkWidget* scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
+        GtkWidget* paned = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
+        gtk_container_add(GTK_CONTAINER(scrolledwindow), ctx.console);
+
+        gtk_widget_set_hexpand(scrolledwindow, TRUE);
+        gtk_widget_set_hexpand(ctx.drawing_area, TRUE);
+        gtk_widget_set_vexpand(ctx.drawing_area, TRUE);
+
+        gtk_paned_pack1(GTK_PANED(paned), ctx.drawing_area, TRUE, FALSE);
+        gtk_paned_pack2(GTK_PANED(paned), scrolledwindow, FALSE, FALSE);
+
+        gtk_container_add(GTK_CONTAINER(ctx.window), paned);
+    }
 
     gtk_widget_add_events(ctx.drawing_area, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
 
