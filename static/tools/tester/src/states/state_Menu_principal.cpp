@@ -60,10 +60,19 @@ sState* testMenu_principal(){
 
     return NULL;
 }
+
 void initMenu_principal(sState *prev){
-	afficher("SERVOS");
+	const char *menu_principal[] = {
+			  "SERVOS",
+			  "PWM",
+			  "I2C",
+			  "LIAISON SERIE",
+			};
+	int Position = (abs(myEnc.read())/2)%NB_menu_principal;
+	afficher(menu_principal[Position]);
 
 }
+
 void deinitMenu_principal(sState *next){
 
 }

@@ -62,8 +62,13 @@ sState* testMenu_servo(){
     return NULL;
 }
 void initMenu_servo(sState *prev){
-	afficher("ANGLE tps reel");
-
+	const char *menu_servo[] = {
+			  "ANGLE tps reel",
+			  "ANGLE validation",
+			  "MICROSECONDES",
+			};
+			int Position = (abs(myEnc.read())/2)%NB_menu_servo;
+			afficher(menu_servo[Position]);
 }
 void deinitMenu_servo(sState *next){
 
