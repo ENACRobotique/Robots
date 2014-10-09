@@ -96,7 +96,7 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
         {
             sGenericStatus o;
 
-            if(ctx->moved) {
+            if (ctx->moved) {
                 cairo_device_to_user(cr, &ctx->move_x, &ctx->move_y);
                 ctx->moved = FALSE;
 
@@ -105,17 +105,17 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
             }
 
             double a = (double) millis() / 1000.; // trick to avoid precision pb with double 2 float conversion (millis() may be big!!)
-            a -= 2*M_PI*(int)(a / (2*M_PI));
+            a -= 2 * M_PI * (int) (a / (2 * M_PI));
             ctx->i2.pos_u.a_angle = a;
 
             // fixed ellipse (RED)
             cairo_set_source_rgb(cr, 1, 0, 0);
-            cairo_ellipse(cr, ctx->i1.pos.x, ctx->i1.pos.y, 2*sqrt(ctx->i1.pos_u.a_var), 2*sqrt(ctx->i1.pos_u.b_var), ctx->i1.pos_u.a_angle); // 95% ellipse
+            cairo_ellipse(cr, ctx->i1.pos.x, ctx->i1.pos.y, 2 * sqrt(ctx->i1.pos_u.a_var), 2 * sqrt(ctx->i1.pos_u.b_var), -ctx->i1.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
 
             // ellipse following mouse pointer and rotating with respect to the time (GREEN)
             cairo_set_source_rgb(cr, 0, 1, 0);
-            cairo_ellipse(cr, ctx->i2.pos.x, ctx->i2.pos.y, 2*sqrt(ctx->i2.pos_u.a_var), 2*sqrt(ctx->i2.pos_u.b_var), ctx->i2.pos_u.a_angle); // 95% ellipse
+            cairo_ellipse(cr, ctx->i2.pos.x, ctx->i2.pos.y, 2 * sqrt(ctx->i2.pos_u.a_var), 2 * sqrt(ctx->i2.pos_u.b_var), -ctx->i2.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
 
             // actual multiplication
@@ -123,7 +123,7 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
 
             // result of the multiplication of the 2 previous 2D gaussians (BLUE)
             cairo_set_source_rgb(cr, 0, 0, 1);
-            cairo_ellipse(cr, o.pos.x, o.pos.y, 2*sqrt(o.pos_u.a_var), 2*sqrt(o.pos_u.b_var), o.pos_u.a_angle); // 95% ellipse
+            cairo_ellipse(cr, o.pos.x, o.pos.y, 2 * sqrt(o.pos_u.a_var), 2 * sqrt(o.pos_u.b_var), -o.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
         }
 
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     ctx.i1.pos.frame = FRAME_PLAYGROUND;
     ctx.i1.pos.x = 100.;
     ctx.i1.pos.y = 100.;
-    ctx.i1.pos_u.a_angle = -10.*M_PI/180.;
+    ctx.i1.pos_u.a_angle = -10. * M_PI / 180.;
     ctx.i1.pos_u.a_var = 4;
     ctx.i1.pos_u.b_var = 25;
     ctx.i1.pos.theta = 0.;
@@ -164,8 +164,8 @@ int main(int argc, char *argv[]) {
     ctx.i2.pos.frame = FRAME_PLAYGROUND;
     ctx.i2.pos.x = 102.;
     ctx.i2.pos.y = 103.;
-    ctx.i2.pos_u.a_angle = 20.*M_PI/180.;
-    ctx.i2.pos_u.a_var = 6;
+    ctx.i2.pos_u.a_angle = 20. * M_PI / 180.;
+    ctx.i2.pos_u.a_var = 0.5;
     ctx.i2.pos_u.b_var = 10;
     ctx.i2.pos.theta = 0.;
     ctx.i2.pos_u.theta = 0.;
