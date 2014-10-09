@@ -22,16 +22,40 @@
 
 #include "cairo_tools.h"
 
-static gboolean on_button_event(GtkWidget *widget, GdkEvent *event, sContext *ctx) {
-    if (event->type == GDK_BUTTON_PRESS) {
-        ctx->press_x = event->button.x;
-        ctx->press_y = event->button.y;
-        ctx->pressed = TRUE;
-    }
-    else if (event->type == GDK_MOTION_NOTIFY) {
+static gboolean on_mouse_event(GtkWidget *widget, GdkEvent *event, sContext *ctx) {
+    switch(event->type){
+    case GDK_BUTTON_PRESS:
+        if (event->button.button == 1) {
+            ctx->press_x = event->button.x;
+            ctx->press_y = event->button.y;
+            ctx->pressed = TRUE;
+        }
+        break;
+    case GDK_MOTION_NOTIFY:
         ctx->move_x = event->motion.x;
         ctx->move_y = event->motion.y;
         ctx->moved = TRUE;
+        break;
+    case GDK_SCROLL:
+        switch(event->scroll.direction){
+        case GDK_SCROLL_UP:
+            ctx->i2.pos_u.b_var *= 1.1;
+            break;
+        case GDK_SCROLL_DOWN:
+            ctx->i2.pos_u.b_var *= 0.9;
+            break;
+        case GDK_SCROLL_RIGHT:
+            ctx->i2.pos_u.a_var *= 1.1;
+            break;
+        case GDK_SCROLL_LEFT:
+            ctx->i2.pos_u.a_var *= 0.9;
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
     }
 
     if (ctx->pressed || ctx->moved) { // ask redraw
@@ -88,7 +112,6 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
                 cairo_device_to_user(cr, &ctx->press_x, &ctx->press_y);
                 ctx->pressed = FALSE;
 
-
                 {
                     char text[32];
 
@@ -104,7 +127,6 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
                     gtk_text_buffer_get_end_iter(buffer, &iter);
                     gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(ctx->console), &iter, 0, FALSE, 0, 0);
                 }
-
             }
 
             cairo_arc(cr, ctx->press_x, ctx->press_y, 5, 0, 2 * M_PI);
@@ -144,16 +166,24 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
             cairo_set_source_rgb(cr, 0, 0, 1);
             cairo_ellipse(cr, o.pos.x, o.pos.y, 2 * sqrt(o.pos_u.a_var), 2 * sqrt(o.pos_u.b_var), -o.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
-        }
 
-        cairo_text(cr, 100, 15, 5, "100,15");
+            {
+                char text[64];
+
+                sprintf(text, "x:%.2fcm, y:%.2fcm", o.pos.x, o.pos.y);
+                cairo_text(cr, o.pos.x + 2, o.pos.y, 5, text);
+
+                sprintf(text, "Vx=%.2fcm², Vy=%.2fcm², theta=%.2f°", o.pos_u.a_var, o.pos_u.b_var, o.pos_u.a_angle*180./M_PI);
+                cairo_text(cr, o.pos.x + 2, o.pos.y - 7, 5, text);
+            }
+        }
     }
 
     return FALSE;
 }
 
 int main(int argc, char *argv[]) {
-    sContext ctx;
+    sContext ctx = {0};
 
     // cairo coordinates will be managed in centimeters
     ctx.wld_width = 300.;
@@ -203,15 +233,15 @@ int main(int argc, char *argv[]) {
         gtk_container_add(GTK_CONTAINER(ctx.window), paned);
     }
 
-    gtk_widget_add_events(ctx.drawing_area, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
-
+    gtk_widget_set_size_request(ctx.drawing_area, 4.*ctx.wld_width, 4.*ctx.wld_height);
+    gtk_widget_add_events(ctx.drawing_area, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK);
     g_signal_connect(G_OBJECT(ctx.drawing_area), "draw", G_CALLBACK(on_draw_event), &ctx);
-    g_signal_connect(G_OBJECT(ctx.drawing_area), "button-press-event", G_CALLBACK(on_button_event), &ctx);
-    g_signal_connect(G_OBJECT(ctx.drawing_area), "motion-notify-event", G_CALLBACK(on_button_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "button-press-event", G_CALLBACK(on_mouse_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "scroll-event", G_CALLBACK(on_mouse_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "motion-notify-event", G_CALLBACK(on_mouse_event), &ctx);
     g_signal_connect(ctx.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_window_set_position(GTK_WINDOW(ctx.window), GTK_WIN_POS_CENTER);
-    gtk_window_set_default_size(GTK_WINDOW(ctx.window), 400, 90);
     gtk_window_set_title(GTK_WINDOW(ctx.window), "GTK window");
 
     gtk_widget_show_all(ctx.window);
