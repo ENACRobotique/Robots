@@ -10,20 +10,15 @@ void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp){
 	static unsigned StChgtUs = 0;
 //	static eStateBstr stBstr = DisChgBstr;
 
-	// Loading capacitor to turning on MOSFET 1 or 3
-	if(pwmCmd == PWM_RANGE){// Only need to charge charge pump if pwmCmd == PWM_RANGE
-		if(dir == Trigo){
-			// Loading capacitor to turning on MOSFET Q_H1
-			StChgtUs = micros();
-			if((micros() - StChgtUs) < PERIOD_CHGT_CAPA)
-				pwm_enable(1, 0);
-		}
-		else if(dir == Notrigo){
-			// Loading capacitor to turning on MOSFET Q_H2
-			StChgtUs = micros();
-			if((micros() - StChgtUs) < PERIOD_CHGT_CAPA)
-				pwm_enable(2, 0);
-		}
+	// Charge bootstrap capacitor
+	if((micros() - StChgtUs) > PERIOD_DCHT_CAPA1){
+		CHG_CAPA1_ON;
+		StChgtUs = micros();
+		DEBUG_5_OFF;
+	}
+	else{
+		CHG_CAPA1_OFF;
+		DEBUG_5_ON;
 	}
 
 	if(motOp != prvMotOp){
@@ -52,7 +47,12 @@ void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp){
 #else
 			// Alternating phase of breaking & driving
 			pwm_enable(1, pwmCmd);
-			pwm_enable(2, PWM_RANGE);
+			//pwm_enable(2, PWM_RANGE); // TODO: GPIO
+			// set p0.7 to gpio; workaround to switch back the pin to gpio
+			PCB_PINSEL0 &= ~(3 << 14);
+			PCB_PINSEL0 |= 0 << 14;
+			gpio_output(BK_PWM2, PIN_PWM2);
+			gpio_write(BK_PWM2, PIN_PWM2, 0);
 #endif
 		}
 		else if(dir == Notrigo){
@@ -61,8 +61,13 @@ void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp){
 			// TODO
 #else
 			// Alternating phase of breaking & driving
-			pwm_enable(1, PWM_RANGE);
 			pwm_enable(2, pwmCmd);
+			//pwm_enable(1, PWM_RANGE); // TODO: GPIO
+			// set p0.0 to gpio; workaround to switch back the pin to gpio
+			PCB_PINSEL0 &= ~(3 << 0);
+			PCB_PINSEL0 |= 0 << 0;
+			gpio_output(BK_PWM1, PIN_PMW1);
+			gpio_write(BK_PWM1, PIN_PMW1, 0);
 #endif
 		}
 		else
@@ -78,7 +83,7 @@ void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp){
 }
 
 /*
- * MORE DETAIL cf with the god LUDO
+ * MORE DETAIL cf the god LUDO
 	// set p0.0 to gpio; workaround to switch back the pin to gpio
 	PCB_PINSEL0 &= ~(3 << 0);
 	PCB_PINSEL0 |= 0 << 0;

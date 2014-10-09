@@ -12,10 +12,10 @@
 ////// Pins LPC
 	//// Pins for motor control
 		// IN1
-		#define PIN_SD1 29
+		#define PIN_SD1 28
 		#define BK_SD1  0
 		// IN2
-		#define PIN_SD2 28
+		#define PIN_SD2 29
 		#define BK_SD2  0
 		// PWM1
 		#define PIN_PMW1 0
@@ -45,7 +45,7 @@
 		#define PIN_RX 9
 		#define BK_RX  0
 	//// Pins for small switch
-		#define PIN_SWTCH1 11
+		#define PIN_SWTCH1 5
 		#define BK_SWTCH1  0
 		#define PIN_SWTCH2 15
 		#define BK_SWTCH2  0
@@ -77,6 +77,9 @@
 #define IN1_VALUE gpio_read(BK_IN1, PIN_IN1)
 #define IN2_VALUE gpio_read(BK_IN2, PIN_IN2)
 
+#define CHG_CAPA1_ON gpio_write(BK_BSTRP1, PIN_BSTRP1,1)
+#define CHG_CAPA1_OFF gpio_write(BK_BSTRP1, PIN_BSTRP1,0)
+
 #define PWM1_VALUE gpio_read(BK_PWM1, PIN_PWM1)
 #define PWM2_VALUE gpio_read(BK_PWM2, PIN_PWM2)
 
@@ -97,8 +100,8 @@
 
 //// Params for motor control
 // Charge capacitor
-#define PERIOD_DCHT_CAPA 8000 // period of motor control µs
-#define PERIOD_CHGT_CAPA  1 // period of overload capacitor in us
+#define PERIOD_DCHT_CAPA1 150 // Period ON to charge capacitor to charge bootstrap capacitor µs
+//#define PERIOD_DCHT_CAPA2 150 // Period ON to charge capacitor to charge bootstrap capacitor µs
 
 //// Params motor-reductor
 #define REDUCT (676./49.)

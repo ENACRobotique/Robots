@@ -25,7 +25,7 @@
  * 			_/ Q_L1			    	_/ Q_L2
  * 			|						|
  * 			|_______________________|
- *				-		|
+ *				 		|
  *						|-
  */
 
@@ -130,12 +130,12 @@ int main() {
 
 			// Get speed consign
 			#ifdef DVLPT_BOARD
-			int c = (/*gpio_read(BK_SWTCH1, PIN_SWTCH1) +*/ 2*gpio_read(BK_SWTCH2, PIN_SWTCH2) + 4*gpio_read(BK_SWTCH3, PIN_SWTCH3) + 8 *gpio_read(BK_SWTCH4, PIN_SWTCH4));
+			int c = (gpio_read(BK_SWTCH1, PIN_SWTCH1) + 2*gpio_read(BK_SWTCH2, PIN_SWTCH2) + 4*gpio_read(BK_SWTCH3, PIN_SWTCH3) + 8 *gpio_read(BK_SWTCH4, PIN_SWTCH4));
 			speedCons = mPerS2IncPerT(c * MAX_SPEED/15);
 			if(gpio_read(BK_SWTCH2, PIN_SWTCH2) == 1)
-				DEBUG_4_ON;
+				DEBUG_3_ON;
 			else
-				DEBUG_4_OFF;
+				DEBUG_3_OFF;
 			#else
 			// TODO
 			#endif
@@ -160,7 +160,7 @@ int main() {
 #ifdef ENCODER
 			controlMotor(pwmCmd, dirCons, Drive);
 #else
-			controlMotor(c*PWM_RANGE/7, dirCons, motOp);
+			controlMotor(c*PWM_RANGE/15, dirCons, motOp);
 #endif
 //		}
 
