@@ -45,7 +45,14 @@ void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
 //                      Y = sin(an)*x + cos(an)*y
 
     float k = 4*(i->a*i->c - i->b*i->b); // 1/(var_x*var_y)
-    *var_x = (i->a + i->c - sqrt((i->a + i->c)*(i->a + i->c) - k))/k;
+
+    if(i->c > i->a){
+        *var_x = (i->a + i->c + sqrt((i->a + i->c)*(i->a + i->c) - k))/k;
+    }
+    else{
+        *var_x = (i->a + i->c - sqrt((i->a + i->c)*(i->a + i->c) - k))/k;
+    }
+
     *var_y = 1/(k*(*var_x));
     float sin_2a = 4*i->b/(k*(*var_x - *var_y));
     *an = asin(sin_2a)/2;
