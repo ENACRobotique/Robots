@@ -572,7 +572,7 @@ int new_asserv_step(){
                     // set speed a priori
                     _mul_l = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r + isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
                     _mul_r = ((long long)(traj[curr_traj][curr_traj_step>>1].c_r - isD2I(RDIAM/2.))<<SHIFT)/traj[curr_traj][curr_traj_step>>1].c_r;
-                    if(d_consigne < 0){
+                    if(consigne < 0){
                         int temp = _mul_l;
                         _mul_l = _mul_r;
                         _mul_r = temp;
@@ -609,7 +609,7 @@ int new_asserv_step(){
             // get principal absolute angle from current position to target
             alpha = iD2I(RDIAM)*ATAN2(gy - y, gx - x);
 
-            if(d_consigne < 0){
+            if(consigne < 0){
                 alpha += isRPI;
             }
 

@@ -338,12 +338,12 @@ int test_tirette(void){
     return 1;
 #endif
     return starting_cord;
-    }
+}
 
 void startColor(void){
 
 #if SIMU
-    color=COLOR_SIMU;
+    color = COLOR_SIMU;
 #else
     static int state = 0;
     sMsg msgOut;
