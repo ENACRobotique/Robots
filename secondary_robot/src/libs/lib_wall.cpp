@@ -57,7 +57,8 @@ void periodicWall(){
     unsigned int dist,dist2;
     static unsigned long int prevMillis=0;
     static int I=0,I2=0 , D=0, D2=0, last_dist , last_dist2;
-    int tmp,tmp2,val;
+    int tmp,tmp2;
+//    int val;
     unsigned long int dtime=millis()-prevMillis;
 
     if ( dtime >=WALL_PERIOD){

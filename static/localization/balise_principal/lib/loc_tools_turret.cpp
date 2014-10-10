@@ -114,8 +114,8 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     msg.payload.genericStatus.adv_status.pos.frame=msg.payload.genericStatus.adv_status.pos.FRAME_PRIMARY;
 
     msg.payload.genericStatus.adv_status.pos_u.a_angle=-1;
-    msg.payload.genericStatus.adv_status.pos_u.a_std=-1;
-    msg.payload.genericStatus.adv_status.pos_u.b_std=-1;
+    msg.payload.genericStatus.adv_status.pos_u.a_var=-1;
+    msg.payload.genericStatus.adv_status.pos_u.b_var=-1;
     msg.payload.genericStatus.adv_status.pos_u.theta=-1;
 
 

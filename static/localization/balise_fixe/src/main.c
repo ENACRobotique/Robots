@@ -4,8 +4,8 @@
 #include <driverlib/gpio.h>
 #include <driverlib/sysctl.h>
 #include <inc/hw_memmap.h>
-#include <lib_int_laser.h>
-#include <lib_synchro_beacon.h>
+#include <shared/lib_int_laser.h>
+#include <shared/lib_synchro_beacon.h>
 #include <messages.h>
 #include <params.h>
 #include <perception.h>
@@ -203,7 +203,7 @@ int main(void) {
 #ifdef DEBUG
                     int k;
                     for (k=0; k < (MEAS_BUF_SIZE+measuresIndex-prevMeasuresIndex)%MEAS_BUF_SIZE ; k++){
-                        int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
+//                        int tempindex=(prevMeasuresIndex+k)%MEAS_BUF_SIZE;
 //                        bn_printfDbg("t %lu beac %d, dt %lu per %lu",measuresBuf[tempindex].date,measuresBuf[tempindex].beacon,measuresBuf[tempindex].deltaT,measuresBuf[tempindex].period);
                     }
 #endif

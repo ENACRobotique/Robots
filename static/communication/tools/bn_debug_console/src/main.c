@@ -265,7 +265,10 @@ int main(int argc, char **argv){
                     int us;
 
                     printf("us: "); fflush(stdout);
-                    scanf("%i", &us);
+                    err = scanf("%i", &us);
+                    if (err != 1){
+                        printf("error getting us setpoint\n");
+                    }
 
                     msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
@@ -289,10 +292,16 @@ int main(int argc, char **argv){
                     printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
 
                     printf("id: "); fflush(stdout);
-                    scanf("%i", &id);
+                    err = scanf("%i", &id);
+                    if (err != 1){
+                        printf("error getting servo id\n");
+                    }
 
                     printf("us: "); fflush(stdout);
-                    scanf("%i", &us);
+                    err = scanf("%i", &us);
+                    if (err != 1){
+                        printf("error getting us setpoint\n");
+                    }
 
                     msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;

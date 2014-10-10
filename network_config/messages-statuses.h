@@ -8,10 +8,9 @@
 #ifndef LIB_NETWORK_CONFIG_MESSAGES_STATUSES_H_
 #define LIB_NETWORK_CONFIG_MESSAGES_STATUSES_H_
 
-#include <messages-elements.h>
-#include <messages-position.h>
 #include <stdint.h>
-#include <sys/types.h>
+#include "messages-elements.h"
+#include "messages-position.h"
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)

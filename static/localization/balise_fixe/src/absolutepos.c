@@ -6,7 +6,7 @@
  */
 
 #include <absolutepos.h>
-#include <lib_synchro_beacon.h>
+#include <shared/lib_synchro_beacon.h>
 #include <math.h>
 #include <messages.h>
 #include <neldermead.h>
@@ -213,8 +213,8 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
                     msg_out.payload.genericStatus.pos.x = x0.x*100.;
                     msg_out.payload.genericStatus.pos.y = x0.y*100.;
                     msg_out.payload.genericStatus.pos.frame = FRAME_PLAYGROUND;
-                    msg_out.payload.genericStatus.pos_u.a_std = 0.;
-                    msg_out.payload.genericStatus.pos_u.b_std = 0.;
+                    msg_out.payload.genericStatus.pos_u.a_var = 0.;
+                    msg_out.payload.genericStatus.pos_u.b_var = 0.;
                     msg_out.payload.genericStatus.pos_u.a_angle = 0.;
                     msg_out.payload.genericStatus.pos_u.theta = -1.;
 
@@ -291,8 +291,8 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
                     msg_out.payload.genericStatus.pos.x = x0.x*100.;
                     msg_out.payload.genericStatus.pos.y = x0.y*100.;
                     msg_out.payload.genericStatus.pos.frame = FRAME_PLAYGROUND;
-                    msg_out.payload.genericStatus.pos_u.a_std = 0.;
-                    msg_out.payload.genericStatus.pos_u.b_std = 0.;
+                    msg_out.payload.genericStatus.pos_u.a_var = 0.;
+                    msg_out.payload.genericStatus.pos_u.b_var = 0.;
                     msg_out.payload.genericStatus.pos_u.a_angle = 0.;
                     msg_out.payload.genericStatus.pos_u.theta = -1.;
 
