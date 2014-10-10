@@ -42,7 +42,7 @@ void setup(){
     }
     devicesInfo[D_MOBILE_1].addr=ADDRX_MOBILE_1;
     devicesInfo[D_MOBILE_2].addr=ADDRX_MOBILE_2;
-    devicesInfo[D_FIX].addr=ADDRX_FIX;
+//    devicesInfo[D_FIX].addr=ADDRX_FIX;
 
     //fixme : do the same for the others
 
