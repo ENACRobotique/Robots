@@ -60,7 +60,7 @@ void laserIntInit() {
 #endif
 
 }
-    
+
 //do I really have to do a description ? Anyway, it probably won't be used.
 void laserIntDeinit(){
 #ifdef ARCH_328P_ARDUINO
@@ -74,7 +74,7 @@ void laserIntDeinit(){
 ldStruct laserDetect(bufStruct *bs){
     uint32_t prevCall, t = micros();
 #ifdef ARCH_LM4FXX                  // different way of using laserDetect (in interruption), so little alteration in order to make it work
-    uint32_t *bufTemp=bs->buf;
+    volatile uint32_t *bufTemp=bs->buf;
 #elif defined(ARCH_328P_ARDUINO)
     uint32_t bufTemp[8];
 #endif

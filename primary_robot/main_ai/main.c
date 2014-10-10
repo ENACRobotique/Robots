@@ -276,8 +276,8 @@ int main(int argc, char **argv){
                     status.id = ELT_PRIMARY;
                     status.prop_status.pos.frame = FRAME_PLAYGROUND;
                     status.prop_status.pos.theta = msgIn.payload.pos.theta;
-                    status.prop_status.pos_u.a_std = 0.;
-                    status.prop_status.pos_u.b_std = 0.;
+                    status.prop_status.pos_u.a_var = 0.;
+                    status.prop_status.pos_u.b_var = 0.;
                     status.prop_status.pos_u.a_angle = 0.;
                     status.prop_status.pos_u.theta = 0.;
                     status.prop_status.pos.x = msgIn.payload.pos.x;

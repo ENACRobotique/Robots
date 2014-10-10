@@ -8,9 +8,9 @@
 #ifndef LIB_NETWORK_CONFIG_MESSAGES_NETWORK_H_
 #define LIB_NETWORK_CONFIG_MESSAGES_NETWORK_H_
 
-#include <messages.h>
-#include <shared/message_header.h>
 #include <stdint.h>
+#include "messages.h"
+#include "../static/communication/botNet/shared/message_header.h"
 
 //Specific payloads
 typedef struct __attribute__((packed)){

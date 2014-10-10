@@ -63,7 +63,7 @@ void deinitWallLeft(sState *next)
 
 sState * testWallLeft()
 	{
-    static unsigned long prevMillisWallLeft=millis();
+//    static unsigned long prevMillisWallLeft=millis();
 
   //  if((millis() > prevMillisWallLeft + TIME_READY_LAUNCHER) && (diff(PIN_SHARP_FRONT_LEFT, PIN_SHARP_BACK_LEFT)<1))
     	//{
@@ -132,7 +132,7 @@ void deinitWallRight(sState *next)
 
 sState * testWallRight()
 	{
-    static unsigned long prevMillisWallLeft=millis();
+//    static unsigned long prevMillisWallLeft=millis();
 
    // if((millis() > prevMillisWallLeft + TIME_READY_LAUNCHER) && (diff(PIN_SHARP_FRONT_LEFT, PIN_SHARP_BACK_LEFT)<1))
     //	{

@@ -8,7 +8,6 @@
 #define LIB_NETWORK_CONFIG_MESSAGES_LOCALIZATION_H_
 
 #include <stdint.h>
-#include <sys/types.h>
 
 // beacons synchronization
 

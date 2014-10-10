@@ -1,7 +1,7 @@
 #include <math.h>
 #include "params.h"
 #include "perception.h"
-#include "lib_int_laser.h"
+#include "shared/lib_int_laser.h"
 
 float calcAngle(sMeasures *mes1, sMeasures *mes2){
 	return (float)(mes2->date - mes1->date)/(float)mes2->period*M_TWOPI;
