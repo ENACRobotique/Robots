@@ -43,6 +43,4 @@ int obj_init(eAIState_t AIState);
 
 extern int switch_left, switch_right;
 
-extern int switch_left, switch_right;
-
 #endif /* OBJ_H_ */
