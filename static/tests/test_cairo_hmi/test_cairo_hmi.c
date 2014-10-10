@@ -185,6 +185,8 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
 int main(int argc, char *argv[]) {
     sContext ctx = {0};
 
+    float initialSizeFactor = 3;
+
     // cairo coordinates will be managed in centimeters
     ctx.wld_width = 300.;
     ctx.wld_height = 200.;
@@ -229,11 +231,11 @@ int main(int argc, char *argv[]) {
 
         gtk_paned_pack1(GTK_PANED(paned), ctx.drawing_area, TRUE, FALSE);
         gtk_paned_pack2(GTK_PANED(paned), scrolledwindow, FALSE, FALSE);
+        gtk_paned_set_position(GTK_PANED(paned), initialSizeFactor*ctx.wld_height);
 
         gtk_container_add(GTK_CONTAINER(ctx.window), paned);
     }
 
-    gtk_widget_set_size_request(ctx.drawing_area, 4.*ctx.wld_width, 4.*ctx.wld_height);
     gtk_widget_add_events(ctx.drawing_area, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK);
     g_signal_connect(G_OBJECT(ctx.drawing_area), "draw", G_CALLBACK(on_draw_event), &ctx);
     g_signal_connect(G_OBJECT(ctx.drawing_area), "button-press-event", G_CALLBACK(on_mouse_event), &ctx);
@@ -242,6 +244,7 @@ int main(int argc, char *argv[]) {
     g_signal_connect(ctx.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_window_set_position(GTK_WINDOW(ctx.window), GTK_WIN_POS_CENTER);
+    gtk_window_set_default_size(GTK_WINDOW(ctx.window), initialSizeFactor*ctx.wld_width, (initialSizeFactor + 0.5)*ctx.wld_height);
     gtk_window_set_title(GTK_WINDOW(ctx.window), "GTK window");
 
     gtk_widget_show_all(ctx.window);
