@@ -15,17 +15,24 @@ typedef struct {
     // gui
     GtkWidget *window;
     GtkWidget *drawing_area;
-    gint da_width, da_height;
+    gint da_width, da_height; // (px)
+    GtkWidget *scrolledwindowConsole;
     GtkWidget *console;
 
     // world
-    double wld_width, wld_height;
+    double wld_width, wld_height; // (cm)
+    double scale; // (px/cm)
+    double center_x, center_y; // (cm)
+    gboolean center_moved;
+    double start_x, start_y; // (px)
+    double center_x_incr, center_y_incr; // (px)
+    gboolean in_movement;
 
     // mouse interaction
-    gboolean pressed;
-    double press_x, press_y;
-    gboolean moved;
-    double move_x, move_y;
+    gboolean mouse_lastpress_moved;
+    double mouse_lastpress_x, mouse_lastpress_y;
+    gboolean mouse_moved;
+    double mouse_x, mouse_y;
 
     // test
     sGenericStatus i1;

@@ -22,43 +22,75 @@
 
 #include "cairo_tools.h"
 
-static gboolean on_mouse_event(GtkWidget *widget, GdkEvent *event, sContext *ctx) {
+static gboolean on_event(GtkWidget *widget, GdkEvent *event, sContext *ctx) {
     switch(event->type){
     case GDK_BUTTON_PRESS:
         if (event->button.button == 1) {
-            ctx->press_x = event->button.x;
-            ctx->press_y = event->button.y;
-            ctx->pressed = TRUE;
+            ctx->mouse_lastpress_x = event->button.x;
+            ctx->mouse_lastpress_y = event->button.y;
+            ctx->mouse_lastpress_moved = TRUE;
+
+            ctx->start_x = event->button.x;
+            ctx->start_y = event->button.y;
+            ctx->center_x_incr = 0;
+            ctx->center_y_incr = 0;
+            ctx->in_movement = TRUE;
         }
         break;
     case GDK_MOTION_NOTIFY:
-        ctx->move_x = event->motion.x;
-        ctx->move_y = event->motion.y;
-        ctx->moved = TRUE;
+        if(event->motion.state & GDK_BUTTON1_MASK) {
+            ctx->center_x_incr = event->motion.x - ctx->start_x;
+            ctx->center_y_incr = event->motion.y - ctx->start_y;
+        }
+
+        ctx->mouse_x = event->motion.x;
+        ctx->mouse_y = event->motion.y;
+        ctx->mouse_moved = TRUE;
         break;
-    case GDK_SCROLL:
+    case GDK_BUTTON_RELEASE:
+        if (event->button.button == 1) {
+            ctx->center_x_incr = event->button.x - ctx->start_x;
+            ctx->center_y_incr = event->button.y - ctx->start_y;
+            ctx->start_x = 0;
+            ctx->start_y = 0;
+            ctx->center_moved = TRUE;
+            ctx->in_movement = FALSE;
+        }
+        break;
+    case GDK_SCROLL:{
+        int x, y;
         switch(event->scroll.direction){
         case GDK_SCROLL_UP:
-            ctx->i2.pos_u.b_var *= 1.1;
+            ctx->scale *= 1.1;
+
+            // scale changed, update mouse position
+            gdk_window_get_device_position(gtk_widget_get_window(ctx->drawing_area), event->scroll.device, &x, &y, NULL);
+            ctx->mouse_x = x;
+            ctx->mouse_y = y;
+            ctx->mouse_moved = TRUE;
             break;
         case GDK_SCROLL_DOWN:
-            ctx->i2.pos_u.b_var *= 0.9;
-            break;
-        case GDK_SCROLL_RIGHT:
-            ctx->i2.pos_u.a_var *= 1.1;
-            break;
-        case GDK_SCROLL_LEFT:
-            ctx->i2.pos_u.a_var *= 0.9;
+            ctx->scale *= 0.9;
+
+            // scale changed, update mouse position
+            gdk_window_get_device_position(gtk_widget_get_window(ctx->drawing_area), event->scroll.device, &x, &y, NULL);
+            ctx->mouse_x = x;
+            ctx->mouse_y = y;
+            ctx->mouse_moved = TRUE;
             break;
         default:
             break;
         }
+
+        break;
+    }
+    case GDK_KEY_PRESS:
         break;
     default:
         break;
     }
 
-    if (ctx->pressed || ctx->moved) { // ask redraw
+    if (ctx->mouse_lastpress_moved || ctx->mouse_moved || ctx->in_movement || ctx->center_moved) { // ask redraw
         invalidate_all(ctx);
     }
 
@@ -66,23 +98,33 @@ static gboolean on_mouse_event(GtkWidget *widget, GdkEvent *event, sContext *ctx
 }
 
 static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
-    { // prepare transformation for playground to fit in window not stretched
+    {
         ctx->da_width = gtk_widget_get_allocated_width(ctx->drawing_area);
         ctx->da_height = gtk_widget_get_allocated_height(ctx->drawing_area);
 
-        double scale = (double) ctx->da_height / ctx->wld_height;
-        double w = scale * ctx->wld_width, h;
-        if (w < ctx->da_width) {
-            cairo_translate(cr, ((double) ctx->da_width - w) / 2., 0.);
+        if(ctx->in_movement || ctx->center_moved){
+            cairo_translate(cr, ctx->center_x_incr, ctx->center_y_incr);
         }
-        else {
-            scale = (double) ctx->da_width / ctx->wld_width;
-            h = scale * ctx->wld_height;
-            cairo_translate(cr, 0., ((double) ctx->da_height - h) / 2.);
+
+        cairo_translate(cr, (double) ctx->da_width / 2., (double) ctx->da_height / 2.);
+        cairo_scale(cr, 1, -1); // the y is axis is inverted between the image frame and the playground frame
+        cairo_scale(cr, ctx->scale, ctx->scale);
+        cairo_translate(cr, -ctx->center_x, -ctx->center_y);
+
+//        cairo_matrix_t m;
+//        cairo_get_matrix(cr, &m);
+//        printf("%.2f\t%.2f\t%.2f\n%.2f\t%.2f\t%.2f\n", m.xx, m.xy, m.x0, m.yx, m.yy, m.y0);
+
+        if(ctx->center_moved){
+            ctx->center_x_incr = 0;
+            ctx->center_y_incr = 0;
+            ctx->start_x = 0;
+            ctx->start_y = 0;
+            ctx->center_x = (double) ctx->da_width / 2.;
+            ctx->center_y = (double) ctx->da_height / 2.;
+            cairo_device_to_user(cr, &ctx->center_x, &ctx->center_y);
+            ctx->center_moved = FALSE;
         }
-        cairo_scale(cr, scale, scale);
-        cairo_translate(cr, 0, ctx->wld_height);
-        cairo_scale(cr, 1, -1);
     }
 
     { // this is where we draw in centimeters!
@@ -106,11 +148,37 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
         cairo_rectangle(cr, 0., 0., ctx->wld_width, ctx->wld_height);
         cairo_stroke(cr);
 
+        // draw grid
+        {
+            double x = 1.2, y = 1.2;
+            int i;
+            cairo_device_to_user_distance(cr, &x, &y);
+            cairo_set_line_width(cr, MAX(x, y));
+            double dashes[] = {3./2., 2./2.};
+            cairo_set_dash(cr, dashes, sizeof(dashes)/sizeof(*dashes), 0);
+            cairo_set_source_rgba(cr, 0, 0, 0, 0.3);
+
+            double incr = 10.;
+
+            for(i = 1; i < ceil(ctx->wld_width/incr); i++){
+                cairo_move_to(cr, (double)i * incr, 0);
+                cairo_line_to(cr, (double)i * incr, ctx->wld_height);
+            }
+
+            for(i = 1; i < ceil(ctx->wld_height/incr); i++){
+                cairo_move_to(cr, 0, (double)i * incr);
+                cairo_line_to(cr, ctx->wld_width, (double)i * incr);
+            }
+
+            cairo_stroke(cr);
+            cairo_set_dash(cr, NULL, 0, 0);
+        }
+
         // draw previous click
         {
-            if (ctx->pressed) {
-                cairo_device_to_user(cr, &ctx->press_x, &ctx->press_y);
-                ctx->pressed = FALSE;
+            if (ctx->mouse_lastpress_moved) {
+                cairo_device_to_user(cr, &ctx->mouse_lastpress_x, &ctx->mouse_lastpress_y);
+                ctx->mouse_lastpress_moved = FALSE;
 
                 {
                     char text[32];
@@ -120,16 +188,14 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
 
                     sprintf(text, "x:%.2f, y:%.2f, theta=%.2f\n", ctx->i2.pos.x, ctx->i2.pos.y, a*180./M_PI);
                     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctx->console));
-                    if(buffer != NULL){
-                        gtk_text_buffer_insert_at_cursor(buffer, text, strlen(text));
-                    }
+                    gtk_text_buffer_insert_at_cursor(buffer, text, strlen(text));
                     GtkTextIter iter;
                     gtk_text_buffer_get_end_iter(buffer, &iter);
                     gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(ctx->console), &iter, 0, FALSE, 0, 0);
                 }
             }
 
-            cairo_arc(cr, ctx->press_x, ctx->press_y, 5, 0, 2 * M_PI);
+            cairo_arc(cr, ctx->mouse_lastpress_x, ctx->mouse_lastpress_y, 5, 0, 2 * M_PI);
             cairo_stroke(cr);
         }
 
@@ -137,12 +203,12 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
         {
             sGenericStatus o;
 
-            if (ctx->moved) {
-                cairo_device_to_user(cr, &ctx->move_x, &ctx->move_y);
-                ctx->moved = FALSE;
+            if (ctx->mouse_moved) {
+                cairo_device_to_user(cr, &ctx->mouse_x, &ctx->mouse_y);
+                ctx->mouse_moved = FALSE;
 
-                ctx->i2.pos.x = ctx->move_x;
-                ctx->i2.pos.y = ctx->move_y;
+                ctx->i2.pos.x = ctx->mouse_x;
+                ctx->i2.pos.y = ctx->mouse_y;
             }
 
             double a = (double) millis() / 1000.; // trick to avoid precision pb with double 2 float conversion (millis() may be big!!)
@@ -167,13 +233,24 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
             cairo_ellipse(cr, o.pos.x, o.pos.y, 2 * sqrt(o.pos_u.a_var), 2 * sqrt(o.pos_u.b_var), -o.pos_u.a_angle); // 95% ellipse
             cairo_stroke(cr);
 
+            // interactive text following result ellipse
             {
                 char text[64];
+                double va = o.pos_u.a_var, vb = o.pos_u.b_var, a = o.pos_u.a_angle;
+
+                if(va < vb){
+                    double tmp = vb;
+                    vb = va;
+                    va = tmp;
+                    a += M_PI/2.;
+                }
+                while(a > M_PI/2.) a -= M_PI;
+                while(a < -M_PI/2.) a += M_PI;
 
                 sprintf(text, "x:%.2fcm, y:%.2fcm", o.pos.x, o.pos.y);
                 cairo_text(cr, o.pos.x + 2, o.pos.y, 5, text);
 
-                sprintf(text, "Vx=%.2fcm², Vy=%.2fcm², theta=%.2f°", o.pos_u.a_var, o.pos_u.b_var, o.pos_u.a_angle*180./M_PI);
+                sprintf(text, "Va=%.2fcm², Vb=%.2fcm², a_theta=%.2f°", va, vb, a*180./M_PI);
                 cairo_text(cr, o.pos.x + 2, o.pos.y - 7, 5, text);
             }
         }
@@ -190,6 +267,10 @@ int main(int argc, char *argv[]) {
     // cairo coordinates will be managed in centimeters
     ctx.wld_width = 300.;
     ctx.wld_height = 200.;
+    ctx.scale = initialSizeFactor;
+    ctx.center_x = ctx.wld_width / 2.;
+    ctx.center_y = ctx.wld_height / 2.;
+    ctx.center_moved = FALSE;
 
     // test setup
     ctx.i1.id = ELT_PRIMARY;
@@ -221,26 +302,29 @@ int main(int argc, char *argv[]) {
     ctx.console = gtk_text_view_new();
 
     {
-        GtkWidget* scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
+        ctx.scrolledwindowConsole = gtk_scrolled_window_new(NULL, NULL);
         GtkWidget* paned = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
-        gtk_container_add(GTK_CONTAINER(scrolledwindow), ctx.console);
 
-        gtk_widget_set_hexpand(scrolledwindow, TRUE);
+        gtk_container_add(GTK_CONTAINER(ctx.scrolledwindowConsole), ctx.console);
+
         gtk_widget_set_hexpand(ctx.drawing_area, TRUE);
         gtk_widget_set_vexpand(ctx.drawing_area, TRUE);
+        gtk_widget_set_hexpand(ctx.scrolledwindowConsole, TRUE);
 
         gtk_paned_pack1(GTK_PANED(paned), ctx.drawing_area, TRUE, FALSE);
-        gtk_paned_pack2(GTK_PANED(paned), scrolledwindow, FALSE, FALSE);
+        gtk_paned_pack2(GTK_PANED(paned), ctx.scrolledwindowConsole, FALSE, FALSE);
         gtk_paned_set_position(GTK_PANED(paned), initialSizeFactor*ctx.wld_height);
 
         gtk_container_add(GTK_CONTAINER(ctx.window), paned);
     }
 
-    gtk_widget_add_events(ctx.drawing_area, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK);
+    gtk_widget_add_events(ctx.drawing_area, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK | GDK_KEY_PRESS_MASK | GDK_BUTTON1_MOTION_MASK);
     g_signal_connect(G_OBJECT(ctx.drawing_area), "draw", G_CALLBACK(on_draw_event), &ctx);
-    g_signal_connect(G_OBJECT(ctx.drawing_area), "button-press-event", G_CALLBACK(on_mouse_event), &ctx);
-    g_signal_connect(G_OBJECT(ctx.drawing_area), "scroll-event", G_CALLBACK(on_mouse_event), &ctx);
-    g_signal_connect(G_OBJECT(ctx.drawing_area), "motion-notify-event", G_CALLBACK(on_mouse_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "button-press-event", G_CALLBACK(on_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "button-release-event", G_CALLBACK(on_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.window), "key-press-event", G_CALLBACK(on_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "scroll-event", G_CALLBACK(on_event), &ctx);
+    g_signal_connect(G_OBJECT(ctx.drawing_area), "motion-notify-event", G_CALLBACK(on_event), &ctx);
     g_signal_connect(ctx.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_window_set_position(GTK_WINDOW(ctx.window), GTK_WIN_POS_CENTER);
