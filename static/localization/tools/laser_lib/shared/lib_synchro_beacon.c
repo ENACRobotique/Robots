@@ -197,3 +197,28 @@ void syncComputationFinal(sSyncPayload *pload){
 
 }
 
+/* Resets synchronization computation
+ */
+void syncComputationReset(){
+    syncParam.driftUpdatePeriod=0;
+    syncParam.inc=0;
+    syncParam.initialDelay=0;
+
+    _offset=0;
+    sum_OO=0;
+    sum_D=0;
+    sum_O=0;
+    sum_OD=0;
+    sum_ones=0;
+
+    firstRxSyncData.index=-2;
+    firstRxSyncData.lastTurnDate=0;
+    firstRxSyncData.period=0;
+    firstRxSyncData.flag=E_SYNC_DATA;
+    lastRxSyncData=firstRxSyncData;
+
+    firstLaserMeasure.localTime=0;
+    firstLaserMeasure.index=-2;
+    lastLaserMeasure=firstLaserMeasure;
+
+}

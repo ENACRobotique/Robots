@@ -123,9 +123,10 @@ void loop() {
     }
 
 
-// In any state, if we receive a "begin election" message, be begin election.
+    // In any state, if we receive a "begin election" message, be begin election.
     if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
         state=S_SYNC_ELECTION;
+        syncComputationReset();
 #ifdef VERBOSE_SYNC
         printf("begin election");
 #endif

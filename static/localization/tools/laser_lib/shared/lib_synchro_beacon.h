@@ -75,7 +75,6 @@ void syncComputationMsg(sSyncPayload *pload);
 void syncComputationLaser(plStruct *sLaser);
 
 /* Computes intermediate sums and store them appropriately.
- *
  */
 void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t period);
 
@@ -83,6 +82,10 @@ void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t perio
  * Usage : feed syncComputationLaser with data received under the flag SYNCF_END_MEASURES.
  */
 void syncComputationFinal(sSyncPayload *pload);
+
+/* Resets synchronization computation
+ */
+void syncComputationReset();
 
 #ifdef __cplusplus
     }
