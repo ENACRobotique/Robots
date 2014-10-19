@@ -14,7 +14,7 @@
 
 typedef enum eMotorOperation{Drive, FreeWheel, Braking }eMotorOperation;
 typedef enum eMotorDir{Trigo, Notrigo }eMotorDir;
-//typedef enum eStateBstr{ChgBstr, DisChgBstr}eStateBstr;
+typedef enum eStateBstr{ChgBstr, DisChgBstr}eStateBstr;
 
 void controlMotor( int pwmCmd, eMotorDir dir, eMotorOperation motOp);
 

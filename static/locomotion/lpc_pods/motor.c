@@ -7,18 +7,20 @@
 
 void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp){
 	static eMotorOperation prvMotOp = FreeWheel;
-	static unsigned StChgtUs = 0;
-//	static eStateBstr stBstr = DisChgBstr;
+	static unsigned StartUs = 0;
+	static eStateBstr prevStBstr = DisChgBstr;
 
 	// Charge bootstrap capacitor
-	if((micros() - StChgtUs) > PERIOD_DCHT_CAPA1){
-		CHG_CAPA1_ON;
-		StChgtUs = micros();
-		DEBUG_5_OFF;
-	}
-	else{
-		CHG_CAPA1_OFF;
-		DEBUG_5_ON;
+	if((micros() - StartUs) > PERIOD_CAPA1){
+		if(prevStBstr == DisChgBstr){
+			CHG_CAPA1_ON;
+			prevStBstr = ChgBstr;
+		}
+		else if(prevStBstr == ChgBstr){
+			CHG_CAPA1_OFF;
+			prevStBstr = DisChgBstr;
+		}
+		StartUs = micros();
 	}
 
 	if(motOp != prvMotOp){

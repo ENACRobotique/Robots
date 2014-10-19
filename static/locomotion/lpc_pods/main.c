@@ -12,21 +12,21 @@
 
 
 /* The H bridge
- * 						|+
- * 			____________|___________
- * 			|						|
- * 			|						|
- * 			_/ Q_H1					_/ Q_H2
- * 			|						|
- * 			|	   +--> Trigo		|
- * 			|___Mot1        Mot2____|
- * 			|	  <--+ Notrigo		|
- * 			|						|
- * 			_/ Q_L1			    	_/ Q_L2
- * 			|						|
- * 			|_______________________|
- *				 		|
- *						|-
+ *                      |+
+ *           ___________|___________
+ *          |                       |
+ *          |                       |
+ *          _/ Q_H1                 _/ Q_H2
+ *          |                       |
+ *          |      +--> Trigo       |
+ *          |___Mot1        Mot2____|
+ *          |     <--+ Notrigo      |
+ *          |                       |
+ *          _/ Q_L1                 _/ Q_L2
+ *          |                       |
+ *          |_______________________|
+ *                      |
+ *                      |-
  */
 
 volatile float speedCons; // Consign wheel speed in inc/T
@@ -53,17 +53,12 @@ int main() {
 		// Command bridges
 		gpio_output(BK_SD2, PIN_SD2); // IN2 out
 		gpio_output(BK_SD1, PIN_SD1); // IN1 out
+		// Bootstrap
+		gpio_output(BK_BSTRP1, PIN_BSTRP1);
 		// Debug
 		gpios_debg_output();
 		// Small switch
-		gpio_input(BK_SWTCH1, PIN_SWTCH1);
-		gpio_input(BK_SWTCH2, PIN_SWTCH2);
-		gpio_input(BK_SWTCH3, PIN_SWTCH3);
-		gpio_input(BK_SWTCH4, PIN_SWTCH4);
-		gpio_input(BK_SWTCH5, PIN_SWTCH5);
-		gpio_input(BK_SWTCH6, PIN_SWTCH6);
-		gpio_input(BK_SWTCH7, PIN_SWTCH7);
-		gpio_input(BK_SWTCH8, PIN_SWTCH8);
+		switchs_init();
 		// LED
 		gpio_output(1, 24);   // writes to output {1,24}
 		gpio_output(0, 31);  // writes to output {0,31}

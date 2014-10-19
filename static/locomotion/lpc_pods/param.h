@@ -62,10 +62,10 @@
 		#define PIN_SWTCH8 23
 		#define BK_SWTCH8  1
 	//// Pins for bootstrap (Load capacitors to on transistor)
-		#define PIN_BSTRP1 31
-		#define BK_BSTRP1  1
-		#define PIN_BSTRP2 29
-		#define BK_BSTRP2  1
+		#define PIN_BSTRP1 4
+		#define BK_BSTRP1  0
+		#define PIN_BSTRP2 29 // Do not use
+		#define BK_BSTRP2  1  // Do not use
 
 
 // Definition of pins to determine the direction of motor
@@ -100,7 +100,7 @@
 
 //// Params for motor control
 // Charge capacitor
-#define PERIOD_DCHT_CAPA1 150 // Period ON to charge capacitor to charge bootstrap capacitor µs
+#define PERIOD_CAPA1 150 // Period ON to charge capacitor to charge bootstrap capacitor µs
 //#define PERIOD_DCHT_CAPA2 150 // Period ON to charge capacitor to charge bootstrap capacitor µs
 
 //// Params motor-reductor
