@@ -155,13 +155,6 @@ void loop() {
             }
             /* no break */
         case S_SYNC_MEASURES:
-            // laser data (if value is ours for sure (ie comes from a tracked measure)
-            if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
-                syncComputationLaser(&laserStruct0);
-            }
-            else if(chosenOne==1 && laserStruct1.thickness && laserStruct1.period) {
-                syncComputationLaser(&laserStruct1);
-            }
             // handling data broadcasted by turret
             if (rxB && inMsg.header.type==E_SYNC_DATA){
                     rxB=0;
@@ -177,18 +170,14 @@ void loop() {
                     syncComputationMsg(&inMsg.payload.sync);
                 }
             }
+            // laser data (if value is ours for sure (ie comes from a tracked measure)
+            if (chosenOne==0 && laserStruct0.thickness && laserStruct0.period){
+                syncComputationLaser(&laserStruct0);
+            }
+            else if(chosenOne==1 && laserStruct1.thickness && laserStruct1.period) {
+                syncComputationLaser(&laserStruct1);
+            }
         	break;
-#if 0   // probably not usefull, so skipped.
-        case S_SYNCED : // waiting the signal from main to go to game mode
-            if (prevState!=state) {
-                prevState=state;
-            }
-            if (rxB && inMsg.header.type==E_SYNC_OK && inMsg.header.srcAddr==ADDRX_MAIN){
-                state=S_GAME;
-            }
-
-            break;
-#endif
         case S_GAME :
             if (prevState!=state) {
                 prevState=state;

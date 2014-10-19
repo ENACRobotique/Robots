@@ -91,7 +91,6 @@ void syncComputationMsg(sSyncPayload *pload){
     //if it is the very first value, store it in special variable, upload laser index and return
     if (!firstRxSyncData.period){
         firstRxSyncData=lastRxSyncData;
-        // if first received, initialize
         if (lastLaserMeasure.index<0 && pload->index>=0){
             lastLaserMeasure.index=pload->index;
         }
