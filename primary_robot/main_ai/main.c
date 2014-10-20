@@ -474,8 +474,6 @@ int main(int argc, char **argv){
 
         // sending trajectory, one step at a time
         if(curr_path.path && curr_traj_extract_sid < curr_path.path_len && (!curr_traj_extract_sid || (millis() - prevSendTraj > 20))){
-            prevSendTraj = millis();
-
             printf("traj step: p1 x%.2f y%.2f, p2 x%.2f y%.2f, s_l%.2f; obs x%.2f y%.2f r%.2f, a_l%.2f\n", curr_path.path[curr_traj_extract_sid].p1.x, curr_path.path[curr_traj_extract_sid].p1.y, curr_path.path[curr_traj_extract_sid].p2.x, curr_path.path[curr_traj_extract_sid].p2.y, curr_path.path[curr_traj_extract_sid].seg_len, curr_path.path[curr_traj_extract_sid].obs.c.x, curr_path.path[curr_traj_extract_sid].obs.c.y, curr_path.path[curr_traj_extract_sid].obs.r, curr_path.path[curr_traj_extract_sid].arc_len);
 
             msgOut.header.type = E_TRAJ;
@@ -499,6 +497,8 @@ int main(int argc, char **argv){
             if(ret < 0){
                 printf("role_send(E_TRAJ) error #%i\n", -ret);
             }
+
+            prevSendTraj = millis();
         }
 
         // check if any obs has been updated => synchro with the monitoring interface
