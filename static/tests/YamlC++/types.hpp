@@ -9,15 +9,18 @@
 #define TYPES_H_
 
 #include <stdint.h>
-
-/***Old types***/
-
+#include <math.h>
 typedef float sNum_t;
 
-typedef struct {
+//typedef struct sPt_t sPt_t;
+struct sPt_t {
     sNum_t x;
     sNum_t y;
-} sPt_t;
+
+    sNum_t getDistTo(sPt_t& other){
+        return sqrt((x - other.x)*(x - other.x) + (y - other.y)*(y - other.y));
+    }
+};
 
 typedef struct {
     sPt_t c;    // center of obstacle
@@ -46,18 +49,5 @@ typedef struct {
     unsigned int path_len;
     sTrajEl_t *path;
 } sPath_t;
-
-/***New types***/
-
-typedef struct{
-    sNum_t dist;
-    unsigned short tid;
-    unsigned int path_len;
-}sPathHeader_t;
-
-typedef struct{
-    sPathHeader_t header;
-    sTrajEl_t *path;
-}sPathDispaly_t;
 
 #endif /* TYPES_H_ */

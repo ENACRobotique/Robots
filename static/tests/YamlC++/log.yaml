@@ -1,0 +1,23 @@
+- Header
+- Trajectory:
+    - 1:
+        - Header: [{dist: 0}, {tid: 0}, {path_len: 4}]
+        - Element:  # [p1:[x, y] , p2:[x, y] , obs:[c:[x, y], r , moved, active, state], arc_len, seg_len, sid]
+            - 0: [[0, 0], [15.2, -16.9], [[33.2, -16.9], 18, false, true, false], 0, 0, 0]
+            - 1: [[17.3, -8.5], [17.3, -8.5], [[-4.9, 3.4], -25.2, false, true, false], 0, 0, 1]
+            - 2: [[17.3, 15.2], [17.3, 15.2], [[33.3, 23.7], 18.1, false, true, false], 0, 0, 2]
+            - 3: [[15.2, 23.7], [15.2, 23.7], [[15.2, 23.7], 0, false, true, false], 0, 0, 3]
+    - 2:
+        - Tid: [{tid: 2}, {len: 4}]
+        - Sid:
+            - 1: [{sid: 1}, {p1: 10.2}]
+            - 2: [{sid: 1}, {p1: 10.2}]
+    - 3:
+        - Header: [{dist: 0}, {tid: 0}, {path_len: 4}]
+        - Element:
+            - 0: [[0, 0], [15.2, -16.9], [[33.2, -16.9], 18, false, true, false], 0, 0, 0]
+            - 1: [[17.3, -8.5], [17.3, -8.5], [[-4.9, 3.4], -25.2, false, true, false], 0, 0, 1]
+            - 2: [[17.3, 15.2], [17.3, 15.2], [[33.3, 23.7], 18.1, false, true, false], 0, 0, 2]
+            - 3: [[15.2, 23.7], [15.2, 23.7], [[15.2, 23.7], 0, false, true, false], 0, 0, 3]
+- Orientation
+- Speed
