@@ -226,6 +226,9 @@ int new_traj_el(sTrajElRaw_t *te){
 
                 state = S_RUN_TRAJ;
             }
+            else if( te->sid < curr_traj_insert_sid ) {
+                // step already received (no error, could be caused by network)
+            }
             else {
                 error = -1; // TODO error: bad step => invalidate all trajectory and ask new one
             }
@@ -242,6 +245,9 @@ int new_traj_el(sTrajElRaw_t *te){
                 next_traj_insert_sid++;
 
                 state = S_CHG_TRAJ;
+            }
+            else if( te->sid < next_traj_insert_sid ) {
+                // step already received (no error, could be caused by network)
             }
             else {
                 error = -3; // TODO error: bad step => invalidate all trajectory and ask new one
