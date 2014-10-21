@@ -226,6 +226,9 @@ int new_traj_el(sTrajElRaw_t *te){
 
                 state = S_RUN_TRAJ;
             }
+            else if( te->sid < curr_traj_insert_sid ) {
+                // step already received (no error, could be caused by network)
+            }
             else {
                 error = -1; // TODO error: bad step => invalidate all trajectory and ask new one
             }
@@ -242,6 +245,9 @@ int new_traj_el(sTrajElRaw_t *te){
                 next_traj_insert_sid++;
 
                 state = S_CHG_TRAJ;
+            }
+            else if( te->sid < next_traj_insert_sid ) {
+                // step already received (no error, could be caused by network)
             }
             else {
                 error = -3; // TODO error: bad step => invalidate all trajectory and ask new one
@@ -534,7 +540,7 @@ int new_asserv_step(){
         }
 
         if(dist < isD2I(1)) { // we are near the goal
-            if(!(curr_traj_step&1) && abs(traj[curr_traj][curr_traj_step>>1].c_r) < isD2I(1)) { // no next step
+            if(!(curr_traj_step&1) && abs(traj[curr_traj][curr_traj_step>>1].c_r) < isD2I(1)) { // last step (following a line && radius of current is almost zero)
                 state = S_WAIT;
 
                 gx = traj[curr_traj][curr_traj_step>>1].p2_x;
@@ -557,10 +563,13 @@ int new_asserv_step(){
                 return 0;
             }
             else {
-                if( ((curr_traj_step+1)>>1) >= curr_traj_insert_sid ){ // we do not have any steps...
-                    consigne_l = 0;
-                    consigne_r = 0;
-                    return 0;
+                if(!(curr_traj_step&1)){ // following a line portion
+                    if( (((curr_traj_step + 1)>>1) + 1) >= curr_traj_insert_sid ){ // we still doesn't have the next traj step
+                        consigne_l = 0; // let's stop to wait for it
+                        consigne_r = 0;
+                        // send error (be careful!!!)
+                        return 0;
+                    }
                 }
                 curr_traj_step++;
                 traj_conv(&traj[curr_traj][(curr_traj_step>>1) + 1]);
