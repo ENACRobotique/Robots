@@ -13,9 +13,9 @@
 
 gboolean invalidate_all(sContext *ctx) {
     // for now, invalidate all
-    GdkRectangle rect = { .x = 0, .y = 0, .width = ctx->da_width, .height = ctx->da_height };
+    GdkRectangle rect = { .x = 0, .y = 0, .width = ctx->da.widget_width__px, .height = ctx->da.widget_height__px };
 
-    gdk_window_invalidate_rect(gtk_widget_get_window(ctx->drawing_area), &rect, 1);
+    gdk_window_invalidate_rect(gtk_widget_get_window(ctx->da.widget), &rect, 1);
 
     return TRUE; // continue to be called
 }
