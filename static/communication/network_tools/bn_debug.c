@@ -75,7 +75,7 @@ int bn_printfDbg(const char *format, ...){
     return bn_printDbg(string);
 }
 
-/* bn_debugSignalling : sends the new debug address to dest. MUST be issued ONLY by the debugger.
+/* bn_debugSendAddr : sends the new debug address to dest. MUST be issued ONLY by the debugger.
  * Arguments :
  *  dest : address of the node whitch we want up update
  * Return value : like bn_send.
@@ -83,18 +83,30 @@ int bn_printfDbg(const char *format, ...){
 int bn_debugSendAddr(bn_Address dest){
     sMsg msg = {{0}};
 
-    msg.header.type = E_ROLE_SETUP;
-    msg.header.destAddr = dest;
-    msg.header.size = 2 + 4*2;
-    msg.payload.roleSetup.nb_steps = 2;
-    // step #0 (overrides any previous debug setup on the remote node)
-    msg.payload.roleSetup.steps[0].step = UPDATE_ACTIONS;
-    msg.payload.roleSetup.steps[0].type = E_DEBUG;
-    msg.payload.roleSetup.steps[0].actions.sendTo.first = ROLE_DEBUG;
-    // step #1 (I will be the default debug node for this remote one)
-    msg.payload.roleSetup.steps[1].step = UPDATE_ADDRESS;
-    msg.payload.roleSetup.steps[1].role = ROLE_DEBUG;
-    msg.payload.roleSetup.steps[1].address = MYADDR;
+#define SETUP_DBG_MSG_BLOCK \
+    msg.header.type = E_ROLE_SETUP;                                     \
+    msg.header.destAddr = dest;                                         \
+    msg.header.size = 2 + 4*2;                                          \
+    msg.payload.roleSetup.nb_steps = 2;                                 \
+    /* step #0 (overrides any previous debug setup on the remote node)*/\
+    msg.payload.roleSetup.steps[0].step = UPDATE_ACTIONS;               \
+    msg.payload.roleSetup.steps[0].type = E_DEBUG;                      \
+    msg.payload.roleSetup.steps[0].actions.sendTo.first = ROLE_DEBUG;   \
+    /* step #1 (I will be the default debug node for this remote one)*/ \
+    msg.payload.roleSetup.steps[1].step = UPDATE_ADDRESS;               \
+    msg.payload.roleSetup.steps[1].role = ROLE_DEBUG;                   \
+    msg.payload.roleSetup.steps[1].address = MYADDR;                    \
 
     return bn_send(&msg);
 }
+
+/* bn_debugSendAddrBroadcast : broadcast version of bn_debugSendAddr
+ */
+int bn_debugSendAddrBroadcast(bn_Address dest){
+    sMsg msg = {{0}};
+
+    SETUP_DBG_MSG_BLOCK
+
+    return bn_sendBroadcast(&msg);
+}
+#undef SETUP_DBG_MSG_BLOCK

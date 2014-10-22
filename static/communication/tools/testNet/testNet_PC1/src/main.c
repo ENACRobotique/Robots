@@ -104,6 +104,7 @@ int main(){
                 nbreceived=0;
                 printf("\ndebug reader menu\n");
                 printf("s : send debugger address\n");
+                printf("d : send debugger to broadcast address\n");
                 printf("i : info about this node\n");
                 printf("b : send a burst of message to \n");
                 printf("p : ping\n");
@@ -120,6 +121,18 @@ int main(){
                     printf("enter destination address\n");
                     scanf("%hx",&destAd);
                     if ( (err=bn_debugSendAddr(destAd)) > 0){
+                        printf("signalling send\n");
+                        quitMenu=1;
+                    }
+                    else {
+                        printf("error while sending : %d\n", err);
+
+                    }
+                    break;
+                case 'D' :
+                    printf("enter broadcast destination address\n");
+                    scanf("%hx",&destAd);
+                    if ( (err=bn_debugSendAddrBroadcast(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;
                     }

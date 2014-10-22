@@ -155,6 +155,36 @@ int bn_sendRetry(sMsg *msg, int retries){
  *      * payload
  */
 int bn_send(sMsg *msg){
+    // check if user is asking for a broadcast ack
+    if ( (msg->header.destAddr & !SUBNET_MASK) == (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_BCAST_ADDR;
+
+
+    //sets ack bit
+    msg->header.ack=0;
+
+    // sending
+    return bn_genericSend(msg);
+}
+
+/*
+ * bn_sendBroadcast : handles the broadcast sending of a message over the SuperBus network (no ack possible)
+ * For user's use only, the message was previously NOT "in the network"
+ * Arguments :
+ *      msg : pointer to the message to send.
+ * Return Value :
+ *      see bn_forward :
+ *          >0 : nb of bytes written is correct
+ *          <0 if error
+ * /!\ BEFORE calling bn_send one must fill (in msg):
+ *      * header.destAddr
+ *      * header.size
+ *      * header.type
+ *      * payload
+ */
+int bn_sendBroadcast(sMsg *msg){
+    // checks if broadcast address
+printf("### %hx %hx %hx\n",(msg->header.destAddr & ~SUBNET_MASK),msg->header.destAddr,~SUBNET_MASK); //todo remove debug
+    if ( !(msg->header.destAddr & BCAST_SUBNET) || (msg->header.destAddr & ~SUBNET_MASK) != (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_BCAST_ADDR;
     //sets ack bit
     msg->header.ack=0;
 
@@ -217,6 +247,9 @@ int bn_sendAck(sMsg *msg){
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
+
+    // check if user is asking for a broadcast ack
+    if ( (tmpAddr & !SUBNET_MASK) == (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_BCAST_ADDR;
 
     // sets ack bit
     msg->header.ack=1;

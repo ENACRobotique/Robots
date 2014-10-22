@@ -54,6 +54,7 @@ typedef struct {
 
 int bn_init();
 int bn_send(sMsg *msg);
+int bn_sendBroadcast(sMsg *msg);
 int bn_genericSend(sMsg *msg);
 int bn_sendAck(sMsg *msg);
 int bn_sendRetry(sMsg *msg, int retries);

@@ -45,7 +45,8 @@ enum{
     ERR_BN_CSUM,
     ERR_BN_NO_SUCH_INTERFACE,   //no such interface on this device
     ERR_BN_UNKNOWN_ADDR,
-    ERR_BN_BUFFER_FULL, //23
+    ERR_BN_NO_BCAST_ADDR,
+    ERR_BN_BUFFER_FULL, //24
 
     // UART (and UART_FRAMING) errors
     ERR_UART_OVERSIZE,          // packet too big to send (size over UART_MTU)
@@ -53,7 +54,7 @@ enum{
     ERR_UART_WRITE_BYTE,
     ERR_UART_WRITE_TIMEOUT,
     ERR_UART_READ_BYTE,
-    ERR_UART_READ_BYTE_TIMEOUT,     // 29
+    ERR_UART_READ_BYTE_TIMEOUT,     // 30
 
     // XBEE errors
     ERR_XBEE_NOSTAT,    // status frame not received
@@ -63,10 +64,10 @@ enum{
     ERR_XBEE_AT_WRONG_CMD,  //AT cmd wrong command
     ERR_XBEE_AT_WRONG_PAR,  //AT cmd wrong param
     ERR_XBEE_AT_ERR,        //AT cmd error
-    ERR_XBEE_INIT_FAILED, // 37
+    ERR_XBEE_INIT_FAILED, // 38
 
     // I²C error
-    ERR_I2C_END_TX, // 38
+    ERR_I2C_END_TX, // 39
 
     ERR_NUMBERRCODES
 };
