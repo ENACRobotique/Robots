@@ -130,11 +130,11 @@ int Xbee_receive(sMsg *pRet){
 /*
  * Handle the sending of the message to the Xbee via the serial.
  * Size & checksum of msg must be set before calling Xbee_send
- * Waits until the sending request was acknowledged (statused), or untils timeout
+ * Waits until the sending request was acknowledged (statused), or until timeout
  *
  * Argument :
- *  msg : message to send (thanks captain obvious!)
- *  nextHop : adress of the nex hop for this message
+ *  msg : pointer to message to send (thanks captain obvious!)
+ *  nextHop : address of the next hop for this message
  * Return value :
  *  number of bytes of the message send
  *  <0 if error :
@@ -143,12 +143,61 @@ int Xbee_receive(sMsg *pRet){
  *      sending not successful (e.g. no ack)
  */
 int Xbee_send(const sMsg *msg, uint16_t nexthop){
-    spAPISpecificStruct stru={0};
-    uint32_t sw=0; //stopwatch
-    int byteRead=0;
+    int ret=0;
+
+
+    if ( (ret=Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader)))<=0 ) return ret;
+
+    ret=Xbee_waitCheckSending(37);
+
+    if ( ret==XBEE_TX_S_NOACK)return -ERR_XBEE_NOACK;
+    else if ( ret==XBEE_TX_S_SUCCESS ) return (msg->header.size+sizeof(sGenericHeader));
+    else return -ERR_XBEE_NOSTAT;
+    // unreachable
+}
+
+/*
+ * Handle the sending of a broadcast message to the Xbee via the serial.
+ * Size & checksum of msg must be set before calling Xbee_send
+ * Waits until the sending request was acknowledged (statused), or until timeout
+ * For a broadcast send, one will not receive an ack by the Xbee itself (may be done at a higher level)
+ *
+ * Argument :
+ *  msg : pointer to message to send (thanks captain obvious!)
+ *  Subnet : adress of the destination subnet
+ * Return value :
+ *  number of bytes of the message send
+ *  <0 if error :
+ *      error on sending frame to Xbee
+ *      error on receiving the status frame
+ *      sending not successful (e.g. no ack)
+ */
+int Xbee_sendBroadcast(const sMsg *msg, uint16_t nexthop){
     int ret=0;
 
     if ( (ret=Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader)))<=0 ) return ret;
+
+    ret=Xbee_waitCheckSending(37);
+
+    if ( ret==XBEE_TX_S_NOACK)return -ERR_XBEE_NOACK;
+    else if ( ret==XBEE_TX_S_SUCCESS ) return (msg->header.size+sizeof(sGenericHeader));
+    else return -ERR_XBEE_NOSTAT;
+    // unreachable
+}
+
+/* For use within Xbee4bn
+ * Waits for a status frame acknowledging that the message was received by the *sender* Xbee (i.e. first
+ * UART transmission is correct)
+ * Arguments :
+ *
+ * Return value :
+ *  >0 : field "status" in the TX status frame returned by the Xbee
+ *  <0 : error (no status frame with frameID received)
+ */
+int Xbee_waitCheckSending(int frameID){
+    uint32_t sw=0; //stopwatch
+    spAPISpecificStruct stru={0};
+    int byteRead=0;
 
     do {
         byteRead=Xbee_readFrame(&stru);
@@ -160,15 +209,9 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
         else if(byteRead < 0){
             return byteRead;
         }
-    } while( !(byteRead>0 && stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
-
-    if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -ERR_XBEE_NOSTAT;
-
-    else {
-        if (stru.data.TXStatus.status==XBEE_TX_S_SUCCESS) return (msg->header.size+sizeof(sGenericHeader));
-        else return -ERR_XBEE_NOACK;
-    }
-    // unreachable
+    } while( !(byteRead>0 && stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==frameID) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
+    if ( !(byteRead>0 && stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==frameID) ) return -ERR_XBEE_NOSTAT;
+    else return stru.data.TXStatus.status;
 }
 
 #endif //MYADDRX

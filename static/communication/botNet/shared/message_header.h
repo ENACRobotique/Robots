@@ -27,7 +27,7 @@ typedef uint16_t bn_Address;
  * The broadcast address is made by replacing the device part of the address wit ones.
  * Trying to send in broadcast to an address that have not been declared as broadcastable should result in an error.
  */
-#define BCAST_SUBNET BIT(15)
+#define BCAST_SUBNET 0x8000 // not using BIT(15) because fuck you arduino, that's why.
 
 // structure of a header
 typedef struct {

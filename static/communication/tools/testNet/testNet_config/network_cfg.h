@@ -24,33 +24,33 @@ extern "C" {
 
 
 
-#define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits adress. Must equal the larger size of the adresse in the different subnetworks
+#define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits address. Must equal the larger size of the addresse in the different subnetworks
 
 //masks
-    #define SUBNET_MASK (0xff<<DEVICE_ADDR_SIZE)  //on a 16-bits adress
+    #define SUBNET_MASK (0xff<<DEVICE_ADDR_SIZE)  //on a 16-bits address
 	#define DEVICEX_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
 	#define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
-    #define ADDRI_MASK  (0xff)      //on a 16-bits adress, xbee devices
-    #define ADDRX_MASK  (0xff)      //on a 16-bits adress, i2c devices
+    #define ADDRI_MASK  (0xff)      //on a 16-bits address, Xbee devices
+    #define ADDRX_MASK  (0xff)      //on a 16-bits address, i2c devices
 
-//subnet adresses
-    #define SUBNETX         (1<<DEVICE_ADDR_SIZE)
+//subnet addresses
+    #define SUBNETX         ((1<<DEVICE_ADDR_SIZE) | (BCAST_SUBNET) )
     #define SUBNETI         (2<<DEVICE_ADDR_SIZE)
     #define SUBNETU1        (3<<DEVICE_ADDR_SIZE)
     #define SUBNETU2        (4<<DEVICE_ADDR_SIZE)
 
 
-//xbee adresses
+//Xbee addresses
     #define ADDRX_PC1       ( BIT(0) | SUBNETX )
     #define ADDRX_BEACON_1  ( BIT(1) | SUBNETX )
     #define ADDRX_BEACON_2  ( BIT(2) | SUBNETX )
 
-//I2C adresses
+//I2C addresses
 //!\ NO ODD ADDRESSES FOR I²C !!!!
     #define ADDRI_ARDUINO       ((1<<1) | SUBNETI)
     #define ADDRI_BEACON_1      ((2<<1) | SUBNETI)
     #define ADDRI_LPC           ((3<<1) | SUBNETI)
-//UART adresses
+//UART addresses
     #define ADDRU1_PC2       (1 | SUBNETU1)
     #define ADDRU1_ARDUINO   (2 | SUBNETU1)
     #define ADDRU2_LPC       (1 | SUBNETU2)

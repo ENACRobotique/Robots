@@ -10,7 +10,7 @@
 
 #include "network_cfg.h"
 
-#define MYADDRX (ADDRX_BEACON_1|SUBNETX)
+#define MYADDRX (ADDRX_BEACON_1)
 #define MYADDRI (ADDRI_BEACON_1)
 #define MYADDRU 0
 #define MYADDRD 0
