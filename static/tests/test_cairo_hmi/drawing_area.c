@@ -44,6 +44,22 @@ void da_prepare_draw(sDrawingArea *da, cairo_t *cr) {
         da->center_px_moved = FALSE;
         da->center_cm_moved = FALSE;
     }
+
+    if (da->mouse_moved) {
+        da->mouse_x__cm = da->mouse_x__px;
+        da->mouse_y__cm = da->mouse_y__px;
+        cairo_device_to_user(cr, &da->mouse_x__cm, &da->mouse_y__cm);
+        da->user_mouse_moved = TRUE;
+        da->mouse_moved = FALSE;
+    }
+
+    if (da->mouse_lastpress_moved) {
+        da->mouse_lastpress_x__cm = da->mouse_lastpress_x__px;
+        da->mouse_lastpress_y__cm = da->mouse_lastpress_y__px;
+        cairo_device_to_user(cr, &da->mouse_lastpress_x__cm, &da->mouse_lastpress_y__cm);
+        da->user_mouse_lastpress_moved = TRUE;
+        da->mouse_lastpress_moved = FALSE;
+    }
 }
 
 gboolean da_need_early_update(sDrawingArea *da) {
@@ -56,10 +72,33 @@ void da_event_click__px(sDrawingArea *da, double x, double y) {
     da->mouse_lastpress_moved = TRUE;
 }
 
+gboolean da_state_click_moved(sDrawingArea *da) {
+    return da->user_mouse_lastpress_moved ? (da->user_mouse_lastpress_moved = FALSE, TRUE) : FALSE;
+}
+
+void da_state_get_click__cm(sDrawingArea *da, double *x, double *y) {
+    *x = da->mouse_lastpress_x__cm;
+    *y = da->mouse_lastpress_y__cm;
+}
+
 void da_event_hover__px(sDrawingArea *da, double x, double y) {
     da->mouse_x__px = x;
     da->mouse_y__px = y;
     da->mouse_moved = TRUE;
+}
+
+gboolean da_state_hover_moved(sDrawingArea *da) {
+    return da->user_mouse_moved ? (da->user_mouse_moved = FALSE, TRUE) : FALSE;
+}
+
+void da_state_get_hover__cm(sDrawingArea *da, double *x, double *y) {
+    *x = da->mouse_x__cm;
+    *y = da->mouse_y__cm;
+}
+
+void da_state_get_hover__cm__float(sDrawingArea *da, float *x, float *y) {
+    *x = da->mouse_x__cm;
+    *y = da->mouse_y__cm;
 }
 
 gboolean da_state_is_panning(sDrawingArea *da) {

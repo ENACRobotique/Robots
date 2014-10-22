@@ -26,9 +26,10 @@ typedef struct {
     double center_x_incr__cm, center_y_incr__cm; // (cm)
 
     // mouse interaction
-    gboolean mouse_lastpress_moved;
-    double mouse_lastpress_x__px, mouse_lastpress_y__px;
-    gboolean mouse_moved;
+    gboolean mouse_lastpress_moved, user_mouse_lastpress_moved;
+    double mouse_lastpress_x__px, mouse_lastpress_y__px; // (px)
+    double mouse_lastpress_x__cm, mouse_lastpress_y__cm; // (cm)
+    gboolean mouse_moved, user_mouse_moved;
     double mouse_x__px, mouse_y__px; // (px)
     double mouse_x__cm, mouse_y__cm; // (cm)
 } sDrawingArea;
@@ -40,9 +41,14 @@ gboolean da_need_early_update(sDrawingArea *da);
 
 // point selection
 void da_event_click__px(sDrawingArea *da, double x, double y);
+gboolean da_state_click_moved(sDrawingArea *da);
+void da_state_get_click__cm(sDrawingArea *da, double *x, double *y);
 
 // hover
 void da_event_hover__px(sDrawingArea *da, double x, double y);
+gboolean da_state_hover_moved(sDrawingArea *da);
+void da_state_get_hover__cm(sDrawingArea *da, double *x, double *y);
+void da_state_get_hover__cm__float(sDrawingArea *da, float *x, float *y);
 
 // panning
 gboolean da_state_is_panning(sDrawingArea *da);

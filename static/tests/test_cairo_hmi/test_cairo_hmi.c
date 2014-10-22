@@ -150,23 +150,18 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
 
     // draw previous click
     {
-        if (ctx->da.mouse_lastpress_moved) {
-            cairo_device_to_user(cr, &ctx->da.mouse_lastpress_x__px, &ctx->da.mouse_lastpress_y__px);
-            ctx->da.mouse_lastpress_moved = FALSE;
+        if (da_state_click_moved(&ctx->da)) {
+            char text[32];
 
-            {
-                char text[32];
+            double a = (double) millis() / 1000.; // trick to avoid precision pb with double 2 float conversion (millis() may be big!!)
+            a -= 2 * M_PI * (int) (a / (2 * M_PI));
 
-                double a = (double) millis() / 1000.; // trick to avoid precision pb with double 2 float conversion (millis() may be big!!)
-                a -= 2 * M_PI * (int) (a / (2 * M_PI));
-
-                sprintf(text, "x:%.2f, y:%.2f, theta=%.2f\n", ctx->i2.pos.x, ctx->i2.pos.y, a * 180. / M_PI);
-                GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctx->console));
-                gtk_text_buffer_insert_at_cursor(buffer, text, strlen(text));
-                GtkTextIter iter;
-                gtk_text_buffer_get_end_iter(buffer, &iter);
-                gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(ctx->console), &iter, 0, FALSE, 0, 0);
-            }
+            sprintf(text, "x:%.2f, y:%.2f, theta=%.2f\n", ctx->i2.pos.x, ctx->i2.pos.y, a * 180. / M_PI);
+            GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctx->console));
+            gtk_text_buffer_insert_at_cursor(buffer, text, strlen(text));
+            GtkTextIter iter;
+            gtk_text_buffer_get_end_iter(buffer, &iter);
+            gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(ctx->console), &iter, 0, FALSE, 0, 0);
         }
 
         cairo_arc(cr, ctx->da.mouse_lastpress_x__px, ctx->da.mouse_lastpress_y__px, 5, 0, 2 * M_PI);
@@ -177,14 +172,8 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
     {
         sGenericStatus o;
 
-        if (ctx->da.mouse_moved) {
-            ctx->da.mouse_x__cm = ctx->da.mouse_x__px;
-            ctx->da.mouse_y__cm = ctx->da.mouse_y__px;
-            cairo_device_to_user(cr, &ctx->da.mouse_x__cm, &ctx->da.mouse_y__cm);
-            ctx->da.mouse_moved = FALSE;
-
-            ctx->i2.pos.x = ctx->da.mouse_x__cm;
-            ctx->i2.pos.y = ctx->da.mouse_y__cm;
+        if (da_state_hover_moved(&ctx->da)) {
+            da_state_get_hover__cm__float(&ctx->da, &ctx->i2.pos.x, &ctx->i2.pos.y);
         }
 
         double a = (double) millis() / 1000.; // trick to avoid precision pb with double 2 float conversion (millis() may be big!!)
