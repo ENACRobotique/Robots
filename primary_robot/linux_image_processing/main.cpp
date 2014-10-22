@@ -19,7 +19,7 @@
 //######################
 //#### Para de simu ####
 //######################
-bool SAVE = true;
+bool SAVE = false;
 bool RGL_HSV = false;
 
 
@@ -64,9 +64,9 @@ int main(int argc, char* argv[]){
 	struct timeval tv_1, tv_2;
 
 	// open the video file for reading
-    VideoCapture cap("/home/yoyo/Bureau/TP Opencv/Vidéo/Vid_feu3.webm");
+    VideoCapture cap("/media/yoyo/BCACD6C6ACD679FA/Dropbox/Club Robot ENAC/Coupe 2014/Robot principal/Traitement Vidéo/Feux_Multi-cas_R-J.mp4");
     // Open video from cam no 1
-    //VideoCapture cap(1);
+//    VideoCapture cap(0);
 
     // if not success, exit program
     if ( !cap.isOpened() ){
@@ -98,16 +98,17 @@ int main(int argc, char* argv[]){
     cout << "Frame size : " << dWidth << " x " << dHeight << endl;
 
     // Write video in file
-    //if(SAVE){
+    VideoWriter oVideoWriter;
+    if(SAVE){
     	Size frameSize(static_cast<int>(dWidth), static_cast<int>(dHeight));
 		// Initialize the VideoWriter object
-		VideoWriter oVideoWriter ("/home/yoyo/Documents/depot-ENAC-Robotique/primary_robot/linux_image_processing/MyVideo.avi", CV_FOURCC('P','I','M','1'), 20, frameSize, true);
+		oVideoWriter = VideoWriter ("/home/yoyo/Documents/depot-ENAC-Robotique/primary_robot/linux_image_processing/MyVideo.avi", CV_FOURCC('P','I','M','1'), 20, frameSize, true);
 		//if not initialize the VideoWriter successfully, exit the program
 		if ( !oVideoWriter.isOpened() ) {
 			cout << "ERROR: Failed to write the video" << endl;
 			return -1;
 		}
-    //}
+    }
 
 
 
@@ -206,7 +207,7 @@ int main(int argc, char* argv[]){
 
 			findContours( contourOutput, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );//CV_CHAIN_APPROX_SIMPLE, CV_CHAIN_APPROX_NONE
 
-
+/*
 			//Draw the contours
 				vector< vector<Point> > triangles;
 				// Array for storing the approximation curve
@@ -263,7 +264,7 @@ int main(int argc, char* argv[]){
 				cv::drawContours(img_topview, contoursJ, idx, colorsJ,4);
 			}
 
-
+*/
         // Show the frame in "MyVideo" window
         imshow("MyVideo", img_brut);
 		imshow("brute redressee", img_topview);
