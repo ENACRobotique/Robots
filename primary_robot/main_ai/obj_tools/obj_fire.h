@@ -31,6 +31,7 @@ void createEPfire(sPt_t *pt, sNum_t theta, sNum_t r, int numObj);
 void createEPfire2(int numObj);
 int interC2D(const sLin_t *l, const sPt_t *c, sNum_t r, sPt_t *pt1, sPt_t *pt2);
 int objBonusFire(void);
+void revertFireDemo(void);
 
 
 #endif /* OBJ_FIRE_H_ */

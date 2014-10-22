@@ -15,7 +15,8 @@ extern int last_tid;
 typedef enum{
     E_AI_SLAVE,
     E_AI_PROG,
-    E_AI_AUTO
+    E_AI_AUTO,
+    E_AI_FIRE
 } eAIState_t;
 
 #endif /* MAIN_H_ */

@@ -535,3 +535,59 @@ int objBonusFire(void){
     prev_pos = obs[0].c;
     return 1;
     }
+
+void revertFireDemo(void){
+    int static stateFire = 0;
+    int ret;
+    sMsg msgOut = {{0}};
+
+    if(starting_cord == 1){ //use starting cord for start
+        switch(stateFire){
+        case 0:
+            printf("Case 0\n");
+            _start_time = millis();
+
+            msgOut.header.type = E_TRAJ;
+            msgOut.header.size = sizeof(msgOut.payload.traj);
+
+            msgOut.payload.traj.p1_x = obs[0].c.x;
+            msgOut.payload.traj.p1_y = obs[0].c.y;
+            msgOut.payload.traj.p2_x = obs[0].c.x + 50;
+            msgOut.payload.traj.p2_y = obs[0].c.y;
+            msgOut.payload.traj.seg_len = 50;
+
+            msgOut.payload.traj.c_x = 0;
+            msgOut.payload.traj.c_y = 0;
+            msgOut.payload.traj.c_r = 0;
+            msgOut.payload.traj.arc_len = 0;
+
+            msgOut.payload.traj.sid = 0;
+            msgOut.payload.traj.tid = last_tid++;
+
+            if((ret=role_send(&msgOut))<=0){
+                printf("role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+            }
+            stateFire = 1;
+            break;
+        case 1:
+            printf("time2 = %dms\n", (int) (millis()-_start_time));
+            if(millis()-_start_time > 500){
+                printf("Case 1\n");
+                sendPosServo(SERVO_PRIM_FIRE1, 1300, -1);
+                stateFire = 2;
+            }
+            break;
+        case 2:
+            if(millis()-_start_time > 1000){
+                printf("Case 2\n");
+                sendPosServo(SERVO_PRIM_FIRE1, 1600, -1);
+                stateFire = 3;
+            }
+            break;
+        case 3:
+            exit(1);
+            break;
+        }
+    }
+}
+

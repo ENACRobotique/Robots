@@ -33,6 +33,7 @@
 #include "obj_types.h"
 #include "obj_statuses.h"
 #include "obj_fire.h"
+#include "obj_com.h"
 
 #include "main.h"
 
@@ -52,7 +53,7 @@ void usage(char *cl){
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
     printf("Options:\n");
-    printf("\t--mode,     -m        AI mode (slave | auto | prog)\n");
+    printf("\t--mode,     -m        AI mode (slave | auto | prog | fire)\n");
     printf("\t--log-file, -f        output log file of received messages (overwritten)\n");
     printf("\t--verbose,  -v        increases verbosity\n");
     printf("\t--quiet,    -q        not verbose\n");
@@ -122,6 +123,9 @@ int main(int argc, char **argv){
             }
             else if(!strcasecmp(optarg, "auto")){
                 eAIState = E_AI_AUTO;
+            }
+            else if(!strcasecmp(optarg, "fire")){
+                eAIState = E_AI_FIRE;
             }
             break;
         case 'f':
@@ -197,6 +201,13 @@ int main(int argc, char **argv){
         if(ret <= 0){
             printf("bn_sendAck(E_POS) error #%i\n", -ret);
         }
+        break;
+    case E_AI_FIRE:
+        sendPosServo(SERVO_PRIM_ARM_RIGHT, 2300, -1);
+        sendPosServo(SERVO_PRIM_ARM_LEFT, 650, -1);
+        sendPosServo(SERVO_PRIM_DOOR, 500, -1);
+        sendPosServo(SERVO_PRIM_FIRE1, 1000, -1);
+
         break;
     }
 
@@ -467,6 +478,9 @@ int main(int argc, char **argv){
         case E_AI_AUTO:
         case E_AI_PROG:
             obj_step(eAIState);
+            break;
+        case E_AI_FIRE:
+            revertFireDemo();
             break;
         default:
             break;
