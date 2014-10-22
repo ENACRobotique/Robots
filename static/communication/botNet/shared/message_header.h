@@ -11,13 +11,23 @@
 
 #include <stdint.h>
 
+#ifndef BIT
+#define BIT(a) (1<<(a))
+#endif
+
 #define BN_MAX_PDU (64) //max size of a message, including header AND payload.
 
 /* bn_Address : on 16 bytes,
  * cf SUBNET_MASK and ADDRxx_MASK in network_cfg.h
- *
  */
 typedef uint16_t bn_Address;
+
+/* Broadcastable subnets : subnets to which one can send broadcast messages.
+ * The first bit of their address is set to 1
+ * The broadcast address is made by replacing the device part of the address wit ones.
+ * Trying to send in broadcast to an address that have not been declared as broadcastable should result in an error.
+ */
+#define BCAST_SUBNET BIT(15)
 
 // structure of a header
 typedef struct {

@@ -19,11 +19,6 @@ extern "C" {
 
 #include "roles.h"
 
-#ifndef BIT
-#define BIT(a) (1<<(a))
-#endif
-
-
 #define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits address. Must equal the larger size of the address in the different subnetworks
 
 //masks
@@ -32,13 +27,13 @@ extern "C" {
     #define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define DEVICEU_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define DEVICED_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
-    #define ADDRX_MASK  (0xff)      //on a 16-bits address, i2c devices
-    #define ADDRI_MASK  (0xff)      //on a 16-bits address, xbee devices
+    #define ADDRX_MASK  (0xff)      //on a 16-bits address, Xbee devices
+    #define ADDRI_MASK  (0xff)      //on a 16-bits address, I²C devices
     #define ADDRU_MASK  (0xff)      //on a 16-bits address, uart devices
     #define ADDRD_MASK  (0xff)      //on a 16-bits address, udp devices
 
 //subnet addresses
-    #define SUBNETX         (1<<DEVICE_ADDR_SIZE)
+    #define SUBNETX         (1<<DEVICE_ADDR_SIZE | BCAST_SUBNET)
     #define SUBNETI_MAIN    (2<<DEVICE_ADDR_SIZE)
     #define SUBNETU1_DEBUG  (3<<DEVICE_ADDR_SIZE)
     #define SUBNETD1_DEBUG  (4<<DEVICE_ADDR_SIZE)
