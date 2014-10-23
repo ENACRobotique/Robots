@@ -85,7 +85,7 @@ void asserLine()
 
 	//int degD =tab[1]+tab[2]+tab[3]+tab[0];
 
-	int prv=0;
+//	int prv=0;
 
 	if(capG==0 && capD==0)
 		{
@@ -112,7 +112,7 @@ void asserLine()
 
 				//deg=(capG*(-8));
 				//move(-80,deg);
-				prv=1;
+//				prv=1;
 				Serial.println("un peu G");
 			}
 
@@ -122,7 +122,7 @@ void asserLine()
 				Serial.println("un peu D");
 				//deg=(capD*(8));
 				//move(-80,deg);
-				prv=2;
+//				prv=2;
 			}
 
 	}

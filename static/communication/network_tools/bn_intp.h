@@ -42,6 +42,15 @@ static inline uint32_t bn_intp_micros2s(uint32_t micros){
     return micros-bn_intp_MicrosOffset;
 }
 
+/* bn_intp_millis2s : converts a local date in millisecond to a synchronized date. returned value are valid only after a synchronization has been done
+ * Argument :
+ *  millis : date to convert
+ * Return value : converted date
+ */
+static inline uint32_t bn_intp_millis2s(uint32_t millis){
+    return millis-(uint32_t)((int32_t)bn_intp_MicrosOffset/1000);
+}
+
 /* bn_intp_isSync : tell if synchronization has been done.
  * Return value :
  *  0 if unsynchronized

@@ -15,13 +15,14 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../network_tools/bn_debug.h"
+#include "../network_tools/bn_intp.h"
 #include "roles.h"
 
 #include "params.h"
 #include "../../global_errors.h"
 #include "node_cfg.h"
 
-
+#include "pos_history.h"
 #include "controller.h"
 #include "asserv.h"
 
@@ -48,9 +49,17 @@ void usage(char *cl){
     printf("\t--help, -h, -?        prints this help\n");
 }
 
+void intp_sync_handler(sMsg *msg){
+    bn_intp_msgHandle(msg);
+
+    if(bn_intp_isSync()){
+        tD_setLo2GlUsOffset(bn_intp_MicrosOffset);
+    }
+}
+
 int main(int argc, char *argv[]){
     FILE *fd = NULL;
-    sMsg inMsg;
+    sMsg inMsg = {{0}}, outMsg = {{0}};
     int ret, quit = 0;
 #ifdef CTRLC_MENU
     int cmd, quitMenu = 0;
@@ -113,6 +122,7 @@ int main(int argc, char *argv[]){
 
     // botNet initialization
     bn_attach(E_ROLE_SETUP, role_setup);
+    bn_attach(E_INTP, intp_sync_handler); // replaces bn_intp_install() to catch synchronization
 
     ret = bn_init();
     if(ret < 0){
@@ -174,6 +184,17 @@ int main(int argc, char *argv[]){
                     printf("new_pos() error #%i\n", -ret);
                 }
                 break;
+            case E_POS_QUERY:
+                if(inMsg.payload.posQuery.id == ELT_PRIMARY){
+                    outMsg.header.destAddr = inMsg.header.srcAddr;
+                    outMsg.header.size = sizeof(outMsg.payload.genericStatus);
+                    outMsg.header.type = E_GENERIC_STATUS;
+
+                    if(!ph_get_pos(&outMsg.payload.genericStatus, tD_newFrom_GlUs(inMsg.payload.posQuery.date))){
+                        bn_send(&outMsg);
+                    }
+                }
+                break;
             default:
                 bn_printDbg("got unhandled msg");
                 break;
@@ -225,6 +246,21 @@ int main(int argc, char *argv[]){
             ret = new_asserv_step();
             if(ret < 0){
                 printf("new_asserv_step() error #%i", -ret);
+            }
+
+            // enqueue latest position
+            if(bn_intp_isSync()){
+                unsigned int p_t; // local time (µs)
+                sPHPos *slot = ph_get_new_slot_pointer();
+
+                get_pos(&slot->s.prop_status.pos, &slot->s.prop_status.pos_u, &p_t);
+
+                slot->s.date = bn_intp_micros2s(p_t); // global time
+                slot->s.id = ELT_PRIMARY;
+
+                slot->d = tD_newFrom_LoUs(p_t);
+
+                ph_incr_new_slot_pointer();
             }
         }
 

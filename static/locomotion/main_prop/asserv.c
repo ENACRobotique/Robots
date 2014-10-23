@@ -121,6 +121,7 @@ void traj_conv(sTrajEl_t *t) {
 }
 
 int x = 0, y = 0, theta = 0; // robot position (I<<SHIFT), robot heading (I.rad<<SHIFT)
+unsigned int t_pos = 0; // time corresponding to the position
 int gx = 0, gy = 0, gtheta = 0; // goal (I<<SHIFT)
 int d_consigne = isDpS2IpP(20. /* cm/s */); // desired speed (IpP<<SHIFT)
 int _mul_l, _mul_r; // speed multiplier for each wheel (<<SHIFT)
@@ -225,6 +226,9 @@ int new_traj_el(sTrajElRaw_t *te){
 
                 state = S_RUN_TRAJ;
             }
+            else if( te->sid < curr_traj_insert_sid ) {
+                // step already received (no error, could be caused by network)
+            }
             else {
                 error = -1; // TODO error: bad step => invalidate all trajectory and ask new one
             }
@@ -241,6 +245,9 @@ int new_traj_el(sTrajElRaw_t *te){
                 next_traj_insert_sid++;
 
                 state = S_CHG_TRAJ;
+            }
+            else if( te->sid < next_traj_insert_sid ) {
+                // step already received (no error, could be caused by network)
             }
             else {
                 error = -3; // TODO error: bad step => invalidate all trajectory and ask new one
@@ -296,7 +303,7 @@ int new_pos(sPosPayload *pos){
 }
 
 int send_pos(){
-    sMsg msg;
+    sMsg msg = {{0}};
 
 //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
     msg.header.type = E_POS;
@@ -315,6 +322,24 @@ int send_pos(){
     }
 
     return role_send(&msg);
+}
+
+void get_pos(s2DPosAtt *p, s2DPAUncert *p_u, unsigned int *p_t){
+    if(p){
+        p->frame = FRAME_PLAYGROUND;
+        p->x = I2Ds(x);
+        p->y = I2Ds(y);
+        p->theta = RI2Rs(theta);
+    }
+
+    if(p_u){
+        // TODO
+        memset(p_u, 0, sizeof(*p_u));
+    }
+
+    if(p_t){
+        *p_t = t_pos;
+    }
 }
 
 #if defined(ARCH_X86_LINUX) && defined(ASSERV_LOGS)
@@ -347,6 +372,8 @@ int new_asserv_step(){
     ticks_l = motor_getticks(&motGauche)<<SHIFT; // (IpP<<SHIFT)
     ticks_r = motor_getticks(&motDroit)<<SHIFT; // (IpP<<SHIFT)
 #endif
+
+    t_pos = micros();
 
     // update the motor speed
     // TODO: use the shifted data in the PID of the motor, really necessary?
@@ -513,7 +540,7 @@ int new_asserv_step(){
         }
 
         if(dist < isD2I(1)) { // we are near the goal
-            if(!(curr_traj_step&1) && abs(traj[curr_traj][curr_traj_step>>1].c_r) < isD2I(1)) { // no next step
+            if(!(curr_traj_step&1) && abs(traj[curr_traj][curr_traj_step>>1].c_r) < isD2I(1)) { // last step (following a line && radius of current is almost zero)
                 state = S_WAIT;
 
                 gx = traj[curr_traj][curr_traj_step>>1].p2_x;
@@ -536,10 +563,13 @@ int new_asserv_step(){
                 return 0;
             }
             else {
-                if( ((curr_traj_step+1)>>1) >= curr_traj_insert_sid ){ // we do not have any steps...
-                    consigne_l = 0;
-                    consigne_r = 0;
-                    return 0;
+                if(!(curr_traj_step&1)){ // following a line portion
+                    if( (((curr_traj_step + 1)>>1) + 1) >= curr_traj_insert_sid ){ // we still doesn't have the next traj step
+                        consigne_l = 0; // let's stop to wait for it
+                        consigne_r = 0;
+                        // send error (be careful!!!)
+                        return 0;
+                    }
                 }
                 curr_traj_step++;
                 traj_conv(&traj[curr_traj][(curr_traj_step>>1) + 1]);

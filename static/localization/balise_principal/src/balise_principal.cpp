@@ -46,7 +46,6 @@ void setup(){
 
     //fixme : do the same for the others
 
-
     domi_init(2,9);
 
     bn_init();

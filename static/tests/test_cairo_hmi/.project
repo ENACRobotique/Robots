@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>lpc_io</name>
+	<name>test_cairo_hmi</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -30,29 +30,39 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>lib/Millis</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
+		</link>
+		<link>
+			<name>lib/PosTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/PosTools</locationURI>
+		</link>
+		<link>
+			<name>lib/TimeTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/TimeTools</locationURI>
+		</link>
+		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/tools/libraries/Timeout</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/communication/botNet</locationURI>
-		</link>
-		<link>
-			<name>lib/lpc2148</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/core/lpc21xx/lpc2148</locationURI>
-		</link>
-		<link>
-			<name>lib/lpc_lib</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/core/lpc21xx/lpc_lib</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/botNet</locationURI>
 		</link>
 		<link>
 			<name>lib/network_config</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/network_config</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/network_config</locationURI>
+		</link>
+		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/network_tools</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

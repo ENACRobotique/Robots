@@ -72,6 +72,7 @@
 									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.otherflags.950387769" name="Other flags" superClass="de.innot.avreclipse.cppcompiler.option.otherflags" value="" valueType="string"/>
+								<option id="de.innot.avreclipse.cppcompiler.option.std.498132293" superClass="de.innot.avreclipse.cppcompiler.option.std" value="de.innot.avreclipse.cppcompiler.option.std.gnucpp98" valueType="enumerated"/>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.626075002" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.383375915" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug"/>

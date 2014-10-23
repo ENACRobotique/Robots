@@ -86,7 +86,7 @@ extern "C" {
 //default debug address :
     #define ADDR_MONITORING_DFLT    (ADDRD1_MONITORING)
     #define ADDR_IA_DFLT            (ADDRD1_MAIN_IA_SIMU)
-#if 0
+#if 1
     #define ADDR_PROP_DFLT          (ADDRD1_MAIN_PROP_SIMU)
 #else
     #define ADDR_PROP_DFLT          (ADDRI_MAIN_PROP)

@@ -18,6 +18,7 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../network_tools/bn_debug.h"
+#include "../network_tools/bn_intp.h"
 #include "../network_tools/bn_utils.h"
 #include "../../global_errors.h"
 #include "../../core/linux/libraries/Millis/millis.h"
@@ -134,6 +135,9 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu), seq : %02hhu ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type, msgIn.header.seqNum);
             }
             switch (msgIn.header.type){
+            case E_GENERIC_STATUS:
+                printf("%.2fcm, %.2fcm, %.2f°\n", msgIn.payload.genericStatus.prop_status.pos.x, msgIn.payload.genericStatus.prop_status.pos.y, msgIn.payload.genericStatus.prop_status.pos.theta*180./M_PI);
+                break;
             case E_ASSERV_STATS :
                 {
                     int i;
@@ -265,7 +269,10 @@ int main(int argc, char **argv){
                     int us;
 
                     printf("us: "); fflush(stdout);
-                    scanf("%i", &us);
+                    err = scanf("%i", &us);
+                    if (err != 1){
+                        printf("error getting us setpoint\n");
+                    }
 
                     msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
@@ -289,10 +296,16 @@ int main(int argc, char **argv){
                     printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
 
                     printf("id: "); fflush(stdout);
-                    scanf("%i", &id);
+                    err = scanf("%i", &id);
+                    if (err != 1){
+                        printf("error getting servo id\n");
+                    }
 
                     printf("us: "); fflush(stdout);
-                    scanf("%i", &us);
+                    err = scanf("%i", &us);
+                    if (err != 1){
+                        printf("error getting us setpoint\n");
+                    }
 
                     msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
@@ -302,6 +315,26 @@ int main(int argc, char **argv){
                     msg.payload.servos.servos[0].us = us;
 
                     bn_send(&msg);
+                    break;
+                }
+                case 'h':
+                    printf("Syncing propulsion..."); fflush(stdout);
+                    bn_intp_sync(role_get_addr(ROLE_PROPULSION), 100);
+                    printf("done\n");
+                    break;
+                case 'w':{
+                    sMsg msg = {{0}};
+
+                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.type = E_POS_QUERY;
+                    msg.header.size = sizeof(msg.payload.posQuery);
+
+                    msg.payload.posQuery.date = (int32_t)micros() - 200000;
+                    msg.payload.posQuery.id = ELT_PRIMARY;
+
+                    bn_send(&msg);
+
+                    printf("Sent position query\n");
                     break;
                 }
                 case 'd':{ // sends new setpoint to the propulsion // FIXME: use sGenericStatus

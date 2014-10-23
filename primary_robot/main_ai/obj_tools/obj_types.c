@@ -19,7 +19,7 @@ sNum_t speed=0;
 sNum_t theta_robot=0.;
 int starting_cord = 0;
 int mode_switch = 0;
-eColor_t color = 1 ;//0=red and 1=yellow
+eColor_t color = RED ;//0=red and 1=yellow
 int current_obj=-1;
 
 sPath_t path= {.dist = 0.,  .path = NULL };
