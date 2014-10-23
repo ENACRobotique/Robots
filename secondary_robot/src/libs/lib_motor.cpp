@@ -56,7 +56,12 @@ void motAsser(){
             intEps= CLAMP( -(64<<4) ,intEps+eps, (64<<4));
 
             //compute command
-            _motCmd=  ((KP*eps)>>2) + ((KI*intEps)>>2);
+            if(_motCon==0){
+            _motCmd=0;
+            }
+            else{
+            	_motCmd=  ((KP*eps)>>2) + ((KI*intEps)>>2);
+            }
 
 
 #ifdef DEBUG_MOTOR
