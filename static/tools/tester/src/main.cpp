@@ -19,9 +19,6 @@
 #include "Servo.h"
 
 #define NB_menu_servo 3
-int retour=0;
-int memenc=0;
-int deltaenc;
 sState *current = &sInitHard;
 unsigned long _matchStart;
 
@@ -32,7 +29,6 @@ void setup() {
 	Serial.println(digitalRead(PIN_COLOR));
 #endif
 
-	attachInterrupt(0, ret, FALLING);
 	digitalWrite(2, HIGH);
 
 

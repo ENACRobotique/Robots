@@ -27,23 +27,32 @@ sState* testservo_micros(){
 //		}
 	servotest.writeMicroseconds(Micros);
 
-		if(Micros!=memMicros)
-		{
-			char affich[16];
-			snprintf(affich,17,"delay= %dus",Micros);
-			afficher(affich);
-			memMicros=Micros;
-		}
+	if(Micros!=memMicros)
+	{
+		char affich[16];
+		snprintf(affich,17,"delay= %dus",Micros);
+		afficher(affich);
+		memMicros=Micros;
+	}
 
-		if(retour)
-		{
-			retour=0;
-			return(&sMenu_servo);
-		}
+	/*if(retour)
+	{
+		retour=0;
+		return(&sMenu_servo);
+	}*/
+	if(!digitalRead(RETOUR))
+	{
+		delay(3);	//anti rebond
+		while(!digitalRead(RETOUR));	//attente du relachement du bouton
+		return(&sMenu_servo);
+	}
     return NULL;
 }
 void initservo_micros(sState *prev){
 	servotest.attach(9);
+	int micros=servotest.readMicroseconds();
+	int value_enc=abs(micros-500)*2/PRECISION_MICROS;
+	myEnc.write(value_enc);
 
 }
 void deinitservo_micros(sState *next){

@@ -32,8 +32,8 @@ sState* testMenu_servo(){
 
 
 		static int memPosition;
-		int Position = (abs(myEnc.read())/2)%NB_menu_servo;    //position du selecteur
-
+//int Position = (abs(myEnc.read())/2)%NB_menu_servo;    //position du selecteur
+		int Position = (myEnc.read()/2)%NB_menu_servo;    //position du selecteur
 		   if(Position != memPosition)  //on affiche que si on change de position
 		   {
 		      afficher(menu_servo[Position]);
@@ -52,10 +52,16 @@ sState* testMenu_servo(){
 		     }
 		  }
 
-		  if(retour)
+		  /*if(retour)
 		  {
 		  	retour=0;
 		  	return(&sMenu_principal);
+		  }*/
+		  if(!digitalRead(RETOUR))
+		  {
+			  delay(3);	//anti rebond
+			  while(!digitalRead(RETOUR));	//attente du relachement du bouton
+			  return(&sMenu_principal);
 		  }
 
 
@@ -67,8 +73,9 @@ void initMenu_servo(sState *prev){
 			  "ANGLE validation",
 			  "MICROSECONDES",
 			};
-			int Position = (abs(myEnc.read())/2)%NB_menu_servo;
-			afficher(menu_servo[Position]);
+			myEnc.write(0);
+//int Position = (abs(myEnc.read())/2)%NB_menu_servo;
+			afficher(menu_servo[0]);
 }
 void deinitMenu_servo(sState *next){
 

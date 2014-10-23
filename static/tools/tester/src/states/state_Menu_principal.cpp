@@ -15,12 +15,11 @@
 #include <stddef.h>
 //#include "../tools.h"
 #include "state_Menu_principal.h"
-//#include "state_servo_selecter1.h"
-//#include "state_servo_selecter2.h"
+#include "state_analogRead.h"
 
 #include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
 
-#define NB_menu_principal 4
+#define NB_menu_principal 5
 
 Encoder myEnc(3, 4);
 
@@ -29,13 +28,15 @@ sState* testMenu_principal(){
 	const char *menu_principal[] = {
 		  "SERVOS",
 		  "PWM",
+		  "Analog Read",
 		  "I2C",
 		  "LIAISON SERIE",
 		};
 
 
 		static int memPosition;
-		int Position = (abs(myEnc.read())/2)%NB_menu_principal;    //position du selecteur
+		//int Position = (abs(myEnc.read())/2)%NB_menu_principal;    //position du selecteur
+		int Position = (myEnc.read()/2)%NB_menu_principal;    //position du selecteur
 
 		   if(Position != memPosition)  //on affiche que si on change de position
 		   {
@@ -51,8 +52,9 @@ sState* testMenu_principal(){
 		    {
 		        case 0:{ return(&sMenu_servo); break; }
 		        case 1:{ return(&spwm); break; }
-	//	        case 2:{ i2c(); break; }
-	//	        case 3:{ liaison_serie(); break; }
+		        case 2:{ return(&sanalogRead); break; }
+	//	        case 3:{ i2c(); break; }
+	//	        case 4:{ liaison_serie(); break; }
 		        //default:
 		     }
 		  }
@@ -65,11 +67,12 @@ void initMenu_principal(sState *prev){
 	const char *menu_principal[] = {
 			  "SERVOS",
 			  "PWM",
+			  "Analog Read",
 			  "I2C",
 			  "LIAISON SERIE",
 			};
-	int Position = (abs(myEnc.read())/2)%NB_menu_principal;
-	afficher(menu_principal[Position]);
+	myEnc.write(0);
+	afficher(menu_principal[0]);
 
 }
 

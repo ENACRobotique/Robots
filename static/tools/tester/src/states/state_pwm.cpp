@@ -18,32 +18,39 @@
 
 sState* testpwm(){
 	static int memPosition=0;
-	int Position = (abs(myEnc.read())/2*5)%260;
+//int Position = (abs(myEnc.read())/2*5)%260;
+	int Position = (myEnc.read()/2*5)%260;
 
 	if(!digitalRead(SELECT))	//nécessite de valider
-		{
-			analogWrite(PIN_PWM_SERVO,Position);
+	{
+		while(!digitalRead(SELECT));	//attente du relachement du bouton
+		analogWrite(PIN_PWM_SERVO,Position);
+	}
 
-		}
+	if(Position!=memPosition)
+	{
+		char affich[16];
+		snprintf(affich,17,"Pos= %d /255",Position);
+		afficher(affich);
+		memPosition=Position;
+	}
 
-		if(Position!=memPosition)
-		{
-			char affich[16];
-			snprintf(affich,17,"Pos= %d /255",Position);
-			afficher(affich);
-
-			memPosition=Position;
-		}
-
-		if(retour)
-		{
-			retour=0;
-			return(&sMenu_principal);
-		}
+	/*if(retour)
+			{
+				retour=0;
+				return(&sMenu_principal);
+			}*/
+	if(!digitalRead(RETOUR))
+	{
+		delay(3);	//anti rebond
+		while(!digitalRead(RETOUR));	//attente du relachement du bouton
+		return(&sMenu_principal);
+	}
     return NULL;
 }
 void initpwm(sState *prev){
 	pinMode(PIN_PWM_SERVO,OUTPUT);
+	myEnc.write(0);
 }
 void deinitpwm(sState *next){
 

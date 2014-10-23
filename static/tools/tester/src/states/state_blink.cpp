@@ -59,11 +59,3 @@ void afficher(const char * chaine)
 	  lcd.write(chaine);
 }
 
-void ret()
-{
-	delay(3);
-	if(!digitalRead(RETOUR))
-	{
-		retour=1;
-	}
-}

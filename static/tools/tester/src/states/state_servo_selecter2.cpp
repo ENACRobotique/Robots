@@ -19,7 +19,7 @@
 
 sState* testservo_selecter2(){
 	static int memPosition=0;
-	int Position = (abs(myEnc.read()-deltaenc)/2*5)%185;
+	int Position = (myEnc.read()/2*5)%185;
 
 	servotest.write(Position); //rotation sans validation
 
@@ -32,17 +32,19 @@ sState* testservo_selecter2(){
 		memPosition=Position;
 	}
 
-	if(retour)
+	if(!digitalRead(RETOUR))
 	{
-		retour=0;
-		memenc=myEnc.read();
+		delay(3);	//anti rebond
+		while(!digitalRead(RETOUR));	//attente du relachement du bouton
 		return(&sMenu_servo);
 	}
     return NULL;
 }
 void initservo_selecter2(sState *prev){
-	deltaenc=myEnc.read()-memenc;
 	servotest.attach(PIN_PWM_SERVO);
+	int angle=servotest.read();
+	int value_enc=5*angle/2;
+	myEnc.write(value_enc);
 
 }
 void deinitservo_selecter2(sState *next){
