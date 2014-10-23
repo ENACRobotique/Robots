@@ -8,7 +8,10 @@
  ============================================================================
  */
 
-// example from http://zetcode.com/gfx/cairo/cairobackends/
+// sources:
+// cairo:            http://zetcode.com/gfx/cairo/cairobackends/
+// close tab button: http://www.micahcarrick.com/gtk-notebook-tabs-with-close-button.html
+
 #include <cairo.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
@@ -266,22 +269,178 @@ int main(int argc, char *argv[]) {
 
     ctx.da.widget = gtk_drawing_area_new();
     ctx.console = gtk_text_view_new();
+    ctx.notebook = gtk_notebook_new();
 
     {
         GtkWidget *scrolledwindowConsole = gtk_scrolled_window_new(NULL, NULL);
-        GtkWidget* paned = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
+        GtkWidget* h_paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+        GtkWidget* v_paned = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
 
         gtk_container_add(GTK_CONTAINER(scrolledwindowConsole), ctx.console);
 
-        gtk_widget_set_hexpand(ctx.da.widget, TRUE);
-        gtk_widget_set_vexpand(ctx.da.widget, TRUE);
-        gtk_widget_set_hexpand(scrolledwindowConsole, TRUE);
+//        gtk_widget_set_hexpand(ctx.da.widget, TRUE);
+//        gtk_widget_set_vexpand(ctx.da.widget, TRUE);
+//        gtk_widget_set_hexpand(scrolledwindowConsole, TRUE);
 
-        gtk_paned_pack1(GTK_PANED(paned), ctx.da.widget, TRUE, FALSE);
-        gtk_paned_pack2(GTK_PANED(paned), scrolledwindowConsole, FALSE, FALSE);
-        gtk_paned_set_position(GTK_PANED(paned), initialSizeFactor * ctx.da.wld_height);
+        gtk_paned_pack1(GTK_PANED(h_paned), ctx.da.widget, TRUE, FALSE);
+        gtk_paned_pack2(GTK_PANED(h_paned), ctx.notebook, FALSE, FALSE);
 
-        gtk_container_add(GTK_CONTAINER(ctx.window), paned);
+        gtk_paned_pack1(GTK_PANED(v_paned), h_paned, TRUE, FALSE);
+        gtk_paned_pack2(GTK_PANED(v_paned), scrolledwindowConsole, FALSE, FALSE);
+        gtk_paned_set_position(GTK_PANED(v_paned), initialSizeFactor * ctx.da.wld_height);
+
+        gtk_container_add(GTK_CONTAINER(ctx.window), v_paned);
+    }
+
+    {
+        //
+        GtkWidget *child;
+        GtkWidget *tab, *bt;
+
+        // common
+        GtkCssProvider *css = gtk_css_provider_new();
+        const char css_button[] = ".button { -GtkButton-default-border : 0px; -GtkButton-default-outside-border : 0px; -GtkButton-inner-border: 0px; -GtkWidget-focus-line-width : 0px; -GtkWidget-focus-padding : 0px; padding: 0px;}";
+        gtk_css_provider_load_from_data(css, css_button, strlen(css_button), NULL);
+
+        // tab1
+        {
+            child = gtk_button_new_with_label("bt");
+        }
+        tab = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+        bt = gtk_button_new();
+        gtk_button_set_relief(GTK_BUTTON(bt), GTK_RELIEF_NONE);
+        gtk_button_set_focus_on_click(GTK_BUTTON(bt), FALSE);
+        gtk_container_add(GTK_CONTAINER(bt), gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU));
+        gtk_style_context_add_provider(gtk_widget_get_style_context(bt), GTK_STYLE_PROVIDER(css), 600);
+        gtk_box_pack_start(GTK_BOX(tab), gtk_image_new_from_stock(GTK_STOCK_CDROM, GTK_ICON_SIZE_MENU), TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(tab), gtk_label_new("tab1"), TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(tab), bt, FALSE, FALSE, 0);
+        gtk_widget_show_all(tab);
+
+        gtk_notebook_append_page(GTK_NOTEBOOK(ctx.notebook), child, tab);
+        gtk_notebook_set_tab_detachable(GTK_NOTEBOOK(ctx.notebook), child, TRUE);
+        gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(ctx.notebook), child, TRUE);
+
+        // tab2
+        {
+
+
+
+            enum
+            {
+               TITLE_COLUMN,
+               AUTHOR_COLUMN,
+               CHECKED_COLUMN,
+               N_COLUMNS
+            };
+
+            void populate_tree_model(GtkTreeStore *store){
+                GtkTreeIter iter1;  /* Parent iter */
+                GtkTreeIter iter2;  /* Child iter  */
+
+                gtk_tree_store_append (store, &iter1, NULL);  /* Acquire a top-level iterator */
+                gtk_tree_store_set (store, &iter1,
+                                    TITLE_COLUMN, "The Art of Computer Programming",
+                                    AUTHOR_COLUMN, "Donald E. Knuth",
+                                    CHECKED_COLUMN, FALSE,
+                                    -1);
+
+                gtk_tree_store_append (store, &iter2, &iter1);  /* Acquire a child iterator */
+                gtk_tree_store_set (store, &iter2,
+                                    TITLE_COLUMN, "Volume 1: Fundamental Algorithms",
+                                    -1);
+
+                gtk_tree_store_append (store, &iter2, &iter1);
+                gtk_tree_store_set (store, &iter2,
+                                    TITLE_COLUMN, "Volume 2: Seminumerical Algorithms",
+                                    CHECKED_COLUMN, TRUE,
+                                    -1);
+
+                gtk_tree_store_append (store, &iter2, &iter1);
+                gtk_tree_store_set (store, &iter2,
+                                    TITLE_COLUMN, "Volume 3: Sorting and Searching",
+                                    -1);
+            }
+
+            GtkTreeStore *store;
+            GtkTreeViewColumn *column;
+            GtkCellRenderer *renderer;
+
+            /* Create a model.  We are using the store model for now, though we
+             * could use any other GtkTreeModel */
+            store = gtk_tree_store_new (N_COLUMNS,
+                                        G_TYPE_STRING,
+                                        G_TYPE_STRING,
+                                        G_TYPE_BOOLEAN);
+
+            /* custom function to fill the model with data */
+            populate_tree_model (store);
+
+            /* Create a view */
+            child = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
+
+            /* The view now holds a reference.  We can get rid of our own
+             * reference */
+            g_object_unref (G_OBJECT (store));
+
+            /* Create a cell render and arbitrarily make it red for demonstration
+             * purposes */
+            renderer = gtk_cell_renderer_text_new ();
+            g_object_set (G_OBJECT (renderer),
+                          "foreground", "red",
+                          NULL);
+
+            /* Create a column, associating the "text" attribute of the
+             * cell_renderer to the first column of the model */
+            column = gtk_tree_view_column_new_with_attributes ("Author", renderer,
+                                                               "text", AUTHOR_COLUMN,
+                                                               NULL);
+
+            /* Add the column to the view. */
+            gtk_tree_view_append_column (GTK_TREE_VIEW (child), column);
+
+            /* Second column.. title of the book. */
+            renderer = gtk_cell_renderer_text_new ();
+            column = gtk_tree_view_column_new_with_attributes ("Title",
+                                                               renderer,
+                                                               "text", TITLE_COLUMN,
+                                                               NULL);
+            gtk_tree_view_append_column (GTK_TREE_VIEW (child), column);
+
+            /* Last column.. whether a book is checked out. */
+            renderer = gtk_cell_renderer_toggle_new ();
+            column = gtk_tree_view_column_new_with_attributes ("Checked out",
+                                                               renderer,
+                                                               "active", CHECKED_COLUMN,
+                                                               NULL);
+            gtk_cell_renderer_toggle_set_activatable(GTK_CELL_RENDERER_TOGGLE(renderer), TRUE);
+            gtk_tree_view_column_set_clickable(GTK_TREE_VIEW_COLUMN(column), TRUE);
+            gtk_tree_view_append_column (GTK_TREE_VIEW (child), column);
+
+
+
+
+
+
+
+
+
+
+        }
+        tab = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+        bt = gtk_button_new();
+        gtk_button_set_relief(GTK_BUTTON(bt), GTK_RELIEF_NONE);
+        gtk_button_set_focus_on_click(GTK_BUTTON(bt), FALSE);
+        gtk_container_add(GTK_CONTAINER(bt), gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU));
+        gtk_style_context_add_provider(gtk_widget_get_style_context(bt), GTK_STYLE_PROVIDER(css), 600);
+        gtk_box_pack_start(GTK_BOX(tab), gtk_image_new_from_stock(GTK_STOCK_FILE, GTK_ICON_SIZE_MENU), TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(tab), gtk_label_new("Layers"), TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(tab), bt, FALSE, FALSE, 0);
+        gtk_widget_show_all(tab);
+
+        gtk_notebook_append_page(GTK_NOTEBOOK(ctx.notebook), child, tab);
+        gtk_notebook_set_tab_detachable(GTK_NOTEBOOK(ctx.notebook), child, TRUE);
+        gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(ctx.notebook), child, TRUE);
     }
 
     gtk_widget_add_events(ctx.da.widget, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK | GDK_KEY_PRESS_MASK | GDK_BUTTON1_MOTION_MASK);

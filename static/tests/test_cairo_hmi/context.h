@@ -17,6 +17,7 @@ typedef struct {
     GtkWidget *window;
     sDrawingArea da;
     GtkWidget *console;
+    GtkWidget *notebook;
 
     // test
     sGenericStatus i1;
