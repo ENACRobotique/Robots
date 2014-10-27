@@ -111,7 +111,7 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
     cairo_line_to(cr, 10, 0);
     cairo_stroke(cr);
 
-    // draw press_y axis
+    // draw y axis
     cairo_set_source_rgb(cr, 0, 1, 0);
     cairo_move_to(cr, 0, 0);
     cairo_line_to(cr, 0, 10);
@@ -167,7 +167,7 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
             gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(ctx->console), &iter, 0, FALSE, 0, 0);
         }
 
-        cairo_arc(cr, ctx->da.mouse_lastpress_x__px, ctx->da.mouse_lastpress_y__px, 5, 0, 2 * M_PI);
+        cairo_arc(cr, ctx->da.mouse_lastpress_x__cm, ctx->da.mouse_lastpress_y__cm, 5, 0, 2 * M_PI);
         cairo_stroke(cr);
     }
 

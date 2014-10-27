@@ -14,6 +14,9 @@ void da_invalidate_all(sDrawingArea *da) {
 }
 
 void da_prepare_draw(sDrawingArea *da, cairo_t *cr) {
+    cairo_matrix_t P0;
+    cairo_get_matrix(cr, &P0);
+
     da->widget_width__px = gtk_widget_get_allocated_width(da->widget);
     da->widget_height__px = gtk_widget_get_allocated_height(da->widget);
 
@@ -40,6 +43,7 @@ void da_prepare_draw(sDrawingArea *da, cairo_t *cr) {
     if (da->center_px_moved) {
         da->center_x__cm = (double) da->widget_width__px / 2.;
         da->center_y__cm = (double) da->widget_height__px / 2.;
+        cairo_matrix_transform_point(&P0, &da->center_x__cm, &da->center_y__cm);
         cairo_device_to_user(cr, &da->center_x__cm, &da->center_y__cm);
         da->center_px_moved = FALSE;
         da->center_cm_moved = FALSE;
@@ -48,6 +52,7 @@ void da_prepare_draw(sDrawingArea *da, cairo_t *cr) {
     if (da->mouse_moved) {
         da->mouse_x__cm = da->mouse_x__px;
         da->mouse_y__cm = da->mouse_y__px;
+        cairo_matrix_transform_point(&P0, &da->mouse_x__cm, &da->mouse_y__cm);
         cairo_device_to_user(cr, &da->mouse_x__cm, &da->mouse_y__cm);
         da->user_mouse_moved = TRUE;
         da->mouse_moved = FALSE;
@@ -56,6 +61,7 @@ void da_prepare_draw(sDrawingArea *da, cairo_t *cr) {
     if (da->mouse_lastpress_moved) {
         da->mouse_lastpress_x__cm = da->mouse_lastpress_x__px;
         da->mouse_lastpress_y__cm = da->mouse_lastpress_y__px;
+        cairo_matrix_transform_point(&P0, &da->mouse_lastpress_x__cm, &da->mouse_lastpress_y__cm);
         cairo_device_to_user(cr, &da->mouse_lastpress_x__cm, &da->mouse_lastpress_y__cm);
         da->user_mouse_lastpress_moved = TRUE;
         da->mouse_lastpress_moved = FALSE;
