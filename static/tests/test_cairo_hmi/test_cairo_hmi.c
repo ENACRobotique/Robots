@@ -310,9 +310,9 @@ int main(int argc, char *argv[]) {
         bt = gtk_button_new();
         gtk_button_set_relief(GTK_BUTTON(bt), GTK_RELIEF_NONE);
         gtk_button_set_focus_on_click(GTK_BUTTON(bt), FALSE);
-        gtk_container_add(GTK_CONTAINER(bt), gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU));
+        gtk_container_add(GTK_CONTAINER(bt), gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU));
         gtk_style_context_add_provider(gtk_widget_get_style_context(bt), GTK_STYLE_PROVIDER(css), 600);
-        gtk_box_pack_start(GTK_BOX(tab), gtk_image_new_from_stock(GTK_STOCK_CDROM, GTK_ICON_SIZE_MENU), TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(tab), gtk_image_new_from_icon_name("phone", GTK_ICON_SIZE_MENU), TRUE, TRUE, 0);
         gtk_box_pack_start(GTK_BOX(tab), gtk_label_new("tab1"), TRUE, TRUE, 0);
         gtk_box_pack_start(GTK_BOX(tab), bt, FALSE, FALSE, 0);
         gtk_widget_show_all(tab);
@@ -431,9 +431,9 @@ int main(int argc, char *argv[]) {
         bt = gtk_button_new();
         gtk_button_set_relief(GTK_BUTTON(bt), GTK_RELIEF_NONE);
         gtk_button_set_focus_on_click(GTK_BUTTON(bt), FALSE);
-        gtk_container_add(GTK_CONTAINER(bt), gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU));
+        gtk_container_add(GTK_CONTAINER(bt), gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU));
         gtk_style_context_add_provider(gtk_widget_get_style_context(bt), GTK_STYLE_PROVIDER(css), 600);
-        gtk_box_pack_start(GTK_BOX(tab), gtk_image_new_from_stock(GTK_STOCK_FILE, GTK_ICON_SIZE_MENU), TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(tab), gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_MENU), TRUE, TRUE, 0);
         gtk_box_pack_start(GTK_BOX(tab), gtk_label_new("Layers"), TRUE, TRUE, 0);
         gtk_box_pack_start(GTK_BOX(tab), bt, FALSE, FALSE, 0);
         gtk_widget_show_all(tab);
