@@ -5,16 +5,16 @@
  *      Author: ludo6431
  */
 
-#include "DAPlayground.h"
-
+#include <cairomm/matrix.h>
 #include <gdkmm/device.h>
 #include <gdkmm/rectangle.h>
 #include <gdkmm/window.h>
 #include <glib/gmacros.h>
 #include <glib/gmain.h>
+#include <gui/DAPlayground.h>
 #include <cmath>
 #include <cstdio>
-#include <vector>
+#include <utility>
 
 using namespace Cairo;
 using namespace Gtk;
@@ -22,7 +22,7 @@ using namespace Gdk;
 using namespace std;
 
 static bool invalidate(DAPlayground *dap) {
-    dap->invalidate_all();
+    dap->get_window()->invalidate(true);
 
     return true;
 }
@@ -74,11 +74,6 @@ DAPlayground::DAPlayground() :
 
 DAPlayground::~DAPlayground() {
 
-}
-
-// rendering management
-void DAPlayground::invalidate_all() {
-    get_window()->invalidate_rect( { 0, 0, widget_width__px, widget_height__px }, true);
 }
 
 // point selection
@@ -154,7 +149,7 @@ void DAPlayground::event_scale_rel(double s) {
 }
 
 void DAPlayground::prepare_draw(const RefPtr<Context>& cr) {
-    Matrix P0 = cr->get_matrix();
+    Matrix P0(cr->get_matrix());
 
     widget_width__px = get_allocated_width();
     widget_height__px = get_allocated_height();
@@ -197,7 +192,8 @@ void DAPlayground::prepare_draw(const RefPtr<Context>& cr) {
     if (mouse_moved) {
         mouse_x__cm = mouse_x__px;
         mouse_y__cm = mouse_y__px;
-        P0.transform_point(mouse_x__cm, mouse_y__cm);
+//        P0.transform_point(mouse_x__cm, mouse_y__cm);
+        da_to_device(mouse_x__cm, mouse_y__cm);
         cr->device_to_user(mouse_x__cm, mouse_y__cm);
         user_mouse_moved = true;
         mouse_moved = false;
@@ -206,7 +202,8 @@ void DAPlayground::prepare_draw(const RefPtr<Context>& cr) {
     if (mouse_lastpress_moved) {
         mouse_lastpress_x__cm = mouse_lastpress_x__px;
         mouse_lastpress_y__cm = mouse_lastpress_y__px;
-        P0.transform_point(mouse_lastpress_x__cm, mouse_lastpress_y__cm);
+//        P0.transform_point(mouse_lastpress_x__cm, mouse_lastpress_y__cm);
+        da_to_device(mouse_lastpress_x__cm, mouse_lastpress_y__cm);
         cr->device_to_user(mouse_lastpress_x__cm, mouse_lastpress_y__cm);
         user_mouse_lastpress_moved = true;
         mouse_lastpress_moved = false;
@@ -216,51 +213,6 @@ void DAPlayground::prepare_draw(const RefPtr<Context>& cr) {
 bool DAPlayground::on_draw(const RefPtr<Context>& cr) {
     // prepare
     prepare_draw(cr);
-
-    // draw x axis
-    cr->set_source_rgb(1, 0, 0);
-    cr->move_to(0, 0);
-    cr->line_to(10, 0);
-    cr->stroke();
-
-    // draw y axis
-    cr->set_source_rgb(0, 1, 0);
-    cr->move_to(0, 0);
-    cr->line_to(0, 10);
-    cr->stroke();
-
-    // draw playground outline
-    double x = 1.5, y = 1.5;
-    cr->device_to_user_distance(x, y);
-    cr->set_line_width(MAX(x, y));
-    cr->set_source_rgba(0, 0, 0, 0.5);
-    cr->rectangle(0., 0., wld_width__cm, wld_height__cm);
-    cr->stroke();
-
-    // draw grid
-    {
-        double x = 1.2, y = 1.2;
-        int i;
-        cr->device_to_user_distance(x, y);
-        cr->set_line_width(MAX(x, y));
-        cr->set_dash((vector<double> ) { 3. / 2., 2. / 2. }, 0);
-        cr->set_source_rgba(0, 0, 0, 0.3);
-
-        double incr = 10.;
-
-        for (i = 1; i < ceil(wld_width__cm / incr); i++) {
-            cr->move_to((double) i * incr, 0);
-            cr->line_to((double) i * incr, wld_height__cm);
-        }
-
-        for (i = 1; i < ceil(wld_height__cm / incr); i++) {
-            cr->move_to(0, (double) i * incr);
-            cr->line_to(wld_width__cm, (double) i * incr);
-        }
-
-        cr->stroke();
-        cr->set_dash((vector<double> ) { }, 0);
-    }
 
     // draw previous click
     {
@@ -275,6 +227,17 @@ bool DAPlayground::on_draw(const RefPtr<Context>& cr) {
     cr->set_source_rgb(1, 0, 0);
     cr->arc(mouse_x__cm, mouse_y__cm, 5, 0, 2 * M_PI);
     cr->stroke();
+
+    // iterate through layers and draw them in order of appearance
+    for (auto& l : layers) {
+        if (!l.second->is_visible()) {
+            continue;
+        }
+
+        cr->save();
+        l.second->on_draw(*this, cr);
+        cr->restore();
+    }
 
     return false;
 }

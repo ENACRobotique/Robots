@@ -8,7 +8,7 @@
  ============================================================================
  */
 
-#include "MonitoringHMI.h"
+#include "WinMain.h"
 
 #include <glibmm/signalproxy.h>
 #include <gtkmm/enums.h>
@@ -20,26 +20,26 @@ using namespace Gtk;
 using namespace Cairo;
 using namespace std;
 
-MonitoringHMI::MonitoringHMI() :
+WinMain::WinMain() :
         m_paned(ORIENTATION_VERTICAL), m_button("Hello World") {
-    m_button.signal_clicked().connect(sigc::mem_fun(*this, &MonitoringHMI::on_button_clicked));
-    m_paned.add1(m_button);
+//    m_button.signal_clicked().connect(sigc::mem_fun(*this, &WinMain::on_button_clicked));
+//    m_paned.add1(m_button);
+//    m_button.show();
+//
+//    m_paned.add2(daplayground);
+//    daplayground.show();
+//
+//    add(m_paned);
+//    m_paned.show();
+    m_button.signal_clicked().connect(sigc::mem_fun(*this, &WinMain::on_button_clicked));
+    m_box.add(m_button);
     m_button.show();
 
-    m_paned.add2(m_da);
-    m_da.show();
+    m_box.add(daplayground);
+    daplayground.set_hexpand(true);
+    daplayground.set_vexpand(true);
+    daplayground.show();
 
-    add(m_paned);
-    m_paned.show();
-}
-
-MonitoringHMI::~MonitoringHMI() {
-}
-
-DAPlayground& MonitoringHMI::daplayground() {
-    return m_da;
-}
-
-void MonitoringHMI::on_button_clicked() {
-    cout << "Hello World" << endl;
+    add(m_box);
+    m_box.show();
 }
