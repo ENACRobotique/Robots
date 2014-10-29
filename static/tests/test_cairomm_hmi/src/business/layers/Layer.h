@@ -48,7 +48,7 @@ public:
         return visible;
     }
 
-    bool on_event(DAPlayground& dap, GdkEvent& event) {
+    virtual bool on_event(DAPlayground& dap, const GdkEvent& event) {
         return false; // return true if handled here
     }
 

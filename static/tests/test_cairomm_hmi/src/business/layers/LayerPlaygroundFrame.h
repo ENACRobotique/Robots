@@ -6,7 +6,7 @@
  */
 
 #ifndef BUSINESS_LAYERS_LAYERPLAYGROUNDFRAME_H_
-#define BUSINESS_LAYERS_LAYERPLAYGROUNDOUTLINE_H_
+#define BUSINESS_LAYERS_LAYERPLAYGROUNDFRAME_H_
 
 #include <business/layers/Layer.h>
 #include <cairomm/context.h>
@@ -27,7 +27,7 @@ public:
             Layer(name, group) {
     }
 
-    virtual void on_draw(DAPlayground& dap, const Cairo::RefPtr<Cairo::Context>& cr);
+    virtual void on_draw(DAPlayground& dap, const Cairo::RefPtr<Cairo::Context>& cr) override;
 };
 
 #endif /* BUSINESS_LAYERS_LAYERPLAYGROUNDFRAME_H_ */

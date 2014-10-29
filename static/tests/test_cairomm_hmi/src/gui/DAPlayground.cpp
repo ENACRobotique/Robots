@@ -5,15 +5,13 @@
  *      Author: ludo6431
  */
 
-#include <cairomm/matrix.h>
 #include <gdkmm/device.h>
-#include <gdkmm/rectangle.h>
 #include <gdkmm/window.h>
-#include <glib/gmacros.h>
 #include <glib/gmain.h>
 #include <gui/DAPlayground.h>
 #include <cmath>
 #include <cstdio>
+#include <iterator>
 #include <utility>
 
 using namespace Cairo;
@@ -28,7 +26,7 @@ static bool invalidate(DAPlayground *dap) {
 }
 
 DAPlayground::DAPlayground() :
-        DrawingArea() {
+        DrawingArea(), P0(identity_matrix()) {
     // gtk widget
     widget_width__px = 0;
     widget_height__px = 0;
@@ -54,12 +52,6 @@ DAPlayground::DAPlayground() :
     center_y_incr__cm = 0;
 
     // mouse interaction
-    mouse_lastpress_moved = false;
-    user_mouse_lastpress_moved = false;
-    mouse_lastpress_x__px = 0;
-    mouse_lastpress_y__px = 0;
-    mouse_lastpress_x__cm = 0;
-    mouse_lastpress_y__cm = 0;
     mouse_moved = false;
     user_mouse_moved = false;
     mouse_x__px = 0;
@@ -74,21 +66,6 @@ DAPlayground::DAPlayground() :
 
 DAPlayground::~DAPlayground() {
 
-}
-
-// point selection
-void DAPlayground::event_click__px(double x, double y) {
-    mouse_lastpress_x__px = x;
-    mouse_lastpress_y__px = y;
-    mouse_lastpress_moved = true;
-}
-bool DAPlayground::state_click_moved() {
-    return user_mouse_lastpress_moved ? (user_mouse_lastpress_moved = false, true) : false;
-}
-
-void DAPlayground::state_get_click__cm(double& x, double& y) {
-    x = mouse_lastpress_x__cm;
-    y = mouse_lastpress_y__cm;
 }
 
 // hover
@@ -149,17 +126,8 @@ void DAPlayground::event_scale_rel(double s) {
 }
 
 void DAPlayground::prepare_draw(const RefPtr<Context>& cr) {
-    Matrix P0(cr->get_matrix());
-
     widget_width__px = get_allocated_width();
     widget_height__px = get_allocated_height();
-
-//    static int prevw = -1, prevh = -1;
-//    if (widget_width__px != prevw || widget_height__px != prevh) {
-//        prevw = widget_width__px;
-//        prevh = widget_height__px;
-//        printf("w:%i\th:%i\n", widget_width__px, widget_height__px);
-//    }
 
     if (center_cm_moved) {
         center_x__cm += center_x_incr__cm;
@@ -177,9 +145,6 @@ void DAPlayground::prepare_draw(const RefPtr<Context>& cr) {
     cr->scale(scale, scale);
     cr->translate(-center_x__cm, -center_y__cm);
 
-//    Matrix m = cr->get_matrix();
-//    printf("  %.2f\t%.2f\t%.2f\n  %.2f\t%.2f\t%.2f\n", m.xx, m.xy, m.x0, m.yx, m.yy, m.y0);
-
     if (center_px_moved) {
         center_x__cm = (double) widget_width__px / 2.;
         center_y__cm = (double) widget_height__px / 2.;
@@ -192,41 +157,18 @@ void DAPlayground::prepare_draw(const RefPtr<Context>& cr) {
     if (mouse_moved) {
         mouse_x__cm = mouse_x__px;
         mouse_y__cm = mouse_y__px;
-//        P0.transform_point(mouse_x__cm, mouse_y__cm);
         da_to_device(mouse_x__cm, mouse_y__cm);
         cr->device_to_user(mouse_x__cm, mouse_y__cm);
         user_mouse_moved = true;
         mouse_moved = false;
     }
-
-    if (mouse_lastpress_moved) {
-        mouse_lastpress_x__cm = mouse_lastpress_x__px;
-        mouse_lastpress_y__cm = mouse_lastpress_y__px;
-//        P0.transform_point(mouse_lastpress_x__cm, mouse_lastpress_y__cm);
-        da_to_device(mouse_lastpress_x__cm, mouse_lastpress_y__cm);
-        cr->device_to_user(mouse_lastpress_x__cm, mouse_lastpress_y__cm);
-        user_mouse_lastpress_moved = true;
-        mouse_lastpress_moved = false;
-    }
 }
 
 bool DAPlayground::on_draw(const RefPtr<Context>& cr) {
+    cr->get_matrix(P0);
+
     // prepare
     prepare_draw(cr);
-
-    // draw previous click
-    {
-        if (state_click_moved()) {
-            printf("x:%.2f, y:%.2f\n", mouse_lastpress_x__px, mouse_lastpress_y__px);
-        }
-
-        cr->arc(mouse_lastpress_x__cm, mouse_lastpress_y__cm, 5, 0, 2 * M_PI);
-        cr->stroke();
-    }
-
-    cr->set_source_rgb(1, 0, 0);
-    cr->arc(mouse_x__cm, mouse_y__cm, 5, 0, 2 * M_PI);
-    cr->stroke();
 
     // iterate through layers and draw them in order of appearance
     for (auto& l : layers) {
@@ -239,13 +181,16 @@ bool DAPlayground::on_draw(const RefPtr<Context>& cr) {
         cr->restore();
     }
 
+    // draw current mouse position
+    cr->set_source_rgb(1, 0, 0);
+    cr->arc(mouse_x__cm, mouse_y__cm, 5, 0, 2 * M_PI);
+    cr->stroke();
+
     return false;
 }
 
 bool DAPlayground::on_button_press_event(GdkEventButton* event) {
     if (event->button == 1) {
-        event_click__px(event->x, event->y);
-
         event_pan_start__px(event->x, event->y);
     }
 
@@ -286,4 +231,19 @@ bool DAPlayground::on_scroll_event(GdkEventScroll* event) {
     }
 
     return true;
+}
+
+bool DAPlayground::on_event(GdkEvent* event) {
+    // iterate through layers in reverse order (more prior last) and call on_event
+    for (auto it = layers.rbegin(); it != layers.rend(); it++) {
+        if (!it->second->is_visible()) {
+            continue;
+        }
+
+        if (it->second->on_event(*this, *event)) {
+            break;
+        }
+    }
+
+    return false;
 }

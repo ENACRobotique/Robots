@@ -29,7 +29,7 @@ public:
             Layer(name, group) {
     }
 
-    virtual void on_draw(DAPlayground& dap, const Cairo::RefPtr<Cairo::Context>& cr);
+    virtual void on_draw(DAPlayground& dap, const Cairo::RefPtr<Cairo::Context>& cr) override;
 };
 
 #endif /* BUSINESS_LAYERS_LAYERPLAYGROUNDGRID_H_ */

@@ -8,6 +8,7 @@
  ============================================================================
  */
 
+#include <business/layers/LayerPlaygroundClicks.h>
 #include <business/layers/LayerPlaygroundFrame.h>
 #include <business/layers/LayerPlaygroundGrid.h>
 #include <business/layers/LayerPlaygroundOutline.h>
@@ -33,6 +34,7 @@ int main(int argc, char *argv[]) {
     dap.layers["outline"] = new LayerOutline();
     dap.layers["grid"] = new LayerGrid();
     dap.layers["frame"] = new LayerFrame();
+    dap.layers["clicks"] = new LayerClicks();
 
     return app->run(win);
 }

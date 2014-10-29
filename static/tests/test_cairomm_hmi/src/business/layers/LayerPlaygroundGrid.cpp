@@ -6,11 +6,9 @@
  */
 
 #include <business/layers/LayerPlaygroundGrid.h>
-#include <gdkmm/window.h>
 #include <glib/gmacros.h>
 #include <gui/DAPlayground.h>
 #include <cmath>
-#include <iostream>
 #include <vector>
 
 using namespace std;

@@ -8,13 +8,11 @@
  ============================================================================
  */
 
-#include "WinMain.h"
-
 #include <glibmm/signalproxy.h>
 #include <gtkmm/enums.h>
+#include <gui/WinMain.h>
 #include <sigc++/connection.h>
 #include <sigc++/functors/mem_fun.h>
-#include <iostream>
 
 using namespace Gtk;
 using namespace Cairo;

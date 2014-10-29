@@ -10,6 +10,7 @@
 
 #include <business/layers/Layer.h>
 #include <cairomm/context.h>
+#include <cairomm/matrix.h>
 #include <cairomm/refptr.h>
 #include <gdk/gdk.h>
 #include <gtkmm/drawingarea.h>
@@ -52,12 +53,8 @@ public:
     }
 
     // geometry
-    void da_to_device(double& x, double& y){
-        int ix, iy;
-        get_window()->get_position(ix, iy);
-
-        x += ix;
-        y += iy;
+    inline void da_to_device(double& x, double& y) {
+        P0.transform_point(x, y);
     }
 
     // layers management
@@ -65,17 +62,19 @@ public:
 
 protected:
     // ### signal handlers ###
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
-    bool on_button_press_event(GdkEventButton* event);
-    bool on_motion_notify_event(GdkEventMotion* event);
-    bool on_button_release_event(GdkEventButton* event);
-    bool on_scroll_event(GdkEventScroll* event);
+    bool on_event(GdkEvent* event) override;
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
+    bool on_button_press_event(GdkEventButton* event) override;
+    bool on_motion_notify_event(GdkEventMotion* event) override;
+    bool on_button_release_event(GdkEventButton* event) override;
+    bool on_scroll_event(GdkEventScroll* event) override;
 
     // ### protected methods ###
     void prepare_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 
     // ### protected attributes ###
     int widget_width__px, widget_height__px; // (px)
+    Cairo::Matrix P0;
 
     // world
     double wld_width__cm, wld_height__cm; // (cm)
@@ -89,9 +88,6 @@ protected:
     double center_x_incr__cm, center_y_incr__cm; // (cm)
 
     // mouse interaction
-    bool mouse_lastpress_moved, user_mouse_lastpress_moved;
-    double mouse_lastpress_x__px, mouse_lastpress_y__px; // (px)
-    double mouse_lastpress_x__cm, mouse_lastpress_y__cm; // (cm)
     bool mouse_moved, user_mouse_moved;
     double mouse_x__px, mouse_y__px; // (px)
     double mouse_x__cm, mouse_y__cm; // (cm)
