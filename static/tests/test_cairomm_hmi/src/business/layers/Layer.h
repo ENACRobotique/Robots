@@ -18,11 +18,11 @@ class DAPlayground;
 class Layer {
 public:
     Layer(std::string name) :
-            name(name), group(""), visible(false) {
+            name(name), group(""), active(false) {
     }
 
     Layer(std::string name, std::string group) :
-            name(name), group(group), visible(false) {
+            name(name), group(group), active(false) {
     }
 
     virtual ~Layer() {
@@ -36,16 +36,16 @@ public:
         return group;
     }
 
-    void set_visible(bool visible) {
-        this->visible = visible;
+    void set_active(bool active) {
+        this->active = active;
     }
 
-    void toggle_visible() {
-        visible = !visible;
+    void toggle_active() {
+        active = !active;
     }
 
-    bool is_visible() const {
-        return visible;
+    bool is_active() const {
+        return active;
     }
 
     virtual bool on_event(DAPlayground& dap, const GdkEvent& event) {
@@ -58,7 +58,7 @@ public:
 protected:
     std::string name;
     std::string group;
-    bool visible;
+    bool active;
 };
 
 #endif /* BUSINESS_LAYERS_LAYER_H_ */

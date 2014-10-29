@@ -26,7 +26,7 @@ public:
 
     LayerClicks(std::string name, std::string group) :
             Layer(name, group) {
-        visible = true;
+        active = true;
 
         mouse_lastpress_moved = false;
         user_mouse_lastpress_moved = false;

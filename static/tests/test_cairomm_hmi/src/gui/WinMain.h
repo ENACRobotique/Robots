@@ -25,7 +25,7 @@ protected:
     void on_button_clicked() {
         std::cout << "Hello World" << std::endl;
 
-        daplayground.layers["grid"]->toggle_visible();
+        daplayground.layers["grid"]->toggle_active();
     }
 
     bool on_da_draw(const Cairo::RefPtr<Cairo::Context>& cr);

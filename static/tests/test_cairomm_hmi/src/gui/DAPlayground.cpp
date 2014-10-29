@@ -172,7 +172,7 @@ bool DAPlayground::on_draw(const RefPtr<Context>& cr) {
 
     // iterate through layers and draw them in order of appearance
     for (auto& l : layers) {
-        if (!l.second->is_visible()) {
+        if (!l.second->is_active()) {
             continue;
         }
 
@@ -236,7 +236,7 @@ bool DAPlayground::on_scroll_event(GdkEventScroll* event) {
 bool DAPlayground::on_event(GdkEvent* event) {
     // iterate through layers in reverse order (more prior last) and call on_event
     for (auto it = layers.rbegin(); it != layers.rend(); it++) {
-        if (!it->second->is_visible()) {
+        if (!it->second->is_active()) {
             continue;
         }
 

@@ -17,17 +17,17 @@ class LayerOutline: public Layer {
 public:
     LayerOutline() :
             Layer("Outline", "Playground") {
-        visible = true;
+        active = true;
     }
 
     LayerOutline(std::string name) :
             Layer(name, "Playground") {
-        visible = true;
+        active = true;
     }
 
     LayerOutline(std::string name, std::string group) :
             Layer(name, group) {
-        visible = true;
+        active = true;
     }
 
     virtual void on_draw(DAPlayground& dap, const Cairo::RefPtr<Cairo::Context>& cr) override;
