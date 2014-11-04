@@ -3,8 +3,10 @@
 
 #include <gpio.h>
 
+
 // Tests or methods of operation
 	#define DVLPT_BOARD
+//	#define SMALL_WHL
 //#define LOW_CONSUMPTION
 //	#define ENCODER
 
@@ -35,8 +37,8 @@
 		#define PIN_SCL 2
 		#define BK_SCL  0
 		// Data
-		#define PIN_DATA 3
-		#define BK_DATA  0
+		#define PIN_SDA 3
+		#define BK_SDA  0
 	//// Pins for UART
 		// TX
 		#define PIN_TX 8
@@ -114,7 +116,11 @@
 
 
 //// Param wheel
+#ifdef SMALL_WHEEL
 #define RAY_WHEEL  0.035 // in meters
+#else
+#define RAY_WHEEL (3.25*INCH2METERS)
+#endif
 
 
 #endif // PARAM_H
