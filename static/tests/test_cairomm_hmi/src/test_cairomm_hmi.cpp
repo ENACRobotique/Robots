@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     DAPlayground& dap = win.daplayground;
     win.set_title("test_cairomm_hmi");
     win.set_position(WIN_POS_CENTER);
-    win.set_default_size(initialSizeFactor * dap.world_width__cm(), (initialSizeFactor + 0.5) * dap.world_height__cm());
+    win.set_default_size((initialSizeFactor + 0.5) * dap.world_width__cm(), initialSizeFactor * dap.world_height__cm());
 
     dap.layers["outline"] = new LayerOutline();
     dap.layers["grid"] = new LayerGrid();

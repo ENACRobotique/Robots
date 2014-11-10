@@ -9,6 +9,7 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/window.h>
 #include <gui/DAPlayground.h>
+#include <gui/parts/Folder.h>
 #include <iostream>
 
 class WinMain: public Gtk::Window {
@@ -34,6 +35,8 @@ protected:
     Gtk::Paned m_paned;
     Gtk::Box m_box;
     Gtk::Button m_button;
+
+    Folder f;
 };
 
 #endif // GTKMM_EXAMPLE_HELLOWORLD_H
