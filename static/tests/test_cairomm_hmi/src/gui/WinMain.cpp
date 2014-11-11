@@ -8,6 +8,10 @@
  ============================================================================
  */
 
+#include <business/layers/LayerPlaygroundClicks.h>
+#include <business/layers/LayerPlaygroundFrame.h>
+#include <business/layers/LayerPlaygroundGrid.h>
+#include <business/layers/LayerPlaygroundOutline.h>
 #include <glibmm/signalproxy.h>
 #include <gtkmm/enums.h>
 #include <gui/parts/ViewLayersList.h>
@@ -20,35 +24,31 @@ using namespace Cairo;
 using namespace std;
 
 WinMain::WinMain() :
-        m_paned(ORIENTATION_VERTICAL), m_button("Hello World") {
-//    m_button.signal_clicked().connect(sigc::mem_fun(*this, &WinMain::on_button_clicked));
-//    m_paned.add1(m_button);
-//    m_button.show();
-//
-//    m_paned.add2(daplayground);
-//    daplayground.show();
-//
-//    add(m_paned);
-//    m_paned.show();
-    m_button.signal_clicked().connect(sigc::mem_fun(*this, &WinMain::on_button_clicked));
-//    m_box.add(m_button);
-    m_button.show();
+        m_paned(ORIENTATION_HORIZONTAL), m_button("Hello World") {
 
-    m_box.add(daplayground);
-    daplayground.set_hexpand(true);
-    daplayground.set_vexpand(true);
-    daplayground.show();
+    // FIXME re-design layers storage for easier update management and easier iteration on group/name
+    daplayground.layers["outline"] = new LayerOutline();
+    daplayground.layers["grid"] = new LayerGrid();
+    daplayground.layers["frame"] = new LayerFrame();
+    daplayground.layers["clicks"] = new LayerClicks();
 
+    add(m_paned);
     {
-        m_box.add(f);
+        m_paned.pack1(daplayground, true, false);
+        {
+            daplayground.set_hexpand(true);
+            daplayground.set_vexpand(true);
+        }
+        daplayground.show();
 
-        f.add(new View(m_button, "blah"));
-        f.show();
-
-        f.add(new ViewLayersList());
+        m_paned.pack2(f, false, false);
+        {
+            f.add(new ViewLayersList(daplayground.layers, "layers"));
+            f.add(new View(m_button, "hello"));
+            m_button.signal_clicked().connect(sigc::mem_fun(*this, &WinMain::on_button_clicked));
+            m_button.show();
+        }
         f.show();
     }
-
-    add(m_box);
-    m_box.show();
+    m_paned.show();
 }

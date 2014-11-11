@@ -13,21 +13,28 @@
 
 class View {
 private:
-    Gtk::Widget& child;
-    Gtk::Widget* const lbl;
+    Gtk::Widget& _widget;
+    Gtk::Widget* const _lbl;
 
 public:
-    View(Gtk::Widget& child, const Glib::ustring& label) :
-            child(child), lbl(new Gtk::Label(label)) {
-        lbl->show();
+    View(Gtk::Widget& widget, const Glib::ustring& label) :
+            _widget(widget), _lbl(new Gtk::Label(label)) {
+        _lbl->show();
+    }
+
+    virtual ~View() {
     }
 
     Gtk::Widget& widget() const {
-        return child;
+        return _widget;
     }
 
     Gtk::Widget& label() const {
-        return *lbl;
+        return *_lbl;
+    }
+
+    virtual Gtk::Widget& child() const {
+        return _widget;
     }
 };
 

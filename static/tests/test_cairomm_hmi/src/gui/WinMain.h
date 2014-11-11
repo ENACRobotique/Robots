@@ -29,8 +29,6 @@ protected:
         daplayground.layers["grid"]->toggle_active();
     }
 
-    bool on_da_draw(const Cairo::RefPtr<Cairo::Context>& cr);
-
     //Member widgets:
     Gtk::Paned m_paned;
     Gtk::Box m_box;

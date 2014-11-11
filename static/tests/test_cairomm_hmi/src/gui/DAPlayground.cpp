@@ -8,6 +8,7 @@
 #include <gdkmm/device.h>
 #include <gdkmm/window.h>
 #include <glib/gmain.h>
+#include <glibmm/refptr.h>
 #include <gui/DAPlayground.h>
 #include <cmath>
 #include <cstdio>
@@ -20,7 +21,9 @@ using namespace Gdk;
 using namespace std;
 
 static bool invalidate(DAPlayground *dap) {
-    dap->get_window()->invalidate(true);
+    Glib::RefPtr<Gdk::Window> win = dap->get_window();
+    if (win)
+        win->invalidate(true);
 
     return true;
 }

@@ -22,7 +22,7 @@ public:
 
         append_page(v->widget(), v->label());
 
-        v->widget().show();
+        v->child().show();
     }
 };
 

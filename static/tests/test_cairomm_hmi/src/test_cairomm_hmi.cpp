@@ -31,10 +31,11 @@ int main(int argc, char *argv[]) {
     win.set_position(WIN_POS_CENTER);
     win.set_default_size((initialSizeFactor + 0.5) * dap.world_width__cm(), initialSizeFactor * dap.world_height__cm());
 
-    dap.layers["outline"] = new LayerOutline();
-    dap.layers["grid"] = new LayerGrid();
-    dap.layers["frame"] = new LayerFrame();
-    dap.layers["clicks"] = new LayerClicks();
+// FIXME re-design layers storage for easier update management and easier iteration on group/name
+//    dap.layers["outline"] = new LayerOutline();
+//    dap.layers["grid"] = new LayerGrid();
+//    dap.layers["frame"] = new LayerFrame();
+//    dap.layers["clicks"] = new LayerClicks();
 
     return app->run(win);
 }
