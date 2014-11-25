@@ -31,7 +31,7 @@
 #define UART_READBYTE_TIMEOUT 10000
 
 #undef ADDR_DEBUG_DFLT
-#define ADDR_DEBUG_DFLT 0
+#define ADDR_DEBUG_DFLT ADDRX_PC1
 
 
 #endif /* NODE_CFG_H_ */
