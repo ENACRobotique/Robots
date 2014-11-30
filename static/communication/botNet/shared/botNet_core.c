@@ -597,7 +597,8 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
 #if MYADDRX !=0
     case IF_XBEE :
         while (retVal<=0 && retries<BN_MAX_RETRIES){
-            retVal=Xbee_send(msg, routeInfo.nextHop);
+            if (bn_isBroadcast(msg->header.destAddr)) retVal=Xbee_sendBroadcast(msg, routeInfo.nextHop);
+            else retVal=Xbee_send(msg, routeInfo.nextHop);
             retries++; //FIXME : handling duplicate receive (ie check last seqnum in bn_routine)
         }
         return retVal;
