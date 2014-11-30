@@ -506,6 +506,10 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
             routeInfo->nextHop=msg->header.destAddr;
             return;
         }
+        else if (bn_isBroadcast(msg->header.destAddr)){
+            routeInfo->ifTo=IF_LOCAL;
+            routeInfo->nextHop=msg->header.destAddr;
+        }
         else {
             routeInfo->ifTo=IF_DROP;
             return;
