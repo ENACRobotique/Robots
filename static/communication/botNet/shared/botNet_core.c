@@ -183,7 +183,7 @@ int bn_send(sMsg *msg){
  */
 int bn_sendBroadcast(sMsg *msg){
     // checks if broadcast address
-    if ( !(msg->header.destAddr & BCAST_SUBNET) || (msg->header.destAddr & ~SUBNET_MASK) != (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_BCAST_ADDR;
+    if (bn_isBroadcast(msg->header.destAddr)) return -ERR_BN_NO_BCAST_ADDR;
     //sets ack bit
     msg->header.ack=0;
 

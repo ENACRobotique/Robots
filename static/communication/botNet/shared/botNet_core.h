@@ -70,6 +70,20 @@ int bn_popInBuf(sMsgIf * msg);
 sMsgIf *bn_getInBufFirst();
 void bn_freeInBufFirst();
 
+
+/*
+ * bn_isBroadcast : test if an adress is a broadcast one
+ * Arguments :
+ *      addr : adress to test
+ * Return Value :
+ *      1 if  the adress is broadcast;
+ *      0 if it is not.
+ */
+inline int bn_isBroadcast(bn_Address addr){
+    if ( !(addr & BCAST_SUBNET) || (addr & ~SUBNET_MASK) != (BIT(DEVICE_ADDR_SIZE)-1) ) return 0;
+    return 1;
+}
+
 #ifdef __cplusplus
 }
 #endif
