@@ -20,7 +20,7 @@
  *          |                       |
  *          |      +--> Trigo       |
  *          |___Mot1        Mot2____|
- *          |     <--+ Notrigo      |
+ *          |     <--+ NoTrigo      |
  *          |                       |
  *          _/ Q_L1                 _/ Q_L2
  *          |                       |
@@ -31,7 +31,7 @@
 
 volatile float speedCons; // Consign wheel speed in inc/T
 float speed_mes; // Wheel speed in inc/T
-float speedCmd; // Speed command for motor
+float speedErr; // Speed command for motor
 volatile eMotorDir dirCons; // Consign wheel direction
 int timeStartLoop;
 unsigned int prevLEDMillis = 0;
@@ -143,8 +143,8 @@ int main() {
 			}
 
 			// Calculation of speed command & pwmCmd
-			speedCmd = (speed_mes - speedCons);
-			pwmCmd = PWM_RANGE*ROUND(speedCmd/mPerS2IncPerT(MAX_SPEED));
+			speedErr = (speed_mes - speedCons);
+			pwmCmd = PWM_RANGE*ROUND(speedErr/mPerS2IncPerT(MAX_SPEED));
 			if(pwmCmd >= PWM_RANGE)
 				pwmCmd = PWM_RANGE;
 			else if(pwmCmd <= 0)
@@ -157,7 +157,7 @@ int main() {
 #else
 			controlMotor(c*PWM_RANGE/15, dirCons, motOp);
 #endif
-//		}
+//		} // if((millis() - timeStartLoop) >= 0)
 
 	} // ############## End loop ############################################
 }
