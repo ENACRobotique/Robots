@@ -11,7 +11,7 @@
 
 #define M_PI 3.14159265358979323846
 #define ROUND(x) (x>0? (long)(x+0.5) : (long)(x-0.5))
-#define INCH2METERS 0,0254.
+#define INCH2METERS 0.0254
 
 
 float incPerT2mPerS(float incPerT);
