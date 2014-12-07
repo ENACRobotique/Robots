@@ -25,20 +25,19 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>lpc2148</name>
+			<name>lib</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/lpc21xx/lpc2148</locationURI>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>lpc_lib</name>
+			<name>lib/lpc2148</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/lpc21xx/lpc_lib</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/core/lpc21xx/lpc2148</locationURI>
+		</link>
+		<link>
+			<name>lib/lpc_lib</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/core/lpc21xx/lpc_lib</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>file:/home/yoyo/Robots/static/core</value>
-		</variable>
-	</variableList>
 </projectDescription>
