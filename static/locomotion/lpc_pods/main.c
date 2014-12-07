@@ -70,9 +70,21 @@ int main() {
 		pwm_enable(1, pwmCmd /* between 0 and range specified in pwm_init */);
 		pwm_enable(2, pwmCmd);
 #ifdef ENCODER
-		// Init IRQ
-		global_IRQ_disable();
-		eint_init(isr_eint0 /* rising edge channel A */, isr_eint3 /* rising edge channel B */);
+		// External interrupts
+		// rising edge channel A
+	    eint_disable(EINT0);
+	    eint_assign(EINT0_P0_16); // FIXME use the right assignation
+	    eint_mode(EINT0, EINT_RISING_EDGE);
+	    eint_register(EINT0, isr_eint0, 2);
+	    eint_enable(EINT0);
+	    // rising edge channel B
+	    eint_disable(EINT3);
+	    eint_assign(EINT3_P0_20); // FIXME use the right assignation
+	    eint_mode(EINT3, EINT_RISING_EDGE);
+	    eint_register(EINT3, isr_eint3, 3);
+	    eint_enable(EINT3);
+
+		// Enable IRQ
 		global_IRQ_enable();
 #endif
 
