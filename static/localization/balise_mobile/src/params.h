@@ -20,11 +20,13 @@ typedef enum{
 } mainState;
 
 
-#define SENDING_PERIOD 1100 //in ms
+#define SENDING_PERIOD 100 //in ms
 
 //#define DEBUG
 //#define DEBUG_SYNC
 //#define DEBUG_SYNC_VALUES
+#define VERBOSE_SYNC
+//#define DEBUG_PRINTLASER
 //#define DEBUG_CALIBRATION
 
 #if MYADDRX==ADDRX_MOBILE_1             // the beacon with a "1" written in red on the PCB

@@ -17,6 +17,7 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../network_tools/bn_debug.h"
+#include "../network_tools/bn_utils.h"
 #include "../../global_errors.h"
 #include "node_cfg.h"
 
@@ -30,13 +31,16 @@
 #include "obj_fire.h"
 #include "obj_fruit.h"
 #include "obj_statuses.h"
+#include "main.h"
 
 
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
 void updateNoHaftTurn(sNum_t theta, sPt_t *pt);
 sNum_t val_obj(int num);
 int8_t next_obj (void);
-void obj_step(void);
-int obj_init(void);
+void obj_step(eAIState_t AIState);
+int obj_init(eAIState_t AIState);
+
+extern int switch_left, switch_right;
 
 #endif /* OBJ_H_ */

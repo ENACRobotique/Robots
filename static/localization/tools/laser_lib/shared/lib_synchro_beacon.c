@@ -188,7 +188,7 @@ void syncComputationFinal(sSyncPayload *pload){
 #ifdef DEBUG_SYNC
         sum_O>>=EVIL_SHIFT;
         int64_t beta=(sum_ones*sum_OD-sum_D*sum_O)*1000/det;
-        bn_printfDbg("det  %ld %ld,Delta_init %lu, beta =%ld°",(int32_t)(det>>32),(int32_t)det,syncParam.initialDelay,(int32_t)(beta*360)/1000);
+        bn_printfDbg("det %ld %ld,Delta_init %lu, %ld°, nb %lli",(int32_t)(det>>32),(int32_t)det,syncParam.initialDelay,(int32_t)(beta*360)/1000,sum_ones);
 #endif
     }
 #undef EVIL_SHIFT

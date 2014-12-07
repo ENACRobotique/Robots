@@ -43,6 +43,7 @@ typedef volatile unsigned char * pREG8;
 #define VIC_VectAddr            (*((pREG32) (0xfffff030)))
 #define VIC_DefVectAddr         (*((pREG32) (0xfffff034)))
 
+#define VIC_VectAddrN(n)        (*(&VIC_VectAddr0 + (n)))
 #define VIC_VectAddr0           (*((pREG32) (0xfffff100)))
 #define VIC_VectAddr1           (*((pREG32) (0xfffff104)))
 #define VIC_VectAddr2           (*((pREG32) (0xfffff108)))
@@ -60,6 +61,7 @@ typedef volatile unsigned char * pREG8;
 #define VIC_VectAddr14          (*((pREG32) (0xfffff138)))
 #define VIC_VectAddr15          (*((pREG32) (0xfffff13c)))
 
+#define VIC_VectCntlN(n)        (*(&VIC_VectCntl0 + (n)))
 #define VIC_VectCntl0           (*((pREG32) (0xfffff200)))
 #define VIC_VectCntl1           (*((pREG32) (0xfffff204)))
 #define VIC_VectCntl2           (*((pREG32) (0xfffff208)))

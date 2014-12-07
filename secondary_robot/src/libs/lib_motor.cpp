@@ -12,7 +12,7 @@ this library contains the different functions useful for the motor and its contr
 #endif
 
 //globals
-int _motCon=0;
+int _motCon;//********************************************************************************************
 
 int _motPinDir,_motPinPWM;
 
@@ -29,10 +29,18 @@ void motorInitHard(int pinDir,int pinPWM){
 #define KP  4// >>2 , with ziegler nichols (Ku = 9>>2, Tu=80ms)
 #define KI  1// >>2
 
+void motAsserTemp() // 254 est la vitesse max en fonction de la charge de la batterie
+	{
+	analogWrite(_motPinPWM,abs(_motCon));
+	if(_motCon>0)digitalWrite(_motPinDir,LOW);
+	else digitalWrite(_motPinDir,HIGH);
+	//Serial.print(_motCon);
+	}
+
 void motAsser(){
     unsigned long int time=millis();
     int eps;
-    static int intEps;
+    static int intEps=0;
     static unsigned long time_prev_asser=millis();
     static int _motCmd=0;
 
@@ -41,13 +49,21 @@ void motAsser(){
         if ( (time-time_prev_asser) < MOT_ASSER_PERIOD+MOT_ASSER_PERIOD/2 ){
             time_prev_asser = time_prev_asser + MOT_ASSER_PERIOD;
             //compute error (epsilon)
-            int read=odoRead();
-            eps=_motCon+read; //odoRead is negative if the robot is going forward
+            int read = odoRead();
+            eps = _motCon - read;//odoRead is negative if the robot is going forward "red side"
+
             //compute error integral
-            intEps=CLAMP( -(64<<4),intEps+eps, (64<<4)  );
+            intEps= CLAMP( -(64<<4) ,intEps+eps, (64<<4));
 
             //compute command
-            _motCmd=  ((KP*eps)>>2) + ((KI*intEps)>>2);
+            if(_motCon==0){
+            _motCmd=0;
+            }
+            else{
+            	_motCmd=  ((KP*eps)>>2) + ((KI*intEps)>>2);
+            }
+
+
 #ifdef DEBUG_MOTOR
 Serial.print(_motCon);
 Serial.print("\t");
@@ -73,7 +89,7 @@ Serial.println(intEps);
               odoRead();
             }
     }
-
+  //  Serial.print( eps );
 //   // asservissement vitesse
 //  if((time-time_prev_asser)>=MOT_ASSER_PERIOD) {
 //    if ( (time-time_prev_asser) < MOT_ASSER_PERIOD+MOT_ASSER_PERIOD/2 ){

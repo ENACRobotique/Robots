@@ -10,8 +10,13 @@
 #include "obj_types.h"
 #include "obj_fct.h"
 
+float curDate = 0;
+float nbFire = 0;   //with the curDate
+int nbFireRecv = 0;
 
-void receptMsgZone(sPt_t *pt[], int nb){
+
+
+void newMsgZone(sPt_t pt[], int nb){
     int i, ret;
 
     for( i = 0 ; i < NB_OBJ ; i++){
@@ -21,12 +26,50 @@ void receptMsgZone(sPt_t *pt[], int nb){
                  listObj[i].nbObs = 1;
                  listObj[i].active = 0;
                  }
-             testPtInZone(pt[nb], nb, &obs[listObj[i].numObs[0]].c, &ret);
+             testPtInZone(&pt[nb], nb, &obs[listObj[i].numObs[0]].c, &ret);
              if(ret){
                  listObj[i].state = WAIT_MES;
                  }
              }
          }
+    }
+
+void checkMsgZone(){
+    sGenericStatus *msg;
+    static int nbpt = 0;
+    static float date_last_msg;
+    static sPt_t tab[NB_MAX_PT_ZONE];
+
+    msg = getLastPGStatus(ELT_ZONE);
+
+    while(msg != NULL){
+        if(msg->date > curDate){
+            if(msg->date == date_last_msg){
+                if(msg->zone_status.pos.frame == FRAME_PRIMARY){
+                    //TODO change the repository
+                    }
+                tab[nbpt].x = msg->zone_status.pos.x;
+                tab[nbpt].y = msg->zone_status.pos.y;
+                nbpt++;
+                }
+            else if(msg->date > date_last_msg){ //ignore old message
+                nbpt = 0;
+                date_last_msg = msg->date;
+                if(msg->zone_status.pos.frame == FRAME_PRIMARY){
+                    //TODO change the repository
+                    }
+                tab[nbpt].x = msg->zone_status.pos.x;
+                tab[nbpt].y = msg->zone_status.pos.y;
+                nbpt++;
+                }
+            if(nbpt == msg->zone_status.nbpt){
+                curDate = msg->date;
+                nbFire = msg->zone_status.nbfire;
+                newMsgZone(tab, msg->zone_status.nbpt);
+                }
+            }
+        msg = getLastPGStatus(ELT_ZONE);
+        }
     }
 
 int updateFire(sPt_t *p, uint8_t or, sNum_t angle){ //or : orientation of the fire. Use this function after receptZone
@@ -78,46 +121,8 @@ int updateFire(sPt_t *p, uint8_t or, sNum_t angle){ //or : orientation of the fi
     }
 
 int checkMsgFire(void){
-    int i;
-    static float curDate = 0;
-    static int ctFire = 0; //link with the current date
-    static int nbFire = 0;  //link with the current date
     sGenericStatus *mes = NULL;
-    sGenericZone *zone = NULL;
-    sPt_t pt, p[8];
-
-    //check if a new zone message
-    if(/*TODO message zone fire receive getLastPGZone(ELT_FIRE)*/1){
-        if(zone->date > curDate){ //message more recent receive
-            for(i = 0 ; i < zone->nbpt ; i++){
-                if(zone->pos[i].frame == FRAME_PRIMARY){
-                    //TODO change the repository and angle
-                    }
-                p[i].x = zone->pos[i].x;
-                p[i].y = zone->pos[i].y;
-                }
-            receptMsgZone(p, zone->nbpt);//FIXME warning
-            if( nbFire == ctFire){
-                for(i = 0 ; i < NB_OBJ ; i++){
-                    if((listObj[i].etype == E_FEU) && (listObj[i].state == WAIT_MES)){
-                        listObj[i].state = FREE;
-                        obs[listObj[i].numObs[0]].state = 0;
-                        }
-                    }
-                }
-            else{ //check if before some messages are lost
-                for(i = 0 ; i < NB_OBJ ; i++){
-                    if((listObj[i].etype == E_FEU) && (listObj[i].state == WAIT_MES)){
-                        listObj[i].state = ACTIVE;
-                        obs[listObj[i].numObs[0]].state = 1;
-                        }
-                    }
-                }
-            curDate = zone->date;
-            ctFire = 0;
-            nbFire = zone->fire_zone.nbfire;
-            }
-        }
+    sPt_t pt;
 
     //check if new message fire
     do{
@@ -129,7 +134,7 @@ int checkMsgFire(void){
             pt.x = mes->fire_status.pos.x;
             pt.y = mes->fire_status.pos.y;
             updateFire(&pt, mes->fire_status.state, mes->fire_status.pos.theta);
-            nbFire++;
+            nbFireRecv++;
             }
         } while(mes != NULL);
 
@@ -137,9 +142,33 @@ int checkMsgFire(void){
     }
 
 void getStatusFire(void){
+    int i;
+    sMsg msgOut;
 
-    //TODO send a message for ask a photo
+    if(nbFire == nbFireRecv){
+       for(i = 0 ; i < NB_OBJ ; i++){
+           if((listObj[i].etype == E_FEU) && (listObj[i].state == WAIT_MES)){
+               listObj[i].state = FREE;
+               obs[listObj[i].numObs[0]].state = 0;
+               }
+           }
+       }
+   else{ //check if before some messages are lost
+       for(i = 0 ; i < NB_OBJ ; i++){
+           if((listObj[i].etype == E_FEU) && (listObj[i].state == WAIT_MES)){
+               listObj[i].state = ACTIVE;
+               obs[listObj[i].numObs[0]].state = 1;
+               }
+           }
+       }
 
+    msgOut.header.destAddr = ADDRD2_MAIN_VIDEO;
+    msgOut.header.type = E_GENERIC_STATUS;
+    msgOut.header.size = 5 + sizeof(msgOut.payload.genericStatus.fire_status);
+
+    msgOut.payload.genericStatus.id = ELT_FIRE;
+
+    bn_send(&msgOut);
     }
 
 

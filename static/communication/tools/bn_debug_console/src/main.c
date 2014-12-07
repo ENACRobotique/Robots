@@ -18,6 +18,7 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../network_tools/bn_debug.h"
+#include "../network_tools/bn_intp.h"
 #include "../network_tools/bn_utils.h"
 #include "../../global_errors.h"
 #include "../../core/linux/libraries/Millis/millis.h"
@@ -134,6 +135,9 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu), seq : %02hhu ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type, msgIn.header.seqNum);
             }
             switch (msgIn.header.type){
+            case E_GENERIC_STATUS:
+                printf("%.2fcm, %.2fcm, %.2f°\n", msgIn.payload.genericStatus.prop_status.pos.x, msgIn.payload.genericStatus.prop_status.pos.y, msgIn.payload.genericStatus.prop_status.pos.theta*180./M_PI);
+                break;
             case E_ASSERV_STATS :
                 {
                     int i;
@@ -143,6 +147,18 @@ int main(int argc, char **argv){
                     for(i=0; i<NB_ASSERV_STEPS_PER_MSG; i++){
                         printf("~%hu,%hi,%hi,%hi,%hi,%hi,%hi\n", as->steps[i].delta_t, as->steps[i].ticks_l, as->steps[i].consigne_l, as->steps[i].out_l, as->steps[i].ticks_r, as->steps[i].consigne_r, as->steps[i].out_r);
                         if(fd) fprintf(fd, "~%hu,%hi,%hi,%hi,%hi,%hi,%hi\n", as->steps[i].delta_t, as->steps[i].ticks_l, as->steps[i].consigne_l, as->steps[i].out_l, as->steps[i].ticks_r, as->steps[i].consigne_r, as->steps[i].out_r);
+                    }
+                }
+                break;
+            case E_POS_STATS :
+                {
+                    int i;
+                    sPosStats *ps = &msgIn.payload.posStats;
+                    printf("seq %hu\n", ps->nb_seq);
+                    if(fd) fprintf(fd, "seq %hu\n", ps->nb_seq);
+                    for(i=0; i<NB_POS_STEPS_PER_MSG; i++){
+                        printf("~%hu,%.2f,%.2f,%.2f\n", ps->steps[i].delta_t, ((float)ps->steps[i].x)/4., ((float)ps->steps[i].y)/4., ((float)ps->steps[i].theta)/10.);
+//                        if(fd) fprintf(fd, "~%hu,%hi,%hi,%hi,%hi,%hi,%hi\n", ps->steps[i].delta_t, ps->steps[i].ticks_l, ps->steps[i].consigne_l, ps->steps[i].out_l, ps->steps[i].ticks_r, as->steps[i].consigne_r, as->steps[i].out_r);
                     }
                 }
                 break;
@@ -175,6 +191,9 @@ int main(int argc, char **argv){
             }
             else{
                 fprintf(stderr, "bn_receive() error #%i\n", -err);
+                if(err == -ERR_SYSERRNO){
+                    fprintf(stderr, "errno=%i\n", errno);
+                }
                 exit(1);
             }
         }
@@ -250,7 +269,10 @@ int main(int argc, char **argv){
                     int us;
 
                     printf("us: "); fflush(stdout);
-                    scanf("%i", &us);
+                    err = scanf("%i", &us);
+                    if (err != 1){
+                        printf("error getting us setpoint\n");
+                    }
 
                     msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
@@ -260,6 +282,59 @@ int main(int argc, char **argv){
                     msg.payload.servos.servos[0].us = us;
 
                     bn_send(&msg);
+                    break;
+                }
+                case 'g':{
+                    sMsg msg = {{0}};
+                    int us;
+                    int id;
+
+                    printf(" 0:SERVO_PRIM_DOOR\n");
+                    printf(" 1:SERVO_PRIM_FIRE1\n");
+                    printf(" 2:SERVO_PRIM_FIRE2\n");
+                    printf(" 3:SERVO_PRIM_ARM_LEFT\n");
+                    printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
+
+                    printf("id: "); fflush(stdout);
+                    err = scanf("%i", &id);
+                    if (err != 1){
+                        printf("error getting servo id\n");
+                    }
+
+                    printf("us: "); fflush(stdout);
+                    err = scanf("%i", &us);
+                    if (err != 1){
+                        printf("error getting us setpoint\n");
+                    }
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_SERVOS;
+                    msg.header.size = 2 + 3;
+                    msg.payload.servos.nb_servos = 1;
+                    msg.payload.servos.servos[0].id = id;
+                    msg.payload.servos.servos[0].us = us;
+
+                    bn_send(&msg);
+                    break;
+                }
+                case 'h':
+                    printf("Syncing propulsion..."); fflush(stdout);
+                    bn_intp_sync(role_get_addr(ROLE_PROPULSION), 100);
+                    printf("done\n");
+                    break;
+                case 'w':{
+                    sMsg msg = {{0}};
+
+                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.type = E_POS_QUERY;
+                    msg.header.size = sizeof(msg.payload.posQuery);
+
+                    msg.payload.posQuery.date = (int32_t)micros() - 200000;
+                    msg.payload.posQuery.id = ELT_PRIMARY;
+
+                    bn_send(&msg);
+
+                    printf("Sent position query\n");
                     break;
                 }
                 case 'd':{ // sends new setpoint to the propulsion // FIXME: use sGenericStatus

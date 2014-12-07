@@ -43,7 +43,7 @@ enum {
 #ifdef ARCH_LM4FXX
     //globales
     bufStruct buf[LAS_INT_TOTAL]={{{0}}};
-    ildStruct ildTable[LAS_INT_TOTAL]={0};
+    ildStruct ildTable[LAS_INT_TOTAL]={{0}};
 
 #endif
 /*
@@ -60,7 +60,7 @@ void laserIntInit() {
 #endif
 
 }
-    
+
 //do I really have to do a description ? Anyway, it probably won't be used.
 void laserIntDeinit(){
 #ifdef ARCH_328P_ARDUINO
@@ -74,7 +74,7 @@ void laserIntDeinit(){
 ldStruct laserDetect(bufStruct *bs){
     uint32_t prevCall, t = micros();
 #ifdef ARCH_LM4FXX                  // different way of using laserDetect (in interruption), so little alteration in order to make it work
-    uint32_t *bufTemp=bs->buf;
+    volatile uint32_t *bufTemp=bs->buf;
 #elif defined(ARCH_328P_ARDUINO)
     uint32_t bufTemp[8];
 #endif
@@ -307,7 +307,6 @@ return 0;
  *  0 otherwise
  */
 int newLaserMeasure(ildStruct *ilds, plStruct *plo){
-
     uint32_t tempDate=0;
 
     if (ilds->thickness){
@@ -316,8 +315,8 @@ int newLaserMeasure(ildStruct *ilds, plStruct *plo){
             plo->date=ilds->date;
             plo->deltaT=ilds->deltaT;
             plo->thickness=ilds->thickness;
+            plo->precision=4; // xxx improve
             //todo : better foe laser avoidance ( date-previous [period] = 0 +- smtg )
-            //fixme : add bn_attach of periodupdate
             plo->period=(ilds->date-ilds->prevDate)<(laser_period+(laser_period>>1))?(ilds->date-ilds->prevDate):0;
         }
         return 1;
@@ -329,7 +328,17 @@ int newLaserMeasure(ildStruct *ilds, plStruct *plo){
  *
  */
 uint32_t delta2dist(unsigned long delta, unsigned long period){
-    float temp=((float)8.006/(((float)delta/(float)period) - (float)0.001127));//<-eureqa-ifed equation //25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2) (formula found by geometry)
-    uint32_t temp2=temp;
+    uint32_t temp2=delta2distf(delta,period);
     return temp2;
+}
+
+float delta2distf(unsigned long delta, unsigned long period){
+    if(period){
+        float den = (float)delta/(float)period - 0.001127;
+        if(den){
+            return 8.006 / den; //<-eureqa-ifed equation //25/( (delta/period-0.5*3.141593/180)/2);//approx of 25/sin( (delta/laser_period-0.5*3.141593/180)/2) (formula found by geometry)
+        }
+    }
+
+    return 0.;
 }

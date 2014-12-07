@@ -14,8 +14,7 @@ motor_t motGauche, motDroit;
 #ifdef ASSERV_STATS
 #include <string.h>
 #include "shared/botNet_core.h"
-#include "shared/bn_debug.h"
-#include "millis.h"
+#include "sys_time.h"
 #include "messages.h"
 
 sMsg outMsg;
@@ -36,8 +35,8 @@ void motor_controller_init() {
     pid_init(&vitMotDroit, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
 
     // motors
-    motor_init(&motGauche, 4 /* P0.8 */, 1, 22);
-    motor_init(&motDroit,  6 /* P0.9 */, 1, 23);
+    motor_init(&motGauche, 5 /* P0.21 */, 0, 19);
+    motor_init(&motDroit,  2 /* P0.7  */, 0,  5);
 
 #ifdef ASSERV_STATS
     prev_time = micros();

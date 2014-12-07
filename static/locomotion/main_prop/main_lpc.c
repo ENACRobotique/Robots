@@ -1,40 +1,59 @@
-#include <stdlib.h>
-#include <stdio.h>
-
 #include <lpc214x.h>
-
-#include <string.h>
-#include <math.h>
-
+#include <asserv.h>
 #include <gpio.h>
-#include <eint.h>
-#include <ime.h>
-#include <pwm.h>
+#include <messages.h>
+#include <pos_history.h>
+#include <roles.h>
+#include <shared/botNet_core.h>
+#include <shared/message_header.h>
 #include <sys_time.h>
-#include <trigo.h>
 
-#include "../botNet/shared/botNet_core.h"
-#include "../network_tools/bn_debug.h"
+#include "../../communication/network_tools/bn_debug.h"
+#include "../../communication/network_tools/bn_intp.h"
 
-#include "params.h"
+// pins usage with PCB_IA_C2014R2:
+//    UART0
+//        TXD0    P0.0    EXT1.1      BOTNET          !PWM1
+//        RXD0    P0.1    EXT1.2      BOTNET          !PWM3 ~EINT0
+//    I²C0
+//        SCL0    P0.2    EXT1.3      BOTNET
+//        SDA0    P0.3    EXT1.4      BOTNET          ~EINT1
+//    EINT*
+//        EINT0   P0.16   EXT1.17     ENC_A RIGHT
+//        EINT3   P0.20   EXT1.21     ENC_A LEFT
+//    PWM*
+//        PWM5    P0.21   EXT1.22     SPEED LEFT
+//        PWM2    P0.7    EXT1.8      SPEED RIGHT     ~EINT2
+//    GPIO*
+//        OUT     P1.24   EXT2.13     Green LED
+//        OUT     P0.31   EXT2.4      Orange LED
+//        OUT     P0.19   EXT1.20     DIR LEFT
+//        OUT     P0.5    EXT1.6      DIR RIGHT
+//        IN      P0.22   EXT1.23     ENC_B LEFT
+//        IN      P0.18   EXT1.19     ENC_B RIGHT
+// for more details, see Features2Pins.txt file
 
-#include "controller.h"
-#include "asserv.h"
+void intp_sync_handler(sMsg *msg){
+    bn_intp_msgHandle(msg);
+
+    if(bn_intp_isSync()){
+        tD_setLo2GlUsOffset(bn_intp_MicrosOffset);
+    }
+}
 
 int main(int argc, char *argv[]){
-    sMsg inMsg;
+    sMsg inMsg = {{0}}, outMsg = {{0}};
     int ret, quit = 0, ledStatus = 0;
     unsigned int prevAsserv = 0, prevPos = 0, prevDbg = 0, prevLed = 0;
 
     // botNet initialization
     bn_attach(E_ROLE_SETUP, role_setup);
+    bn_attach(E_INTP, intp_sync_handler); // replaces bn_intp_install() to catch synchronization
 
     bn_init();
 
     // hardware initialization
     asserv_init();
-
-    prevAsserv = millis();
 
     // main loop
     while(!quit){
@@ -54,6 +73,17 @@ int main(int argc, char *argv[]){
 
                 new_pos(&inMsg.payload.pos);
                 break;
+            case E_POS_QUERY:
+                if(inMsg.payload.posQuery.id == ELT_PRIMARY){
+                    outMsg.header.destAddr = inMsg.header.srcAddr;
+                    outMsg.header.size = sizeof(outMsg.payload.genericStatus);
+                    outMsg.header.type = E_GENERIC_STATUS;
+
+                    if(!ph_get_pos(&outMsg.payload.genericStatus, tD_newFrom_GlUs(inMsg.payload.posQuery.date))){
+                        bn_send(&outMsg);
+                    }
+                }
+                break;
             case E_DATA:
             case E_PING:
                 break;
@@ -64,14 +94,29 @@ int main(int argc, char *argv[]){
         }
 
         if(millis() - prevAsserv >= 20){
-            prevAsserv += 20;
-
-            if(millis() - prevAsserv > 10) { // we are very late, do not take care of these data
+            if(millis() - prevAsserv > 30) { // we are very late, do not take care of these data
                 prevAsserv = millis();
                 continue;
             }
 
+            prevAsserv = millis();
+
             new_asserv_step();
+
+            // enqueue latest position
+            if(bn_intp_isSync()){
+                unsigned int p_t; // local time (µs)
+                sPHPos *slot = ph_get_new_slot_pointer();
+
+                get_pos(&slot->s.prop_status.pos, &slot->s.prop_status.pos_u, &p_t);
+
+                slot->s.date = bn_intp_micros2s(p_t); // global time
+                slot->s.id = ELT_PRIMARY;
+
+                slot->d = tD_newFrom_LoUs(p_t);
+
+                ph_incr_new_slot_pointer();
+            }
         }
 
         if(millis() - prevPos >= 100) {

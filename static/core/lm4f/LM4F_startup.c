@@ -58,7 +58,7 @@ void hardfault_handler(void);
 extern unsigned long _stack_top;
 // defined by the liker, this are just start and end marker for each section.
 // .text (code)
-extern unsigned long _start_text;
+// extern unsigned long _start_text;
 extern unsigned long _end_text;
 // .data (data to be copied on ram)
 extern unsigned long _start_data;
@@ -74,8 +74,8 @@ void(* myvectors[])(void) = {
 	// This are the fixed priority interrupts and the stack pointer loaded at startup at R13 (SP).
 	//												VECTOR N (Check Datasheet)
 	// here the compiler it's boring.. have to figure that out
-    (void (*)) &_stack_top, 
-    						// stack pointer should be 
+    (void (*)) &_stack_top,
+    						// stack pointer should be
 							// placed here at startup.			0
     rst_handler,			// code entry point					1
     nmi_handler,			// NMI handler.						2
@@ -239,38 +239,38 @@ void(* myvectors[])(void) = {
 // 							Function implementations.
 //-----------------------------------------------------------------------------
 
-/* 
+/*
 * System on reset code. NVIC 1
 * Here I prepare the memory for the c compiler.
 * The stack pointer should be set at the beginning with the NVIC table already.
 * Copy the .data segment from flash into ram.
-* 0 to the .bss segment 
+* 0 to the .bss segment
 */
-	
-void rst_handler(void){	
+
+void rst_handler(void){
 	// Copy the .data section pointers to ram from flash.
 	// Look at LD manual (Optional Section Attributes).
-	
+
 	// source and destination pointers
 	unsigned long *src;
 	unsigned long *dest;
-	
+
 	//this should be good!
 	src = &_end_text;
 	dest = &_start_data;
-	
+
 	//this too
     while(dest < &_end_data)
     {
         *dest++ = *src++;
     }
-	
+
     // now set the .bss segment to 0!
     dest = &_start_bss;
 	while(dest < &_end_bss){
 		*dest++ = 0;
 	}
-	
+
 	// after setting copying .data to ram and "zero-ing" .bss we are good
 	// to start the main() method!
 	// There you go!

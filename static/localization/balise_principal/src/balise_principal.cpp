@@ -42,8 +42,9 @@ void setup(){
     }
     devicesInfo[D_MOBILE_1].addr=ADDRX_MOBILE_1;
     devicesInfo[D_MOBILE_2].addr=ADDRX_MOBILE_2;
-    //fixme : do the same for the others
+//    devicesInfo[D_FIX].addr=ADDRX_FIX;
 
+    //fixme : do the same for the others
 
     domi_init(2,9);
 

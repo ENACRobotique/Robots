@@ -21,24 +21,19 @@ uint32_t time_prev_laser=0;
 
 
 
-plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detecion infos
-volatile uint32_t laser_period=50000;       // in µs, to be confirmed by the main robot
-uint32_t sync_lastTurnDate_stored=0,sync_period_stored=0,sync_last_received=0;
+plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detection infos
+uint32_t laser_period=50000;       // in µs, to be confirmed by the main robot
 uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the laser structure
 uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
 char chosenOne=0;                           // interruption chosen for synchronization
 
 
 char debug_led=1;
-char state=S_SYNC_ELECTION, prevState=S_BEGIN;                           // State machine state
+mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;                           // State machine state
 
 inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
 }
-
-
-
-
 
 void setup() {
   laserIntInit();
@@ -100,7 +95,7 @@ void loop() {
         memset(&laserStruct0,0,sizeof(plStruct));
         memset(&laserStruct1,0,sizeof(plStruct));
     }
-    else if (laserStruct0.thickness && (micros()-lasStrRec0)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+    else if (laserStruct0.thickness && (micros()-lasStrRec0)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later)
         uint32_t micMDate=timeMicros-laserStruct0.date;
         uint32_t micMLast=timeMicros-lastLaserDetectMicros;
 
@@ -108,7 +103,7 @@ void loop() {
         memset(&laserStruct0,0,sizeof(plStruct));
 //        memset(&laserStruct1,0,sizeof(plStruct));
     }
-    else if (laserStruct1.thickness && (micros()-lasStrRec1)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later) FIXME : use measured period
+    else if (laserStruct1.thickness && (micros()-lasStrRec1)>(laser_period>>4)){ //one laser detected and we don't expect the other one anymore (one eight of the period later)
         uint32_t micMDate=timeMicros-laserStruct1.date;
         uint32_t micMLast=timeMicros-lastLaserDetectMicros;
 
@@ -121,17 +116,24 @@ void loop() {
     if ( laserStruct.thickness ) {
         lastLaserDetectMicros=laserStruct.date;
         lastLaserDetectMillis=laserStruct.date/1000;
+        delay(8);
+#ifdef DEBUG_PRINTLASER
+        bn_printfDbg("date %lu per %lu\n",laserStruct.date,laserStruct.period);
+#endif
+    }
+
+
+// In any state, if we receive a "begin election" message, be begin election.
+    if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
+        state=S_SYNC_ELECTION;
+#ifdef VERBOSE_SYNC
+        printf("begin election");
+#endif
     }
 
 
 //STATE MACHINE
     switch (state){
-        case S_BEGIN :
-            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
-                state=S_SYNC_ELECTION;
-                printf("begin election");
-            }
-            else break;
         case S_SYNC_ELECTION :
             if (prevState!=state) {
                 // reset counters
@@ -142,7 +144,9 @@ void loop() {
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
             if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
                 chosenOne=(intLas0<intLas1?1:0);
+#ifdef VERBOSE_SYNC
                 bn_printDbg("end election\n");
+#endif
                 state=S_SYNC_MEASURES;
             }
             else {
@@ -161,8 +165,11 @@ void loop() {
             if (rxB && inMsg.header.type==E_SYNC_DATA){
                     rxB=0;
                 if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
-                    bn_printDbg("syncComputation\n");
                     syncComputationFinal(&inMsg.payload.sync);
+                    updateSync();
+#ifdef VERBOSE_SYNC
+                    bn_printfDbg("syncComputation : %lu\n",micros2s(micros()));
+#endif
                     state=S_GAME;
                 }
                 else {

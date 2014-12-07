@@ -19,7 +19,7 @@ sNum_t speed=0;
 sNum_t theta_robot=0.;
 int starting_cord = 0;
 int mode_switch = 0;
-int color = 1 ;//0=red and 1=yellow
+eColor_t color = RED ;//0=red and 1=yellow
 int current_obj=-1;
 
 sPath_t path= {.dist = 0.,  .path = NULL };
@@ -39,10 +39,10 @@ sObj_t listObj[NB_OBJ] = {
 	{.etype = E_FEU,   .state = ACTIVE, .numObj=3, .nbObs=1, .numObs[0]=START_FEU+3  , 																   .dist=0, .active=1, .done=0, .nbEP=1, .utype.fire.c={210., 40.},.utype.fire.pos=3, .utype.fire.angle=180.},
 	{.etype = E_FEU,   .state = ACTIVE, .numObj=4, .nbObs=1, .numObs[0]=START_FEU+4  ,															       .dist=0, .active=1, .done=0, .nbEP=1, .utype.fire.c={210.,140.},.utype.fire.pos=3, .utype.fire.angle=0.  },
 	{.etype = E_FEU,   .state = ACTIVE, .numObj=5, .nbObs=1, .numObs[0]=START_FEU+5  ,																   .dist=0, .active=1, .done=0, .nbEP=1, .utype.fire.c={260., 90.},.utype.fire.pos=3, .utype.fire.angle=90. },
-	{.etype = E_FEU,   .state = ACTIVE, .numObj=6, .nbObs=3, .numObs[0]=START_FEU+6  , .numObs[1]=START_TORCHE_FIXE  , .numObs[2]=START_TORCHE_FIXE+1, .dist=0, .active=0, .done=0, .nbEP=1, .utype.fire.c={1.  ,120.},.utype.fire.pos=4, .utype.fire.angle=0.  },
-	{.etype = E_FEU,   .state = ACTIVE, .numObj=7, .nbObs=3, .numObs[0]=START_FEU+7  , .numObs[1]=START_TORCHE_FIXE+2, .numObs[2]=START_TORCHE_FIXE+3, .dist=0, .active=0, .done=0, .nbEP=1, .utype.fire.c={130.,  1.},.utype.fire.pos=4, .utype.fire.angle=270.},
-	{.etype = E_FEU,   .state = ACTIVE, .numObj=8, .nbObs=3, .numObs[0]=START_FEU+8  , .numObs[1]=START_TORCHE_FIXE+4, .numObs[2]=START_TORCHE_FIXE+5, .dist=0, .active=0, .done=0, .nbEP=1, .utype.fire.c={170.,  1.},.utype.fire.pos=4, .utype.fire.angle=90. },
-	{.etype = E_FEU,   .state = ACTIVE, .numObj=9, .nbObs=3, .numObs[0]=START_FEU+9  , .numObs[1]=START_TORCHE_FIXE+6, .numObs[2]=START_TORCHE_FIXE+7, .dist=0, .active=0, .done=0, .nbEP=1, .utype.fire.c={299.,120.},.utype.fire.pos=4, .utype.fire.angle=0.  },
+	{.etype = E_FEU,   .state = ACTIVE, .numObj=6, .nbObs=3, .numObs[0]=START_FEU+6  , .numObs[1]=START_TORCHE_FIXE  , .numObs[2]=START_TORCHE_FIXE+1, .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{22. ,80.}, 10.,90. }, .entryPoint[0]={{22. ,80.}, 10.,270.}, .utype.fire.c={1.  ,120.},.utype.fire.pos=4, .utype.fire.angle=0.  },
+	{.etype = E_FEU,   .state = ACTIVE, .numObj=7, .nbObs=3, .numObs[0]=START_FEU+7  , .numObs[1]=START_TORCHE_FIXE+2, .numObs[2]=START_TORCHE_FIXE+3, .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{130.,22.}, 10.,180.}, .entryPoint[0]={{130.,22.}, 10.,0.  }, .utype.fire.c={130.,  1.},.utype.fire.pos=4, .utype.fire.angle=270.},
+	{.etype = E_FEU,   .state = ACTIVE, .numObj=8, .nbObs=3, .numObs[0]=START_FEU+8  , .numObs[1]=START_TORCHE_FIXE+4, .numObs[2]=START_TORCHE_FIXE+5, .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{170.,22.}, 10.,180.}, .entryPoint[0]={{170.,22.}, 10.,0.  }, .utype.fire.c={170.,  1.},.utype.fire.pos=4, .utype.fire.angle=90. },
+	{.etype = E_FEU,   .state = ACTIVE, .numObj=9, .nbObs=3, .numObs[0]=START_FEU+9  , .numObs[1]=START_TORCHE_FIXE+6, .numObs[2]=START_TORCHE_FIXE+7, .dist=0, .active=1, .done=0, .nbEP=2, .entryPoint[0]={{278.,80.}, 10.,270.}, .entryPoint[0]={{278.,80.}, 10.,90. }, .utype.fire.c={299.,120.},.utype.fire.pos=4, .utype.fire.angle=0.  },
 	};
 
 

@@ -43,6 +43,7 @@ const char *role_string(uint8_t role);
 // sends data according to the rules defined during setup
 int         role_send       (sMsg *msg);
 int         role_sendAck    (sMsg *msg);
+int         role_sendRetry  (sMsg *msg, int retries);
 #if MYROLE
 // relays data according to the rules defined durring setup
 int         role_relay      (sMsg *msg);

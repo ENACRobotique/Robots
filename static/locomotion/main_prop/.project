@@ -35,9 +35,29 @@
 			<locationURI>PARENT-2-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
 		</link>
 		<link>
+			<name>lib/PosTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/PosTools</locationURI>
+		</link>
+		<link>
+			<name>lib/TestTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/TestTools</locationURI>
+		</link>
+		<link>
+			<name>lib/TimeTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/TimeTools</locationURI>
+		</link>
+		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/Timeout</locationURI>
+		</link>
+		<link>
+			<name>lib/UART_framing</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/UART_framing</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>

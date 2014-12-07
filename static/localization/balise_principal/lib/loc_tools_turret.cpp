@@ -98,6 +98,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
 
     // robot's geometry correction
     angle-=ANGLE_ZERO;
+    if (angle<0) angle+=2*M_PI;
 
     sMsg msg={{0}};
     msg.header.size=sizeof(sGenericStatus);
@@ -113,14 +114,14 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     msg.payload.genericStatus.adv_status.pos.frame=msg.payload.genericStatus.adv_status.pos.FRAME_PRIMARY;
 
     msg.payload.genericStatus.adv_status.pos_u.a_angle=-1;
-    msg.payload.genericStatus.adv_status.pos_u.a_std=-1;
-    msg.payload.genericStatus.adv_status.pos_u.b_std=-1;
+    msg.payload.genericStatus.adv_status.pos_u.a_var=-1;
+    msg.payload.genericStatus.adv_status.pos_u.b_var=-1;
     msg.payload.genericStatus.adv_status.pos_u.theta=-1;
 
 
     bn_send(&msg);
 
-//    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, (int)(angle*180./M_PI),(int)msg.payload.genericPos.x,(int)msg.payload.genericPos.y);
+//    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, (int)(angle*180./M_PI),(int)msg.payload.genericStatus.adv_status.pos.x,(int)msg.payload.genericStatus.adv_status.pos.y);
 
     return 0;
 
