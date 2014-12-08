@@ -1,36 +1,32 @@
-
 /**************************************************************************
-**
-** Copyright (C) 1993 David E. Steward & Zbigniew Leyk, all rights reserved.
-**
-**			     Meschach Library
-** 
-** This Meschach Library is provided "as is" without any express 
-** or implied warranty of any kind with respect to this software. 
-** In particular the authors shall not be liable for any direct, 
-** indirect, special, incidental or consequential damages arising 
-** in any way from use of the software.
-** 
-** Everyone is granted permission to copy, modify and redistribute this
-** Meschach Library, provided:
-**  1.  All copies contain this copyright notice.
-**  2.  All modified copies shall carry a notice stating who
-**      made the last modification and the date of such modification.
-**  3.  No charge is made for this software or works derived from it.  
-**      This clause shall not be construed as constraining other software
-**      distributed on the same medium as this software, nor is a
-**      distribution fee considered a charge.
-**
-***************************************************************************/
-
+ **
+ ** Copyright (C) 1993 David E. Steward & Zbigniew Leyk, all rights reserved.
+ **
+ **			     Meschach Library
+ ** 
+ ** This Meschach Library is provided "as is" without any express 
+ ** or implied warranty of any kind with respect to this software. 
+ ** In particular the authors shall not be liable for any direct, 
+ ** indirect, special, incidental or consequential damages arising 
+ ** in any way from use of the software.
+ ** 
+ ** Everyone is granted permission to copy, modify and redistribute this
+ ** Meschach Library, provided:
+ **  1.  All copies contain this copyright notice.
+ **  2.  All modified copies shall carry a notice stating who
+ **      made the last modification and the date of such modification.
+ **  3.  No charge is made for this software or works derived from it.  
+ **      This clause shall not be construed as constraining other software
+ **      distributed on the same medium as this software, nor is a
+ **      distribution fee considered a charge.
+ **
+ ***************************************************************************/
 
 /* macros for names used in versions 1.0 and 1.1 */
 /* 8/11/93 */
 
-
 #ifndef OLDNAMESH
 #define OLDNAMESH
-
 
 /* type IVEC */
 
@@ -42,7 +38,6 @@
 #define fin_ivec   iv_finput
 #define in_ivec    iv_input
 #define dump_ivec  iv_dump
-
 
 /* type ZVEC */
 
@@ -86,7 +81,6 @@
 #define sp_zero_mat   sp_zero
 #define sp_dump_mat   sp_dump
 
-
 /* type SPROW */
 
 #define sp_row        SPROW
@@ -100,7 +94,6 @@
 #define sp_row_merge  sprow_merge
 #define sp_row_ip     sprow_ip
 #define sp_row_sqr    sprow_sqr
-
 
 /* type MAT */
 
@@ -130,7 +123,6 @@
 #define rand_vec  v_rand
 #define ones_vec  v_ones
 #define dump_vec  v_dump
-
 
 /* type PERM */
 

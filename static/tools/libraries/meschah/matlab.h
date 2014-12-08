@@ -1,31 +1,29 @@
-
 /**************************************************************************
-**
-** Copyright (C) 1993 David E. Steward & Zbigniew Leyk, all rights reserved.
-**
-**			     Meschach Library
-** 
-** This Meschach Library is provided "as is" without any express 
-** or implied warranty of any kind with respect to this software. 
-** In particular the authors shall not be liable for any direct, 
-** indirect, special, incidental or consequential damages arising 
-** in any way from use of the software.
-** 
-** Everyone is granted permission to copy, modify and redistribute this
-** Meschach Library, provided:
-**  1.  All copies contain this copyright notice.
-**  2.  All modified copies shall carry a notice stating who
-**      made the last modification and the date of such modification.
-**  3.  No charge is made for this software or works derived from it.  
-**      This clause shall not be construed as constraining other software
-**      distributed on the same medium as this software, nor is a
-**      distribution fee considered a charge.
-**
-***************************************************************************/
-
+ **
+ ** Copyright (C) 1993 David E. Steward & Zbigniew Leyk, all rights reserved.
+ **
+ **			     Meschach Library
+ ** 
+ ** This Meschach Library is provided "as is" without any express 
+ ** or implied warranty of any kind with respect to this software. 
+ ** In particular the authors shall not be liable for any direct, 
+ ** indirect, special, incidental or consequential damages arising 
+ ** in any way from use of the software.
+ ** 
+ ** Everyone is granted permission to copy, modify and redistribute this
+ ** Meschach Library, provided:
+ **  1.  All copies contain this copyright notice.
+ **  2.  All modified copies shall carry a notice stating who
+ **      made the last modification and the date of such modification.
+ **  3.  No charge is made for this software or works derived from it.  
+ **      This clause shall not be construed as constraining other software
+ **      distributed on the same medium as this software, nor is a
+ **      distribution fee considered a charge.
+ **
+ ***************************************************************************/
 
 /* matlab.h -- Header file for matlab.c, spmatlab.c and zmatlab.c
-   for save/load formats */
+ for save/load formats */
 
 #ifndef MATLAB_DEF
 
@@ -33,12 +31,12 @@
 
 /* structure required by MATLAB */
 typedef struct {
-	long    type;   /* matrix type */
-	long    m;      /* # rows */
-	long    n;      /* # cols */
-	long    imag;   /* is complex? */
-	long    namlen; /* length of variable name */
-		} matlab;
+    long type; /* matrix type */
+    long m; /* # rows */
+    long n; /* # cols */
+    long imag; /* is complex? */
+    long namlen; /* length of variable name */
+} matlab;
 
 /* macros for matrix storage type */
 #define INTEL   0       /* for 80x87 format */
@@ -72,7 +70,6 @@ typedef struct {
 #define PRECISION  	SINGLE_PREC
 #endif
 
-
 /* prototypes */
 
 #ifdef ANSI_C
@@ -84,9 +81,9 @@ double d_save(FILE *,double,const char *);
 
 #else
 
-extern	MAT *m_save(), *m_load();
-extern	VEC *v_save();
-extern	double d_save();
+extern MAT *m_save(), *m_load();
+extern VEC *v_save();
+extern double d_save();
 #endif
 
 /* complex variant */
@@ -94,17 +91,17 @@ extern	double d_save();
 #include "zmatrix.h"
 
 #ifdef ANSI_C
-extern ZMAT	*zm_save(FILE *fp,ZMAT *A,char *name);
-extern ZVEC	*zv_save(FILE *fp,ZVEC *x,char *name);
-extern complex	z_save(FILE *fp,complex z,char *name);
-extern ZMAT	*zm_load(FILE *fp,char **name);
+extern ZMAT *zm_save(FILE *fp,ZMAT *A,char *name);
+extern ZVEC *zv_save(FILE *fp,ZVEC *x,char *name);
+extern complex z_save(FILE *fp,complex z,char *name);
+extern ZMAT *zm_load(FILE *fp,char **name);
 
 #else
 
-extern ZMAT	*zm_save();
-extern ZVEC	*zv_save();
-extern complex	z_save();
-extern ZMAT	*zm_load();
+extern ZMAT *zm_save();
+extern ZVEC *zv_save();
+extern complex z_save();
+extern ZMAT *zm_load();
 
 #endif
 

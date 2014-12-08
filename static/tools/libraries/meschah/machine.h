@@ -3,12 +3,12 @@
 /* Add details necessary for your own installation here! */
 
 /* This is for use with "configure" -- if you are not using configure
-	then use machine.van for the "vanilla" version of machine.h */
+ then use machine.van for the "vanilla" version of machine.h */
 
 /* Note special macros: ANSI_C (ANSI C syntax)
-			SEGMENTED (segmented memory machine e.g. MS-DOS)
-			MALLOCDECL (declared if malloc() etc have
-					been declared) */
+ SEGMENTED (segmented memory machine e.g. MS-DOS)
+ MALLOCDECL (declared if malloc() etc have
+ been declared) */
 
 /* #undef const */
 
@@ -23,7 +23,6 @@
 /* #undef WORDS_BIGENDIAN */
 #define U_INT_DEF 1
 #define VARARGS 1
-
 
 /* for basic or larger versions */
 #define COMPLEX 1
@@ -48,7 +47,6 @@
 /* if not, change it */
 #include        <stdio.h>
 
-
 /* Check for ANSI C memmove and memset */
 #ifdef STDC_HEADERS
 
@@ -69,7 +67,6 @@
 #include	<string.h>
 #include	<float.h>
 #endif
-
 
 /* if have bcopy & bzero and no alternatives yet known, use them */
 #ifdef HAVE_BCOPY
@@ -92,8 +89,8 @@
 #endif
 
 /* If prototypes are available & ANSI_C not yet defined, then define it,
-	but don't include any header files as the proper ANSI C headers
-        aren't here */
+ but don't include any header files as the proper ANSI C headers
+ aren't here */
 #define HAVE_PROTOTYPES 1
 #ifdef HAVE_PROTOTYPES
 #ifndef ANSI_C
@@ -135,7 +132,6 @@
 #define LONGREAL DOUBLE
 #endif
 
-
 /* machine epsilon or unit roundoff error */
 /* This is correct on most IEEE Real precision systems */
 #ifdef DBL_EPSILON
@@ -164,15 +160,15 @@
 /* #undef M_MACHEPS */
 
 /********************
-#ifdef DBL_EPSILON
-#define	MACHEPS	DBL_EPSILON
-#endif
-#ifdef M_MACHEPS
-#ifndef MACHEPS
-#define MACHEPS	M_MACHEPS
-#endif
-#endif
-********************/
+ #ifdef DBL_EPSILON
+ #define	MACHEPS	DBL_EPSILON
+ #endif
+ #ifdef M_MACHEPS
+ #ifndef MACHEPS
+ #define MACHEPS	M_MACHEPS
+ #endif
+ #endif
+ ********************/
 
 #define	M_MAX_INT 2147483647
 #ifdef	M_MAX_INT
@@ -186,8 +182,7 @@
 #define HUGE_VAL HUGE
 #endif
 
-
 #ifdef ANSI_C
-extern	int	isatty(int);
+extern int isatty(int);
 #endif
 
