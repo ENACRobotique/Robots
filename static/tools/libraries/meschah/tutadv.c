@@ -143,7 +143,7 @@ int k;
 
    if (!work) {
       work = m3d_get(10,10,10);
-      mem_stat_reg_list((void **)&work,TYPE_MAT3D,M3D_LIST);
+      mem_stat_reg_list((void **)&work,TYPE_MAT3D,M3D_LIST,__FILE__,__LINE__);
       work->me[9][9][9] = -3.14;
    }
    
