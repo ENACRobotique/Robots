@@ -227,7 +227,7 @@
 			<resource resourceType="PROJECT" workspacePath="/linux_prop_simu"/>
 		</configuration>
 		<configuration configurationName="linux-Tests">
-			<resource resourceType="PROJECT" workspacePath="/main_prop"/>
+			<resource resourceType="PROJECT" workspacePath="/main_prop_axle"/>
 		</configuration>
 		<configuration configurationName="lpc-Debug"/>
 	</storageModule>

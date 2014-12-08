@@ -52,7 +52,7 @@ sRTableEntry rTable[]={
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRI == ADDRI_MAIN_PROP || MYADDRU == ADDRU2_MAIN_PROP)
-// project "main_prop/lpc"
+// project "main_prop_axle/lpc"
 sRTableEntry rTable[]={
     {SUBNETX,        {IF_I2C,  ADDRI_MAIN_TURRET}},
     {SUBNETU1_DEBUG, {IF_I2C,  ADDRI_MAIN_IO}},
@@ -71,7 +71,7 @@ sRTableEntry rTable[]={
     {0x42&(~SUBNET_MASK),{IF_DROP,0}}
 };
 #elif (MYADDRD == ADDRD1_DEBUG1 || MYADDRD == ADDRD1_DEBUG2  || MYADDRD == ADDRD1_DEBUG3 || MYADDRD == ADDRD1_MAIN_PROP_SIMU || MYADDRD == ADDRD1_MAIN_IA_SIMU || MYADDRD == ADDRD1_MONITORING)
-// project "bn_debug_console" OR project "main_prop/linux" OR project "main_ai" OR project "monitoring_hmi/*"
+// project "bn_debug_console" OR project "main_prop_axle/linux" OR project "main_ai" OR project "monitoring_hmi/*"
 sRTableEntry rTable[]={
     {SUBNETX,        {IF_UDP,  ADDRD1_DBGBRIDGE}},
     {SUBNETI_MAIN,   {IF_UDP,  ADDRD1_DBGBRIDGE}},
