@@ -26,7 +26,7 @@
  File for doing assorted I/O operations not invlolving
  MAT/VEC/PERM objects
  */
-static char rcsid[] = "$Id: otherio.c,v 1.2 1994/01/13 05:34:52 des Exp $";
+//static char rcsid[] = "$Id: otherio.c,v 1.2 1994/01/13 05:34:52 des Exp $";
 
 #include	<stdio.h>
 #include	<ctype.h>
@@ -59,7 +59,7 @@ int fy_or_n(FILE *fp, const char *s)
         if (fgets(scratch, MAXLINE, fp) == NULL)
             error(E_INPUT, "fy_or_n");
         cp = scratch;
-        while (isspace(*cp))
+        while (isspace((int)*cp))
             cp++;
         if (*cp == 'y' || *cp == 'Y')
             return TRUE;

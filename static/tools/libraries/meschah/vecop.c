@@ -27,7 +27,7 @@
 #include	<stdio.h>
 #include	"matrix.h"
 
-static char rcsid[] = "$Id: vecop.c,v 1.5 1996/08/20 18:18:10 stewart Exp $";
+//static char rcsid[] = "$Id: vecop.c,v 1.5 1996/08/20 18:18:10 stewart Exp $";
 
 /* _in_prod -- inner product of two vectors from i0 downwards
  -- that is, returns a(i0:dim)^T.b(i0:dim) */
@@ -307,7 +307,7 @@ VEC *v_linlist(VEC *out, VEC *v1, double a1, ...) {
     va_start(ap, a1);
     out = sv_mlt(a1, v1, out);
 
-    while (par = va_arg(ap, VEC *)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, VEC *))) { /* NULL ends the list*/
         a_par = va_arg(ap, double);
         if (a_par == 0.0)
             continue;

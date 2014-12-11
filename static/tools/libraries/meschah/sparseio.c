@@ -30,7 +30,7 @@
 #include        <stdio.h>
 #include        "sparse.h"
 
-static char rcsid[] = "$Id: sparseio.c,v 1.4 1994/01/13 05:34:25 des Exp $";
+//static char rcsid[] = "$Id: sparseio.c,v 1.4 1994/01/13 05:34:25 des Exp $";
 
 /* local variables */
 static char line[MAXLINE];
@@ -229,7 +229,7 @@ SPMAT *sp_finput(FILE *fp)
                 /* if we need more scratch space, let's get it!
                  -- using amortized doubling */
                 if (len >= scratch_len) {
-                    scratch = RENEW(scratch, 2 * scratch_len, row_elt);
+                    RENEW(scratch, 2 * scratch_len, row_elt);
                     if (!scratch)
                         error(E_MEM, "sp_finput");
                     scratch_len = 2 * scratch_len;
@@ -299,7 +299,7 @@ SPMAT *sp_finput(FILE *fp)
                 /* if we need more scratch space, let's get it!
                  -- using amortized doubling */
                 if (len >= scratch_len) {
-                    scratch = RENEW(scratch, 2 * scratch_len, row_elt);
+                    RENEW(scratch, 2 * scratch_len, row_elt);
                     if (!scratch)
                         error(E_MEM, "sp_finput");
                     scratch_len = 2 * scratch_len;

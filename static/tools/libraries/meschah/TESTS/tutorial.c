@@ -26,7 +26,7 @@
 
 /* routines from Chapter 1 of Meschach */
 
-static char rcsid[] = "$Id: tutorial.c,v 1.3 1994/01/16 22:53:09 des Exp $";
+//static char rcsid[] = "$Id: tutorial.c,v 1.3 1994/01/16 22:53:09 des Exp $";
 
 #include <math.h>
 #include "matrix.h"

@@ -26,7 +26,7 @@
 #include        <ctype.h>
 #include        "zmatrix.h"
 
-static char rcsid[] = "$Id: zmatio.c,v 1.1 1994/01/13 04:25:18 des Exp $";
+//static char rcsid[] = "$Id: zmatio.c,v 1.1 1994/01/13 04:25:18 des Exp $";
 
 /* local variables */
 static char line[MAXLINE];

@@ -32,7 +32,7 @@
 #include        <stdlib.h>
 #include	"sparse.h"
 
-static char rcsid[] = "$Id: sprow.c,v 1.1 1994/01/13 05:35:36 des Exp $";
+//static char rcsid[] = "$Id: sprow.c,v 1.1 1994/01/13 05:35:36 des Exp $";
 
 #define	MINROWLEN	10
 
@@ -206,7 +206,7 @@ SPROW *sprow_xpd(SPROW *r, int n, int type)
         if (mem_info_is_on()) {
             mem_bytes(type, r->maxlen * sizeof(row_elt), newlen * sizeof(row_elt));
         }
-        r->elt = RENEW(r->elt, newlen, row_elt);
+        RENEW(r->elt, newlen, row_elt);
         if (!r->elt)
             error(E_MEM, "sprow_xpd");
         r->maxlen = newlen;
@@ -253,7 +253,7 @@ SPROW *sprow_resize(SPROW *r, int n, int type)
         if (mem_info_is_on()) {
             mem_bytes(type, r->maxlen * sizeof(row_elt), n * sizeof(row_elt));
         }
-        r->elt = RENEW(r->elt, n, row_elt);
+        RENEW(r->elt, n, row_elt);
         if (!r->elt)
             error(E_MEM, "sprow_resize");
         r->maxlen = r->len = n;
@@ -738,7 +738,7 @@ double sprow_set_val(SPROW *r, int j, double val)
                 mem_bytes(TYPE_SPROW, r->maxlen * sizeof(row_elt), new_len * sizeof(row_elt));
             }
 
-            r->elt = RENEW(r->elt, new_len, row_elt);
+            RENEW(r->elt, new_len, row_elt);
             if (!r->elt) /* can't allocate */
                 error(E_MEM, "sprow_set_val");
             r->maxlen = 2 * r->maxlen + 1;

@@ -27,7 +27,7 @@
  */
 
 /* solve.c 1.2 11/25/87 */
-static char rcsid[] = "$Id: solve.c,v 1.3 1994/01/13 05:29:57 des Exp $";
+//static char rcsid[] = "$Id: solve.c,v 1.3 1994/01/13 05:29:57 des Exp $";
 
 #include	<stdio.h>
 #include	<math.h>

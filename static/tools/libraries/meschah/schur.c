@@ -33,7 +33,7 @@
 #include	"matrix.h"
 #include        "matrix2.h"
 
-static char rcsid[] = "$Id: schur.c,v 1.7 1994/03/17 05:36:53 des Exp $";
+//static char rcsid[] = "$Id: schur.c,v 1.7 1994/03/17 05:36:53 des Exp $";
 
 #ifndef ANSI_C
 static void hhldr3(x,y,z,nu1,beta,newval)
@@ -64,12 +64,11 @@ double beta, nu1, nu2, nu3;
 static void hhldr3cols(MAT *A, int k, int j0, double beta, double nu1, double nu2, double nu3)
 #endif
 {
-    Real **A_me, ip, prod;
+    Real ip, prod;
     int j, n;
 
     if (k < 0 || k + 3 > A->m || j0 < 0)
         error(E_BOUNDS, "hhldr3cols");
-    A_me = A->me;
     n = A->n;
 
     /* printf("hhldr3cols:(l.%d) j0 = %d, k = %d, A at 0x%lx, m = %d, n = %d\n",
@@ -112,14 +111,13 @@ double beta, nu1, nu2, nu3;
 static void hhldr3rows(MAT *A, int k, int i0, double beta, double nu1, double nu2, double nu3)
 #endif
 {
-    Real **A_me, ip, prod;
+    Real ip, prod;
     int i, m;
 
     /* printf("hhldr3rows:(l.%d) A at 0x%lx\n", __LINE__, (long)A); */
     /* printf("hhldr3rows: k = %d\n", k); */
     if (k < 0 || k + 3 > A->n)
         error(E_BOUNDS, "hhldr3rows");
-    A_me = A->me;
     m = A->m;
     i0 = min(i0, m - 1);
 
@@ -152,7 +150,7 @@ MAT *schur(MAT *A, MAT *Q)
 #endif
 {
     int i, j, iter, k, k_min, k_max, k_tmp, n, split;
-    Real beta2, c, discrim, dummy, nu1, s, t, tmp, x, y, z;
+    Real beta2, c, discrim, dummy, nu1, s, tmp, x, y, z;
     Real **A_me;
     Real sqrt_macheps;
     STATIC VEC *diag = VNULL, *beta = VNULL;

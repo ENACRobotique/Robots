@@ -81,7 +81,7 @@ int len;
  A[m-1][j0], A[m-1][j0+1], ..., A[m-1][j0+n-1]
  */
 
-static char rcsid[] = "$Id: extras.c,v 1.4 1995/06/08 15:13:15 des Exp $";
+//static char rcsid[] = "$Id: extras.c,v 1.4 1995/06/08 15:13:15 des Exp $";
 
 #include	<math.h>
 
@@ -403,7 +403,7 @@ void Mmm(m, n, p, alpha, A, Aj0, B, Bj0, C, Cj0)
     int m, n, p; /* C is m x n */
     double alpha;
     Real **A, **B, **C;int Aj0, Bj0, Cj0; {
-    register int i, j, k;
+    register int i;//, j, k;
     /* register Real	tmp, sum; */
 
     /****************************************
@@ -420,7 +420,7 @@ void Mmtrm(m, n, p, alpha, A, Aj0, B, Bj0, C, Cj0)
     int m, n, p; /* C is m x n */
     double alpha;
     Real **A, **B, **C;int Aj0, Bj0, Cj0; {
-    register int i, j, k;
+    register int /*i, j, */k;
 
     /****************************************
      for ( i = 0; i < m; i++ )
@@ -436,7 +436,7 @@ void Mmmtr(m, n, p, alpha, A, Aj0, B, Bj0, C, Cj0)
     int m, n, p; /* C is m x n */
     double alpha;
     Real **A, **B, **C;int Aj0, Bj0, Cj0; {
-    register int i, j, k;
+    register int i;//, j, k;
 
     /****************************************
      for ( i = 0; i < m; i++ )

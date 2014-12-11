@@ -27,7 +27,7 @@
  Complex case
  */
 
-static char rcsid[] = "$Id: zsolve.c,v 1.1 1994/01/13 04:20:33 des Exp $";
+//static char rcsid[] = "$Id: zsolve.c,v 1.1 1994/01/13 04:20:33 des Exp $";
 
 #include	<stdio.h>
 #include	<math.h>

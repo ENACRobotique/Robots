@@ -27,7 +27,7 @@
 #include	<stdio.h>
 #include	"matrix.h"
 
-static char rcsid[] = "$Id: pxop.c,v 1.6 1995/06/08 14:57:11 des Exp $";
+//static char rcsid[] = "$Id: pxop.c,v 1.6 1995/06/08 14:57:11 des Exp $";
 
 /**********************************************************************
  Note: A permutation is often interpreted as a matrix

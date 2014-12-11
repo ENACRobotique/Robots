@@ -28,7 +28,7 @@
 #include        <ctype.h>
 #include        "matrix.h"
 
-static char rcsid[] = "$Id: matrixio.c,v 1.4 1994/01/13 05:31:10 des Exp $";
+//static char rcsid[] = "$Id: matrixio.c,v 1.4 1994/01/13 05:31:10 des Exp $";
 
 /* local variables */
 static char line[MAXLINE];

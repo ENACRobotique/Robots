@@ -32,7 +32,7 @@
 #include	"matrix2.h"
 #include	"sparse.h"
 
-static char rcsid[] = "$Id: arnoldi.c,v 1.3 1994/01/13 05:45:40 des Exp $";
+//static char rcsid[] = "$Id: arnoldi.c,v 1.3 1994/01/13 05:45:40 des Exp $";
 
 /* arnoldi -- an implementation of the Arnoldi method */
 MAT *arnoldi(A, A_param, x0, m, h_rem, Q, H)

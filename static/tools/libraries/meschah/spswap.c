@@ -28,7 +28,7 @@
  to use Karen George's suggestion to use unordered rows
  */
 
-static char rcsid[] = "$Id: spswap.c,v 1.3 1994/01/13 05:44:43 des Exp $";
+//static char rcsid[] = "$Id: spswap.c,v 1.3 1994/01/13 05:44:43 des Exp $";
 
 #include	<stdio.h>
 #include	<math.h>
@@ -138,7 +138,7 @@ row_elt *chase_col(const SPMAT *A, int col, int *row_num, int *idx, int max_row)
 {
     int old_idx, old_row, tmp_idx, tmp_row;
     SPROW *r;
-    row_elt *e;
+    row_elt *e = NULL;
 
     if (col < 0 || col >= A->n)
         error(E_BOUNDS, "chase_col");

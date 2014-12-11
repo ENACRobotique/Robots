@@ -32,7 +32,7 @@
 #include        <stdlib.h>
 #include	"sparse.h"
 
-static char rcsid[] = "$Id: sparse.c,v 1.10 1994/03/08 05:46:07 des Exp $";
+//static char rcsid[] = "$Id: sparse.c,v 1.10 1994/03/08 05:46:07 des Exp $";
 
 #define	MINROWLEN	10
 
@@ -98,7 +98,7 @@ double sp_set_val(SPMAT *A, int i, int j, double val)
                 mem_bytes(TYPE_SPMAT, A->row[i].maxlen * sizeof(row_elt), new_len * sizeof(row_elt));
             }
 
-            r->elt = RENEW(r->elt, new_len, row_elt);
+            RENEW(r->elt, new_len, row_elt);
             if (!r->elt) /* can't allocate */
                 error(E_MEM, "sp_set_val");
             r->maxlen = 2 * r->maxlen + 1;
@@ -129,7 +129,7 @@ VEC *x, *out;
 VEC *sp_mv_mlt(const SPMAT *A, const VEC *x, VEC *out)
 #endif
 {
-    int i, j_idx, m, n, max_idx;
+    int i, j_idx, m, max_idx;
     Real sum, *x_ve;
     SPROW *r;
     row_elt *elts;
@@ -143,7 +143,6 @@ VEC *sp_mv_mlt(const SPMAT *A, const VEC *x, VEC *out)
     if (out == x)
         error(E_INSITU, "sp_mv_mlt");
     m = A->m;
-    n = A->n;
     x_ve = x->ve;
 
     for (i = 0; i < m; i++) {
@@ -169,7 +168,7 @@ VEC *x, *out;
 VEC *sp_vm_mlt(const SPMAT *A, const VEC *x, VEC *out)
 #endif
 {
-    int i, j_idx, m, n, max_idx;
+    int i, j_idx, m, max_idx;
     Real tmp, *x_ve, *out_ve;
     SPROW *r;
     row_elt *elts;
@@ -184,7 +183,6 @@ VEC *sp_vm_mlt(const SPMAT *A, const VEC *x, VEC *out)
         error(E_INSITU, "sp_vm_mlt");
 
     m = A->m;
-    n = A->n;
     v_zero(out);
     x_ve = x->ve;
     out_ve = out->ve;
@@ -734,7 +732,7 @@ SPMAT *sp_copy2(const SPMAT *A, SPMAT *OUT)
             mem_bytes(TYPE_SPMAT, A->max_m * sizeof(SPROW), A->m * sizeof(SPROW));
         }
 
-        OUT->row = RENEW(OUT->row, A->m, SPROW);
+        RENEW(OUT->row, A->m, SPROW);
         if (!OUT->row)
             error(E_MEM, "sp_copy2");
 
@@ -815,7 +813,7 @@ SPMAT *sp_resize(SPMAT *A, int m, int n)
             mem_bytes(TYPE_SPMAT, A->max_m * sizeof(SPROW), m * sizeof(SPROW));
         }
 
-        A->row = RENEW(A->row, (unsigned )m, SPROW);
+        RENEW(A->row, (unsigned )m, SPROW);
         if (!A->row)
             error(E_MEM, "sp_resize");
         for (i = A->m; i < m; i++) {
@@ -839,8 +837,8 @@ SPMAT *sp_resize(SPMAT *A, int m, int n)
             mem_bytes(TYPE_SPMAT, 2 * A->max_n * sizeof(int), 2 * n * sizeof(int));
         }
 
-        A->start_row = RENEW(A->start_row, (unsigned )n, int);
-        A->start_idx = RENEW(A->start_idx, (unsigned )n, int);
+        RENEW(A->start_row, (unsigned )n, int);
+        RENEW(A->start_idx, (unsigned )n, int);
         if (!A->start_row || !A->start_idx)
             error(E_MEM, "sp_resize");
         A->max_n = n; /* ...and update max_n */
@@ -910,7 +908,7 @@ SPMAT *sp_compact(SPMAT *A, double tol)
 /* sp_mlt (C) Copyright David Stewart and Fabrizio Novalis <novalis@mars.elet.polimi.it> */
 /* sp_mlt -- computes out = A*B and returns out */
 SPMAT *sp_mlt(const SPMAT *A, const SPMAT *B, SPMAT *out) {
-    int i, j, k, idx, cp;
+    int i, j, idx, cp;
     SPROW *rA, *rB, *rout, *rtemp;
     double valA;
 
@@ -965,7 +963,7 @@ int sp_get_vars(int m, int n, int deg, ...) {
     SPMAT **par;
 
     va_start(ap, deg);
-    while (par = va_arg(ap, SPMAT **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, SPMAT **))) { /* NULL ends the list*/
         *par = sp_get(m, n, deg);
         i++;
     }
@@ -993,7 +991,7 @@ int sp_resize_vars(int m, int n, ...) {
     SPMAT **par;
 
     va_start(ap, n);
-    while (par = va_arg(ap, SPMAT **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, SPMAT **))) { /* NULL ends the list*/
         *par = sp_resize(*par, m, n);
         i++;
     }
@@ -1021,7 +1019,7 @@ int sp_free_vars(SPMAT **va, ...) {
     sp_free(*va);
     *va = (SPMAT *) NULL;
     va_start(ap, va);
-    while (par = va_arg(ap, SPMAT **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, SPMAT **))) { /* NULL ends the list*/
         sp_free(*par);
         *par = (SPMAT *) NULL;
         i++;

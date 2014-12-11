@@ -25,7 +25,7 @@
 /* iotort.c  10/11/93 */
 /* test of I/O functions */
 
-static char rcsid[] = "$Id: $";
+//static char rcsid[] = "$Id: $";
 
 #include "sparse.h"
 #include "zmatrix.h"

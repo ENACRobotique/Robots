@@ -35,7 +35,7 @@
 #include        "zmatrix.h"
 #include	"matlab.h"
 
-static char rcsid[] = "$Id: zmatlab.c,v 1.2 1995/02/14 20:13:27 des Exp $";
+//static char rcsid[] = "$Id: zmatlab.c,v 1.2 1995/02/14 20:13:27 des Exp $";
 
 /* zm_save -- save matrix in ".mat" file for MATLAB
  -- returns matrix to be saved */
@@ -85,7 +85,7 @@ ZMAT *zm_save(fp, A, name)
  -- returns vector to be saved */
 ZVEC *zv_save(fp, x, name)
     FILE *fp;ZVEC *x;char *name; {
-    int i, j;
+    int i;
     matlab mat;
 
     if (!x)

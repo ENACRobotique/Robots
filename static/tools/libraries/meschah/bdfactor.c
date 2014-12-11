@@ -28,7 +28,7 @@
  */
 
 /* bdfactor.c  18/11/93 */
-static char rcsid[] = "$Id: ";
+//static char rcsid[] = "$Id: ";
 
 #include	<stdio.h>
 #include	<math.h>

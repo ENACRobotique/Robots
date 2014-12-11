@@ -27,7 +27,7 @@
 #include	<stdio.h>
 #include	"zmatrix.h"
 
-static char rcsid[] = "$Id: zmemory.c,v 1.2 1994/04/05 02:13:14 des Exp $";
+//static char rcsid[] = "$Id: zmemory.c,v 1.2 1994/04/05 02:13:14 des Exp $";
 
 /* zv_zero -- zeros all entries of a complex vector
  -- uses __zzero__() */
@@ -263,7 +263,7 @@ ZMAT *zm_resize(ZMAT *A, int new_m, int new_n)
             mem_bytes(TYPE_ZMAT, A->max_m * sizeof(complex *), new_m * sizeof(complex *));
         }
 
-        A->me = RENEW(A->me, new_m, complex *);
+        RENEW(A->me, new_m, complex *);
         if (!A->me)
             error(E_MEM, "zm_resize");
     }
@@ -277,7 +277,7 @@ ZMAT *zm_resize(ZMAT *A, int new_m, int new_n)
             mem_bytes(TYPE_ZMAT, A->max_m * A->max_n * sizeof(complex), new_size * sizeof(complex));
         }
 
-        A->base = RENEW(A->base, new_size, complex);
+        RENEW(A->base, new_size, complex);
         if (!A->base)
             error(E_MEM, "zm_resize");
         A->max_size = new_size;
@@ -391,7 +391,7 @@ ZVEC *zv_resize(ZVEC *x, int new_dim)
             mem_bytes(TYPE_ZVEC, x->max_dim * sizeof(complex), new_dim * sizeof(complex));
         }
 
-        x->ve = RENEW(x->ve, new_dim, complex);
+        RENEW(x->ve, new_dim, complex);
         if (!x->ve)
             error(E_MEM, "zv_resize");
         x->max_dim = new_dim;
@@ -428,7 +428,7 @@ int zv_get_vars(int dim, ...) {
     ZVEC **par;
 
     va_start(ap, dim);
-    while (par = va_arg(ap, ZVEC **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, ZVEC **))) { /* NULL ends the list*/
         *par = zv_get(dim);
         i++;
     }
@@ -443,7 +443,7 @@ int zm_get_vars(int m, int n, ...) {
     ZMAT **par;
 
     va_start(ap, n);
-    while (par = va_arg(ap, ZMAT **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, ZMAT **))) { /* NULL ends the list*/
         *par = zm_get(m, n);
         i++;
     }
@@ -472,7 +472,7 @@ int zv_resize_vars(int new_dim, ...) {
     ZVEC **par;
 
     va_start(ap, new_dim);
-    while (par = va_arg(ap, ZVEC **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, ZVEC **))) { /* NULL ends the list*/
         *par = zv_resize(*par, new_dim);
         i++;
     }
@@ -487,7 +487,7 @@ int zm_resize_vars(int m, int n, ...) {
     ZMAT **par;
 
     va_start(ap, n);
-    while (par = va_arg(ap, ZMAT **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, ZMAT **))) { /* NULL ends the list*/
         *par = zm_resize(*par, m, n);
         i++;
     }
@@ -516,7 +516,7 @@ int zv_free_vars(ZVEC **pv, ...) {
     zv_free(*pv);
     *pv = ZVNULL;
     va_start(ap, pv);
-    while (par = va_arg(ap, ZVEC **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, ZVEC **))) { /* NULL ends the list*/
         zv_free(*par);
         *par = ZVNULL;
         i++;
@@ -534,7 +534,7 @@ int zm_free_vars(ZMAT **va, ...) {
     zm_free(*va);
     *va = ZMNULL;
     va_start(ap, va);
-    while (par = va_arg(ap, ZMAT **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, ZMAT **))) { /* NULL ends the list*/
         zm_free(*par);
         *par = ZMNULL;
         i++;

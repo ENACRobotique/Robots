@@ -26,7 +26,7 @@
  Matrix factorisation routines to work with the other matrix files.
  */
 
-static char rcsid[] = "$Id: bkpfacto.c,v 1.7 1994/01/13 05:45:50 des Exp $";
+//static char rcsid[] = "$Id: bkpfacto.c,v 1.7 1994/01/13 05:45:50 des Exp $";
 
 #include	<stdio.h>
 #include	<math.h>
@@ -50,10 +50,9 @@ static void interchange(A, i, j)
     MAT *A; /* assumed != NULL & also SQUARE */
     int i, j; /* assumed in range */
 {
-    Real **A_me, tmp;
+    Real tmp;
     int k, n;
 
-    A_me = A->me;
     n = A->n;
     if (i == j)
         return;
@@ -108,7 +107,7 @@ MAT *BKPfactor(MAT *A, PERM *pivot, PERM *blocks)
 #endif
 {
     int i, j, k, n, onebyone, r;
-    Real **A_me, aii, aip1, aip1i, lambda, sigma, tmp;
+    Real aii, aip1, aip1i, lambda, sigma, tmp;
     Real det, s, t;
 
     if (!A || !pivot || !blocks)
@@ -119,7 +118,6 @@ MAT *BKPfactor(MAT *A, PERM *pivot, PERM *blocks)
         error(E_SIZES, "BKPfactor");
 
     n = A->n;
-    A_me = A->me;
     px_ident(pivot);
     px_ident(blocks);
 
@@ -228,7 +226,7 @@ VEC *BKPsolve(const MAT *A, PERM *pivot, const PERM *block, const VEC *b, VEC *x
 {
     STATIC VEC *tmp = VNULL; /* dummy storage needed */
     int i, j, n, onebyone;
-    Real **A_me, a11, a12, a22, b1, b2, det, sum, *tmp_ve, tmp_diag;
+    Real a11, a12, a22, b1, b2, det, sum, tmp_diag;
 
     if (!A || !pivot || !block || !b)
         error(E_NULL, "BKPsolve");
@@ -240,9 +238,6 @@ VEC *BKPsolve(const MAT *A, PERM *pivot, const PERM *block, const VEC *b, VEC *x
     x = v_resize(x, n);
     tmp = v_resize(tmp, n);
     MEM_STAT_REG(tmp, TYPE_VEC);
-
-    A_me = A->me;
-    tmp_ve = tmp->ve;
 
     px_vec(pivot, b, tmp);
     /* solve for lower triangular part */

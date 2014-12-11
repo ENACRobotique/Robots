@@ -31,7 +31,7 @@
 #include	"matrix.h"
 #include        "matrix2.h"
 
-static char rcsid[] = "$Id: svd.c,v 1.7 1995/09/08 14:45:43 des Exp $";
+//static char rcsid[] = "$Id: svd.c,v 1.7 1995/09/08 14:45:43 des Exp $";
 
 #define	sgn(x)	((x) >= 0 ? 1 : -1)
 #define	MAX_STACK	100

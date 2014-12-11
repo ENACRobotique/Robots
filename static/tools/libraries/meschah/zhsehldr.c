@@ -32,7 +32,7 @@
  Complex version
  */
 
-static char rcsid[] = "$Id: zhsehldr.c,v 1.2 1994/04/07 01:43:47 des Exp $";
+//static char rcsid[] = "$Id: zhsehldr.c,v 1.2 1994/04/07 01:43:47 des Exp $";
 
 #include	<stdio.h>
 #include	<math.h>
@@ -159,8 +159,6 @@ ZMAT *zhhtrrows(M, i0, j0, hh, beta)
 ZMAT *zhhtrcols(M, i0, j0, hh, beta)
     ZMAT *M;int i0, j0;ZVEC *hh;double beta; {
     /* Real	ip, scale; */
-    complex scale;
-    int i /*, k */;
     STATIC ZVEC *w = ZVNULL;
 
     if (M == ZMNULL || hh == ZVNULL)

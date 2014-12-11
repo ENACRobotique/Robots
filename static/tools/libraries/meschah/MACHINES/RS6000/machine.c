@@ -30,7 +30,7 @@
   full advantage of specialised architectures (pipelining, vector
   processors etc).
   */
-static	char	*rcsid = "$Header: /usr/local/home/des/meschach/meschach/RCS/machine.c,v 1.3 1991/08/29 06:42:11 des Exp $";
+//static	char	*rcsid = "$Header: /usr/local/home/des/meschach/meschach/RCS/machine.c,v 1.3 1991/08/29 06:42:11 des Exp $";
 
 #include	"machine.h"
 

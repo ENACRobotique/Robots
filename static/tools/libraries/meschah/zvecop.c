@@ -25,7 +25,7 @@
 #include	<stdio.h>
 #include	"matrix.h"
 #include	"zmatrix.h"
-static char rcsid[] = "$Id: zvecop.c,v 1.3 1997/10/07 16:13:54 stewart Exp stewart $";
+//static char rcsid[] = "$Id: zvecop.c,v 1.3 1997/10/07 16:13:54 stewart Exp stewart $";
 
 /* _zin_prod -- inner product of two vectors from i0 downwards
  -- flag != 0 means compute sum_i a[i]*.b[i];

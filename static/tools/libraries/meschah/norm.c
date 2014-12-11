@@ -25,7 +25,7 @@
 /*
  A collection of functions for computing norms: scaled and unscaled
  */
-static char rcsid[] = "$Id: norm.c,v 1.6 1994/01/13 05:34:35 des Exp $";
+//static char rcsid[] = "$Id: norm.c,v 1.6 1994/01/13 05:34:35 des Exp $";
 
 #include	<stdio.h>
 #include	<math.h>

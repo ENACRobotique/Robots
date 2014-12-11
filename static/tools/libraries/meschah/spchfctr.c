@@ -28,7 +28,7 @@
 
  */
 
-static char rcsid[] = "$Id: spchfctr.c,v 1.5 1996/08/20 19:45:33 stewart Exp $";
+//static char rcsid[] = "$Id: spchfctr.c,v 1.5 1996/08/20 19:45:33 stewart Exp $";
 
 #include	<stdio.h>
 #include	<math.h>
@@ -391,7 +391,7 @@ SPMAT *A;
 SPMAT *spICHfactor(SPMAT *A)
 #endif
 {
-    int k, m, n, nxt_row, nxt_idx, diag_idx;
+    int k, m, nxt_row, nxt_idx, diag_idx;
     Real pivot, tmp2;
     SPROW *r_piv, *r_op;
     row_elt *elt_piv, *elt_op;
@@ -408,7 +408,6 @@ SPMAT *spICHfactor(SPMAT *A)
         sp_diag_access(A);
 
     m = A->m;
-    n = A->n;
     for (k = 0; k < m; k++) {
         r_piv = &(A->row[k]);
 

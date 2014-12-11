@@ -31,7 +31,7 @@
 #include	"matrix.h"
 #include        "matrix2.h"
 
-static char rcsid[] = "$Id: symmeig.c,v 1.6 1995/03/27 15:45:55 des Exp $";
+//static char rcsid[] = "$Id: symmeig.c,v 1.6 1995/03/27 15:45:55 des Exp $";
 
 #define	SQRT2	1.4142135623730949
 #define	sgn(x)	( (x) >= 0 ? 1 : -1 )

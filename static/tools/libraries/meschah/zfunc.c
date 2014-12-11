@@ -30,7 +30,7 @@
 #include	<math.h>
 #include	"zmatrix.h"
 
-static char rcsid[] = "$Id: zfunc.c,v 1.3 1995/04/07 16:27:25 des Exp $";
+//static char rcsid[] = "$Id: zfunc.c,v 1.3 1995/04/07 16:27:25 des Exp $";
 
 #ifndef COMPLEX_H
 

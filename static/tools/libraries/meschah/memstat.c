@@ -37,7 +37,7 @@
 #include  "iter.h"
 #endif
 
-static char rcsid[] = "$Id: memstat.c,v 1.1 1994/01/13 05:32:44 des Exp $";
+//static char rcsid[] = "$Id: memstat.c,v 1.1 1994/01/13 05:32:44 des Exp $";
 
 /* global variable */
 
@@ -350,7 +350,7 @@ int mem_stat_reg_vars(int list, int type, char *fname, int line, ...) {
 
     /* va_start(ap, type); */
     va_start(ap, line); /* Changed for Linux 7th Oct, 2003 */
-    while (par = va_arg(ap, void **)) { /* NULL ends the list*/
+    while ((par = va_arg(ap, void **))) { /* NULL ends the list*/
         mem_stat_reg_list(par, type, list, fname, line);
         i++;
     }

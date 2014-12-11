@@ -27,9 +27,7 @@
 #include	<stdio.h>
 #include 	"matrix.h"
 
-static char rcsid[] = "$Id: ivecop.c,v 1.6 1996/08/20 18:19:21 stewart Exp $";
-
-static char line[MAXLINE];
+//static char rcsid[] = "$Id: ivecop.c,v 1.6 1996/08/20 18:19:21 stewart Exp $";
 
 /* iv_get -- get integer vector -- see also memory.c */
 #ifndef ANSI_C
@@ -118,7 +116,7 @@ IVEC *iv_resize(IVEC *iv, int new_dim)
         if (mem_info_is_on()) {
             mem_bytes(TYPE_IVEC, iv->max_dim * sizeof(int), new_dim * sizeof(int));
         }
-        iv->ive = RENEW(iv->ive, new_dim, int);
+        RENEW(iv->ive, new_dim, int);
         if (!iv->ive)
             error(E_MEM, "iv_resize");
         iv->max_dim = new_dim;
