@@ -27,7 +27,7 @@
 		<link>
 			<name>meschah</name>
 			<type>2</type>
-			<location>/ubuntu1310/home/ludo6431/Documents/ENAC/ClubRobot/github/static/tools/libraries/meschah</location>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/meschah</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
