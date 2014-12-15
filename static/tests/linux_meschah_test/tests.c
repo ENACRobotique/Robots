@@ -77,7 +77,7 @@ void test_linearsolve(){
     A->me[1][1] = 4;
 
     // inversion of A
-    Am1 = m_inverse(A, MNULL);
+    Am1 = m_inverse(A, Am1);
 
     printf("A:\n");
     m_output(A);
@@ -89,7 +89,7 @@ void test_linearsolve(){
     b->ve[1] = -2.;
 
     // calculation of A^-1 * b
-    x = mv_mlt(Am1, b, VNULL);
+    x = mv_mlt(Am1, b, x);
 
     printf("b:\n");
     v_output(b);
@@ -97,10 +97,17 @@ void test_linearsolve(){
     v_output(x);
 
     // verification (calculates b - A*x)
-    res = mv_mltadd(b, x, A, -1, VNULL);
+    res = mv_mltadd(b, x, A, -1, res);
 
     printf("residu:\n");
     v_output(res);
+
+    // free allocations
+    M_FREE(A);
+    M_FREE(Am1);
+    V_FREE(b);
+    V_FREE(x);
+    V_FREE(res);
 }
 
 void test_errlinearsolve(){
@@ -140,14 +147,13 @@ void test_errlinearsolve(){
     printf("A^-1:\n");
     m_output(Am1);
 
-    b = VNULL;
     for(double t = 0.; t <= 1.; t+=0.001){
         b = v_resize(b, 2);
         b->ve[0] = cos(2.*M_PI*t);
         b->ve[1] = sin(2.*M_PI*t);
 
         // calculation of A^-1 * b
-        x = mv_mlt(Am1, b, VNULL);
+        x = mv_mlt(Am1, b, x);
 
 //            printf("b:\n");
 //            v_output(b);
@@ -163,7 +169,7 @@ void test_errlinearsolve(){
         }
 
         // verification (calculates b - A*x)
-        res = mv_mltadd(b, x, A, -1, VNULL);
+        res = mv_mltadd(b, x, A, -1, res);
 
 //            printf("residu:\n");
 //            v_output(res);
@@ -200,6 +206,97 @@ void test_errlinearsolve(){
     v_output(max2_x);
 
     if(fcsv) fclose(fcsv);
+
+    // free allocations
+    M_FREE(A);
+    M_FREE(Am1);
+    V_FREE(b);
+    V_FREE(x);
+    V_FREE(res);
+    V_FREE(max1_b);
+    V_FREE(max1_x);
+    V_FREE(max2_b);
+    V_FREE(max2_x);
+}
+
+void test_matvecops(){
+    double A_angle = M_PI / 6.;
+    MAT *A = m_get(3, 3);
+    MAT *Am1 = MNULL;
+
+    double B_angle = - M_PI / 3.;
+    MAT *B = m_get(3, 3);
+    MAT *Bm1 = MNULL;
+
+    VEC *b = v_get(3);
+
+    MAT *mtmp = MNULL;
+    VEC *vtmp = VNULL;
+    VEC *ABb = VNULL;
+    VEC *new_b = VNULL;
+
+    A->me[0][0] = cos(A_angle);
+    A->me[0][1] = -sin(A_angle);
+    A->me[0][2] = 20.;
+    A->me[1][0] = sin(A_angle);
+    A->me[1][1] = cos(A_angle);
+    A->me[1][2] = -15.;
+    A->me[2][0] = 0.;
+    A->me[2][1] = 0.;
+    A->me[2][2] = 1.;
+
+    printf("A:\n");
+    m_output(A);
+
+    Am1 = m_inverse(A, Am1);
+
+    printf("A^-1:\n");
+    m_output(Am1);
+
+    B->me[0][0] = cos(B_angle);
+    B->me[0][1] = -sin(B_angle);
+    B->me[0][2] = -2.;
+    B->me[1][0] = sin(B_angle);
+    B->me[1][1] = cos(B_angle);
+    B->me[1][2] = -5.;
+    B->me[2][0] = 0.;
+    B->me[2][1] = 0.;
+    B->me[2][2] = 1.;
+
+    printf("B:\n");
+    m_output(B);
+
+    Bm1 = m_inverse(B, Bm1);
+
+    printf("B^-1:\n");
+    m_output(Bm1);
+
+    b->ve[0] = 1.5;
+    b->ve[1] = -1.;
+    b->ve[2] = 1.;
+
+    printf("b:\n");
+    v_output(b);
+
+    mtmp = m_mlt(A, B, mtmp);
+    ABb = mv_mlt(mtmp, b, ABb);
+
+    printf("ABb:\n");
+    v_output(ABb);
+
+    vtmp = mv_mlt(Am1, ABb, vtmp);
+    new_b = mv_mlt(Bm1, vtmp, new_b);
+
+    printf("new_b:\n");
+    v_output(new_b);
+
+    M_FREE(A);
+    M_FREE(B);
+    V_FREE(b);
+    M_FREE(mtmp);
+    V_FREE(vtmp);
+    V_FREE(new_b);
+    V_FREE(ABb);
 }
 
 struct{
@@ -209,6 +306,7 @@ struct{
         {test_macheps, "Machine epsilon test (double & float)"},
         {test_linearsolve, "Ax=b solutions (using explicit matrix inversion"},
         {test_errlinearsolve, "Solves Ax=b for different b and check residual (using explicit matrix inversion"},
+        {test_matvecops, "Matrix vector operations"},
 };
 
 int main() {
@@ -216,6 +314,7 @@ int main() {
     for(int i = 0; i < sizeof(tests)/sizeof(*tests); i++){
         const char format[] = "# Starting test #%02i \"%s\" #\n";
 
+        // create border
         {
             int sz = sizeof(format) - 2 + strlen(tests[i].s) + 1 - 2 - 2;
             buf = realloc(buf, sz);
@@ -233,12 +332,16 @@ int main() {
         printf(format, i, tests[i].s);
         puts(buf);
 
+        // call test
         tests[i].f();
 
         puts(buf);
         printf("# End of test #%02i   \"%s\" #\n", i, tests[i].s);
         puts(buf);
     }
+    if(buf) free(buf);
+
+//    malloc_stats();
 
     return EXIT_SUCCESS;
 }
