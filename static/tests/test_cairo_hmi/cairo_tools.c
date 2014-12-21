@@ -11,15 +11,6 @@
 
 #include "cairo_tools.h"
 
-gboolean invalidate_all(sContext *ctx) {
-    // for now, invalidate all
-    GdkRectangle rect = { .x = 0, .y = 0, .width = ctx->da_width, .height = ctx->da_height };
-
-    gdk_window_invalidate_rect(gtk_widget_get_window(ctx->drawing_area), &rect, 1);
-
-    return TRUE; // continue to be called
-}
-
 void cairo_ellipse(cairo_t *cr, double xc, double yc, double a, double b, double rot) {
     cairo_save(cr);
     cairo_translate(cr, xc, yc);

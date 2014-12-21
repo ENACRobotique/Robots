@@ -10,7 +10,6 @@
 
 #include "context.h"
 
-gboolean invalidate_all(sContext *ctx);
 void cairo_ellipse(cairo_t *cr, double xc, double yc, double a, double b, double rot);
 void cairo_text(cairo_t *cr, double x, double y, double size, const char *txt);
 

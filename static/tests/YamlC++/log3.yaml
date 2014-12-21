@@ -1,0 +1,10 @@
+Trajectory:
+  - Header: {tid: 0}  # dist: 42 cm, path_len: 4
+    Elements:
+      - {start: {x: 0, y: 0}, end: {x: 15.2, y: -16.9}, obs: {c: {x: 33.2, y: -16.9}, r: 18}}
+      - {start: {x: 17.3, y: -8.5}, end: {x: 17.3, y: -8.5}, obs: {c: {x: -4.9, y: 3.4}, r: -25.2}}
+      - {start: {x: 17.3, y: 15.2}, end: {x: 17.3, y: 15.2}, obs: {c: {x: 33.3, y: 23.7}, r: 18.1}}
+      - {start: {x: 15.2, y: 23.7}, end: {x: 15.2, y: 23.7}, obs: {c: {x: 15.2, y: 23.7}, r: 0}}
+  - Header: {tid: 1}  # dist: 42 cm, path_len: 1
+    Elements:
+      - {start: {x: 0, y: 0}, end: {x: 15.2, y: -16.9}, obs: {c: {x: 33.2, y: -16.9}, r: 18}}

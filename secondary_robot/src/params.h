@@ -74,7 +74,7 @@
 
 #define TIME_READY_LAUNCHER 500 //in ms
 
-#define DEBUG
+#define DEBUG 1
 
 /* endDefines *********************************************/
 
