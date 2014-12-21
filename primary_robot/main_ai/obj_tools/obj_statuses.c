@@ -34,7 +34,7 @@ typedef struct{
     sStatusListEl *lastStatuses;
 } sStatusListInstance;
 
-sStatusListInstance elts[NUM_E_ELEMENT];
+sStatusListInstance elts[NUM_E_ELEMENT] = {0};
 static sStatusListEl *lastPRStatuses = NULL;
 
 static sStatusListEl *newEl(){

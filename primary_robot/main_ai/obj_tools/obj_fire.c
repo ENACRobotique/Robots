@@ -384,7 +384,7 @@ int objBonusFire(void){
 
                 if(j == 0){ //Left zone
                     convPts2Line(&p[0], &p[1], 0, &l);
-                    for( k = 2 ; k < 5 ; k++){
+                    for( k = 2 ; k < 4 ; k++){
                         symPtprLine(&p[k], &l, &p[k]);
                         }
                     }

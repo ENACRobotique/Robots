@@ -3,7 +3,14 @@
  *
  *  Created on: 10 oct. 2013
  *      Author: Ludo6431
+ *
+ * main.cpp
+ *
+ *  Created on: 21 dec. 2014
+ *      Author: Seb
  */
+
+extern "C"{
 #include <signal.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -36,7 +43,7 @@
 #include "obj_com.h"
 
 #include "main.h"
-
+}
 #ifdef CTRLC_MENU
 static int menu = 0;
 
@@ -45,10 +52,10 @@ void intHandler(int dummy) {
 }
 #endif
 
-sPath_t curr_path = {.path = NULL};
+sPath_t curr_path; //= {.path = NULL};
 int curr_traj_extract_sid = -1;
 int last_tid = 0;
-
+int cpt=0;
 void usage(char *cl){
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
@@ -85,7 +92,8 @@ int main(int argc, char **argv){
     int i;
     eAIState_t eAIState = E_AI_SLAVE;
     // traj mgmt
-    sPath_t new_path = {.path = NULL};
+    sPath_t new_path;
+    new_path.path = NULL;
     unsigned int prevSendTraj = 0;
     // obss send
     uint8_t send_obss_reset = 0, send_obss_idx = 0;
@@ -242,8 +250,8 @@ int main(int argc, char **argv){
 
             if (verbose>=1) {
                 if(msgIn.header.type != E_POS)
-                printf("message received from %s (%03hx), type : %s (%hhu)  ", role_string(role_get_role(msgIn.header.srcAddr)), msgIn.header.srcAddr, eType2str(msgIn.header.type), msgIn.header.type);
-                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
+                printf("message received from %s (%03hx), type : %s (%hhu)  ", role_string(role_get_role(msgIn.header.srcAddr)), msgIn.header.srcAddr, eType2str((E_TYPE)msgIn.header.type), msgIn.header.type);
+                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str((E_TYPE)msgIn.header.type),msgIn.header.type);
             }
             switch (msgIn.header.type){
             case E_DEBUG :
@@ -253,11 +261,13 @@ int main(int argc, char **argv){
             case E_POS :
 //                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
 //                printf("\n");
-                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
+                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str((E_TYPE)msgIn.header.type),msgIn.header.type);
 
                 // updating position...
                 {
-                	sPt_t new_pos = {.x = msgIn.payload.pos.x, .y = msgIn.payload.pos.y};
+                	sPt_t new_pos;
+                	new_pos.x = msgIn.payload.pos.x;
+                	new_pos.y = msgIn.payload.pos.y;
                 	sNum_t d;
 
                 	if(prevPos){
@@ -286,7 +296,7 @@ int main(int argc, char **argv){
 
                     status.date = micros(); // XXX
                     status.id = ELT_PRIMARY;
-                    status.prop_status.pos.frame = FRAME_PLAYGROUND;
+                    status.prop_status.pos.frame = 0; //FRAME_PLAYGROUND
                     status.prop_status.pos.theta = msgIn.payload.pos.theta;
                     status.prop_status.pos_u.a_var = 0.;
                     status.prop_status.pos_u.b_var = 0.;
@@ -347,7 +357,7 @@ int main(int argc, char **argv){
                 break;
             case E_GOAL :
                 printf("robot%hhu@(%.2fcm,%.2fcm,%.2f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
-                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
+                if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str((E_TYPE)msgIn.header.type),msgIn.header.type);
 
                 switch(eAIState){
                 case E_AI_SLAVE:
@@ -478,6 +488,8 @@ int main(int argc, char **argv){
         case E_AI_AUTO:
         case E_AI_PROG:
             obj_step(eAIState);
+
+            printf("cpt=%i\n", cpt++);
             break;
         case E_AI_FIRE:
             revertFireDemo();
