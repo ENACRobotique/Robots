@@ -5,6 +5,7 @@
  *      Author: quentin
  */
 
+#if MYADDRX
 // config files
 #include "node_cfg.h"
 #include "network_cfg.h"
@@ -24,7 +25,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#if MYADDRX
 
 
 
