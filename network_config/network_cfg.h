@@ -12,7 +12,6 @@
 #include <stdint.h>
 #include "../static/communication/botNet/shared/message_header.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,7 +22,6 @@ extern "C" {
 #define BIT(a) (1<<(a))
 #endif
 
-
 #define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits address. Must equal the larger size of the address in the different subnetworks
 
 //masks
@@ -32,8 +30,8 @@ extern "C" {
     #define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define DEVICEU_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
     #define DEVICED_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
-    #define ADDRX_MASK  (0xff)      //on a 16-bits address, i2c devices
-    #define ADDRI_MASK  (0xff)      //on a 16-bits address, xbee devices
+    #define ADDRX_MASK  (0xff)      //on a 16-bits address, xbee devices
+    #define ADDRI_MASK  (0xff)      //on a 16-bits address, i2c devices
     #define ADDRU_MASK  (0xff)      //on a 16-bits address, uart devices
     #define ADDRD_MASK  (0xff)      //on a 16-bits address, udp devices
 
@@ -137,7 +135,6 @@ typedef struct{
     bn_Address destSubnet;
     sRouteInfo nextHop;
 }sRTableEntry;
-
 
 extern sRTableEntry rTable[];
 
