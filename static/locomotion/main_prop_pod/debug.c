@@ -1,7 +1,7 @@
 #include "debug.h"
 #include "param.h"
 
-void gpios_debg_output(void){
+void debug_init(void){
 	gpio_output(BK_DBG1, PIN_DBG1);
 	gpio_output(BK_DBG2, PIN_DBG2);
 	gpio_output(BK_DBG3, PIN_DBG3);

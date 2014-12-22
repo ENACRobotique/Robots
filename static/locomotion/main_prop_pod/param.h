@@ -6,7 +6,6 @@
 
 // Tests or methods of operation
 	#define DVLPT_BOARD
-//	#define SMALL_WHL
 //#define LOW_CONSUMPTION
 //	#define ENCODER
 
@@ -96,6 +95,7 @@
 #define READ_DIR_ASKED gpio_read(BK_SWTCH5, PIN_SWTCH5);
 #else
 // TODO
+#error TODO unimplemented yet
 #endif
 
 #define PWM_RANGE 1024  // Don't change this value without change parameter of PWM
@@ -107,11 +107,11 @@
 
 //// Params motor-reductor
 #define REDUCT (676./49.)
-#define SPIN2INC (1/REDUCT)
+#define SPIN2INC (1./REDUCT)
 
 //// Params for asservissement
 #define T_ASSER 20 // in ms
-#define FRQ_ASSER (1/0.02)
+#define FRQ_ASSER (1./0.02)
 #define MAX_SPEED 3 // in m/s
 
 

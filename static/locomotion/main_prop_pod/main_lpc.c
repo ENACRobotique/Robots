@@ -56,7 +56,7 @@ int main() {
 		// Bootstrap
 		gpio_output(BK_BSTRP1, PIN_BSTRP1);
 		// Debug
-		gpios_debg_output();
+		debug_init();
 		// Small switch
 		switchs_init();
 		// LED
@@ -125,6 +125,7 @@ int main() {
 
 			#else
 			// TODO
+#error TODO unimplemented yet
 			#endif
 
 #ifdef ENCODER
@@ -145,6 +146,7 @@ int main() {
 				DEBUG_3_OFF;
 			#else
 			// TODO
+#error TODO unimplemented yet
 			#endif
 
 #ifdef ENCODER

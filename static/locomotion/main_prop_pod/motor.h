@@ -5,9 +5,10 @@
 #include "param.h"
 
 #ifdef DVLPT_BOARD
-#define RAMPE (1024./7.*1000)
+#define RAMPE (1024./7.*1000.)
 #else
 // TODO
+#error TODO unimplemented yet
 #endif
 
 

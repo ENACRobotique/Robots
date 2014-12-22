@@ -46,6 +46,7 @@ void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp){
 #ifdef LOW_CONSUMPTION
 			// Alternating phase of free wheel & driving
 			// TODO
+#error TODO unimplemented yet
 #else
 			// Alternating phase of breaking & driving
 			pwm_enable(1, pwmCmd);
@@ -61,6 +62,7 @@ void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp){
 #ifdef LOW_CONSUMPTION
 			// Alternating phase of free wheel & driving
 			// TODO
+#error TODO unimplemented yet
 #else
 			// Alternating phase of breaking & driving
 			pwm_enable(2, pwmCmd);

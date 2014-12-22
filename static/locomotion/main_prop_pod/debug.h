@@ -4,10 +4,6 @@
 #include <lpc214x.h>
 #include <gpio.h>
 
-#ifdef DVLPT_BOARD
-#define DBG_SWITH
-#endif
-
 // Pin for debug
 #define PIN_DBG1 10
 #define BK_DBG1  0
@@ -19,8 +15,6 @@
 #define BK_DBG4  0
 #define PIN_DBG5 18
 #define BK_DBG5  0
-
-
 
 // Definition of five pins of debug
 #define DEBUG_1_ON gpio_write(BK_DBG1, PIN_DBG1, 1)
@@ -34,8 +28,6 @@
 #define DEBUG_5_ON gpio_write(BK_DBG5, PIN_DBG5, 1)
 #define DEBUG_5_OFF gpio_write(BK_DBG5, PIN_DBG5, 0)
 
-void gpios_debg_output(void);
-
-
+void debug_init(void);
 
 #endif // DEBUG_H
