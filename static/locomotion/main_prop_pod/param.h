@@ -5,7 +5,6 @@
 
 
 // Tests or methods of operation
-	#define DVLPT_BOARD
 //#define LOW_CONSUMPTION
 //	#define ENCODER
 
@@ -91,12 +90,7 @@
 //#define sensHorai {IN1_OFF; IN2_ON; DEBUG_2_ON; DEBUG_1_OFF;}
 //#define brake { IN1_OFF; IN2_OFF;}
 
-#ifdef DVLPT_BOARD
 #define READ_DIR_ASKED gpio_read(BK_SWTCH5, PIN_SWTCH5);
-#else
-// TODO
-#error TODO unimplemented yet
-#endif
 
 #define PWM_RANGE 1024  // Don't change this value without change parameter of PWM
 

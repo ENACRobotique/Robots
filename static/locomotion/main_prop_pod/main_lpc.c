@@ -102,7 +102,6 @@ int main() {
 //			}
 
 			// Get direction
-			#ifdef DVLPT_BOARD
 			dirCons = READ_DIR_ASKED;
 
 			// Get motor operation
@@ -123,11 +122,6 @@ int main() {
 				break;
 			}
 
-			#else
-			// TODO
-#error TODO unimplemented yet
-			#endif
-
 #ifdef ENCODER
 			// Get number of IRQ
 			global_IRQ_disable();
@@ -137,17 +131,12 @@ int main() {
 #endif
 
 			// Get speed consign
-			#ifdef DVLPT_BOARD
 			int c = (gpio_read(BK_SWTCH1, PIN_SWTCH1) + 2*gpio_read(BK_SWTCH2, PIN_SWTCH2) + 4*gpio_read(BK_SWTCH3, PIN_SWTCH3) + 8 *gpio_read(BK_SWTCH4, PIN_SWTCH4));
 			speedCons = mPerS2IncPerT(c * MAX_SPEED/15);
 			if(gpio_read(BK_SWTCH2, PIN_SWTCH2) == 1)
 				DEBUG_3_ON;
 			else
 				DEBUG_3_OFF;
-			#else
-			// TODO
-#error TODO unimplemented yet
-			#endif
 
 #ifdef ENCODER
 			// Get speed measured
