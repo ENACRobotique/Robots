@@ -19,77 +19,84 @@ extern "C" {
 #include "roles.h"
 
 #ifndef BIT
-#define BIT(a) (1<<(a))
+#   define BIT(a) (1<<(a))
 #endif
 
 #define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits address. Must equal the larger size of the address in the different subnetworks
 
 //masks
-    #define SUBNET_MASK (0xff<<DEVICE_ADDR_SIZE)  //on a 16-bits address
-    #define DEVICEX_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
-    #define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
-    #define DEVICEU_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
-    #define DEVICED_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
-    #define ADDRX_MASK  (0xff)      //on a 16-bits address, xbee devices
-    #define ADDRI_MASK  (0xff)      //on a 16-bits address, i2c devices
-    #define ADDRU_MASK  (0xff)      //on a 16-bits address, uart devices
-    #define ADDRD_MASK  (0xff)      //on a 16-bits address, udp devices
+#define SUBNET_MASK (0xff<<DEVICE_ADDR_SIZE)  //on a 16-bits address
+#define DEVICEX_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
+#define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
+#define DEVICEU_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
+#define DEVICED_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
+#define ADDRX_MASK  (0xff)      //on a 16-bits address, xbee devices
+#define ADDRI_MASK  (0xff)      //on a 16-bits address, i2c devices
+#define ADDRU_MASK  (0xff)      //on a 16-bits address, uart devices
+#define ADDRD_MASK  (0xff)      //on a 16-bits address, udp devices
 
 //subnet addresses
-    #define SUBNETX         (1<<DEVICE_ADDR_SIZE)
-    #define SUBNETI_MAIN    (2<<DEVICE_ADDR_SIZE)
-    #define SUBNETU1_DEBUG  (3<<DEVICE_ADDR_SIZE)
-    #define SUBNETD1_DEBUG  (4<<DEVICE_ADDR_SIZE)
-    #define SUBNETU2_MAIN   (5<<DEVICE_ADDR_SIZE)
-    #define SUBNETD2_MAIN   (6<<DEVICE_ADDR_SIZE)
+#define SUBNETX     (1<<DEVICE_ADDR_SIZE)
+#define SUBNETI1    (2<<DEVICE_ADDR_SIZE)   // MAIN
+#define SUBNETU1    (3<<DEVICE_ADDR_SIZE)   // DEBUG
+#define SUBNETD1    (4<<DEVICE_ADDR_SIZE)   // DEBUG
+#define SUBNETU2    (5<<DEVICE_ADDR_SIZE)   // MAIN
+#define SUBNETD2    (6<<DEVICE_ADDR_SIZE)   // MAIN
+#define SUBNETI2    (7<<DEVICE_ADDR_SIZE)   // MAIN (prop only)
 
 //xbee addresses
-    #define ADDRX_MAIN_TURRET   ( BIT(0) | SUBNETX )
-    #define ADDRX_FIX           ( BIT(1) | SUBNETX )
-    #define ADDRX_MOBILE_1      ( BIT(2) | SUBNETX )
-    #define ADDRX_MOBILE_2      ( BIT(3) | SUBNETX )
-    #define ADDRX_SECOND        ( BIT(4) | SUBNETX )
-    #define ADDRX_DEBUG         ( BIT(5) | SUBNETX )
-    #define ADDRX_DBGBRIDGE     ( BIT(7) | SUBNETX )
-    #define ADDRX_BROADCAST     ( 0xff   | SUBNETX )
+#define ADDRX_MAIN_TURRET       ( BIT(0)    | SUBNETX )
+#define ADDRX_FIX               ( BIT(1)    | SUBNETX )
+#define ADDRX_MOBILE_1          ( BIT(2)    | SUBNETX )
+#define ADDRX_MOBILE_2          ( BIT(3)    | SUBNETX )
+#define ADDRX_SECOND            ( BIT(4)    | SUBNETX )
+#define ADDRX_DEBUG             ( BIT(5)    | SUBNETX )
+#define ADDRX_DBGBRIDGE         ( BIT(7)    | SUBNETX )
+#define ADDRX_BROADCAST         ( 0xff      | SUBNETX )
 
-//I2C addresses (least significant bit of I²C addresses must be unused)
-    //subnet MAIN
-    #define ADDRI_MAIN_TURRET   ( (1<<1) | SUBNETI_MAIN )
-    #define ADDRI_MAIN_PROP     ( (2<<1) | SUBNETI_MAIN )
-    #define ADDRI_MAIN_IO       ( (3<<1) | SUBNETI_MAIN )
-    #define ADDRI_DBGBRIDGE     ( (4<<1) | SUBNETI_MAIN )
+//I2C addresses (SUBNETI1 ; least significant bit of I²C addresses must be unused)
+#define ADDRI1_MAIN_TURRET      ( (1<<1)    | SUBNETI1 )
+#define ADDRI1_MAIN_PROP        ( (2<<1)    | SUBNETI1 )
+#define ADDRI1_MAIN_IO          ( (3<<1)    | SUBNETI1 )
+#define ADDRI1_DBGBRIDGE        ( (4<<1)    | SUBNETI1 )
 
-//UART addresses (SUBNETU1_DEBUG)
-    #define ADDRU1_DBGBRIDGE    ( 1 | SUBNETU1_DEBUG )
-    #define ADDRU1_MAIN_IO      ( 2 | SUBNETU1_DEBUG )
+//I2C addresses (SUBNETI2 ; least significant bit of I²C addresses must be unused)
+#define ADDRI2_MAIN_PROP_POD1   ( (1<<1)    | SUBNETI2 )
+#define ADDRI2_MAIN_PROP_POD2   ( (2<<1)    | SUBNETI2 )
+#define ADDRI2_MAIN_PROP_POD3   ( (3<<1)    | SUBNETI2 )
+#define ADDRI2_MAIN_PROP_POD4   ( (4<<1)    | SUBNETI2 )
+#define ADDRI2_MAIN_PROP_POD5   ( (5<<1)    | SUBNETI2 )
 
-//UART addresses (SUBNETU2_MAIN)
-    #define ADDRU2_MAIN_PROP    ( 1 | SUBNETU2_MAIN )
-    #define ADDRU2_MAIN_AI      ( 2 | SUBNETU2_MAIN )
+//UART addresses (SUBNETU1)
+#define ADDRU1_DBGBRIDGE        ( 1         | SUBNETU1 )
+#define ADDRU1_MAIN_IO          ( 2         | SUBNETU1 )
 
-//UDP addresses (SUBNETD1_DEBUG)
-    #define ADDRD1_DEBUG1               ( 1 | SUBNETD1_DEBUG )
-    #define ADDRD1_DEBUG2               ( 2 | SUBNETD1_DEBUG )
-    #define ADDRD1_DEBUG3               ( 3 | SUBNETD1_DEBUG )
-    #define ADDRD1_DBGBRIDGE            ( 4 | SUBNETD1_DEBUG )
-    #define ADDRD1_MONITORING           ( 5 | SUBNETD1_DEBUG )
-    #define ADDRD1_MAIN_PROP_SIMU       ( 6 | SUBNETD1_DEBUG )
-    #define ADDRD1_MAIN_IA_SIMU         ( 7 | SUBNETD1_DEBUG )
+//UART addresses (SUBNETU2)
+#define ADDRU2_MAIN_PROP        ( 1         | SUBNETU2 )
+#define ADDRU2_MAIN_AI          ( 2         | SUBNETU2 )
 
-//UDP addresses (SUBNETD2_MAIN)
-    #define ADDRD2_MAIN_AI              ( 1 | SUBNETD2_MAIN )
-    #define ADDRD2_MAIN_VIDEO           ( 2 | SUBNETD2_MAIN )
+//UDP addresses (SUBNETD1)
+#define ADDRD1_DEBUG1           ( 1         | SUBNETD1 )
+#define ADDRD1_DEBUG2           ( 2         | SUBNETD1 )
+#define ADDRD1_DEBUG3           ( 3         | SUBNETD1 )
+#define ADDRD1_DBGBRIDGE        ( 4         | SUBNETD1 )
+#define ADDRD1_MONITORING       ( 5         | SUBNETD1 )
+#define ADDRD1_MAIN_PROP_SIMU   ( 6         | SUBNETD1 )
+#define ADDRD1_MAIN_IA_SIMU     ( 7         | SUBNETD1 )
+
+//UDP addresses (SUBNETD2)
+#define ADDRD2_MAIN_AI          ( 1         | SUBNETD2 )
+#define ADDRD2_MAIN_VIDEO       ( 2         | SUBNETD2 )
 
 //default debug address :
-    #define ADDR_MONITORING_DFLT    (ADDRD1_MONITORING)
-    #define ADDR_IA_DFLT            (ADDRD1_MAIN_IA_SIMU)
+#define ADDR_MONITORING_DFLT    (ADDRD1_MONITORING)
+#define ADDR_IA_DFLT            (ADDRD1_MAIN_IA_SIMU)
 #if 1
-    #define ADDR_PROP_DFLT          (ADDRD1_MAIN_PROP_SIMU)
+#   define ADDR_PROP_DFLT       (ADDRD1_MAIN_PROP_SIMU)
 #else
-    #define ADDR_PROP_DFLT          (ADDRI_MAIN_PROP)
+#   define ADDR_PROP_DFLT       (ADDRI1_MAIN_PROP)
 #endif
-    #define ADDR_DEBUG_DFLT         (ADDRX_DEBUG)
+#define ADDR_DEBUG_DFLT         (ADDRX_DEBUG)
 
 /* Interface enum
  *

@@ -5,12 +5,12 @@
  *      Author: quentin
  */
 
-#if MYADDRX
 // config files
 #include "node_cfg.h"
 #include "network_cfg.h"
 #include "messages.h"
 
+#if MYADDRX
 // other required libraries
 #include "../../../tools/libraries/Timeout/timeout.h"
 #include "../../Xbee_API/shared/Xbee_API.h"

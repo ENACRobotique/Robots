@@ -187,7 +187,7 @@ uint8_t role_get_role(bn_Address address){
     case ADDRU2_MAIN_AI:
         return ROLE_IA;
     case ADDRD1_MAIN_PROP_SIMU:
-    case ADDRI_MAIN_PROP:
+    case ADDRI1_MAIN_PROP:
     case ADDRU2_MAIN_PROP:
         return ROLE_PROPULSION;
     case ADDRD1_DEBUG1:
