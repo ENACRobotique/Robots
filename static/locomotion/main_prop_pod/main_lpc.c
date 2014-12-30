@@ -29,6 +29,42 @@
  *                      |-
  */
 
+/*
+ * pins usage:
+ *      UART0
+ *          TXD0    P0.0    EXT1.1      TX_LPC              !PWM1
+ *          RXD0    P0.1    EXT1.2      RX_LPC              !PWM3 ~EINT0
+ *      I²C0
+ *          SCL0    P0.2    EXT1.3      SCL_LPC
+ *          SDA0    P0.3    EXT1.4      SDA_LPC             ~EINT1
+ *      PWM*
+ *          PWM2    P0.7    EXT1.8      PWM1_LPC            ~EINT2
+ *          PWM5    P0.21   EXT1.22     PWM2_LPC
+ *      EINT*
+ *          EINT0   P0.16   EXT1.17     CHNL_I_LPC
+ *          EINT1   P0.14   EXT1.15     CHNL_A_LPC          !I²C1 ~UART1
+ *          EINT3   P0.20   EXT1.21     CHNL_B_LPC
+ *      GPIO*
+ *          OUT     P0.6    EXT1.7      SD1_LPC
+ *          OUT     P0.8    EXT1.9      LED_1               !UART1
+ *          IN/OUT  P0.9    EXT1.10     pull-up SCL_LPC     !UART1
+ *          IN/OUT  P0.10   EXT1.11     pull-up SDA_LPC     ~UART1
+ *          IN      P0.11   EXT1.12     SW3_LPC             !I²C1 ~UART1
+ *          IN      P0.12   EXT1.13     SW2_LPC             ~UART1
+ *          IN      P0.13   EXT1.14     SW1_LPC             ~UART1
+ *          OUT     P0.30   EXT2.3      SD2_LPC             ~EINT3
+ *          OUT     P0.31   EXT2.4      LED_3
+ *          OUT     P1.24   EXT2.13     LED3
+ *      DEBUG
+ *                  P1.26   EXT2.15
+ *                  P1.27   EXT2.16
+ *                  P1.28   EXT2.17
+ *                  P1.29   EXT2.18
+ *                  P1.30   EXT2.19
+ *
+ * for more details, see Features2Pins.txt file
+ */
+
 volatile float speedCons; // Consign wheel speed in inc/T
 float speed_mes; // Wheel speed in inc/T
 float speedErr; // Speed command for motor
