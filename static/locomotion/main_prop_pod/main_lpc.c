@@ -30,7 +30,7 @@
  */
 
 /*
- * pins usage:
+ * pins usage (board Rev1):
  *      UART0
  *          TXD0    P0.0    EXT1.1      TX_LPC              !PWM1
  *          RXD0    P0.1    EXT1.2      RX_LPC              !PWM3 ~EINT0
