@@ -82,7 +82,7 @@ extern "C" {
 #define ADDRD1_DBGBRIDGE        ( 4         | SUBNETD1 )
 #define ADDRD1_MONITORING       ( 5         | SUBNETD1 )
 #define ADDRD1_MAIN_PROP_SIMU   ( 6         | SUBNETD1 )
-#define ADDRD1_MAIN_IA_SIMU     ( 7         | SUBNETD1 )
+#define ADDRD1_MAIN_AI_SIMU     ( 7         | SUBNETD1 )
 
 //UDP addresses (SUBNETD2)
 #define ADDRD2_MAIN_AI          ( 1         | SUBNETD2 )
@@ -90,7 +90,7 @@ extern "C" {
 
 //default debug address :
 #define ADDR_MONITORING_DFLT    (ADDRD1_MONITORING)
-#define ADDR_IA_DFLT            (ADDRD1_MAIN_IA_SIMU)
+#define ADDR_AI_DFLT            (ADDRD1_MAIN_AI_SIMU)
 #if 1
 #   define ADDR_PROP_DFLT       (ADDRD1_MAIN_PROP_SIMU)
 #else
