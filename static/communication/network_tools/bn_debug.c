@@ -85,8 +85,8 @@ int bn_debugSendAddr(bn_Address dest){
 
     msg.header.type = E_ROLE_SETUP;
     msg.header.destAddr = dest;
-    msg.header.size = 2 + 4*2;
     msg.payload.roleSetup.nb_steps = 2;
+    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
     // step #0 (overrides any previous debug setup on the remote node)
     msg.payload.roleSetup.steps[0].step = UPDATE_ACTIONS;
     msg.payload.roleSetup.steps[0].type = E_DEBUG;

@@ -312,11 +312,11 @@ struct{
 int main() {
     char* buf = NULL;
     for(int i = 0; i < sizeof(tests)/sizeof(*tests); i++){
-        const char format[] = "# Starting test #%02i \"%s\" #\n";
+        const char format[] = "# Begin of test #%02i \"%s\" #\n";
 
         // create border
         {
-            int sz = sizeof(format) - 2 + strlen(tests[i].s) + 1 - 2 - 2;
+            int sz = sizeof(format) + strlen(tests[i].s) - 5;
             buf = realloc(buf, sz);
             int j;
             for(j = 0; j < sz-1; j++){

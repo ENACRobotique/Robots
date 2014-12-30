@@ -135,10 +135,10 @@ int bn_send(sMsg *msg){
  */
 int bn_genericSend(sMsg *msg){
     // sets source address
-    msg->header.srcAddr = ((MYADDRX?:MYADDRI)?:MYADDRU)?:MYADDRD;
+    msg->header.srcAddr = MYADDR;
 
     //check the size of the message
-    if ( (msg->header.size + sizeof(sGenericHeader)) > BN_MAX_PDU) return -ERR_BN_OVERSIZE;
+    if ( (msg->header.size + sizeof(msg->header)) > BN_MAX_PDU) return -ERR_BN_OVERSIZE;
 
     //sets type version
     msg->header.typeVersion=BN_TYPE_VERSION;
