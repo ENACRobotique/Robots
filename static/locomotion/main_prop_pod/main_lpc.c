@@ -44,8 +44,8 @@
  *          EINT3   P0.20   EXT1.21     CHNL_B_LPC
  *      GPIO*
  *          OUT     P0.6    EXT1.7      SD1_LPC
- *          OUT     P0.8    EXT1.9      LED_1               !UART1
- *          IN/OUT  P0.9    EXT1.10     pull-up SCL_LPC     !UART1
+ *          OUT     P0.8    EXT1.9      LED_1               !PWM4 !UART1
+ *          IN/OUT  P0.9    EXT1.10     pull-up SCL_LPC     !PWM6 !UART1 ~EINT3
  *          IN/OUT  P0.10   EXT1.11     pull-up SDA_LPC     ~UART1
  *          IN      P0.11   EXT1.12     SW3_LPC             !I²C1 ~UART1
  *          IN      P0.12   EXT1.13     SW2_LPC             ~UART1
