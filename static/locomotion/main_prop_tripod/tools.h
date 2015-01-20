@@ -13,7 +13,6 @@
 #define ROUND(x) (x>0? (long)(x+0.5) : (long)(x-0.5))
 #define INCH2METERS 0.0254
 
-
 float incPerT2mPerS(float incPerT);
 float mPerS2IncPerT(float mPerS);
 void blindLED(int bk, int pin, int delay_on, int delay_off, int nbr_it /*0 = Infinite time*/);

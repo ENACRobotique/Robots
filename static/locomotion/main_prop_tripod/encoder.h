@@ -1,13 +1,11 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-
 #include <lpc214x.h>
 #include "param.h"
 #include <eint.h>
 #include <ime.h>
 #include <gpio.h>
-
 
 #define DIR_MES_TRIGO 1
 #define DIR_MES_HORAI -1
@@ -18,9 +16,7 @@ extern volatile int irqCpt;
 extern volatile int irqCptRef;
 extern volatile int dir_mes;
 
-
 void isr_eint0();
 void isr_eint3();
-
 
 #endif
