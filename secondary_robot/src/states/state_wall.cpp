@@ -6,7 +6,7 @@
 
 #include "../params.h"
 #include "../tools.h"
-#include "lib_radar2.h"
+#include "lib_radar.h"
 #include "lib_wall.h"
 #include "lib_line.h"
 #include "lib_move.h"
