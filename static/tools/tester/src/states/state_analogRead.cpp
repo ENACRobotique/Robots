@@ -17,27 +17,24 @@
 // test;
 
 sState* testanalogRead(){
-	static int memValue[]={0};
-	int Value[] = {analogRead(0)};
-	int lentab=(sizeof(Value)/sizeof(int));
-	int Position = (myEnc.read()/2)%lentab;
-	if(Value!=memValue)
+	static int memValue[]={0,0,0,0,0,0};
+	int Position = (myEnc.read()/2)%6;    //position du selecteur
+	int Value = analogRead(Position);
+
+	if(abs(Value-memValue[Position])>11)
 	{
 		char affich[16];
-		for(int i=Position;i<min(Position+1,lentab);i++)
-		{
-			snprintf(affich,17,"CH%d:%d%%  ",i,Value[i]/1024);
-		}
+		double val;
+		val=Value/1024.0;
+		int pe=val*100;
+		snprintf(affich,17,"CH%d : %d %%",Position,pe);
 		afficher(affich);
-		for(int i=0;i<1;i++)
-		{
-			memValue[i]=Value[i];
-		}
+		memValue[Position]=Value;
 	}
 
 	if(!digitalRead(RETOUR))
 	{
-		delay(3);	//anti rebond
+		delay(DELAY_BOUNCE);	//anti rebond
 		while(!digitalRead(RETOUR));	//attente du relachement du bouton
 		return(&sMenu_principal);
 	}

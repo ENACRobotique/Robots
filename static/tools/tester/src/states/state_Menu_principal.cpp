@@ -10,7 +10,7 @@
 #include <params.h>
 #include <state_blink.h>
 #include <state_Menu_servo.h>
-#include <state_pwm.h>
+#include <state_Menu_pwm.h>
 #include <state_types.h>
 #include <stddef.h>
 //#include "../tools.h"
@@ -21,7 +21,7 @@
 
 #define NB_menu_principal 5
 
-Encoder myEnc(3, 4);
+Encoder myEnc(4, 5);
 
 
 sState* testMenu_principal(){
@@ -35,8 +35,8 @@ sState* testMenu_principal(){
 
 
 		static int memPosition;
-		//int Position = (abs(myEnc.read())/2)%NB_menu_principal;    //position du selecteur
-		int Position = (myEnc.read()/2)%NB_menu_principal;    //position du selecteur
+		int Position = (abs(myEnc.read())/2)%NB_menu_principal;    //position du selecteur
+		//int Position = (myEnc.read()/2)%NB_menu_principal;    //position du selecteur
 
 		   if(Position != memPosition)  //on affiche que si on change de position
 		   {
@@ -51,7 +51,7 @@ sState* testMenu_principal(){
 		    switch (Position)
 		    {
 		        case 0:{ return(&sMenu_servo); break; }
-		        case 1:{ return(&spwm); break; }
+		        case 1:{ return(&sMenu_pwm); break; }
 		        case 2:{ return(&sanalogRead); break; }
 	//	        case 3:{ i2c(); break; }
 	//	        case 4:{ liaison_serie(); break; }

@@ -12,8 +12,10 @@
 #include <tools.h>
 #include "state_blink.h"
 
+#ifndef NOLCD
 #include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
-LiquidCrystal lcd(6, 7, 8, 10, 11, 12);
+LiquidCrystal lcd(6, 7, 8, 10, 9, 12); //pins a changer
+#endif
 
 sState* testBlink(){
     return NULL;
@@ -54,8 +56,13 @@ sState sBlink={
 
 void afficher(const char * chaine)
 {
+#ifndef NOLCD
 	  lcd.clear();
 	  lcd.home();
 	  lcd.write(chaine);
+#endif
+#ifdef NOLCD
+		Serial.println(chaine);
+#endif
 }
 

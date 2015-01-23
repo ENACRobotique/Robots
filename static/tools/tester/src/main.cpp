@@ -12,8 +12,7 @@
 #include "states/state_blink.h"
 #include "states/state_Menu_principal.h"
 #include "states/state_Menu_servo.h"
-//#include "states/state_servo_selecter1.h"
-#include "states/state_pwm.h"
+#include "states/state_Menu_pwm.h"
 #include "Arduino.h"
 #include "Encoder.h"
 #include "Servo.h"
@@ -26,7 +25,6 @@ void setup() {
 #ifdef DEBUG
 	Serial.begin(115200);
 	Serial.println("start");
-	Serial.println(digitalRead(PIN_COLOR));
 #endif
 
 	digitalWrite(2, HIGH);

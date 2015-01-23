@@ -52,14 +52,9 @@ sState* testMenu_servo(){
 		     }
 		  }
 
-		  /*if(retour)
-		  {
-		  	retour=0;
-		  	return(&sMenu_principal);
-		  }*/
 		  if(!digitalRead(RETOUR))
 		  {
-			  delay(3);	//anti rebond
+			  delay(DELAY_BOUNCE);	//anti rebond
 			  while(!digitalRead(RETOUR));	//attente du relachement du bouton
 			  return(&sMenu_principal);
 		  }
@@ -68,14 +63,9 @@ sState* testMenu_servo(){
     return NULL;
 }
 void initMenu_servo(sState *prev){
-	const char *menu_servo[] = {
-			  "ANGLE tps reel",
-			  "ANGLE validation",
-			  "MICROSECONDES",
-			};
 			myEnc.write(0);
 //int Position = (abs(myEnc.read())/2)%NB_menu_servo;
-			afficher(menu_servo[0]);
+			afficher("ANGLE tps reel");
 }
 void deinitMenu_servo(sState *next){
 

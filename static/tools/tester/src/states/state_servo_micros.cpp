@@ -15,16 +15,27 @@
 #include "state_servo_micros.h"
 #include "state_blink.h"
 
-//Servo servotest;
 
 sState* testservo_micros(){
-	static int memMicros=0;
-	int Micros = (abs(myEnc.read())/2*PRECISION_MICROS)%2200+500;
+	static int memMicros=500;
+	static long temps_enc=0;
+	static int pos_enc_old=0;
 
-//	if(!digitalRead(SELECT))	//nécessite de valider avant que le servo ne se déplace
-//		{
-//			servotest.writeMicroseconds(Micros);
-//		}
+	int pos_enc=abs(myEnc.read())/2;
+	int delta=PRECISION_MICROS;
+
+	if(pos_enc!=pos_enc_old)
+	{
+		long deltat=millis()-temps_enc;
+		if(deltat<DUREE_BIG_STEPS)
+		{
+			delta=10*PRECISION_MICROS;
+		}
+		temps_enc=millis();
+	}
+	int Micros = max((memMicros-500+delta*(pos_enc-pos_enc_old))%3000+500,500);
+	Micros=min(Micros,3000);
+	pos_enc_old=pos_enc;
 	servotest.writeMicroseconds(Micros);
 
 	if(Micros!=memMicros)
@@ -35,21 +46,16 @@ sState* testservo_micros(){
 		memMicros=Micros;
 	}
 
-	/*if(retour)
-	{
-		retour=0;
-		return(&sMenu_servo);
-	}*/
 	if(!digitalRead(RETOUR))
 	{
-		delay(3);	//anti rebond
+		delay(DELAY_BOUNCE);	//anti rebond
 		while(!digitalRead(RETOUR));	//attente du relachement du bouton
 		return(&sMenu_servo);
 	}
     return NULL;
 }
 void initservo_micros(sState *prev){
-	servotest.attach(9);
+	servotest.attach(PIN_PWM_SERVO);
 	int micros=servotest.readMicroseconds();
 	int value_enc=abs(micros-500)*2/PRECISION_MICROS;
 	myEnc.write(value_enc);
