@@ -5,15 +5,14 @@ this library contains the different functions useful for the motor and its contr
 #include "lib_motor.h"
 
 //defines
-#define MOT_ASSER_PERIOD 20
+#define MOT_ASSER_PERIOD 20 // milliseconds
 
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
 
 //globals
-int _motCon;//********************************************************************************************
-
+int _motCon;
 int _motPinDir,_motPinPWM;
 
 //initializes the PINs for motor speed and direction
@@ -28,14 +27,6 @@ void motorInitHard(int pinDir,int pinPWM){
 
 #define KP  4// >>2 , with ziegler nichols (Ku = 9>>2, Tu=80ms)
 #define KI  1// >>2
-
-void motAsserTemp() // 254 est la vitesse max en fonction de la charge de la batterie
-	{
-	analogWrite(_motPinPWM,abs(_motCon));
-	if(_motCon>0)digitalWrite(_motPinDir,LOW);
-	else digitalWrite(_motPinDir,HIGH);
-	//Serial.print(_motCon);
-	}
 
 void motAsser(){
     unsigned long int time=millis();
@@ -63,7 +54,6 @@ void motAsser(){
             	_motCmd=  ((KP*eps)>>2) + ((KI*intEps)>>2);
             }
 
-
 #ifdef DEBUG_MOTOR
 Serial.print(_motCon);
 Serial.print("\t");
@@ -89,31 +79,4 @@ Serial.println(intEps);
               odoRead();
             }
     }
-  //  Serial.print( eps );
-//   // asservissement vitesse
-//  if((time-time_prev_asser)>=MOT_ASSER_PERIOD) {
-//    if ( (time-time_prev_asser) < MOT_ASSER_PERIOD+MOT_ASSER_PERIOD/2 ){
-//      time_prev_asser = time_prev_asser + MOT_ASSER_PERIOD;
-//
-//      temp=odoRead();
-//      _motCmd=_motCmd+ ((abs(_motCon)+temp)>>4) ; //the sign is here correct, increment negative hen going forward
-//
-//      if (_motCon>0) digitalWrite(_motPinDir, LOW);  // go forward
-//      else digitalWrite(_motPinDir, HIGH);
-//      analogWrite(_motPinPWM, _motCmd); // update motor speed
-//    }
-//    else {//to avoid problems due to long loop
-//      time_prev_asser=millis();
-//      _motCmd=0;//<=>resets the integral term
-//      analogWrite(_motPinPWM, CLAMP(0,_motCmd,255));
-//      odoRead();
-//    }
-//  }
 }
-
-
-////speed in inc/s
-//inline void motSetCon(int motSpeed){
-//    _motCon=motSpeed;
-//}
-  

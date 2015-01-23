@@ -13,9 +13,6 @@
 
 //#define DEBUG_MOTOR
 
-
-
-
 void motorInitHard(int pinDir,int pinPWM);
 void motAsser();
 void motAsserTemp();
