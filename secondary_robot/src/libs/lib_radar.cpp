@@ -97,7 +97,7 @@ Serial.println(" ");
 }
 
 //returns the shortest range measured
-uint16_t radarCloser(){
+uint16_t radarClosest(){
   uint16_t mini=999;
   int i;
   for (i=0;i<RAD_NB_PTS;i++){

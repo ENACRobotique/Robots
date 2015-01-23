@@ -37,7 +37,7 @@ void radarInitHard(int);
 void radarRefresh();
 
 //returns the shortest range measured
-uint16_t radarCloser();
+uint16_t radarClosest();
 
 //returns the number of range measures shorter than the limit defined in C_rad_limits
 //(for the direction assiciated to each measure).
