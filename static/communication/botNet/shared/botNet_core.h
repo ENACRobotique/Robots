@@ -79,7 +79,7 @@ void bn_freeInBufFirst();
  *      1 if  the adress is broadcast;
  *      0 if it is not.
  */
-inline int bn_isBroadcast(bn_Address addr){
+static inline int bn_isBroadcast(bn_Address addr){
     if ( !(addr & BCAST_SUBNET) || (addr & ~SUBNET_MASK) != (BIT(DEVICE_ADDR_SIZE)-1) ) return 0;
     return 1;
 }
