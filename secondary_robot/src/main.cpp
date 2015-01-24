@@ -38,7 +38,7 @@ void setup(){
 #ifdef DEBUG
     Serial.println("sortie init mat");
 #endif
-    current->init(0);
+    current->init(NULL);
     }
 
 }

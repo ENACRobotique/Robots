@@ -1,7 +1,7 @@
 
 #include "state_wall.h"
 #include "state_pause.h"
-#include "state_funny.h"
+#include "state_dead.h"
 #include "state_traj.h"
 
 #include "../params.h"

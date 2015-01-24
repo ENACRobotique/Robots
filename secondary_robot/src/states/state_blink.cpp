@@ -9,11 +9,10 @@
 #include "../params.h"
 #include "../tools.h"
 #include "state_types.h"
-#include "state_funny.h"
-
+#include "state_dead.h"
 
 sState* testBlink(){
-    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
+    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
     return 0;
 }
 void initBlink(sState *prev){

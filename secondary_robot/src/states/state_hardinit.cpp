@@ -5,9 +5,10 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-#include "state_funny.h"
+#include "state_dead.h"
 #include "state_wall.h"
-#include "state_tirette.h"
+#include "state_ALACON.h"
+#include "state_traj.h"
 
 
 #include "../libs/lib_move.h"
@@ -16,7 +17,7 @@
 #include "lib_wall.h"
 
 sState* reTirette(){
-    return &sTirette;
+    return &sTrajRedInit;
 }
 void initHard(sState *prev){
 
@@ -24,30 +25,14 @@ void initHard(sState *prev){
     Serial.println("debut init matérielles");
 #endif
     //movements
-    moveInitHard(PIN_DIR_SERVO, ANGLE_ZERO, DIR_SERVO_START);
-    motorInitHard(PIN_MOTOR_DIR,PIN_MOTOR_PWM);
-    odoInitHard(PIN_ODO_INT,PIN_ODO_SEN);
+    motorInitHard(PIN_MOTOR1_DIR,PIN_MOTOR1_PWM);
+    odoInitHard(PIN_ODO1_INT,PIN_ODO1_SEN);
 
     //radar
     Wire.begin();
 
     //line following/detector
     //Wire.begin(); already done
-
-    //launcher
-    pinMode(PIN_LAUNCHER_1,OUTPUT);
-    pinMode(PIN_LAUNCHER_2,OUTPUT);
-    pinMode(PIN_LAUNCHER_NET,OUTPUT);
-    launcherServoUp.attach(PIN_LAUNCHER_1);
-    launcherServoUp.write(LAUNCHER_UP_POS_0);
-    launcherServoDown.attach(PIN_LAUNCHER_2);
-    launcherServoDown.write(LAUNCHER_DOWN_POS_0);
-    launcherServoNet.attach(PIN_LAUNCHER_NET);
-    launcherServoNet.write(LAUNCHER_NET_POS_0);
-
-
-    //wall
-    wallInitHard(PIN_SHARP_FRONT_RIGHT ,PIN_SHARP_BACK_RIGHT,PIN_SHARP_FRONT_LEFT  ,PIN_SHARP_BACK_LEFT);
 
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);

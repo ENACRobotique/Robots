@@ -1,12 +1,3 @@
-/*
- * state_traj.cpp
- *
- *  Created on: 8 mai 2013
- *      Author: quentin
- *   Modify on: janvier 2014
- *   		By: Seb
- */
-
 
 #include "Arduino.h"
 #include "state_types.h"
@@ -19,9 +10,7 @@
 #include "state_traj.h"
 #include "state_pause.h"
 #include "state_wall.h"
-#include "state_funny.h"
 #include "state_wait.h"
-#include "state_fresco.h"
 #include "state_lineMonit.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
@@ -58,33 +47,11 @@ void deinitTrajRedInit(sState *next)
 }
 
 trajElem start_red[]={
-
-#ifdef MUR_R
-		{0,0,100}, //to wait until the servo is in the good position
-				{-360,0,320},
-				{-360,-7,800},
-				{-360,-5,350},
-				{-360,-2,200},
+				{40,0,2000},
+				{30,0,1000},
+				{50,0,3000},
 				{0,0,0},
-//	{0,0,100}, //to wait until the servo is in the good position
-//	{-360,0,100},
-//    {-360,-7,900},
-//    {-360,-1,400},
-//    {-360,0,300},
-//    {0,0,0},
-#endif
-
-
-
-#ifdef Int_R
-	{0,0,100}, //to wait until the servo is in the good position
-	{-360,0,70},
-    {-360,-55,1300},
-    {-360,-1,600},
-    {-360,0,200},
-    {0,0,0},
-#endif
-       };
+				};
 
 sState *testTrajRedInit()
 	{
@@ -145,24 +112,8 @@ void deinitTrajYellowInit(sState *next)
 }
 
 trajElem start_yellow[]={ //A MODIFIER
-#ifdef MUR_Y
-		{0,0,100}, //to wait until the servo is in the good position
-		{360,0,320},
-		{360,-7,800},
-		{360,-5,350},
-		{360,-2,200},
+		{5,0,10000},
 	    {0,0,0},
-#endif
-
-
-#ifdef INT_Y
-		{0,0,100}, //to wait until the servo is in the good position
-		{360,0,470},
-		{360,-50,1300},
-		{360,-5,350},
-		{360,-2,200},
-		{0,0,0},
-#endif
 		};
 sState *testTrajYellowInit()
 	{
@@ -219,13 +170,7 @@ void deinitTrajYellowFinal(sState *next)
 }
 
 trajElem Final_yellow[]={
-
-				{360,0,1800},
-				{360,-85,900},
-		        {360,-30,500},
-		        {0,0,300},
-
-		        {-160,-60,500},
+				{360,0,1000},
 		        {0,0,0},
 
 //		        {-290,-55,1100},
@@ -241,7 +186,7 @@ sState *testTrajYellowFinal()
 
 			if(periodicProgTraj(Final_yellow,&st_saveTime,&i,&prev_millis))
 			 	{
-				return &sFunny;
+				return &sWait;
 			 	}
 
 
@@ -303,11 +248,7 @@ void deinitTrajRedFinal(sState *next)
 }
 
 trajElem Final_red[]={
-		{-360,0,1100},
-		{-360,-60,1000},
-        {-360,-5,800},
-        {0,0,200},
-        {160,-60,500},
+		{-50,0,2000},
         {0,0,0},
 
 //        {360,0,600},
@@ -325,7 +266,7 @@ sState *testTrajRedFinal()
 
 	    if(periodicProgTraj(Final_red,&st_saveTime,&i,&prev_millis))
 		{
-	    	return &sFunny;
+	    	return &sWait;
 		}
 
 

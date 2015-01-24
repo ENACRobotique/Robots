@@ -25,8 +25,8 @@ void motorInitHard(int pinDir,int pinPWM){
     analogWrite(_motPinPWM,0);
 }
 
-#define KP  4// >>2 , with ziegler nichols (Ku = 9>>2, Tu=80ms)
-#define KI  1// >>2
+#define KP  18// >>2 , with ziegler nichols (Ku = 9>>2, Tu=80ms)
+#define KI  5// >>2
 
 void motAsser(){
     unsigned long int time=millis();
@@ -45,7 +45,6 @@ void motAsser(){
 
             //compute error integral
             intEps= CLAMP( -(64<<4) ,intEps+eps, (64<<4));
-
             //compute command
             if(_motCon==0){
             _motCmd=0;
@@ -65,7 +64,9 @@ Serial.print(CLAMP(0,abs(_motCmd),254));
 Serial.print("\t");
 Serial.print(eps);
 Serial.print("\t");
-Serial.println(intEps);
+Serial.print(intEps);
+Serial.print("\t");
+Serial.println(millis());
 #endif
             if(_motCmd>=0) digitalWrite(_motPinDir,LOW);
             else digitalWrite(_motPinDir,HIGH);

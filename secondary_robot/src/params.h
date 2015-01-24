@@ -17,16 +17,16 @@
 /* Defines ************************************************/
 //pins
 //digital I/O
-#define PIN_DIR_SERVO 5
-#define PIN_MOTOR_PWM 6
-#define PIN_MOTOR_DIR 7
-#define PIN_ODO_INT 2//odometer, interruption pin
-#define PIN_ODO_SEN 9
-#define PIN_TIRETTE 10
+#define PIN_MOTOR1_PWM 6
+#define PIN_MOTOR1_DIR 7
+#define PIN_ODO1_INT 2//odometer1, interruption pin
+#define PIN_ODO1_SEN 4
+#define PIN_MOTOR2_PWM 8
+#define PIN_MOTOR2_DIR 9
+#define PIN_ODO2_INT 3//odometer2, interruption pin
+#define PIN_ODO2_SEN 5
+#define PIN_TIRETTE 11
 #define PIN_LED 13
-#define PIN_LAUNCHER_1 8
-#define PIN_LAUNCHER_2 3
-#define PIN_LAUNCHER_NET 4
 #define PIN_COLOR 12
 
 //analog in
@@ -47,25 +47,8 @@
 #define WALL_DST 15 //in cm<<1
 #define WALL_SPEED 80
 
-#define ANGLE_ZERO      30
-#define DIR_SERVO_START 8// rem : en tenant compte de ANGLE_ZERO
-
 #define COLOR_RED HIGH
 #define COLOR_YELLOW LOW
-
-#define LAUNCHER_DOWN_POS_0 120
-#define LAUNCHER_DOWN_POS_1 20
-
-#define LAUNCHER_UP_POS_0 120
-#define LAUNCHER_UP_POS_1 20 //Droit
-
-
-
-#define LAUNCHER_NET_POS_0 100
-#define LAUNCHER_NET_POS_1 10
-
-#define ARM_RAISE_TIME 3000//in millis
-#define ARM_2WAY_FAST 500   //in millis
 
 #define UPPERCUT
 

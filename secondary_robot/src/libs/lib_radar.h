@@ -13,7 +13,7 @@
 #include "lib_us.h"
 
 //defines
-#define DEBUG_RADAR
+//#define DEBUG_RADAR
 
 #define RAD_TIMER_1 70//70    //time between call for mesure and mesure reading (cf sensor datasheet)
 #define RAD_TIMER_2 70//0   //time between mesure reading and call for next mesure (cf servo sweeping speed)
