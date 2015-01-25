@@ -59,7 +59,7 @@ void motAsser(){
 			if ( (time-time_prev_asser[i]) < MOT_ASSER_PERIOD+MOT_ASSER_PERIOD/2 ){
 				time_prev_asser[i] = time_prev_asser[i] + MOT_ASSER_PERIOD;
 				//compute error (epsilon)
-				int read = odoRead();
+				int read=odoRead(i);
 				eps = _motCon[i] - read;//odoRead is negative if the robot is going forward "red side"
 
 				//compute error integral
@@ -96,7 +96,7 @@ void motAsser(){
 				  time_prev_asser[0]=millis();
 				  intEps[0]=0;//<=>resets the integral term
 				  analogWrite(_motPinPWM[i], CLAMP(0,abs(_motCmd[i]),254));
-				  odoRead();
+				  odoRead(i);
 				}
 		}
 	}

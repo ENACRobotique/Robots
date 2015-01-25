@@ -28,7 +28,9 @@ void initHard(sState *prev){
     int pin_motors_dir[1]={PIN_MOTOR1_DIR};
     int pin_motors_pwm[1]={PIN_MOTOR1_PWM};
     motorInitHard(pin_motors_dir,pin_motors_pwm);
-    odoInitHard(PIN_ODO1_INT,PIN_ODO1_SEN);
+    int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT};
+    int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN};
+    odoInitHard(pin_odo_int,pin_odo_sen);
 
     //radar
     Wire.begin();
