@@ -17,13 +17,13 @@
 /* Defines ************************************************/
 //pins
 //digital I/O
-#define NB_MOTORS 1
+#define NB_MOTORS 2
 #define PIN_MOTOR1_PWM 6
 #define PIN_MOTOR1_DIR 7
 #define PIN_ODO1_INT 2//odometer1, interruption pin
 #define PIN_ODO1_SEN 4
-#define PIN_MOTOR2_PWM 8
-#define PIN_MOTOR2_DIR 9
+#define PIN_MOTOR2_PWM 9
+#define PIN_MOTOR2_DIR 8
 #define PIN_ODO2_INT 3//odometer2, interruption pin
 #define PIN_ODO2_SEN 5
 #define PIN_TIRETTE 11

@@ -8,34 +8,16 @@
 #include "Servo.h"
 #include "lib_move.h"
 
-//globals
-
-Servo _dirServo;
-
-int _servo_zero=0;
 
 //macros
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
 
-//define
-#define MAX_ANGLE 180
-#define MIN_ANGLE 0
-
-//initialises stirring servo (1pin + "null value"+ First value)
-//REQUIRES : motorInitHard()
-void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
-    pinMode(pinDirServo,OUTPUT);
-    _servo_zero=zeroAngle;
-    _dirServo.attach(pinDirServo);
-    _dirServo.write(CLAMP(MIN_ANGLE , startAngle+_servo_zero, MAX_ANGLE));
-
-}
 
 //sets speed motors (omega=0 means straight line)
 void move(int speed,int omega){
-	int speeds[NB_MOTORS]={speed + omega};
+	int speeds[NB_MOTORS]={speed + omega, speed - omega};
     motSetCon(speeds);
 }
 

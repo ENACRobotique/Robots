@@ -16,7 +16,7 @@ void odoIsr1(){
     else _nbIncOdo[0] -= (digitalRead(_pinSenOdo[0])<<1) -1;
 }
 
-#if NB_MOTORS > 2
+#if NB_MOTORS > 1
 void odoIsr2(){
     if (digitalRead(_pinIntOdo[1])) _nbIncOdo[1] += (digitalRead(_pinSenOdo[1])<<1) -1;
     else _nbIncOdo[1] -= (digitalRead(_pinSenOdo[1])<<1) -1;
@@ -33,7 +33,7 @@ void odoInitHard(int pinInt[], int pinSen[]){
 		pinMode(_pinSenOdo[i],INPUT);
 	}
     attachInterrupt(pinInt[0]-2, odoIsr1 , CHANGE); //particular case for arduino uno, cf reference
-#if NB_MOTORS > 2
+#if NB_MOTORS > 1
     attachInterrupt(pinInt[1]-2, odoIsr2 , CHANGE); //particular case for arduino uno, cf reference
 #endif
 }
@@ -42,7 +42,7 @@ void odoInitHard(int pinInt[], int pinSen[]){
 //remove the ISR
 void odoDeinit(){
     detachInterrupt(_pinIntOdo[0]-2); //particular case for arduino uno, cf reference
-#if NB_MOTORS > 2
+#if NB_MOTORS > 1
     detachInterrupt(_pinIntOdo[1]-2); //particular case for arduino uno, cf reference
 #endif
 }

@@ -88,7 +88,7 @@ void motAsser(){
 	Serial.println(millis());
 	#endif
 				if(_motCmd[i]>=0) digitalWrite(_motPinDir[i],LOW);
-				else digitalWrite(_motPinDir[0],HIGH);
+				else digitalWrite(_motPinDir[i],HIGH);
 
 				analogWrite(_motPinPWM[i],CLAMP(0,abs(_motCmd[i]),254));
 			}
