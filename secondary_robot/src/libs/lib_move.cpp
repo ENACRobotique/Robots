@@ -33,10 +33,10 @@ void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
 
 }
 
-//sets speed and servo dir (angle=0 means straight line)
-void move(int speed,int angle){
-    motSetCon(speed);
-    _dirServo.write(CLAMP(MIN_ANGLE , angle+_servo_zero, MAX_ANGLE));
+//sets speed motors (omega=0 means straight line)
+void move(int speed,int omega){
+	int speeds[NB_MOTORS]={speed + omega};
+    motSetCon(speeds);
 }
 
 

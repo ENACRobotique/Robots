@@ -18,7 +18,7 @@ int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned l
 void initTrajRedInit(sState *prev)
 	{
 		#ifdef DEBUG
-			Serial.println("debut traj rouge");
+			Serial.println("debut traj rouge (premier trajet)");
 		#endif
 
 	    if (prev==&sPause)
@@ -44,12 +44,13 @@ void deinitTrajRedInit(sState *next)
 	        st_saveTime=0;
 	        st_prevSaveTime=0;
 	    	}
-}
+	}
 
 trajElem start_red[]={
-				{40,0,2000},
-				{30,0,1000},
-				{50,0,3000},
+				{20,0,1000},
+				{20,5,1000},
+				{20,-5,1000},
+				{0,0,1000},
 				{0,0,0},
 				};
 
@@ -61,8 +62,9 @@ sState *testTrajRedInit()
 	    if(periodicProgTraj(start_red,&st_saveTime,&i,&prev_millis))
 	    {
 
-	    	launcherServoDown.write(120);
-	    	launcherServoUp.write(10);
+			#ifdef DEBUG
+				Serial.println("\tTrajet 1 fini !");
+			#endif
 
 	    	 return &sTrajRedFinal;
 	    }
@@ -170,13 +172,9 @@ void deinitTrajYellowFinal(sState *next)
 }
 
 trajElem Final_yellow[]={
-				{360,0,1000},
+				{5,0,1000},
 		        {0,0,0},
 
-//		        {-290,-55,1100},
-//		        {-280,0,250},
-//		        {-200,0,700},
-//		        {0,0,0},
 		};
 
 sState *testTrajYellowFinal()
@@ -217,7 +215,7 @@ sState sTrajYellowFinal={
 void initTrajRedFinal(sState *prev)
 	{
 	  	#ifdef DEBUG
-			Serial.println("debut traj rouge");
+			Serial.println("debut traj rouge final");
 		#endif
 
 	    if (prev==&sPause)
@@ -248,15 +246,8 @@ void deinitTrajRedFinal(sState *next)
 }
 
 trajElem Final_red[]={
-		{-50,0,2000},
+		{20,0,2000},
         {0,0,0},
-
-//        {360,0,600},
-//        {240,-50,1100},
-//        {260,-42,200},
-        //{340,-1,300},
-        //{240,-1,200},
-//        {0,0,0},
        };
 
 sState *testTrajRedFinal()
@@ -295,7 +286,7 @@ sState sTrajRedFinal={
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
 
     if (!(*prev_millis)) *prev_millis=millis();
-    move(tab[*i].speed,tab[*i].angle);
+    move(tab[*i].speed,tab[*i].omega);
 
 
     if ( (millis()-*prev_millis-*pausetime)>tab[*i].duration ) {
@@ -303,7 +294,7 @@ int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned l
         *prev_millis=millis();
         *pausetime=0;
     }
-    if ( tab[*i].angle==0 && tab[*i].duration==0 && tab[*i].speed==0) {
+    if ( tab[*i].omega==0 && tab[*i].duration==0 && tab[*i].speed==0) {
         *i=0;
         *prev_millis=0;
         return 1;

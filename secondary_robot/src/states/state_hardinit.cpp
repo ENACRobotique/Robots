@@ -25,7 +25,9 @@ void initHard(sState *prev){
     Serial.println("debut init matérielles");
 #endif
     //movements
-    motorInitHard(PIN_MOTOR1_DIR,PIN_MOTOR1_PWM);
+    int pin_motors_dir[1]={PIN_MOTOR1_DIR};
+    int pin_motors_pwm[1]={PIN_MOTOR1_PWM};
+    motorInitHard(pin_motors_dir,pin_motors_pwm);
     odoInitHard(PIN_ODO1_INT,PIN_ODO1_SEN);
 
     //radar
