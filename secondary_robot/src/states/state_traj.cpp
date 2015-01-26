@@ -60,21 +60,28 @@ void deinitTrajRedInit(sState *next)
 trajElem start_red[]={
 
 #ifdef MUR_R
-	{0,0,100}, //to wait until the servo is in the good position
-	{-360,0,100},
-    {-360,-7,1000},
-    {-360,-1,400},
-    {-360,0,300},
-    {0,0,0},
+		{0,0,100}, //to wait until the servo is in the good position
+				{-360,0,320},
+				{-360,-7,800},
+				{-360,-5,350},
+				{-360,-2,200},
+				{0,0,0},
+//	{0,0,100}, //to wait until the servo is in the good position
+//	{-360,0,100},
+//    {-360,-7,900},
+//    {-360,-1,400},
+//    {-360,0,300},
+//    {0,0,0},
 #endif
+
 
 
 #ifdef Int_R
 	{0,0,100}, //to wait until the servo is in the good position
 	{-360,0,70},
-    {-360,-55,1400},
+    {-360,-55,1300},
     {-360,-1,600},
-    {-360,0,300},
+    {-360,0,200},
     {0,0,0},
 #endif
        };
@@ -181,6 +188,7 @@ sState sTrajYellowInit={
 //******************************************************************************************************************
 void initTrajYellowFinal(sState *prev)
 	{
+
 			#ifdef DEBUG
 				Serial.println("debut traj jaune");
 			#endif
@@ -212,16 +220,18 @@ void deinitTrajYellowFinal(sState *next)
 
 trajElem Final_yellow[]={
 
-				{360,0,1900},
+				{360,0,1800},
 				{360,-85,900},
 		        {360,-30,500},
 		        {0,0,300},
 
-		        {-360,0,100},
-		        {-360,-40,1100},
-		        {-360,-5,250},
-		        {-340,0,700},
+		        {-160,-60,500},
 		        {0,0,0},
+
+//		        {-290,-55,1100},
+//		        {-280,0,250},
+//		        {-200,0,700},
+//		        {0,0,0},
 		};
 
 sState *testTrajYellowFinal()
@@ -241,7 +251,7 @@ sState *testTrajYellowFinal()
 				    	 	 }
 
 
-			if((millis()-st_saveTime)-TimeToLauncher > 3100 ){
+			if((millis()-st_saveTime)-TimeToLauncher > 3000 ){
 				    	 uint16_t limits[RAD_NB_PTS]={3,40};
 				    		    		radarSetLim(limits);
 				   	     	}
@@ -293,17 +303,19 @@ void deinitTrajRedFinal(sState *next)
 }
 
 trajElem Final_red[]={
-		{-360,0,900},
+		{-360,0,1100},
 		{-360,-60,1000},
         {-360,-5,800},
         {0,0,200},
-
-        {360,0,600},
-        {360,-30,1200},
-        {360,-1,200},
-        {340,-1,300},
-        {240,-1,200},
+        {160,-60,500},
         {0,0,0},
+
+//        {360,0,600},
+//        {240,-50,1100},
+//        {260,-42,200},
+        //{340,-1,300},
+        //{240,-1,200},
+//        {0,0,0},
        };
 
 sState *testTrajRedFinal()
@@ -323,7 +335,7 @@ sState *testTrajRedFinal()
 		}
 
 
-	     if((millis()-st_saveTime)-TimeToLauncher > 1700 ){
+	     if((millis()-st_saveTime)-TimeToLauncher > 3100 ){
 	    	 uint16_t limits[RAD_NB_PTS]={40,3};
 	    		    		radarSetLim(limits);
 	     	     				    	 	 }

@@ -12,10 +12,10 @@
 
 #include "state_types.h"
 
-//#define MUR_R
-#define Int_R
-//#define MUR_Y
-#define INT_Y
+#define MUR_R
+//#define Int_R
+#define MUR_Y
+//#define INT_Y
 
 typedef struct {
     int speed;      //in inc/s
