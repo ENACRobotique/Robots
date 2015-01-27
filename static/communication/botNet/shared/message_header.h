@@ -22,12 +22,12 @@
  */
 typedef uint16_t bn_Address;
 
-/* Broadcastable subnets : subnets to which one can send broadcast messages.
+/* Linkcastable subnets : subnets to which one can send link-cast messages (the ability to do so is dependent on the hardware).
  * The first bit of their address is set to 1
  * The broadcast address is made by replacing the device part of the address wit ones.
- * Trying to send in broadcast to an address that have not been declared as broadcastable should result in an error.
+ * Trying to send in broadcast to an address that have not been declared as linkcastable should result in an error.
  */
-#define BCAST_SUBNET 0x8000 // not using BIT(15) because fuck you arduino, that's why.
+#define LCAST_SUBNET 0x8000 // not using BIT(15) because fuck you arduino, that's why.
 
 // structure of a header
 typedef struct {

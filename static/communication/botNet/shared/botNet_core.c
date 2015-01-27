@@ -1,5 +1,5 @@
 /*
- * lib_superbus.c
+ * botNet_core.c
  *
  *  Created on: 28 mai 2013
  *      Author: quentin
@@ -89,7 +89,7 @@ uint8_t seqNum=0;
 // todo bn_deinit
 
 /*
- * Handles the initialization of the superBus interfaces
+ * Handles the initialization of the botNet interfaces
  * return value :
  *  0 if OK
  *  <0 if error
@@ -140,7 +140,7 @@ int bn_sendRetry(sMsg *msg, int retries){
 }
 
 /*
- * bn_send : handles the "classic" sending of a message over the SuperBus network (no ack nor broadcast)
+ * bn_send : handles the "classic" sending of a message over the BotNet network (no ack nor linkcast)
  * For user's use only, the message was previously NOT "in the network"
  * Arguments :
  *      msg : pointer to the message to send.
@@ -155,8 +155,8 @@ int bn_sendRetry(sMsg *msg, int retries){
  *      * payload
  */
 int bn_send(sMsg *msg){
-    // check if user is asking for a broadcast ack
-    if ( (msg->header.destAddr & !SUBNET_MASK) == (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_BCAST_ADDR;
+    // check if user is asking for a linkcast ack
+    if ( (msg->header.destAddr & !SUBNET_MASK) == (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_LCAST_ADDR;
 
 
     //sets ack bit
@@ -167,7 +167,7 @@ int bn_send(sMsg *msg){
 }
 
 /*
- * bn_sendBroadcast : handles the broadcast sending of a message over the SuperBus network (no ack possible)
+ * bn_sendLinkcast : handles the linkcast sending of a message over the BotNet network (no ack possible)
  * For user's use only, the message was previously NOT "in the network"
  * Arguments :
  *      msg : pointer to the message to send.
@@ -181,9 +181,9 @@ int bn_send(sMsg *msg){
  *      * header.type
  *      * payload
  */
-int bn_sendBroadcast(sMsg *msg){
-    // checks if broadcast address
-    if (bn_isBroadcast(msg->header.destAddr)) return -ERR_BN_NO_BCAST_ADDR;
+int bn_sendLinkcast(sMsg *msg){
+    // checks if linkcast address
+    if (bn_isLinkcast(msg->header.destAddr)) return -ERR_BN_NO_LCAST_ADDR;
     //sets ack bit
     msg->header.ack=0;
 
@@ -224,7 +224,7 @@ int bn_genericSend(sMsg *msg){
 }
 
 /*
- * bn_sendAck : handles the "acked" sending of a message over the SuperBus network (no broadcast)
+ * bn_sendAck : handles the "acked" sending of a message over the BotNet network (no linkcast)
  * For user's use only, the message was previously NOT "in the network"
  * Arguments :
  *      msg : pointer to the message to send.
@@ -247,8 +247,8 @@ int bn_sendAck(sMsg *msg){
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
 
-    // check if user is asking for a broadcast ack
-    if ( (tmpAddr & !SUBNET_MASK) == (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_BCAST_ADDR;
+    // check if user is asking for a linkcast ack
+    if ( (tmpAddr & !SUBNET_MASK) == (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_LCAST_ADDR;
 
     // sets ack bit
     msg->header.ack=1;
@@ -281,7 +281,7 @@ int bn_sendAck(sMsg *msg){
 }
 
 /*
- * SuperBus Routine, handles receiving messages, routing/forwarding them, putting them in a buffer
+ * BotNet Routine, handles receiving messages, routing/forwarding them, putting them in a buffer
  * receives several messages at a time
  * Handles one message at the time, SHOULD be called in a rather fast loop
  * Non blocking function
@@ -471,7 +471,7 @@ int bn_receive(sMsg *msg){
 void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
     int i=0;
 
-    // if this message is for this node (including broadcast possibilities) but not from this node XXX enable I2C broadcast rx
+    // if this message is for this node (including linkcast possibilities) but not from this node XXX enable I2C linkcast rx
     if ( ifFrom!=IF_LOCAL &&
         (
             ( (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ||
@@ -484,7 +484,7 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         routeInfo->nextHop=msg->header.destAddr;
         return;
     }
-    //if this message is from this node , for this node AND not a broadcast one (ie. dest address is exactly ours), treat it like an incoming message for this node
+    //if this message is from this node , for this node AND not a linkcast one (ie. dest address is exactly ours), treat it like an incoming message for this node
     if ( ifFrom==IF_LOCAL &&
         (
             msg->header.destAddr==MYADDRX ||
@@ -506,7 +506,7 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
             routeInfo->nextHop=msg->header.destAddr;
             return;
         }
-        else if (bn_isBroadcast(msg->header.destAddr)){
+        else if (bn_isLinkcast(msg->header.destAddr)){
             routeInfo->ifTo=IF_LOCAL;
             routeInfo->nextHop=msg->header.destAddr;
         }
@@ -574,7 +574,7 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
 
 
 /*
- * Handles the forwarding of a message over the SuperBus network
+ * Handles the forwarding of a message over the BotNet network
  * Arguments :
  *     msg : pointer to the message to send
  *     ifFrom : interface (physical or virtual) on which the message has been received
@@ -601,7 +601,7 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom){
 #if MYADDRX !=0
     case IF_XBEE :
         while (retVal<=0 && retries<BN_MAX_RETRIES){
-            if (bn_isBroadcast(msg->header.destAddr)) retVal=Xbee_sendBroadcast(msg, routeInfo.nextHop);
+            if (bn_isLinkcast(msg->header.destAddr)) retVal=Xbee_sendLinkcast(msg, routeInfo.nextHop);
             else retVal=Xbee_send(msg, routeInfo.nextHop);
             retries++; //FIXME : handling duplicate receive (ie check last seqnum in bn_routine)
         }

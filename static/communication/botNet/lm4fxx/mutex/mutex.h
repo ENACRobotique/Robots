@@ -15,7 +15,7 @@
 
 static volatile tBoolean SREG_save;
 
-//pseudo-mutex for superBus central Buffer access management
+//pseudo-mutex for botNet central Buffer access management
 inline void mutexLock(){
     SREG_save = IntMasterDisable();
 }

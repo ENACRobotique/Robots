@@ -12,7 +12,7 @@
 
 // warning, this is not a real mutex, use it only with botnet
 
-//pseudo-mutex for superBus central Buffer access management
+//pseudo-mutex for botNet central Buffer access management
 
 inline void mutexLock(){
     return;

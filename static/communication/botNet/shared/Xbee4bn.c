@@ -16,7 +16,7 @@
 #include "../../UART_framing/shared/lib_UART_framing.h"
 #include "../../../global_errors.h"
 
-// superBus specific libraries
+// botNet specific libraries
 #include "Xbee4bn.h"
 #include "botNet_core.h"
 
@@ -160,7 +160,8 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
  * Handle the sending of a broadcast message to the Xbee via the serial.
  * Size & checksum of msg must be set before calling Xbee_send
  * Waits until the sending request was acknowledged (statused), or until timeout
- * For a broadcast send, one will not receive an ack by the Xbee itself (may be done at a higher level)
+ * For a broadcast send, one will not receive an ack by the Xbee itself (may be done at a higher level),
+ * but will still receive status frame
  *
  * Argument :
  *  msg : pointer to message to send (thanks captain obvious!)
@@ -172,7 +173,7 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
  *      error on receiving the status frame
  *      sending not successful (e.g. no ack)
  */
-int Xbee_sendBroadcast(const sMsg *msg, uint16_t nexthop){
+int Xbee_sendLinkcast(const sMsg *msg, uint16_t nexthop){
     int ret=0;
 
     if ( (ret=Xbee_Tx16(nexthop,0,37,msg,msg->header.size+sizeof(sGenericHeader)))<=0 ) return ret;

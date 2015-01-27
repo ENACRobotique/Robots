@@ -17,7 +17,7 @@
 
 static volatile uint8_t SREG_save;
 
-//pseudo-mutex for superBus central Buffer access management
+//pseudo-mutex for botNet central Buffer access management
 static inline void mutexLock(){
     SREG_save = SREG;
     noInterrupts();

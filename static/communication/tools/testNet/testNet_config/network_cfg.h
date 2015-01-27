@@ -34,7 +34,7 @@ extern "C" {
     #define ADDRX_MASK  (0xff)      //on a 16-bits address, i2c devices
 
 //subnet addresses
-    #define SUBNETX         ((1<<DEVICE_ADDR_SIZE) | (BCAST_SUBNET) )
+    #define SUBNETX         ((1<<DEVICE_ADDR_SIZE) | (LCAST_SUBNET) )
     #define SUBNETI         (2<<DEVICE_ADDR_SIZE)
     #define SUBNETU1        (3<<DEVICE_ADDR_SIZE)
     #define SUBNETU2        (4<<DEVICE_ADDR_SIZE)

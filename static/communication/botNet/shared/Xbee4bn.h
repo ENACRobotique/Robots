@@ -22,7 +22,7 @@ extern "C" { //to enable use in both C projects an C++ projects
 int Xbee_setup();
 int Xbee_receive(sMsg *pRet);
 int Xbee_send(const sMsg *msg, bn_Address nexthop);
-int Xbee_sendBroadcast(const sMsg *msg, bn_Address subnet);
+int Xbee_sendLinkcast(const sMsg *msg, bn_Address subnet);
 int Xbee_waitCheckSending(int frameID);
 #ifdef __cplusplus
 }

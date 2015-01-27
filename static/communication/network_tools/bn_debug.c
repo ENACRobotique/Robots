@@ -107,6 +107,6 @@ int bn_debugSendAddrBroadcast(bn_Address dest){
 
     SETUP_DBG_MSG_BLOCK
 
-    return bn_sendBroadcast(&msg);
+    return bn_sendLinkcast(&msg);
 }
 #undef SETUP_DBG_MSG_BLOCK

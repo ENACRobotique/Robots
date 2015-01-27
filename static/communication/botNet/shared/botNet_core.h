@@ -54,7 +54,7 @@ typedef struct {
 
 int bn_init();
 int bn_send(sMsg *msg);
-int bn_sendBroadcast(sMsg *msg);
+int bn_sendLinkcast(sMsg *msg);
 int bn_genericSend(sMsg *msg);
 int bn_sendAck(sMsg *msg);
 int bn_sendRetry(sMsg *msg, int retries);
@@ -72,15 +72,15 @@ void bn_freeInBufFirst();
 
 
 /*
- * bn_isBroadcast : test if an adress is a broadcast one
+ * bn_isLinkcast : test if an adress is a linkcast one
  * Arguments :
  *      addr : adress to test
  * Return Value :
- *      1 if  the adress is broadcast;
+ *      1 if  the adress is a linkcast one;
  *      0 if it is not.
  */
-static inline int bn_isBroadcast(bn_Address addr){
-    if ( !(addr & BCAST_SUBNET) || (addr & ~SUBNET_MASK) != (BIT(DEVICE_ADDR_SIZE)-1) ) return 0;
+static inline int bn_isLinkcast(bn_Address addr){
+    if ( !(addr & LCAST_SUBNET) || (addr & ~SUBNET_MASK) != (BIT(DEVICE_ADDR_SIZE)-1) ) return 0;
     return 1;
 }
 
