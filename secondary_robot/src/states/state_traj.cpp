@@ -47,11 +47,10 @@ void deinitTrajRedInit(sState *next)
 	}
 
 trajElem start_red[]={
-				{30,0,1000},
-				{-40,0,1000},
-				{0,40,2000},
-				{20,20,3000},
-				{20,-20,3000},
+				{-40,0,3000},
+				{0,30,2000},
+				{-60,-6,6500},
+				{-40,3,7000},
 				{0,0,0},
 				};
 
@@ -247,8 +246,6 @@ void deinitTrajRedFinal(sState *next)
 }
 
 trajElem Final_red[]={
-		{20,0,500},
-		{-20,0,500},
         {0,0,0},
        };
 

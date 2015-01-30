@@ -9,6 +9,7 @@
 #include "state_wall.h"
 #include "state_ALACON.h"
 #include "state_traj.h"
+#include "state_Manualdrive.h"
 
 
 #include "../libs/lib_move.h"
@@ -17,7 +18,8 @@
 #include "lib_wall.h"
 
 sState* reTirette(){
-    return &sTrajRedInit;
+	return &sTrajRedInit;
+	//return &sManualdrive;
 }
 void initHard(sState *prev){
 
