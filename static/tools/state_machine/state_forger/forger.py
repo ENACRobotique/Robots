@@ -16,6 +16,7 @@ class Forger(Ui_MainWindow):
         self.table = str.maketrans(' éèêà@çöôïî<>^','_eeeaacooii___')
 
     def built(self):
+        self.actionQuitter.triggered.connect(quit)
         self.createFilesButton.clicked.connect(self.create_files)
         self.setDirectoryButton.clicked.connect(self.select_save_directory)
         self.setModelsDirectoryButton.clicked.connect(self.select_models_directory)
