@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'interface.ui'
 #
-# Created: Sun Jan 25 05:22:37 2015
+# Created: Fri Jan 30 20:56:35 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -51,6 +51,24 @@ class Ui_MainWindow(object):
         self.lineEditStatename.setObjectName(_fromUtf8("lineEditStatename"))
         self.horizontalLayout_2.addWidget(self.lineEditStatename)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.label_3 = QtGui.QLabel(self.centralwidget)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.horizontalLayout_4.addWidget(self.label_3)
+        self.includesPlainText = QtGui.QPlainTextEdit(self.centralwidget)
+        self.includesPlainText.setObjectName(_fromUtf8("includesPlainText"))
+        self.horizontalLayout_4.addWidget(self.includesPlainText)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_4)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
+        self.label_5 = QtGui.QLabel(self.centralwidget)
+        self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.horizontalLayout_5.addWidget(self.label_5)
+        self.flagsPlainText = QtGui.QPlainTextEdit(self.centralwidget)
+        self.flagsPlainText.setObjectName(_fromUtf8("flagsPlainText"))
+        self.horizontalLayout_5.addWidget(self.flagsPlainText)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
         self.horizontalLayout_3.addLayout(self.verticalLayout_2)
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
@@ -59,12 +77,6 @@ class Ui_MainWindow(object):
         self.setDirectoryButton = QtGui.QPushButton(self.centralwidget)
         self.setDirectoryButton.setObjectName(_fromUtf8("setDirectoryButton"))
         self.verticalLayout.addWidget(self.setDirectoryButton)
-        self.label_3 = QtGui.QLabel(self.centralwidget)
-        self.label_3.setObjectName(_fromUtf8("label_3"))
-        self.verticalLayout.addWidget(self.label_3)
-        self.label_4 = QtGui.QLabel(self.centralwidget)
-        self.label_4.setObjectName(_fromUtf8("label_4"))
-        self.verticalLayout.addWidget(self.label_4)
         self.verticalLayout_3.addLayout(self.verticalLayout)
         self.createFilesButton = QtGui.QPushButton(self.centralwidget)
         self.createFilesButton.setObjectName(_fromUtf8("createFilesButton"))
@@ -92,9 +104,11 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Créateur de state", None))
         self.label.setText(_translate("MainWindow", "Auteur : ", None))
         self.label_2.setText(_translate("MainWindow", "nom de l\'état : ", None))
+        self.label_3.setToolTip(_translate("MainWindow", "<html><head/><body><p>chemins relatifs vers les fichiers à inclures, un fichier par ligne.</p><p>ex:</p><p>../params.h</p><p>lib_motor.h</p></body></html>", None))
+        self.label_3.setText(_translate("MainWindow", "includes : ", None))
+        self.label_5.setToolTip(_translate("MainWindow", "<html><head/><body><p>Un état par ligne. ex:</p><p>E_MOTOR</p><p>E_RADAR</p></body></html>", None))
+        self.label_5.setText(_translate("MainWindow", "Flags : ", None))
         self.setDirectoryButton.setText(_translate("MainWindow", "Dossier de modèles", None))
-        self.label_3.setText(_translate("MainWindow", "Includes : à faire plus tard", None))
-        self.label_4.setText(_translate("MainWindow", "Flags : A faire", None))
         self.createFilesButton.setText(_translate("MainWindow", "Créer les fichiers", None))
         self.menuFichier.setTitle(_translate("MainWindow", "Fichier", None))
         self.actionQuitter.setText(_translate("MainWindow", "Quitter", None))

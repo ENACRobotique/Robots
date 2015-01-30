@@ -8,7 +8,7 @@
 
 #include "Arduino.h"
 #include "state_%STATENAME%.h"
-
+%INCLUDES%
 
 
 sState* test%STATENAME%()
@@ -28,7 +28,7 @@ void deinit%STATENAME%(sState *next)
     }
 
 sState s%STATENAME%={
-        BIT(E_MOTOR),    ///a faire.......
+        %FLAGS%
         &init%STATENAME%,
         &deinit%STATENAME%,
         &test%STATENAME%

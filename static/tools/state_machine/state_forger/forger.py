@@ -9,7 +9,8 @@ class Forger(Ui_MainWindow):
         self.MainWindow = MainWindow
         self.author = ''
         self.statename = ''
-        self.sources=['models/state_model.cpp','models/state_model.h']
+        self.includes = []
+        self.flags = []
         self.destination = './'
         self.table = str.maketrans(' éèêà@çöôïî<>^','_eeeaacooii___')
 
@@ -29,28 +30,43 @@ class Forger(Ui_MainWindow):
         statename = statename.strip('_')
         self.statename = statename.capitalize()
 
+    def set_includes(self):
+        self.includes = self.includesPlainText.toPlainText().split()
+
+    def set_flags(self):
+        self.flags = self.flagsPlainText.toPlainText().split()
+
     def create_files(self):
         self.set_author()
         self.set_state_name()
         date = time.strftime("%Y %B %d")
         for file in os.listdir('models/'):
             source = 'models/' + file
-        #for source in self.sources:
-            fs = open(source,'r')
+            filesource = open(source,'r')
             _,ext = os.path.splitext(source)
             destination = self.destination + 'state_' + self.statename + ext
-            fd = open(destination, 'w')
+            filedestination = open(destination, 'w')
 
-            for line in fs:
-                line = line.replace('%STATENAME%', self.statename)
-                line = line.replace('%STATENAME_UPPER%', self.statename.upper())
-                line = line.replace('%AUTHOR%', self.author)
-                line = line.replace('%DATE%', date)
+            for line in filesource:
+                if line.__contains__('%INCLUDES%'):
+                    self.set_includes()
+                    if self.includes != []:
+                        txt = '#include "' + '"\n#include "'.join(self.includes) + '"\n'
+                        filedestination.write(txt)
+                elif line.__contains__('%FLAGS%'):
+                    self.set_flags()
+                    if self.flags != []:
+                        txt = '\tBIT(' + ')|BIT('.join(self.flags) + '),\n'
+                        filedestination.write(txt)
+                else:
+                    line = line.replace('%STATENAME%', self.statename)
+                    line = line.replace('%STATENAME_UPPER%', self.statename.upper())
+                    line = line.replace('%AUTHOR%', self.author)
+                    line = line.replace('%DATE%', date)
+                    filedestination.write(line)
 
-                fd.write(line)
-
-        fs.close()
-        fd.close()
+        filesource.close()
+        filedestination.close()
 
     def select_model_directory(self):
         #TODO cet fonction, la sélection, ...
