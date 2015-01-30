@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'interface.ui'
 #
-# Created: Fri Jan 30 20:56:35 2015
+# Created: Fri Jan 30 22:15:46 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -74,6 +74,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.setModelsDirectoryButton = QtGui.QPushButton(self.centralwidget)
+        self.setModelsDirectoryButton.setObjectName(_fromUtf8("setModelsDirectoryButton"))
+        self.verticalLayout.addWidget(self.setModelsDirectoryButton)
         self.setDirectoryButton = QtGui.QPushButton(self.centralwidget)
         self.setDirectoryButton.setObjectName(_fromUtf8("setDirectoryButton"))
         self.verticalLayout.addWidget(self.setDirectoryButton)
@@ -108,7 +111,8 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "includes : ", None))
         self.label_5.setToolTip(_translate("MainWindow", "<html><head/><body><p>Un état par ligne. ex:</p><p>E_MOTOR</p><p>E_RADAR</p></body></html>", None))
         self.label_5.setText(_translate("MainWindow", "Flags : ", None))
-        self.setDirectoryButton.setText(_translate("MainWindow", "Dossier de modèles", None))
+        self.setModelsDirectoryButton.setText(_translate("MainWindow", "Dossier de modèles", None))
+        self.setDirectoryButton.setText(_translate("MainWindow", "Dossier de destination", None))
         self.createFilesButton.setText(_translate("MainWindow", "Créer les fichiers", None))
         self.menuFichier.setTitle(_translate("MainWindow", "Fichier", None))
         self.actionQuitter.setText(_translate("MainWindow", "Quitter", None))

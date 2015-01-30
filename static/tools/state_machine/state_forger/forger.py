@@ -11,12 +11,14 @@ class Forger(Ui_MainWindow):
         self.statename = ''
         self.includes = []
         self.flags = []
-        self.destination = './'
+        self.models_directory = 'models/'
+        self.destination = None
         self.table = str.maketrans(' éèêà@çöôïî<>^','_eeeaacooii___')
 
     def built(self):
         self.createFilesButton.clicked.connect(self.create_files)
-        self.setDirectoryButton.clicked.connect(self.select_model_directory)
+        self.setDirectoryButton.clicked.connect(self.select_save_directory)
+        self.setModelsDirectoryButton.clicked.connect(self.select_models_directory)
 
     def set_author(self):
         author = self.lineEditAuthor.text().lower()
@@ -37,15 +39,19 @@ class Forger(Ui_MainWindow):
         self.flags = self.flagsPlainText.toPlainText().split()
 
     def create_files(self):
+        if self.destination is None:
+            QtGui.QMessageBox.information(None,"Destination inconnue","Sélectionnez d'abord un dossier de destination")
+            self.select_save_directory()
         self.set_author()
         self.set_state_name()
         date = time.strftime("%Y %B %d")
-        for file in os.listdir('models/'):
-            source = 'models/' + file
+        for file in os.listdir(self.models_directory):
+            source = self.models_directory + file
             filesource = open(source,'r')
-            _,ext = os.path.splitext(source)
-            destination = self.destination + 'state_' + self.statename + ext
-            filedestination = open(destination, 'w')
+            name,ext = os.path.splitext(file)
+            name = name.replace('model','')
+            destinationName = self.destination + '/' + name + self.statename + ext
+            filedestination = open(destinationName, 'w')
 
             for line in filesource:
                 if line.__contains__('%INCLUDES%'):
@@ -68,10 +74,9 @@ class Forger(Ui_MainWindow):
         filesource.close()
         filedestination.close()
 
-    def select_model_directory(self):
-        #TODO cet fonction, la sélection, ...
-        directoryselecter = QtGui.QFileDialog(None, 'Open file', '/home/fabien')
-        #directoryselecter.setFileMode(QtGui.QFileDialog.Directory)
-        #directoryselecter.setNameFilter("All C++ files (*.cpp *.cc *.C *.cxx *.c++)")
-        directory = directoryselecter.getOpenFileName()
-        print(directory)
+    def select_save_directory(self):
+        self.destination = QtGui.QFileDialog(None, 'Open file', '/home/fabien').getExistingDirectory()
+
+    def select_models_directory(self):
+        self.models_directory = QtGui.QFileDialog(None, 'Open file', '/home/fabien').getExistingDirectory() +'/'
+

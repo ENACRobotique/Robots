@@ -86,9 +86,16 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QPushButton" name="setDirectoryButton">
+         <widget class="QPushButton" name="setModelsDirectoryButton">
           <property name="text">
            <string>Dossier de modèles</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="setDirectoryButton">
+          <property name="text">
+           <string>Dossier de destination</string>
           </property>
          </widget>
         </item>
