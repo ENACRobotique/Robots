@@ -50,7 +50,6 @@ class Forger(Ui_MainWindow):
             source = self.models_directory + file
             filesource = open(source,'r')
             name,ext = os.path.splitext(file)
-            name = name.replace('model','')
             destinationName = self.destination + '/' + name + self.statename + ext
             filedestination = open(destinationName, 'w')
 
