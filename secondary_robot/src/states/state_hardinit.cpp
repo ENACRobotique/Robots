@@ -15,11 +15,14 @@
 #include "../libs/lib_move.h"
 #include "../libs/lib_motor.h"
 #include "../libs/lib_radar.h"
+#include "../libs/lib_attitude.h"
+#include "../libs/MPU_6050.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
-	return &sTrajRedInit;
+	//return &sTrajRedInit;
 	//return &sManualdrive;
+	return &sAlacon;
 }
 void initHard(sState *prev){
 
@@ -38,9 +41,9 @@ void initHard(sState *prev){
     int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN,PIN_ODO2_SEN};
     odoInitHard(pin_odo_int,pin_odo_sen);
 
-    //radar
+    //attitude
     Wire.begin();
-
+    initInertial();
     //line following/detector
     //Wire.begin(); already done
 

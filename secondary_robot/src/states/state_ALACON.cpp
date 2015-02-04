@@ -41,7 +41,7 @@ void deinitAlacon(sState *next)
 	}
 
 sState sAlacon={
-        BIT(E_MOTOR)|BIT(E_RADAR),
+		BIT(E_ATTITUDE),
         &initAlacon,
         &deinitAlacon,
         &testAlacon
