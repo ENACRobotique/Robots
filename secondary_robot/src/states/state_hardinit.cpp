@@ -40,6 +40,7 @@ void initHard(sState *prev){
     int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT,PIN_ODO2_INT};
     int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN,PIN_ODO2_SEN};
     odoInitHard(pin_odo_int,pin_odo_sen);
+    servoInitHard(PIN_SERVO);
 
     //attitude
     Wire.begin();

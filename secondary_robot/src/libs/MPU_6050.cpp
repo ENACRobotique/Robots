@@ -4,6 +4,20 @@
 #include "Arduino.h"
 #include "Wire.h"
 
+  unsigned long last_read_time;
+  float         last_x_angle;  // These are the filtered angles
+  float         last_y_angle;
+  float         last_z_angle;
+  float         last_gyro_x_angle;  // Store the gyro angles to compare drift
+  float         last_gyro_y_angle;
+  float         last_gyro_z_angle;
+  float    base_x_accel;
+  float    base_y_accel;
+  float    base_z_accel;
+  float    base_x_gyro;
+  float    base_y_gyro;
+  float    base_z_gyro;
+
 void set_last_read_angle_data(unsigned long time, float x, float y, float z, float x_gyro, float y_gyro, float z_gyro) {
   last_read_time = time;
   last_x_angle = x;
@@ -153,19 +167,19 @@ int MPU6050_write_reg(int reg, uint8_t data)
 
 void initInertial()
 {
-  unsigned long last_read_time=0;
-  float         last_x_angle=0;  // These are the filtered angles
-  float         last_y_angle=0;
-  float         last_z_angle=0;
-  float         last_gyro_x_angle=0;  // Store the gyro angles to compare drift
-  float         last_gyro_y_angle=0;
-  float         last_gyro_z_angle=0;
-  float    base_x_accel=0;
-  float    base_y_accel=0;
-  float    base_z_accel=0;
-  float    base_x_gyro=0;
-  float    base_y_gyro=0;
-  float    base_z_gyro=0;
+  last_read_time=0;
+  last_x_angle=0;  // These are the filtered angles
+  last_y_angle=0;
+  last_z_angle=0;
+  last_gyro_x_angle=0;  // Store the gyro angles to compare drift
+  last_gyro_y_angle=0;
+  last_gyro_z_angle=0;
+  base_x_accel=0;
+  base_y_accel=0;
+  base_z_accel=0;
+  base_x_gyro=0;
+  base_y_gyro=0;
+  base_z_gyro=0;
   int error;
   uint8_t c;
 
@@ -196,7 +210,7 @@ void initInertial()
 
 
 
-void readInertial()
+int readInertial()
 {
   int error;
   double dT;
@@ -250,14 +264,6 @@ void readInertial()
 
   // Update the saved data with the latest values
   set_last_read_angle_data(t_now, angle_x, angle_y, angle_z, unfiltered_gyro_angle_x, unfiltered_gyro_angle_y, unfiltered_gyro_angle_z);
-
-
-#ifdef DEBUG
-  // Send the data to the serial port
-  //Serial.print(F("DEL:"));              //Delta T
-  Serial.print(dt, DEC);
-  Serial.print("\t");
-  Serial.println(angle_x,2);
-#endif
+  return(angle_x);
 
 }

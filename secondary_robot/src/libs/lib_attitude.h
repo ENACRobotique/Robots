@@ -17,6 +17,7 @@
 
 extern Servo servoAttitude;
 
+
 void servoInitHard(int pinservo);
 void attitudeAsser();
 void attitudeAsserTemp();
