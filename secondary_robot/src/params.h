@@ -17,6 +17,7 @@
 /* Defines ************************************************/
 //pins
 //digital I/O
+#define TANK
 #define NB_MOTORS 2
 #define PIN_MOTOR1_PWM 6
 #define PIN_MOTOR1_DIR 7

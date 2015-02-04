@@ -18,15 +18,6 @@ int _motPinDir[NB_MOTORS],_motPinPWM[NB_MOTORS];
 //initializes the PINs for motor speed and direction
 //REQUIRES : odoinitHard()
 void motorInitHard(int pinDir[],int pinPWM[]){
-//	for(int i=0;i<sizeof(pinDir)/sizeof(int);i++)
-//	{
-//		_motPinDir=pinDir[i];
-//	}
-//
-//	for(int i=0;i<sizeof(pinPWM)/sizeof(int);i++)
-//	{
-//		_motPinPWM=pinPWM[i];
-//	}
 	for(int i=0;i<NB_MOTORS;i++)
 	{
 		_motPinDir[i]=pinDir[i];
@@ -42,13 +33,12 @@ void motorInitHard(int pinDir[],int pinPWM[]){
 
 }
 
-#define KP  18// >>2 , with ziegler nichols (Ku = 9>>2, Tu=80ms)
-#define KI  5// >>2
-
+int Kp[NB_MOTORS] ={18,18}; // >>2
+int Ki[NB_MOTORS] = {5,5}; // >>2
 void motAsser(){
     unsigned long int time=millis();
     static int intEps[NB_MOTORS]={0};
-    static unsigned long time_prev_asser[NB_MOTORS]={millis()};    //ARRGGG !!! How to initialise it ? {{millis(), ... ,{millis()}
+    static unsigned long time_prev_asser[NB_MOTORS]={0};
     static int _motCmd[NB_MOTORS]={0};
 
     for(int i=0;i<NB_MOTORS;i++)
@@ -69,7 +59,7 @@ void motAsser(){
 				_motCmd[i]=0;
 				}
 				else{
-					_motCmd[i]=  ((KP*eps)>>2) + ((KI*intEps[i])>>2);
+					_motCmd[i]=  ((Kp[i]*eps)>>2) + ((Ki[i]*intEps[i])>>2);
 				}
 
 	#ifdef DEBUG_MOTOR
