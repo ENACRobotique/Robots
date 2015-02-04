@@ -63,7 +63,7 @@ void motAsser(){
 				eps = _motCon[i] - read;//odoRead is negative if the robot is going forward "red side"
 
 				//compute error integral
-				intEps[0]= CLAMP( -(64<<4) ,intEps[i]+eps, (64<<4));
+				intEps[i]= CLAMP( -(64<<4) ,intEps[i]+eps, (64<<4));
 				//compute command
 				if(_motCon[i]==0){
 				_motCmd[i]=0;
