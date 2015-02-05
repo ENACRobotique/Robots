@@ -1,0 +1,12 @@
+You can create your own models.
+the followings keywords will be replace by correspondant datas:
+%STATENAME%
+%DATE%
+%AUTHOR%
+%INCLUDES%        #do not write other thing in the same line, it will be crush.
+%FLAGS%           #do not write other thing in the same line, it will be crush.
+
+The name of the file will be the name of the model + the state name.
+ex:
+ if there is a file named "myfile_.ext" in your model directory and your state name is "Mystate",
+ the file name will be "myfile_Mystate.ext"
