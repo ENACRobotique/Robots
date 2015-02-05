@@ -614,24 +614,6 @@ typedef union accel_t_gyro_union
 
 
 
-extern unsigned long last_read_time;
-extern float         last_x_angle;  // These are the filtered angles
-extern float         last_y_angle;
-extern float         last_z_angle;
-extern float         last_gyro_x_angle;  // Store the gyro angles to compare drift
-extern float         last_gyro_y_angle;
-extern float         last_gyro_z_angle;
-
-extern float    base_x_accel;
-extern float    base_y_accel;
-extern float    base_z_accel;
-extern float    base_x_gyro;
-extern float    base_y_gyro;
-extern float    base_z_gyro;
-
-
-
-
 void set_last_read_angle_data(unsigned long time, float x, float y, float z, float x_gyro, float y_gyro, float z_gyro);
 int read_gyro_accel_vals(uint8_t* accel_t_gyro_ptr);
 void calibrate_sensors();

@@ -210,7 +210,7 @@ void initInertial()
 
 
 
-int readInertial()
+int readInertial(int )
 {
   int error;
   double dT;

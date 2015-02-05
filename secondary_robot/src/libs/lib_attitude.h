@@ -14,6 +14,8 @@
 #include "Wire.h"
 #define DEBUG_ATTITUDE
 
+#define X_ANGLE 1
+
 
 extern Servo servoAttitude;
 
