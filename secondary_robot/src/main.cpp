@@ -51,7 +51,7 @@ void loop(){
     static char ledState=0;
     if ( (millis()-prevBlink)>500){
         ledState^=1;
-        digitalWrite(PIN_LED,ledState);
+        //digitalWrite(PIN_LED,ledState);
         prevBlink=millis();
     }
 #endif

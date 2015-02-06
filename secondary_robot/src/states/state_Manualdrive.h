@@ -9,7 +9,7 @@
 #define STATE_MANUALDRIVE_H_
 
 #include "state_types.h"
-
+#define DEBUG_MANUAL
 extern sState sManualdrive;
 
 #endif /* STATE_MANUALDRIVE_ */

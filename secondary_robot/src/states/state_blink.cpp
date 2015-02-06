@@ -16,18 +16,18 @@ sState* testBlink(){
     return 0;
 }
 void initBlink(sState *prev){
-    pinMode(PIN_LED,OUTPUT);
+    //pinMode(PIN_LED,OUTPUT);
 
 }
 void deinitBlink(sState *next){
-    digitalWrite(PIN_LED,LOW);
+    //digitalWrite(PIN_LED,LOW);
 }
 
 void blink(){
     static int state=1;
     static unsigned long prevMillis=millis();
     if ( (millis()-prevMillis) >100){
-        digitalWrite(PIN_LED, state);    // set the LED off
+        //digitalWrite(PIN_LED, state);    // set the LED off
         state^=1;
         prevMillis=millis();
     }
