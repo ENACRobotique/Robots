@@ -11,23 +11,25 @@
 #include "../tools.h"
 #include "lib_move.h"
 
-sState* testManualdrive()
-    {
-        int speed = analogRead(0);
-        int omega = analogRead(1);
-        //speed = map(speed,0,1023,0,255);
-        //omega = map(omega,0,1023,0,255);
-        speed = max(speed,254);
-        omega = max(omega,254);
-        move(omega,speed);
-#if DEBUG
-        Serial.print("speed: ");
+sState* testManualdrive(){
+	static long time = millis();
+	if ((millis() - time) > 200){
+        int speed = analogRead(1);
+        int omega = analogRead(0);
+        speed = map(speed,0,1023,-60,60);
+        omega = -map(omega,0,1023,-20,20);
+        move(speed,omega);
+        time = millis();
+#ifdef DEBUG_MANUAL
+        Serial.print(time);
+        Serial.print("\t");
         Serial.print(speed);
-        Serial.print("omega: ");
-        Serial.print(omega);
+        Serial.print("\t");
+        Serial.println(omega);
 #endif
+	}
         return NULL;
-    }
+}
 
 void initManualdrive(sState *prev)
     {
@@ -40,7 +42,7 @@ void deinitManualdrive(sState *next)
     }
 
 sState sManualdrive={
-        BIT(E_MOTOR),    ///a faire.......
+        BIT(E_MOTOR),
         &initManualdrive,
         &deinitManualdrive,
         &testManualdrive
