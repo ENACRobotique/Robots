@@ -16,6 +16,7 @@
 #include "../libs/lib_move.h"
 #include "../libs/lib_motor.h"
 #include "../libs/lib_radar.h"
+#include "../libs/lib_fan.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
@@ -45,6 +46,9 @@ void initHard(sState *prev){
 
     //line following/detector
     //Wire.begin(); already done
+
+    //fan
+    fanInitHard(PIN_VENTILO);
 
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);
