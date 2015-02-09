@@ -5,16 +5,16 @@
 #include <gpio.h>
 
 // Pin for debug
-#define PIN_DBG1 10
-#define BK_DBG1  0
-#define PIN_DBG2 12
-#define BK_DBG2  0
-#define PIN_DBG3 14
-#define BK_DBG3  0
-#define PIN_DBG4 16
-#define BK_DBG4  0
-#define PIN_DBG5 18
-#define BK_DBG5  0
+#define PIN_DBG1 26
+#define BK_DBG1  1
+#define PIN_DBG2 27
+#define BK_DBG2  1
+#define PIN_DBG3 28
+#define BK_DBG3  1
+#define PIN_DBG4 29
+#define BK_DBG4  1
+#define PIN_DBG5 30
+#define BK_DBG5  1
 
 // Definition of five pins of debug
 #define DEBUG_1_ON gpio_write(BK_DBG1, PIN_DBG1, 1)

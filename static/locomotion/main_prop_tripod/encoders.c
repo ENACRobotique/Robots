@@ -12,53 +12,57 @@
 #include <gpio.h>
 
 #include "encoder.h"
-
 #include "encoders.h"
-
-volatile int irqCpt = 0;
-volatile int dir_mes = 0; // clockwise rotation = -1; trigonometry = 1
-
-encoder_t enc1, enc2, enc3;
 
 #define DIR_MES_TRIGO 1
 #define DIR_MES_HORAI -1
-#define NB_CHANNEL 2
-#define RES_CHANNEL 500 // inc/turn
 
-extern volatile int irqCpt;
-extern volatile int irqCptRef;
-extern volatile int dir_mes;
 
-// EINT0 sur P0,1 => Channel A
-void isr_eint0() __attribute__ ((interrupt("IRQ")));
-void isr_eint0() {
+encoder_t enc1, enc2, enc3;
+
+// Routine of interruption for encoder 1
+void isr_ENC1() __attribute__ ((interrupt("IRQ")));
+void isr_ENC1() {
+    SCB_EXTINT = BIT(1); // acknowledges interrupt
+    VIC_VectAddr = (unsigned) 0; // updates priority hardware
+
+    if (READ_CHA_POD1) // CHA_POD1 = 1
+        enc1.dir = DIR_MES_HORAI; // sens = -1
+    else
+        enc1.dir = DIR_MES_TRIGO; // sens = +1
+
+    enc1.nbticks = enc1.nbticks + enc1.dir;
+}
+
+// Routine of interruption for encoder 2
+void isr_ENC2(encoder_t *e) __attribute__ ((interrupt("IRQ")));
+void isr_ENC2(encoder_t *e) {
     SCB_EXTINT = BIT(0); // acknowledges interrupt
     VIC_VectAddr = (unsigned) 0; // updates priority hardware
 
-    if (ChannelB) // B =1
-        dir_mes = DIR_MES_TRIGO; // sens = +1
+    if (READ_CHA_POD2) // CHA_POD2 = 1
+        enc2.dir = DIR_MES_HORAI; // sens = -1
     else
-        dir_mes = DIR_MES_HORAI; // sens = -1
+        enc2.dir = DIR_MES_TRIGO; // sens = +1
 
-    irqCpt = irqCpt + dir_mes;
+    enc2.nbticks = enc2.nbticks + enc2.dir;
 }
 
-// EINT3 sur P0,20 => Channel B
-void isr_eint3() __attribute__ ((interrupt("IRQ")));
-void isr_eint3() {
+// Routine of interruption for encoder 3
+void isr_ENC3(encoder_t *e) __attribute__ ((interrupt("IRQ")));
+void isr_ENC3(encoder_t *e) {
     SCB_EXTINT = BIT(3); // acknowledges interrupt
     VIC_VectAddr = (unsigned) 0; // updates priority hardware
 
-    if (ChannelA)
-        dir_mes = DIR_MES_HORAI; // sens = -1
+    if (READ_CHB_POD3) // CHB_POD3 = 1
+        enc3.dir = DIR_MES_HORAI; // sens = -1
     else
-        dir_mes = DIR_MES_TRIGO; // sens = +1
+        enc3.dir = DIR_MES_TRIGO; // sens = +1
 
-    irqCpt = irqCpt + dir_mes;
-}
+    enc3.nbticks = enc3.nbticks + enc3.dir;}
 
 void encoders_init(){
-    encoder_init(&enc1, EINT0, EINT0_P0_16, EINT_RISING_EDGE, isr_eint0, 2);
-    encoder_init(&enc2, EINT3, EINT3_P0_20, EINT_RISING_EDGE, isr_eint3, 3);
-//    encoder_init(&enc3, EINT2, EINT2_P0_15, EINT_RISING_EDGE, isr_eint2, 4);
+    encoder_init(&enc1, EINT1, EINT1_P0_14, EINT_RISING_EDGE, isr_ENC1, 2);
+    encoder_init(&enc2, EINT0, EINT0_P0_16, EINT_RISING_EDGE, isr_ENC2, 3);
+    encoder_init(&enc3, EINT3, EINT3_P0_20, EINT_RISING_EDGE, isr_ENC3, 4);
 }

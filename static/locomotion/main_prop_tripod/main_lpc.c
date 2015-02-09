@@ -67,8 +67,6 @@ int main() {
     // Command bridges
     gpio_output(BK_SD2, PIN_SD2); // IN2 out
     gpio_output(BK_SD1, PIN_SD1); // IN1 out
-    // Bootstrap
-    gpio_output(BK_BSTRP1, PIN_BSTRP1);
     // Debug
     debug_init();
     // Small switch
@@ -76,14 +74,12 @@ int main() {
     // LED
     gpio_output(1, 24);   // writes to output {1,24}
     gpio_output(0, 31);  // writes to output {0,31}
-
     // Time
     sys_time_init();
     // Init PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
     pwm_enable(1, pwmCmd /* between 0 and range specified in pwm_init */);
     pwm_enable(2, pwmCmd);
-
     // init encoders
     encoders_init();
 
@@ -103,8 +99,7 @@ int main() {
 //			}
 
         // Get direction
-        dirCons = READ_DIR_ASKED
-        ;
+        dirCons = READ_DIR_ASKED;
 
         // Get motor operation
         switch (gpio_read(BK_SWTCH7, PIN_SWTCH7) + gpio_read(BK_SWTCH8, PIN_SWTCH8)) {
