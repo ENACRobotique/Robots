@@ -1,32 +1,26 @@
 #include "encoder.h"
 
-volatile int irqCpt = 0;
-volatile int dir_mes = 0; // clockwise rotation = -1; trigonometry = 1
+void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_mode, eint_handler eint_h, int eint_prio){
+    e->eint = eint;
 
-// EINT0 sur P0,1 => Channel A
-void isr_eint0() __attribute__ ((interrupt("IRQ")));
-void isr_eint0() {
-    SCB_EXTINT = BIT(0); // acknowledges interrupt
-    VIC_VectAddr = (unsigned) 0; // updates priority hardware
-
-    if (ChannelB) // B =1
-        dir_mes = DIR_MES_TRIGO; // sens = +1
-    else
-        dir_mes = DIR_MES_HORAI; // sens = -1
-
-    irqCpt = irqCpt + dir_mes;
+    eint_disable(eint);
+    eint_assign(eint_pin);
+    eint_mode(eint, eint_mode);
+    eint_register(eint, eint_h, eint_prio);
+    eint_enable(eint);
 }
 
-// EINT3 sur P0,20 => Channel B
-void isr_eint3() __attribute__ ((interrupt("IRQ")));
-void isr_eint3() {
-    SCB_EXTINT = BIT(3); // acknowledges interrupt
-    VIC_VectAddr = (unsigned) 0; // updates priority hardware
+int encoder_read(encoder_t* e){
+    int nbticks;
 
-    if (ChannelA)
-        dir_mes = DIR_MES_HORAI; // sens = -1
-    else
-        dir_mes = DIR_MES_TRIGO; // sens = +1
+    global_IRQ_disable();
+    nbticks = e->nbticks;
+    e->nbticks = 0;
+    global_IRQ_enable();
 
-    irqCpt = irqCpt + dir_mes;
+    return nbticks;
+}
+
+void encoder_deinit(encoder_t* e){
+    eint_disable(e->eint);
 }

@@ -24,12 +24,15 @@
  *      GPIO-OUT    P0.10   EXT1.11     SD2_POD1_LPC        ~UART1
  *      GPIO-OUT    P0.11   EXT1.12     SD2_POD2_LPC        !I²C1 ~UART1
  *      GPIO-OUT    P0.12   EXT1.13     SD2_POD3_LPC        ~UART1
- *      EINT1       P0.14   EXT1.15     CHA_POD1_LPC        !I²C1 ~UART1
- *      GPIO-IN     P0.15   EXT1.16     CHB_POD1_LPC
- *      EINT0       P0.16   EXT1.17     CHA_POD2_LPC
- *      GPIO-IN     P0.17   EXT1.18     CHB_POD2_LPC
+ *      EINT1       P0.14   EXT1.15     CHB_POD1_LPC        !I²C1 ~UART1
+ *      GPIO-IN     P0.15   EXT1.16     CHA_POD1_LPC
+ *      EINT0       P0.16   EXT1.17     CHB_POD2_LPC
+ *      GPIO-IN     P0.17   EXT1.18     CHA_POD2_LPC
  *      EINT3       P0.20   EXT1.21     CHA_POD3_LPC
  *      GPIO-IN     P0.21   EXT1.22     CHB_POD3_LPC
+ *      GPIO-IN     P0.28   EXT2.1      SW1_LPC
+ *      GPIO-IN     P0.29   EXT2.2      SW2_LPC
+ *      GPIO-IN     P0.30   EXT2.3      SW3_LPC
  *      GPIO-OUT    P0.31   EXT2.4      LED
  *      GPIO-OUT    P1.24   EXT2.13     LED
  *      DEBUG       P1.26   EXT2.15
@@ -80,24 +83,11 @@ int main() {
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
     pwm_enable(1, pwmCmd /* between 0 and range specified in pwm_init */);
     pwm_enable(2, pwmCmd);
-#ifdef ENCODER
-    // External interrupts
-    // rising edge channel A
-    eint_disable(EINT0);
-    eint_assign(EINT0_P0_16);// FIXME use the right assignation
-    eint_mode(EINT0, EINT_RISING_EDGE);
-    eint_register(EINT0, isr_eint0, 2);
-    eint_enable(EINT0);
-    // rising edge channel B
-    eint_disable(EINT3);
-    eint_assign(EINT3_P0_20);// FIXME use the right assignation
-    eint_mode(EINT3, EINT_RISING_EDGE);
-    eint_register(EINT3, isr_eint3, 3);
-    eint_enable(EINT3);
 
-    // Enable IRQ
+    // init encoders
+    encoders_init();
+
     global_IRQ_enable();
-#endif
 
     timeStartLoop = millis();
 
