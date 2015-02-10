@@ -1,7 +1,10 @@
-#include "encoder.h"
+#include <ime.h>
 
-void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio){
+#include <encoder.h>
+
+void encoder_init(encoder_t* e, encoder_polarity_t pol, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio) {
     e->eint = eint;
+    e->pol = pol;
 
     eint_disable(eint);
     eint_assign(eint_pin);
@@ -10,7 +13,7 @@ void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE
     eint_enable(eint);
 }
 
-int encoder_read(encoder_t* e){
+int encoder_read(encoder_t* e) {
     int nbticks;
 
     global_IRQ_disable();
@@ -18,9 +21,9 @@ int encoder_read(encoder_t* e){
     e->nbticks = 0;
     global_IRQ_enable();
 
-    return nbticks;
+    return e->pol == POSITIVE_IS_TRIGO ? nbticks : -nbticks;
 }
 
-void encoder_deinit(encoder_t* e){
+void encoder_deinit(encoder_t* e) {
     eint_disable(e->eint);
 }

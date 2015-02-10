@@ -79,12 +79,6 @@
 #define PIN_SWTCH3 30
 #define BK_SWTCH3  0
 
-
-// Read the channels of encoders (pins in gpio mode only)
-#define READ_CHA_POD1 gpio_read(BK_CHA_POD1, PIN_CHA_POD1)
-#define READ_CHA_POD2 gpio_read(BK_CHA_POD2, PIN_CHA_POD2)
-#define READ_CHB_POD3 gpio_read(BK_CHB_POD3, PIN_CHB_POD3)
-
 #define PWM_RANGE 1024  // Don't change this value without change parameter of PWM
 
 //// Parameters motor-reductor

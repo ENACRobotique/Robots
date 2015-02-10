@@ -1,9 +1,6 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#include "param.h"
-#include <sys_time.h>
-
 #define BK_GREEN_LED_BOARD 0
 #define PIN_GREEN_LED_BOARD 24
 #define BK_ORANGE_LED_BOARD 1

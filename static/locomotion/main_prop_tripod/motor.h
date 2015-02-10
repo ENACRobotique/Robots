@@ -1,21 +1,20 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-#include "debug.h"
-#include "param.h"
+typedef struct {
+#ifdef ARCH_LPC21XX
+    // pwm channel
+    unsigned char pwm;
 
-#define RAMPE (1024./7.*1000.)
+    // gpio pin for direction
+    int dir_bank;
+    int dir_pin;
+#elif defined(ARCH_X86_LINUX)
+    // TODO
+#endif
+} motor_t;
 
-typedef enum eMotorOperation {
-    Drive, FreeWheel, Braking
-} eMotorOperation;
-typedef enum eMotorDir {
-    Trigo, Notrigo
-} eMotorDir;
-typedef enum eStateBstr {
-    ChgBstr, DisChgBstr
-} eStateBstr;
-
-void controlMotor(int pwmCmd, eMotorDir dir, eMotorOperation motOp);
+void motor_init(motor_t *m, unsigned char pwm, int bank, int pin);
+void motor_update(motor_t *m, int pwm);
 
 #endif // MOTOR_H
