@@ -55,7 +55,7 @@ void blindLED(int bk, int pin, int delay_on /*ms*/, int delay_off/*ms*/, int nbr
 
 }
 
-void switchs_init(void) {
+void switches_init(void) {
     gpio_input(BK_SWTCH1, PIN_SWTCH1);
     gpio_input(BK_SWTCH2, PIN_SWTCH2);
     gpio_input(BK_SWTCH3, PIN_SWTCH3);

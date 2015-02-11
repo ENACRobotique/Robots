@@ -6,11 +6,9 @@
 ////// Pins LPC
 //// Pins for POD1
 // IN1
-#define PIN_SD1_POD1 4
-#define BK_SD1_POD1  0
-// IN2
-#define PIN_SD2_POD1 10
-#define BK_SD2_POD1  0
+#define PIN_DIR_POD1 4
+#define BK_DIR_POD1  0
+
 // PWM1
 #define PIN_PMW_POD1 7
 #define BK_PWM_POD1  0
@@ -22,12 +20,9 @@
 #define BK_CHB_POD1  0
 
 //// Pins for POD2
-// IN1
-#define PIN_SD1_POD2 5
-#define BK_SD1_POD2  0
-// IN2
-#define PIN_SD2_POD2 11
-#define BK_SD2_POD2  0
+// DIR
+#define PIN_DIR_POD2 5
+#define BK_DIR_POD2  0
 // PWM1
 #define PIN_PMW_POD2 8
 #define BK_PWM_POD2  0
@@ -39,20 +34,17 @@
 #define BK_CHB_POD2  0
 
 //// Pins for POD3
-// IN1
-#define PIN_SD1_POD3 6
-#define BK_SD1_POD3  0
-// IN2
-#define PIN_SD2_POD3 12
-#define BK_SD2_POD3  0
+// DIR
+#define PIN_DIR_POD3 6
+#define BK_DIR_POD3  0
 // PWM1
 #define PIN_PMW_POD3 9
 #define BK_PWM_POD3  0
 // Channel A
-#define PIN_CHA_POD3 20
+#define PIN_CHA_POD3 21
 #define BK_CHA_POD3  0
 // Channel B
-#define PIN_CHB_POD3 21
+#define PIN_CHB_POD3 20
 #define BK_CHB_POD3  0
 
 //// Pins for I2C

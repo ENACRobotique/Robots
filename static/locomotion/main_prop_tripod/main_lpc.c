@@ -24,8 +24,8 @@
  *      GPIO-IN     P0.15   EXT1.16     CHA_POD1_LPC
  *      EINT0       P0.16   EXT1.17     CHB_POD2_LPC
  *      GPIO-IN     P0.17   EXT1.18     CHA_POD2_LPC
- *      EINT3       P0.20   EXT1.21     CHA_POD3_LPC
- *      GPIO-IN     P0.21   EXT1.22     CHB_POD3_LPC
+ *      EINT3       P0.20   EXT1.21     CHB_POD3_LPC
+ *      GPIO-IN     P0.21   EXT1.22     CHA_POD3_LPC
  *      GPIO-IN     P0.28   EXT2.1      SW1_LPC
  *      GPIO-IN     P0.29   EXT2.2      SW2_LPC
  *      GPIO-IN     P0.30   EXT2.3      SW3_LPC
@@ -45,25 +45,37 @@ int main() {
     gpio_init_all();
     // Debug
     debug_init();
-    // Small switch
-    switchs_init();
+    // Small switches
+    switches_init();
     // LED
     gpio_output(1, 24);   // writes to output {1,24}
     gpio_output(0, 31);  // writes to output {0,31}
     // Time
     sys_time_init();
-    // Init PWM
+    // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Init motors
+    // Motors
     motors_init();
-    // Init encoders
+    // Encoders
     encoders_init();
 
     global_IRQ_enable();
 
+
+    //// Global variables
     unsigned int prevControl = millis();
-    while (1) { // ############## Loop ############################################
+    int ret, quit = 0;
+    sMsg inMsg = {{0}}, outMsg = {{0}};
+
+
+    while (!quit) { // ############## Loop ############################################
         sys_time_update();
+
+        // Reception and processing of the message
+        ret = bn_receive(&inMsg);
+        if(ret > 0){
+            process_msg(&inMsg, &outMsg);// TODO
+        }
 
         if (micros() - prevControl >= 20000) {
             prevControl += 20000;

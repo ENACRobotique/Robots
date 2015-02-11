@@ -5,24 +5,24 @@
 #include <pwm.h>
 #include <tools.h>
 
-void motor_init(motor_t* m, unsigned char pwm, int dir_bank, int dir_pin) {
-    m->pwm = pwm;
+void motor_init(motor_t* m, unsigned char pwm_ch, int dir_bank, int dir_pin) {
+    m->pwm_ch = pwm_ch;
     m->dir_bank = dir_bank;
     m->dir_pin = dir_pin;
 
-    pwm_enable(m->pwm, 0);
+    pwm_enable(m->pwm_ch, 0);
     gpio_output(m->dir_bank, m->dir_pin);
     gpio_write(m->dir_bank, m->dir_pin, 0);
-    gpio_enable(m->dir_bank, m->dir_pin);
+    gpio_enable(m->dir_bank, m->dir_pin); // FIXME
 }
 
 void motor_update(motor_t* m, int pwm) {
     if (pwm >= 0) {
-        pwm_update(m->pwm, pwm);
+        pwm_update(m->pwm_ch, pwm);
         gpio_write(m->dir_bank, m->dir_pin, 0);
     }
     else {
-        pwm_update(m->pwm, -pwm);
+        pwm_update(m->pwm_ch, -pwm);
         gpio_write(m->dir_bank, m->dir_pin, 1);
     }
 }

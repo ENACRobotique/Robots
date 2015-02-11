@@ -4,7 +4,7 @@
 typedef struct {
 #ifdef ARCH_LPC21XX
     // pwm channel
-    unsigned char pwm;
+    unsigned char pwm_ch;
 
     // gpio pin for direction
     int dir_bank;
@@ -14,7 +14,7 @@ typedef struct {
 #endif
 } motor_t;
 
-void motor_init(motor_t *m, unsigned char pwm, int bank, int pin);
+void motor_init(motor_t *m, unsigned char pwm_ch, int bank, int pin);
 void motor_update(motor_t *m, int pwm);
 
 #endif // MOTOR_H

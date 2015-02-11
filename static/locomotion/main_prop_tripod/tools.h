@@ -13,6 +13,6 @@
 float incPerT2mPerS(float incPerT);
 float mPerS2IncPerT(float mPerS);
 void blindLED(int bk, int pin, int delay_on, int delay_off, int nbr_it /*0 = Infinite time*/);
-void switchs_init(void);
+void switches_init(void);
 
 #endif
