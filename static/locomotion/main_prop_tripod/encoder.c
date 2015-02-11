@@ -27,3 +27,7 @@ int encoder_read(encoder_t* e) {
 void encoder_deinit(encoder_t* e) {
     eint_disable(e->eint);
 }
+
+int get_encoder(encoder_t* e){
+    return e->nbticks;
+}

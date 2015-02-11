@@ -60,6 +60,9 @@ int main() {
     motors_init();
     // Encoders
     encoders_init();
+    // Trajectory
+    trajectory_controller_t traj_ctl;
+    trajctl_init(&traj_ctl);
 
     global_IRQ_enable();
 
@@ -79,17 +82,12 @@ int main() {
 //            process_msg(&inMsg, &outMsg);// TODO
         }
 
-        if (micros() - prevControl >= 20000) {
-            prevControl += 20000;
 
-            // Get direction
-            // TODO
+        if (micros() - prevControl >= PER_ASSER) {
+            prevControl += PER_ASSER;
 
-            // Get speed consign
-            // TODO
-
-            // Motor control
-            // TODO
+            // Control trajectory
+            trajctl_update(traj_ctl);
         }
     } // ############## End loop ############################################
 }

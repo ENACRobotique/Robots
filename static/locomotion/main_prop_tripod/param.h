@@ -79,7 +79,7 @@
 #define RES_ENC 500 // ticks/turn/channel
 
 //// Parameters for asservissement
-#define PER_SPEED_ASSER 20 // in ms
+#define PER_ASSER 20000 // in µs
 #define FRQ_ASSER (1./0.02)
 #define MAX_SPEED 3 // in m/s
 

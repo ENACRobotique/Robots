@@ -9,7 +9,10 @@
 #define SPEED_CONTROLLER_H_
 
 typedef struct{
+    int speeds_pv[3];
 
 } speed_controller_t;
+
+void get_speeds_pv(speed_controller_t* spd_ctl, encoder_t** tab_enc);
 
 #endif /* SPEED_CONTROLLER_H_ */
