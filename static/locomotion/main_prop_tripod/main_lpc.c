@@ -2,11 +2,13 @@
 #include <encoders.h>
 #include <gpio.h>
 #include <ime.h>
-#include <motors.h>
+#include "motors.h"
+#include "motor.h"
 #include <param.h>
 #include <pwm.h>
 #include <sys_time.h>
 #include <tools.h>
+#include "messages.h"
 
 /*
  * pins usage and mapping (board Rev2):
@@ -64,17 +66,17 @@ int main() {
 
     //// Global variables
     unsigned int prevControl = millis();
-    int ret, quit = 0;
+    int ret;
     sMsg inMsg = {{0}}, outMsg = {{0}};
 
 
-    while (!quit) { // ############## Loop ############################################
+    while (1) { // ############## Loop ############################################
         sys_time_update();
 
         // Reception and processing of the message
         ret = bn_receive(&inMsg);
         if(ret > 0){
-            process_msg(&inMsg, &outMsg);// TODO
+//            process_msg(&inMsg, &outMsg);// TODO
         }
 
         if (micros() - prevControl >= 20000) {
