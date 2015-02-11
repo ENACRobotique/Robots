@@ -8,8 +8,11 @@
 #ifndef SPEED_CONTROLLER_H_
 #define SPEED_CONTROLLER_H_
 
+#include "encoder.h"
+
 typedef struct{
     int speeds_pv[3];
+    int speeds_cmd[3];
 
 } speed_controller_t;
 

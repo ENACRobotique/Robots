@@ -9,6 +9,7 @@
 #include <sys_time.h>
 #include <tools.h>
 #include "messages.h"
+#include "trajectory_controller.h"
 
 /*
  * pins usage and mapping (board Rev2):

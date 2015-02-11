@@ -10,7 +10,8 @@
 
 
 void get_speeds_pv(speed_controller_t* spd_ctl, encoder_t** tab_enc){
-    for(int i=0; i<3; i++){
-        spd_ctl->speeds_pv[i] = get_encoder(*tab_enc[i]->nbticks)/PER_ASSER;
+    int i;
+    for(i=0; i<3; i++){
+        spd_ctl->speeds_pv[i] = get_encoder(&tab_enc[i])/PER_ASSER;
     }
 }

@@ -9,6 +9,7 @@ typedef struct {
     // gpio pin for direction
     int dir_bank;
     int dir_pin;
+
 #elif defined(ARCH_X86_LINUX)
     // TODO
 #endif
