@@ -8,7 +8,7 @@ this library contains the different functions useful for the motor and its contr
 
 //defines
 #define ATTITUDE_ASSER_PERIOD 20 // milliseconds
-
+#define ANGLE_TO_ASSERV X_ANGLE
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
@@ -25,15 +25,10 @@ void servoInitHard(int pinservo){
 	servoAttitude.attach(_pinServo);
 }
 
-#define KP  1// >>2
-#define KI  1// >>8
+#define KP  2// >>2
+#define KI  2// >>8
 
 void attitudeAsser(){
-
-//int angle_x = readInertial();
-//_attitudeCon = servoAttitude.read() + angle_x/5;
-//int cketuveu = max(10,min(175,(_attitudeCon)));
-//servoAttitude.write(cketuveu);
 
     unsigned long int time=millis();
     static int intEps=0;
@@ -47,7 +42,7 @@ void attitudeAsser(){
 		if ( (time-time_prev_asser) < ATTITUDE_ASSER_PERIOD+ATTITUDE_ASSER_PERIOD/2 ){
 			time_prev_asser = time_prev_asser + ATTITUDE_ASSER_PERIOD;
 			//compute error (epsilon)
-			int read=readInertial();
+			int read=readInertial(ANGLE_TO_ASSERV);
 			eps = _attitudeCon - read;
 
 			//compute error integral
@@ -86,7 +81,7 @@ Serial.println(_attitudeCmd);
 			  time_prev_asser=millis();
 			  intEps=0;//<=>resets the integral term
 			  servoAttitude.write(CLAMP(10,_attitudeCmd,175));
-			  readInertial();
+			  readInertial(ANGLE_TO_ASSERV);
 			}
 	}
 }

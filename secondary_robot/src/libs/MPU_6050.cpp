@@ -1,5 +1,6 @@
 
 #include "MPU_6050.h"
+#include "lib_attitude.h"
 #include "../params.h"
 #include "Arduino.h"
 #include "Wire.h"
@@ -210,7 +211,7 @@ void initInertial()
 
 
 
-int readInertial(int )
+int readInertial(int value)
 {
   int error;
   double dT;
@@ -264,6 +265,28 @@ int readInertial(int )
 
   // Update the saved data with the latest values
   set_last_read_angle_data(t_now, angle_x, angle_y, angle_z, unfiltered_gyro_angle_x, unfiltered_gyro_angle_y, unfiltered_gyro_angle_z);
-  return(angle_x);
+  switch(value){
+    case X_ANGLE:
+	    return(angle_x);
+    case Y_ANGLE:
+  	    return(angle_y);
+    case Z_ANGLE:
+	    return(angle_z);
+    case X_ACCEL:
+	    return(accel_x);
+    case Y_ACCEL:
+	    return(accel_y);
+    case Z_ACCEL:
+	    return(accel_z);
+    case X_ANGLE_ACCEL:
+	    return(accel_angle_x);
+    case Y_ANGLE_ACCEL:
+	    return(accel_angle_y);
+    case Z_ANGLE_ACCEL:
+	    return(accel_angle_z);
+    default:
+	    return(0);
+  }
+
 
 }

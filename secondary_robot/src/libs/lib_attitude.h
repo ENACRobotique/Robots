@@ -15,7 +15,14 @@
 #define DEBUG_ATTITUDE
 
 #define X_ANGLE 1
-
+#define Y_ANGLE 2
+#define Z_ANGLE 3
+#define X_ACCEL 11
+#define Y_ACCEL 12
+#define Z_ACCEL 13
+#define X_ANGLE_ACCEL 21
+#define Y_ANGLE_ACCEL 22
+#define Z_ANGLE_ACCEL 23
 
 extern Servo servoAttitude;
 
