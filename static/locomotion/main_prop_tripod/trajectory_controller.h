@@ -16,26 +16,29 @@
 
 typedef struct{
     MAT *mat_sp_POD2b;
+    MAT *mat_sp_b2POD;
 
     //// data for trajectory control
     // Previous position
     int x_prev, y_prev;
-    // Current position
+    // Current value (process values)
     int x, y;
     int Vx_pv, Vy_pv;
 
     //// data for orientation control
     // Previous orientation
     int o_prev;
-    // Current orientation
+    // Current value (process values)
     int o;
-    int O_pv;
+    int o_pv;
 
     // Set point values
     int Vx_sp, Vy_sp;
+    int x_sp, y_sp;
+    int o_sp;
 
-    // Command values
-    int Vx_cmd, Vy_cmd, Omg_cmd;
+    // Command values witch take account of trajectory and rotation
+    int Vx_cmd, Vy_cmd, Omega_cmd;
 
     // PID
     PID_t sPID;
@@ -49,6 +52,8 @@ typedef struct{
 } trajectory_controller_t;
 
 void trajctl_init(trajectory_controller_t* ctl, MAT* mat_base, encoder_t ** tab_enc, motor_t ** tab_m, speed_controller_t ** tab_sp_ctl, int x_init, int y_init, int kp, int kd, int ki, int I_max, unsigned char shift);
-void get_new_pos(trajectory_controller_t* ctl);
+void get_new_pos_orien(trajectory_controller_t* ctl);
+void trajectory_control(trajectory_controller_t* ctl);
+void orientation_control(trajectory_controller_t* ctl);
 
 #endif /* TRAJECTORY_CONTROLLER_H_ */

@@ -11,7 +11,8 @@ typedef struct {
 #ifdef ARCH_LPC21XX
     eEINT eint; // Id of interruption
     encoder_polarity_t pol;
-    int nbticks;
+    int nbticks; // Update when there is an interruption
+    int p_nbticks; // (p=processed) Update at the beginning of the trajectory control loop
     int cor_transmission; // Factor to correct the transmission
 #elif defined(ARCH_X86_LINUX)
     // TODO

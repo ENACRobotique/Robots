@@ -29,5 +29,5 @@ void encoder_deinit(encoder_t* e) {
 }
 
 int get_encoder(encoder_t* e){
-    return e->nbticks;
+    return e->p_nbticks;
 }

@@ -81,7 +81,10 @@
 //// Parameters for asservissement
 #define PER_ASSER 20000 // in µs
 #define FRQ_ASSER (1./0.02)
-#define MAX_SPEED 3 // in m/s
+#define MAX_SPEED 2 // in m/s
+#define MAX_ACC   1 // in m/s²
+#define MAX_ANG_SPD 180 // in deg/s
+#define MAX_ANG_ACC 90 // in deg/s²
 
 //// Wheel parameters
 #ifdef SMALL_WHEEL
