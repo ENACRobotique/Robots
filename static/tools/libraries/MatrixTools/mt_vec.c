@@ -9,6 +9,7 @@
 
 void mt_v_init(MT_VEC* v, int elts) {
     v->elts = elts;
+    v->stack = 0;
     if (elts > 0) {
         v->ve = (int32_t*) calloc(elts, sizeof(*v->ve));
     }
@@ -18,7 +19,7 @@ void mt_v_init(MT_VEC* v, int elts) {
 }
 
 void mt_v_free(MT_VEC* v) {
-    if (v->ve) {
+    if (v->ve && !v->stack) {
         free(v->ve);
     }
 }

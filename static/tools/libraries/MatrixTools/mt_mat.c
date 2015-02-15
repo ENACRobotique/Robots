@@ -19,6 +19,7 @@
 void mt_m_init(MT_MAT* m, int rows, int cols) {
     m->rows = rows;
     m->cols = cols;
+    m->stack = 0;
     if (rows > 0 && cols > 0) {
         m->me = (int32_t*) calloc(rows * cols, sizeof(*m->me));
     }
@@ -168,7 +169,7 @@ int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
 }
 
 void mt_m_free(MT_MAT* m) {
-    if (m->me) {
+    if (m->me && !m->stack) {
         free(m->me);
     }
 }

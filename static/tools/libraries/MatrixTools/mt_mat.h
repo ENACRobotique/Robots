@@ -11,7 +11,7 @@
 #include <mt_vec.h>
 #include <stdlib.h>
 #include <stdint.h>
-
+#include <alloca.h>
 
 #define MT_MAT_SHIFT (10)
 
@@ -19,8 +19,16 @@ typedef struct {
     int32_t* me;
 
     int rows;
-    int cols;
+    int cols :31;
+    int8_t stack :1;
 } MT_MAT;
+
+/**
+ * Allocate a matrix on the stack
+ * You don't need to call mt_m_free() on the objects statically initialized with this macro
+ * The memory reserved for those objects will automatically be released at the end of the function where they have been initialized
+ */
+#define MT_M_INITS(rows, cols) {(int32_t*)alloca((rows)*(cols)*sizeof(int32_t)), (rows), (cols), 1}
 
 #define MT_M_AT(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 

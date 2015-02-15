@@ -6,20 +6,24 @@
 #include <string.h>
 
 void test_linearsolve(){
-    MT_MAT A;
-    MT_MAT Am1;
-    MT_MAT AAm1;
-    MT_VEC b;
-    MT_VEC x;
-    MT_VEC res;
+    // containers initialization, via function call:  (internal call to malloc(), be sure to call mt_*_free() when done)
+    MT_MAT A;       mt_m_init(&A, 2, 2);
+    MT_MAT Am1;     mt_m_init(&Am1, 2, 2);
+    MT_VEC b;       mt_v_init(&b, 2);
+    // or via constant initializer on stack:  (you don't need to call mt_*_free() on those objects but the memory where it points will be released at the end of this function)
+    MT_MAT AAm1   = MT_M_INITS(2, 2);
+    MT_VEC x      = MT_V_INITS(2);
+    MT_VEC res    = MT_V_INITS(2);
 
-    // containers initializes
-    mt_m_init(&A, 2, 2);
-    mt_m_init(&Am1, 2, 2);
-    mt_m_init(&AAm1, 2, 2);
-    mt_v_init(&b, 2);
-    mt_v_init(&x, 2);
-    mt_v_init(&res, 2);
+    printf("b  : %p\n", b.ve);
+    printf("x  : %p\n", x.ve);
+    printf("res: %p\n", res.ve);
+
+    printf("sizeof(int)=%lu\n", sizeof(int));
+    printf("sizeof(long int)=%lu\n", sizeof(long int));
+    printf("sizeof(long long int)=%lu\n", sizeof(long long));
+    printf("sizeof(int*)=%lu\n", sizeof(int*));
+    printf("sizeof(MT_VEC)=%lu\n", sizeof(MT_VEC));
 
     // problem initialization
     MT_M_AT(&A, 0, 0) = 1<<MT_MAT_SHIFT;
@@ -29,6 +33,8 @@ void test_linearsolve(){
 
     // inversion of A
     mt_m_inv(&A, &Am1);
+
+    // computes A*A^-1 to verify we get the identity
     mt_mm_mlt(&A, &Am1, &AAm1);
 
     printf("A:\n");
@@ -58,8 +64,9 @@ void test_linearsolve(){
     // free allocations
     mt_m_free(&A);
     mt_m_free(&Am1);
-    mt_m_free(&AAm1);
     mt_v_free(&b);
+    // calls to mt_*_free() do nothing in case of stack-allocated object, you can omit those
+    mt_m_free(&AAm1);
     mt_v_free(&x);
     mt_v_free(&res);
 }
