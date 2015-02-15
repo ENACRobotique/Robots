@@ -5,9 +5,8 @@
  *      Author: ludo6431
  */
 
+#include <mt_mat.h>
 #include <stdint.h>
-
-#include "imat.h"
 
 #define MRC(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 #define M64(m, r, c) (int64_t)(MRC(m, r, c))
@@ -58,6 +57,37 @@ int mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out) {
 }
 
 /**
+ * Matrix-Vector multiplication + addition
+ * Performs out = v1 + k*M*v2
+ *   k integer must be specified with MT_VEC_SHIFT shift
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_mv_mltadd(const MT_VEC* v1, int32_t k, const MT_MAT* M, const MT_VEC* v2, MT_VEC* out) {
+    int i, j;
+    int64_t sum;
+
+    if (M->cols != v2->elts || M->rows != v1->elts) {
+        return -1;
+    }
+
+    if (out->elts != M->rows) {
+        return -2;
+    }
+
+    for (i = 0; i < M->rows; i++) {
+        sum = 0;
+        for (j = 0; j < M->cols; j++) {
+            sum += M64(M, i, j) * (int64_t) v2->ve[j];
+        }
+        out->ve[i] = v1->ve[i] + (int32_t) (((int64_t) k * (sum >> MT_MAT_SHIFT)) >> MT_VEC_SHIFT);
+    }
+
+    return 0;
+}
+
+/**
  * Matrix-Matrix multiplication
  * returns  0 in case of success
  *         -1 if bad input
@@ -96,7 +126,6 @@ int mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
  *         -3 if unsupported operation
  */
 int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
-    int i, j;
     int32_t det;
 
     if (M->rows == 1 || M->rows != M->cols) {

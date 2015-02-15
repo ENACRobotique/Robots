@@ -5,7 +5,7 @@
  *      Author: ludo6431
  */
 
-#include "ivec.h"
+#include <mt_vec.h>
 
 void mt_v_init(MT_VEC* v, int elts) {
     v->elts = elts;
