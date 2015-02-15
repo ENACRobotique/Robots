@@ -3,24 +3,30 @@
 
 #include <eint.h>
 
-typedef enum {
-    POSITIVE_IS_TRIGO, NEGATIVE_IS_TRIGO
-} encoder_polarity_t;
+/**
+ * Generic encoder reading for LPC2148
+ * Relies on lpc_lib
+ *
+ * author: Ludovic Lacoste
+ */
 
+/**
+ * Storage for an instance of encoder
+ *   all fields are private, use encoder_*() functions
+ */
 typedef struct {
 #ifdef ARCH_LPC21XX
     eEINT eint; // Id of interruption
-    encoder_polarity_t pol;
-    int nbticks; // Update when there is an interruption
-    int p_nbticks; // (p=processed) Update at the beginning of the trajectory control loop
-    int cor_transmission; // Factor to correct the transmission
+    int nbticks; // Updated when there is an interruption and reset on encoder_update() call
+    int nbticks_cache; // Cached nbticks between two encoder_update() calls
 #elif defined(ARCH_X86_LINUX)
     // TODO
 #endif
 } encoder_t;
 
-void encoder_init(encoder_t* e, encoder_polarity_t pol, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio);
-int get_encoder(encoder_t* e);
-
+void encoder_init   (encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio);
+void encoder_update (encoder_t* e);
+int  encoder_get    (encoder_t* e);
+void encoder_deinit (encoder_t* e);
 
 #endif

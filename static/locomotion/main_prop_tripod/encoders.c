@@ -15,8 +15,8 @@
 volatile encoder_t enc1, enc2, enc3;
 
 // Routine of interruption for encoder 1
-void isr_enc1() __attribute__ ((interrupt("IRQ")));
-void isr_enc1() {
+void isr_eint1_enc1() __attribute__ ((interrupt("IRQ")));
+void isr_eint1_enc1() {
     SCB_EXTINT = BIT(1); // acknowledges interrupt
     VIC_VectAddr = (unsigned) 0; // updates priority hardware
 
@@ -24,8 +24,8 @@ void isr_enc1() {
 }
 
 // Routine of interruption for encoder 2
-void isr_enc2() __attribute__ ((interrupt("IRQ")));
-void isr_enc2() {
+void isr_eint0_enc2() __attribute__ ((interrupt("IRQ")));
+void isr_eint0_enc2() {
     SCB_EXTINT = BIT(0); // acknowledges interrupt
     VIC_VectAddr = (unsigned) 0; // updates priority hardware
 
@@ -33,8 +33,8 @@ void isr_enc2() {
 }
 
 // Routine of interruption for encoder 3
-void isr_enc3() __attribute__ ((interrupt("IRQ")));
-void isr_enc3() {
+void isr_eint3_enc3() __attribute__ ((interrupt("IRQ")));
+void isr_eint3_enc3() {
     SCB_EXTINT = BIT(3); // acknowledges interrupt
     VIC_VectAddr = (unsigned) 0; // updates priority hardware
 
@@ -42,8 +42,7 @@ void isr_enc3() {
 }
 
 void encoders_init() {
-    // FIXME, verify polarity with hardware
-    encoder_init(&enc1, POSITIVE_IS_TRIGO, EINT1, EINT1_P0_14, EINT_RISING_EDGE, isr_enc1, 2);
-    encoder_init(&enc2, POSITIVE_IS_TRIGO, EINT0, EINT0_P0_16, EINT_RISING_EDGE, isr_enc2, 3);
-    encoder_init(&enc3, POSITIVE_IS_TRIGO, EINT3, EINT3_P0_20, EINT_RISING_EDGE, isr_enc3, 4);
+    encoder_init(&enc1, EINT1, EINT1_P0_14, EINT_RISING_EDGE, isr_eint1_enc1, 2);
+    encoder_init(&enc2, EINT0, EINT0_P0_16, EINT_RISING_EDGE, isr_eint0_enc2, 3);
+    encoder_init(&enc3, EINT3, EINT3_P0_20, EINT_RISING_EDGE, isr_eint3_enc3, 4);
 }
