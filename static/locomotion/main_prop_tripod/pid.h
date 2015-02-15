@@ -1,8 +1,7 @@
-/*
+/**
  * pid.h
  *
- *  Created on: 11 févr. 2015
- *      Authors: Ludo, Yoyo
+ * author: Ludovic Lacoste
  */
 
 #ifndef _PID_H

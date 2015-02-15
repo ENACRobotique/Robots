@@ -2,20 +2,23 @@
  * speed_controller.c
  *
  *  Created on: 11 févr. 2015
- *      Author: yoyo
  */
-#include "speed_controller.h"
-#include "encoder.h"
-#include "param.h"
-#include "ime.h"
 
+#include <speed_controller.h>
 
-void get_enc_pv(speed_controller_t* spd_ctl, encoder_t** tab_enc){
-    int i;
-    global_IRQ_disable(); // Prevent nbticks to be modified by an interruption caused by an increment
-    for(i=0; i<3; i++){
-        spd_ctl->speeds_pv[i] = get_encoder(&tab_enc[i])/PER_ASSER;
-        *tab_enc[i]->p_nbticks = *tab_enc[i]->nbticks;
-    }
-    global_IRQ_enable();
+#define SHIFT_PID (8)
+
+void spdctl_init(speed_controller_t* sc, encoder_t* enc, motor_t* mot) {
+    sc->enc = enc;
+    sc->mot = mot;
+
+    pid_init(&sc->pid, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
+}
+
+void spdctl_update(speed_controller_t* sc, int setpoint) {
+    int processValue = encoder_get(sc->enc);
+
+    int cmd = pid_update(&sc->pid, setpoint, processValue);
+
+    motor_update(sc->mot, cmd);
 }

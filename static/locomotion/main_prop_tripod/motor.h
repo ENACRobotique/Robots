@@ -16,6 +16,6 @@ typedef struct {
 } motor_t;
 
 void motor_init(motor_t *m, unsigned char pwm_ch, int bank, int pin);
-void motor_update(motor_t *m, int pwm);
+void motor_update(motor_t *m, int cmd);
 
 #endif // MOTOR_H

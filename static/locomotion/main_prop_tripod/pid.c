@@ -1,12 +1,12 @@
-/*
+/**
  * pid.c
  *
- *  Created on: 11 févr. 2015
- *      Authors: Ludo, Yoyo
+ * author: Ludovic Lacoste
  */
 
+#include <limits.h>
+
 #include "pid.h"
-#include "limits.h"
 
 void pid_init(PID_t *p, int KP, int KI, int KD, int I_max, unsigned char shift) {
     p->shift = shift;
