@@ -10,82 +10,136 @@
 #include "imat.h"
 
 #define MRC(m, r, c) (m)->me[(r)*(m)->cols + (c)]
+#define M64(m, r, c) (int64_t)(MRC(m, r, c))
 
-MT_MAT* mt_m_get(int rows, int cols) {
-    MT_MAT* m = (MT_MAT*) malloc(sizeof(*m));
-    if (m) {
-        m->rows = rows;
-        m->cols = cols;
-        m->me = (int*) calloc(rows * cols, sizeof(*m->me));
+/**
+ * Initializes a new matrix of size rows x cols
+ * Assumes the input matrix is garbage,
+ * does not frees any already allocated memory
+ */
+void mt_m_init(MT_MAT* m, int rows, int cols) {
+    m->rows = rows;
+    m->cols = cols;
+    if (rows > 0 && cols > 0) {
+        m->me = (int32_t*) calloc(rows * cols, sizeof(*m->me));
     }
-    return m;
+    else {
+        m->me = NULL;
+    }
 }
 
-MT_VEC* mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out) {
+/**
+ * Matrix-Vector multiplication
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out) {
     int i, j;
     int64_t sum;
 
-    if (out) {
-        if (out->elts != M->rows) {
-            return MT_VNULL;
-        }
+    if (M->cols != v->elts) {
+        return -1;
     }
-    else {
-        out = mt_v_get(M->rows);
+
+    if (out->elts != M->rows) {
+        return -2;
     }
 
     for (i = 0; i < M->rows; i++) {
         sum = 0;
         for (j = 0; j < M->cols; j++) {
-            sum += MRC(M, i, j)* v->ve[j];
+            sum += M64(M, i, j) * (int64_t) v->ve[j];
         }
         out->ve[i] = sum >> MT_MAT_SHIFT;
     }
 
-    return out;
+    return 0;
 }
 
-MT_MAT* mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
+/**
+ * Matrix-Matrix multiplication
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
     int i, j, k;
     int64_t sum;
 
     if (A->cols != B->rows) {
-        return MT_MNULL;
+        return -1;
     }
 
-    if (OUT) {
-        if (OUT->rows != A->rows || OUT->cols != B->cols) {
-            return MT_MNULL;
-        }
-    }
-    else {
-        OUT = mt_m_get(A->rows, B->cols);
+    if (OUT->rows != A->rows || OUT->cols != B->cols) {
+        return -2;
     }
 
     for (i = 0; i < OUT->rows; i++) {
         for (j = 0; j < OUT->cols; j++) {
             sum = 0;
             for (k = 0; k < A->cols; k++) {
-                sum += MRC(A, i, k)* MRC(B, k, j);
+                sum += M64(A, i, k) * M64(B, k, j);
             }
             MRC(OUT, i, j)= sum >> MT_MAT_SHIFT;
         }
     }
 
-    return OUT;
+    return 0;
 }
 
-MT_MAT* mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
-    return MT_MNULL; // TODO
-}
+/**
+ * Matrix inversion
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ *         -3 if unsupported operation
+ */
+int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
+    int i, j;
+    int32_t det;
 
-MT_MAT* mt_m_free(MT_MAT* m) {
-    if (m) {
-        if (m->me) {
-            free(m->me);
-        }
-        free(m);
+    if (M->rows == 1 || M->rows != M->cols) {
+        return -1;
     }
 
-    return MT_MNULL;
+    if (M->rows > 3) {
+        return -3;
+    }
+
+    if (OUT->rows != M->rows || OUT->cols != M->cols) {
+        return -2;
+    }
+
+    if (M->rows == 2) {
+        det = (int32_t) ((M64(M, 0, 0) * M64(M, 1, 1) - M64(M, 0, 1) * M64(M, 1, 0)) >> MT_MAT_SHIFT);
+
+        MRC(OUT, 0, 0)= (M64(M, 1, 1)<<MT_MAT_SHIFT)/det;
+        MRC(OUT, 0, 1)= -(M64(M, 0, 1)<<MT_MAT_SHIFT)/det;
+        MRC(OUT, 1, 0)= -(M64(M, 1, 0)<<MT_MAT_SHIFT)/det;
+        MRC(OUT, 1, 1)= (M64(M, 0, 0)<<MT_MAT_SHIFT)/det;
+    }
+    else if (M->rows == 3) {
+        det = (int32_t) ((M64(M, 0, 0) * ((M64(M, 1, 1) * M64(M, 2, 2) - M64(M, 2, 1) * M64(M, 1, 2)) >> MT_MAT_SHIFT) -
+                        M64(M, 0, 1) * ((M64(M, 1, 0) * M64(M, 2, 2) - M64(M, 1, 2) * M64(M, 2, 0)) >> MT_MAT_SHIFT) +
+                        M64(M, 0, 2) * ((M64(M, 1, 0) * M64(M, 2, 1) - M64(M, 1, 1) * M64(M, 2, 0)) >> MT_MAT_SHIFT)) >> MT_MAT_SHIFT);
+
+        MRC(OUT, 0, 0)= (M64(M, 1, 1) * M64(M, 2, 2) - M64(M, 2, 1) * M64(M, 1, 2)) / det;
+        MRC(OUT, 0, 1)= (M64(M, 0, 2) * M64(M, 2, 1) - M64(M, 0, 1) * M64(M, 2, 2)) / det;
+        MRC(OUT, 0, 2)= (M64(M, 0, 1) * M64(M, 1, 2) - M64(M, 0, 2) * M64(M, 1, 1)) / det;
+        MRC(OUT, 1, 0)= (M64(M, 1, 2) * M64(M, 2, 0) - M64(M, 1, 0) * M64(M, 2, 2)) / det;
+        MRC(OUT, 1, 1)= (M64(M, 0, 0) * M64(M, 2, 2) - M64(M, 0, 2) * M64(M, 2, 0)) / det;
+        MRC(OUT, 1, 2)= (M64(M, 1, 0) * M64(M, 0, 2) - M64(M, 0, 0) * M64(M, 1, 2)) / det;
+        MRC(OUT, 2, 0)= (M64(M, 1, 0) * M64(M, 2, 1) - M64(M, 2, 0) * M64(M, 1, 1)) / det;
+        MRC(OUT, 2, 1)= (M64(M, 2, 0) * M64(M, 0, 1) - M64(M, 0, 0) * M64(M, 2, 1)) / det;
+        MRC(OUT, 2, 2)= (M64(M, 0, 0) * M64(M, 1, 1) - M64(M, 1, 0) * M64(M, 0, 1)) / det;
+    }
+
+    return 0;
+}
+
+void mt_m_free(MT_MAT* m) {
+    if (m->me) {
+        free(m->me);
+    }
 }

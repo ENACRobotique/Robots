@@ -7,22 +7,18 @@
 
 #include "ivec.h"
 
-MT_VEC* mt_v_get(int elts) {
-    MT_VEC* v = (MT_VEC*) malloc(sizeof(*v));
-    if (v) {
-        v->elts = elts;
-        v->ve = (int*) calloc(elts, sizeof(*v->ve));
+void mt_v_init(MT_VEC* v, int elts) {
+    v->elts = elts;
+    if (elts > 0) {
+        v->ve = (int32_t*) calloc(elts, sizeof(*v->ve));
     }
-    return v;
+    else {
+        v->ve = NULL;
+    }
 }
 
-MT_VEC* mt_v_free(MT_VEC* v) {
-    if (v) {
-        if (v->ve) {
-            free(v->ve);
-        }
-        free(v);
+void mt_v_free(MT_VEC* v) {
+    if (v->ve) {
+        free(v->ve);
     }
-
-    return MT_VNULL;
 }

@@ -22,13 +22,10 @@ typedef struct {
     int cols;
 } MT_MAT;
 
-MT_MAT* mt_m_get(int rows, int cols);
-MT_VEC* mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out);
-MT_MAT* mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT);
-MT_MAT* mt_m_inv(const MT_MAT* M, MT_MAT* OUT);
-MT_MAT* mt_m_free(MT_MAT* m);
-#define MT_M_FREE(m) do { (m) = mt_m_free((MT_MAT*)(m)); } while(0)
-
-#define MT_MNULL ((MT_MAT*)NULL)
+void mt_m_init(MT_MAT* m, int rows, int cols);
+int  mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out);
+int  mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT);
+int  mt_m_inv(const MT_MAT* M, MT_MAT* OUT);
+void mt_m_free(MT_MAT* m);
 
 #endif /* MATRIXTOOLS_IMAT_H_ */

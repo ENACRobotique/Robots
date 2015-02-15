@@ -19,10 +19,7 @@ typedef struct {
     int elts;
 } MT_VEC;
 
-MT_VEC* mt_v_get(int elts);
-MT_VEC* mt_v_free(MT_VEC* v);
-#define MT_V_FREE(v) do { (v) = mt_v_free((MT_VEC*)(v)); } while(0)
-
-#define MT_VNULL ((MT_VEC*)NULL)
+void mt_v_init(MT_VEC* v, int elts);
+void mt_v_free(MT_VEC* v);
 
 #endif /* MATRIXTOOLS_IVEC_H_ */
