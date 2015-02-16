@@ -21,9 +21,9 @@ R2 = [cos(phi2) sin(phi2); -sin(phi2) cos(phi2)]; % rob2p2
 R3 = [cos(phi3) sin(phi3); -sin(phi3) cos(phi3)]; % rob2p3
 
 % transformation matrices for each pod (not used here)
-P_rob2p1 = [R1 -R1*OP1_rob; 0 0 1]
-P_rob2p2 = [R2 -R2*OP2_rob; 0 0 1]
-P_rob2p3 = [R3 -R3*OP3_rob; 0 0 1]
+P_rob2p1 = [R1 -R1*OP1_rob; 0 0 1];
+P_rob2p2 = [R2 -R2*OP2_rob; 0 0 1];
+P_rob2p3 = [R3 -R3*OP3_rob; 0 0 1];
 
 % calculate setpoint for each pod for linear speed only
 v_rob = 10*[cos(10*pi/180); sin(10*pi/180)]; % (cm/s)
@@ -61,11 +61,26 @@ v_pods = M_rob2pods*vo_rob
 % trying to get geometric data back from the matrix
 
 % with this kind of matrix, it's impossible to get the true L1,L2,L3 and theta1,theta2,theta3...
-A = M_rob2pods
-_phi1 = atan2(-A(1, 1), A(1, 2)) *180/pi
-_phi2 = atan2(-A(2, 1), A(2, 2)) *180/pi
-_phi3 = atan2(-A(3, 1), A(3, 2)) *180/pi
-_L1 = A(1, 3)
-_L2 = A(2, 3)
-_L3 = A(3, 3)
+% we get an equivalent system with the three wheel axis intersecting in one point
+A = M_rob2pods;
+_sphi1 = -A(1, 1);
+_cphi1 =  A(1, 2);
+_phi1 = atan2(-A(1, 1), A(1, 2)) *180/pi % (deg)
+_sphi2 = -A(2, 1);
+_cphi2 =  A(2, 2);
+_phi2 = atan2(-A(2, 1), A(2, 2)) *180/pi % (deg)
+_sphi3 = -A(3, 1);
+_cphi3 =  A(3, 2);
+_phi3 = atan2(-A(3, 1), A(3, 2)) *180/pi % (deg)
+_L1 = A(1, 3) % (cm)
+_L2 = A(2, 3) % (cm)
+_L3 = A(3, 3) % (cm)
+
+% if you assume that theta1,theta2,theta3 are perfectly respected, you can get L1,L2,L3
+_theta1 =  30*pi/180; % (rad)
+_theta2 = 150*pi/180; % (rad)
+_theta3 = 270*pi/180; % (rad)
+__L1 = A(1, 3)/(_sphi1*sin(_theta1) + _cphi1*cos(_theta1))
+__L2 = A(2, 3)/(_sphi2*sin(_theta2) + _cphi2*cos(_theta2))
+__L3 = A(3, 3)/(_sphi3*sin(_theta3) + _cphi3*cos(_theta3))
 
