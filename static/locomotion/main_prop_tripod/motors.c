@@ -5,13 +5,10 @@
  *      Author: ludo6431
  */
 
-#include <motor.h>
 #include "motors.h"
 
-motor_t mot1, mot2, mot3;
-
-void motors_init(){
-    motor_init(&mot1, 2, 0, 4);
-    motor_init(&mot2, 4, 0, 5);
-    motor_init(&mot3, 6, 0, 6);
+void motors_init(motor_t mots[]){
+    motor_init(&mots[0], 2, 0, 4);
+    motor_init(&mots[1], 4, 0, 5);
+    motor_init(&mots[2], 6, 0, 6);
 }

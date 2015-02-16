@@ -13,12 +13,11 @@
 
 typedef struct {
     encoder_t* enc;
-    motor_t* mot;
 
     PID_t pid;
 } speed_controller_t;
 
-void spdctl_init    (speed_controller_t* sc, encoder_t* enc, motor_t* mot);
-void spdctl_update  (speed_controller_t* sc);
+void spdctl_init(speed_controller_t* sc, encoder_t* enc);
+int spdctl_update(speed_controller_t* sc, int setpoint);
 
 #endif /* SPEED_CONTROLLER_H_ */

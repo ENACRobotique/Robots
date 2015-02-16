@@ -2,153 +2,143 @@
  * controller_trajectory.c
  *
  *  Created on: 11 févr. 2015
- *      Author: yoyo
+ *      Authors: Ludovic Lacoste, yoyo
  */
 
-#include "trajectory_controller.h"
-#include "param.h"
-#include "tools.h"
-#include "matrix.h"
-#include "pid.h"
-#include "encoder.h"
-#include "motor.h"
-#include "speed_controller.h"
+#include <mt_mat.h>
+#include <param.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tools.h>
+#include <trajectory_controller.h>
 
-void trajctl_init(trajectory_controller_t* ctl, MAT* mat_base, encoder_t ** tab_enc, motor_t ** tab_m, speed_controller_t ** tab_sp_ctl, int x_init, int y_init, int kp, int kd, int ki, int I_max, unsigned char shift) {
-    int i;
+#if NB_PODS != 3
+#error "You can't change NB_PODS without changing trajectory_controller.c as well!"
+#endif
 
-    // Transition matrixes
-    ctl->mat_sp_POD2b = mat_base;
-    ctl->mat_sp_b2POD = m_inverse(mat_base, ctl->mat_sp_b2POD);
+void trajctl_init(trajectory_controller_t* ctl, int32_t mat_base[NB_SPDS][NB_PODS]) {
+    int i, j;
+    memset(ctl, 0, sizeof(*ctl));
 
-    // Init structures encoder, motor and speed controller
-    for(i=0; i<3; i++){
-        ctl->enc[i] = *tab_enc[i];
-        ctl->m[i] = *tab_m[i];
-        ctl->spd_ctls[i] = *tab_sp_ctl[i];
+    // Transformation matrices
+    mt_m_init(&ctl->mat_sp_pods2rob, NB_SPDS, NB_PODS);
+    mt_m_init(&ctl->mat_sp_rob2pods, NB_PODS, NB_SPDS);
+    for (i = 0; i < NB_SPDS; i++) {
+        for (j = 0; j < NB_PODS; j++) {
+            MT_M_AT(&ctl->mat_sp_pods2rob, i, j)= mat_base[i][j];
+        }
+    }
+#if NB_PODS == NB_SPDS
+    mt_m_inv(&ctl->mat_sp_pods2rob, &ctl->mat_sp_rob2pods);
+#else
+#error "Case where NB_PODS != NB_SPDS is not yet implemented"
+#endif
+
+    // Init encoders, motors and speed controllers
+    encoders_init(ctl->encs);
+    motors_init(ctl->mots);
+    for (i = 0; i < NB_PODS; i++) {
+        spdctl_init(&ctl->spd_ctls[i], &ctl->encs[i]);
     }
 
-    // Get the initial position
-    ctl->x = x_init;
-    ctl->y = y_init;
-
-    pid_init(&(ctl->sPID), kp, ki, kd, I_max, shift);
+    // Init PID
+    pid_init(&ctl->pid_traj, 1, 0, 0, 0, 0); // TODO find good values
+    pid_init(&ctl->pid_orien, 1, 0, 0, 0, 0); // TODO find good values
 }
 
-void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */){
-    // 0. Update ctl from trajectory_sp(t), orientation_sp(t)
-     // TODO
+void _update_pos_orien(trajectory_controller_t* ctl, MT_VEC *spd_pv_rob);
+void _trajectory_control(trajectory_controller_t* ctl, int x_sp, int y_sp, MT_VEC* spd_cmd_rob);
+void _orientation_control(trajectory_controller_t* ctl, int o_sp, MT_VEC* spd_cmd_rob);
 
-    // 1. Gets process value from the three encoders
-       // => V1_pv, V2_pv, V3_pv and duplicates the nbticks
-       get_enc_pv(ctl->spd_ctls, (encoder_t**)&(ctl->enc)); // XXX
+void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */) {
+    int i;
+    MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS); // (V1_pv, V2_pv, V3_pv)
+    MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS); // (Vx_pv, Vy_pv, Oz_pv)
+    int x_sp, y_sp, o_sp;
+    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS); // (Vx_cmd, Vy_cmd, Oz_pv)
+    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS); // (V1_cmd, V2_cmd, V3_cmd)
 
-    // 2. Compute new position and orientation from
-       // V1_pv, V2_pv, V3_pv => "x_pv", "y_pv", "o_pv"
-       get_new_pos_orien(ctl);
+    // Update ctl from trajectory_sp(t), orientation_sp(t)
+    // TODO update x_sp, y_sp, o_sp
 
-    // 3. Trajectory control
-       //(some pid... ; gives speed orientation set point: Vx_cmd, Vy_cmd)
-       trajectory_control(ctl);
+    // Gets process value from the three encoders
+    // => V1_pv, V2_pv, V3_pv and backups the nbticks
+    for (i = 0; i < NB_PODS; i++) {
+        encoder_update(&ctl->encs[i]);
+        spd_pv_pods.ve[i] = encoder_get(&ctl->encs[i]);
+    }
 
-    // 4. Orientation control
-       // (some pid as well... ; gives angular speed Omega_cmd)
-       orientation_control(ctl);
+    // Send previously computed command to the motors
+    for (i = 0; i < NB_PODS; i++) {
+        motor_update(&ctl->mots[i], ctl->next_spd_cmds[i]);
+    }
 
-    // 5. Calculate speed set points for each pod
-       // Vx, Vy and Omega => V1_cmd, V2_cmd, V3_cmd
-       speed_cmd_PODs(ctl);
+    // Get the speeds transformed in the robot's reference frame
+    // (V1_pv, V2_pv, V3_pv) => (Vx_pv, Vy_pv, Oz_pv)
+    mt_mv_mlt(&ctl->mat_sp_pods2rob, &spd_pv_pods, &spd_pv_rob);
 
-    // 6. call speed controller with V1_cmd, V2_cmd, V3_cmd
-       motors_control(ctl);
+    // Compute new position and orientation from
+    // (Vx_pv, Vy_pv, Oz_pv, x, y, o) => (x, y, o)
+    _update_pos_orien(ctl, &spd_pv_rob);
 
-    // 7. update motor command with results from speed controllers
-       motors_update(ctl);
+    // Trajectory control
+    //(some pid... ; gives speed orientation set point: Vx_cmd, Vy_cmd)
+    _trajectory_control(ctl, x_sp, y_sp, &spd_cmd_rob);
+
+    // Orientation control
+    // (some pid as well... ; gives angular speed Oz_cmd)
+    _orientation_control(ctl, o_sp, &spd_cmd_rob);
+
+    // Calculate speed set points for each pod
+    // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
+    mt_mv_mlt(&ctl->mat_sp_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
+
+    // call speed controller with V1_cmd, V2_cmd, V3_cmd
+    for (i = 0; i < NB_PODS; i++) {
+        ctl->next_spd_cmds[i] = spdctl_update(&ctl->spd_ctls[i], spd_cmd_pods.ve[i]);
+    }
 }
 
-void get_new_pos_orien(trajectory_controller_t* ctl){
-    VEC* V_sp_b_pv = VNULL;
-    VEC* V_sp_PODs = VNULL;
-
-    // Fill the vector of speed of PODs
-    V_sp_PODs->ve[0] = ctl->spd_ctls->speeds_pv[0];
-    V_sp_PODs->ve[1] = ctl->spd_ctls->speeds_pv[1];
-    V_sp_PODs->ve[2] = ctl->spd_ctls->speeds_pv[2];
-
-    // Compute the speed of the base V_sp_b_pv = (Vx_pv, Vy_pv, O_pv) in the reference of the base
-    V_sp_b_pv = mv_mlt(ctl->mat_sp_POD2b, V_sp_PODs, V_sp_b_pv);
-
-    // Stock values
-    ctl->Vx_pv = iROUND(V_sp_b_pv->ve[0]);
-    ctl->Vy_pv = iROUND(V_sp_b_pv->ve[1]);
-    ctl->o_pv = iROUND(V_sp_b_pv->ve[2]);
-
+void _update_pos_orien(trajectory_controller_t* ctl, MT_VEC* spd_pv_rob) {
     // Compute the new position
-    ctl->x = ctl->x_prev + ctl->Vx_pv*PER_ASSER;
-    ctl->y = ctl->y_prev + ctl->Vy_pv*PER_ASSER;
-    ctl->o = ctl->o_prev + ctl->o_pv; // FIXME, make a modulo
+    ctl->x += spd_pv_rob->ve[0];
+    ctl->y += spd_pv_rob->ve[1];
+    ctl->o += spd_pv_rob->ve[2]; // FIXME, make a modulo
 }
 
-void trajectory_control(trajectory_controller_t* ctl){
+void _trajectory_control(trajectory_controller_t* ctl, int x_sp, int y_sp, MT_VEC* spd_cmd_rob) {
     int errx, erry;
 
     // Limit acceleration (keeping ratio of errors constant)
-    errx = ctl->x_sp - ctl->x;
-    erry = ctl->y_sp - ctl->y;
+    errx = x_sp - ctl->x;
+    erry = y_sp - ctl->y;
 
-    if(abs(errx)>= MAX_ACC){
-        errx = SIGN(errx)*MAX_ACC;
-        ctl->x_sp = ctl->x + errx;
+    if (abs(errx) >= MAX_ACC) {
+        errx = SIGN(errx) * MAX_ACC;
+        x_sp = ctl->x + errx;
     }
 
-    if(abs(erry)>= MAX_ACC){
-        erry = SIGN(erry)*MAX_ACC;
-        ctl->y_sp = ctl->y + erry;
+    if (abs(erry) >= MAX_ACC) {
+        erry = SIGN(erry) * MAX_ACC;
+        y_sp = ctl->y + erry;
     }
 
     // Compute the speeds command Vx_cmd, Vy_cmd
-    ctl->Vx_cmd = pid_update(ctl->sPID, ctl->x_sp, ctl->x);
-    ctl->Vy_cmd = pid_update(ctl->sPID, ctl->y_sp, ctl->y);
-
+    spd_cmd_rob->ve[0] = pid_update(&ctl->pid_traj, x_sp, ctl->x);
+    spd_cmd_rob->ve[1] = pid_update(&ctl->pid_traj, y_sp, ctl->y);
 }
 
-void orientation_control(trajectory_controller_t* ctl){
+void _orientation_control(trajectory_controller_t* ctl, int o_sp, MT_VEC* spd_cmd_rob) {
     int erro;
 
     // Limit angular acceleration
-    erro = ctl->o_sp - ctl->o_pv;
+    erro = o_sp - ctl->o;
 
-    if(abs(erro)>= MAX_ANG_ACC){
-        erro = SIGN(erro)*MAX_ANG_ACC;
-        ctl->o_sp = ctl->o + erro;
+    if (abs(erro) >= MAX_ANG_ACC) {
+        erro = SIGN(erro) * MAX_ANG_ACC;
+        o_sp = ctl->o + erro;
     }
 
     // Compute the angular speed command Omega_cmd
-    ctl->Omega_cmd = pid_update(ctl->sPID, ctl->o_sp, ctl->o);
-}
-
-void speed_cmd_PODs(trajectory_controller_t* ctl){
-    VEC* V_sp_cmd_b = VNULL;
-    VEC* V_sp_PODs = VNULL;
-
-    // Fill the vector of speed cmd in the base
-    V_sp_cmd_b->ve[0] = ctl->Vx_cmd;
-    V_sp_cmd_b->ve[1] = ctl->Vy_cmd;
-    V_sp_cmd_b->ve[2] = ctl->Omega_cmd;
-
-    // Compute the speeds for PODs
-    V_sp_PODs = mv_mlt(ctl->mat_sp_b2POD, V_sp_cmd_b, V_sp_PODs);
-
-    // Stock values
-    ctl->spd_ctls->speeds_cmd[0] = V_sp_PODs->ve[0];
-    ctl->spd_ctls->speeds_cmd[1] = V_sp_PODs->ve[1];
-    ctl->spd_ctls->speeds_cmd[2] = V_sp_PODs->ve[2];
-}
-
-void motors_control(trajectory_controller_t* ctl){
-    // TODO
-}
-
-void motors_update(trajectory_controller_t* ctl){
-    // TODO
+    spd_cmd_rob->ve[2] = pid_update(&ctl->pid_orien, o_sp, ctl->o);
 }

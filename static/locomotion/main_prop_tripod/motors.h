@@ -8,6 +8,10 @@
 #ifndef MOTORS_H_
 #define MOTORS_H_
 
-void motors_init();
+#include <motor.h>
+
+#define NB_MOTORS (3)
+
+void motors_init(motor_t mots[]);
 
 #endif /* MOTORS_H_ */

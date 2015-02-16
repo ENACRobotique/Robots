@@ -8,17 +8,14 @@
 
 #define SHIFT_PID (8)
 
-void spdctl_init(speed_controller_t* sc, encoder_t* enc, motor_t* mot) {
+void spdctl_init(speed_controller_t* sc, encoder_t* enc) {
     sc->enc = enc;
-    sc->mot = mot;
 
     pid_init(&sc->pid, 2<<SHIFT_PID, (2*2/1)<<(SHIFT_PID-3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900<<SHIFT_PID, SHIFT_PID);
 }
 
-void spdctl_update(speed_controller_t* sc, int setpoint) {
+int spdctl_update(speed_controller_t* sc, int setpoint) {
     int processValue = encoder_get(sc->enc);
 
-    int cmd = pid_update(&sc->pid, setpoint, processValue);
-
-    motor_update(sc->mot, cmd);
+    return pid_update(&sc->pid, setpoint, processValue);
 }

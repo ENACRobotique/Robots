@@ -1,9 +1,6 @@
 #include <debug.h>
-#include <encoders.h>
 #include <gpio.h>
 #include <ime.h>
-#include "motors.h"
-#include "motor.h"
 #include <param.h>
 #include <pwm.h>
 #include <sys_time.h>
@@ -43,6 +40,12 @@
  * for more details, see Features2Pins.txt file
  */
 
+const int32_t mat_base[3][3] = {
+        {1<<MT_MAT_SHIFT,   0,                  0               },
+        {0,                 1<<MT_MAT_SHIFT,    0               },
+        {0,                 0,                  1<<MT_MAT_SHIFT }
+};
+
 int main() {
     //// Initialization
     gpio_init_all();
@@ -57,22 +60,16 @@ int main() {
     sys_time_init();
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Motors
-    motors_init();
-    // Encoders
-    encoders_init();
     // Trajectory
     trajectory_controller_t traj_ctl;
-    trajctl_init(&traj_ctl);
+    trajctl_init(&traj_ctl, mat_base);
 
     global_IRQ_enable();
-
 
     //// Global variables
     unsigned int prevControl = millis();
     int ret;
     sMsg inMsg = {{0}}, outMsg = {{0}};
-
 
     while (1) { // ############## Loop ############################################
         sys_time_update();
@@ -83,12 +80,11 @@ int main() {
 //            process_msg(&inMsg, &outMsg);// TODO
         }
 
-
         if (micros() - prevControl >= PER_ASSER) {
             prevControl += PER_ASSER;
 
             // Control trajectory
-            trajctl_update(traj_ctl);
+            trajctl_update(&traj_ctl);
         }
     } // ############## End loop ############################################
 }

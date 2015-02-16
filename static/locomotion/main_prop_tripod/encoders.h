@@ -8,6 +8,10 @@
 #ifndef ENCODERS_H_
 #define ENCODERS_H_
 
-void encoders_init();
+#include <encoder.h>
+
+#define NB_ENCODERS (3)
+
+void encoders_init(encoder_t encs[]);
 
 #endif /* ENCODERS_H_ */
