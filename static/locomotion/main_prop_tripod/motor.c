@@ -1,7 +1,7 @@
 #include <gpio.h>
 #include <lpc214x.h>
 #include <motor.h>
-#include <param.h>
+#include <pins.h>
 #include <pwm.h>
 #include <tools.h>
 

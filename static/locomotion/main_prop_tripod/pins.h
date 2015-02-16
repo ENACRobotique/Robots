@@ -1,7 +1,5 @@
-#ifndef PARAM_H
-#define PARAM_H
-
-#include <gpio.h>
+#ifndef PINS_H
+#define PINS_H
 
 ////// Pins LPC
 //// Pins for POD1
@@ -63,34 +61,4 @@
 #define PIN_RX 1
 #define BK_RX  0
 
-//// Pins for small switch
-#define PIN_SWTCH1 28
-#define BK_SWTCH1  0
-#define PIN_SWTCH2 29
-#define BK_SWTCH2  0
-#define PIN_SWTCH3 30
-#define BK_SWTCH3  0
-
-#define PWM_RANGE 1024  // Don't change this value without change parameter of PWM
-
-//// Parameters motor-reductor
-#define REDUCT (676./49.)
-#define SPIN2INC (1./REDUCT)
-#define RES_ENC 500 // ticks/turn/channel
-
-//// Parameters for asservissement
-#define PER_ASSER 20000 // in µs
-#define FRQ_ASSER (1./0.02)
-#define MAX_SPEED 2 // in m/s
-#define MAX_ACC   1 // in m/s²
-#define MAX_ANG_SPD 180 // in deg/s
-#define MAX_ANG_ACC 90 // in deg/s²
-
-//// Wheel parameters
-#ifdef SMALL_WHEEL
-#define RAY_WHEEL  0.035 // in meters
-#else
-#define RAY_WHEEL (3.25*INCH2METERS)
-#endif
-
-#endif // PARAM_H
+#endif // PINS_H

@@ -61,7 +61,7 @@ typedef struct{
     int next_spd_cmds[NB_PODS];
 } trajectory_controller_t;
 
-void trajctl_init(trajectory_controller_t* ctl, int32_t mat_base[3][3]);
+void trajctl_init(trajectory_controller_t* ctl, const int32_t mat_base[3][3]);
 void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */);
 
 #endif /* TRAJECTORY_CONTROLLER_H_ */

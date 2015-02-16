@@ -1,12 +1,14 @@
 #include <debug.h>
 #include <gpio.h>
 #include <ime.h>
-#include <param.h>
+#include <pins.h>
+#include <params.h>
 #include <pwm.h>
 #include <sys_time.h>
 #include <tools.h>
 #include "messages.h"
 #include "trajectory_controller.h"
+#include "shared/botNet_core.h"
 
 /*
  * pins usage and mapping (board Rev2):
@@ -50,9 +52,9 @@ int main() {
     //// Initialization
     gpio_init_all();
     // Debug
-    debug_init();
+    debug_leds_init();
     // Small switches
-    switches_init();
+    debug_switches_init();
     // LED
     gpio_output(1, 24);   // writes to output {1,24}
     gpio_output(0, 31);  // writes to output {0,31}
@@ -69,7 +71,7 @@ int main() {
     //// Global variables
     unsigned int prevControl = millis();
     int ret;
-    sMsg inMsg = {{0}}, outMsg = {{0}};
+    sMsg inMsg = {{0}};//, outMsg = {{0}};
 
     while (1) { // ############## Loop ############################################
         sys_time_update();

@@ -8,7 +8,7 @@
 #include <eint.h>
 #include <gpio.h>
 #include <lpc214x.h>
-#include <param.h>
+#include <pins.h>
 #include "encoders.h"
 
 encoder_t* _encs;

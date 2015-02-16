@@ -6,7 +6,7 @@
  */
 
 #include <mt_mat.h>
-#include <param.h>
+#include <pins.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tools.h>
@@ -16,7 +16,7 @@
 #error "You can't change NB_PODS without changing trajectory_controller.c as well!"
 #endif
 
-void trajctl_init(trajectory_controller_t* ctl, int32_t mat_base[NB_SPDS][NB_PODS]) {
+void trajctl_init(trajectory_controller_t* ctl, const int32_t mat_base[NB_SPDS][NB_PODS]) {
     int i, j;
     memset(ctl, 0, sizeof(*ctl));
 
@@ -107,21 +107,21 @@ void _update_pos_orien(trajectory_controller_t* ctl, MT_VEC* spd_pv_rob) {
 }
 
 void _trajectory_control(trajectory_controller_t* ctl, int x_sp, int y_sp, MT_VEC* spd_cmd_rob) {
-    int errx, erry;
-
-    // Limit acceleration (keeping ratio of errors constant)
-    errx = x_sp - ctl->x;
-    erry = y_sp - ctl->y;
-
-    if (abs(errx) >= MAX_ACC) {
-        errx = SIGN(errx) * MAX_ACC;
-        x_sp = ctl->x + errx;
-    }
-
-    if (abs(erry) >= MAX_ACC) {
-        erry = SIGN(erry) * MAX_ACC;
-        y_sp = ctl->y + erry;
-    }
+//    int errx, erry;
+//
+//    // Limit acceleration
+//    errx = x_sp - ctl->x;
+//    erry = y_sp - ctl->y;
+//
+//    if (abs(errx) >= MAX_ACC) {
+//        errx = SIGN(errx) * MAX_ACC;
+//        x_sp = ctl->x + errx;
+//    }
+//
+//    if (abs(erry) >= MAX_ACC) {
+//        erry = SIGN(erry) * MAX_ACC;
+//        y_sp = ctl->y + erry;
+//    }
 
     // Compute the speeds command Vx_cmd, Vy_cmd
     spd_cmd_rob->ve[0] = pid_update(&ctl->pid_traj, x_sp, ctl->x);
@@ -129,15 +129,15 @@ void _trajectory_control(trajectory_controller_t* ctl, int x_sp, int y_sp, MT_VE
 }
 
 void _orientation_control(trajectory_controller_t* ctl, int o_sp, MT_VEC* spd_cmd_rob) {
-    int erro;
-
-    // Limit angular acceleration
-    erro = o_sp - ctl->o;
-
-    if (abs(erro) >= MAX_ANG_ACC) {
-        erro = SIGN(erro) * MAX_ANG_ACC;
-        o_sp = ctl->o + erro;
-    }
+//    int erro;
+//
+//    // Limit angular acceleration
+//    erro = o_sp - ctl->o;
+//
+//    if (abs(erro) >= MAX_ANG_ACC) {
+//        erro = SIGN(erro) * MAX_ANG_ACC;
+//        o_sp = ctl->o + erro;
+//    }
 
     // Compute the angular speed command Omega_cmd
     spd_cmd_rob->ve[2] = pid_update(&ctl->pid_orien, o_sp, ctl->o);
