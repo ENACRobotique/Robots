@@ -57,3 +57,15 @@ M_pods2rob = inv(M_rob2pods)
 vo_rob = [v_rob;0] + omega_rob;
 v_pods = M_rob2pods*vo_rob
 
+% =================================================
+% trying to get geometric data back from the matrix
+
+% with this kind of matrix, it's impossible to get the true L1,L2,L3 and theta1,theta2,theta3...
+A = M_rob2pods
+_phi1 = atan2(-A(1, 1), A(1, 2)) *180/pi
+_phi2 = atan2(-A(2, 1), A(2, 2)) *180/pi
+_phi3 = atan2(-A(3, 1), A(3, 2)) *180/pi
+_L1 = A(1, 3)
+_L2 = A(2, 3)
+_L3 = A(3, 3)
+
