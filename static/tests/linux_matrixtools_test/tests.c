@@ -71,11 +71,39 @@ void test_linearsolve(){
     mt_v_free(&res);
 }
 
+void test_invmatrix() {
+	#define dMSHIFT ((double)(1 << MT_MAT_SHIFT))
+	const int32_t mat_rob2pods[3][3] = {
+	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
+	    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
+	    { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
+	};
+
+	// static allocation on stack matrices (no need to free those)
+	MT_MAT M_rob2pods = MT_M_INITS(3, 3);
+	MT_MAT M_pods2rob = MT_M_INITS(3, 3);
+
+	// init input matrix
+	for(int i = 0; i < 3; i++) {
+		for(int j = 0; j < 3; j++) {
+			MT_M_AT(&M_rob2pods, i, j) = mat_rob2pods[i][j];
+		}
+	}
+
+	mt_m_inv(&M_rob2pods, &M_pods2rob);
+
+    printf("M_rob2pods, ");
+    mt_m_output(&M_rob2pods);
+    printf("M_pods2rob, ");
+    mt_m_output(&M_pods2rob);
+}
+
 struct{
     void (*f)();
     char* s;
 } tests[]={
-        {test_linearsolve, "Ax=b solutions (using explicit matrix inversion"},
+        {test_linearsolve, "Ax=b solutions (using explicit matrix inversion)"},
+        {test_invmatrix,   "Matrix inversion"},
 };
 
 int main() {

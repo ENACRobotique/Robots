@@ -1,7 +1,7 @@
 % geometric data with imperfections
-L1 = 30 * 1.02; % (cm)
-L2 = 30 * 0.99; % (cm)
-L3 = 30 * 1.01; % (cm)
+L1 = 15.5 * 1.02; % (cm)
+L2 = 15.5 * 0.99; % (cm)
+L3 = 15.5 * 1.01; % (cm)
 
 theta1 =  30*pi/180 * 1.01; % (rad)
 theta2 = 150*pi/180 * 0.99; % (rad)
@@ -43,14 +43,14 @@ v_p2 = v_v_p2 + v_o_p2 % (cm/s)
 v_p3 = v_v_p3 + v_o_p3 % (cm/s)
 
 % formula extracted from operations above
-_v_p1 = -v_rob(1)*sin(phi1) + v_rob(2)*cos(phi1) + L1*omega_rob(3)*(sin(phi1)*sin(theta1) + cos(phi1)*cos(theta1)) % (cm/s)
-_v_p2 = -v_rob(1)*sin(phi2) + v_rob(2)*cos(phi2) + L2*omega_rob(3)*(sin(phi2)*sin(theta2) + cos(phi2)*cos(theta2)) % (cm/s)
-_v_p3 = -v_rob(1)*sin(phi3) + v_rob(2)*cos(phi3) + L3*omega_rob(3)*(sin(phi3)*sin(theta3) + cos(phi3)*cos(theta3)) % (cm/s)
+_v_p1 = -v_rob(1)*sin(phi1) + v_rob(2)*cos(phi1) + L1*omega_rob(3)*cos(phi1 - theta1) % (cm/s)
+_v_p2 = -v_rob(1)*sin(phi2) + v_rob(2)*cos(phi2) + L2*omega_rob(3)*cos(phi2 - theta2) % (cm/s)
+_v_p3 = -v_rob(1)*sin(phi3) + v_rob(2)*cos(phi3) + L3*omega_rob(3)*cos(phi3 - theta3) % (cm/s)
 
 % build single static matrix from formula above
-M_rob2pods = [ -sin(phi1) cos(phi1) L1*(sin(phi1)*sin(theta1) + cos(phi1)*cos(theta1));
-               -sin(phi2) cos(phi2) L2*(sin(phi2)*sin(theta2) + cos(phi2)*cos(theta2));
-               -sin(phi3) cos(phi3) L3*(sin(phi3)*sin(theta3) + cos(phi3)*cos(theta3))]
+M_rob2pods = [ -sin(phi1) cos(phi1) L1*cos(phi1 - theta1);
+               -sin(phi2) cos(phi2) L2*cos(phi2 - theta2);
+               -sin(phi3) cos(phi3) L3*cos(phi3 - theta3)]
 M_pods2rob = inv(M_rob2pods)
 
 % verify results
@@ -65,13 +65,13 @@ v_pods = M_rob2pods*vo_rob
 A = M_rob2pods;
 _sphi1 = -A(1, 1);
 _cphi1 =  A(1, 2);
-_phi1 = atan2(-A(1, 1), A(1, 2)) *180/pi % (deg)
+_phi1 = atan2(_sphi1, _cphi1) *180/pi % (deg)
 _sphi2 = -A(2, 1);
 _cphi2 =  A(2, 2);
-_phi2 = atan2(-A(2, 1), A(2, 2)) *180/pi % (deg)
+_phi2 = atan2(_sphi2, _cphi2) *180/pi % (deg)
 _sphi3 = -A(3, 1);
 _cphi3 =  A(3, 2);
-_phi3 = atan2(-A(3, 1), A(3, 2)) *180/pi % (deg)
+_phi3 = atan2(_sphi3, _cphi3) *180/pi % (deg)
 _L1 = A(1, 3) % (cm)
 _L2 = A(2, 3) % (cm)
 _L3 = A(3, 3) % (cm)

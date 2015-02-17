@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <alloca.h>
 
-#define MT_MAT_SHIFT (10)
+#define MT_MAT_SHIFT (16)
 
 typedef struct {
     int32_t* me;

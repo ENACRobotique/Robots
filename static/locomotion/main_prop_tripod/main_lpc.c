@@ -42,10 +42,18 @@
  * for more details, see Features2Pins.txt file
  */
 
-const int32_t mat_base[3][3] = {
-        {1<<MT_MAT_SHIFT,   0,                  0               },
-        {0,                 1<<MT_MAT_SHIFT,    0               },
-        {0,                 0,                  1<<MT_MAT_SHIFT }
+/* from theoric data
+M_rob2pods =
+  -5.00000000000000e-01   8.66025403784439e-01   1.55000000000000e+01
+  -5.00000000000000e-01  -8.66025403784439e-01   1.55000000000000e+01
+   1.00000000000000e+00  -1.83690953073357e-16   1.55000000000000e+01
+*/
+#define dMSHIFT ((double)(1 << MT_MAT_SHIFT))
+
+const int32_t mat_rob2pods[3][3] = {
+    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
+    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
+    { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
 };
 
 int main() {
@@ -64,7 +72,7 @@ int main() {
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
     // Trajectory
     trajectory_controller_t traj_ctl;
-    trajctl_init(&traj_ctl, mat_base);
+    trajctl_init(&traj_ctl, mat_rob2pods);
 
     global_IRQ_enable();
 
