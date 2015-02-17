@@ -7,8 +7,9 @@
 
 #include <mt_vec.h>
 
-void mt_v_init(MT_VEC* v, int elts) {
+void mt_v_init(MT_VEC* v, uint16_t elts, uint8_t shift) {
     v->elts = elts;
+    v->shift = shift;
     v->stack = 0;
     if (elts > 0) {
         v->ve = (int32_t*) calloc(elts, sizeof(*v->ve));

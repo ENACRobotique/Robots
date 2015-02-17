@@ -6,14 +6,17 @@
 #include <string.h>
 
 void test_linearsolve(){
+#define MAT_SHIFT (16)
+#define VEC_SHIFT (5)
+
     // containers initialization, via function call:  (internal call to malloc(), be sure to call mt_*_free() when done)
-    MT_MAT A;       mt_m_init(&A, 2, 2);
-    MT_MAT Am1;     mt_m_init(&Am1, 2, 2);
-    MT_VEC b;       mt_v_init(&b, 2);
+    MT_MAT A;       mt_m_init(&A, 2, 2, MAT_SHIFT);
+    MT_MAT Am1;     mt_m_init(&Am1, 2, 2, MAT_SHIFT);
+    MT_VEC b;       mt_v_init(&b, 2, VEC_SHIFT);
     // or via constant initializer on stack:  (you don't need to call mt_*_free() on those objects but the memory where it points will be released at the end of this function)
-    MT_MAT AAm1   = MT_M_INITS(2, 2);
-    MT_VEC x      = MT_V_INITS(2);
-    MT_VEC res    = MT_V_INITS(2);
+    MT_MAT AAm1   = MT_M_INITS(2, 2, MAT_SHIFT);
+    MT_VEC x      = MT_V_INITS(2, VEC_SHIFT);
+    MT_VEC res    = MT_V_INITS(2, VEC_SHIFT);
 
     printf("b  : %p\n", b.ve);
     printf("x  : %p\n", x.ve);
@@ -26,10 +29,10 @@ void test_linearsolve(){
     printf("sizeof(MT_VEC)=%lu\n", sizeof(MT_VEC));
 
     // problem initialization
-    MT_M_AT(&A, 0, 0) = 1<<MT_MAT_SHIFT;
-    MT_M_AT(&A, 0, 1) = 2<<MT_MAT_SHIFT;
-    MT_M_AT(&A, 1, 0) = 3<<MT_MAT_SHIFT;
-    MT_M_AT(&A, 1, 1) = 4<<MT_MAT_SHIFT;
+    MT_M_AT(&A, 0, 0) = 1<<MAT_SHIFT;
+    MT_M_AT(&A, 0, 1) = 2<<MAT_SHIFT;
+    MT_M_AT(&A, 1, 0) = 3<<MAT_SHIFT;
+    MT_M_AT(&A, 1, 1) = 4<<MAT_SHIFT;
 
     // inversion of A
     mt_m_inv(&A, &Am1);
@@ -44,8 +47,8 @@ void test_linearsolve(){
     printf("A*A^-1:\n");
     mt_m_output(&AAm1);
 
-    b.ve[0] = 1<<MT_VEC_SHIFT;
-    b.ve[1] = -2<<MT_VEC_SHIFT;
+    b.ve[0] = 1<<VEC_SHIFT;
+    b.ve[1] = -2<<VEC_SHIFT;
 
     // calculation of A^-1 * b
     mt_mv_mlt(&Am1, &b, &x);
@@ -56,7 +59,7 @@ void test_linearsolve(){
     mt_v_output(&x);
 
     // verification (calculates b - A*x)
-    mt_mv_mltadd(&b, -1<<MT_VEC_SHIFT, &A, &x, &res);
+    mt_mv_mltadd(&b, -1<<VEC_SHIFT, &A, &x, &res);
 
     printf("residu:\n");
     mt_v_output(&res);
@@ -65,23 +68,28 @@ void test_linearsolve(){
     mt_m_free(&A);
     mt_m_free(&Am1);
     mt_v_free(&b);
-    // calls to mt_*_free() do nothing in case of stack-allocated object, you can omit those
+    // calls to mt_*_free() do nothing in case of stack-allocated object, you can omit those next calls
     mt_m_free(&AAm1);
     mt_v_free(&x);
     mt_v_free(&res);
+
+#undef MAT_SHIFT
+#undef VEC_SHIFT
 }
 
 void test_invmatrix() {
-	#define dMSHIFT ((double)(1 << MT_MAT_SHIFT))
-	const int32_t mat_rob2pods[3][3] = {
+#define MAT_SHIFT (24)
+#define dMSHIFT ((double)(1 << MAT_SHIFT))
+
+    const int32_t mat_rob2pods[3][3] = {
 	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
 	    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
 	    { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
 	};
 
 	// static allocation on stack matrices (no need to free those)
-	MT_MAT M_rob2pods = MT_M_INITS(3, 3);
-	MT_MAT M_pods2rob = MT_M_INITS(3, 3);
+	MT_MAT M_rob2pods = MT_M_INITS(3, 3, MAT_SHIFT);
+	MT_MAT M_pods2rob = MT_M_INITS(3, 3, MAT_SHIFT);
 
 	// init input matrix
 	for(int i = 0; i < 3; i++) {
@@ -96,6 +104,8 @@ void test_invmatrix() {
     mt_m_output(&M_rob2pods);
     printf("M_pods2rob, ");
     mt_m_output(&M_pods2rob);
+
+#undef MAT_SHIFT
 }
 
 struct{

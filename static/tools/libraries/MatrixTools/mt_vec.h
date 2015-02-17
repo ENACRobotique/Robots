@@ -12,13 +12,12 @@
 #include <stdlib.h>
 #include <alloca.h>
 
-#define MT_VEC_SHIFT (10)
-
 typedef struct {
     int32_t* ve;
 
-    int elts :31;
-    int8_t stack :1;
+    uint16_t elts;
+    uint8_t shift;
+    uint8_t stack;
 } MT_VEC;
 
 /**
@@ -26,9 +25,9 @@ typedef struct {
  * You don't need to call mt_v_free() on the objects statically initialized with this macro
  * The memory reserved for those objects will automatically be released at the end of the function where they have been initialized
  */
-#define MT_V_INITS(elts) {(int32_t*)alloca((elts)*sizeof(int32_t)), (elts), 1}
+#define MT_V_INITS(elts, shift) {(int32_t*)alloca((elts)*sizeof(int32_t)), (elts), (shift), 1}
 
-void mt_v_init(MT_VEC* v, int elts);
+void mt_v_init(MT_VEC* v, uint16_t elts, uint8_t shift);
 void mt_v_free(MT_VEC* v);
 
 #endif /* MATRIXTOOLS_IVEC_H_ */

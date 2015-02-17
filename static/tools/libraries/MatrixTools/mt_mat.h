@@ -13,14 +13,13 @@
 #include <stdint.h>
 #include <alloca.h>
 
-#define MT_MAT_SHIFT (16)
-
 typedef struct {
     int32_t* me;
 
-    int rows;
-    int cols :31;
-    int8_t stack :1;
+    uint8_t rows;
+    uint8_t cols;
+    uint8_t shift;
+    uint8_t stack;
 } MT_MAT;
 
 /**
@@ -28,11 +27,11 @@ typedef struct {
  * You don't need to call mt_m_free() on the objects statically initialized with this macro
  * The memory reserved for those objects will automatically be released at the end of the function where they have been initialized
  */
-#define MT_M_INITS(rows, cols) {(int32_t*)alloca((rows)*(cols)*sizeof(int32_t)), (rows), (cols), 1}
+#define MT_M_INITS(rows, cols, shift) {(int32_t*)alloca((rows)*(cols)*sizeof(int32_t)), (rows), (cols), (shift), 1}
 
 #define MT_M_AT(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 
-void mt_m_init(MT_MAT* m, int rows, int cols);
+void mt_m_init(MT_MAT* m, uint8_t rows, uint8_t cols, uint8_t shift);
 int  mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out);
 int  mt_mv_mltadd(const MT_VEC* v1, int32_t k, const MT_MAT* M, const MT_VEC* v2, MT_VEC* out);
 int  mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT);

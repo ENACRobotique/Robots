@@ -3,6 +3,12 @@
 
 #include <math.h>
 
+#define MAT_SHIFT (16)
+#define dMSHIFT ((double)(1 << MAT_SHIFT))
+
+#define VEC_SHIFT (16)
+#define dVSHIFT ((double)(1 << VEC_SHIFT))
+
 #define SHIFT (8)
 #define SHIFT_PID (8)
 #define dSHIFT ((double)(1<<SHIFT))

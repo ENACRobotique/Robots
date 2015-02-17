@@ -6,6 +6,7 @@
  */
 
 #include <mt_mat.h>
+#include <params.h>
 #include <pins.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,20 +17,20 @@
 #error "You can't change NB_PODS without changing trajectory_controller.c as well!"
 #endif
 
-void trajctl_init(trajectory_controller_t* ctl, const int32_t mat_base[NB_SPDS][NB_PODS]) {
+void trajctl_init(trajectory_controller_t* ctl, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]) {
     int i, j;
     memset(ctl, 0, sizeof(*ctl));
 
     // Transformation matrices
-    mt_m_init(&ctl->mat_sp_pods2rob, NB_SPDS, NB_PODS);
-    mt_m_init(&ctl->mat_sp_rob2pods, NB_PODS, NB_SPDS);
-    for (i = 0; i < NB_SPDS; i++) {
-        for (j = 0; j < NB_PODS; j++) {
-            MT_M_AT(&ctl->mat_sp_pods2rob, i, j)= mat_base[i][j];
+    mt_m_init(&ctl->M_spds_pods2rob, NB_SPDS, NB_PODS, MAT_SHIFT);
+    mt_m_init(&ctl->M_spds_rob2pods, NB_PODS, NB_SPDS, MAT_SHIFT);
+    for (i = 0; i < NB_PODS; i++) {
+        for (j = 0; j < NB_SPDS; j++) {
+            MT_M_AT(&ctl->M_spds_rob2pods, i, j)= mat_rob2pods[i][j];
         }
     }
 #if NB_PODS == NB_SPDS
-    mt_m_inv(&ctl->mat_sp_pods2rob, &ctl->mat_sp_rob2pods);
+    mt_m_inv(&ctl->M_spds_rob2pods, &ctl->M_spds_pods2rob);
 #else
 #error "Case where NB_PODS != NB_SPDS is not yet implemented"
 #endif
@@ -52,11 +53,11 @@ void _orientation_control(trajectory_controller_t* ctl, int o_sp, MT_VEC* spd_cm
 
 void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */) {
     int i;
-    MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS); // (V1_pv, V2_pv, V3_pv)
-    MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS); // (Vx_pv, Vy_pv, Oz_pv)
+    MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_pv, V2_pv, V3_pv)
+    MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_pv, Vy_pv, Oz_pv)
     int x_sp, y_sp, o_sp;
-    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS); // (Vx_cmd, Vy_cmd, Oz_pv)
-    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS); // (V1_cmd, V2_cmd, V3_cmd)
+    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv)
+    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd)
 
     // Update ctl from trajectory_sp(t), orientation_sp(t)
     // TODO update x_sp, y_sp, o_sp
@@ -75,7 +76,7 @@ void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientati
 
     // Get the speeds transformed in the robot's reference frame
     // (V1_pv, V2_pv, V3_pv) => (Vx_pv, Vy_pv, Oz_pv)
-    mt_mv_mlt(&ctl->mat_sp_pods2rob, &spd_pv_pods, &spd_pv_rob);
+    mt_mv_mlt(&ctl->M_spds_pods2rob, &spd_pv_pods, &spd_pv_rob);
 
     // Compute new position and orientation from
     // (Vx_pv, Vy_pv, Oz_pv, x, y, o) => (x, y, o)
@@ -91,11 +92,12 @@ void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientati
 
     // Calculate speed set points for each pod
     // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
-    mt_mv_mlt(&ctl->mat_sp_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
+    mt_mv_mlt(&ctl->M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
 
     // call speed controller with V1_cmd, V2_cmd, V3_cmd
     for (i = 0; i < NB_PODS; i++) {
-        ctl->next_spd_cmds[i] = spdctl_update(&ctl->spd_ctls[i], spd_cmd_pods.ve[i]);
+        spdctl_update(&ctl->spd_ctls[i], spd_cmd_pods.ve[i]);
+        ctl->next_spd_cmds[i] = spdctl_get(&ctl->spd_ctls[i]);
     }
 }
 

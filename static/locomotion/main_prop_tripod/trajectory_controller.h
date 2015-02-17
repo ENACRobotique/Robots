@@ -36,17 +36,12 @@
  */
 #define NB_SPDS (3)
 
-typedef struct{
-    MT_MAT mat_sp_pods2rob;
-    MT_MAT mat_sp_rob2pods;
+typedef struct {
+    MT_MAT M_spds_pods2rob;
+    MT_MAT M_spds_rob2pods;
 
-    //// data for trajectory control
-    // Current value (process values)
-    int x, y;
-
-    //// data for orientation control
-    // Current value (process values)
-    int o;
+    // Last known status
+    int x, y, o;
 
     // PID
     PID_t pid_traj;
@@ -61,7 +56,7 @@ typedef struct{
     int next_spd_cmds[NB_PODS];
 } trajectory_controller_t;
 
-void trajctl_init(trajectory_controller_t* ctl, const int32_t mat_base[3][3]);
+void trajctl_init(trajectory_controller_t* ctl, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
 void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */);
 
 #endif /* TRAJECTORY_CONTROLLER_H_ */
