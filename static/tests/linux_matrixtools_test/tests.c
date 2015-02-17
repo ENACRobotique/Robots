@@ -8,15 +8,19 @@
 void test_linearsolve(){
 #define MAT_SHIFT (16)
 #define VEC_SHIFT (5)
+#define m_init(m, r, c) mt_m_init((m), (r), (c), MAT_SHIFT)
+#define M_INITS(r, c) MT_M_INITS((r), (c), MAT_SHIFT)
+#define v_init(v, e) mt_v_init((v), (e), VEC_SHIFT)
+#define V_INITS(e) MT_V_INITS((e), VEC_SHIFT)
 
     // containers initialization, via function call:  (internal call to malloc(), be sure to call mt_*_free() when done)
-    MT_MAT A;       mt_m_init(&A, 2, 2, MAT_SHIFT);
-    MT_MAT Am1;     mt_m_init(&Am1, 2, 2, MAT_SHIFT);
-    MT_VEC b;       mt_v_init(&b, 2, VEC_SHIFT);
+    MT_MAT A;       m_init(&A, 2, 2);
+    MT_MAT Am1;     m_init(&Am1, 2, 2);
+    MT_VEC b;       v_init(&b, 2);
     // or via constant initializer on stack:  (you don't need to call mt_*_free() on those objects but the memory where it points will be released at the end of this function)
-    MT_MAT AAm1   = MT_M_INITS(2, 2, MAT_SHIFT);
-    MT_VEC x      = MT_V_INITS(2, VEC_SHIFT);
-    MT_VEC res    = MT_V_INITS(2, VEC_SHIFT);
+    MT_MAT AAm1   = M_INITS(2, 2);
+    MT_VEC x      = V_INITS(2);
+    MT_VEC res    = V_INITS(2);
 
     printf("b  : %p\n", b.ve);
     printf("x  : %p\n", x.ve);
@@ -75,11 +79,17 @@ void test_linearsolve(){
 
 #undef MAT_SHIFT
 #undef VEC_SHIFT
+#undef m_init
+#undef M_INITS
+#undef v_init
+#undef V_INITS
 }
 
 void test_invmatrix() {
-#define MAT_SHIFT (24)
+#define MAT_SHIFT (16)
 #define dMSHIFT ((double)(1 << MAT_SHIFT))
+#define m_init(m, r, c) mt_m_init((m), (r), (c), MAT_SHIFT)
+#define M_INITS(r, c) MT_M_INITS((r), (c), MAT_SHIFT)
 
     const int32_t mat_rob2pods[3][3] = {
 	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
@@ -88,8 +98,8 @@ void test_invmatrix() {
 	};
 
 	// static allocation on stack matrices (no need to free those)
-	MT_MAT M_rob2pods = MT_M_INITS(3, 3, MAT_SHIFT);
-	MT_MAT M_pods2rob = MT_M_INITS(3, 3, MAT_SHIFT);
+	MT_MAT M_rob2pods = M_INITS(3, 3);
+	MT_MAT M_pods2rob = M_INITS(3, 3);
 
 	// init input matrix
 	for(int i = 0; i < 3; i++) {
@@ -106,6 +116,8 @@ void test_invmatrix() {
     mt_m_output(&M_pods2rob);
 
 #undef MAT_SHIFT
+#undef m_init
+#undef M_INITS
 }
 
 struct{
