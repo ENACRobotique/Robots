@@ -1,17 +1,17 @@
 /*
- * imatrix.h
+ * mt_mat.h
  *
  *  Created on: 15 févr. 2015
  *      Author: ludo6431
  */
 
-#ifndef MATRIXTOOLS_IMAT_H_
-#define MATRIXTOOLS_IMAT_H_
+#ifndef MT_MAT_H_
+#define MT_MAT_H_
 
-#include <mt_vec.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <alloca.h>
+
+#include "mt_vec.h"
 
 typedef struct {
     int32_t* me;
@@ -38,4 +38,4 @@ int  mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT);
 int  mt_m_inv(const MT_MAT* M, MT_MAT* OUT);
 void mt_m_free(MT_MAT* m);
 
-#endif /* MATRIXTOOLS_IMAT_H_ */
+#endif /* MT_MAT_H_ */

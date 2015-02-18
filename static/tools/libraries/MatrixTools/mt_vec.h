@@ -1,15 +1,14 @@
 /*
- * ivec.h
+ * mt_vec.h
  *
  *  Created on: 15 févr. 2015
  *      Author: ludo6431
  */
 
-#ifndef MATRIXTOOLS_IVEC_H_
-#define MATRIXTOOLS_IVEC_H_
+#ifndef MT_VEC_H
+#define MT_VEC_H
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <alloca.h>
 
 typedef struct {
@@ -27,7 +26,9 @@ typedef struct {
  */
 #define MT_V_INITS(elts, shift) {(int32_t*)alloca((elts)*sizeof(int32_t)), (elts), (shift), 1}
 
+#define MT_V_AT(v, e) (v)->ve[(e)]
+
 void mt_v_init(MT_VEC* v, uint16_t elts, uint8_t shift);
 void mt_v_free(MT_VEC* v);
 
-#endif /* MATRIXTOOLS_IVEC_H_ */
+#endif /* MT_VEC_H */

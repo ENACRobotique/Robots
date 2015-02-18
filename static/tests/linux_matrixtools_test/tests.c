@@ -1,17 +1,36 @@
-#include <mt_io.h>
-#include <mt_mat.h>
-#include <mt_vec.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
-void test_linearsolve(){
-#define MAT_SHIFT (16)
-#define VEC_SHIFT (5)
+#include "mt_io.h"
+#include "mt_mat.h"
+#include "mt_vec.h"
+
+#define M_PI (3.141592653589793)
+
+#define dMSHIFT ((double)(1 << MAT_SHIFT))
+#define dVSHIFT ((double)(1 << VEC_SHIFT))
 #define m_init(m, r, c) mt_m_init((m), (r), (c), MAT_SHIFT)
 #define M_INITS(r, c) MT_M_INITS((r), (c), MAT_SHIFT)
 #define v_init(v, e) mt_v_init((v), (e), VEC_SHIFT)
 #define V_INITS(e) MT_V_INITS((e), VEC_SHIFT)
+
+void test_machtypes(){
+    printf("sizeof(int)=%zu\n", sizeof(int));
+    printf("sizeof(long int)=%zu\n", sizeof(long int));
+    printf("sizeof(long long int)=%zu\n", sizeof(long long));
+    printf("sizeof(int*)=%zu\n", sizeof(int*));
+    printf("sizeof(MT_VEC)=%zu\n", sizeof(MT_VEC));
+    printf("sizeof(MT_MAT)=%zu\n", sizeof(MT_MAT));
+}
+
+void test_linearsolve(){
+#define MAT_SHIFT (16)
+#define VEC_SHIFT (16)
+
+	int ret;
 
     // containers initialization, via function call:  (internal call to malloc(), be sure to call mt_*_free() when done)
     MT_MAT A;       m_init(&A, 2, 2);
@@ -22,51 +41,53 @@ void test_linearsolve(){
     MT_VEC x      = V_INITS(2);
     MT_VEC res    = V_INITS(2);
 
-    printf("b  : %p\n", b.ve);
-    printf("x  : %p\n", x.ve);
-    printf("res: %p\n", res.ve);
-
-    printf("sizeof(int)=%lu\n", sizeof(int));
-    printf("sizeof(long int)=%lu\n", sizeof(long int));
-    printf("sizeof(long long int)=%lu\n", sizeof(long long));
-    printf("sizeof(int*)=%lu\n", sizeof(int*));
-    printf("sizeof(MT_VEC)=%lu\n", sizeof(MT_VEC));
+    printf("b  : %p (heap)\n", b.ve);
+    printf("x  : %p (stack)\n", x.ve);
+    printf("res: %p (stack)\n", res.ve);
 
     // problem initialization
-    MT_M_AT(&A, 0, 0) = 1<<MAT_SHIFT;
-    MT_M_AT(&A, 0, 1) = 2<<MAT_SHIFT;
-    MT_M_AT(&A, 1, 0) = 3<<MAT_SHIFT;
-    MT_M_AT(&A, 1, 1) = 4<<MAT_SHIFT;
+    MT_M_AT(&A, 0, 0) =  M_PI * dMSHIFT;
+    MT_M_AT(&A, 0, 1) = -2.   * dMSHIFT;
+    MT_M_AT(&A, 1, 0) =  3.   * dMSHIFT;
+    MT_M_AT(&A, 1, 1) =  1.5  * dMSHIFT;
 
     // inversion of A
-    mt_m_inv(&A, &Am1);
+    ret = mt_m_inv(&A, &Am1);
+    assert(!ret);
 
     // computes A*A^-1 to verify we get the identity
-    mt_mm_mlt(&A, &Am1, &AAm1);
+    ret = mt_mm_mlt(&A, &Am1, &AAm1);
+    assert(!ret);
 
-    printf("A:\n");
+    printf("A, ");
     mt_m_output(&A);
-    printf("A^-1:\n");
+    printf("A^-1, ");
     mt_m_output(&Am1);
-    printf("A*A^-1:\n");
+    printf("A*A^-1, ");
     mt_m_output(&AAm1);
 
-    b.ve[0] = 1<<VEC_SHIFT;
-    b.ve[1] = -2<<VEC_SHIFT;
+    MT_V_AT(&b, 0) =  1. * dVSHIFT;
+    MT_V_AT(&b, 1) = -2. * dVSHIFT;
 
     // calculation of A^-1 * b
-    mt_mv_mlt(&Am1, &b, &x);
+    ret = mt_mv_mlt(&Am1, &b, &x);
+    assert(!ret);
 
-    printf("b:\n");
+    printf("b, ");
     mt_v_output(&b);
-    printf("x:\n");
+    printf("x, ");
     mt_v_output(&x);
 
     // verification (calculates b - A*x)
-    mt_mv_mltadd(&b, -1<<VEC_SHIFT, &A, &x, &res);
+    ret = mt_mv_mltadd(&b, -1<<VEC_SHIFT, &A, &x, &res);
+    assert(!ret);
 
-    printf("residu:\n");
+    printf("residu, ");
     mt_v_output(&res);
+
+    // shift-independent check of precision (must be true for any shift)
+    assert(abs(res.ve[0]) <= 5); // error up to 5 LSB tolerated given the number of operations
+    assert(abs(res.ve[1]) <= 5);
 
     // free allocations
     mt_m_free(&A);
@@ -79,17 +100,10 @@ void test_linearsolve(){
 
 #undef MAT_SHIFT
 #undef VEC_SHIFT
-#undef m_init
-#undef M_INITS
-#undef v_init
-#undef V_INITS
 }
 
 void test_invmatrix() {
 #define MAT_SHIFT (16)
-#define dMSHIFT ((double)(1 << MAT_SHIFT))
-#define m_init(m, r, c) mt_m_init((m), (r), (c), MAT_SHIFT)
-#define M_INITS(r, c) MT_M_INITS((r), (c), MAT_SHIFT)
 
     const int32_t mat_rob2pods[3][3] = {
 	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
@@ -116,14 +130,13 @@ void test_invmatrix() {
     mt_m_output(&M_pods2rob);
 
 #undef MAT_SHIFT
-#undef m_init
-#undef M_INITS
 }
 
 struct{
     void (*f)();
     char* s;
 } tests[]={
+        {test_machtypes,   "Machine types"},
         {test_linearsolve, "Ax=b solutions (using explicit matrix inversion)"},
         {test_invmatrix,   "Matrix inversion"},
 };

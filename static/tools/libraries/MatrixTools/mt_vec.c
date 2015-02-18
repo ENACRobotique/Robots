@@ -1,11 +1,13 @@
 /*
- * ivec.c
+ * mt_vec.c
  *
  *  Created on: 15 févr. 2015
  *      Author: ludo6431
  */
 
-#include <mt_vec.h>
+#include <stdlib.h>
+
+#include "mt_vec.h"
 
 void mt_v_init(MT_VEC* v, uint16_t elts, uint8_t shift) {
     v->elts = elts;

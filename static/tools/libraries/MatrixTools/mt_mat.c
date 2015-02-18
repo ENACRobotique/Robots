@@ -1,12 +1,14 @@
 /*
- * imatrix.c
+ * mt_mat.c
  *
  *  Created on: 15 févr. 2015
  *      Author: ludo6431
  */
 
-#include <mt_mat.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+#include "mt_mat.h"
 
 #define MRC(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 #define M64(m, r, c) (int64_t)(MRC(m, r, c))
