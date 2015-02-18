@@ -1,12 +1,17 @@
+#include "tools.h"
+
 #include <math.h>
 #include <stdio.h>
 #include "math_ops.h"
 
-#include "tools.h"
-#include "obj_types.h"
+extern "C"{
+#include "millis.h"
+}
 
 #ifdef AS_STATS
+extern "C"{
 #include "millis.h"
+}
 #endif
 
 #define CHECK_LIMITS
@@ -45,7 +50,7 @@ sObs_t obs[]= {
 };
 
 #else
-sObs_t obs[] = {
+sObs_t obs[] ;/*= {
     // robots
     {{0., 0.}, 0., 1, 1},   //primary
     {{0., 0.}, R_ROBOT+12., 1, 1, 1},   //secondary
@@ -122,7 +127,7 @@ sObs_t obs[] = {
 
     // arrivée
     {{0. , 0.}, 0, 0, 1, 1} //51
-};
+};*/
 #endif
 // tangents between physical obstacles (17kiB)
 sTgts_t tgts[N][N];

@@ -74,6 +74,18 @@ typedef struct {
     sTrajEl_t *path;
 } sPath_t;
 
+typedef enum{
+    E_OBSPAIR_UNKNOWN,
+    E_OBSPAIR_0S_CONCENTRIC,
+    E_OBSPAIR_1S_LINE,
+    E_OBSPAIR_0S_SURROUNDS,
+    E_OBSPAIR_0S_SURROUNDED,
+    E_OBSPAIR_2S_INTERSECTION,
+    E_OBSPAIR_2S_POINT2CIRCLE,
+    E_OBSPAIR_2S_CIRCLE2POINT,
+    E_OBSPAIR_4S_FULL
+} _type;
+
 // a set of common tangents between two obstacles (from o1 to o2)
 typedef struct {
     sSeg_t s1;  // first external (clock wise / a)
@@ -83,17 +95,7 @@ typedef struct {
 
     sNum_t d; // distance between obstacles
 
-    enum{
-        E_OBSPAIR_UNKNOWN,
-        E_OBSPAIR_0S_CONCENTRIC,
-        E_OBSPAIR_1S_LINE,
-        E_OBSPAIR_0S_SURROUNDS,
-        E_OBSPAIR_0S_SURROUNDED,
-        E_OBSPAIR_2S_INTERSECTION,
-        E_OBSPAIR_2S_POINT2CIRCLE,
-        E_OBSPAIR_2S_CIRCLE2POINT,
-        E_OBSPAIR_4S_FULL
-    } type; // type of relation between those 2 obstacles
+    _type type; // type of relation between those 2 obstacles
 } sTgts_t;  // sizeof(sTgts_t)=72
 
 // an index of obstacle between 0:N-1

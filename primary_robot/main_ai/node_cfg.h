@@ -8,7 +8,6 @@
 #ifndef NODE_CFG_H_
 #define NODE_CFG_H_
 
-#include "network_cfg.h"
 
 #define MYADDRX 0 // ADDRX_DEBUG
 #define MYADDRI 0
@@ -30,6 +29,5 @@
 #define UART_READBYTE_TIMEOUT   100000  //in µs
 
 #define XBEE_UART_PATH "/dev/ttyUSB0"
-
 
 #endif /* NODE_CFG_H_ */
