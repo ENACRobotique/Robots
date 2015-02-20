@@ -20,6 +20,7 @@ extern "C"{
 #include <unistd.h>
 }
 
+unsigned int tid = 0; //the same tid is used by all path object
 
 Path::Path() : _dist(0), _path_len(0){
 }
@@ -52,7 +53,6 @@ void Path::clear(){
 void Path::sendRobot() {
     sMsg outMsg = { { 0 } };
     int ret;
-    static unsigned int tid = 0;
 
     length(); //compute _dist, arc_len and seg_len //TODO check length between compute and save to the path.
     _path_len = _path.size();
