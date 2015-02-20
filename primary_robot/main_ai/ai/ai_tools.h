@@ -11,7 +11,6 @@
 #include <ai_types.h>
 #include <time_tools.h>
 
-void send_robot(sPath_t path);
 //void printServoPos(eServoPos_t *pos);
 void printListObj(void);
 void printObsActive(void);

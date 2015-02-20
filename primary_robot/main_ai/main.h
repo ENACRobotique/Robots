@@ -21,6 +21,7 @@ extern "C"{
 
 #include "a_star.h"
 #include <ai_types.h>
+#include "path.h"
 
 extern sPath_t curr_path;
 extern int curr_traj_extract_sid;

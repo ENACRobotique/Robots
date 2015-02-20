@@ -83,37 +83,7 @@ void loadingPath(sPath_t _path, int num) {
     obs_updated[N - 1]++;
 }
 
-/*
- * Generate a new path with a obstacle list
- */
-void set_traj(sPath_t *p, iABObs_t l[], int nb) {
-    int i;
-    p->path = (sTrajEl_t *) calloc(nb - 1, sizeof(sTrajEl_t));
-    p->path_len = nb - 1;
-    // p->dist // TODO
-    // p->path_len // TODO
 
-    for (i = 0; i < nb - 1; i++) {
-        sSeg_t *s = tgt(l[i], l[i + 1]);
-
-        p->path[i].p1 = s->p1;
-        p->path[i].p2 = s->p2;
-        distPt2Pt(&s->p1, &s->p2, &p->path[i].seg_len);
-
-        p->path[i].obs.active = 1;
-        p->path[i].obs.c = obs[O(l[i + 1])].c;
-        p->path[i].obs.moved = 1;
-        p->path[i].obs.r = fabs(obs[O(l[i + 1])].r) * (1 - 2 * DIR(l[i + 1]));
-        if (i == nb - 1) {
-            p->path[i].arc_len = 0.;
-        }
-        else {
-            p->path[i].arc_len = arc_len(l[i], l[i + 1], l[i + 2]);
-        }
-
-        p->path[i].sid = i;
-    }
-}
 
 int same_obs(sObs_t *obs1, sObs_t *obs2) {
     printf("r1=%f r2=%f\n", obs1->r, obs2->r);

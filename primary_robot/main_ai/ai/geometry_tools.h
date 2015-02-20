@@ -10,6 +10,7 @@
 
 #include "tools.h"
 
+#include "path.h"
 
 void TransPt(sPt_t *traj, int x, int y);
 void Rot90Pt(sPt_t *traj);

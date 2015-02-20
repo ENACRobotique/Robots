@@ -3,6 +3,7 @@
 
 #include <main.h>
 #include "math_types.h"
+#include "path.h"
 #include "tools.h"
 extern "C"{
 #include <stdint.h>

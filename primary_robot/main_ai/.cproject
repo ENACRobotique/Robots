@@ -37,7 +37,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet/shared}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.264938753" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.dialect.flags.479678067" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" value="-fpermissive" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.dialect.flags.479678067" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" value="-fpermissive -std=c++0x" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1665888784" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.326899352" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">

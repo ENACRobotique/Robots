@@ -8,6 +8,7 @@
 #include <path.h>
 
 #include <cmath>
+#include <iostream>
 #include "tools.h"
 #include "main.h"
 #include "math_ops.h"
@@ -17,180 +18,145 @@
 extern "C"{
 #include "roles.h"
 #include <unistd.h>
-
 }
 
-Path::Path() {
-    // TODO Auto-generated constructor stub
 
+Path::Path() : _dist(0), _path_len(0){
+}
+
+Path::Path(vector <sTrajEl_t*> list) : _dist(0), _path_len(list.size()), _path(list){
 }
 
 Path::~Path() {
     // TODO Auto-generated destructor stub
 }
 
+void Path::clear(){
+    _dist = 0;
+    _path_len = 0 ;
+
+    //for(sTrajEl_t* i : _path){
+    for(unsigned int i ; i < _path.size() ; i++){
+        delete _path[i];
+    }
+
+    _path.clear();
+}
+
+
 /*
  * Send the path to the robot.
+ * Every parameter that can be calculated automatically, the calculation is performed.
  * Try to send MAX_RETRIES if failed.
  */
-
 void Path::sendRobot() {
     sMsg outMsg = { { 0 } };
     int ret;
+    static unsigned int tid = 0;
 
-    last_tid++;
+    length(); //compute _dist, arc_len and seg_len //TODO check length between compute and save to the path.
+    _path_len = _path.size();
 
-    if (_path.path)
-        for (unsigned int i = 0; i < _path.path_len; i++) {
-            printf("  %u: p1 x%f y%f, p2 x%f y%f, obs x%f y%f r%.2f, a_l%f s_l%f\n", i, _path.path[i].p1.x, _path.path[i].p1.y, _path.path[i].p2.x, _path.path[i].p2.y, _path.path[i].obs.c.x, _path.path[i].obs.c.y, _path.path[i].obs.r, _path.path[i].arc_len, _path.path[i].seg_len);
+    tid++;
+
+    if (!_path.empty()){
+        for (unsigned int i = 0; i < _path_len; i++) {
+            printElTraj(i);
 
             outMsg.header.type = E_TRAJ;
             outMsg.header.size = sizeof(outMsg.payload.traj);
 
-            outMsg.payload.traj.p1_x = _path.path[i].p1.x;
-            outMsg.payload.traj.p1_y = _path.path[i].p1.y;
-            outMsg.payload.traj.p2_x = _path.path[i].p2.x;
-            outMsg.payload.traj.p2_y = _path.path[i].p2.y;
-            outMsg.payload.traj.seg_len = _path.path[i].seg_len;
+            outMsg.payload.traj.p1_x = _path[i]->p1.x;
+            outMsg.payload.traj.p1_y = _path[i]->p1.y;
+            outMsg.payload.traj.p2_x = _path[i]->p2.x;
+            outMsg.payload.traj.p2_y = _path[i]->p2.y;
+            outMsg.payload.traj.seg_len = _path[i]->seg_len;
 
-            outMsg.payload.traj.c_x = _path.path[i].obs.c.x;
-            outMsg.payload.traj.c_y = _path.path[i].obs.c.y;
-            outMsg.payload.traj.c_r = _path.path[i].obs.r;
-            outMsg.payload.traj.arc_len = _path.path[i].arc_len;
+            outMsg.payload.traj.c_x = _path[i]->obs.c.x;
+            outMsg.payload.traj.c_y = _path[i]->obs.c.y;
+            outMsg.payload.traj.c_r = _path[i]->obs.r;
+            outMsg.payload.traj.arc_len = _path[i]->arc_len;
 
             outMsg.payload.traj.sid = i;
-            outMsg.payload.traj.tid = last_tid;
+            outMsg.payload.traj.tid = tid;
 
             if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                printf("role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+                printf("Error [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
             }
 
             usleep(1000);
         }
+    }
 }
 
 void Path::stopRobot() {
-    sTrajEl_t traj = { { obs[0].c.x, obs[0].c.y }, { obs[0].c.x, obs[0].c.y }, { { obs[0].c.x, obs[0].c.y }, 0, 0, 1 }, 0, 0, 0 };
+    sTrajEl_t *traj = new sTrajEl_t{ { obs[0].c.x, obs[0].c.y }, { obs[0].c.x, obs[0].c.y }, { { obs[0].c.x, obs[0].c.y }, 0, 0, 1 }, 0, 0, 0 }; //TODO used get generic status
 
-    _path.path = &traj;
-    _path.path_len = 1;
+    clear();
+
+    _path.push_back(traj);
 
     sendRobot();
 }
 
-int Path::sendSeg(const sPt_t *p, const sVec_t *v) { //the robot goes directly to the point or the vector
-    sPath_t path;
-    sTrajEl_t t = { { 0 } };
 
-    if (((p == NULL) && (v == NULL)) || ((p != NULL) && (v != NULL))) {
-        return -1;
-    }
+/*
+ * The robot go to the destination point.
+ * "f" to force the robot to go, even if the destination point is in obstacle.
+ */
+void Path::go2Point(const sPt_t &robot, const sPt_t &dest, const bool f){
+    clear();
 
-    if (p != NULL) {
-        t.p1 = obs[0].c;
-        t.p2 = *p;
-        distPt2Pt(&t.p1, &t.p2, &t.seg_len);
+    sTrajEl_t *traj = new sTrajEl_t;
 
-        t.obs.c = t.p2;
-        t.obs.r = 0.;
-        t.arc_len = 0.;
-        t.sid = 0;
-    }
+    traj->p1 = robot; //TODO used get generic status
+    traj->p2 = dest;
+    traj->obs = {{0., 0.}, 0. ,0 ,0 ,0};
 
-    if (v != NULL) {
-        t.p1 = obs[0].c;
-        t.p2.x = t.p1.x + v->x;
-        t.p2.y = t.p1.y + v->y;
-        distPt2Pt(&t.p1, &t.p2, &t.seg_len);
+    _path.push_back(traj);
 
-        t.obs.c = t.p2;
-        t.obs.r = 0.;
-        t.arc_len = 0.;
-        t.sid = 0;
-    }
-
-    _path.path = &t;
-    _path.path_len = 1;
     sendRobot();
-
-    return 1;
 }
 
 
-void followProg(){
-    sGenericStatus *stPr = getLastPGStatus(ELT_PRIMARY);
-    sPt_t ptPr;
-    sGenericStatus *stAPr = getLastPGStatus(ELT_ADV_PRIMARY);
-    sPt_t ptAPr;
-    sGenericStatus *stASc = getLastPGStatus(ELT_ADV_SECONDARY);
-    sPt_t ptASc;
-    sNum_t d, dot;
-    sVec_t v1, v2;
-    int contact = 0;
+void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tableau statique
+    clear();
 
-    if (stPr) {
-        ptPr.x = stPr->prop_status.pos.x;
-        ptPr.y = stPr->prop_status.pos.y;
 
-        if (stAPr) {
-            ptAPr.x = stAPr->prop_status.pos.x;
-            ptAPr.y = stAPr->prop_status.pos.y;
+   //copier _obs dans obs
 
-            distPt2Pt(&ptPr, &ptAPr, &d);
-            v1.x = cos(stPr->prop_status.pos.theta);
-            v1.y = sin(stPr->prop_status.pos.theta);
-            convPts2Vec(&ptPr, &ptAPr, &v2);
-            dotVecs(&v1, &v2, &dot);
+    for (unsigned int i = 0; i < l.size()-1; i++) {
+        sTrajEl_t* el = new sTrajEl_t;
 
-            if (d < 50 && dot > 0.6 * d) {
-                printf("CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
-                contact = 1;
-            }
-        }
+        sSeg_t *s = tgt(l[i], l[i + 1]);
 
-        if (stASc) {
-            ptASc.x = stASc->prop_status.pos.x;
-            ptASc.y = stASc->prop_status.pos.y;
+        el->p1 = s->p1;
+        el->p2 = s->p2;
+        el->obs.active = 1;
+        el->obs.c = obs[O(l[i + 1])].c;
+        el->obs.moved = 1;
+        el->obs.r = fabs(obs[O(l[i + 1])].r) * (1 - 2 * DIR(l[i + 1]));
 
-            distPt2Pt(&ptPr, &ptASc, &d);
-            v1.x = cos(stPr->prop_status.pos.theta);
-            v1.y = sin(stPr->prop_status.pos.theta);
-            convPts2Vec(&ptPr, &ptASc, &v2);
-            dotVecs(&v1, &v2, &dot);
-
-            if (d < 40 && dot > 0.6 * d) {
-                printf("CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
-                contact = 1;
-            }
-        }
-
-        if (contact) {
-            sMsg outMsg = { { 0 } };
-
-            outMsg.header.type = E_TRAJ;
-            outMsg.header.size = sizeof(outMsg.payload.traj);
-            outMsg.payload.traj.p1_x = ptPr.x;
-            outMsg.payload.traj.p1_y = ptPr.y;
-            outMsg.payload.traj.p2_x = ptPr.x;
-            outMsg.payload.traj.p2_y = ptPr.y;
-            outMsg.payload.traj.seg_len = 0.;
-
-            outMsg.payload.traj.c_x = ptPr.x;
-            outMsg.payload.traj.c_y = ptPr.y;
-            outMsg.payload.traj.c_r = 0.;
-            outMsg.payload.traj.arc_len = 0.;
-
-            outMsg.payload.traj.sid = 0;
-            outMsg.payload.traj.tid = ++last_tid;
-
-            role_sendRetry(&outMsg, MAX_RETRIES);
-        }
+        _path.push_back(el);
     }
+
+    sendRobot();
 }
 
-sNum_t seg_len(sPt_t *p1, sPt_t *p2) {
-    return sqrt(fabs(p1->x - p2->x) * fabs(p1->x - p2->x) + fabs(p1->y - p2->y) * fabs(p1->y - p2->y));
+/*
+ * Print to the display the trajectory element choose.
+ */
+void const Path::printElTraj(const unsigned int num){
+
+    if(_path.size() > num)
+        cout << "El " << num << " : p1 x" << _path[num]->p1.x << " p1 y" << _path[num]->p1.y
+                             << " ; p2 x" << _path[num]->p2.x << " p2 y" << _path[num]->p2.y
+                             << " ; obs x" << _path[num]->obs.c.x << " y" << _path[num]->obs.c.y << " r" << _path[num]->obs.r
+                             << " ; a_l" << _path[num]->arc_len << " s_l" << _path[num]->seg_len
+                             << endl;
 }
+
+
 
 sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t ori, sPt_t *p2_3) {
     sVec_t v1, v3;
@@ -233,21 +199,33 @@ sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t ori, sPt_t *p2_3) {
     return fabs(d * ori);
 }
 
-void path_len(sTrajEl_t tab[], int size) {  //FIXME last traj with leng seg
-    int i;
 
-    for (i = 0; i < size - 1; i++) {
-        tab[i].arc_len = arc_len2(&(tab[i].p2), &tab[i].obs.c, tab[i].obs.r, &(tab[i + 1].p1));
-        tab[i].seg_len = seg_len(&(tab[i].p1), &(tab[i].p2));
+
+/*
+ * Return the total length path
+ */
+sNum_t Path::length(){
+
+    setPathLength();
+
+    for (unsigned int i = 0; i < _path_len; i++) {
+        _dist += _path[i]->seg_len + _path[i]->arc_len;
     }
-    tab[size - 1].arc_len = 0;
+    return _dist;
 }
 
-sNum_t distPath(sPath_t *path) {
-    int i;
-    sNum_t dist = 0;
-    for (i = 0; i < path->path_len; i++) {
-        dist += path->path->seg_len + path->path->arc_len;
+
+/*
+ * Compute the length of each path elements and set the total length of the final path from the list of trajectories elements.
+ * Be careful, the path must be respect the standards. Especially, the arc_len of the last path element should be null.
+ */
+void Path::setPathLength() {
+
+    for (unsigned int i = 0; i < _path.size() - 1; i++) {
+        _path[i]->arc_len = arc_len2(&(_path[i]->p2), &(_path[i]->obs.c), _path[i]->obs.r, &(_path[i+1]->p1));
+        distPt2Pt(&_path[i]->p1, &_path[i]->p2, &_path[i]->seg_len );
     }
-    return dist;
+
+    _path[_path.size() - 1]->arc_len = 0;
+    distPt2Pt(&_path[_path.size() - 1]->p1, &_path[_path.size() - 1]->p2, &_path[_path.size() - 1]->seg_len);
 }

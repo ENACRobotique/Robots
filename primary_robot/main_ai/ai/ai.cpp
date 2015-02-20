@@ -37,7 +37,76 @@ int mode_obj=0;
 Path path_;
 
 
+void colissionDetection(){
+    sGenericStatus *stPr = getLastPGStatus(ELT_PRIMARY);
+    sPt_t ptPr;
+    sGenericStatus *stAPr = getLastPGStatus(ELT_ADV_PRIMARY);
+    sPt_t ptAPr;
+    sGenericStatus *stASc = getLastPGStatus(ELT_ADV_SECONDARY);
+    sPt_t ptASc;
+    sNum_t d, dot;
+    sVec_t v1, v2;
+    int contact = 0;
 
+    if (stPr) {
+        ptPr.x = stPr->prop_status.pos.x;
+        ptPr.y = stPr->prop_status.pos.y;
+
+        if (stAPr) {
+            ptAPr.x = stAPr->prop_status.pos.x;
+            ptAPr.y = stAPr->prop_status.pos.y;
+
+            distPt2Pt(&ptPr, &ptAPr, &d);
+            v1.x = cos(stPr->prop_status.pos.theta);
+            v1.y = sin(stPr->prop_status.pos.theta);
+            convPts2Vec(&ptPr, &ptAPr, &v2);
+            dotVecs(&v1, &v2, &dot);
+
+            if (d < 50 && dot > 0.6 * d) {
+                printf("CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
+                contact = 1;
+            }
+        }
+
+        if (stASc) {
+            ptASc.x = stASc->prop_status.pos.x;
+            ptASc.y = stASc->prop_status.pos.y;
+
+            distPt2Pt(&ptPr, &ptASc, &d);
+            v1.x = cos(stPr->prop_status.pos.theta);
+            v1.y = sin(stPr->prop_status.pos.theta);
+            convPts2Vec(&ptPr, &ptASc, &v2);
+            dotVecs(&v1, &v2, &dot);
+
+            if (d < 40 && dot > 0.6 * d) {
+                printf("CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
+                contact = 1;
+            }
+        }
+
+        if (contact) {
+            sMsg outMsg = { { 0 } };
+
+            outMsg.header.type = E_TRAJ;
+            outMsg.header.size = sizeof(outMsg.payload.traj);
+            outMsg.payload.traj.p1_x = ptPr.x;
+            outMsg.payload.traj.p1_y = ptPr.y;
+            outMsg.payload.traj.p2_x = ptPr.x;
+            outMsg.payload.traj.p2_y = ptPr.y;
+            outMsg.payload.traj.seg_len = 0.;
+
+            outMsg.payload.traj.c_x = ptPr.x;
+            outMsg.payload.traj.c_y = ptPr.y;
+            outMsg.payload.traj.c_r = 0.;
+            outMsg.payload.traj.arc_len = 0.;
+
+            outMsg.payload.traj.sid = 0;
+            outMsg.payload.traj.tid = ++last_tid;
+
+            role_sendRetry(&outMsg, MAX_RETRIES);
+        }
+    }
+}
 
 
 void obj_step(eAIState_t AIState) {
@@ -115,50 +184,48 @@ void obj_step(eAIState_t AIState) {
                 state = SHUT_DOWN;
 
             if (AIState == E_AI_PROG) {
-                followProg();
             }
 
-            else
-                if (AIState == E_AI_AUTO) {
-                    //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
-                    /*           temp=0;
-                     for(j=0 ; j<NB_OBJ ; j++){
-                     if(listObj[j].active==0) temp++;
-                     }
-                     if(temp==NB_OBJ) state = SHUT_DOWN;
-                     */
-                    //Calculation of the next objective
-                    if ((((millis() - last_time) > 1000) && (mode_obj == 0))) {
-                        printf("[INFO] obs[0] suivi par next_obj(): x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
-                        last_time = millis();
+            else if (AIState == E_AI_AUTO) {
+                //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
+                /*           temp=0;
+                 for(j=0 ; j<NB_OBJ ; j++){
+                 if(listObj[j].active==0) temp++;
+                 }
+                 if(temp==NB_OBJ) state = SHUT_DOWN;
+                 */
+                //Calculation of the next objective
+                if ((((millis() - last_time) > 1000) && (mode_obj == 0))) {
+                    printf("[INFO] obs[0] suivi par next_obj(): x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
+                    last_time = millis();
 
-                        if ((obj = next_obj()) != -1) {
-                            current_obj = obj;
-                            if (checkCurrentPathLenght(path) == 0 || checkRobotBlock() == 1) {
-                                path_.sendRobot(); //FIXME send path
-                            }
+                    if ((obj = next_obj()) != -1) {
+                        current_obj = obj;
+                        if (checkCurrentPathLenght(path) == 0 || checkRobotBlock() == 1) {
+                            path_.sendRobot(); //FIXME send path
                         }
                     }
-
-                    //Update position
-                    if ((millis() - _start_time) > 2000) {
-                        // simuSecondary();
-                    }
-
-                    posPrimary();
-                    //checkRobot2Obj();
-                    checkRobotBlock();
-
-                    if ((millis() - last_time2) > 1000) {
-                        last_time2 = millis();
-                        //  updateEntryPointTree();
-                        printf("Position actuel : x=%f et y=%f\n", _current_pos.x, _current_pos.y);
-                        printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x, pt_select.y, fabs(pt_select.x - _current_pos.x), fabs(pt_select.y - _current_pos.y));
-                    }
                 }
-                else {
-                    cerr << "[ERROR] [ai.cpp] Error : Unknown AI state" << endl;
+
+                //Update position
+                if ((millis() - _start_time) > 2000) {
+                    // simuSecondary();
                 }
+
+                posPrimary();
+                //checkRobot2Obj();
+                checkRobotBlock();
+
+                if ((millis() - last_time2) > 1000) {
+                    last_time2 = millis();
+                    //  updateEntryPointTree();
+                    printf("Position actuel : x=%f et y=%f\n", _current_pos.x, _current_pos.y);
+                    printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x, pt_select.y, fabs(pt_select.x - _current_pos.x), fabs(pt_select.y - _current_pos.y));
+                }
+            }
+            else {
+                cerr << "[ERROR] [ai.cpp] Error : Unknown AI state" << endl;
+            }
 
             //If the select point is achieved
             if (((fabs(pt_select.x - _current_pos.x) < RESO_POS && fabs(pt_select.y - _current_pos.y) < RESO_POS)) || mode_obj == 1) { //objectif atteint
