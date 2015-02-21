@@ -17,8 +17,8 @@ using namespace std;
 
 class Obj {
     public:
-        Obj();
-        Obj(eObj_t type, vector<unsigned int> numObs, vector<sObjPt_t> entryPoint);
+        Obj(eObj_t type);
+        Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjPt_t> &entryPoint);
         virtual ~Obj();
 
         virtual void initObj(){};
@@ -29,20 +29,15 @@ class Obj {
 
 
         //TODO fonction update dist and path and time
-        sNum_t updateDistance(sPt_t pos); //Computing the shortest distance between the position of the robot and the entered items //TODO Considering the orientation of the robot
+        sNum_t update(sPt_t posRobot);
         void updateTime() {_time = _dist / SPEED;};
         sPath_t path() {
             return _path;
         }
         ;
-        sObjPt_t entryPoint(int num) {
-            return _entryPoint[num];
-        }
-        ;
-        int EP() {
-            return _EP;
-        }
-        ;
+        sObjPt_t entryPoint(int num) {return _entryPoint[num];};
+        int EP() {return _EP;};
+        sPt_t destPoint();
 
         bool active() {
             return _active;
@@ -50,7 +45,7 @@ class Obj {
         ;
         sNum_t value();
 
-    private:
+    protected:
         eObj_t _type;                       //objective type
         eStateObj_t _state;                 //if the objective is used or not //TODO group with probability
         vector<unsigned int> _numObs;       //obstacle number associate to the objective

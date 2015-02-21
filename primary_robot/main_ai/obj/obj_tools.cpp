@@ -28,8 +28,8 @@ using namespace std;
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
     int i;
     for (i = 1; i < 4; i++) {
-        obs[N - i - 1].c.x = pt->x + (r) * cos(theta * M_PI / 180 + i * M_PI_2);
-        obs[N - i - 1].c.y = pt->y + (r) * sin(theta * M_PI / 180 + i * M_PI_2);
+        obs[N - i - 1].c.x = pt->x + (r) * cos(theta + i * M_PI_2);
+        obs[N - i - 1].c.y = pt->y + (r) * sin(theta + i * M_PI_2);
         obs[N - i - 1].active = 1;
         obs[N - i - 1].r = r - 0.5;
     }
@@ -69,7 +69,7 @@ void loadingPath(sPath_t _path, int num) {
     path = _path;
 
 #ifdef NON_HOLONOMIC
-    if (num > 0) {
+    if (num >= 0) {
         sObjPt_t _ep = listObj[num]->entryPoint(listObj[num]->EP());
         updateEndTraj(_ep.angleEP, &_ep.c, _ep.radiusEP);
         printEndTraj();
@@ -78,9 +78,9 @@ void loadingPath(sPath_t _path, int num) {
         printf("Error with the second parameter in loadingPath\n");
 #endif
 
-    pt_select = _path.path[_path.path_len - 1].p2;
-    obs[N - 1].c = pt_select;
-    obs_updated[N - 1]++;
+   // pt_select = _path.path[_path.path_len - 1].p2;
+   // obs[N - 1].c = pt_select;
+   // obs_updated[N - 1]++;
 }
 
 
@@ -141,7 +141,7 @@ int next_obj(void) {
     sNum_t tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
 
-    printf("Start next_obj()\n");
+    cout << "[INFO] [obj_tools.cpp] Start next_obj()" << endl;
 
     obs[N - 1].active = 1;
 
@@ -153,9 +153,9 @@ int next_obj(void) {
         //printObsActive();
 #endif
 
-        if (listObj[i]->updateDistance(_current_pos) < 0) {
+        if (listObj[i]->update(_current_pos) < 0) {
 #if DEBUG
-            printf("No find path to achieve the objective for objective n°%d\n\n", i);
+            printf("[INFO] [obj_tools.cpp] No find path to achieve the objective for objective n°%d\n\n", i);
 #endif
             continue;
         }
@@ -172,7 +172,13 @@ int next_obj(void) {
     }
 
     if (tmp_inx >= 0) { //Update end of trajectory
+#ifdef NON_HOLONOMIC
+        loadingPath(listObj[tmp_inx]->path(), tmp_inx);
+#else
         loadingPath(listObj[tmp_inx]->path());
+#endif
+        obs[N - 1].c = listObj[tmp_inx]->destPoint();
+        obs_updated[N - 1]++;
     }
 
 #if DEBUG
@@ -187,20 +193,23 @@ int next_obj(void) {
 
 int metObj(int numObj){
     static bool first = true;
-    int ret;
 
-     if(first){
-         listObj[numObj]->initObj();
-         first = false;
-     }
-     if( (ret = listObj[numObj]->loopObj()) == -1){
-         cerr << "[Error] [obj_tools.cpp] Bad class" << endl;
-         return -1;
-     }
-     if(ret == 0){ //0 finished
-         first = true;
-         return 0;
-     }
+    if(numObj < 0 || numObj > (int) listObj.size()){
+        cerr << "[ERROR] [obj_tools.cpp] metObj, bad numObj=" << numObj << endl;
+        return -1;
+    }
+
+    if(first){
+        listObj[numObj]->initObj();
+        first = false;
+        cout << "[INFO] [obj_tools.cpp] Starting objective number : " << numObj << endl;
+    }else{
+        if(listObj[numObj]->loopObj() == 0){ //0 finished
+            first = true;
+            cout << "[INFO] [obj_tools.cpp] Ending objective number : " << numObj << endl;
+            return 0;
+        }
+    }
 
     return 1;
 }

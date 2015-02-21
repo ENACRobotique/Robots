@@ -81,7 +81,7 @@ void Path::sendRobot() {
             outMsg.payload.traj.tid = tid;
 
             if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                printf("Error [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+                printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
             }
 
             usleep(1000);
@@ -109,7 +109,7 @@ void Path::go2Point(const sPt_t &robot, const sPt_t &dest, const bool f){
 
     sTrajEl_t *traj = new sTrajEl_t;
 
-    traj->p1 = robot; //TODO used get generic status
+    traj->p1 = robot;
     traj->p2 = dest;
     traj->obs = {{0., 0.}, 0. ,0 ,0 ,0};
 
@@ -213,6 +213,23 @@ sNum_t Path::length(){
     }
     return _dist;
 }
+
+void Path::addPath(vector <sTrajEl_t*> list){
+    clear();
+
+    for(unsigned int i = 0 ; i < list.size() ; i++){
+        _path.push_back(list[i]);
+    }
+}
+
+void Path::addPath2(sPath_t &path){
+    clear();
+
+    for(unsigned int i = 0 ; i < path.path_len ; i++){
+        _path.push_back(&path.path[i]);
+    }
+}
+
 
 
 /*

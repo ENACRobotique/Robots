@@ -18,7 +18,6 @@ sNum_t theta_robot = 0.;
 int starting_cord = 0;
 int mode_switch = 0;
 eColor_t color;
-int current_obj = -1;
 
 sPath_t path ;
 uint8_t obs_updated[N] ;

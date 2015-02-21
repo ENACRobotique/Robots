@@ -16,13 +16,16 @@ using namespace std;
 
 class Clap : public Obj{
     public:
-        Clap();
+        Clap(const unsigned int num);
         virtual ~Clap();
 
         void initObj(){};
-        int loopObj(){return 1;};
+        int loopObj();
         eObj_t type() const {return E_CLAP;};
         float gain(){return 1;};
+
+    private :
+        unsigned int _num;
 
 };
 

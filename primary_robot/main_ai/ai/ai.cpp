@@ -32,7 +32,6 @@ std::vector<Obj*> listObj;
 estate_t state = COLOR_SELECTION;
 sWaitPos waiting_pos;
 unsigned int last_time2 = -1;
-int mode_obj=0;
 
 Path path_;
 
@@ -110,8 +109,10 @@ void colissionDetection(){
 
 
 void obj_step(eAIState_t AIState) {
-    int obj = -1;
-
+    //int obj = -1;
+    static bool mode_obj = false;
+    static int current_obj = -1;
+    sPath_t path_loc;
 
     switch (state) {
         case COLOR_SELECTION: //Choose the color and take off the starting cord
@@ -180,61 +181,66 @@ void obj_step(eAIState_t AIState) {
             break;
 
         case GAME: //Let's go
-            if (millis() - _start_time > END_MATCH)
+            if (millis() - _start_time > END_MATCH){
                 state = SHUT_DOWN;
-
-            if (AIState == E_AI_PROG) {
+                break;
             }
 
-            else if (AIState == E_AI_AUTO) {
-                //Test si tous objectif sont fini, temporaire pour eviter spam à la fin
-                /*           temp=0;
-                 for(j=0 ; j<NB_OBJ ; j++){
-                 if(listObj[j].active==0) temp++;
-                 }
-                 if(temp==NB_OBJ) state = SHUT_DOWN;
-                 */
+            if (!mode_obj) {
+                //Test if all objective have finished
+                if(listObj.empty()){
+                    cout << "[INFO] [ai.cpp] Objective list is empty" << endl;
+                    state = SHUT_DOWN; //FIXME waitting other objective
+                    break;
+                }
+
                 //Calculation of the next objective
-                if ((((millis() - last_time) > 1000) && (mode_obj == 0))) {
-                    printf("[INFO] obs[0] suivi par next_obj(): x=%f & y=%f\n", obs[0].c.x, obs[0].c.y);
+                if ((millis() - last_time) > 1000) {
+                    cout << "[INFO] [ai.cpp] obs[0] suivi par next_obj(): x=" << obs[0].c.x << " & y=" << obs[0].c.y << endl;
                     last_time = millis();
 
-                    if ((obj = next_obj()) != -1) {
-                        current_obj = obj;
-                        if (checkCurrentPathLenght(path) == 0 || checkRobotBlock() == 1) {
-                            path_.sendRobot(); //FIXME send path
-                        }
+                    if ((current_obj = next_obj()) != -1) {
+                        //if (checkCurrentPathLenght(path) == 0 || checkRobotBlock() == 1) { //TODO in path class
+#ifdef NON_HOLONOMIC
+                  /*      int k = listObj[current_obj]->_EP;
+                        sObjPt_t ep = listObj[current_obj]->entryPoint(k);
+                        updateEndTraj(ep.angleEP,  &ep.c, ep.radiusEP);
+                        printEndTraj();*/
+#endif
+                        pt_select = listObj[current_obj]->destPoint();
+
+
+                        path_loc = listObj[current_obj]->path();
+                        path_.addPath2(path_loc);
+                        path_.sendRobot();
                     }
                 }
 
-                //Update position
-                if ((millis() - _start_time) > 2000) {
-                    // simuSecondary();
-                }
-
-                posPrimary();
-                //checkRobot2Obj();
-                checkRobotBlock();
-
-                if ((millis() - last_time2) > 1000) {
-                    last_time2 = millis();
-                    //  updateEntryPointTree();
-                    printf("Position actuel : x=%f et y=%f\n", _current_pos.x, _current_pos.y);
-                    printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x, pt_select.y, fabs(pt_select.x - _current_pos.x), fabs(pt_select.y - _current_pos.y));
+                //Test is the robot is on the entry point selected
+                if ( (fabs(pt_select.x - _current_pos.x) < RESO_POS && fabs(pt_select.y - _current_pos.y) < RESO_POS) && (current_obj != -1) ){
+                    mode_obj = true;
                 }
             }
-            else {
-                cerr << "[ERROR] [ai.cpp] Error : Unknown AI state" << endl;
-            }
-
-            //If the select point is achieved
-            if (((fabs(pt_select.x - _current_pos.x) < RESO_POS && fabs(pt_select.y - _current_pos.y) < RESO_POS)) || mode_obj == 1) { //objectif atteint
-                //printf("(listObj[current_obj]).type=%d et curent_obj=%d, mode_obj=%d\n",(listObj[current_obj]).type, current_obj, mode_obj);
-                //printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x,pt_select.y, fabs(pt_select.x-_current_pos.x),fabs(pt_select.y-_current_pos.y));
-                //printf("mode_obj=%d", mode_obj);
+            else{
                 if (metObj(current_obj) == 0){
-                    mode_obj = 0;
+                    mode_obj = false;
                 }
+            }
+
+            //Update position
+            if ((millis() - _start_time) > 2000) {
+                // simuSecondary();
+            }
+
+            obs_updated[4]++;
+            posPrimary();
+            //checkRobot2Obj();
+            checkRobotBlock();
+
+            if ((millis() - last_time2) > 1000) {
+                last_time2 = millis();
+                printf("Position actuel : x=%f et y=%f\n", _current_pos.x, _current_pos.y);
+                printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x, pt_select.y, fabs(pt_select.x - _current_pos.x), fabs(pt_select.y - _current_pos.y));
             }
 
             break;
@@ -245,14 +251,18 @@ void obj_step(eAIState_t AIState) {
             return;
             break;
         default:
+            cerr << "[ERROR] [ai.cpp] Unknown state=" << state << endl;
             break;
     }
 }
 
 int obj_init(eAIState_t AIState) {
+    Path path;
 
-    listObj.push_back(new Clap);
-    listObj.push_back(new Clap);
+    //path.go2Point(obs[0].c, {100, 100}, true);
+
+    listObj.push_back(new Clap(1));
+    listObj.push_back(new Clap(2));
 
     return 0;
 }

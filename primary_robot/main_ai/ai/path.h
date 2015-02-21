@@ -59,6 +59,7 @@ class Path {
         //Set methods
         sNum_t length();
         void addPath(vector <sTrajEl_t*> list);
+        void addPath2(sPath_t &path);
 
 
     private:

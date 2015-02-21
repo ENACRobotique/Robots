@@ -21,7 +21,7 @@ typedef enum {
 typedef struct {
         sPt_t c;
         float radiusEP;             //taille des 3 cercle d'approche
-        int angleEP;                //angle d'approche entre 0 et 360
+        float angleEP;                //angle d'approche entre 0 et 2 M_PI //go to the center
 } sObjPt_t;
 
 #define SPEED 1

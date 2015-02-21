@@ -120,7 +120,7 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 
 // number of physical obstacles (16)
 #if 1
-#define N (23)
+#define N (12)
 #else
 #define N (54)
 #endif

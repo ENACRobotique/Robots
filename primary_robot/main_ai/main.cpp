@@ -16,6 +16,7 @@ extern "C"{
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #include "../botNet/shared/botNet_core.h"
 #include "millis.h"
@@ -106,10 +107,6 @@ int main(int argc, char **argv) {
                         if (!strcasecmp(optarg, "auto")) {
                             eAIState = E_AI_AUTO;
                         }
-                        else
-                            if (!strcasecmp(optarg, "fire")) {
-                                eAIState = E_AI_FIRE;
-                            }
                 break;
             case 'f':
                 if (fd) {
@@ -184,13 +181,6 @@ int main(int argc, char **argv) {
             if (ret <= 0) {
                 printf("bn_sendAck(E_POS) error #%i\n", -ret);
             }
-            break;
-        case E_AI_FIRE:
-           // sendPosServo(SERVO_PRIM_ARM_RIGHT, 2300, -1);
-            //sendPosServo(SERVO_PRIM_ARM_LEFT, 650, -1);
-            //sendPosServo(SERVO_PRIM_DOOR, 500, -1);
-            //sendPosServo(SERVO_PRIM_FIRE1, 1000, -1);
-
             break;
     }
 
