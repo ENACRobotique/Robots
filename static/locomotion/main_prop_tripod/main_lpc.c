@@ -97,6 +97,9 @@ int main() {
             case E_POS:
                 new_pos(inMsg.payload.pos);
                 break;
+//            case E_GEO: // Information to initialize geometry, ...
+//                // Update info
+//                break;
             }
         } // End: if(ret > 0)
 

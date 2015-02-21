@@ -47,8 +47,8 @@ enum {
 
 //// Variables about the state of the robot
 // Current position
-int x = 0, y = 0; // Robot position on the table I << SHIFT
-int theta = 0; // Robot heading on the table I.rad << SHIFT
+int x_sp, y_sp; // Robot position on the table I << SHIFT
+int theta_sp = 0; // Robot heading on the table I.rad << SHIFT
 // Goal
 int gx = 0, gy = 0; // I << SHIFT
 int gtheta = 0; // I << SHIFT
@@ -152,14 +152,14 @@ void new_pos(sPosPayload *pos){
        * If the robot is motionless, the goal of robot is actualize
        */
     if(pos->id == 0){ // Keep information for primary robot
-        x = isD2I(pos->x); // (I << SHIFT)
-        y = isD2I(pos->y); // (I << SHIFT)
-        theta = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
+        x_sp = isD2I(pos->x); // (I << SHIFT)
+        y_sp = isD2I(pos->y); // (I << SHIFT)
+        theta_sp = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
 
         if(state == S_WAIT){
-            gx = x;
-            gy = y;
-            gtheta = theta;
+            gx = x_sp;
+            gy = y_sp;
+            gtheta = theta_sp;
         }
     }
 }
@@ -203,26 +203,23 @@ void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientati
     int i;
     MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_pv, V2_pv, V3_pv)
     MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_pv, Vy_pv, Oz_pv)
-    int x_sp, y_sp, o_sp;
     MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv)
     MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd)
 
-    // Update ctl from trajectory_sp(t), orientation_sp(t)
-    // TODO update x_sp, y_sp, o_sp
 
-    // Gets process value from the three encoders
+    // Gets speed process values from the three encoders
     // => V1_pv, V2_pv, V3_pv and backups the nbticks
     for (i = 0; i < NB_PODS; i++) {
         encoder_update(&ctl->encs[i]);
         spd_pv_pods.ve[i] = encoder_get(&ctl->encs[i]);
     }
 
-    // Send previously computed command to the motors
+    // Send previously computed command to the motors // FIXME why now, is it too late?
     for (i = 0; i < NB_PODS; i++) {
         motor_update(&ctl->mots[i], ctl->next_spd_cmds[i]);
     }
 
-    // Get the speeds transformed in the robot's reference frame
+    // Get the speeds process values transformed in the robot's reference frame
     // (V1_pv, V2_pv, V3_pv) => (Vx_pv, Vy_pv, Oz_pv)
     mt_mv_mlt(&ctl->M_spds_pods2rob, &spd_pv_pods, &spd_pv_rob);
 
@@ -236,7 +233,7 @@ void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientati
 
     // Orientation control
     // (some pid as well... ; gives angular speed Oz_cmd)
-    _orientation_control(ctl, o_sp, &spd_cmd_rob);
+    _orientation_control(ctl, theta_sp, &spd_cmd_rob);
 
     // Calculate speed set points for each pod
     // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
