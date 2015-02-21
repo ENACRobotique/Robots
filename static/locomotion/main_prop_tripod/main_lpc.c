@@ -2,7 +2,7 @@
 #include <gpio.h>
 #include <ime.h>
 #include <pins.h>
-#include <params.h>
+#include "params.h"
 #include <pwm.h>
 #include <sys_time.h>
 #include <tools.h>
@@ -71,6 +71,8 @@ int main() {
     // Trajectory
     trajectory_controller_t traj_ctl;
     trajctl_init(&traj_ctl, mat_rob2pods);
+    // BotNet initialization
+    //TODO
 
     global_IRQ_enable();
 
@@ -85,11 +87,26 @@ int main() {
         // Reception and processing of the message
         ret = bn_receive(&inMsg);
         if(ret > 0){
-//            process_msg(&inMsg, &outMsg);// TODO
-        }
+            switch(inMsg.header.type){
+            case E_SPEED_SETPOINT: // Get the speed setpoint of the robot
+                new_speed_sp(inMsg.payload.speedSetPoint.speed);
+                break;
+            case E_TRAJ: // Get the new step of a trajectory
+                new_traj_el(inMsg.payload.traj);
+                break;
+            case E_POS:
+                new_pos(inMsg.payload.pos);
+                break;
+            }
+        } // End: if(ret > 0)
 
+        // Automatic control
         if (micros() - prevControl >= PER_ASSER) {
-            prevControl += PER_ASSER;
+            // If there is too much delay we skip to the next increment of the loop
+            if(micros() - prevControl > PER_ASSER_CRITIC){
+                prevControl = micros();
+                continue;
+            }
 
             // Control trajectory
             trajctl_update(&traj_ctl);

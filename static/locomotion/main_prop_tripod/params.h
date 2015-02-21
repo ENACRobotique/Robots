@@ -57,6 +57,8 @@
 
 // Parameters for control loops
 #define PER_ASSER 20000 // in µs
+#define PER_ASSER_CRITIC 30000 // in µs
+#define SPEED_NOMI 20 // in cm/s
 //#define MAX_SPEED 2 // in m/s FIXME
 //#define MAX_ACC   1 // in m/s²
 //#define MAX_ANG_SPD 180 // in deg/s
