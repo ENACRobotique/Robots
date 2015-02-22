@@ -1,13 +1,15 @@
 #include <debug.h>
 #include <gpio.h>
 #include <ime.h>
-#include <pins.h>
-#include "params.h"
 #include <pwm.h>
 #include <sys_time.h>
-#include <tools.h>
+
+#include "tools.h"
+#include "pins.h"
+#include "params.h"
 #include "messages.h"
 #include "trajectory_controller.h"
+#include "trajectory_manager.h"
 #include "shared/botNet_core.h"
 
 /*
@@ -70,7 +72,7 @@ int main() {
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
     // Trajectory
     trajectory_controller_t traj_ctl;
-    trajctl_init(&traj_ctl, mat_rob2pods);
+    trajctlr_init(&traj_ctl, mat_rob2pods);
     // BotNet initialization
     //TODO
 
@@ -89,13 +91,13 @@ int main() {
         if(ret > 0){
             switch(inMsg.header.type){
             case E_SPEED_SETPOINT: // Get the speed setpoint of the robot
-                new_speed_sp(inMsg.payload.speedSetPoint.speed);
+                trajmngr_new_speed_sp(inMsg.payload.speedSetPoint.speed);
                 break;
             case E_TRAJ: // Get the new step of a trajectory
-                new_traj_el(inMsg.payload.traj);
+                trajmngr_new_traj_el(&inMsg.payload.traj);
                 break;
             case E_POS:
-                new_pos(inMsg.payload.pos);
+                trajmngr_new_pos(&inMsg.payload.pos);
                 break;
 //            case E_GEO: // Information to initialize geometry, ...
 //                // Update info
@@ -112,7 +114,7 @@ int main() {
             }
 
             // Control trajectory
-            trajctl_update(&traj_ctl);
+            trajctlr_update(&traj_ctl);
         }
     } // ############## End loop ############################################
 }

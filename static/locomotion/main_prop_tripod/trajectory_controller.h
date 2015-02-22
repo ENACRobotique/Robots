@@ -36,14 +36,12 @@
  */
 #define NB_SPDS (3)
 
-#define TRAJ_MAX_SIZE (16)
-
 typedef struct {
     MT_MAT M_spds_pods2rob;
     MT_MAT M_spds_rob2pods;
 
     // Last known status
-    int x, y, o;
+    int x, y, theta;
 
     // PID
     PID_t pid_traj;
@@ -58,10 +56,7 @@ typedef struct {
     int next_spd_cmds[NB_PODS];
 } trajectory_controller_t;
 
-void trajctl_init(trajectory_controller_t* ctl, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
-void trajctl_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */);
-void new_speed_sp(float speed);
-void new_traj_el(sTrajElRaw_t *te);
-void new_pos(sPosPayload *pos);
+void trajctlr_init(trajectory_controller_t* ctl, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
+void trajctlr_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */);
 
 #endif /* TRAJECTORY_CONTROLLER_H_ */
