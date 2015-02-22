@@ -5,14 +5,14 @@
  *      Author: seb
  */
 
+#include <astar_tools.h>
 #include <main_ai_tools/path.h>
 #include <main_ai_tools/statuses.h>
+#include <tools.h>
 #include <cmath>
 #include <iostream>
-#include "tools.h"
 #include "math_ops.h"
 #include "a_star.h"
-#include "variables.h"
 
 extern "C"{
 #include "roles.h"

@@ -7,11 +7,11 @@
 
 
 #include <ai_tools.h>
-#include <main_ai_tools/variables.h>
 #include "types.h"
 #include "ai.h"
 #include <obj.h>
 #include <obj_tools.h>
+#include <tools.h>
 #include "math_ops.h"
 #include "clap.h"
 #include <iostream>

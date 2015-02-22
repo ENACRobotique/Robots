@@ -22,7 +22,7 @@ extern "C"{
 
 #include "botNet_core.h"
 #include "communications.h"
-#include "variables.h"
+#include "tools.h"
 #include "ai.h"
 
 #ifdef CTRLC_MENU

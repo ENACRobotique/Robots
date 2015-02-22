@@ -1,5 +1,4 @@
-#include "tools.h"
-
+#include <astar_tools.h>
 #include <math.h>
 #include <stdio.h>
 #include "math_ops.h"

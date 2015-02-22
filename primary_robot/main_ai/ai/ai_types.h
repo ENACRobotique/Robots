@@ -2,9 +2,9 @@
 #define _TYPE_IA_H
 
 
+#include <astar_tools.h>
 #include <main_ai_tools/path.h>
 #include "math_types.h"
-#include "tools.h"
 extern "C"{
 #include <stdint.h>
 #include "messages-interactions.h"

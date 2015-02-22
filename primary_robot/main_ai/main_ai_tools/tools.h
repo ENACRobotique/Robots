@@ -5,8 +5,8 @@
  *      Author: seb
  */
 
-#ifndef MAIN_AI_TOOLS_VARIABLES_H_
-#define MAIN_AI_TOOLS_VARIABLES_H_
+#ifndef MAIN_AI_TOOLS_TOOLS_H_
+#define MAIN_AI_TOOLS_TOOLS_H_
 
 #include <main_ai_tools/path.h>
 #include <main_ai_tools/statuses.h>
@@ -31,4 +31,4 @@ extern Statuses statuses;
 extern Path path;
 
 
-#endif /* MAIN_AI_TOOLS_VARIABLES_H_ */
+#endif /* MAIN_AI_TOOLS_TOOLS_H_ */

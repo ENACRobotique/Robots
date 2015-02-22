@@ -10,10 +10,10 @@
 
 #include <ai_types.h>
 #include <main_ai_tools/statuses.h>
+#include <tools.h>
 #include "obj.h"
 #include <vector>
 #include <cmath>
-#include "variables.h"
 #define MAX_RETRIES 1
 
 //#define ABS_POS

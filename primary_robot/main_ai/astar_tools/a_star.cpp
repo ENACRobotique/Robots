@@ -1,7 +1,7 @@
+#include <astar_tools.h>
 #include "a_star.h"
 
 #include "math_ops.h"
-#include "tools.h"
 
 extern "C"{
 #include <stdlib.h>

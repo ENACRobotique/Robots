@@ -8,7 +8,7 @@
 #ifndef OBJ_OBJ_TOOLS_H_
 #define OBJ_OBJ_TOOLS_H_
 
-#include "tools.h"
+#include <astar_tools.h>
 
 #define NON_HOLONOMIC //exist if the robot isn't an holonomic robot (for backward compatible)
 

@@ -9,7 +9,7 @@
 
 #include <ai.h>
 #include <ai_tools.h>
-#include "tools.h"
+#include <astar_tools.h>
 #include <iostream>
 
 extern "C"{
@@ -25,7 +25,7 @@ extern "C"{
 #include <obj.h>
 
 #include <main_ai_tools/path.h>
-#include "variables.h"
+#include <tools.h>
 #include "communications.h"
 
 using namespace std;

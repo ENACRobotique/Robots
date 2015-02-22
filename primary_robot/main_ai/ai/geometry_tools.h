@@ -8,8 +8,8 @@
 #ifndef OBJ_GEOMETRY_TOOLS_H_
 #define OBJ_GEOMETRY_TOOLS_H_
 
+#include <astar_tools.h>
 #include <main_ai_tools/path.h>
-#include "tools.h"
 
 
 void TransPt(sPt_t *traj, int x, int y);

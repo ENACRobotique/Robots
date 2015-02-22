@@ -20,8 +20,8 @@ extern "C"{
 #include "botNet_core.h"
 
 
-#include "tools.h"
-#include <main_ai_tools/variables.h>
+#include <astar_tools.h>
+#include <tools.h>
 #include "ai_types.h"
 
 void sendObsCfg(){

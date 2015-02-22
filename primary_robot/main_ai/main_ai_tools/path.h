@@ -8,8 +8,7 @@
 #ifndef AI_PATH_H_
 #define AI_PATH_H_
 
-#include "tools.h"
-
+#include <astar_tools.h>
 #include <vector>
 
 
