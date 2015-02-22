@@ -116,16 +116,14 @@ void Path::go2Point(const sPt_t &dest, const bool f){
     obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
     obs[N-1].c = dest;
 
-    cout << obs[0].c.x << endl;
-    cout << obs[N-1].c.x << endl;
-
-    cout << "go to" << endl;
- /*   if (DIST(0, N - 1) < 1.) {
+    sNum_t dist;
+    distPt2Pt(&obs[0].c, &obs[N-1].c, &dist);
+    if(dist < 2.){
         return;
-    }*/
-    cout << "go to" << endl;
+    }
+
     fill_tgts_lnk();
-    cout << "go to" << endl;
+
     sPath_t path;
     a_star(A(0), A(N-1), &path);
     if (path.path) {
