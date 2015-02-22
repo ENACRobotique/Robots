@@ -7,8 +7,8 @@
 
 #include <main_ai_tools/statuses.h>
 #include <iostream>
+#include <iomanip>
 #include <cmath>
-
 #include "ai_types.h"
 
 
@@ -50,8 +50,13 @@ int Statuses::receivedNewStatus(sGenericStatus &status){
         cerr << "[ERROR] [statuses.ccp] Unknown status id" << endl;
         return -1;
     }
-    cout << "[INFO] [status.cpp] New status : " << status.pos.x << ", " << status.pos.y << endl;
+    //cout << "[INFO] [status.cpp] New status : " << status.pos.x << ", " << status.pos.y << endl;
+
     _list[status.id].push_back(status); //TODO sort by date
+
+    if(status.id == ELT_PRIMARY)
+        cout << fixed << setprecision(2) << "\x1b[K\x1b[s" << "pos : " << status.pos.x << "cm, " << status.pos.y << "cm, " << status.pos.theta * 180. / M_PI << "°" << "\x1b[u" << flush;
+
     return 1;
 }
 

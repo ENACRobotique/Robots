@@ -31,7 +31,6 @@ extern "C"{
  * If the interface is critical a new ping is send in loop and a message error is print.
  */
 void sendPing(){
-    cout << "ping";
 #if !SIMU
     int state = 0, ret ;
     while(1){
@@ -182,8 +181,6 @@ int sendPos(sPt_t &p, sNum_t theta) {
     msgOut.payload.pos.theta = theta;
     msgOut.payload.pos.x = p.x;
     msgOut.payload.pos.y = p.y;
-    //obs[0].c.x = p.x;
-    //obs[0].c.y = p.y;
 
     //XXX Created an intern message generic status for update the position, and if message not pos not receive --> position problem !!!
 
@@ -192,7 +189,7 @@ int sendPos(sPt_t &p, sNum_t theta) {
         return -2;
     }
     cout << "[SEND MES] [POS] Sending position to primary robot (" << msgOut.payload.pos.x << ", " << msgOut.payload.pos.y << ", " << msgOut.payload.pos.theta * 180. / M_PI << ")" << endl;
-getchar();
+
     return 1;
 }
 
@@ -228,10 +225,11 @@ void checkInbox(int verbose, ofstream &file){
     sMsg msgIn;
     int ret;
 
-    if((ret = bn_receive(&msgIn)) < 0){ // get the message
+    if((ret = bn_receive(&msgIn)) < 0){ //get the message
         cerr << "[ERROR] [communication.cpp] bn_receive() error #" << -ret << endl;
         return;
-    }
+    }else if( ret == 0) //no message
+        return;
 
     if ((ret = role_relay(&msgIn)) < 0 ) { // relay the message
         cerr << "[ERROR] [communication.cpp] role_relay() error #" << -ret << endl;
@@ -276,7 +274,7 @@ void checkInbox(int verbose, ofstream &file){
             sta.prop_status.pos_u.theta = 0.;
             sta.prop_status.pos.x = msgIn.payload.pos.x;
             sta.prop_status.pos.y = msgIn.payload.pos.y;
-cout << "pos message ................................................................" << endl;
+
             statuses.receivedNewStatus(sta);
 
             break;
@@ -329,12 +327,9 @@ cout << "pos message ...........................................................
 
             break;
         default:
-         //   cout << "[WARNING] message type not define or doesn't exist" << endl << endl;
+            cout << "[WARNING] message type not define or doesn't exist" << endl << endl;
             if (file){}
     }
-
-    sPt_t pt = statuses.getLastPosXY(ELT_PRIMARY);
-    cout << "\x1b[K\x1b[s" << "pos" << pt.x << "cm, " << pt.y << "cm, " << "TODO ANGLE * 180. / M_PI" << "\x1b[u" << flush;
 }
 
 /*
