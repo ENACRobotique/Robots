@@ -9,8 +9,8 @@
 #define AI_AI_H_
 
 #include <ai_types.h>
+#include <main_ai_tools/statuses.h>
 #include "obj.h"
-
 #include <vector>
 #include <cmath>
 
@@ -33,5 +33,7 @@ void obj_step(eAIState_t AIState);
 extern int obj_init(eAIState_t AIState);
 
 extern std::vector<Obj*> listObj;
+extern Path path_;
+extern Statuses statuses_;
 
 #endif /* AI_AI_H_ */

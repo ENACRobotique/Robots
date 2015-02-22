@@ -16,10 +16,18 @@
 
 using namespace std;
 
+typedef struct{
+    bool updated; //updated the position in monitoring hmi only for the robot
+    //TODO time maintenance
+
+}statusConfig_t;
+
 class Statuses {
     public:
         Statuses();
         ~Statuses();
+
+        void setConfig();
 
         void maintenace();
         int receivedNewStatus(sGenericStatus &status);
@@ -27,12 +35,15 @@ class Statuses {
         sGenericStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);
 
         //Simple function define in the FRAME_PLAYGROUND
-        sPt_t getPosXY(eElement el);
+        sPt_t getLastPosXY(eElement el);
+        //TODO get last speed
 
     private:
         void fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *srcPAPG, s2DPAUncert *srcUPG, s2DPosAtt *dstPAPG, s2DPAUncert *dstUPG);
+        void posUpdated(sGenericStatus &status);
 
         array <deque <sGenericStatus>, NUM_E_ELEMENT> _list;
+        array <statusConfig_t, NUM_E_ELEMENT> _config;
 
 };
 

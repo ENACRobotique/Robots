@@ -5,11 +5,11 @@
  *      Author: seb
  */
 
-#include <statuses.h>
-
+#include <main_ai_tools/statuses.h>
 #include <iostream>
 #include <cmath>
 
+#include "ai_types.h"
 
 
 Statuses::Statuses() {
@@ -38,16 +38,24 @@ int Statuses::receivedNewStatus(sGenericStatus &status){
 }
 
 sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
-    if(_list[el].back().pos.frame == fr){
-        return _list[el].back();
+    if(!_list.empty()){
+        if(_list[el].back().pos.frame == fr){
+            return _list[el].back();
+        }
+        else{
+            //TODO convert, used fromPRPG2PG
+            return _list[el].back();
+        }
     }
-    else{
-        //TODO convert, used fromPRPG2PG
-        return _list[el].back();
-    }
+    //TODO ask position
+    static sGenericStatus status;
+    status.id = el;
+    status.date = 0;
+
+    return status;
 }
 
-sPt_t Statuses::getPosXY(eElement el){
+sPt_t Statuses::getLastPosXY(eElement el){
     sGenericStatus status = getLastStatus(el);
     sPt_t point;
 
@@ -57,6 +65,10 @@ sPt_t Statuses::getPosXY(eElement el){
     return point;
 }
 
+
+/*
+ * Convert a position define to a frame in an other frame
+ */
 void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *srcPAPG, s2DPAUncert *srcUPG, s2DPosAtt *dstPAPG, s2DPAUncert *dstUPG) {
     float theta;
 
@@ -73,5 +85,19 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
     if (srcUPR && srcUPG && dstUPG) {
         dstUPG->theta = srcUPR->theta + srcUPG->theta;
         // TODO compute full uncertainty
+    }
+}
+
+/*
+ * Udapte the new position on monitoring
+ */
+void Statuses::posUpdated(sGenericStatus &status) {
+    if (status.id != ELT_PRIMARY) { //Only for element fix in obs such as robots
+        obs[status.id].active = 1;
+        obs[status.id].moved = 1;
+        obs[status.id].c.x = status.pos.x;
+        obs[status.id].c.y = status.pos.y;
+
+        obs_updated[status.id]++;
     }
 }

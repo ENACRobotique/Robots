@@ -49,7 +49,7 @@ class Path {
         //Send methods
         void sendRobot();
         void stopRobot();
-        void go2Point(const sPt_t &robot, const sPt_t &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
+        void go2Point(const sPt_t &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
         void followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l);
 
         //Get methods
@@ -67,7 +67,7 @@ class Path {
 
         sNum_t _dist;               //Computed sends
         unsigned int _path_len;     //Computed sends
-        vector <sTrajEl_t*> _path;
+        vector <sTrajEl_t> _path;
 };
 
 

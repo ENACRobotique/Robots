@@ -12,6 +12,9 @@
 
 #include <main.h>
 
+#include <iostream>
+#include <fstream>
+
 extern "C"{
 #include <string.h>
 #include <stdlib.h>
@@ -22,9 +25,12 @@ extern "C"{
 #include "millis.h"
 }
 
-#include <ai/obj_statuses.h>
+#include "statuses.h"
 #include <ai/ai.h>
+#include "ai_tools.h"
 #include "math_ops.h"
+#include <communications.h>
+#include "variables.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -49,37 +55,12 @@ void usage(char *cl) {
     printf("\t--help,     -h, -?    prints this help\n");
 }
 
-void posUpdated(sGenericStatus *status) {
-    if (status->id != ELT_PRIMARY) {
-        obs[status->id].active = 1;
-        obs[status->id].moved = 1;
-        obs[status->id].c.x = status->pos.x;
-        obs[status->id].c.y = status->pos.y;
-
-//        printf("PosUpdated %i\n", status->id);
-
-        obs_updated[status->id]++;
-    }
-}
-
 int main(int argc, char **argv) {
     int ret;
     char verbose = 1;
-    sMsg msgIn, msgOut = { { 0 } };
-    FILE *fd = NULL;
-    sPt_t last_pos = { 0., 0. };
-    float last_theta = 0.;
-    float last_speed = 0.;
-    unsigned int prevPos = 0;
-    int i;
+    ofstream file("log");
     eAIState_t eAIState = E_AI_SLAVE;
-    // traj mgmt
-    sPath_t new_path;
-    new_path.path = NULL;
-    unsigned int prevSendTraj = 0;
-    // obss send
-    uint8_t send_obss_reset = 0, send_obss_idx = 0;
-    unsigned int prevSendObss = 0, prevSendObs = 0;
+
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -99,20 +80,19 @@ int main(int argc, char **argv) {
                 if (!strcasecmp(optarg, "slave")) {
                     eAIState = E_AI_SLAVE;
                 }
-                else
-                    if (!strcasecmp(optarg, "prog")) {
-                        eAIState = E_AI_PROG;
-                    }
-                    else
-                        if (!strcasecmp(optarg, "auto")) {
-                            eAIState = E_AI_AUTO;
-                        }
+                else if (!strcasecmp(optarg, "prog")) {
+                    eAIState = E_AI_PROG;
+                }
+                else if (!strcasecmp(optarg, "auto")) {
+                    eAIState = E_AI_AUTO;
+                }
                 break;
             case 'f':
-                if (fd) {
+                //FIXME change de default file nanme "log"
+             /*   if (fd) {
                     fclose(fd);
                 }
-                fd = fopen(optarg, "wb+");
+                fd = fopen(optarg, "wb+");*/
                 break;
             case 'v':
                 verbose++;
@@ -132,57 +112,36 @@ int main(int argc, char **argv) {
         }
     }
 
+    // network initialization
     bn_attach(E_ROLE_SETUP, role_setup);
 
     ret = bn_init();
     if (ret < 0) {
-        printf("bn_init() error #%i\n", -ret);
+        cerr << "[ERROR] [main.cpp] bn_init() error : " << -ret << endl;
         exit(1);
     }
+    ping();
 
-    {
-        sStatusHandlingConfig cfg;
-        cfg.has_position = 1;
-
-        cfg.handlerPG = NULL;
-        setConfig(ELT_PRIMARY, &cfg);
-
-        cfg.handlerPG = posUpdated;
-        setConfig(ELT_SECONDARY, &cfg);
-        setConfig(ELT_ADV_PRIMARY, &cfg);
-        setConfig(ELT_ADV_SECONDARY, &cfg);
-    }
-
+    // calls initialization functions
     switch (eAIState) {
         case E_AI_AUTO:
         case E_AI_PROG:
             ret = obj_init(eAIState);
             if (ret < 0) {
-                printf("obj_init() error #%i\n", -ret);
+                cerr << "[ERROR] [main.cpp] obj_init() error #" << -ret << endl;
             }
             break;
         case E_AI_SLAVE:
-            obs[0].c.x = 300. - 15.5;
-            obs[0].c.y = 200. - 15.8;
+            sPt_t pt = {INIT_POS_YELLOW_X, INIT_POS_YELLOW_Y};
+            Obj obj_slave();
 
-            // sending initial position
-            msgOut.header.type = E_POS;
-            msgOut.header.size = sizeof(msgOut.payload.pos);
-
-            msgOut.payload.pos.id = 0;
-            msgOut.payload.pos.theta = -M_PI / 2;
-            msgOut.payload.pos.u_a = 0;
-            msgOut.payload.pos.u_a_theta = 0;
-            msgOut.payload.pos.u_b = 0;
-            msgOut.payload.pos.x = obs[0].c.x;
-            msgOut.payload.pos.y = obs[0].c.y;
-            printf("Sending initial position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msgOut.payload.pos.id, msgOut.payload.pos.x, msgOut.payload.pos.y, msgOut.payload.pos.theta * 180. / M_PI);
-            ret = role_sendAck(&msgOut);
-            if (ret <= 0) {
-                printf("bn_sendAck(E_POS) error #%i\n", -ret);
-            }
+            setPos(&pt, INIT_ANGLE_YELLOW);
             break;
     }
+
+    //Send all obs to monitoring
+    for(int i = 0 ; i < N ; i++)
+        obs_updated[i]++;
 
 #ifdef CTRLC_MENU
     signal(SIGINT, intHandler);
@@ -203,349 +162,28 @@ int main(int argc, char **argv) {
 #endif
         usleep(500);
 
-        //receives messages, displays string if message is a debug message
-        ret = bn_receive(&msgIn);
-        if (ret > 0) {
-            printf("\x1b[K\x1b[s");
+        // check if receiving new messages
+        checkInbox(verbose, file);
 
-            ret = role_relay(&msgIn);
-            if (ret < 0) {
-                printf("role_relay() error #%i\n", -ret);
-            }
-
-            if (verbose >= 1) {
-                if (msgIn.header.type != E_POS)
-                    printf("message received from %s (%03hx), type : %s (%hhu)  ", role_string(role_get_role(msgIn.header.srcAddr)), msgIn.header.srcAddr, eType2str((E_TYPE) msgIn.header.type), msgIn.header.type);
-                if (fd)
-                    fprintf(fd, "message received from %hx, type : %s (%hhu)  ", msgIn.header.srcAddr, eType2str((E_TYPE) msgIn.header.type), msgIn.header.type);
-            }
-            switch (msgIn.header.type) {
-                case E_DEBUG:
-                    printf("%s", msgIn.payload.debug);
-                    if (fd)
-                        fprintf(fd, "%s", msgIn.payload.debug);
-                    break;
-                case E_POS:
-//                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
-//                printf("\n");
-                    if (fd)
-                        fprintf(fd, "message received from %hx, type : %s (%hhu)  ", msgIn.header.srcAddr, eType2str((E_TYPE) msgIn.header.type), msgIn.header.type);
-
-                    // updating position...
-                    {
-                        sPt_t new_pos;
-                        new_pos.x = msgIn.payload.pos.x;
-                        new_pos.y = msgIn.payload.pos.y;
-                        sNum_t d;
-
-                        if (prevPos) {
-                            distPt2Pt(&last_pos, &new_pos, &d);
-
-                            last_speed = d * 1000. / (millis() - prevPos);
-                            speed = last_speed;
-
-                            //printf("%.2fcm/s\n", last_speed);
-                        }
-
-                        prevPos = millis();
-                        last_pos = new_pos;
-                    }
-
-                    last_pos.x = msgIn.payload.pos.x;
-                    last_pos.y = msgIn.payload.pos.y;
-                    last_theta = msgIn.payload.pos.theta;
-                    theta_robot = last_theta;
-                    if (msgIn.payload.pos.tid > last_tid) {
-                        last_tid = msgIn.payload.pos.tid;
-                    }
-
-                    {
-                        sGenericStatus status;
-
-                        status.date = micros(); // XXX
-                        status.id = ELT_PRIMARY;
-                   //     status.prop_status.pos.frame = FRAME_PLAYGROUND;
-                        status.prop_status.pos.theta = msgIn.payload.pos.theta;
-                        status.prop_status.pos_u.a_var = 0.;
-                        status.prop_status.pos_u.b_var = 0.;
-                        status.prop_status.pos_u.a_angle = 0.;
-                        status.prop_status.pos_u.theta = 0.;
-                        status.prop_status.pos.x = msgIn.payload.pos.x;
-                        status.prop_status.pos.y = msgIn.payload.pos.y;
-
-                        received_new_status(&status);
-                    }
-
-                    if (curr_path.path && msgIn.payload.pos.tid == curr_path.tid) {
-                        if (msgIn.payload.pos.ssid) { // circle portion
-                            sPt_t *o_c = NULL;
-                            sVec_t v;
-                            sNum_t r, n, d;
-
-                            o_c = &curr_path.path[msgIn.payload.pos.sid].obs.c;
-                            r = curr_path.path[msgIn.payload.pos.sid].obs.r;
-
-                            convPts2Vec(o_c, &last_pos, &v);
-                            normVec(&v, &n);
-
-                            d = n - fabs(r);
-
-                            if (fabs(d) > 2.) {
-                                printf("!!! far from the circle (%.2fcm)...\n", d);
-                            }
-
-                            obs[0].moved = 1;
-                            obs[0].c.x = o_c->x + v.x * (fabs(r) + 0.1) / n;
-                            obs[0].c.y = o_c->y + v.y * (fabs(r) + 0.1) / n;
-                            obs[0].r = 0.;
-                        }
-                        else { // line portion
-                            sNum_t d;
-                            sPt_t h;
-                            sSeg_t s;
-
-                            convPts2Seg(&curr_path.path[msgIn.payload.pos.sid].p1, &curr_path.path[msgIn.payload.pos.sid].p2, &s);
-
-                            sqdistPt2Seg(&last_pos, &s, &d, &h);
-
-                            if (d > 2. * 2.) {
-                                printf("!!! far from the line (%.2fcm)...\n", sqrt(d));
-                            }
-
-                            obs[0].moved = 1;
-                            obs[0].c = h;
-                            obs[0].r = 0.;
-                        }
-                    }
-                    else {
-                        obs[0].moved = 1;
-                        obs[0].c = last_pos;
-                        obs[0].r = 0.;
-                    }
-                    break;
-                case E_GOAL:
-                    printf("robot%hhu@(%.2fcm,%.2fcm,%.2f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta * 180. / M_PI);
-                    if (fd)
-                        fprintf(fd, "message received from %hx, type : %s (%hhu)  ", msgIn.header.srcAddr, eType2str((E_TYPE) msgIn.header.type), msgIn.header.type);
-
-                    switch (eAIState) {
-                        case E_AI_SLAVE:
-                            obs[N - 1].moved = 1;
-                            obs[N - 1].c.x = msgIn.payload.pos.x;
-                            obs[N - 1].c.y = msgIn.payload.pos.y;
-                            obs[N - 1].r = 0.;
-                            obs_updated[N - 1]++;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    break;
-                case E_OBS_CFG:
-                    send_obss_reset = 1;
-                    send_obss_idx = 0;
-                    prevSendObss = millis();
-
-                    for (i = 0; i < N; i++) {
-                        obs_updated[i] = 1;
-                    }
-
-                    msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
-                    msgOut.header.type = E_OBS_CFG;
-                    msgOut.header.size = sizeof(msgOut.payload.obsCfg);
-
-                    msgOut.payload.obsCfg.nb_obs = N;
-                    msgOut.payload.obsCfg.r_robot = R_ROBOT;
-                    msgOut.payload.obsCfg.x_min = X_MIN;
-                    msgOut.payload.obsCfg.x_max = X_MAX;
-                    msgOut.payload.obsCfg.y_min = Y_MIN;
-                    msgOut.payload.obsCfg.y_max = Y_MAX;
-
-                    ret = bn_send(&msgOut);
-                    if (ret < 0) {
-                        printf("bn_send(E_OBS_CFG) error #%i\n", -ret);
-                    }
-                    break;
-                case E_GENERIC_STATUS:
-                    received_new_status(&msgIn.payload.genericStatus);
-                    printf("pos:%.2f,%.2f\n", msgIn.payload.genericStatus.adv_status.pos.x, msgIn.payload.genericStatus.adv_status.pos.y);
-                    break;
-                case E_IHM_STATUS:
-                    /*
-                     for(i = 0 ; i < (int)msgIn.payload.ihmStatus.nb_states ; i++){
-                     switch(msgIn.payload.ihmStatus.states[i].id){
-                     case IHM_STARTING_CORD:
-                     starting_cord = msgIn.payload.ihmStatus.states[i].state;
-                     printf("## scord: %i\n", starting_cord);
-                     break;
-                     case IHM_MODE_SWICTH:
-                     mode_switch = msgIn.payload.ihmStatus.states[i].state;
-                     printf("## smode: %i\n", mode_switch);
-                     break;
-                     case IHM_LED:
-                     break;
-                     case IHM_LIMIT_SWITCH_LEFT:
-                     switch_left = msgIn.payload.ihmStatus.states[i].state;
-                     printf("## lswitch: %i\n", switch_left);
-                     break;
-                     case IHM_LIMIT_SWITCH_RIGHT:
-                     switch_right = msgIn.payload.ihmStatus.states[i].state;
-                     printf("## rswitch: %i\n", switch_right);
-                     break;
-                     default:
-                     break;
-                     }
-                     }
-                     */
-                    break;
-                default:
-                    printf("\n");
-                    if (fd)
-                        fprintf(fd, "\n");
-                    break;
-            }
-
-            printf("pos %.2fcm, %.2fcm, %.1f°", last_pos.x, last_pos.y, last_theta * 180. / M_PI);
-            printf(", armLeft : ");
-            //printServoPos(&armLeft);
-            printf(", armRight : ");
-            //printServoPos(&armRight);
-            printf("\x1b[u");
-            fflush(stdout);
-        }
-        else
-            if (ret < 0) {
-#ifdef CTRLC_MENU
-                if (ret == -ERR_SYSERRNO && errno == EINTR) {
-                    menu=1;
-                }
-                else
-#endif
-                {
-                    fprintf(stderr, "bn_receive() error #%i\n", -ret);
-                    exit(1);
-                }
-            }
-
+        // calls loop functions
         switch (eAIState) {
             case E_AI_SLAVE:
-                if (obs[N - 1].moved) {
-                    fill_tgts_lnk();
-
-                    for (i = 0; i < N; i++) {
-                        obs[i].moved = 0;
-                    }
-
-                    if (DIST(0, N - 1) < 1.) {
-                        continue;
-                    }
-
-                    a_star(A(0), A(N-1), &new_path);
-                    if (new_path.path) {
-                        printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N - 1, new_path.dist, new_path.path_len);
-
-                        if (curr_path.path) {
-                            free(curr_path.path);
-                        }
-                        memcpy(&curr_path, &new_path, sizeof(curr_path));
-                        new_path.path = NULL;
-
-                        curr_traj_extract_sid = 0;
-                        curr_path.tid = ++last_tid;
-                    }
-                    else {
-                        printf("no path from 0a to %ua\n", N - 1);
-                    }
+                sPt_t goal;
+                if (lastGoal(goal, true)) {
+                    cout << "[INFO] New goal available" << endl;
+                    path.go2Point(goal, true);
                 }
                 break;
             case E_AI_AUTO:
             case E_AI_PROG:
                 obj_step(eAIState);
-
-                //printf("cpt=%i\n", cpt++);
                 break;
             default:
                 break;
         }
 
-        // sending trajectory, one step at a time
-        if (curr_path.path && curr_traj_extract_sid < curr_path.path_len && (!curr_traj_extract_sid || (millis() - prevSendTraj > 20))) {
-            printf("traj step: p1 x%.2f y%.2f, p2 x%.2f y%.2f, s_l%.2f; obs x%.2f y%.2f r%.2f, a_l%.2f\n", curr_path.path[curr_traj_extract_sid].p1.x, curr_path.path[curr_traj_extract_sid].p1.y, curr_path.path[curr_traj_extract_sid].p2.x, curr_path.path[curr_traj_extract_sid].p2.y, curr_path.path[curr_traj_extract_sid].seg_len, curr_path.path[curr_traj_extract_sid].obs.c.x, curr_path.path[curr_traj_extract_sid].obs.c.y, curr_path.path[curr_traj_extract_sid].obs.r, curr_path.path[curr_traj_extract_sid].arc_len);
-
-            msgOut.header.type = E_TRAJ;
-            msgOut.header.size = sizeof(msgOut.payload.traj);
-
-            msgOut.payload.traj.p1_x = curr_path.path[curr_traj_extract_sid].p1.x;
-            msgOut.payload.traj.p1_y = curr_path.path[curr_traj_extract_sid].p1.y;
-            msgOut.payload.traj.p2_x = curr_path.path[curr_traj_extract_sid].p2.x;
-            msgOut.payload.traj.p2_y = curr_path.path[curr_traj_extract_sid].p2.y;
-            msgOut.payload.traj.seg_len = curr_path.path[curr_traj_extract_sid].seg_len;
-
-            msgOut.payload.traj.c_x = curr_path.path[curr_traj_extract_sid].obs.c.x;
-            msgOut.payload.traj.c_y = curr_path.path[curr_traj_extract_sid].obs.c.y;
-            msgOut.payload.traj.c_r = curr_path.path[curr_traj_extract_sid].obs.r;
-            msgOut.payload.traj.arc_len = curr_path.path[curr_traj_extract_sid].arc_len;
-
-            msgOut.payload.traj.sid = curr_traj_extract_sid++;
-            msgOut.payload.traj.tid = curr_path.tid;
-
-            ret = role_sendRetry(&msgOut, 1); //TODO Used function class
-            if (ret < 0) {
-                printf("role_send(E_TRAJ) error #%i\n", -ret);
-            }
-
-            prevSendTraj = millis();
-        }
-
-        // check if any obs has been updated => synchro with the monitoring interface
-        if (!send_obss_reset && (millis() - prevSendObs > 100)) {
-            prevSendObs = millis();
-
-            for (i = 0; i < N; i++) {
-                if (obs_updated[i] > 0) {
-                    send_obss_reset = 1;
-                    send_obss_idx = 0;
-                    prevSendObss = 0;
-                    break;
-                }
-            }
-        }
-
-        // sending obstacles, up to MAX_NB_OBSS_PER_MSG per message
-        if (send_obss_reset && (millis() - prevSendObss > 150)) {
-            prevSendObss = millis();
-
-            msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
-            msgOut.header.type = E_OBSS;
-
-            for (i = 0; send_obss_idx < N && i < MAX_NB_OBSS_PER_MSG;
-                    send_obss_idx++) {
-                if (obs_updated[send_obss_idx] > 0) {
-                    obs_updated[send_obss_idx] = 0;
-
-                    msgOut.payload.obss.obs[i].id = send_obss_idx;
-                    msgOut.payload.obss.obs[i].active = obs[send_obss_idx].active;
-                    msgOut.payload.obss.obs[i].moved = obs[send_obss_idx].moved;
-
-                    msgOut.payload.obss.obs[i].x = (int16_t) (obs[send_obss_idx].c.x * 100. + 0.5);
-                    msgOut.payload.obss.obs[i].y = (int16_t) (obs[send_obss_idx].c.y * 100. + 0.5);
-                    msgOut.payload.obss.obs[i].r = (int16_t) (obs[send_obss_idx].r * 100. + 0.5);
-
-                    i++;
-                }
-            }
-            msgOut.payload.obss.nb_obs = i;
-            msgOut.header.size = 2 + (i << 3);
-
-            ret = bn_send(&msgOut);
-            if (ret < 0) {
-                printf("bn_send(E_OBSS) error #%i\n", -ret);
-            }
-
-            if (send_obss_idx == N) {
-                send_obss_reset = 0;
-            }
-        }
+        // sending obstacles to monitoring
+        sendObss();
 
 //        if(millis() - prevGetPos > 200){
 //            sGenericPos *p;
@@ -706,8 +344,7 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    if (fd)
-        fclose(fd);
+    file.close();
     printf("bye\n");
 
     return 0;

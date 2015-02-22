@@ -2,8 +2,8 @@
 #define _TYPE_IA_H
 
 #include <main.h>
+#include <main_ai_tools/path.h>
 #include "math_types.h"
-#include "path.h"
 #include "tools.h"
 extern "C"{
 #include <stdint.h>
@@ -44,7 +44,6 @@ typedef struct {
 extern uint8_t obs_updated[];
 
 extern sPt_t _current_pos;
-extern sPath_t path;
 extern long _start_time;
 extern long last_time;
 extern sPt_t pt_select;

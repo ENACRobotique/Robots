@@ -7,13 +7,13 @@
 
 
 #include <ai_tools.h>
+#include <main_ai_tools/variables.h>
 #include "types.h"
 #include "ai.h"
 #include <obj.h>
 #include <obj_tools.h>
 #include "math_ops.h"
 #include "clap.h"
-
 #include <iostream>
 
 extern "C"{
@@ -66,7 +66,7 @@ void printEndTraj() {
  * The second argument is used for a non holonomic robot with the 3 circles anti half turn.
  */
 void loadingPath(sPath_t _path, int num) {
-    path = _path;
+    //path = _path; //FIXME
 
 #ifdef NON_HOLONOMIC
     if (num >= 0) {

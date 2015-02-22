@@ -33,6 +33,9 @@ int testInObs(sPt_t *p) { //retourne le numéro de l'obstable si la position est
     return 0;
 }
 
+Obj::Obj() : _state(ACTIVE), _dist(-1), _time(-1), _point(-1), _EP(-1), _active(true), _done(0) {
+}
+
 Obj::Obj(eObj_t type) : _type(type), _state(ACTIVE), _dist(-1), _time(-1), _point(-1), _EP(-1), _active(true), _done(0) {
 }
 
@@ -50,6 +53,12 @@ Obj::Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjPt_t> &entryPoint
 
 Obj::~Obj() {
     // TODO Auto-generated destructor stub
+}
+
+
+
+void Obj::setEP(sObjPt_t &pt){
+    _entryPoint.push_back(pt);
 }
 
 /*

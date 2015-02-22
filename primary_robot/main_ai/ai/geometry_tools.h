@@ -8,9 +8,9 @@
 #ifndef OBJ_GEOMETRY_TOOLS_H_
 #define OBJ_GEOMETRY_TOOLS_H_
 
+#include <main_ai_tools/path.h>
 #include "tools.h"
 
-#include "path.h"
 
 void TransPt(sPt_t *traj, int x, int y);
 void Rot90Pt(sPt_t *traj);

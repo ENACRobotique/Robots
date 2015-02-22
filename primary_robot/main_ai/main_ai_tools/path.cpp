@@ -5,15 +5,15 @@
  *      Author: seb
  */
 
-#include <path.h>
-
+#include <main_ai_tools/path.h>
+#include <main_ai_tools/statuses.h>
 #include <cmath>
 #include <iostream>
 #include "tools.h"
 #include "main.h"
 #include "math_ops.h"
-
-#include "obj_statuses.h"
+#include "a_star.h"
+#include "variables.h"
 
 extern "C"{
 #include "roles.h"
@@ -25,7 +25,8 @@ unsigned int tid = 0; //the same tid is used by all path object
 Path::Path() : _dist(0), _path_len(0){
 }
 
-Path::Path(vector <sTrajEl_t*> list) : _dist(0), _path_len(list.size()), _path(list){
+Path::Path(vector <sTrajEl_t*> list) : _dist(0), _path_len(list.size()){
+    //FIXME _path list
 }
 
 Path::~Path() {
@@ -35,11 +36,6 @@ Path::~Path() {
 void Path::clear(){
     _dist = 0;
     _path_len = 0 ;
-
-    //for(sTrajEl_t* i : _path){
-    for(unsigned int i ; i < _path.size() ; i++){
-        delete _path[i];
-    }
 
     _path.clear();
 }
@@ -66,16 +62,16 @@ void Path::sendRobot() {
             outMsg.header.type = E_TRAJ;
             outMsg.header.size = sizeof(outMsg.payload.traj);
 
-            outMsg.payload.traj.p1_x = _path[i]->p1.x;
-            outMsg.payload.traj.p1_y = _path[i]->p1.y;
-            outMsg.payload.traj.p2_x = _path[i]->p2.x;
-            outMsg.payload.traj.p2_y = _path[i]->p2.y;
-            outMsg.payload.traj.seg_len = _path[i]->seg_len;
+            outMsg.payload.traj.p1_x = _path[i].p1.x;
+            outMsg.payload.traj.p1_y = _path[i].p1.y;
+            outMsg.payload.traj.p2_x = _path[i].p2.x;
+            outMsg.payload.traj.p2_y = _path[i].p2.y;
+            outMsg.payload.traj.seg_len = _path[i].seg_len;
 
-            outMsg.payload.traj.c_x = _path[i]->obs.c.x;
-            outMsg.payload.traj.c_y = _path[i]->obs.c.y;
-            outMsg.payload.traj.c_r = _path[i]->obs.r;
-            outMsg.payload.traj.arc_len = _path[i]->arc_len;
+            outMsg.payload.traj.c_x = _path[i].obs.c.x;
+            outMsg.payload.traj.c_y = _path[i].obs.c.y;
+            outMsg.payload.traj.c_r = _path[i].obs.r;
+            outMsg.payload.traj.arc_len = _path[i].arc_len;
 
             outMsg.payload.traj.sid = i;
             outMsg.payload.traj.tid = tid;
@@ -83,6 +79,7 @@ void Path::sendRobot() {
             if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
                 printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
             }
+            cout << "[INFO] A new path was send" << endl;
 
             usleep(1000);
         }
@@ -94,7 +91,7 @@ void Path::stopRobot() {
 
     clear();
 
-    _path.push_back(traj);
+    _path.push_back(*traj);
 
     sendRobot();
 }
@@ -104,7 +101,8 @@ void Path::stopRobot() {
  * The robot go to the destination point.
  * "f" to force the robot to go, even if the destination point is in obstacle.
  */
-void Path::go2Point(const sPt_t &robot, const sPt_t &dest, const bool f){
+void Path::go2Point(const sPt_t &dest, const bool f){
+#if 0
     clear();
 
     sTrajEl_t *traj = new sTrajEl_t;
@@ -114,6 +112,31 @@ void Path::go2Point(const sPt_t &robot, const sPt_t &dest, const bool f){
     traj->obs = {{0., 0.}, 0. ,0 ,0 ,0};
 
     _path.push_back(traj);
+#endif
+
+    obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
+    obs[N-1].c = dest;
+
+    cout << obs[0].c.x << endl;
+    cout << obs[N-1].c.x << endl;
+
+    cout << "go to" << endl;
+ /*   if (DIST(0, N - 1) < 1.) {
+        return;
+    }*/
+    cout << "go to" << endl;
+    fill_tgts_lnk();
+    cout << "go to" << endl;
+    sPath_t path;
+    a_star(A(0), A(N-1), &path);
+    if (path.path) {
+        printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N - 1, path.dist, path.path_len);
+
+        addPath2(path);
+    }
+    else {
+        printf("no path from 0a to %ua\n", N - 1);
+    }
 
     sendRobot();
 }
@@ -137,7 +160,7 @@ void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tab
         el->obs.moved = 1;
         el->obs.r = fabs(obs[O(l[i + 1])].r) * (1 - 2 * DIR(l[i + 1]));
 
-        _path.push_back(el);
+        _path.push_back(*el);
     }
 
     sendRobot();
@@ -149,10 +172,10 @@ void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tab
 void const Path::printElTraj(const unsigned int num){
 
     if(_path.size() > num)
-        cout << "El " << num << " : p1 x" << _path[num]->p1.x << " p1 y" << _path[num]->p1.y
-                             << " ; p2 x" << _path[num]->p2.x << " p2 y" << _path[num]->p2.y
-                             << " ; obs x" << _path[num]->obs.c.x << " y" << _path[num]->obs.c.y << " r" << _path[num]->obs.r
-                             << " ; a_l" << _path[num]->arc_len << " s_l" << _path[num]->seg_len
+        cout << "El " << num << " : p1 x" << _path[num].p1.x << " p1 y" << _path[num].p1.y
+                             << " ; p2 x" << _path[num].p2.x << " p2 y" << _path[num].p2.y
+                             << " ; obs x" << _path[num].obs.c.x << " y" << _path[num].obs.c.y << " r" << _path[num].obs.r
+                             << " ; a_l" << _path[num].arc_len << " s_l" << _path[num].seg_len
                              << endl;
 }
 
@@ -208,8 +231,10 @@ sNum_t Path::length(){
 
     setPathLength();
 
-    for (unsigned int i = 0; i < _path_len; i++) {
-        _dist += _path[i]->seg_len + _path[i]->arc_len;
+    _dist = 0;
+
+    for (unsigned int i = 0; i < _path.size(); i++) {
+        _dist += _path[i].seg_len + _path[i].arc_len;
     }
     return _dist;
 }
@@ -218,15 +243,16 @@ void Path::addPath(vector <sTrajEl_t*> list){
     clear();
 
     for(unsigned int i = 0 ; i < list.size() ; i++){
-        _path.push_back(list[i]);
+        _path.push_back(*list[i]);
     }
 }
 
 void Path::addPath2(sPath_t &path){
+    cout << "ok" << endl;
     clear();
-
+    cout << "nok" << endl;
     for(unsigned int i = 0 ; i < path.path_len ; i++){
-        _path.push_back(&path.path[i]);
+        _path.push_back(path.path[i]);
     }
 }
 
@@ -238,11 +264,13 @@ void Path::addPath2(sPath_t &path){
  */
 void Path::setPathLength() {
 
-    for (unsigned int i = 0; i < _path.size() - 1; i++) {
-        _path[i]->arc_len = arc_len2(&(_path[i]->p2), &(_path[i]->obs.c), _path[i]->obs.r, &(_path[i+1]->p1));
-        distPt2Pt(&_path[i]->p1, &_path[i]->p2, &_path[i]->seg_len );
-    }
+    if(!_path.empty()){
+        for (unsigned int i = 0; i < _path.size() - 1; i++) {
+            _path[i].arc_len = arc_len2(&(_path[i].p2), &(_path[i].obs.c), _path[i].obs.r, &(_path[i+1].p1));
+            distPt2Pt(&_path[i].p1, &_path[i].p2, &_path[i].seg_len );
+        }
 
-    _path[_path.size() - 1]->arc_len = 0;
-    distPt2Pt(&_path[_path.size() - 1]->p1, &_path[_path.size() - 1]->p2, &_path[_path.size() - 1]->seg_len);
+        _path[_path.size() - 1].arc_len = 0;
+        distPt2Pt(&_path[_path.size() - 1].p1, &_path[_path.size() - 1].p2, &_path[_path.size() - 1].seg_len);
+    }
 }

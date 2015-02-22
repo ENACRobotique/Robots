@@ -19,6 +19,5 @@ int starting_cord = 0;
 int mode_switch = 0;
 eColor_t color;
 
-sPath_t path ;
 uint8_t obs_updated[N] ;
 

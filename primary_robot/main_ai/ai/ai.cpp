@@ -20,11 +20,11 @@ extern "C"{
 
 #include "math_ops.h"
 #include <obj_tools.h>
-#include <ai/obj_statuses.h>
+#include <main_ai_tools/statuses.h>
 #include <clap.h>
 #include <obj.h>
 
-#include "path.h"
+#include <main_ai_tools/path.h>
 
 using namespace std;
 
@@ -34,30 +34,31 @@ sWaitPos waiting_pos;
 unsigned int last_time2 = -1;
 
 Path path_;
+Statuses statuses_;
 
 
 void colissionDetection(){
-    sGenericStatus *stPr = getLastPGStatus(ELT_PRIMARY);
+    sGenericStatus &stPr = statuses_.getLastStatus(ELT_PRIMARY);
     sPt_t ptPr;
-    sGenericStatus *stAPr = getLastPGStatus(ELT_ADV_PRIMARY);
+    sGenericStatus &stAPr = statuses_.getLastStatus(ELT_ADV_PRIMARY);
     sPt_t ptAPr;
-    sGenericStatus *stASc = getLastPGStatus(ELT_ADV_SECONDARY);
+    sGenericStatus &stASc = statuses_.getLastStatus(ELT_ADV_SECONDARY);
     sPt_t ptASc;
     sNum_t d, dot;
     sVec_t v1, v2;
     int contact = 0;
 
-    if (stPr) {
-        ptPr.x = stPr->prop_status.pos.x;
-        ptPr.y = stPr->prop_status.pos.y;
+   // if (stPr) {
+        ptPr.x = stPr.prop_status.pos.x;
+        ptPr.y = stPr.prop_status.pos.y;
 
-        if (stAPr) {
-            ptAPr.x = stAPr->prop_status.pos.x;
-            ptAPr.y = stAPr->prop_status.pos.y;
+    //    if (stAPr) {
+            ptAPr.x = stAPr.prop_status.pos.x;
+            ptAPr.y = stAPr.prop_status.pos.y;
 
             distPt2Pt(&ptPr, &ptAPr, &d);
-            v1.x = cos(stPr->prop_status.pos.theta);
-            v1.y = sin(stPr->prop_status.pos.theta);
+            v1.x = cos(stPr.prop_status.pos.theta);
+            v1.y = sin(stPr.prop_status.pos.theta);
             convPts2Vec(&ptPr, &ptAPr, &v2);
             dotVecs(&v1, &v2, &dot);
 
@@ -65,15 +66,15 @@ void colissionDetection(){
                 printf("CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
                 contact = 1;
             }
-        }
+ //       }
 
-        if (stASc) {
-            ptASc.x = stASc->prop_status.pos.x;
-            ptASc.y = stASc->prop_status.pos.y;
+   //     if (stASc) {
+            ptASc.x = stASc.prop_status.pos.x;
+            ptASc.y = stASc.prop_status.pos.y;
 
             distPt2Pt(&ptPr, &ptASc, &d);
-            v1.x = cos(stPr->prop_status.pos.theta);
-            v1.y = sin(stPr->prop_status.pos.theta);
+            v1.x = cos(stPr.prop_status.pos.theta);
+            v1.y = sin(stPr.prop_status.pos.theta);
             convPts2Vec(&ptPr, &ptASc, &v2);
             dotVecs(&v1, &v2, &dot);
 
@@ -81,7 +82,7 @@ void colissionDetection(){
                 printf("CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
                 contact = 1;
             }
-        }
+   //     }
 
         if (contact) {
             sMsg outMsg = { { 0 } };
@@ -104,7 +105,7 @@ void colissionDetection(){
 
             role_sendRetry(&outMsg, MAX_RETRIES);
         }
-    }
+   // }
 }
 
 

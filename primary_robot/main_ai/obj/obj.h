@@ -17,6 +17,7 @@ using namespace std;
 
 class Obj {
     public:
+        Obj();
         Obj(eObj_t type);
         Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjPt_t> &entryPoint);
         virtual ~Obj();
@@ -26,6 +27,7 @@ class Obj {
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return 0;};
 
+        void setEP(sObjPt_t &pt);
 
 
         //TODO fonction update dist and path and time
