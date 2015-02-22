@@ -13,20 +13,10 @@
 #include "obj.h"
 #include <vector>
 #include <cmath>
-
-#define INIT_POS_YELLOW_X 45
-#define INIT_POS_YELLOW_Y 100
-#define INIT_POS_GREEN_X  (300 - INIT_POS_YELLOW_X)
-#define INIT_POS_GREEN_Y  INIT_POS_YELLOW_Y
-#define INIT_ANGLE_YELLOW 0
-#define INIT_ANGLE_GREEN  M_PI
-
+#include "variables.h"
 #define MAX_RETRIES 1
 
 //#define ABS_POS
-typedef enum {
-    E_AI_SLAVE, E_AI_PROG, E_AI_AUTO
-} eAIState_t;
 
 
 void obj_step(eAIState_t AIState);

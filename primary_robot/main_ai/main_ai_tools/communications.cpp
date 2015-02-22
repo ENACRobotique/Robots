@@ -103,8 +103,39 @@ void sendObss(){
         }
     }
 }
+/*
+ * Send the position of the robot
+ * Failure if return is < 0
+ */
+void sendPos(sPt_t &p, sNum_t theta) {
+    int ret;
 
-void ping(){
+    sMsg msg = { { 0 } };
+    msg.header.type = E_POS;
+    msg.header.size = sizeof(msg.payload.pos);
+
+    msg.payload.pos.id = 0;
+    msg.payload.pos.u_a = 0;
+    msg.payload.pos.u_a_theta = 0;
+    msg.payload.pos.u_b = 0;
+    msg.payload.pos.theta = theta;
+    msg.payload.pos.x = p.x;
+    msg.payload.pos.y = p.y;
+    obs[0].c.x = p.x;
+    obs[0].c.y = p.y;
+    theta_robot = theta;
+    _current_pos = obs[0].c;
+
+    if ((ret = role_sendRetry(&msg, MAX_RETRIES)) <= 0) {
+        printf("bn_sendRetry(E_POS) error #%i\n", -ret);
+    }
+    else {
+        printf("Sending position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msg.payload.pos.id, msg.payload.pos.x, msg.payload.pos.y, msg.payload.pos.theta * 180. / M_PI);
+    }
+}
+
+
+int ping(){
 #if !SIMU
     int state = 0, ret ;
     while(1){
@@ -155,6 +186,7 @@ void ping(){
         if(state == 6) break;
         }
 #endif
+    return 1;
 }
 
 

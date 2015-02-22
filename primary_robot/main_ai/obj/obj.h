@@ -9,7 +9,6 @@
 #define OBJ_OBJ_H_
 
 #include <ai_types.h>
-#include <main.h>
 #include "types.h"
 #include <vector>
 

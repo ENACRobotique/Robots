@@ -1,7 +1,7 @@
 #ifndef _TYPE_IA_H
 #define _TYPE_IA_H
 
-#include <main.h>
+
 #include <main_ai_tools/path.h>
 #include "math_types.h"
 #include "tools.h"

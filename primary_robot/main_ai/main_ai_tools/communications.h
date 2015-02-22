@@ -17,8 +17,9 @@ using namespace std;
 //Send message
 void sendObsCfg();
 void sendObss();
+void sendPos(sPt_t &p, sNum_t theta);
 
-void ping();
+int ping();
 
 //Receive message
 void checkInbox(int verbose, ofstream &file);

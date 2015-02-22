@@ -10,7 +10,6 @@
 #include <cmath>
 #include <iostream>
 #include "tools.h"
-#include "main.h"
 #include "math_ops.h"
 #include "a_star.h"
 #include "variables.h"

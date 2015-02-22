@@ -8,7 +8,7 @@
 #ifndef OBJ_CLAP_H_
 #define OBJ_CLAP_H_
 
-#include <main.h>
+
 #include <types.h>
 #include "obj.h"
 

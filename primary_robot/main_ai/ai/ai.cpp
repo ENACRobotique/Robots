@@ -25,6 +25,8 @@ extern "C"{
 #include <obj.h>
 
 #include <main_ai_tools/path.h>
+#include "variables.h"
+#include "communications.h"
 
 using namespace std;
 
@@ -85,25 +87,7 @@ void colissionDetection(){
    //     }
 
         if (contact) {
-            sMsg outMsg = { { 0 } };
-
-            outMsg.header.type = E_TRAJ;
-            outMsg.header.size = sizeof(outMsg.payload.traj);
-            outMsg.payload.traj.p1_x = ptPr.x;
-            outMsg.payload.traj.p1_y = ptPr.y;
-            outMsg.payload.traj.p2_x = ptPr.x;
-            outMsg.payload.traj.p2_y = ptPr.y;
-            outMsg.payload.traj.seg_len = 0.;
-
-            outMsg.payload.traj.c_x = ptPr.x;
-            outMsg.payload.traj.c_y = ptPr.y;
-            outMsg.payload.traj.c_r = 0.;
-            outMsg.payload.traj.arc_len = 0.;
-
-            outMsg.payload.traj.sid = 0;
-            outMsg.payload.traj.tid = ++last_tid;
-
-            role_sendRetry(&outMsg, MAX_RETRIES);
+            path.stopRobot();
         }
    // }
 }
@@ -135,7 +119,7 @@ void obj_step(eAIState_t AIState) {
                 }
 
 #ifndef ABS_POS
-                setPos(&obs[0].c, theta_robot); //Sending initial position
+                sendPos(obs[0].c, theta_robot); //Sending initial position
                 state = WAIT_STARTING_CORD;
 #else
                 waiting_pos.next = WAIT_STARTING_CORD;

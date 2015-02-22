@@ -12,6 +12,7 @@
 #include <geometry_tools.h>
 #include "math_ops.h"
 #include "obj_tools.h"
+#include "a_star.h"
 
 extern "C"{
 #include "millis.h"

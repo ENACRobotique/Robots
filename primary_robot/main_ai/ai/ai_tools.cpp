@@ -316,30 +316,3 @@ int newSpeed(float speed) {
     return 1;
 }
 
-int setPos(sPt_t *p, sNum_t theta) {
-    int ret;
-    sMsg msg = { { 0 } };
-    msg.header.type = E_POS;
-    msg.header.size = sizeof(msg.payload.pos);
-
-    msg.payload.pos.id = 0;
-    msg.payload.pos.u_a = 0;
-    msg.payload.pos.u_a_theta = 0;
-    msg.payload.pos.u_b = 0;
-    msg.payload.pos.theta = theta;
-    msg.payload.pos.x = p->x;
-    msg.payload.pos.y = p->y;
-    obs[0].c.x = p->x;
-    obs[0].c.y = p->y;
-    theta_robot = theta;
-    _current_pos = obs[0].c;
-
-    if ((ret = role_sendRetry(&msg, MAX_RETRIES)) <= 0) {
-        printf("bn_sendRetry(E_POS) error #%i\n", -ret);
-    }
-    else {
-        printf("Sending position to robot%i (%.2fcm,%.2fcm,%.2f°).\n", msg.payload.pos.id, msg.payload.pos.x, msg.payload.pos.y, msg.payload.pos.theta * 180. / M_PI);
-    }
-
-    return 0;
-}

@@ -10,27 +10,20 @@
  *      Author: Seb
  */
 
-#include <main.h>
-
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
+#include <cstring>
+#include <getopt.h> //already exist extern "C"
 
 extern "C"{
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <getopt.h>
-
-#include "../botNet/shared/botNet_core.h"
-#include "millis.h"
+#include <unistd.h> //for uslepp
 }
 
-#include "statuses.h"
-#include <ai/ai.h>
-#include "ai_tools.h"
-#include "math_ops.h"
-#include <communications.h>
+#include "botNet_core.h"
+#include "communications.h"
 #include "variables.h"
+#include "ai.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -40,10 +33,6 @@ void intHandler(int dummy) {
 }
 #endif
 
-sPath_t curr_path;
-int curr_traj_extract_sid = -1;
-int last_tid = 0;
-int cpt = 0;
 void usage(char *cl) {
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
@@ -58,9 +47,8 @@ void usage(char *cl) {
 int main(int argc, char **argv) {
     int ret;
     char verbose = 1;
-    ofstream file("log");
+    ofstream file("log.txt");
     eAIState_t eAIState = E_AI_SLAVE;
-
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -88,11 +76,8 @@ int main(int argc, char **argv) {
                 }
                 break;
             case 'f':
-                //FIXME change de default file nanme "log"
-             /*   if (fd) {
-                    fclose(fd);
-                }
-                fd = fopen(optarg, "wb+");*/
+                file.close();
+                file.open(optarg);
                 break;
             case 'v':
                 verbose++;
@@ -102,7 +87,7 @@ int main(int argc, char **argv) {
                 break;
 
             default:
-                printf("?? getopt returned character code 0%o ??\n", c);
+                cerr << "[ERROR] [main.cpp] ?? getopt returned character code 0" << c << "??" << endl;
                 /* no break */
             case 'h':
             case '?':
@@ -113,14 +98,20 @@ int main(int argc, char **argv) {
     }
 
     // network initialization
-    bn_attach(E_ROLE_SETUP, role_setup);
-
-    ret = bn_init();
-    if (ret < 0) {
-        cerr << "[ERROR] [main.cpp] bn_init() error : " << -ret << endl;
-        exit(1);
+    if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
+        cerr << "[ERROR] [main.cpp] bn_attach() error : " << -ret << endl;
+        exit(EXIT_FAILURE);
     }
-    ping();
+
+    if ((ret = bn_init()) < 0) {
+        cerr << "[ERROR] [main.cpp] bn_init() error : " << -ret << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    if ((ret = ping()) < 0){
+        cerr << "[ERROR] [main.cpp] ping()" << endl;
+        exit(EXIT_FAILURE);
+    }
 
     // calls initialization functions
     switch (eAIState) {
@@ -132,33 +123,28 @@ int main(int argc, char **argv) {
             }
             break;
         case E_AI_SLAVE:
-            sPt_t pt = {INIT_POS_YELLOW_X, INIT_POS_YELLOW_Y};
-            Obj obj_slave();
-
-            setPos(&pt, INIT_ANGLE_YELLOW);
+            sPt_t pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
+            sendPos(pt, INIT_ANGLE_YELLOW);
             break;
     }
 
-    //Send all obs to monitoring
+    // send all obs to monitoring if activate
     for(int i = 0 ; i < N ; i++)
-        obs_updated[i]++;
+        if(obs[i].active)
+            obs_updated[i]++;
+
+    cout << "[INFO] Initialization is finished" << endl;
 
 #ifdef CTRLC_MENU
     signal(SIGINT, intHandler);
     printf("listening, CTRL+C  for menu\n");
-#else
-    printf("listening...\n");
-#endif
 
-    //main loop
-#ifdef CTRLC_MENU
-    while (!quit)
-#else
-    while (1)
-#endif
-    {
-#ifdef CTRLC_MENU
+    while (!quit){
         int nbTraces,f; //for traceroute display
+#else
+
+    // loop
+    while (1){
 #endif
         usleep(500);
 
@@ -185,25 +171,7 @@ int main(int argc, char **argv) {
         // sending obstacles to monitoring
         sendObss();
 
-//        if(millis() - prevGetPos > 200){
-//            sGenericPos *p;
-//
-//            prevGetPos = millis();
-//
-//            p = getLastPGPosition(ELT_ADV_PRIMARY);
-//            printf("ADV_PRIMARY %p\n", p);
-//
-//            p = getLastPGPosition(ELT_ADV_SEC);
-//            printf("ADV_SEC %p\n", p);
-//
-//            p = getLastPGPosition(ELT_PRIMARY);
-//            printf("PRIMARY %p\n", p);
-//
-//            p = getLastPGPosition(ELT_SECONDARY);
-//            printf("SECONDARY %p\n", p);
-//        }
-
-        //menu
+        // menu
 #ifdef CTRLC_MENU
         if (menu) {
             quitMenu=0;
@@ -345,7 +313,7 @@ int main(int argc, char **argv) {
     }
 
     file.close();
-    printf("bye\n");
+    cout << "bye bye ..." << endl;
 
-    return 0;
+    return EXIT_SUCCESS;
 }

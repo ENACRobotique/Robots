@@ -21,9 +21,27 @@ Statuses::~Statuses() {
     // TODO Auto-generated destructor stub
 }
 
-void maintenace(){
+void Statuses::maintenace(){
     // TODO delete old items of the lists (for ex. older than 5seconds)
     // TODO compare but need synchronized time (as well as in obj_tim_tools.c, I'm going to do it... and come back here later)
+
+    //        if(millis() - prevGetPos > 200){
+    //            sGenericPos *p;
+    //
+    //            prevGetPos = millis();
+    //
+    //            p = getLastPGPosition(ELT_ADV_PRIMARY);
+    //            printf("ADV_PRIMARY %p\n", p);
+    //
+    //            p = getLastPGPosition(ELT_ADV_SEC);
+    //            printf("ADV_SEC %p\n", p);
+    //
+    //            p = getLastPGPosition(ELT_PRIMARY);
+    //            printf("PRIMARY %p\n", p);
+    //
+    //            p = getLastPGPosition(ELT_SECONDARY);
+    //            printf("SECONDARY %p\n", p);
+    //        }
 }
 
 int Statuses::receivedNewStatus(sGenericStatus &status){
