@@ -9,7 +9,7 @@
 
 #include <tools.h>
 
-
+int verbose = 1;
 int mode_switch = 0;
 eColor_t color;
 eInOut_t starting_cord;

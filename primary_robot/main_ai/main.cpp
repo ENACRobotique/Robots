@@ -46,7 +46,6 @@ void usage(char *cl) {
 
 int main(int argc, char **argv) {
     int ret;
-    char verbose = 1;
     ofstream file("log.txt");
     eAIState_t eAIState = E_AI_SLAVE;
 

@@ -39,7 +39,6 @@ typedef struct {
 
 extern uint8_t obs_updated[];
 
-extern sPt_t _current_pos;
 extern long _start_time;
 extern long last_time;
 extern sPt_t pt_select;

@@ -11,7 +11,6 @@ long _start_time;
 long last_time = 0;
 
 sPt_t pt_select;
-sPt_t _current_pos = { 0., 0. };
 
 sNum_t speed = 0;
 sNum_t theta_robot = 0.;

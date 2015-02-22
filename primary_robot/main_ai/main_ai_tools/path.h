@@ -63,6 +63,9 @@ class Path {
 
     private:
         void setPathLength();
+        int same_obs(sObs_t *obs1, sObs_t *obs2);
+        int checkSamePath(sPath_t &path);
+        int checkRobotBlock();
 
         sNum_t _dist;               //Computed sends
         unsigned int _path_len;     //Computed sends

@@ -121,15 +121,15 @@ void sendObss(){
     if (millis() - prevSendObss > 150){
         prevSendObss = millis();
 
-        for (i = 0 ; i < N ; i++){ //check if at least one obs_updated was modified
+        for (i = 0 ; i < N-1 ; i++){ //check if at least one obs_updated was modified
             if(obs_updated[i] > 0)
                 break;
         }
-        if( i < N ){ //send a message
+        if( i < N-1 ){ //send a message
             msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
             msgOut.header.type = E_OBSS;
 
-            for (i = 0 ; send_obss_idx < N && i < MAX_NB_OBSS_PER_MSG ; send_obss_idx++) {
+            for (i = 0 ; send_obss_idx < N-1 && i < MAX_NB_OBSS_PER_MSG ; send_obss_idx++) {
                 if (obs_updated[send_obss_idx] > 0){
                     obs_updated[send_obss_idx] = 0;
 
@@ -147,7 +147,7 @@ void sendObss(){
             msgOut.payload.obss.nb_obs = i;
             msgOut.header.size = 2 + (i << 3);
 
-            if (send_obss_idx == N)
+            if (send_obss_idx == N-1)
                 send_obss_idx = 0;
 
             if ((ret = bn_send(&msgOut)) < 0) {
@@ -155,7 +155,8 @@ void sendObss(){
                 return;
             }
 
-            cout << "[SEND MES] [OBSS] message send to monitoring" << endl;
+            if (verbose >= 2)
+                cout << "[SEND MES] [OBSS] message send to monitoring" << endl;
 
         }
     }

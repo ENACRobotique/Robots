@@ -13,9 +13,11 @@
 #include <iostream>
 #include "math_ops.h"
 #include "a_star.h"
+#include "time_tools.h"
 
 extern "C"{
 #include "roles.h"
+#include "millis.h"
 #include <unistd.h>
 }
 
@@ -47,40 +49,53 @@ void Path::clear(){
  */
 void Path::sendRobot() {
     sMsg outMsg = { { 0 } };
+    static sPath_t path;
     int ret;
 
     length(); //compute _dist, arc_len and seg_len //TODO check length between compute and save to the path.
     _path_len = _path.size();
 
-    tid++;
+    cout << "[INFO] Try to send a path" << endl;
 
-    if (!_path.empty()){
-        for (unsigned int i = 0; i < _path_len; i++) {
-            printElTraj(i);
+    if (!checkSamePath(path) || checkRobotBlock()){
+        tid++;
 
-            outMsg.header.type = E_TRAJ;
-            outMsg.header.size = sizeof(outMsg.payload.traj);
+        if (!_path.empty()){
+            for (unsigned int i = 0; i < _path_len; i++) {
+                printElTraj(i);
 
-            outMsg.payload.traj.p1_x = _path[i].p1.x;
-            outMsg.payload.traj.p1_y = _path[i].p1.y;
-            outMsg.payload.traj.p2_x = _path[i].p2.x;
-            outMsg.payload.traj.p2_y = _path[i].p2.y;
-            outMsg.payload.traj.seg_len = _path[i].seg_len;
+                outMsg.header.type = E_TRAJ;
+                outMsg.header.size = sizeof(outMsg.payload.traj);
 
-            outMsg.payload.traj.c_x = _path[i].obs.c.x;
-            outMsg.payload.traj.c_y = _path[i].obs.c.y;
-            outMsg.payload.traj.c_r = _path[i].obs.r;
-            outMsg.payload.traj.arc_len = _path[i].arc_len;
+                outMsg.payload.traj.p1_x = _path[i].p1.x;
+                outMsg.payload.traj.p1_y = _path[i].p1.y;
+                outMsg.payload.traj.p2_x = _path[i].p2.x;
+                outMsg.payload.traj.p2_y = _path[i].p2.y;
+                outMsg.payload.traj.seg_len = _path[i].seg_len;
 
-            outMsg.payload.traj.sid = i;
-            outMsg.payload.traj.tid = tid;
+                outMsg.payload.traj.c_x = _path[i].obs.c.x;
+                outMsg.payload.traj.c_y = _path[i].obs.c.y;
+                outMsg.payload.traj.c_r = _path[i].obs.r;
+                outMsg.payload.traj.arc_len = _path[i].arc_len;
 
-            if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+                outMsg.payload.traj.sid = i;
+                outMsg.payload.traj.tid = tid;
+
+                if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
+                    printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+                }
+                cout << "[INFO] A new path was send" << endl;
+
+                usleep(1000);
             }
-            cout << "[INFO] A new path was send" << endl;
+        }
+        delete path.path; //delete the previous path send;
 
-            usleep(1000);
+        path.dist = _dist;
+        path.path_len = _path_len;
+        path.path = new sTrajEl_t[_path_len];
+        for(unsigned int i = 0 ; i < _path_len ; i++){
+            path.path[i] = _path[i];
         }
     }
 }
@@ -269,4 +284,79 @@ void Path::setPathLength() {
         _path[_path.size() - 1].arc_len = 0;
         distPt2Pt(&_path[_path.size() - 1].p1, &_path[_path.size() - 1].p2, &_path[_path.size() - 1].seg_len);
     }
+}
+
+
+int Path::same_obs (sObs_t *obs1, sObs_t *obs2){
+    if(verbose > 2)
+        printf("r1=%f r2=%f\n",obs1->r,obs2->r);
+    return ( obs1->r == obs2->r && obs1->c.x == obs2->c.x && obs1->c.y == obs2->c.y);
+    }
+
+/*
+ * Return 1 if the same path else 0.
+ */
+int Path::checkSamePath(sPath_t &path) {
+    unsigned int t1_ind = path.path_len;
+    unsigned int t2_ind = _path_len;
+
+    cout << "[INFO] Check if the same path" << endl;
+
+    if(path.path_len==0 || _path_len==0)
+        return 0;
+    if(verbose > 2)
+        cout << "same_t 1.0" << endl;
+
+    while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminer
+        if(verbose > 2)
+            cout << "same_t 2.0" << endl;
+        if (same_obs(&(path.path[t1_ind-1].obs), &(_path[t2_ind-1].obs)) ){
+          t1_ind--;
+           t2_ind--;
+           }
+       else return 0;
+    }
+    if(verbose > 2)
+        cout << "same_t 3.0" << endl;
+    if (!(same_obs (&(path.path[t1_ind].obs), &(_path[t2_ind].obs))))
+        return 0;
+
+    if ( (fabs(path.path[t1_ind].p2.x - _path[t2_ind].p2.x ) > 2.) && (fabs(path.path[t1_ind].p2.y - _path[t2_ind].p2.y) > 2.) )
+        return 0;
+    else
+        if(verbose > 2)
+            cout << "same_t 4.0" << endl;
+
+    cout << "[INFO] Same path" << endl;
+    return 1 ;
+}
+
+/*
+ * Return 1 if the robot is block else 0.
+ */
+int Path::checkRobotBlock() {
+    static sPt_t pos[10] = { { 0., 0. } };
+    static int pt = 0;
+    static unsigned int lastTime = 0;
+    int i, cpt = 0;
+    sNum_t dist;
+    sPt_t pos_robot =statuses.getLastPosXY(ELT_PRIMARY);
+
+    if (fabs(time_diff(millis(), lastTime)) > 200) {
+        pos[pt] = pos_robot;
+        pt++;
+        pt = pt % 10;
+        for (i = 0; i < 10; i++) {
+            distPt2Pt(&pos_robot, &pos[i], &dist);
+            if (dist < 1.)
+                cpt++;
+        }
+        if (cpt >= 10) {
+            cout << "[INFO] Robot is blocked" << endl;
+            return 1;
+        }
+        lastTime = millis();
+    }
+
+    return 0;
 }

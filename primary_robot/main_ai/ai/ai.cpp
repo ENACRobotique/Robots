@@ -35,16 +35,14 @@ estate_t state = COLOR_SELECTION;
 sWaitPos waiting_pos;
 unsigned int last_time2 = -1;
 
-Path path_;
-Statuses statuses_;
 
 
 void colissionDetection(){
-    sGenericStatus &stPr = statuses_.getLastStatus(ELT_PRIMARY);
+    sGenericStatus &stPr = statuses.getLastStatus(ELT_PRIMARY);
     sPt_t ptPr;
-    sGenericStatus &stAPr = statuses_.getLastStatus(ELT_ADV_PRIMARY);
+    sGenericStatus &stAPr = statuses.getLastStatus(ELT_ADV_PRIMARY);
     sPt_t ptAPr;
-    sGenericStatus &stASc = statuses_.getLastStatus(ELT_ADV_SECONDARY);
+    sGenericStatus &stASc = statuses.getLastStatus(ELT_ADV_SECONDARY);
     sPt_t ptASc;
     sNum_t d, dot;
     sVec_t v1, v2;
@@ -196,18 +194,21 @@ void obj_step(eAIState_t AIState) {
 
 
                         path_loc = listObj[current_obj]->path();
-                        path_.addPath2(path_loc);
-                        path_.sendRobot();
+                        path.addPath2(path_loc);
+                        path.sendRobot();
                     }
                 }
 
                 //Test is the robot is on the entry point selected
-                if ( (fabs(pt_select.x - _current_pos.x) < RESO_POS && fabs(pt_select.y - _current_pos.y) < RESO_POS) && (current_obj != -1) ){
+                sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
+                if ( (fabs(pt_select.x - pos_robot.x) < RESO_POS && fabs(pt_select.y - pos_robot.y) < RESO_POS) && (current_obj != -1) ){
                     mode_obj = true;
                 }
-            }
-            else{
+            } else{
+                cout << mode_obj<< endl;
                 if (metObj(current_obj) == 0){
+                    pt_select.x = -1;
+                    pt_select.y = -1;
                     mode_obj = false;
                 }
             }
@@ -220,12 +221,11 @@ void obj_step(eAIState_t AIState) {
             obs_updated[4]++;
             posPrimary();
             //checkRobot2Obj();
-            checkRobotBlock();
+            //checkRobotBlock();
 
             if ((millis() - last_time2) > 1000) {
                 last_time2 = millis();
-                printf("Position actuel : x=%f et y=%f\n", _current_pos.x, _current_pos.y);
-                printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x, pt_select.y, fabs(pt_select.x - _current_pos.x), fabs(pt_select.y - _current_pos.y));
+           //     printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x, pt_select.y, fabs(pt_select.x - _current_pos.x), fabs(pt_select.y - _current_pos.y));
             }
 
             break;

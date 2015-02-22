@@ -140,20 +140,21 @@ int next_obj(void) {
     sNum_t tmp_val = 0.;
     sNum_t tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
+    sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
 
     cout << "[INFO] [obj_tools.cpp] Start next_obj()" << endl;
 
-    obs[N - 1].active = 1;
+    obs[N-1].active = 1;
 
     for (unsigned int i = 0; i < listObj.size(); i++) {
         if (listObj[i]->active() == false)
-            continue; //test if  objective is still active //TODO remove if finished
+            continue; //test if  objective is still active
 
-#if DEBUG
+#if DEBUG //TODO if verbose == 2
         //printObsActive();
 #endif
 
-        if (listObj[i]->update(_current_pos) < 0) {
+        if (listObj[i]->update(pos_robot) < 0) {
 #if DEBUG
             printf("[INFO] [obj_tools.cpp] No find path to achieve the objective for objective n°%d\n\n", i);
 #endif

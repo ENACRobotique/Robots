@@ -23,7 +23,6 @@ void obj_step(eAIState_t AIState);
 extern int obj_init(eAIState_t AIState);
 
 extern std::vector<Obj*> listObj;
-extern Path path_;
-extern Statuses statuses_;
+
 
 #endif /* AI_AI_H_ */

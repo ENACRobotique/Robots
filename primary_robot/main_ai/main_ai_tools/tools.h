@@ -38,6 +38,7 @@ typedef enum {
 } eInOut_t;
 
 
+extern int verbose;
 extern int mode_switch;
 extern eColor_t color;
 extern eInOut_t starting_cord; //true = out and false = in

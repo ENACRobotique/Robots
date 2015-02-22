@@ -183,10 +183,12 @@ void simuSecondary(void) { //TODO if a other robot on trajectory
     }
 }
 
+
 void posPrimary(void) {
     int i;
     sPt_t pt;
     sVec_t v;
+    sPt_t _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
 
     if (get_position(&_current_pos)) {
         if (((i = test_in_obs(&_current_pos)) != 0)) {
@@ -267,31 +269,6 @@ int checkAdvOnRobot(void) {
     return 0;
 }
 
-int checkRobotBlock(void) {
-    static sPt_t pos[10] = { { 0., 0. } };
-    static int pt = 0;
-    static unsigned int lastTime = 0;
-    int i, cpt = 0;
-    sNum_t dist;
-
-    if (fabs(time_diff(millis(), lastTime)) > 200) {
-        pos[pt] = obs[0].c;
-        pt++;
-        pt = pt % 10;
-        for (i = 0; i < 10; i++) {
-            distPt2Pt(&obs[0].c, &pos[i], &dist);
-            if (dist < 1.)
-                cpt++;
-        }
-        if (cpt == 10) {
-            //printf("Warning robot block\n");
-            return 1;
-        }
-        lastTime = millis();
-    }
-
-    return 0;
-}
 
 //TODO Optimisation des deplacement du robot algarithme arbre recouvrant
 
