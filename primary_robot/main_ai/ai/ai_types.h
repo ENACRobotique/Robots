@@ -29,10 +29,6 @@ typedef enum {
     COLOR_SELECTION, WAITING_POS, WAIT_STARTING_CORD, WAIT_START, WAIT_SECONDARY, GAME, SHUT_DOWN
 } estate_t;
 
-typedef enum {
-    YELLOW, GREEN
-} eColor_t;
-
 typedef struct {
         estate_t next;
         sPt_t pos;
@@ -50,9 +46,7 @@ extern sPt_t pt_select;
 extern sNum_t speed;
 extern sNum_t theta_robot;
 
-extern int starting_cord;
-extern int mode_switch;
-extern eColor_t color;
+
 extern int current_obj;
 
 #endif

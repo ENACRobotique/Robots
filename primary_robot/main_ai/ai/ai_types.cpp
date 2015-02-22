@@ -15,9 +15,7 @@ sPt_t _current_pos = { 0., 0. };
 
 sNum_t speed = 0;
 sNum_t theta_robot = 0.;
-int starting_cord = 0;
-int mode_switch = 0;
-eColor_t color;
+
 
 uint8_t obs_updated[N] ;
 

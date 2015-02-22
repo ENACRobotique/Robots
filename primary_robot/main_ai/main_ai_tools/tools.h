@@ -23,10 +23,24 @@
 #define INIT_POS_SLAVE_Y 100
 #define INIT_ANGLE_SLAVE -M_PI_2
 
+#define MAX_SPEED 150.
+
 typedef enum {
     E_AI_SLAVE, E_AI_PROG, E_AI_AUTO
 } eAIState_t;
 
+typedef enum {
+    YELLOW, GREEN
+} eColor_t;
+
+typedef enum {
+    IN, OUT
+} eInOut_t;
+
+
+extern int mode_switch;
+extern eColor_t color;
+extern eInOut_t starting_cord; //true = out and false = in
 extern Statuses statuses;
 extern Path path;
 

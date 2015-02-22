@@ -25,8 +25,5 @@ void checkRobot2Obj(void);
 int checkAdvOnRobot(void);
 int checkRobotBlock(void);
 void startColor(void);
-int initTraj(void);
-int newSpeed(float speed);
-int setPos(sPt_t *p, sNum_t theta);
 
 #endif /* OBJ_FCT_H_ */

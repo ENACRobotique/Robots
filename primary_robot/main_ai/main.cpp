@@ -108,10 +108,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if ((ret = ping()) < 0){
-        cerr << "[ERROR] [main.cpp] ping()" << endl;
-        exit(EXIT_FAILURE);
-    }
+    sendPing();
 
     // calls initialization functions
     switch (eAIState) {
@@ -128,10 +125,11 @@ int main(int argc, char **argv) {
             break;
     }
 
-    // send all obs to monitoring if activate
+    // send configuration of the playground and all obs to monitoring if activate
+    sendObsCfg();
     for(int i = 0 ; i < N ; i++)
         if(obs[i].active)
-            obs_updated[i]++;
+            obs_updated[i] = 1;
 
     cout << "[INFO] Initialization is finished" << endl;
 

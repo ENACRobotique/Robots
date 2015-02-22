@@ -246,10 +246,9 @@ void Path::addPath(vector <sTrajEl_t*> list){
     }
 }
 
-void Path::addPath2(sPath_t &path){
-    cout << "ok" << endl;
+void Path::addPath2(sPath_t path){
     clear();
-    cout << "nok" << endl;
+
     for(unsigned int i = 0 ; i < path.path_len ; i++){
         _path.push_back(path.path[i]);
     }

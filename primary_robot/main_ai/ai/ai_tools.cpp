@@ -296,23 +296,3 @@ int checkRobotBlock(void) {
 //TODO Optimisation des deplacement du robot algarithme arbre recouvrant
 
 
-
-int newSpeed(float speed) {
-    sMsg msg = { { 0 } };
-
-    if (fabs(speed) > 150.) {
-        return -1;
-    }
-
-    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
-    msg.header.type = E_SPEED_SETPOINT;
-    msg.header.size = sizeof(msg.payload.speedSetPoint);
-    msg.payload.speedSetPoint.speed = speed;
-
-    if (bn_sendRetry(&msg, MAX_RETRIES) <= 0) {
-        printf("bn_sendRetry(E_SPEED_SETPOINT) failed!\n");
-    }
-
-    return 1;
-}
-

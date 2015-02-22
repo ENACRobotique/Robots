@@ -46,17 +46,17 @@ void Statuses::maintenace(){
 
 int Statuses::receivedNewStatus(sGenericStatus &status){
 
-    if(status.id < 0 || status.id >NUM_E_ELEMENT){
+    if(status.id < 0 || status.id > NUM_E_ELEMENT){
         cerr << "[ERROR] [statuses.ccp] Unknown status id" << endl;
         return -1;
     }
-
+    cout << "[INFO] [status.cpp] New status : " << status.pos.x << ", " << status.pos.y << endl;
     _list[status.id].push_back(status); //TODO sort by date
     return 1;
 }
 
 sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
-    if(!_list.empty()){
+    if(!_list[el].empty()){
         if(_list[el].back().pos.frame == fr){
             return _list[el].back();
         }
