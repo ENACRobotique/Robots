@@ -5,13 +5,17 @@
  *      Author: yoyo
  */
 
+#include <stdlib.h>
+
 #include <eint.h>
 #include <gpio.h>
 #include <lpc214x.h>
-#include <pins.h>
+
+#include "pins.h"
+
 #include "encoders.h"
 
-encoder_t* _encs;
+encoder_t* _encs = NULL;
 
 #if NB_ENCODERS != 3
 #error "You can't change NB_ENCODERS without changing encoders.c as well"
@@ -50,4 +54,13 @@ void encoders_init(encoder_t encs[]) {
     encoder_init(&_encs[0], EINT1, EINT1_P0_14, EINT_RISING_EDGE, isr_eint1_enc1, 2);
     encoder_init(&_encs[1], EINT0, EINT0_P0_16, EINT_RISING_EDGE, isr_eint0_enc2, 3);
     encoder_init(&_encs[2], EINT3, EINT3_P0_20, EINT_RISING_EDGE, isr_eint3_enc3, 4);
+}
+
+void encoders_reset() {
+    if (_encs) {
+        int i;
+        for (i = 0; i < NB_ENCODERS; i++) {
+            encoder_update(&_encs[i]);
+        }
+    }
 }

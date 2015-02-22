@@ -13,5 +13,6 @@
 #define NB_ENCODERS (3)
 
 void encoders_init(encoder_t encs[]);
+void encoders_reset();
 
 #endif /* ENCODERS_H_ */

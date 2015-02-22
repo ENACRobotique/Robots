@@ -110,8 +110,10 @@ int main() {
             // If there is too much delay we skip to the next increment of the loop
             if(micros() - prevControl > PER_ASSER_CRITIC){
                 prevControl = micros();
+                encoders_reset();
                 continue;
             }
+            prevControl = micros();
 
             // Control trajectory
             trajctlr_update(&traj_ctl);
