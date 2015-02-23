@@ -12,7 +12,8 @@
 
 /**
  * Storage for an instance of encoder
- *   all fields are private, use encoder_*() functions
+ *   you must update manually the nbticks field in the interrupt service routine gave to the encoder_init function
+ *   all other fields are private, use encoder_*() functions
  */
 typedef struct {
 #ifdef ARCH_LPC21XX

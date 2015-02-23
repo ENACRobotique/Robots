@@ -57,6 +57,17 @@
 /**
  * Initializes the given encoder_t structure and starts ticks collection
  *   the other arguments allows to initializes the underlying external interrupt, see eint.h for more explanations
+ *   the handler must increment or decrement the e->nbticks variable according to the current rotation direction
+ *   the compiler must be aware the function passed to this function is an isr and the user must take care of the priority hardware and the irq acknoledge
+ *
+ *   example of handler:
+ *      void isr_eint1_enc1() __attribute__ ((interrupt("IRQ")));
+ *      void isr_eint1_enc1() {
+ *          SCB_EXTINT = BIT(1); // acknowledges interrupt
+ *          VIC_VectAddr = (unsigned) 0; // updates priority hardware
+ *
+ *          enc.nbticks += (gpio_read(BK_CHA_POD1, PIN_CHA_POD1) << 1) - 1; // increment or decrement according to the value of a gpio input channel
+ *      }
  */
 void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio) {
     e->eint = eint;
@@ -94,7 +105,7 @@ void encoder_deinit(encoder_t* e) {
 
 /**
  * Returns the cached nbticks updated by a call to encoder_update()
- *   positive value means trigonometric rotation (facing the wheel, motor behind it)
+ *   the sign of the value follows the convention used by the interrupt service routine
  */
 int encoder_get(encoder_t* e) {
     return e->nbticks_cache;

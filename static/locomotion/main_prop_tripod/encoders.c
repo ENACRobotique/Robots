@@ -15,6 +15,8 @@
 
 #include "encoders.h"
 
+// XXX on LPC2148, the pin polarity may be toggled on each interrupt if needed
+
 encoder_t* _encs = NULL;
 
 #if NB_ENCODERS != 3
