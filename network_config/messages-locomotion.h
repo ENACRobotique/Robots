@@ -15,7 +15,7 @@ typedef struct{
 } sSpeedSetPoint;
 
 typedef struct {
-// segment
+// segment (centimeters)
     float p1_x;
     float p1_y;
     float p2_x;
@@ -29,7 +29,19 @@ typedef struct {
 // trajectory data
     uint16_t tid; // trajectory identifier
     uint16_t sid; // step identifier
+    float cumul_cvdist; // cumulative curvilinear distance before this step (centimeters)
 } sTrajElRaw_t;
+
+typedef struct {
+// start point
+    float p1_s; // traveled distance (aka curvilinear abscissa)
+    float p1_a; // orientation (rad)
+    float seg_cvlen; // curvilinear length of this orientation step
+// orientation data
+    uint16_t tid; // orientation identifier
+    uint16_t sid; // step identifier
+    float cumul_cvdist; // cumulative curvilinear distance before this step (centimeters)
+} sOrientElRaw_t;
 
 #define NB_ASSERV_STEPS_PER_MSG (4)
 typedef struct __attribute__((packed)){
