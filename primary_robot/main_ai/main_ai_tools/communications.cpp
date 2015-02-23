@@ -18,6 +18,7 @@ extern "C"{
 }
 
 #include "botNet_core.h"
+#include "bn_utils.h"
 
 
 #include <astar_tools.h>
@@ -31,13 +32,13 @@ extern "C"{
  * If the interface is critical a new ping is send in loop and a message error is print.
  */
 void sendPing(){
-#if !SIMU
     int state = 0, ret ;
     while(1){
         switch(state){
             //Minimum necessary
             case 0:
-                if( (ret = bn_ping(ADDRD1_DBGBRIDGE)) >= 0){ //FIXME bn_ping doesn't exist
+#if !SIMU
+                if( (ret = bn_ping(ADDRD1_DBGBRIDGE)) >= 0){
                     state = 1;
                 }
                 printf("Ping debug bridge : %d\n", ret);
@@ -54,7 +55,13 @@ void sendPing(){
                     }
                 printf("Ping main prop : %d\n", ret);
                 break;
-           //Optional (for the moment)
+#endif
+                if( (ret = bn_ping(ADDRD1_MAIN_PROP_SIMU)) >= 0){
+                    state = 3;
+                    }
+                printf("Ping main prop simu : %d\n", ret);
+                break;
+           //Optional
             case 3:
                 if( (ret = bn_ping(ADDRD1_MONITORING)) < 0){
                     printf("Warning : Monitoring is not connected - ");
@@ -63,6 +70,7 @@ void sendPing(){
                 printf("Ping monitoring : %d\n", ret);
                 break;
             case 4:
+#if !SIMU
                 if( (ret = bn_ping(ADDRX_MOBILE_1)) < 0){
                     printf("Warning : Mobile 1 is not connected - ");
                     }
@@ -73,14 +81,15 @@ void sendPing(){
                 if( (ret = bn_ping(ADDRX_MOBILE_2)) < 0){
                     printf("Warning : Mobile 2 is not connected - ");
                     }
-                state = 6;
                 printf("Ping mobile 2 : %d\n", ret);
+#endif
+                state = 6;
                 break;
+
 
             }
         if(state == 6) break;
         }
-#endif
 }
 
 /*
