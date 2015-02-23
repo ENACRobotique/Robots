@@ -27,16 +27,16 @@
 #define PIN_MOTOR2_DIR 13
 #define PIN_ODO2_INT 3//odometer2, interruption pin
 #define PIN_ODO2_SEN 8
-#define PIN_SERVO 10
 #define PIN_TIRETTE 9
-#define PIN_LED 15 //////////////////////////////
+//#define PIN_LED 13
 #define PIN_COLOR 4
-
+#define PIN_SERVO 10
+#define PIN_VENTILO 11
 //analog in
-#define PIN_SHARP_FRONT_RIGHT A0
-#define PIN_SHARP_FRONT_LEFT A1
-#define PIN_SHARP_BACK_RIGHT A2
-#define PIN_SHARP_BACK_LEFT A3
+//#define PIN_SHARP_FRONT_RIGHT A0
+//#define PIN_SHARP_FRONT_LEFT A1
+//#define PIN_SHARP_BACK_RIGHT A2
+//#define PIN_SHARP_BACK_LEFT A3
 
 //times
 #define TIME_MATCH_STOP 90000   //in ms

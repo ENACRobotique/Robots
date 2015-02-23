@@ -47,10 +47,9 @@ void deinitTrajRedInit(sState *next)
 	}
 
 trajElem start_red[]={
-				{-40,0,3000},
-				{0,30,2000},
-				{-60,-6,6500},
-				{-40,3,7000},
+				{50,0,3000},
+				{40,10,1700},
+				{20,0,6000},
 				{0,0,0},
 				};
 
@@ -114,7 +113,9 @@ void deinitTrajYellowInit(sState *next)
 }
 
 trajElem start_yellow[]={ //A MODIFIER
-		{5,0,10000},
+		{50,0,3000},
+		{40,-10,1700},
+		{20,0,6000},
 	    {0,0,0},
 		};
 sState *testTrajYellowInit()
@@ -172,7 +173,6 @@ void deinitTrajYellowFinal(sState *next)
 }
 
 trajElem Final_yellow[]={
-				{5,0,1000},
 		        {0,0,0},
 
 		};

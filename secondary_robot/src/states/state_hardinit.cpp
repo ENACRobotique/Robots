@@ -10,6 +10,7 @@
 #include "state_ALACON.h"
 #include "state_traj.h"
 #include "state_Manualdrive.h"
+#include "state_tirette.h"
 
 
 #include "../libs/lib_move.h"
@@ -17,12 +18,13 @@
 #include "../libs/lib_radar.h"
 #include "../libs/lib_attitude.h"
 #include "../libs/MPU_6050.h"
+#include "../libs/lib_fan.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
 	//return &sTrajRedInit;
 	//return &sManualdrive;
-	return &sAlacon;
+	return &sTirette;
 }
 void initHard(sState *prev){
 
@@ -48,15 +50,15 @@ void initHard(sState *prev){
     //line following/detector
     //Wire.begin(); already done
 
+    //fan
+    fanInitHard(PIN_VENTILO);
+
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);
 
     //"color" (start side) button
     pinMode(PIN_COLOR,INPUT_PULLUP);
 
-    //led pin
-    pinMode( PIN_LED , OUTPUT);
-    digitalWrite(PIN_LED,LOW);
 
 #ifdef DEBUG
     Serial.println("fin init matérielles");
