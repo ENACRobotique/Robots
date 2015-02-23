@@ -11,10 +11,6 @@
 #include "lib_motor.h"
 #include "Arduino.h"
 
-//initialises stirring servo (1pin + "null value"+ First value)
-void moveInitHard(int pinDirServo,int zeroAngle,int startAngle);
-
-
 void move(int speed,int angle);
 
 

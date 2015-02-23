@@ -11,15 +11,14 @@
 #include <messages-elements.h>
 #include <stdint.h>
 
+typedef enum{FRAME_PLAYGROUND, FRAME_PRIMARY}frame_t;
+
 typedef struct __attribute__((packed)){
 // position in frame (specified in field "frame")
     float x;            // (cm)
     float y;            // (cm)
     float theta;        // (rad)
-    enum{
-        FRAME_PLAYGROUND,
-        FRAME_PRIMARY
-    } frame :8;
+    frame_t frame:8;
 } s2DPosAtt; // 2D position & attitude
 
 typedef struct __attribute__((packed)){

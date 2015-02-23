@@ -18,8 +18,8 @@
 //#define INT_Y
 
 typedef struct {
-    int speed;      //in inc/s
-    int angle;      //in degree, 0°=straight forward
+    int speed;      // speed/1.77 = real_speed in cm/s
+    int omega;      //in ... ?
     unsigned long duration;   //in ms
 }trajElem;
 
