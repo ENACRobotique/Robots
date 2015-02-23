@@ -56,6 +56,10 @@ M_pods2rob = inv(M_rob2pods)
 % verify results
 vo_rob = [v_rob;0] + omega_rob;
 v_pods = M_rob2pods*vo_rob
+_vo_rob = M_pods2rob*v_pods
+disp(["    => ", num2str(atan2(_vo_rob(2), _vo_rob(1))*180/pi), "°"])
+disp(["    => ", num2str(norm(_vo_rob(1:2))), "cm/s"])
+disp(["    => ", num2str(_vo_rob(3)*180/pi), "°/s"])
 
 % =================================================
 % trying to get geometric data back from the matrix
