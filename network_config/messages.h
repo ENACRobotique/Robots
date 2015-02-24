@@ -54,6 +54,7 @@ typedef enum{
     E_SPEED_SETPOINT,       // @payload.speedSetPoint: speed setpoint
     E_GENERIC_STATUS,       // @payload.genericStatus: generic status of an element
     E_POS_STATS,            // @payload.posStats: position statistics (packed)
+    E_TRAJ_ORIENT_EL,       // @payload.trajOrientEl: complex trajectory element (position + orientation wrt time)
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -119,8 +120,9 @@ typedef union{
 
 // LOCOMOTION (cf messages-locomotion.h)
     sSpeedSetPoint speedSetPoint;       // E_SPEED_SETPOINT
-    sTrajElRaw_t traj;                  // E_TRAJ
+    sTrajElRaw_t traj;                  // E_TRAJ (deprecated use trajOrientEl instead)
     sAsservStats asservStats;           // E_ASSERV_STATS
+    sTrajOrientElRaw_t trajOrientEl;    // E_TRAJ_ORIENT_EL
 
 // LOCALIZATION (cf messages-localization.h)
     sMobileReportPayload mobileReport;  // E_
