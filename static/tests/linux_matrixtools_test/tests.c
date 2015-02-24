@@ -30,7 +30,7 @@ void test_linearsolve(){
 #define MAT_SHIFT (16)
 #define VEC_SHIFT (16)
 
-	int ret;
+    int ret;
 
     // containers initialization, via function call:  (internal call to malloc(), be sure to call mt_*_free() when done)
     MT_MAT A;       m_init(&A, 2, 2);
@@ -108,28 +108,28 @@ void test_invmatrix() {
     int ret;
 
     const int32_t mat_rob2pods[3][3] = {
-	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-	    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-	    { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
-	};
+            {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
+            {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
+            { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
+    };
 
-	// static allocation on stack matrices (no need to free those)
-	MT_MAT M_rob2pods = M_INITS(3, 3);
-	MT_MAT M_pods2rob = M_INITS(3, 3);
+    // static allocation on stack matrices (no need to free those)
+    MT_MAT M_rob2pods = M_INITS(3, 3);
+    MT_MAT M_pods2rob = M_INITS(3, 3);
     MT_MAT M_product = M_INITS(3, 3);
 
-	// init input matrix
-	for(int i = 0; i < 3; i++) {
-		for(int j = 0; j < 3; j++) {
-			MT_M_AT(&M_rob2pods, i, j) = mat_rob2pods[i][j];
-		}
-	}
+    // init input matrix
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            MT_M_AT(&M_rob2pods, i, j) = mat_rob2pods[i][j];
+        }
+    }
 
-	ret = mt_m_inv(&M_rob2pods, &M_pods2rob);
-	assert(!ret);
+    ret = mt_m_inv(&M_rob2pods, &M_pods2rob);
+    assert(!ret);
 
-	ret = mt_mm_mlt(&M_rob2pods, &M_pods2rob, &M_product);
-	assert(!ret);
+    ret = mt_mm_mlt(&M_rob2pods, &M_pods2rob, &M_product);
+    assert(!ret);
 
     printf("M_rob2pods, ");
     mt_m_output(&M_rob2pods);
@@ -182,7 +182,7 @@ int main() {
     }
     if(buf) free(buf);
 
-//    malloc_stats();
+    //    malloc_stats();
 
     return EXIT_SUCCESS;
 }
