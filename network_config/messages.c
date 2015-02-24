@@ -37,6 +37,7 @@ const char *eType2str(E_TYPE elem){
     case E_IHM_STATUS :             return "IHM_STATUS" ;
     case E_GENERIC_STATUS :         return "GENERIC_STATUS" ;
     case E_POS_STATS :              return "POS_STATS" ;
+    case E_TRAJ_ORIENT_EL :         return "TRAJ_ORIENT_EL" ;
     /************************ user types stop ************************/
 
     default :
