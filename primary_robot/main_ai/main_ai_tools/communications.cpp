@@ -18,6 +18,7 @@ extern "C"{
 }
 
 #include "botNet_core.h"
+#include "bn_utils.h"
 
 
 #include <astar_tools.h>
@@ -31,13 +32,14 @@ extern "C"{
  * If the interface is critical a new ping is send in loop and a message error is print.
  */
 void sendPing(){
-#if !SIMU
     int state = 0, ret ;
+
     while(1){
         switch(state){
             //Minimum necessary
             case 0:
-                if( (ret = bn_ping(ADDRD1_DBGBRIDGE)) >= 0){ //FIXME bn_ping doesn't exist
+#if !SIMU
+                if( (ret = bn_ping(ADDRD1_DBGBRIDGE)) >= 0){
                     state = 1;
                 }
                 printf("Ping debug bridge : %d\n", ret);
@@ -54,7 +56,13 @@ void sendPing(){
                     }
                 printf("Ping main prop : %d\n", ret);
                 break;
-           //Optional (for the moment)
+#endif
+                if( (ret = bn_ping(ADDRD1_MAIN_PROP_SIMU)) >= 0){
+                    state = 3;
+                    }
+                printf("Ping main prop simu : %d\n", ret);
+                break;
+           //Optional
             case 3:
                 if( (ret = bn_ping(ADDRD1_MONITORING)) < 0){
                     printf("Warning : Monitoring is not connected - ");
@@ -63,6 +71,7 @@ void sendPing(){
                 printf("Ping monitoring : %d\n", ret);
                 break;
             case 4:
+#if !SIMU
                 if( (ret = bn_ping(ADDRX_MOBILE_1)) < 0){
                     printf("Warning : Mobile 1 is not connected - ");
                     }
@@ -73,14 +82,15 @@ void sendPing(){
                 if( (ret = bn_ping(ADDRX_MOBILE_2)) < 0){
                     printf("Warning : Mobile 2 is not connected - ");
                     }
-                state = 6;
                 printf("Ping mobile 2 : %d\n", ret);
+#endif
+                state = 6;
                 break;
+
 
             }
         if(state == 6) break;
         }
-#endif
 }
 
 /*
@@ -255,7 +265,6 @@ void checkInbox(int verbose, ofstream &file){
             cout << "[DEBUG]" << msgIn.payload.debug << endl;
             if (file)
                 file << "[DEBUG]" << msgIn.payload.debug << endl;
-
             break;
         case E_POS:
             if( verbose >= 2)
@@ -277,7 +286,6 @@ void checkInbox(int verbose, ofstream &file){
             sta.prop_status.pos.y = msgIn.payload.pos.y;
 
             statuses.receivedNewStatus(sta);
-
             break;
         case E_GOAL:
             cout << "[GOAL] robot" << msgIn.payload.pos.id << "@(" << msgIn.payload.pos.x << ", " << msgIn.payload.pos.y << ", " << msgIn.payload.pos.theta * 180. / M_PI << ")" << endl;
@@ -287,7 +295,6 @@ void checkInbox(int verbose, ofstream &file){
             goal.x = msgIn.payload.pos.x;
             goal.y = msgIn.payload.pos.y;
             lastGoal(goal, false);
-
             break;
         case E_OBS_CFG:
             cout << "[OBS_CFS]" << endl;
@@ -299,33 +306,11 @@ void checkInbox(int verbose, ofstream &file){
                 cout << "[GENERIC_STATUS] pos:(" << msgIn.payload.genericStatus.adv_status.pos.x << ", " << msgIn.payload.genericStatus.adv_status.pos.y << ", " << msgIn.payload.genericStatus.adv_status.pos.theta * 180. / M_PI << ")" << endl;
 
             statuses.receivedNewStatus(msgIn.payload.genericStatus);
-
             break;
         case E_IHM_STATUS:
             cout << "[IHM_STATUS] ";
 
-            for(int i = 0 ; i < (int) msgIn.payload.ihmStatus.nb_states ; i++){
-                switch(msgIn.payload.ihmStatus.states[i].id){
-                    case IHM_STARTING_CORD:
-                        if(msgIn.payload.ihmStatus.states[i].state == 0) //TODO check
-                            starting_cord = OUT;
-                        else
-                            starting_cord = IN;
-                        cout << "## scord: " << starting_cord << endl;
-                        break;
-                    case IHM_MODE_SWICTH:
-                        mode_switch = msgIn.payload.ihmStatus.states[i].state;
-                        cout << "## smode: %i\n" << mode_switch << endl;
-                        break;
-                    case IHM_LED:
-                        cout << "## sled:" << endl;
-                        break;
-                    default:
-                        cout << "[WARNING] id not define or doesn't exist" << endl;
-                    break;
-                 }
-             }
-
+            ihm.receivedNewIhm(msgIn.payload.ihmStatus);
             break;
         default:
             cout << "[WARNING] message type not define or doesn't exist" << endl << endl;
