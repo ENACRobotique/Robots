@@ -44,6 +44,22 @@
  * for more details, see Features2Pins.txt file
  */
 
+/*
+ *      y axis
+ *         ^
+ *    P2   #   P1
+ *     \   #   /
+ *      \  #  /
+ *       \ # /
+ *        \#/
+ *         o######### > x axis
+ *         |
+ *         |
+ *         |
+ *         |
+ *         P3
+ */
+
 /* from theoric data
 M_rob2pods =
   -5.00000000000000e-01   8.66025403784439e-01   1.55000000000000e+01

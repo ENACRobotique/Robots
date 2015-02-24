@@ -103,7 +103,9 @@ void test_linearsolve(){
 }
 
 void test_invmatrix() {
-#define MAT_SHIFT (16)
+#define MAT_SHIFT (25)
+
+    int ret;
 
     const int32_t mat_rob2pods[3][3] = {
 	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
@@ -114,6 +116,7 @@ void test_invmatrix() {
 	// static allocation on stack matrices (no need to free those)
 	MT_MAT M_rob2pods = M_INITS(3, 3);
 	MT_MAT M_pods2rob = M_INITS(3, 3);
+    MT_MAT M_product = M_INITS(3, 3);
 
 	// init input matrix
 	for(int i = 0; i < 3; i++) {
@@ -122,12 +125,18 @@ void test_invmatrix() {
 		}
 	}
 
-	mt_m_inv(&M_rob2pods, &M_pods2rob);
+	ret = mt_m_inv(&M_rob2pods, &M_pods2rob);
+	assert(!ret);
+
+	ret = mt_mm_mlt(&M_rob2pods, &M_pods2rob, &M_product);
+	assert(!ret);
 
     printf("M_rob2pods, ");
     mt_m_output(&M_rob2pods);
     printf("M_pods2rob, ");
     mt_m_output(&M_pods2rob);
+    printf("M_product, ");
+    mt_m_output(&M_product);
 
 #undef MAT_SHIFT
 }

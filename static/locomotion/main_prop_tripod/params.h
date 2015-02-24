@@ -3,13 +3,19 @@
 
 #include <math.h>
 
-#define MAT_SHIFT (16)
+// data in the matrix (or its inverse) will be in the range of -20;20, during an inversion or a matrix multiplication up to 3 times an element can be stored
+//   ln(3*20)/ln(2) = 5.91 => 6 bits for the integer part + 1 sign bit => 32-(6+1) = 25 bits for the decimal part
+//   => 2^25 = 33554432 decimal part possibilities, ln(33554432)/ln(10)=7.53 => more than 7 significant figures for the decimal part
+#define MAT_SHIFT (25)
 #define dMSHIFT ((double)(1 << MAT_SHIFT))
 
-#define VEC_SHIFT (16)
+// data in the vectors will be in the range of -81000;81000
+//   ln(81000)/ln(2) = 16.3 => 17 bits for the integer part + 1 sign bit => 32-(18) = 14 bits for the decimal part
+//   => 2^14 = 16384 decimal part possibilities, ln(16384)/ln(10)=4.21 => more than 4 significant figures for the decimal part
+#define VEC_SHIFT (14)
 #define dVSHIFT ((double)(1 << VEC_SHIFT))
 
-#define SHIFT (8)
+#define SHIFT (VEC_SHIFT)
 #define SHIFT_PID (8)
 #define dSHIFT ((double)(1<<SHIFT))
 #define iROUND(d) ((int)( (d)+0.5 )) // the +0.5 is here to get a round instead of a floor when casting to int
@@ -24,8 +30,8 @@
 #define WDIAM (3.25*2.54)  // wheel diameter (cm)
 
 #define SpP (0.02)  // seconds per sampling period
-#define IpR (500.*676./49.) // increments per revolution
-#define DpR (PI*WDIAM) // distance per revolution (cm)
+#define IpR (500.*676./49.) // increments per revolution (6897.959183673)
+#define DpR (PI*WDIAM) // distance per revolution (25.933847355 cm)
 
 // revolution per second to increment per sampling period
 #define RpS2IpP(o) ((o)*IpR*SpP)
@@ -38,7 +44,7 @@
 #define isDpS2IpP(o) isROUND(DpS2IpP(o))  // (IpP<<SHIFT)
 
 // centimeters to increments
-#define D2I(d) ((d)*IpR/DpR)
+#define D2I(d) ((d)*IpR/DpR) // (265.982871309 increments per centimeter)
 #define iD2I(d) iROUND(D2I(d))  // (I)
 #define isD2I(d) isROUND(D2I(d)) // (I<<SHIFT)
 
@@ -51,7 +57,6 @@
 #define R2I(R) ((R)/M_TWOPI*IpR)
 #define iR2I(R) iROUND(R2I(R)) // (I)
 #define isR2I(R) isROUND(R2I(R)) // (I<<SHIFT)
-
 
 #define PWM_RANGE 1024  // If you want to change the resolution of the motor command, just don't change this value, you're doing it wrong...
 

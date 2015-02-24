@@ -69,13 +69,13 @@ disp(["    => ", num2str(_vo_rob(3)*180/pi), "°/s"])
 A = M_rob2pods;
 _sphi1 = -A(1, 1);
 _cphi1 =  A(1, 2);
-_phi1 = atan2(_sphi1, _cphi1) *180/pi % (deg)
+disp(["    => phi1=", num2str(atan2(_sphi1, _cphi1)*180/pi), "°"])
 _sphi2 = -A(2, 1);
 _cphi2 =  A(2, 2);
-_phi2 = atan2(_sphi2, _cphi2) *180/pi % (deg)
+disp(["    => phi2=", num2str(atan2(_sphi2, _cphi2)*180/pi), "°"])
 _sphi3 = -A(3, 1);
 _cphi3 =  A(3, 2);
-_phi3 = atan2(_sphi3, _cphi3) *180/pi % (deg)
+disp(["    => phi3=", num2str(atan2(_sphi3, _cphi3)*180/pi), "°"])
 _L1 = A(1, 3) % (cm)
 _L2 = A(2, 3) % (cm)
 _L3 = A(3, 3) % (cm)
