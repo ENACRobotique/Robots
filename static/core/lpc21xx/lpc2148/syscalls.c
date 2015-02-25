@@ -44,6 +44,10 @@ void _exit(int status){
     while (1);
 }
 
+int _fini(){
+    return 0;
+}
+
 int _close(int file){
     return -1;
 }

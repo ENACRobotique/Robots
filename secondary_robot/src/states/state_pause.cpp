@@ -4,20 +4,20 @@
 #include "../tools.h"
 #include "../params.h"
 #include "state_pause.h"
-#include "state_funny.h"
-#include "lib_radar2.h"
+#include "lib_radar.h"
 #include "lib_move.h"
 #include "state_tirette.h"
+#include "state_dead.h"
 
 sState *pausePrevState;
 sState* testPause(){
     static unsigned long lastSeen;
     if(radarIntrusion()) lastSeen=millis();
     if( (millis()-lastSeen)>= RADAR_SAFETY_TIME ) return pausePrevState;
-    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
+    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
     if ((millis()-_matchStart) > TIME_MATCH_LAUN ) {
 	launcherServoUp.write(10);
-	launcherServoNet.write(LAUNCHER_NET_POS_1);}
+	}
     return 0;
 }
 

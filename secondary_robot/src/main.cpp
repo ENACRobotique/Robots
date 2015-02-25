@@ -12,7 +12,7 @@
 #include "states/state_hardinit.h"
 #include "states/state_blink.h"
 #include "Arduino.h"
-#include "lib_radar2.h"
+#include "lib_radar.h"
 #include "lib_motor.h"
 #include "lib_wall.h"
 #include "lib_line.h"
@@ -38,7 +38,7 @@ void setup(){
 #ifdef DEBUG
     Serial.println("sortie init mat");
 #endif
-    current->init(0);
+    current->init(NULL);
     }
 
 }
@@ -51,7 +51,7 @@ void loop(){
     static char ledState=0;
     if ( (millis()-prevBlink)>500){
         ledState^=1;
-        digitalWrite(PIN_LED,ledState);
+        //digitalWrite(PIN_LED,ledState);
         prevBlink=millis();
     }
 #endif

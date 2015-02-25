@@ -190,7 +190,7 @@ int main(int argc, char *argv[]){
     }
 
     // send position
-    outMsg.header.destAddr = ADDRI_MAIN_PROP;
+    outMsg.header.destAddr = ADDRI1_MAIN_PROP;
     outMsg.header.type = E_POS;
     outMsg.header.size = sizeof(outMsg.payload.pos);
     outMsg.payload.pos.id = 0;
@@ -334,7 +334,7 @@ int main(int argc, char *argv[]){
                         switch(dir_state){
                         case E_DIR_FWD:
                             // header
-                            outMsg.header.destAddr = ADDRI_MAIN_PROP;
+                            outMsg.header.destAddr = ADDRI1_MAIN_PROP;
                             outMsg.header.type = E_TRAJ;
                             outMsg.header.size = sizeof(outMsg.payload.traj);
                             // payload
@@ -358,7 +358,7 @@ int main(int argc, char *argv[]){
                             break;
                         case E_DIR_STOP:
                             // header
-                            outMsg.header.destAddr = ADDRI_MAIN_PROP;
+                            outMsg.header.destAddr = ADDRI1_MAIN_PROP;
                             outMsg.header.type = E_TRAJ;
                             outMsg.header.size = sizeof(outMsg.payload.traj);
                             // payload
@@ -382,7 +382,7 @@ int main(int argc, char *argv[]){
                             break;
                         case E_DIR_RGT:
                             // header
-                            outMsg.header.destAddr = ADDRI_MAIN_PROP;
+                            outMsg.header.destAddr = ADDRI1_MAIN_PROP;
                             outMsg.header.type = E_TRAJ;
                             outMsg.header.size = sizeof(outMsg.payload.traj);
 
@@ -430,7 +430,7 @@ int main(int argc, char *argv[]){
                             break;
                         case E_DIR_LFT:
                             // header
-                            outMsg.header.destAddr = ADDRI_MAIN_PROP;
+                            outMsg.header.destAddr = ADDRI1_MAIN_PROP;
                             outMsg.header.type = E_TRAJ;
                             outMsg.header.size = sizeof(outMsg.payload.traj);
 

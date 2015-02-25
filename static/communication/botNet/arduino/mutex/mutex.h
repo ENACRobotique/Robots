@@ -18,12 +18,12 @@
 static volatile uint8_t SREG_save;
 
 //pseudo-mutex for superBus central Buffer access management
-static inline void mutexLock(){
+static inline void bn_mutexLock(){
     SREG_save = SREG;
     noInterrupts();
 }
 
-static inline void mutexUnlock(){
+static inline void bn_mutexUnlock(){
     SREG = SREG_save;
 }
 

@@ -1,12 +1,12 @@
 
 #include "state_wall.h"
 #include "state_pause.h"
-#include "state_funny.h"
+#include "state_dead.h"
 #include "state_traj.h"
 
 #include "../params.h"
 #include "../tools.h"
-#include "lib_radar2.h"
+#include "lib_radar.h"
 #include "lib_wall.h"
 #include "lib_line.h"
 #include "lib_move.h"

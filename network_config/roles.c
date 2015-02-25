@@ -13,15 +13,15 @@
 
 #include "roles.h"
 
-#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_IA && MYROLE!=ROLE_PROPULSION && MYROLE!=ROLE_DEBUG)
-#error "MYROLE must be correct and defined in node_cfg.h"
+#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_AI && MYROLE!=ROLE_PROPULSION && MYROLE!=ROLE_DEBUG)
+#error "MYROLE must be defined and correct in node_cfg.h"
 #endif
 
 #if MYROLE != ROLE_MONITORING
 bn_Address addr_role_mon = ADDR_MONITORING_DFLT;
 #endif
-#if MYROLE != ROLE_IA
-bn_Address addr_role_ia = ADDR_IA_DFLT;
+#if MYROLE != ROLE_AI
+bn_Address addr_role_ai = ADDR_AI_DFLT;
 #endif
 #if MYROLE != ROLE_PROPULSION
 bn_Address addr_role_prop = ADDR_PROP_DFLT;
@@ -31,7 +31,7 @@ bn_Address addr_role_dbg = ADDR_DEBUG_DFLT;
 #endif
 
 sRoleActions role_actions[3] = {
-#if MYROLE == ROLE_IA
+#if MYROLE == ROLE_AI
         { // E_TRAJ messages
                 .sendTo.first = ROLE_PROPULSION,
                 .sendTo.second = ROLE_MONITORING,
@@ -47,7 +47,7 @@ sRoleActions role_actions[3] = {
         },
 #endif
 
-#if MYROLE == ROLE_IA
+#if MYROLE == ROLE_AI
         { // E_POS messages
                 .sendTo.first = ROLE_PROPULSION,
                 .sendTo.second = ROLE_MONITORING,
@@ -56,7 +56,7 @@ sRoleActions role_actions[3] = {
         },
 #else
         { // E_POS messages
-                .sendTo.first = ROLE_IA,
+                .sendTo.first = ROLE_AI,
                 .sendTo.second = 0,
                 .relayTo.n1 = 0,
                 .relayTo.n2 = 0
@@ -82,7 +82,7 @@ void role_setup(sMsg *msg){
         return;
     }
 
-    for(i = 0; i < rs->nb_steps; i++){
+    for(i = 0; i < MIN(13, rs->nb_steps); i++){
         typeof(rs->steps[0]) *s = &rs->steps[i];
         switch(s->step){
         case UPDATE_ADDRESS:
@@ -120,9 +120,9 @@ int role_set_addr(uint8_t role, bn_Address address){
 #else
         return -1;
 #endif
-    case ROLE_IA:
-#if MYROLE != ROLE_IA
-        addr_role_ia = address;
+    case ROLE_AI:
+#if MYROLE != ROLE_AI
+        addr_role_ai = address;
         break;
 #else
         return -1;
@@ -149,24 +149,28 @@ int role_set_addr(uint8_t role, bn_Address address){
 
 bn_Address role_get_addr(uint8_t role){
     switch(role){
+    // monitoring
     case ROLE_MONITORING:
 #if MYROLE != ROLE_MONITORING
         return addr_role_mon;
 #else
         return MYADDR;
 #endif
-    case ROLE_IA:
-#if MYROLE != ROLE_IA
-        return addr_role_ia;
+    // ai
+    case ROLE_AI:
+#if MYROLE != ROLE_AI
+        return addr_role_ai;
 #else
         return MYADDR;
 #endif
+    // propulsion
     case ROLE_PROPULSION:
 #if MYROLE != ROLE_PROPULSION
         return addr_role_prop;
 #else
         return MYADDR;
 #endif
+    // debug
     case ROLE_DEBUG:
 #if MYROLE != ROLE_DEBUG
         return addr_role_dbg;
@@ -180,16 +184,20 @@ bn_Address role_get_addr(uint8_t role){
 
 uint8_t role_get_role(bn_Address address){
     switch(address){
+    // monitoring
     case ADDRD1_MONITORING:
         return ROLE_MONITORING;
-    case ADDRD1_MAIN_IA_SIMU:
+    // ai
+    case ADDRD1_MAIN_AI_SIMU:
     case ADDRD2_MAIN_AI:
     case ADDRU2_MAIN_AI:
-        return ROLE_IA;
+        return ROLE_AI;
+    // propulsion
     case ADDRD1_MAIN_PROP_SIMU:
-    case ADDRI_MAIN_PROP:
+    case ADDRI1_MAIN_PROP:
     case ADDRU2_MAIN_PROP:
         return ROLE_PROPULSION;
+    // debug
     case ADDRD1_DEBUG1:
     case ADDRD1_DEBUG2:
     case ADDRD1_DEBUG3:
@@ -204,8 +212,8 @@ const char *role_string(uint8_t role){
     switch(role){
     case ROLE_MONITORING:
         return "monitoring";
-    case ROLE_IA:
-        return "ia";
+    case ROLE_AI:
+        return "ai";
     case ROLE_PROPULSION:
         return "propulsion";
     case ROLE_DEBUG:
