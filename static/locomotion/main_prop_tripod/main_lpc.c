@@ -86,10 +86,13 @@ int main() {
     sys_time_init();
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Trajectory
-    trajectory_controller_t traj_ctl;
-    trajctlr_init(&traj_ctl, mat_rob2pods);
-    // BotNet initialization
+    // Trajectory manager (trajectory steps management)
+    trajectory_manager_t traj_mngr;
+    trajmngr_init(&traj_mngr);
+    // Trajectory controller (trajectory control loop)
+    trajectory_controller_t traj_ctlr;
+    trajctlr_init(&traj_ctlr, mat_rob2pods);
+    // BotNet initialization (i²c + uart)
     //TODO
 
     global_IRQ_enable();
@@ -106,18 +109,12 @@ int main() {
         ret = bn_receive(&inMsg);
         if(ret > 0){
             switch(inMsg.header.type){
-            case E_SPEED_SETPOINT: // Get the speed setpoint of the robot
-                trajmngr_new_speed_sp(inMsg.payload.speedSetPoint.speed);
-                break;
-            case E_TRAJ: // Get the new step of a trajectory
-                trajmngr_new_traj_el(&inMsg.payload.traj);
+            case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
+                trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
             case E_POS:
-                trajmngr_new_pos(&inMsg.payload.pos);
+                trajmngr_new_pos(&traj_mngr, &inMsg.payload.pos);
                 break;
-//            case E_GEO: // Information to initialize geometry, ...
-//                // Update info
-//                break;
             }
         } // End: if(ret > 0)
 
@@ -132,7 +129,7 @@ int main() {
             prevControl = micros();
 
             // Control trajectory
-            trajctlr_update(&traj_ctl);
+            trajctlr_update(&traj_ctlr);
         }
     } // ############## End loop ############################################
 }
