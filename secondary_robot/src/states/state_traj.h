@@ -28,14 +28,12 @@ int progTraj(trajElem tab[]);
 
 extern sState sTrajRedInit;
 extern sState sTrajYellowInit;
-extern sState sTrajRedFinal;
-extern sState sTrajYellowFinal;
+extern sState sTrajEndStairsYellow;
+extern sState sTrajEndStairsGreen;
 
 
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
-extern sState sTrajRedInit;
-extern sState sTrajYellowInit;
 
 
 #endif /* STATE_TRAJ_H_ */

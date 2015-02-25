@@ -60,6 +60,9 @@
 
 #define TIME_READY_LAUNCHER 500 //in ms
 
+#define FAN_SPEED 254 //PWM Command(0-255)
+#define TIME_RAG_RLSD 2000 //in milliseconds
+
 #define DEBUG 1
 
 /* endDefines *********************************************/
