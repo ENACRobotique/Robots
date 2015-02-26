@@ -44,6 +44,7 @@ class Path {
         Path(vector <sTrajEl_t*> list); //FIXME
         ~Path();
         void clear();
+        void maintenace();
 
         //Send methods
         void sendRobot();

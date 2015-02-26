@@ -41,6 +41,10 @@ void Path::clear(){
     _path.clear();
 }
 
+void Path::maintenace(){
+    checkRobotBlock();
+}
+
 
 /*
  * Send the path to the robot.
@@ -304,7 +308,7 @@ int Path::checkRobotBlock() {
     static unsigned int lastTime = 0;
     int i, cpt = 0;
     sNum_t dist;
-    sPt_t pos_robot =statuses.getLastPosXY(ELT_PRIMARY);
+    sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
 
     if (fabs(time_diff(millis(), lastTime)) > 200) {
         pos[pt] = pos_robot;

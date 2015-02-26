@@ -24,6 +24,7 @@ extern "C"{
 #include "communications.h"
 #include "tools.h"
 #include "ai.h"
+#include "net.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -167,6 +168,11 @@ int main(int argc, char **argv) {
 
         // sending obstacles to monitoring
         sendObss();
+
+        // calls maintenance function
+        statuses.maintenace();
+        path.maintenace();
+        net.maintenace();
 
         // menu
 #ifdef CTRLC_MENU
