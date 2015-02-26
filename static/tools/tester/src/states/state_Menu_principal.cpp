@@ -21,7 +21,7 @@
 
 #define NB_menu_principal 5
 
-Encoder myEnc(4, 5);
+Encoder myEnc(ENCODER1, ENCODER2);
 
 
 sState* testMenu_principal(){

@@ -44,20 +44,6 @@ void setup() {
 
 void loop() {
 
-
-#ifdef DEBUG
-	static unsigned long prevBlink = millis();
-	static char ledState = 0;
-	if ((millis() - prevBlink) > 500) {
-		ledState ^= 1;
-		digitalWrite(PIN_LED, ledState);
-		prevBlink = millis();
-	}
-#endif
-
-	if (current->flag & BIT(E_BLINK))
-		blink();
-
 	sState *next;
 	if (current->testFunction) {
 		if ((next = (current->testFunction()))) {

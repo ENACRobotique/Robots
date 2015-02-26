@@ -17,9 +17,9 @@
 // test;
 
 sState* testanalogRead(){
-	static int memValue[]={0,0,0,0,0,0};
-	int Position = (myEnc.read()/2)%6;    //position du selecteur
-	int Value = analogRead(Position);
+	static int memValue[]={0,0,0};
+	int Position = (myEnc.read()/2)%3;    //position du selecteur
+	int Value = analogRead(Position+1);
 
 	if(abs(Value-memValue[Position])>11)
 	{
@@ -47,9 +47,9 @@ void deinitanalogRead(sState *next){
 
 }
 
-void analogRead(){
-
-}
+//void analogRead(){
+//
+//}
 
 sState sanalogRead={
     0,

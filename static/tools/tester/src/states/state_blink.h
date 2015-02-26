@@ -10,13 +10,6 @@
 
 #include <state_types.h>
 
-
-
-extern sState sBlink;
-
-
-void blink();
-
 void afficher(const char* chaine);
 
 void ret();

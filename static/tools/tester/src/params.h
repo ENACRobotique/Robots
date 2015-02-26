@@ -15,10 +15,21 @@
 /* Defines ************************************************/
 //pins
 //digital I/O
-#define PIN_LED 13
+
+#define CODERINT 2
+#define ENCODER1 4
+#define ENCODER2 5
 #define SELECT 6
 #define RETOUR 7
 #define PIN_PWM_SERVO 11
+#define LCD1 3
+#define LCD2 8
+#define LCD3 9
+#define LCD4 10
+#define LCD5 12
+#define LCD6 13
+#define CODERSTATE A0
+
 #define DUREE_BIG_STEPS 20
 
 #define PRECISION_MICROS 5	//précision pour le mode micros

@@ -12,7 +12,7 @@
 
 extern sState sanalogRead;
 
-void analogRead();
+//void analogRead();
 
 //void afficher(const char* chaine);
 
