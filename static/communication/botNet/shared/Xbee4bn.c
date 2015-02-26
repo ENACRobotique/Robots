@@ -10,6 +10,7 @@
 #include "network_cfg.h"
 #include "messages.h"
 
+#if MYADDRX
 // other required libraries
 #include "../../../tools/libraries/Timeout/timeout.h"
 #include "../../Xbee_API/shared/Xbee_API.h"
@@ -24,7 +25,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#if MYADDRX
 
 
 
