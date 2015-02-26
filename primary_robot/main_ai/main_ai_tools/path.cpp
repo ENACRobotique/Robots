@@ -5,6 +5,8 @@
  *      Author: seb
  */
 
+#include "path.h"
+
 #include <astar_tools.h>
 #include <main_ai_tools/path.h>
 #include <main_ai_tools/statuses.h>
@@ -20,8 +22,6 @@ extern "C"{
 #include "millis.h"
 #include <unistd.h>
 }
-
-unsigned int tid = 0; //the same tid is used by all path object
 
 Path::Path() : _dist(0), _path_len(0){
 }
@@ -58,44 +58,8 @@ void Path::sendRobot() {
     cout << "[INFO] Try to send a path" << endl;
 
     if (!checkSamePath(path) || checkRobotBlock()){
-        tid++;
-
         if (!_path.empty()){
-            for (unsigned int i = 0; i < _path_len; i++) {
-                printElTraj(i);
-
-                outMsg.header.type = E_TRAJ;
-                outMsg.header.size = sizeof(outMsg.payload.traj);
-
-                outMsg.payload.traj.p1_x = _path[i].p1.x;
-                outMsg.payload.traj.p1_y = _path[i].p1.y;
-                outMsg.payload.traj.p2_x = _path[i].p2.x;
-                outMsg.payload.traj.p2_y = _path[i].p2.y;
-                outMsg.payload.traj.seg_len = _path[i].seg_len;
-
-                outMsg.payload.traj.c_x = _path[i].obs.c.x;
-                outMsg.payload.traj.c_y = _path[i].obs.c.y;
-                outMsg.payload.traj.c_r = _path[i].obs.r;
-                outMsg.payload.traj.arc_len = _path[i].arc_len;
-
-                outMsg.payload.traj.sid = i;
-                outMsg.payload.traj.tid = tid;
-
-                if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                    printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
-                }
-                cout << "[INFO] A new path was send" << endl;
-
-                usleep(1000);
-            }
-        }
-        delete path.path; //delete the previous path send;
-
-        path.dist = _dist;
-        path.path_len = _path_len;
-        path.path = new sTrajEl_t[_path_len];
-        for(unsigned int i = 0 ; i < _path_len ; i++){
-            path.path[i] = _path[i];
+            net.sendPath(_path);
         }
     }
 }
