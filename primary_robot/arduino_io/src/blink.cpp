@@ -150,7 +150,7 @@ void loop(){
     if( (time -  timeStartingCord > 20) && flagStartingCord){
         StartingCord = digitalRead(PIN_STARTING_CORD);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_IA);
+        outMsg.header.destAddr = role_get_addr(ROLE_AI);
         outMsg.header.type = E_IHM_STATUS;
         outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         outMsg.payload.ihmStatus.nb_states = 1;
@@ -165,7 +165,7 @@ void loop(){
     if( (time -  timeModeSwitch > 20) && flagModeSwitch){
         ModeSwicth = digitalRead(PIN_MODE_SWICTH);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_IA);
+        outMsg.header.destAddr = role_get_addr(ROLE_AI);
         outMsg.header.type = E_IHM_STATUS;
         outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         outMsg.payload.ihmStatus.nb_states = 1;
@@ -182,7 +182,7 @@ void loop(){
         if(limitSwitchRight != prevLimitSwitchRight){
             prevLimitSwitchRight = limitSwitchRight;
 
-            outMsg.header.destAddr = role_get_addr(ROLE_IA);
+            outMsg.header.destAddr = role_get_addr(ROLE_AI);
             outMsg.header.type = E_IHM_STATUS;
             outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
             outMsg.payload.ihmStatus.nb_states = 1;
@@ -198,7 +198,7 @@ void loop(){
         if(limitSwitchLeft != prevLimitSwitchLeft){
             prevLimitSwitchLeft = limitSwitchLeft;
 
-            outMsg.header.destAddr = role_get_addr(ROLE_IA);
+            outMsg.header.destAddr = role_get_addr(ROLE_AI);
             outMsg.header.type = E_IHM_STATUS;
             outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
             outMsg.payload.ihmStatus.nb_states = 1;

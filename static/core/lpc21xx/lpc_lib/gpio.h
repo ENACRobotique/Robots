@@ -9,29 +9,39 @@
 
 static inline void gpio_init_all() {
   SCB_SCS = BIT(0) | BIT(1); // Port0&1 GPIOs are fast ones
+}
 
-//  GPIO0_FIOMASK = 0xFFFFFFFF;
-//  GPIO1_FIOMASK = 0xFFFFFFFF;
+static inline void gpio_enable(int bank, int pin) {
+  if (bank == 0) {
+    if (pin <= 15) {
+      PCB_PINSEL0 &= ~(3 << (pin << 1));
+    }
+    else {
+      PCB_PINSEL1 &= ~(3 << ((pin - 16) << 1));
+    }
+  }
+}
+
+static inline void gpio_input(int bank, int pin);
+
+static inline void gpio_disable(int bank, int pin) {
+  gpio_input(bank, pin);
 }
 
 static inline void gpio_output(int bank, int pin) {
   if(bank==0) {
-//    GPIO0_FIOMASK &= ~BIT(pin);
     GPIO0_FIODIR |= BIT(pin);
   }
   else {
-    //GPIO1_FIOMASK &= ~BIT(pin);
     GPIO1_FIODIR |= BIT(pin);
   }
 }
 
 static inline void gpio_input(int bank, int pin) {
   if(bank==0) {
-    //GPIO0_FIOMASK &= ~BIT(pin);
     GPIO0_FIODIR &= ~BIT(pin);
   }
   else {
-    //GPIO1_FIOMASK &= ~BIT(pin);
     GPIO1_FIODIR &= ~BIT(pin);
   }
 }
@@ -51,18 +61,10 @@ static inline void gpio_write(int bank, int pin, int val) {
   if(bank==0) {
     GPIO0_FIOMASK = ~BIT(pin);
     GPIO0_FIOPIN = (val!=0)<<pin;
-/*    if(val)
-      GPIO0_FIOPIN |= BIT(pin);
-    else
-      GPIO0_FIOPIN &= ~BIT(pin);*/
   }
   else {
     GPIO1_FIOMASK = ~BIT(pin);
     GPIO1_FIOPIN = (val!=0)<<pin;
-/*    if(val)
-      GPIO1_FIOPIN |= BIT(pin);
-    else
-      GPIO1_FIOPIN &= ~BIT(pin);*/
   }
 }
 

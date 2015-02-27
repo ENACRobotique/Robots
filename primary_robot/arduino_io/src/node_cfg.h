@@ -9,7 +9,7 @@
 
 //network config
 #define MYADDRX 0
-#define MYADDRI ADDRI_MAIN_IO
+#define MYADDRI ADDRI1_MAIN_IO
 #define MYADDRU ADDRU1_MAIN_IO
 #define MYADDRD 0
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)

@@ -105,8 +105,12 @@ static inline void eint_mode(eEINT i, eEINT_MODE m){
 
 typedef void (*eint_handler)();
 
+/**
+ * Binds the external interrupt number i to the isr h with priority priority
+ *   Be careful, you can't have two interrupt handlers with the same priority
+ */
 static inline eint_handler eint_register(eEINT i, eint_handler h, int priority){
-    eint_handler prev_h = (eint_handler)VIC_VectAddr2;
+    eint_handler prev_h = (eint_handler)VIC_VectAddrN(priority);
 
     VIC_VectCntlN(priority) = BIT(5) | (14 + i);
     VIC_VectAddrN(priority) = (unsigned)h;
