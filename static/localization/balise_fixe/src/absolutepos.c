@@ -203,7 +203,7 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
                     sMsg msg_out = {{0}};
 
                     // Header
-                    msg_out.header.destAddr = role_get_addr(ROLE_IA);
+                    msg_out.header.destAddr = role_get_addr(ROLE_AI);
                     msg_out.header.type = E_GENERIC_STATUS;
                     msg_out.header.size = sizeof(sGenericStatus);
 
@@ -281,7 +281,7 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
                     sMsg msg_out = {{0}};
 
                     // Header
-                    msg_out.header.destAddr = role_get_addr(ROLE_IA);
+                    msg_out.header.destAddr = role_get_addr(ROLE_AI);
                     msg_out.header.type = E_GENERIC_STATUS;
                     msg_out.header.size = sizeof(sGenericStatus);
 

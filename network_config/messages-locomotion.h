@@ -34,10 +34,10 @@ typedef struct {
 
 typedef struct {
 	// time constraints
-	uint32_t t1; // time at elts[0].p1 (synchronized time in us)
-	uint16_t t2; // time at elts[0].p2 (offset wrt t1 in ms)
-	uint16_t t3; // time at elts[1].p1 (offset wrt t2 in ms)
-	uint16_t t4; // time at elts[1].p2 (offset wrt t3 in ms)
+	uint32_t t;   // t:                    time at elts[0].p1 (synchronized time in us)
+	uint16_t dt1; // t+dt1*1000:           time at elts[0].p2 (dt1 in ms)
+	uint16_t dt2; // t+(dt1+dt2)*1000:     time at elts[1].p1 (dt2 in ms)
+	uint16_t dt3; // t+(dt1+dt2+dt3)*1000: time at elts[1].p2 (dt3 in ms)
 
 	// full trajectory data
     uint16_t tid :12; // trajectory identifier (4096 trajectory id-s)
