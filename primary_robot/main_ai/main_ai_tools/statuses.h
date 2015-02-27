@@ -26,10 +26,11 @@ class Statuses {
     public:
         Statuses();
         ~Statuses();
+        void maintenace();
 
         void setConfig();
 
-        void maintenace();
+
         int receivedNewStatus(sGenericStatus &status);
 
         sGenericStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);

@@ -11,6 +11,7 @@
 #include <main_ai_tools/path.h>
 #include <main_ai_tools/statuses.h>
 #include "ihm.h"
+#include "net.h"
 
 
 #define INIT_POS_YELLOW_X 45
@@ -41,6 +42,7 @@ extern eInOut_t starting_cord; //true = out and false = in
 extern Statuses statuses;
 extern Path path;
 extern Ihm ihm;
+extern Net net;
 
 
 #endif /* MAIN_AI_TOOLS_TOOLS_H_ */

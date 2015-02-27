@@ -16,3 +16,4 @@ eInOut_t starting_cord;
 Statuses statuses;
 Path path;
 Ihm ihm;
+Net net;

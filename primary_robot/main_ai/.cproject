@@ -37,7 +37,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/obj}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet/shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/main_ai_tools}&quot;"/>
-									<listOptionValue builtIn="false" value="../__GXX_EXPERIMENTAL_CXX0X__"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.264938753" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.dialect.flags.479678067" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" value="-fpermissive" valueType="string"/>
