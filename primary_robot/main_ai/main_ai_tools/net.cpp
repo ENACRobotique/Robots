@@ -82,10 +82,10 @@ void Net::sendPath2Net(){
                 _trajEl.pop();
             }
 
-            outMsg.payload.trajOrientEl.t1 = 0; //TODO define reference time and add a delta (time to send the message)
-            outMsg.payload.trajOrientEl.t2 = 0; //TODO
-            outMsg.payload.trajOrientEl.t3 = 0; //TODO
-            outMsg.payload.trajOrientEl.t4 = 0; //TODO
+            outMsg.payload.trajOrientEl.t = 0; //TODO define reference time and add a delta (time to send the message)
+            outMsg.payload.trajOrientEl.dt1 = 0; //TODO
+            outMsg.payload.trajOrientEl.dt2 = 0; //TODO
+            outMsg.payload.trajOrientEl.dt3 = 0; //TODO
 
             outMsg.payload.trajOrientEl.tid = tid;
             outMsg.payload.trajOrientEl.sid = i;
