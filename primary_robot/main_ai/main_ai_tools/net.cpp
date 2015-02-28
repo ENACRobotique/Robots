@@ -17,10 +17,11 @@ extern "C"{
 }
 #include "messages.h"
 
-#define TRAJ_ORIENT 0//1 active else 0
+#define TRAJ_ORIENT 1 //1 active else 0
 
-#define round(a) ((a - (int) a) < 0.5 ? (a) : (a+1))
-#define conv(a, b) (int) round(((double) a * pow(2,b)))
+#define ROUND(a) ((a - (int) a) < 0.5 ? (a) : (a+1))
+#define CONV2TRAJORIENT(a, b) (int) ROUND(((double) a) * pow(2,b))
+#define CONV2TRAJ(a, b) (((double) a)/(pow(2,b)))
 
 unsigned int tid = 0; //the same tid is used by all path object
 
@@ -45,71 +46,64 @@ void Net::maintenace(){
 }
 
 /*
- * Add a new path in the list of path ready to send
+ * Clear _trajEl and _trajOrientEl
  */
-void Net::sendPath(vector <sTrajEl_t> &trajEl){
+void Net::clearEl(){//TODO warning if no empty
     queue <sTrajEl_t> empty;
     swap(_trajEl, empty);
 
-    queue <sTrajElOrient_t> empty2;
-    swap(_trajElOrient, empty2);
+    queue <sTrajOrientEl_t> emptyOrient;
+    swap(_trajOrientEl, emptyOrient);
+}
+
+/*
+ * Add a new path in the list of path ready to send
+ */
+void Net::sendPath(vector <sTrajEl_t> &trajEl){
+    clearEl();
 
     for(sTrajEl_t i : trajEl){
         _trajEl.push(i);
     }
 }
 
+/*
+ * Add a new path orient in the list of path ready to send
+ */
+void Net::sendPathOrient(vector <sTrajOrientEl_t> &trajElOrient){
+    clearEl();
+
+    for(sTrajOrientEl_t i : trajElOrient){
+        _trajOrientEl.push(i);
+    }
+}
 
 /*
- * Create a new message E_TRAJ_ORIENT_EL with a list elements of trajectory define by sTrajEl_t and send it.
+ * Transfers _trajEl to _trajOrientEl and compute the new parameter.
  */
 void Net::convTrajToTrajOrient(){
-    sMsg outMsg;
-    int ret;
+    sTrajOrientEl_t trajOrient;
 
-    if(!_trajEl.empty()){
-        outMsg.header.type = E_TRAJ_ORIENT_EL;
-        outMsg.header.size = sizeof(outMsg.payload.trajOrientEl);
+    while(!_trajEl.empty()){
+        trajOrient.t1 = 0; //TODO
+        trajOrient.t2 = 0; //TODO
 
-        for(unsigned int i = 0 ; i < _trajEl.size(); i++){
-            for(unsigned int j = 0 ; j < 2 ; j++){
-                outMsg.payload.trajOrientEl.elts[j].p1_x = conv(_trajEl.back().p1.x, 6);
-                outMsg.payload.trajOrientEl.elts[j].p1_y = conv(_trajEl.back().p1.y, 6);
-                outMsg.payload.trajOrientEl.elts[j].p2_x = conv(_trajEl.back().p2.x, 6);
-                outMsg.payload.trajOrientEl.elts[j].p2_x = conv(_trajEl.back().p2.y, 6);
+        trajOrient.p1 = _trajEl.front().p1;
+        trajOrient.p2 = _trajEl.front().p2;
 
-                outMsg.payload.trajOrientEl.elts[j].c_x = conv(_trajEl.back().obs.c.x, 6);
-                outMsg.payload.trajOrientEl.elts[j].c_y = conv(_trajEl.back().obs.c.y, 6);
-                outMsg.payload.trajOrientEl.elts[j].c_r = conv(_trajEl.back().obs.r, 6);
+        trajOrient.obs = _trajEl.front().obs;
 
-                outMsg.payload.trajOrientEl.elts[j].theta1 =  0; //TODO
-                outMsg.payload.trajOrientEl.elts[j].theta2 =  0; //TODO
+        trajOrient.theta1 = 0; //TODO get current theta
+        trajOrient.theta2 = 0; //TODO get current theta
 
-                outMsg.payload.trajOrientEl.elts[j].seg_len = conv(_trajEl.back().seg_len, 5);
-                outMsg.payload.trajOrientEl.elts[j].rot1_dir =  0; //TODO
-                outMsg.payload.trajOrientEl.elts[j].arc_len = conv(_trajEl.back().arc_len, 5);
-                outMsg.payload.trajOrientEl.elts[j].rot2_dir = 0; //TODO
+        trajOrient.seg_len = _trajEl.front().seg_len;
+        trajOrient.arc_len = _trajEl.front().arc_len;
 
-                _trajEl.pop();
-            }
+        trajOrient.rot1_dir = 0; //TODO
+        trajOrient.rot2_dir  = 0; //TODO
 
-            outMsg.payload.trajOrientEl.t = 0; //TODO define reference time and add a delta (time to send the message)
-            outMsg.payload.trajOrientEl.dt1 = 0; //TODO
-            outMsg.payload.trajOrientEl.dt2 = 0; //TODO
-            outMsg.payload.trajOrientEl.dt3 = 0; //TODO
-
-            outMsg.payload.trajOrientEl.tid = tid;
-            outMsg.payload.trajOrientEl.sid = i;
-
-            if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                printf("[ERROR] [%s:%i] : role_sendRetry(E_TRAJ) failed #%i\n", __FILE__, __LINE__, -ret);
-            }
-            cout << "[INFO] A new path was send" << endl;
-
-            usleep(1000);
-        }
-
-    tid++;
+        _trajEl.pop();
+        _trajOrientEl.push(trajOrient);
     }
 
 }
@@ -149,11 +143,70 @@ void Net::sendPathToNet(){
 
             if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
                 printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
-            }
-            cout << "[INFO] A new path was send" << endl;
+            }else
+                cout << "[INFO] A new path was send" << endl;
 
             usleep(1000);
         }
     tid++;
     }
  }
+
+
+/*
+ * Sends the path orient save in _trajOrientEl to the prop with a E_TRAJ_ORIENT_EL message
+ */
+void Net::sendPathOrientToNet(){
+    sMsg outMsg;
+    int ret, i = 0;
+
+    if(!_trajOrientEl.empty()){
+        outMsg.header.type = E_TRAJ_ORIENT_EL;
+        outMsg.header.size = sizeof(outMsg.payload.trajOrientEl);
+
+        while(!_trajOrientEl.empty()){
+            for(unsigned int j = 0 ; j < 2 ; j++){
+                outMsg.payload.trajOrientEl.elts[j].p1_x = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p1.x, 6);
+                outMsg.payload.trajOrientEl.elts[j].p1_y = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p1.y, 6);
+
+                outMsg.payload.trajOrientEl.elts[j].p2_x = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p2.x, 6);
+                outMsg.payload.trajOrientEl.elts[j].p2_y = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p2.y, 6);
+
+                outMsg.payload.trajOrientEl.elts[j].c_x = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().obs.c.x, 6);
+                outMsg.payload.trajOrientEl.elts[j].c_y = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().obs.c.y, 6);
+                outMsg.payload.trajOrientEl.elts[j].c_r = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().obs.r, 6);
+
+                outMsg.payload.trajOrientEl.elts[j].theta1 =  CONV2TRAJORIENT(_trajOrientEl.front().theta1, 13);
+                outMsg.payload.trajOrientEl.elts[j].theta2 =  CONV2TRAJORIENT(_trajOrientEl.front().theta2, 13);
+
+                outMsg.payload.trajOrientEl.elts[j].seg_len = CONV2TRAJORIENT(_trajOrientEl.front().seg_len, 5);
+                outMsg.payload.trajOrientEl.elts[j].rot1_dir =  _trajOrientEl.front().rot1_dir;
+                outMsg.payload.trajOrientEl.elts[j].arc_len = CONV2TRAJORIENT(_trajOrientEl.front().arc_len, 5);
+                outMsg.payload.trajOrientEl.elts[j].rot2_dir = _trajOrientEl.front().rot2_dir;
+
+                _trajOrientEl.pop();
+                if(_trajOrientEl.empty())
+                    break;
+            }
+
+            outMsg.payload.trajOrientEl.t = 0; //TODO define reference time and add a delta (time to send the message)
+            outMsg.payload.trajOrientEl.dt1 = 0; //TODO
+            outMsg.payload.trajOrientEl.dt2 = 0; //TODO
+            outMsg.payload.trajOrientEl.dt3 = 0; //TODO
+
+            outMsg.payload.trajOrientEl.tid = tid;
+            outMsg.payload.trajOrientEl.sid = i;
+
+            if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
+                printf("[ERROR] [%s:%i] : role_sendRetry(E_TRAJ_ORIENT_EL) failed #%i\n", __FILE__, __LINE__, -ret);
+            }else
+                cout << "[INFO] A new path orient was send" << endl;
+
+            i++;
+
+            usleep(1000);
+        }
+
+    tid++;
+    }
+}

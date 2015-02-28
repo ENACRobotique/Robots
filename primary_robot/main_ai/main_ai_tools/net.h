@@ -23,7 +23,7 @@ typedef struct{
     sPt_t p1;
     sPt_t p2;
 
-    sObs_t c;//TODO change in circle type with the new math tools
+    sObs_t obs;//TODO change in circle type with the new math tools
 
     float theta1;
     float theta2;
@@ -33,16 +33,17 @@ typedef struct{
 
     bool rot1_dir; // (false: CW | true: CCW)
     bool rot2_dir;
-}sTrajElOrient_t;
+}sTrajOrientEl_t;
 
 class Net {
     public:
         Net();
         ~Net();
         void maintenace();
+        void clearEl();
 
         void sendPath(vector <sTrajEl_t> &trajEl);
-        void sendPathOrient(vector <sTrajElOrient_t> &trajElOrient);
+        void sendPathOrient(vector <sTrajOrientEl_t> &trajElOrient);
 
 
     private:
@@ -51,7 +52,7 @@ class Net {
         void sendPathOrientToNet();
 
         queue <sTrajEl_t> _trajEl;
-        queue <sTrajElOrient_t> _trajElOrient;
+        queue <sTrajOrientEl_t> _trajOrientEl;
 
 };
 
