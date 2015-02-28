@@ -14,6 +14,7 @@ extern int x, y, theta; // robot position (I<<SHIFT), robot heading (I.rad<<SHIF
 
 void asserv_init();
 int new_traj_el(sTrajElRaw_t *te);
+int new_orient_traj_el(sTrajOrientElRaw_t *toe);
 int new_speed_setpoint(float speed);
 int new_pos(sPosPayload *pos);
 int send_pos();

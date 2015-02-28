@@ -36,6 +36,7 @@
 
 #define SQR(v) ((long long)(v)*(v))
 #define SIGN(v) (((v)>0) - ((v)<0))
+#define CONV2TRAJ(a, b) ((double) a/(pow(2,b)))
 
 #ifdef ARCH_LPC21XX
 volatile int _ticks_l=0, _ticks_r=0;
@@ -279,6 +280,37 @@ int new_traj_el(sTrajElRaw_t *te){
     }
 
     return error;
+}
+
+int new_traj_orient_el(sTrajOrientElRaw_t *toe){
+    sTrajElRaw_t te;
+    int i, ret;
+
+    for(i = 0 ; i < 2 ; i++){
+        te.p1_x = CONV2TRAJ(toe->elts[i].p1_x, 6);
+        te.p1_y = CONV2TRAJ(toe->elts[i].p1_y, 6);
+        te.p2_x = CONV2TRAJ(toe->elts[i].p2_x, 6);
+        te.p2_y = CONV2TRAJ(toe->elts[i].p2_y, 6);
+
+        te.c_x = CONV2TRAJ(toe->elts[i].c_x, 6);
+        te.c_y = CONV2TRAJ(toe->elts[i].c_y, 6);
+        te.c_r = CONV2TRAJ(toe->elts[i].c_r, 6);
+
+        te.seg_len = CONV2TRAJ(toe->elts[i].seg_len, 5);
+        te.arc_len = CONV2TRAJ(toe->elts[i].arc_len, 5);
+
+        te.sid = toe->sid*2 + i;
+        te.tid = toe->tid;
+
+        ret = new_traj_el(&te);
+        if(ret < 0){
+            return ret;
+        }
+
+        if(te.arc_len == 0) //end of trajectory
+            break;
+    }
+    return 0;
 }
 
 int new_speed_setpoint(float speed){
