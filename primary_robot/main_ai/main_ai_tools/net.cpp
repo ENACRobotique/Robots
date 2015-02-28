@@ -12,9 +12,12 @@
 #include <iostream>
 
 extern "C"{
+#include <unistd.h>
 #include "roles.h"
 }
 #include "messages.h"
+
+#define TRAJ_ORIENT 0//1 active else 0
 
 #define round(a) ((a - (int) a) < 0.5 ? (a) : (a+1))
 #define conv(a, b) (int) round(((double) a * pow(2,b)))
@@ -32,7 +35,12 @@ Net::~Net() {
 
 void Net::maintenace(){
 
-    sendPath2Net();
+#if TRAJ_ORIENT
+    convTrajToTrajOrient();
+    sendPathOrientToNet();
+#else
+    sendPathToNet();
+#endif
 
 }
 
@@ -43,6 +51,9 @@ void Net::sendPath(vector <sTrajEl_t> &trajEl){
     queue <sTrajEl_t> empty;
     swap(_trajEl, empty);
 
+    queue <sTrajElOrient_t> empty2;
+    swap(_trajElOrient, empty2);
+
     for(sTrajEl_t i : trajEl){
         _trajEl.push(i);
     }
@@ -52,7 +63,7 @@ void Net::sendPath(vector <sTrajEl_t> &trajEl){
 /*
  * Create a new message E_TRAJ_ORIENT_EL with a list elements of trajectory define by sTrajEl_t and send it.
  */
-void Net::sendPath2Net(){
+void Net::convTrajToTrajOrient(){
     sMsg outMsg;
     int ret;
 
@@ -94,6 +105,8 @@ void Net::sendPath2Net(){
                 printf("[ERROR] [%s:%i] : role_sendRetry(E_TRAJ) failed #%i\n", __FILE__, __LINE__, -ret);
             }
             cout << "[INFO] A new path was send" << endl;
+
+            usleep(1000);
         }
 
     tid++;
@@ -101,45 +114,46 @@ void Net::sendPath2Net(){
 
 }
 
-/*//send a E_TRAJ
-
-         if (!_path.empty()){
-            for (unsigned int i = 0; i < _path_len; i++) {
-                printElTraj(i);
-
-                outMsg.header.type = E_TRAJ;
-                outMsg.header.size = sizeof(outMsg.payload.traj);
-
-                outMsg.payload.traj.p1_x = _path[i].p1.x;
-                outMsg.payload.traj.p1_y = _path[i].p1.y;
-                outMsg.payload.traj.p2_x = _path[i].p2.x;
-                outMsg.payload.traj.p2_y = _path[i].p2.y;
-                outMsg.payload.traj.seg_len = _path[i].seg_len;
-
-                outMsg.payload.traj.c_x = _path[i].obs.c.x;
-                outMsg.payload.traj.c_y = _path[i].obs.c.y;
-                outMsg.payload.traj.c_r = _path[i].obs.r;
-                outMsg.payload.traj.arc_len = _path[i].arc_len;
-
-                outMsg.payload.traj.sid = i;
-                outMsg.payload.traj.tid = tid;
-
-                if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                    printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
-                }
-                cout << "[INFO] A new path was send" << endl;
-
-                usleep(1000);
-            }
-        }
-        delete path.path; //delete the previous path send;
-
-        path.dist = _dist;
-        path.path_len = _path_len;
-        path.path = new sTrajEl_t[_path_len];
-        for(unsigned int i = 0 ; i < _path_len ; i++){
-            path.path[i] = _path[i];
-        }
-
-
+/*
+ * Sends the path save in _trajEl to the prop with a E_TRAJ message
  */
+void Net::sendPathToNet(){
+    sMsg outMsg;
+    int ret;
+
+    if(!_trajEl.empty()){
+        unsigned int size = _trajEl.size();
+
+        outMsg.header.type = E_TRAJ;
+        outMsg.header.size = sizeof(outMsg.payload.traj);
+
+        outMsg.payload.traj.tid = tid;
+
+        for (unsigned int i = 0; i < size; i++) {
+            outMsg.header.type = E_TRAJ;
+            outMsg.header.size = sizeof(outMsg.payload.traj);
+            outMsg.payload.traj.sid = i;
+
+            outMsg.payload.traj.p1_x = _trajEl.front().p1.x;
+            outMsg.payload.traj.p1_y = _trajEl.front().p1.y;
+            outMsg.payload.traj.p2_x = _trajEl.front().p2.x;
+            outMsg.payload.traj.p2_y = _trajEl.front().p2.y;
+            outMsg.payload.traj.seg_len = _trajEl.front().seg_len;
+
+            outMsg.payload.traj.c_x = _trajEl.front().obs.c.x;
+            outMsg.payload.traj.c_y = _trajEl.front().obs.c.y;
+            outMsg.payload.traj.c_r = _trajEl.front().obs.r;
+            outMsg.payload.traj.arc_len = _trajEl.front().arc_len;
+
+            _trajEl.pop();
+
+            if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
+                printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+            }
+            cout << "[INFO] A new path was send" << endl;
+
+            usleep(1000);
+        }
+    tid++;
+    }
+ }

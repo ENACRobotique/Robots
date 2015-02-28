@@ -42,7 +42,12 @@ void Path::clear(){
 }
 
 void Path::maintenace(){
-    checkRobotBlock();
+    static unsigned int prevTime = 0;
+
+    if(millis() - prevTime > 200){
+        checkRobotBlock();
+        prevTime = millis();
+    }
 }
 
 
@@ -52,9 +57,7 @@ void Path::maintenace(){
  * Try to send MAX_RETRIES if failed.
  */
 void Path::sendRobot() {
-    sMsg outMsg = { { 0 } };
     static sPath_t path;
-    int ret;
 
     length(); //compute _dist, arc_len and seg_len //TODO check length between compute and save to the path.
     _path_len = _path.size();
@@ -63,7 +66,23 @@ void Path::sendRobot() {
 
     if (!checkSamePath(path) || checkRobotBlock()){
         if (!_path.empty()){
+            //delete the previous path sent;
+            delete path.path;
+
+            //save the new path sent
+            path.dist = _dist;
+            path.path_len = _path_len;
+            path.path = new sTrajEl_t[_path_len];
+            for(unsigned int i = 0 ; i < _path_len ; i++){
+                path.path[i] = _path[i];
+            }
+
+            //sends the path
             net.sendPath(_path);
+
+            //print the traj to the display
+            for(unsigned int i = 0 ; i < _path_len ; i++)
+                printElTraj(i);
         }
     }
 }
