@@ -322,6 +322,9 @@ int role_sendRetry(sMsg *msg, int retries){
     case E_TRAJ:
         SEND_BLOCK(ACT_MSG_TRAJ);
         break;
+    case E_TRAJ_ORIENT_EL:
+        SEND_BLOCK(ACT_MSG_TRAJ);
+        break;
     case E_POS:
         SEND_BLOCK(ACT_MSG_POS);
         break;
