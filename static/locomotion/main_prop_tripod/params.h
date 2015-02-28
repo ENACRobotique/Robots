@@ -3,6 +3,14 @@
 
 #include <math.h>
 
+//// Test and working modes
+// Working on LPC or Linux
+#define ARCH_LPC21XX
+#ifndef ARCH_LPC21XX
+#define ARCH_X86_LINUX
+
+#endif
+
 #define MAT_SHIFT (16)
 #define dMSHIFT ((double)(1 << MAT_SHIFT))
 
@@ -63,6 +71,11 @@
 //#define MAX_ACC   1 // in m/s²
 //#define MAX_ANG_SPD 180 // in deg/s
 //#define MAX_ANG_ACC 90 // in deg/s²
+
+// Motor parameter
+//#ifdef ARCH_X86_LINUX // FIXME
+#define MOT_TIME_CST (100.)
+//#endif
 
 #endif
 
