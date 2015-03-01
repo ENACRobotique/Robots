@@ -10,8 +10,9 @@ typedef struct {
     int dir_bank;
     int dir_pin;
 
-#elif defined(ARCH_X86_LINUX)
-    // TODO
+//#elif defined(ARCH_X86_LINUX)  // FIXME
+    int speed;
+    int setPoint;
 #endif
 } motor_t;
 

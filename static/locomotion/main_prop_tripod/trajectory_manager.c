@@ -2,7 +2,14 @@
  * trajectory_manager.c
  *
  *  Created on: 22 févr. 2015
- *      Author: ludo6431
+ *      Author: ludo6431, Yoyo
+ *  Description:
+ *  The trajectory manager allow to process some type of messages like
+ *      a new speed set point
+ *      a new elements of trajectory
+ *      a new current position of the robot
+ *  These messages are convert or adapted in units robots before to be stock or take into account
+ *
  */
 
 #include <string.h>
@@ -90,8 +97,8 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te) {
 
 void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos) {
     /* Description:
-     * Store and convert the position and heading in robot units
-     * If the robot is motionless, the goal of robot is actualize
+     * Store and convert the position and heading in robot units received by "bn_received function"
+     * If the robot is motionless, the goal of robot is actualized
      */
     if (pos->id == ELT_PRIMARY) { // Keep information for primary robot
         tm->x = isD2I(pos->x); // (I << SHIFT)

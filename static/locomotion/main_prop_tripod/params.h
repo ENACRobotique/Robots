@@ -3,6 +3,13 @@
 
 #include <math.h>
 
+//// Test and working modes
+// Working on LPC or Linux
+#define ARCH_LPC21XX
+//#ifndef ARCH_LPC21XX // FIXME
+#define ARCH_X86_LINUX
+#endif
+
 // data in the matrix (or its inverse) will be in the range of -20;20, during an inversion or a matrix multiplication up to 3 times an element can be stored
 //   ln(3*20)/ln(2) = 5.91 => 6 bits for the integer part + 1 sign bit => 32-(6+1) = 25 bits for the decimal part
 //   => 2^25 = 33554432 decimal part possibilities, ln(33554432)/ln(10)=7.53 => more than 7 significant figures for the decimal part
@@ -58,16 +65,19 @@
 #define iR2I(R) iROUND(R2I(R)) // (I)
 #define isR2I(R) isROUND(R2I(R)) // (I<<SHIFT)
 
+// LPC parameter
 #define PWM_RANGE 1024  // If you want to change the resolution of the motor command, just don't change this value, you're doing it wrong...
 
 // Parameters for control loops
 #define PER_ASSER 20000 // in µs
 #define PER_ASSER_CRITIC 30000 // in µs
 #define SPEED_NOMI 20 // in cm/s
-//#define MAX_SPEED 2 // in m/s FIXME
-//#define MAX_ACC   1 // in m/s²
-//#define MAX_ANG_SPD 180 // in deg/s
-//#define MAX_ANG_ACC 90 // in deg/s²
+
+
+// Motor parameter
+//#ifdef ARCH_X86_LINUX // FIXME
+#define MOT_TIME_CST (100.) // in ms
+//#endif
 
 #endif
 

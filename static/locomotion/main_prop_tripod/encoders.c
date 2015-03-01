@@ -47,7 +47,7 @@ void isr_eint3_enc3() {
     SCB_EXTINT = BIT(3); // acknowledges interrupt
     VIC_VectAddr = (unsigned) 0; // updates priority hardware
 
-    _encs[2].nbticks += (gpio_read(BK_CHB_POD3, PIN_CHB_POD3) << 1) - 1;
+    _encs[2].nbticks += (gpio_read(BK_CHA_POD3, PIN_CHA_POD3) << 1) - 1;
 }
 
 void encoders_init(encoder_t encs[]) {
@@ -59,6 +59,9 @@ void encoders_init(encoder_t encs[]) {
 }
 
 void encoders_reset() {
+    /* Description:
+     * Update all the internal values of ticks since the last previous call
+     */
     if (_encs) {
         int i;
         for (i = 0; i < NB_ENCODERS; i++) {
