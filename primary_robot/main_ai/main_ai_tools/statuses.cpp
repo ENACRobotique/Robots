@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <cmath>
 #include "ai_types.h"
+#include "tools.h"
 
 
 Statuses::Statuses() {
@@ -55,7 +56,7 @@ int Statuses::receivedNewStatus(sGenericStatus &status){
     _list[status.id].push_back(status); //TODO sort by date
 
     if(status.id == ELT_PRIMARY)
-        cout << fixed << setprecision(2) << "\x1b[K\x1b[s" << "pos : " << status.pos.x << "cm, " << status.pos.y << "cm, " << status.pos.theta * 180. / M_PI << "°" << "\x1b[u" << flush;
+        logs.putNewPos(status.pos.x, status.pos.y, status.pos.theta);
 
     return 1;
 }

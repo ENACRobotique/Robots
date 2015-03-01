@@ -339,7 +339,8 @@ int Path::checkRobotBlock() {
                 cpt++;
         }
         if (cpt >= 10) {
-            cout << "[INFO] Robot is blocked" << endl;
+            if(verbose >= 2)
+                cout << "[INFO] Robot is blocked" << endl;
             return 1;
         }
         lastTime = millis();

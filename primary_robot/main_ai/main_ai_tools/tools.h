@@ -12,6 +12,7 @@
 #include <main_ai_tools/statuses.h>
 #include "ihm.h"
 #include "net.h"
+#include "log.h"
 
 
 #define INIT_POS_YELLOW_X 45
@@ -43,6 +44,6 @@ extern Statuses statuses;
 extern Path path;
 extern Ihm ihm;
 extern Net net;
-
+extern Log logs;
 
 #endif /* MAIN_AI_TOOLS_TOOLS_H_ */

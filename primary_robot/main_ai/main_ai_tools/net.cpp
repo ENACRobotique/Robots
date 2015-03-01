@@ -166,15 +166,15 @@ void Net::sendPathOrientToNet(){
 
         while(!_trajOrientEl.empty()){
             for(unsigned int j = 0 ; j < 2 ; j++){
-                outMsg.payload.trajOrientEl.elts[j].p1_x = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p1.x, 6);
-                outMsg.payload.trajOrientEl.elts[j].p1_y = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p1.y, 6);
+                outMsg.payload.trajOrientEl.elts[j].p1_x = CONV2TRAJORIENT(_trajOrientEl.front().p1.x, 6);
+                outMsg.payload.trajOrientEl.elts[j].p1_y = CONV2TRAJORIENT(_trajOrientEl.front().p1.y, 6);
 
-                outMsg.payload.trajOrientEl.elts[j].p2_x = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p2.x, 6);
-                outMsg.payload.trajOrientEl.elts[j].p2_y = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().p2.y, 6);
+                outMsg.payload.trajOrientEl.elts[j].p2_x = CONV2TRAJORIENT(_trajOrientEl.front().p2.x, 6);
+                outMsg.payload.trajOrientEl.elts[j].p2_y = CONV2TRAJORIENT(_trajOrientEl.front().p2.y, 6);
 
-                outMsg.payload.trajOrientEl.elts[j].c_x = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().obs.c.x, 6);
-                outMsg.payload.trajOrientEl.elts[j].c_y = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().obs.c.y, 6);
-                outMsg.payload.trajOrientEl.elts[j].c_r = (int16_t) CONV2TRAJORIENT(_trajOrientEl.front().obs.r, 6);
+                outMsg.payload.trajOrientEl.elts[j].c_x = CONV2TRAJORIENT(_trajOrientEl.front().obs.c.x, 6);
+                outMsg.payload.trajOrientEl.elts[j].c_y = CONV2TRAJORIENT(_trajOrientEl.front().obs.c.y, 6);
+                outMsg.payload.trajOrientEl.elts[j].c_r = CONV2TRAJORIENT(_trajOrientEl.front().obs.r, 6);
 
                 outMsg.payload.trajOrientEl.elts[j].theta1 =  CONV2TRAJORIENT(_trajOrientEl.front().theta1, 13);
                 outMsg.payload.trajOrientEl.elts[j].theta2 =  CONV2TRAJORIENT(_trajOrientEl.front().theta2, 13);

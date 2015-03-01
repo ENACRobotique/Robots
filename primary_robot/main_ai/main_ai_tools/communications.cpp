@@ -59,16 +59,18 @@ void sendPing(){
 #endif
                 if( (ret = bn_ping(ADDRD1_MAIN_PROP_SIMU)) >= 0){
                     state = 3;
+                    logs << INFO << "Ping main prop simu : " << ret;
+                    break;
                     }
-                printf("Ping main prop simu : %d\n", ret);
+                logs << ERR << "Ping main prop simu error#" << -ret;
                 break;
            //Optional
             case 3:
                 if( (ret = bn_ping(ADDRD1_MONITORING)) < 0){
-                    printf("Warning : Monitoring is not connected - ");
+                    logs << WAR << "Monitoring is not connected";
                     }
                 state = 4;
-                printf("Ping monitoring : %d\n", ret);
+                logs << INFO << "Ping monitoring : " << -ret;
                 break;
             case 4:
 #if !SIMU
@@ -116,7 +118,7 @@ void sendObsCfg(){
         return;
     }
 
-    cout << "[SEND MES] [OBS_CFG] message send to monitoring" << endl;
+    logs << MES << "[OBS_CFG] message send to monitoring";
 }
 
 /*
@@ -165,8 +167,7 @@ void sendObss(){
                 return;
             }
 
-            if (verbose >= 2)
-                cout << "[SEND MES] [OBSS] message send to monitoring" << endl;
+            logs << MES <<"[OBSS] message send to monitoring";
 
         }
     }
@@ -196,10 +197,10 @@ int sendPos(sPt_t &p, sNum_t theta) {
     //XXX Created an intern message generic status for update the position, and if message not pos not receive --> position problem !!!
 
     if ((ret = role_sendRetry(&msgOut, MAX_RETRIES)) <= 0) {
-        cerr << "[ERROR] [communication.cpp] bn_sendRetry(E_POS) error #" << -ret << endl;
+        logs << ERR << "bn_sendRetry(E_POS) error #" << -ret;
         return -2;
     }
-    cout << "[SEND MES] [POS] Sending position to primary robot (" << msgOut.payload.pos.x << ", " << msgOut.payload.pos.y << ", " << msgOut.payload.pos.theta * 180. / M_PI << ")" << endl;
+    logs << MES << "[POS] Sending position to primary robot (" << msgOut.payload.pos.x << ", " << msgOut.payload.pos.y << ", " << msgOut.payload.pos.theta * 180. / M_PI << ")";
 
     return 1;
 }
@@ -247,17 +248,8 @@ void checkInbox(int verbose, ofstream &file){
         return;
     }
 
-    // print message TODO Create a function or class to log message and send to the display
-    if (verbose >= 1) {
-        if (msgIn.header.type != E_POS)
-            cout << "[NEW MES] message received from : " << role_string(role_get_role(msgIn.header.srcAddr)) << "(" << msgIn.header.srcAddr << "), type : " << eType2str((E_TYPE) msgIn.header.type) << "(" << msgIn.header.type << ")" << endl;
-        else if (verbose >= 2) {
-            cout << "[NEW MES] message received from : " << role_string(role_get_role(msgIn.header.srcAddr)) << "(" << msgIn.header.srcAddr << "), type : " << eType2str((E_TYPE) msgIn.header.type) << "(" << msgIn.header.type << ")" << endl;
-        }
-
-        if (file)
-            file << "[NEW MES] message received from : " << role_string(role_get_role(msgIn.header.srcAddr)) << "(" << msgIn.header.srcAddr << "), type : " << eType2str((E_TYPE) msgIn.header.type) << "(" << msgIn.header.type << ")" << endl;
-    }
+    // print message
+    logs << MES_V(E_V3) << "message received from : " << role_string(role_get_role(msgIn.header.srcAddr)) << "(" << msgIn.header.srcAddr << "), type : " << eType2str((E_TYPE) msgIn.header.type) << "(" << msgIn.header.type << ")";
 
     // processing of the message
     switch (msgIn.header.type) {
@@ -267,9 +259,7 @@ void checkInbox(int verbose, ofstream &file){
                 file << "[DEBUG]" << msgIn.payload.debug << endl;
             break;
         case E_POS:
-            if( verbose >= 2)
-               cout << "[POS] robot" << msgIn.payload.pos.id << "@(" << msgIn.payload.pos.x << ", " << msgIn.payload.pos.y << ", " << msgIn.payload.pos.theta * 180. / M_PI << ")" << endl;
-            if (file){}
+            logs << MES_V(E_V3) << "[POS] robot" << msgIn.payload.pos.id << "@(" << msgIn.payload.pos.x << ", " << msgIn.payload.pos.y << ", " << msgIn.payload.pos.theta * 180. / M_PI << ")";
 
             //convert in generic status because E_POS message is depreciate
             sGenericStatus sta;

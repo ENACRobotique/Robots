@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
                 break;
 
             default:
-                cerr << "[ERROR] [main.cpp] ?? getopt returned character code 0" << c << "??" << endl;
+                logs << ERR << "?? getopt returned character code 0" << c << "??";
                 /* no break */
             case 'h':
             case '?':
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
         if(obs[i].active)
             obs_updated[i] = 1;
 
-    cout << "[INFO] Initialization is finished" << endl;
+    logs << INFO << "Initialization is finished";
 
 #ifdef CTRLC_MENU
     signal(SIGINT, intHandler);
