@@ -1,13 +1,20 @@
-#include <ime.h>
 #include <encoder.h>
 
+#ifdef ARCH_LPC21XX
+#include <ime.h>
+#elif defined(ARCH_X86_LINUX)
+#include <math.h>
+#include "millis.h"
+#include "params.h"
+#endif
+
 /**
- * Generic encoder reading for LPC2148
- * Relies on lpc_lib
+ * Generic encoder reading for LPC2148 and associated simulator for linux
+ * Relies on lpc_lib for lpc2148 target
  *
  * author: Ludovic Lacoste
  *
- * Example of usage:
+ * Example of usage for LPC2148:
  *
  *      // Define a global volatile encoder_t variable:
  *      volatile encoder_t enc1;
@@ -53,7 +60,8 @@
  *      }
  */
 
-void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio) {
+#ifdef ARCH_LPC21XX
+
 /**
  * Initializes the given encoder_t structure and starts ticks collection
  *   the other arguments allows to initializes the underlying external interrupt, see eint.h for more explanations
@@ -69,6 +77,9 @@ void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE
  *          enc.nbticks += (gpio_read(BK_CHA_POD1, PIN_CHA_POD1) << 1) - 1; // increment or decrement according to the value of a gpio input channel
  *      }
  */
+void encoder_init(encoder_t* e, motor_t* m, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio) {
+    e->m = m;
+
     e->eint = eint;
 
     e->nbticks = 0;
@@ -81,10 +92,20 @@ void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE
     eint_enable(eint);
 }
 
-void encoder_update(encoder_t* e) {
+#elif defined(ARCH_X86_LINUX)
+
+void encoder_init(encoder_t* e, motor_t* m) {
+    e->m = m;
+    e->lastticksquery = millis();
+}
+
+#endif
+
 /**
  * Updates the internal value returned by encoder_get() with the current sum of ticks since the previous call of encoder_update()
  */
+void encoder_update(encoder_t* e) {
+#ifdef ARCH_LPC21XX
     int nbticks;
 
     global_IRQ_disable();
@@ -93,19 +114,31 @@ void encoder_update(encoder_t* e) {
     global_IRQ_enable();
 
     e->nbticks_cache = nbticks;
+#elif defined(ARCH_X86_LINUX)
+    unsigned int time = millis();
+    int input = e->m->setPoint; // here, the number of ticks per period is in the same order of magnitude than the pwm control of the motor (FIXME base 2015)
+
+    // very simple motor model... (continuous-time low-pass filter)
+    e->m->speed = (int) (input + (float)(e->m->speed - input)*expf(-(float) (time - e->lastticksquery)/MOT_TIME_CST));
+    e->lastticksquery = time;
+
+    e->nbticks_cache = e->m->speed;
+#endif
 }
 
-void encoder_deinit(encoder_t* e) {
 /**
  * Stops the ticks collection
  */
+void encoder_deinit(encoder_t* e) {
+#ifdef ARCH_LPC21XX
     eint_disable(e->eint);
+#endif
 }
 
-int encoder_get(encoder_t* e) {
 /**
  * Returns the cached nbticks updated by a call to encoder_update()
  *   the sign of the value follows the convention used by the interrupt service routine
  */
+int encoder_get(encoder_t* e) {
     return e->nbticks_cache;
 }

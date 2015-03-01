@@ -3,13 +3,6 @@
 
 #include <math.h>
 
-//// Test and working modes
-// Working on LPC or Linux
-#define ARCH_LPC21XX
-//#ifndef ARCH_LPC21XX // FIXME
-#define ARCH_X86_LINUX
-#endif
-
 // data in the matrix (or its inverse) will be in the range of -20;20, during an inversion or a matrix multiplication up to 3 times an element can be stored
 //   ln(3*20)/ln(2) = 5.91 => 6 bits for the integer part + 1 sign bit => 32-(6+1) = 25 bits for the decimal part
 //   => 2^25 = 33554432 decimal part possibilities, ln(33554432)/ln(10)=7.53 => more than 7 significant figures for the decimal part
@@ -29,6 +22,10 @@
 #define isROUND(d) iROUND((d)*dSHIFT)
 #define lROUND(d) ((long long)( (d)+0.5 )) // the +0.5 is here to get a round instead of a floor when casting to int
 #define lsROUND(d) lROUND((d)*dSHIFT)
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 #define PI (M_PI)
 #define sPI (PI*dSHIFT)
@@ -73,11 +70,13 @@
 #define PER_ASSER_CRITIC 30000 // in µs
 #define SPEED_NOMI 20 // in cm/s
 
+// Simulator parameters (when code running on linux)
+#ifdef ARCH_X86_LINUX
 
 // Motor parameter
-//#ifdef ARCH_X86_LINUX // FIXME
 #define MOT_TIME_CST (100.) // in ms
-//#endif
+
+#endif
 
 #endif
 

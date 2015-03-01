@@ -1,6 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#ifdef ARCH_LPC21XX
+
 #include <lpc214x.h>
 #include <gpio.h>
 
@@ -35,6 +37,8 @@
 #define DEBUG_4_OFF gpio_write(BK_DBG4, PIN_DBG4, 0)
 #define DEBUG_5_ON gpio_write(BK_DBG5, PIN_DBG5, 1)
 #define DEBUG_5_OFF gpio_write(BK_DBG5, PIN_DBG5, 0)
+
+#endif
 
 void debug_leds_init(void);
 void debug_switches_init(void);

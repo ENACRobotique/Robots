@@ -36,8 +36,8 @@ void trajctlr_init(trajectory_controller_t* ctl, const int32_t mat_rob2pods[NB_P
 #endif
 
     // Init encoders, motors and speed controllers
-    encoders_init(ctl->encs);
     motors_init(ctl->mots);
+    encoders_init(ctl->encs, ctl->mots);
     for (i = 0; i < NB_PODS; i++) {
         spdctlr_init(&ctl->spd_ctls[i], &ctl->encs[i]);
     }
@@ -100,6 +100,10 @@ void trajctlr_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientat
         spdctlr_update(&ctl->spd_ctls[i], spd_cmd_pods.ve[i]);
         ctl->next_spd_cmds[i] = spdctlr_get(&ctl->spd_ctls[i]);
     }
+}
+
+void trajctlr_reset(trajectory_controller_t* ctl){
+    encoders_reset(ctl->encs);
 }
 
 void _update_pos_orien(trajectory_controller_t* ctl, MT_VEC* spd_pv_rob) {

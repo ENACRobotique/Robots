@@ -1,12 +1,16 @@
+#ifdef ARCH_LPC21XX
 #include <gpio.h>
 #include <lpc214x.h>
-#include <motor.h>
 #include <pins.h>
 #include <pwm.h>
-#include <tools.h>
+#endif
 
-void motor_init(motor_t* m, unsigned char pwm_ch, int dir_bank, int dir_pin) {
+#include "tools.h"
+
+#include "motor.h"
+
 #ifdef ARCH_LPC21XX
+void motor_init(motor_t* m, unsigned char pwm_ch, int dir_bank, int dir_pin) {
     m->pwm_ch = pwm_ch;
     m->dir_bank = dir_bank;
     m->dir_pin = dir_pin;
@@ -15,11 +19,15 @@ void motor_init(motor_t* m, unsigned char pwm_ch, int dir_bank, int dir_pin) {
     gpio_output(m->dir_bank, m->dir_pin);
     gpio_write(m->dir_bank, m->dir_pin, 0);
     gpio_enable(m->dir_bank, m->dir_pin);
-#elif ARCH_X86_LINUX
-    m->speed = 0;
-    m->setpoint = 0;
-#endif
 }
+#elif defined(ARCH_X86_LINUX)
+
+void motor_init(motor_t* m) {
+    m->speed = 0;
+    m->setPoint = 0;
+}
+
+#endif
 
 /**
  * Updates motor command
@@ -35,7 +43,7 @@ void motor_update(motor_t* m, int cmd) {
         pwm_update(m->pwm_ch, -cmd);
         gpio_write(m->dir_bank, m->dir_pin, 1);
     }
-#elif ARCH_X86_LINUX
+#elif defined(ARCH_X86_LINUX)
     m->setPoint = (cmd>1024) ? (1024) : (cmd<-1024 ? -1024 : cmd); // Bound cmd between -+1024
 #endif
 }

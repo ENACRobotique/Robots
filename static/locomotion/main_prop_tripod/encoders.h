@@ -12,7 +12,7 @@
 
 #define NB_ENCODERS (3)
 
-void encoders_init(encoder_t encs[]);
-void encoders_reset();
+void encoders_init(encoder_t encs[], motor_t mots[]);
+void encoders_reset(encoder_t encs[]);
 
 #endif /* ENCODERS_H_ */
