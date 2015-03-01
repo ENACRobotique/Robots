@@ -1,5 +1,4 @@
 #include <ime.h>
-
 #include <encoder.h>
 
 /**
@@ -54,11 +53,11 @@
  *      }
  */
 
+void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio) {
 /**
  * Initializes the given encoder_t structure and starts ticks collection
  *   the other arguments allows to initializes the underlying external interrupt, see eint.h for more explanations
  */
-void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE eint_type, eint_handler eint_h, int eint_prio) {
     e->eint = eint;
 
     e->nbticks = 0;
@@ -71,10 +70,10 @@ void encoder_init(encoder_t* e, eEINT eint, eEINT_PINASSIGN eint_pin, eEINT_MODE
     eint_enable(eint);
 }
 
+void encoder_update(encoder_t* e) {
 /**
  * Updates the internal value returned by encoder_get() with the current sum of ticks since the previous call of encoder_update()
  */
-void encoder_update(encoder_t* e) {
     int nbticks;
 
     global_IRQ_disable();
@@ -85,17 +84,17 @@ void encoder_update(encoder_t* e) {
     e->nbticks_cache = nbticks;
 }
 
+void encoder_deinit(encoder_t* e) {
 /**
  * Stops the ticks collection
  */
-void encoder_deinit(encoder_t* e) {
     eint_disable(e->eint);
 }
 
+int encoder_get(encoder_t* e) {
 /**
  * Returns the cached nbticks updated by a call to encoder_update()
  *   positive value means trigonometric rotation (facing the wheel, motor behind it)
  */
-int encoder_get(encoder_t* e) {
     return e->nbticks_cache;
 }

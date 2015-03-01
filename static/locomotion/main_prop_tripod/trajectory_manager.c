@@ -20,8 +20,8 @@ enum {
 
 //// Variables about the state of the robot
 // Current position
-int x_sp, y_sp; // Robot position on the table I << SHIFT
-int theta_sp = 0; // Robot heading on the table I.rad << SHIFT
+int x, y; // Robot position on the table I << SHIFT
+int theta = 0; // Robot heading on the table I.rad << SHIFT
 // Goal
 int gx = 0, gy = 0; // I << SHIFT
 int gtheta = 0; // I << SHIFT
@@ -121,17 +121,17 @@ int trajmngr_new_traj_el(sTrajElRaw_t *te) {
 void trajmngr_new_pos(sPosPayload *pos) {
     /* Description:
      * Stock and convert the position and heading in robot units
-     * If the robot is motionless, the goal of robot is actualize
+     * If the robot is motionless, the goal of robot is actualized
      */
     if (pos->id == 0) { // Keep information for primary robot
-        x_sp = isD2I(pos->x); // (I << SHIFT)
-        y_sp = isD2I(pos->y); // (I << SHIFT)
-        theta_sp = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
+        x = isD2I(pos->x); // (I << SHIFT)
+        y = isD2I(pos->y); // (I << SHIFT)
+        theta = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
 
         if (state == S_WAIT) {
-            gx = x_sp;
-            gy = y_sp;
-            gtheta = theta_sp;
+            gx = x;
+            gy = y;
+            gtheta = theta;
         }
     }
 }

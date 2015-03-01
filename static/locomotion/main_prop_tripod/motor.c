@@ -18,7 +18,6 @@ void motor_init(motor_t* m, unsigned char pwm_ch, int dir_bank, int dir_pin) {
 #elif ARCH_X86_LINUX
     m->speed = 0;
     m->setpoint = 0;
-    m->lastticksquery = millis();
 #endif
 }
 

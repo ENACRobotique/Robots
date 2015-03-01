@@ -13,7 +13,7 @@ typedef struct {
 //#elif defined(ARCH_X86_LINUX)  // FIXME
     int speed;
     int setPoint;
-//#endif
+#endif
 } motor_t;
 
 void motor_init(motor_t *m, unsigned char pwm_ch, int bank, int pin);

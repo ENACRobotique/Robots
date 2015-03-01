@@ -19,8 +19,8 @@ typedef struct {
     eEINT eint; // Id of interruption
     int nbticks; // Updated when there is an interruption and reset on encoder_update() call
     int nbticks_cache; // Cached nbticks between two encoder_update() calls
-#elif defined(ARCH_X86_LINUX)
-    // TODO
+//#elif ARCH_X86_LINUX // FIXME
+    unsigned int lastticksquery;
 #endif
 } encoder_t;
 

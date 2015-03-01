@@ -59,13 +59,10 @@ const int32_t mat_rob2pods[3][3] = {
 int main() {
     //// Initialization
     gpio_init_all();
-    // Debug
+    // Debug and LEDs
     debug_leds_init();
     // Small switches
     debug_switches_init();
-    // LED
-    gpio_output(1, 24);   // writes to output {1,24}
-    gpio_output(0, 31);  // writes to output {0,31}
     // Time
     sys_time_init();
     // PWM
@@ -99,9 +96,6 @@ int main() {
             case E_POS:
                 trajmngr_new_pos(&inMsg.payload.pos);
                 break;
-//            case E_GEO: // Information to initialize geometry, ...
-//                // Update info
-//                break;
             }
         } // End: if(ret > 0)
 
@@ -125,6 +119,5 @@ int main() {
 
 /*
  * ############## Remarks ####################
- * 1) May be used isRound to have more precision
  *
  */

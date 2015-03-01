@@ -6,9 +6,8 @@
 //// Test and working modes
 // Working on LPC or Linux
 #define ARCH_LPC21XX
-#ifndef ARCH_LPC21XX
+//#ifndef ARCH_LPC21XX // FIXME
 #define ARCH_X86_LINUX
-
 #endif
 
 #define MAT_SHIFT (16)
@@ -60,21 +59,18 @@
 #define iR2I(R) iROUND(R2I(R)) // (I)
 #define isR2I(R) isROUND(R2I(R)) // (I<<SHIFT)
 
-
+// LPC parameter
 #define PWM_RANGE 1024  // If you want to change the resolution of the motor command, just don't change this value, you're doing it wrong...
 
 // Parameters for control loops
 #define PER_ASSER 20000 // in µs
 #define PER_ASSER_CRITIC 30000 // in µs
 #define SPEED_NOMI 20 // in cm/s
-//#define MAX_SPEED 2 // in m/s FIXME
-//#define MAX_ACC   1 // in m/s²
-//#define MAX_ANG_SPD 180 // in deg/s
-//#define MAX_ANG_ACC 90 // in deg/s²
+
 
 // Motor parameter
 //#ifdef ARCH_X86_LINUX // FIXME
-#define MOT_TIME_CST (100.)
+#define MOT_TIME_CST (100.) // in ms
 //#endif
 
 #endif
