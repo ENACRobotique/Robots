@@ -2,13 +2,18 @@
  * trajectory_manager.c
  *
  *  Created on: 22 févr. 2015
- *      Author: ludo6431
+ *      Author: ludo6431, Yoyo
+ *  Description:
+ *  The trajectory manager allow to process some type of messages like
+ *      a new speed set point
+ *      a new elements of trajectory
+ *      a new current position of the robot
+ *  These messages are convert or adapted in units robots before to be stock or take into account
+ *
  */
 
 #include <string.h>
-
 #include "params.h"
-
 #include "trajectory_manager.h"
 
 enum {
@@ -26,7 +31,7 @@ int theta = 0; // Robot heading on the table I.rad << SHIFT
 int gx = 0, gy = 0; // I << SHIFT
 int gtheta = 0; // I << SHIFT
 
-//// Variables for trajectory controller
+////// Variables for trajectory controller
 // Set points
 int speed_sp = isDpS2IpP(SPEED_NOMI); // Desired speed (IpP<<SHIFT)
 // Trajectories
@@ -40,7 +45,7 @@ sTrajEl_t traj[2][TRAJ_MAX_SIZE]; // Array to shock steps for two trajectory
 //// Functions to update information after a received message
 void trajmngr_new_speed_sp(float speed) {
     /* Description:
-     * Get the new speed set point value
+     * Get the new speed set point value in units robots
      */
     speed_sp = isDpS2IpP(speed);
 }
@@ -120,7 +125,7 @@ int trajmngr_new_traj_el(sTrajElRaw_t *te) {
 
 void trajmngr_new_pos(sPosPayload *pos) {
     /* Description:
-     * Stock and convert the position and heading in robot units
+     * Stock and convert the current position and heading in robot units received by "bn_received function"
      * If the robot is motionless, the goal of robot is actualized
      */
     if (pos->id == 0) { // Keep information for primary robot
