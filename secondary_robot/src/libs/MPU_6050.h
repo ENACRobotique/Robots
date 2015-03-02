@@ -581,7 +581,7 @@
 
 
 
-typedef union accel_t_gyro_union
+typedef union
 {
   struct
   {
@@ -610,7 +610,7 @@ typedef union accel_t_gyro_union
     int y_gyro;
     int z_gyro;
   } value;
-};
+} accel_t_gyro_union;
 
 
 

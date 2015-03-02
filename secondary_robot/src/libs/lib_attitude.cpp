@@ -14,7 +14,7 @@ this library contains the different functions useful for the motor and its contr
 #endif
 
 //globals
-int _attitudeCon;
+int _attitudeCon = -5;
 int _pinServo;
 Servo servoAttitude;
 
@@ -23,9 +23,10 @@ Servo servoAttitude;
 void servoInitHard(int pinservo){
 	_pinServo=pinservo;
 	servoAttitude.attach(_pinServo);
+	servoAttitude.write(135);
 }
 
-#define KP  2// >>2
+#define KP  4// >>2
 #define KI  2// >>8
 
 void attitudeAsser(){
@@ -42,17 +43,17 @@ void attitudeAsser(){
 		if ( (time-time_prev_asser) < ATTITUDE_ASSER_PERIOD+ATTITUDE_ASSER_PERIOD/2 ){
 			time_prev_asser = time_prev_asser + ATTITUDE_ASSER_PERIOD;
 			//compute error (epsilon)
-			int read=readInertial(ANGLE_TO_ASSERV);
+			int read=-readInertial(ANGLE_TO_ASSERV);
 			eps = _attitudeCon - read;
 
 			//compute error integral
-			intEps= CLAMP( -(64<<4) ,intEps+eps, (64<<4));
+			intEps= CLAMP( -(64<<2) ,intEps+eps, (64<<2));
 			//compute command
 //			if(_attitudeCon==0){
 //				_attitudeCmd=0;
 //			}
 //			else{
-				_attitudeCmd= servoAttitude.read() - ((KP*eps)>>2) - ((KI*intEps)>>8);
+				_attitudeCmd = ((KP*eps)>>2) + ((KI*intEps)>>3);
 //			}
 
 #ifdef DEBUG_ATTITUDE
@@ -62,25 +63,26 @@ Serial.print(_attitudeCon);
 Serial.print("\t");
 Serial.print(read);
 Serial.print("\t");
-Serial.println(_attitudeCmd);
+Serial.print(_attitudeCmd);
 //Serial.print("\t");
 //Serial.print(CLAMP(15,abs(_attitudeCmd),175));
 //Serial.print("\t");
 //Serial.print(eps);
+Serial.print("\t");
+Serial.print(intEps);
 //Serial.print("\t");
-//Serial.print(intEps);
-//Serial.print("\t");
-//Serial.println(millis());
+//Serial.print(millis());
+Serial.println();
 #endif
-			if(_attitudeCmd>=0) servoAttitude.write(_attitudeCmd);
-			else servoAttitude.write(_attitudeCmd);
+			//if(_attitudeCmd>=0) servoAttitude.write(180-_attitudeCmd);
+			//else servoAttitude.write(180-_attitudeCmd);
 
-			servoAttitude.write(CLAMP(10,_attitudeCmd,175));
+			servoAttitude.write(CLAMP(15,90+_attitudeCmd,135));
 		}
 		else {//to avoid problems due to long loop
 			  time_prev_asser=millis();
 			  intEps=0;//<=>resets the integral term
-			  servoAttitude.write(CLAMP(10,_attitudeCmd,175));
+			  servoAttitude.write(CLAMP(15,90+_attitudeCmd,135));
 			  readInertial(ANGLE_TO_ASSERV);
 			}
 	}
