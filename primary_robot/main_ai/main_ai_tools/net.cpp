@@ -174,7 +174,9 @@ void Net::sendPathOrientToNet(){
 
                 outMsg.payload.trajOrientEl.elts[j].c_x = CONV2TRAJORIENT(_trajOrientEl.front().obs.c.x, 6);
                 outMsg.payload.trajOrientEl.elts[j].c_y = CONV2TRAJORIENT(_trajOrientEl.front().obs.c.y, 6);
-                outMsg.payload.trajOrientEl.elts[j].c_r = CONV2TRAJORIENT(_trajOrientEl.front().obs.r, 6);
+                outMsg.payload.trajOrientEl.elts[j].c_r = CONV2TRAJORIENT(_trajOrientEl.front().obs.r, 5);
+
+                outMsg.payload.trajOrientEl.elts[j].is_last_element = 0;
 
                 outMsg.payload.trajOrientEl.elts[j].theta1 =  CONV2TRAJORIENT(_trajOrientEl.front().theta1, 13);
                 outMsg.payload.trajOrientEl.elts[j].theta2 =  CONV2TRAJORIENT(_trajOrientEl.front().theta2, 13);
@@ -185,8 +187,10 @@ void Net::sendPathOrientToNet(){
                 outMsg.payload.trajOrientEl.elts[j].rot2_dir = _trajOrientEl.front().rot2_dir;
 
                 _trajOrientEl.pop();
-                if(_trajOrientEl.empty())
+                if(_trajOrientEl.empty()){
+                    outMsg.payload.trajOrientEl.elts[j].is_last_element = 1;
                     break;
+                }
             }
 
             outMsg.payload.trajOrientEl.t = 0; //TODO define reference time and add a delta (time to send the message)
