@@ -10,6 +10,7 @@
 
 #include "state_types.h"
 
+extern void initHardStairs(int pin_servo);
 extern sState sStairs;
 extern sState sEndStairs;
 

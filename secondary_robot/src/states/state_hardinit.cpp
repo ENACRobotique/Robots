@@ -6,25 +6,23 @@
 #include "Wire.h"
 
 #include "state_dead.h"
-#include "state_wall.h"
+#include "state_stairs.h"
 #include "state_ALACON.h"
 #include "state_traj.h"
 #include "state_Manualdrive.h"
 #include "state_tirette.h"
 
-
+#include "../libs/lib_attitude.h"
+#include "../libs/MPU_6050.h"
 #include "../libs/lib_move.h"
 #include "../libs/lib_motor.h"
 #include "../libs/lib_radar.h"
-#include "../libs/lib_attitude.h"
-#include "../libs/MPU_6050.h"
 #include "../libs/lib_fan.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
-	//return &sTrajRedInit;
-	//return &sManualdrive;
 	return &sTirette;
+//	return &sAlacon;
 }
 void initHard(sState *prev){
 
@@ -42,16 +40,16 @@ void initHard(sState *prev){
     int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT,PIN_ODO2_INT};
     int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN,PIN_ODO2_SEN};
     odoInitHard(pin_odo_int,pin_odo_sen);
-    servoInitHard(PIN_SERVO);
 
-    //attitude
+    //radar
     Wire.begin();
     initInertial();
+    servoInitHard(PIN_SERVO_ATTITUDE);
     //line following/detector
     //Wire.begin(); already done
-
     //fan
     fanInitHard(PIN_VENTILO);
+    initHardStairs(PIN_SERVO_CARPET);
 
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);

@@ -26,14 +26,16 @@ typedef struct {
 int progTraj(trajElem tab[]);
 
 
-extern sState sTrajRedInit;
+extern sState sTrajGreenInit;
 extern sState sTrajYellowInit;
-extern sState sTrajEndStairsYellow;
 extern sState sTrajEndStairsGreen;
+extern sState sTrajEndStairsYellow;
 
 
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
+extern sState sTrajGreenInit;
+extern sState sTrajYellowInit;
 
 
 #endif /* STATE_TRAJ_H_ */
