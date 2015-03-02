@@ -95,11 +95,11 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te) {
     return error;
 }
 
+/** Description:
+ * Store and convert the position and heading in robot units received by "bn_received function"
+ * If the robot is motionless, the goal of robot is actualized
+ */
 void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos) {
-    /* Description:
-     * Store and convert the position and heading in robot units received by "bn_received function"
-     * If the robot is motionless, the goal of robot is actualized
-     */
     if (pos->id == ELT_PRIMARY) { // Keep information for primary robot
         tm->x = isD2I(pos->x); // (I << SHIFT)
         tm->y = isD2I(pos->y); // (I << SHIFT)
@@ -113,38 +113,60 @@ void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos) {
     }
 }
 
-#define fCAST(v) ((float)(v))
 #define dCAST(v) ((double)(v))
-#define fCSHIFT(s) ((float)(1 << (s)))
 #define dCSHIFT(s) ((double)(1 << (s)))
-#define isD2Is5(d) isROUND(D2I(fCAST(d) / fCSHIFT(5)))
-#define isD2Is6(d) isROUND(D2I(fCAST(d) / fCSHIFT(6)))
-#define isD2Is13(d) isROUND(D2I(fCAST(d) / fCSHIFT(13)))
-#define isDpS2IpPs5(dps) isROUND(DpS2IpP(fCAST(dps) / fCSHIFT(5)))
+#define D2Isi(d, i) (D2I(dCAST(d) / dCSHIFT(i)))
+#define isD2Isi(d, i) isROUND(D2Isi(d, i))
+#define isDpS2IpPs5(dps) isROUND(DpS2IpP(dCAST(dps) / dCSHIFT(5)))
+#define _SPDCALC(d, t) (int32_t)((t)>0 ? ((int64_t)(d) * (int64_t)USpP / (int64_t)(t)) : 0)
 void _convertMsg2Slot(sTrajOrientElRaw_t* m, sTrajSlot_t* s, int8_t ssid) {
     s->tid = m->tid;
     s->sid = m->sid;
     s->ssid = ssid;
-    s->sssid = 0;
 
     s->seg_start_date = m->t + (ssid ? (m->dt1 + m->dt2) * 1000 : 0);
-    s->seg_start_theta = isD2Is13(m->elts[ssid].theta1);
+    s->seg_start_theta = isD2Isi(m->elts[ssid].theta1, 13);
     s->rot1_dir = m->elts[ssid].rot1_dir;
-    s->p1_x = isD2Is6(m->elts[ssid].p1_x);
-    s->p1_y = isD2Is6(m->elts[ssid].p1_y);
-    s->p2_x = isD2Is6(m->elts[ssid].p2_x);
-    s->p2_y = isD2Is6(m->elts[ssid].p2_y);
-    s->seg_len = isD2Is5(m->elts[ssid].seg_len);
-    s->seg_spd = 0; //TODO
+    s->p1_x = isD2Isi(m->elts[ssid].p1_x, 6);
+    s->p1_y = isD2Isi(m->elts[ssid].p1_y, 6);
+    s->p2_x = isD2Isi(m->elts[ssid].p2_x, 6);
+    s->p2_y = isD2Isi(m->elts[ssid].p2_y, 6);
+    s->seg_len = isD2Isi(m->elts[ssid].seg_len, 5);
 
     s->arc_start_date = m->t + (m->dt1 + (ssid ? m->dt2 + m->dt3 : 0)) * 1000;
-    s->arc_start_theta = isD2Is13(m->elts[ssid].theta2);
+    s->arc_start_theta = isD2Isi(m->elts[ssid].theta2, 13);
     s->rot2_dir = m->elts[ssid].rot2_dir;
-    s->c_x = isD2Is6(m->elts[ssid].c_x);
-    s->c_y = isD2Is6(m->elts[ssid].c_y);
-    s->c_r = isD2Is5(m->elts[ssid].c_r);
-    s->arc_len = isD2Is5(m->elts[ssid].arc_len);
-    s->arc_spd = 0; //TODO
+    s->c_x = isD2Isi(m->elts[ssid].c_x, 6);
+    s->c_y = isD2Isi(m->elts[ssid].c_y, 6);
+    s->c_r = isD2Isi(m->elts[ssid].c_r, 5);
+    s->arc_len = isD2Isi(m->elts[ssid].arc_len, 5);
+    s->arc_spd = 0; // can't be computed here, will be updated in _updateSlotKnowingNext()
+
+    // compute segment speed
+    int32_t dt_us = s->arc_start_date - s->seg_start_date; // duration for segment item in microseconds
+    s->seg_spd = _SPDCALC(s->seg_len, dt_us);
+
+    if(m->elts[ssid].is_last_element) {
+        s->state = SLOT_OK;
+    }
+    else {
+        s->state = SLOT_WAITING_NEXT;
+    }
+}
+
+void _updateSlotKnowingNext(sTrajSlot_t* curr, sTrajSlot_t* next) {
+    if(
+            curr->state == SLOT_WAITING_NEXT &&
+            next->state != SLOT_EMPTY &&
+            next->seg_start_date >= curr->arc_start_date &&
+            next->tid == curr->tid &&
+            (next->sid == curr->sid || next->sid == curr->sid + 1 || next->sid - 1 == curr->sid)
+    ) {
+        int32_t dt_us = next->seg_start_date - curr->arc_start_date; // duration for arc item in microseconds
+        curr->arc_spd = _SPDCALC(curr->arc_len, dt_us);
+
+        curr->state = SLOT_OK;
+    }
 }
 
 int _convertMsg2Slots(sTrajOrientElRaw_t* m, sTrajSlot_t* s1, sTrajSlot_t* s2) {
@@ -156,6 +178,8 @@ int _convertMsg2Slots(sTrajOrientElRaw_t* m, sTrajSlot_t* s1, sTrajSlot_t* s2) {
         ret = 2;
 
         _convertMsg2Slot(m, s2, 1);
+
+        _updateSlotKnowingNext(s1, s2);
     }
 
     return ret;

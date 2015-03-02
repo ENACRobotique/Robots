@@ -34,15 +34,17 @@
 #define WDIAM (3.25*2.54)  // wheel diameter (cm)
 
 #define SpP (0.02)  // seconds per sampling period
+#define MSpP (20.)  // milliseconds per sampling period
+#define USpP (20000.)  // microseconds per sampling period
 #define IpR (500.*676./49.) // increments per revolution (6897.959183673)
 #define DpR (PI*WDIAM) // distance per revolution (25.933847355 cm)
 
-// revolution per second to increment per sampling period
+// revolution per second to increments per sampling period
 #define RpS2IpP(o) ((o)*IpR*SpP)
 #define iRpS2IpP(o) iROUND(RpS2IpP(o))  // (IpP)
 #define isRpS2IpP(o) isROUND(RpS2IpP(o)) // (IpP<<SHIFT)
 
-// centimeters per second to increment per sampling period
+// centimeters per second to increments per sampling period
 #define DpS2IpP(o) RpS2IpP((o)/DpR)
 #define iDpS2IpP(o) iROUND(DpS2IpP(o))  // (IpP)
 #define isDpS2IpP(o) isROUND(DpS2IpP(o))  // (IpP<<SHIFT)
@@ -62,7 +64,7 @@
 #define iR2I(R) iROUND(R2I(R)) // (I)
 #define isR2I(R) isROUND(R2I(R)) // (I<<SHIFT)
 
-// LPC parameter
+// LPC parameters
 #define PWM_RANGE 1024  // If you want to change the resolution of the motor command, just don't change this value, you're doing it wrong...
 
 // Parameters for control loops
