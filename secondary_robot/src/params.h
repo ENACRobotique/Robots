@@ -27,12 +27,12 @@
 #define PIN_MOTOR2_DIR 13
 #define PIN_ODO2_INT 3//odometer2, interruption pin
 #define PIN_ODO2_SEN 8
-#define PIN_TIRETTE 9
+#define PIN_TIRETTE A0
 //#define PIN_LED 13
 #define PIN_COLOR 4
-#define PIN_SERVO 10
+#define PIN_SERVO_ATTITUDE 10
+#define PIN_SERVO_CARPET 9
 #define PIN_VENTILO 11
-
 //analog in
 //#define PIN_SHARP_FRONT_RIGHT A0
 //#define PIN_SHARP_FRONT_LEFT A1
@@ -60,6 +60,9 @@
 #define RADAR_SAFETY_TIME 500 //in ms
 
 #define TIME_READY_LAUNCHER 500 //in ms
+
+#define FAN_SPEED 254 //PWM Command(0-255)
+#define TIME_RAG_RLSD 1000 //in milliseconds
 
 #define DEBUG 1
 
