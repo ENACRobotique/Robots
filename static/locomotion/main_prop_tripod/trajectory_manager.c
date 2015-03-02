@@ -142,7 +142,7 @@ void _convertMsg2Slot(sTrajOrientElRaw_t* m, sTrajSlot_t* s, int8_t ssid) {
     s->rot2_dir = m->elts[ssid].rot2_dir;
     s->c_x = isD2Is6(m->elts[ssid].c_x);
     s->c_y = isD2Is6(m->elts[ssid].c_y);
-    s->c_r = isD2Is6(m->elts[ssid].c_r);
+    s->c_r = isD2Is5(m->elts[ssid].c_r);
     s->arc_len = isD2Is5(m->elts[ssid].arc_len);
     s->arc_spd = 0; //TODO
 }
@@ -152,7 +152,7 @@ int _convertMsg2Slots(sTrajOrientElRaw_t* m, sTrajSlot_t* s1, sTrajSlot_t* s2) {
 
     _convertMsg2Slot(m, s1, 0);
 
-    if (1 /* TODO */) {
+    if (!m->elts[0].is_last_element) {
         ret = 2;
 
         _convertMsg2Slot(m, s2, 1);
