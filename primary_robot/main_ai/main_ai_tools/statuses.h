@@ -37,7 +37,8 @@ class Statuses {
 
         //Simple function define in the FRAME_PLAYGROUND
         sPt_t getLastPosXY(eElement el);
-        //TODO get last speed
+        float getLastPosOrient(eElement el);
+        float getLastSpeed(eElement el);
 
     private:
         void fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *srcPAPG, s2DPAUncert *srcUPG, s2DPosAtt *dstPAPG, s2DPAUncert *dstUPG);

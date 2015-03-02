@@ -11,6 +11,8 @@
 #include <cmath>
 #include "ai_types.h"
 #include "tools.h"
+#include "math_ops.h"
+#include "time_tools.h"
 
 
 Statuses::Statuses() {
@@ -51,7 +53,7 @@ int Statuses::receivedNewStatus(sGenericStatus &status){
         cerr << "[ERROR] [statuses.ccp] Unknown status id" << endl;
         return -1;
     }
-    //cout << "[INFO] [status.cpp] New status : " << status.pos.x << ", " << status.pos.y << endl;
+    logs << INFO_V(E_V3) << "New status : " << status.pos.x << ", " << status.pos.y << ", " << status.pos.theta * 180 / M_PI;
 
     _list[status.id].push_back(status); //TODO sort by date
 
@@ -87,6 +89,34 @@ sPt_t Statuses::getLastPosXY(eElement el){
     point.y = status.pos.y;
 
     return point;
+}
+
+float Statuses::getLastPosOrient(eElement el){
+    sGenericStatus status = getLastStatus(el);
+
+    return status.pos.theta;
+}
+
+float Statuses::getLastSpeed(eElement el){
+
+    if(_list[el].size() >=2){
+        sGenericStatus status1 = getLastStatus(el);
+        sPt_t pt1 = {status1.pos.x, status1.pos.y};
+
+        sGenericStatus status2 =_list[el][_list[el].size() - 2];
+        sPt_t pt2 = {status2.pos.x, status2.pos.y};
+
+        float dist;
+        distPt2Pt(&pt1, &pt2, &dist);
+logs << INFO <<"DATE =" << status1.date;
+logs << INFO <<"DATE =" << status2.date;
+logs << INFO <<"dist =" << dist;
+
+        return dist/(status1.date - status2.date)*1000000;
+    }
+
+
+    return 0;
 }
 
 
