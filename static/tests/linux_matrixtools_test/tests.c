@@ -105,12 +105,28 @@ void test_linearsolve(){
 void test_invmatrix() {
 #define MAT_SHIFT (25)
 
+#define RAD_SHIFT (13)
+// MAT over RAD shift
+#if MAT_SHIFT > RAD_SHIFT
+#define dMoRSHIFT ((double)(1 << (MAT_SHIFT - RAD_SHIFT)))
+#else
+#define dMoRSHIFT ((double)(1 >> (RAD_SHIFT - MAT_SHIFT)))
+#endif
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+#define PI (M_PI)
+#define WDIAM (3.25*2.54)  // wheel diameter (cm)
+#define IpR (500.*676./49.) // increments per revolution (6897.959183673)
+#define DpR (PI*WDIAM) // distance per revolution (25.933847355 cm)
+#define D2I(d) ((d)*IpR/DpR) // (265.982871309 increments per centimeter)
+
     int ret;
 
     const int32_t mat_rob2pods[3][3] = {
-            {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-            {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-            { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
+    	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    	    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    	    { 1.  * dMSHIFT,  0                 * dMSHIFT, D2I(15.5) * dMoRSHIFT}
     };
 
     // static allocation on stack matrices (no need to free those)
