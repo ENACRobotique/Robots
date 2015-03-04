@@ -56,6 +56,9 @@ class Log {
 
 extern Log& operator<<(Log& log, const char*text);
 extern Log& operator<<(Log& log, const int num);
+extern Log& operator<<(Log& log, const float num);
+extern Log& operator<<(Log& log, const double num);
+extern Log& operator<<(Log& log, const uint32_t num);
 extern Log& operator<<(Log& log, eLog_t type);
 extern Log& operator<<(Log& log, eVer_t ver);
 
