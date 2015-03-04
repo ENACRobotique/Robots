@@ -18,21 +18,18 @@
 #include <speed_controller.h>
 #include <stdint.h>
 
-#if NB_ENCODERS != 3 || NB_MOTORS != 3
-#error "You can't change NB_ENCODERS or NB_MOTORS without changing trajectory_controller as well!"
+#if NB_ENCODERS != NB_MOTORS
+#error "trajectory_controller's implementation assumes NB_ENCODERS==NB_MOTORS"
 #endif
 
-// do not use those defines from motors.h and encoders.h, use NB_PODS
-#undef NB_ENCODERS
-#undef NB_MOTORS
-
 /**
- * Number of pods (must be equal to NB_MOTORS and NB_ENCODERS)
+ * Number of pods
  */
-#define NB_PODS (3)
+#define NB_PODS (NB_MOTORS)
 
 /**
- * Number of internal speed outputs, must be 3 for a planar motion case (Vx, Vy, Omega)
+ * Number of internal speed outputs, must be 3 for a planar motion case (Vx, Vy, Omegaz)
+ * current implementation assumes a value of 3, others will produce inconsistent results or buffer overflow
  */
 #define NB_SPDS (3)
 
@@ -41,7 +38,8 @@ typedef struct {
     MT_MAT M_spds_rob2pods;
 
     // Last known status
-    int x, y, theta;
+    int x, y; // (in I << SHIFT)
+    int theta; // (in R << (RAD_SHIFT + SHIFT))
 
     // PID
     PID_t pid_traj;
