@@ -105,7 +105,7 @@ void startColor(void) {
             state = 1;
             color = 0;
 
-            msgOut.header.destAddr = ADDRI_MAIN_IO;
+            msgOut.header.destAddr = ADDRI1_MAIN_IO;
             msgOut.header.type = E_IHM_STATUS;
             msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
 
@@ -127,7 +127,7 @@ void startColor(void) {
             state = 3;
             color = 1;
 
-            msgOut.header.destAddr = ADDRI_MAIN_IO;
+            msgOut.header.destAddr = ADDRI1_MAIN_IO;
             msgOut.header.type = E_IHM_STATUS;
             msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
 
@@ -147,20 +147,25 @@ void startColor(void) {
 #endif
 }
 
-sPt_t trjS[4] = { //trajectory of the secondary robot
-{ 10., 190. }, { 40., 160. }, { 135., 160. }, { 135., 190. } };
-
 int testPtInPt(sPt_t *p1, sPt_t *p2, int r) {
     return sqrt((p2->x - p1->x) * (p2->x - p1->x) + (p2->y - p1->y) * (p2->y - p1->y)) <= r;
 }
 
 void simuSecondary(void) { //TODO if a other robot on trajectory
-    static int state = 0;
+    sPt_t trjS[4] = {{ 10., 100. }, { 100., 100. }, { 125., 120. }, { 125., 190. }}; //trajectory of the secondary robot : Yellow
+
+    static unsigned int state = 0;
     static unsigned int lastTime = 0;
     static sPt_t pos;
 
+    if(color == GREEN)
+        for(unsigned int i = 0 ; i < (sizeof(trjS) / sizeof(*trjS)); i++)
+            trjS[i].x = 300 - trjS[i].x;
+
     unsigned int time = millis();
     sNum_t theta;
+
+    obs[1].active = 1;
 
     if (!lastTime) {
         lastTime = millis();
@@ -270,6 +275,6 @@ int checkAdvOnRobot(void) {
 }
 
 
-//TODO Optimisation des deplacement du robot algarithme arbre recouvrant
+//TODO Optimisation des deplacements du robot algorithme arbre recouvrant
 
 
