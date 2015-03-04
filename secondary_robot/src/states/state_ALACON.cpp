@@ -10,6 +10,7 @@
 #include "state_ALACON.h"
 #include "../params.h"
 #include "../tools.h"
+#include "lib_fan.h"
 
 #include "lib_move.h"
 
@@ -23,7 +24,7 @@ sState* testAlacon()
 
 void initAlacon(sState *prev)
 	{
-    move(20,0);
+	fanSetCon(254);
 #ifdef DEBUG
     Serial.println("j'entre en A LA CON");
 #endif

@@ -24,17 +24,17 @@ Servo servoCarpet;
 
 void initHardStairs(int pin_servo){
 	servoCarpet.attach(pin_servo);
-	servoCarpet.write(0);
+	servoCarpet.write(110);
 }
 
 sState *testStairs()
 	{
 	if (millis()-timeStairsStarted >= TIME_RAG_RLSD){
-		servoCarpet.write(45);
+		servoCarpet.write(40);
 	}
 	int attitudeConStairs = _attitudeCon;
 	if (millis()-timeStairsStarted > 2000){
-		if ((abs(attitudeConStairs-attitudeConStartStairs) <= rangeAttitudeConStop) || millis()-timeStairsStarted > 5000) {
+		if ((abs(attitudeConStairs-attitudeConStartStairs) <= rangeAttitudeConStop) || millis()-timeStairsStarted > 7500) {
 			if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
 			else return &sTrajEndStairsYellow;
 		}
@@ -45,7 +45,7 @@ sState *testStairs()
 void initStairs(sState *prev)
 	{
 	fanSetCon(FAN_SPEED);
-	move(20,0);
+	move(10,0);
 	attitudeConStartStairs = _attitudeCon;
 	timeStairsStarted = millis();
 	#ifdef DEBUG
