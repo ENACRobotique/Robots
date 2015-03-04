@@ -9,6 +9,8 @@ this library contains the different functions useful for the motor and its contr
 //defines
 #define ATTITUDE_ASSER_PERIOD 20 // milliseconds
 #define ANGLE_TO_ASSERV X_ANGLE
+#define MAX_ANGLE 15
+#define MIN_ANGLE 160
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
@@ -23,7 +25,7 @@ Servo servoAttitude;
 void servoInitHard(int pinservo){
 	_pinServo=pinservo;
 	servoAttitude.attach(_pinServo);
-	servoAttitude.write(135);
+	servoAttitude.write(MIN_ANGLE);
 }
 
 #define KP  4// >>2
@@ -77,12 +79,12 @@ Serial.println();
 			//if(_attitudeCmd>=0) servoAttitude.write(180-_attitudeCmd);
 			//else servoAttitude.write(180-_attitudeCmd);
 
-			servoAttitude.write(CLAMP(15,90+_attitudeCmd,135));
+			servoAttitude.write(CLAMP(MAX_ANGLE,90+_attitudeCmd,MIN_ANGLE));
 		}
 		else {//to avoid problems due to long loop
 			  time_prev_asser=millis();
 			  intEps=0;//<=>resets the integral term
-			  servoAttitude.write(CLAMP(15,90+_attitudeCmd,135));
+			  servoAttitude.write(CLAMP(MAX_ANGLE,90+_attitudeCmd,MIN_ANGLE));
 			  readInertial(ANGLE_TO_ASSERV);
 			}
 	}
