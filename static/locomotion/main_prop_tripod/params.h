@@ -3,10 +3,15 @@
 
 #include <math.h>
 
-// data in the matrix (or its inverse) will be in the range of -20;20, during an inversion or a matrix multiplication up to 3 times an element can be stored
-//   ln(3*20)/ln(2) = 5.91 => 6 bits for the integer part + 1 sign bit => 32-(6+1) = 25 bits for the decimal part
-//   => 2^25 = 33554432 decimal part possibilities, ln(33554432)/ln(10)=7.53 => more than 7 significant figures for the decimal part
-#define MAT_SHIFT (25)
+
+/**
+ * SHIFTS DEFINITION
+ */
+
+// data in the matrix (or its inverse) will be in the range of -3;3, during an inversion or a matrix multiplication up to 3 times an element can be stored
+//   ln(3*3)/ln(2) = 3.17 => 4 bits for the integer part + 1 sign bit => 32-(4+1) = 27 bits for the decimal part
+//   => 2^27 = 134217728 decimal part possibilities, ln(134217728)/ln(10)=8.13 => more than 8 significant figures for the decimal part
+#define MAT_SHIFT (27)
 #define dMSHIFT ((double)(1 << MAT_SHIFT))
 
 // data in the vectors will be in the range of -81000;81000
@@ -14,6 +19,22 @@
 //   => 2^14 = 16384 decimal part possibilities, ln(16384)/ln(10)=4.21 => more than 4 significant figures for the decimal part
 #define VEC_SHIFT (14)
 #define dVSHIFT ((double)(1 << VEC_SHIFT))
+
+#define RAD_SHIFT (13)
+#define dRSHIFT ((double)(1 << RAD_SHIFT))
+
+// MAT over RAD shift
+#if MAT_SHIFT > RAD_SHIFT
+#define dMoRSHIFT ((double)(1 << (MAT_SHIFT - RAD_SHIFT)))
+#else
+#define dMoRSHIFT ((double)(1 >> (RAD_SHIFT - MAT_SHIFT)))
+#endif
+
+// M_rob2pods produces (V1;V2;V3) in [IpP<<SHIFT x IpP<<SHIFT x IpP<<SHIFT] from (Vx;Vy;Oz) in [IpP<<SHIFT x IpP<<SHIFT x RpP<<(RAD_SHIFT+SHIFT)]
+
+/**
+ * DATA ADAPTATION
+ */
 
 #define SHIFT (VEC_SHIFT)
 #define SHIFT_PID (8)
@@ -55,7 +76,7 @@
 #define isD2I(d) isROUND(D2I(d)) // (I<<SHIFT)
 
 // increments to centimeters
-#define I2D(I) ((I)*DpR/IpR)
+#define I2D(I) ((I)*DpR/IpR) // (0.003759641 centimeters per increment)
 #define I2Ds(Is) I2D((Is)/dSHIFT)
 #define iI2Ds(Is) iROUND(I2Ds(Is))
 

@@ -67,9 +67,9 @@ M_rob2pods =
    1.00000000000000e+00  -1.83690953073357e-16   1.55000000000000e+01
 */
 const int32_t mat_rob2pods[3][3] = {
-    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-    { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
+    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    { 1.  * dMSHIFT,  0                 * dMSHIFT, D2I(15.5) * dMoRSHIFT}
 };
 
 int main() {
