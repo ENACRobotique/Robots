@@ -103,7 +103,7 @@ void test_linearsolve(){
 }
 
 void test_invmatrix() {
-#define MAT_SHIFT (25)
+#define MAT_SHIFT (27)
 
 #define RAD_SHIFT (13)
 // MAT over RAD shift
