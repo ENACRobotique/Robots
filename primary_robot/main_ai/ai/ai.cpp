@@ -215,7 +215,7 @@ void obj_step(eAIState_t AIState) {
 
             //Update position
             if ((millis() - _start_time) > 2000) {
-                // simuSecondary();
+                 simuSecondary();
             }
 
             obs_updated[4]++;
