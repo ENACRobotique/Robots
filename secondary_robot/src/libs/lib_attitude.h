@@ -32,6 +32,7 @@ void attitudeAsser();
 void attitudeAsserTemp();
 
 extern int _attitudeCon;
+extern int _attitudeCmd;
 inline void attitudeSetCon(int attitude){
 	_attitudeCon=attitude;
 }

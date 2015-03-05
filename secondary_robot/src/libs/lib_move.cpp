@@ -17,6 +17,7 @@
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
 
+#define DERIVE 1
 
 #ifdef TRIKE
 Servo _dirServo;
@@ -38,7 +39,12 @@ void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
 //sets speed motors (omega=0 means straight line)
 void move(int speed,int omega){
 #ifdef TANK
-	int speeds[NB_MOTORS]={-speed - omega, -speed + omega};
+	int derive = 0;
+	if (speed || omega)
+	{
+		derive = DERIVE;
+	}
+	int speeds[NB_MOTORS]={-speed - omega, -speed + omega + derive};
     motSetCon(speeds);
 #else
 #ifdef TRIKE
