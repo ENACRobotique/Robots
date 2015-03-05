@@ -22,7 +22,7 @@
 
 sState* reTirette(){
 	return &sTirette;
-//	return &sAlacon;
+	//return &sAlacon;
 }
 void initHard(sState *prev){
 

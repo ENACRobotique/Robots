@@ -17,9 +17,9 @@
 
 
 
-int attitudeConStartStairs;
-unsigned long timeStairsStarted;
-int rangeAttitudeConStop = -1;
+int attitudeCmdStartStairs;
+unsigned long timeStairsStarted = 0;
+int rangeAttitudeCmdStop = -1;
 Servo servoCarpet;
 
 void initHardStairs(int pin_servo){
@@ -29,12 +29,15 @@ void initHardStairs(int pin_servo){
 
 sState *testStairs()
 	{
-	if (millis()-timeStairsStarted >= TIME_RAG_RLSD){
-		servoCarpet.write(40);
+	int attitudeCmdStairs = _attitudeCmd;
+	if (90+attitudeCmdStairs <= 100 && timeStairsStarted == 0){
+		timeStairsStarted = millis();
 	}
-	int attitudeConStairs = _attitudeCon;
-	if (millis()-timeStairsStarted > 2000){
-		if ((abs(attitudeConStairs-attitudeConStartStairs) <= rangeAttitudeConStop) || millis()-timeStairsStarted > 7500) {
+	if (timeStairsStarted != 0){
+		if (millis()-timeStairsStarted >= TIME_RAG_RLSD){
+			servoCarpet.write(40);
+	}
+		if (/*(abs(attitudeCmdStairs-attitudeCmdStartStairs) <= rangeAttitudeCmdStop))||*/ millis()-timeStairsStarted > 6500) {
 			if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
 			else return &sTrajEndStairsYellow;
 		}
@@ -46,8 +49,7 @@ void initStairs(sState *prev)
 	{
 	fanSetCon(FAN_SPEED);
 	move(10,0);
-	attitudeConStartStairs = _attitudeCon;
-	timeStairsStarted = millis();
+	attitudeCmdStartStairs = _attitudeCmd;
 	#ifdef DEBUG
 		Serial.println("Starting stairs");
 	#endif
