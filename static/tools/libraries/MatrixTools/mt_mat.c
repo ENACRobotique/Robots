@@ -7,11 +7,19 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#ifdef ARCH_X86_LINUX
+#include <assert.h>
+#endif
 
 #include "mt_mat.h"
 
 #define MRC(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 #define M64(m, r, c) (int64_t)(MRC(m, r, c))
+#ifndef ABS
+#define ABS(v) ((v)<0 ? -(v) : (v))
+#endif
+// 2-steps shift, 1 doesn't work here (x86)
+#define MASK_32S(s) ((~((1ull<<(s))-1))<<32)
 
 /**
  * Initializes a new matrix of size rows x cols
@@ -56,6 +64,11 @@ int mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out) {
         for (j = 0; j < M->cols; j++) {
             sum += M64(M, i, j) * (int64_t) v->ve[j];
         }
+
+#ifdef ARCH_X86_LINUX
+        assert(!(ABS(sum) & MASK_32S(M->shift)));
+#endif
+
         out->ve[i] = sum >> M->shift;
     }
 
@@ -89,7 +102,18 @@ int mt_mv_mltadd(const MT_VEC* v1, int32_t k, const MT_MAT* M, const MT_VEC* v2,
         for (j = 0; j < M->cols; j++) {
             sum += M64(M, i, j) * (int64_t) v2->ve[j];
         }
-        out->ve[i] = v1->ve[i] + (int32_t) (((int64_t) k * (sum >> M->shift)) >> v1->shift);
+
+#ifdef ARCH_X86_LINUX
+        assert(!(ABS(sum) & MASK_32S(M->shift)));
+#endif
+
+        int64_t tmp = (int64_t) k * (sum >> M->shift);
+
+#ifdef ARCH_X86_LINUX
+        assert(!(ABS(tmp) & MASK_32S(v1->shift)));
+#endif
+
+        out->ve[i] = v1->ve[i] + (int32_t) (tmp >> v1->shift);
     }
 
     return 0;
@@ -121,6 +145,11 @@ int mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
             for (k = 0; k < A->cols; k++) {
                 sum += M64(A, i, k) * M64(B, k, j);
             }
+
+#ifdef ARCH_X86_LINUX
+            assert(!(ABS(sum) & MASK_32S(A->shift)));
+#endif
+
             MRC(OUT, i, j)= sum >> A->shift;
         }
     }
@@ -137,6 +166,7 @@ int mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
  */
 int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
     int32_t det;
+    int64_t tmp, tmp2, tmp3, tmp4;
 
     if (M->rows == 1 || M->rows != M->cols) {
         return -1;
@@ -153,7 +183,13 @@ int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
     OUT->shift = M->shift;
 
     if (M->rows == 2) {
-        det = (int32_t) ((M64(M, 0, 0) * M64(M, 1, 1) - M64(M, 0, 1) * M64(M, 1, 0)) >> M->shift);
+        tmp = M64(M, 0, 0) * M64(M, 1, 1) - M64(M, 0, 1) * M64(M, 1, 0);
+
+#ifdef ARCH_X86_LINUX
+        assert(!(ABS(tmp) & MASK_32S(M->shift)));
+#endif
+
+        det = (int32_t) (tmp >> M->shift);
 
         MRC(OUT, 0, 0)= (M64(M, 1, 1)<<M->shift)/det;
         MRC(OUT, 0, 1)= -(M64(M, 0, 1)<<M->shift)/det;
@@ -161,9 +197,23 @@ int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
         MRC(OUT, 1, 1)= (M64(M, 0, 0)<<M->shift)/det;
     }
     else if (M->rows == 3) {
-        det = (int32_t) ((M64(M, 0, 0) * ((M64(M, 1, 1) * M64(M, 2, 2) - M64(M, 2, 1) * M64(M, 1, 2)) >> M->shift) -
-                        M64(M, 0, 1) * ((M64(M, 1, 0) * M64(M, 2, 2) - M64(M, 1, 2) * M64(M, 2, 0)) >> M->shift) +
-                        M64(M, 0, 2) * ((M64(M, 1, 0) * M64(M, 2, 1) - M64(M, 1, 1) * M64(M, 2, 0)) >> M->shift)) >> M->shift);
+        tmp2 = M64(M, 1, 1) * M64(M, 2, 2) - M64(M, 2, 1) * M64(M, 1, 2);
+        tmp3 = M64(M, 1, 0) * M64(M, 2, 2) - M64(M, 1, 2) * M64(M, 2, 0);
+        tmp4 = M64(M, 1, 0) * M64(M, 2, 1) - M64(M, 1, 1) * M64(M, 2, 0);
+
+#ifdef ARCH_X86_LINUX
+        assert(!(ABS(tmp2) & MASK_32S(M->shift)));
+        assert(!(ABS(tmp3) & MASK_32S(M->shift)));
+        assert(!(ABS(tmp4) & MASK_32S(M->shift)));
+#endif
+
+        tmp = M64(M, 0, 0) * (tmp2 >> M->shift) - M64(M, 0, 1) * (tmp3 >> M->shift) + M64(M, 0, 2) * (tmp4 >> M->shift);
+
+#ifdef ARCH_X86_LINUX
+        assert(!(ABS(tmp) & MASK_32S(M->shift)));
+#endif
+
+        det = (int32_t) (tmp >> M->shift);
 
         MRC(OUT, 0, 0)= (M64(M, 1, 1) * M64(M, 2, 2) - M64(M, 2, 1) * M64(M, 1, 2)) / det;
         MRC(OUT, 0, 1)= (M64(M, 0, 2) * M64(M, 2, 1) - M64(M, 0, 1) * M64(M, 2, 2)) / det;

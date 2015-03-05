@@ -155,6 +155,9 @@ void test_invmatrix() {
     mt_m_output(&M_product);
 
 #undef MAT_SHIFT
+#undef RAD_SHIFT
+#undef WDIAM
+#undef IpR
 }
 
 struct{
