@@ -20,6 +20,10 @@
 #endif
 // 2-steps shift, 1 doesn't work here (x86)
 #define MASK_32S(s) ((~((1ull<<(s))-1))<<32)
+/**
+ * Tests if you can right shit v by s and cast the value to 32bit without loss of most significant bits
+ */
+#define RSHIFT_C32_OK(v, s) ((ABS(v) & MASK_32S(s)) == 0)
 
 /**
  * Initializes a new matrix of size rows x cols
@@ -66,7 +70,7 @@ int mt_mv_mlt(const MT_MAT* M, const MT_VEC* v, MT_VEC* out) {
         }
 
 #ifdef ARCH_X86_LINUX
-        assert(!(ABS(sum) & MASK_32S(M->shift)));
+        assert(RSHIFT_C32_OK(sum, M->shift));
 #endif
 
         out->ve[i] = sum >> M->shift;
@@ -104,13 +108,13 @@ int mt_mv_mltadd(const MT_VEC* v1, int32_t k, const MT_MAT* M, const MT_VEC* v2,
         }
 
 #ifdef ARCH_X86_LINUX
-        assert(!(ABS(sum) & MASK_32S(M->shift)));
+        assert(RSHIFT_C32_OK(sum, M->shift));
 #endif
 
         int64_t tmp = (int64_t) k * (sum >> M->shift);
 
 #ifdef ARCH_X86_LINUX
-        assert(!(ABS(tmp) & MASK_32S(v1->shift)));
+        assert(RSHIFT_C32_OK(tmp, v1->shift));
 #endif
 
         out->ve[i] = v1->ve[i] + (int32_t) (tmp >> v1->shift);
@@ -147,7 +151,7 @@ int mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
             }
 
 #ifdef ARCH_X86_LINUX
-            assert(!(ABS(sum) & MASK_32S(A->shift)));
+            assert(RSHIFT_C32_OK(sum, A->shift));
 #endif
 
             MRC(OUT, i, j)= sum >> A->shift;
@@ -186,7 +190,7 @@ int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
         tmp = M64(M, 0, 0) * M64(M, 1, 1) - M64(M, 0, 1) * M64(M, 1, 0);
 
 #ifdef ARCH_X86_LINUX
-        assert(!(ABS(tmp) & MASK_32S(M->shift)));
+        assert(RSHIFT_C32_OK(tmp, M->shift));
 #endif
 
         det = (int32_t) (tmp >> M->shift);
@@ -202,15 +206,15 @@ int mt_m_inv(const MT_MAT* M, MT_MAT* OUT) {
         tmp4 = M64(M, 1, 0) * M64(M, 2, 1) - M64(M, 1, 1) * M64(M, 2, 0);
 
 #ifdef ARCH_X86_LINUX
-        assert(!(ABS(tmp2) & MASK_32S(M->shift)));
-        assert(!(ABS(tmp3) & MASK_32S(M->shift)));
-        assert(!(ABS(tmp4) & MASK_32S(M->shift)));
+        assert(RSHIFT_C32_OK(tmp2, M->shift));
+        assert(RSHIFT_C32_OK(tmp3, M->shift));
+        assert(RSHIFT_C32_OK(tmp4, M->shift));
 #endif
 
         tmp = M64(M, 0, 0) * (tmp2 >> M->shift) - M64(M, 0, 1) * (tmp3 >> M->shift) + M64(M, 0, 2) * (tmp4 >> M->shift);
 
 #ifdef ARCH_X86_LINUX
-        assert(!(ABS(tmp) & MASK_32S(M->shift)));
+        assert(RSHIFT_C32_OK(tmp, M->shift));
 #endif
 
         det = (int32_t) (tmp >> M->shift);
