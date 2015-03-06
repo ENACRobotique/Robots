@@ -82,12 +82,12 @@ int main() {
     sys_time_init();
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Trajectory manager (trajectory elements management)
-    trajectory_manager_t traj_mngr;
-    trajmngr_init(&traj_mngr);
     // Trajectory controller (trajectory control loop)
     trajectory_controller_t traj_ctlr;
     trajctlr_init(&traj_ctlr, mat_rob2pods);
+    // Trajectory manager (trajectory elements management)
+    trajectory_manager_t traj_mngr;
+    trajmngr_init(&traj_mngr, &traj_ctlr);
     // BotNet initialization (i²c + uart)
     //TODO
 

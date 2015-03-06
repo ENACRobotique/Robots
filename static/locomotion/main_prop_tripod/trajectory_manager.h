@@ -14,7 +14,9 @@
 
 #include "tools.h"
 
-#define TRAJ_MAX_SLOTS (16)
+#include "trajectory_controller.h"
+
+#define TRAJ_MAX_SLOTS (32)
 
 // data converted to fixed point (and in increments or in increments per period)
 typedef struct {
@@ -51,23 +53,22 @@ typedef struct {
 } sTrajSlot_t;
 
 typedef struct {
+    trajectory_controller_t* ctlr;
+
     enum {
         S_WAIT, // no action asked (we are stopped)
-        S_CHG_TRAJ, // new trajectory to follow
-        S_RUN_TRAJ // we are following a trajectory
+        S_FOLLOWING // we are following a trajectory
     } state; // state of the trajectory follow
 
-    // current position
-    int x, y; // Robot position on the table (I << SHIFT)
-    int theta; // Robot heading on the table (I.rad << SHIFT)
-    // current goal
-    int gx, gy; // (I << SHIFT)
-    int gtheta; // (I.rad << SHIFT)
+    uint16_t curr_tid :12;
+    uint8_t next_sid :4;
 
-    sTrajSlot_t traj[TRAJ_MAX_SLOTS]; // circular buffer to store steps of current and next trajectory
+    uint16_t slots_insert_idx;
+    uint16_t slots_used_number;
+    sTrajSlot_t slots[TRAJ_MAX_SLOTS]; // circular buffer to store steps of current and next trajectory
 } trajectory_manager_t;
 
-void trajmngr_init(trajectory_manager_t* tm);
+void trajmngr_init(trajectory_manager_t* tm, trajectory_controller_t* tc);
 int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te);
 void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos);
 

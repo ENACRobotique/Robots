@@ -41,6 +41,10 @@ typedef struct {
     int x, y; // (in I << SHIFT)
     int theta; // (in R << (RAD_SHIFT + SHIFT))
 
+    // current goal
+    int gx, gy; // (in I << SHIFT)
+    int gtheta; // (in R << (RAD_SHIFT + SHIFT))
+
     // PID
     PID_t pid_traj;
     PID_t pid_orien;

@@ -13,14 +13,110 @@
  */
 
 #include <string.h>
+#ifdef ARCH_X86_LINUX
+#include <assert.h>
+#endif
 
 #include "params.h"
 
 #include "trajectory_manager.h"
 
-void trajmngr_init(trajectory_manager_t* tm) {
+void _updateSlotKnowingNext(sTrajSlot_t* curr, sTrajSlot_t* next);
+int _convertMsg2Slots(sTrajOrientElRaw_t* m, sTrajSlot_t* s1, sTrajSlot_t* s2);
+
+void trajmngr_init(trajectory_manager_t* tm, trajectory_controller_t* tc) {
+    // will set the indexes to 0 and the slots' state to empty
     memset(tm, 0, sizeof(*tm));
-    //TODO
+
+    tm->ctlr = tc;
+}
+
+int trajmngr_new_traj_slot(trajectory_manager_t* tm, sTrajSlot_t* ts) {
+    int error = 0;
+
+    switch(tm->state) {
+    case S_WAIT:
+        // TODO
+        break;
+
+    case S_FOLLOWING:
+        if(ts->tid == tm->curr_tid) {
+            if(ts->sid == tm->next_sid) {
+                tm->next_sid = (tm->next_sid + 1)&15;
+            }
+            else if((ts->sid + 1)&15 == tm->next_sid) {
+                // received at least twice the same message, ignoring
+            }
+            else {
+                error = -1;
+            }
+        }
+        // TODO...
+        break;
+    }
+
+    //    // We received some step of the current trajectory that we are following
+    //    if (curr_traj_insert_sid > 0 && te->tid == curr_tid) {
+    //        // Enough size in the array to add more trajectory elements
+    //        if (curr_traj_insert_sid < TRAJ_MAX_SLOTS) {
+    //            // Expected follow up
+    //            if (te->sid == curr_traj_insert_sid) {
+    //                memcpy(&traj[curr_traj][curr_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
+    //                traj[curr_traj][curr_traj_insert_sid].is_ok = 0;
+    //                curr_traj_insert_sid++;
+    //                state = S_RUN_TRAJ; // Follow the trajectory
+    //            }
+    //            else if (te->sid < curr_traj_insert_sid) {
+    //                // Step already received (no error, could be caused by duplication in the network)
+    //            }
+    //            else {
+    //                error = -1; // TODO error: bad step => invalidate all trajectory and ask new one
+    //            }
+    //        }
+    //        // Too much trajectory steps received
+    //        else {
+    //            error = -2; // TODO
+    //        }
+    //    }
+    //    // We received some step of the next trajectory, but we didn't switch to those (next tid is valid)
+    //    else if (next_traj_insert_sid > 0 && te->tid == next_tid) {
+    //        // Enough size in the array to add more trajectory elements
+    //        if (next_traj_insert_sid < TRAJ_MAX_SLOTS) {
+    //            memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
+    //            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
+    //            next_traj_insert_sid++;
+    //
+    //            state = S_CHG_TRAJ; // New trajectory to follow
+    //        }
+    //        else if (te->sid < next_traj_insert_sid) {
+    //            // Step already received (no error, could be caused by duplication in the network)
+    //        }
+    //        else {
+    //            error = -3; // TODO error: bad step => invalidate all trajectory and ask new one
+    //        }
+    //    }
+    //    // We received the first step of a new trajectory
+    //    else {
+    //        if (te->sid == 0) {
+    //            next_traj_insert_sid = 0; // Reset the index for the next trajectory
+    //            next_tid = te->tid; // get the next tid
+    //            memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
+    //            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
+    //            next_traj_insert_sid++;
+    //
+    //            state = S_CHG_TRAJ;
+    //        }
+    //        else {
+    //            error = -5; // TODO
+    //        }
+    //    }
+    //
+    //    // Processing of the error
+    //    if (error) {
+    //        // TODO
+    //    }
+
+    return -1;
 }
 
 int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te) {
@@ -31,66 +127,20 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te) {
      */
     int error = 0;
 
-//    // We received some step of the current trajectory that we are following
-//    if (curr_traj_insert_sid > 0 && te->tid == curr_tid) {
-//        // Enough size in the array to add more trajectory elements
-//        if (curr_traj_insert_sid < TRAJ_MAX_SLOTS) {
-//            // Expected follow up
-//            if (te->sid == curr_traj_insert_sid) {
-//                memcpy(&traj[curr_traj][curr_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
-//                traj[curr_traj][curr_traj_insert_sid].is_ok = 0;
-//                curr_traj_insert_sid++;
-//                state = S_RUN_TRAJ; // Follow the trajectory
-//            }
-//            else if (te->sid < curr_traj_insert_sid) {
-//                // Step already received (no error, could be caused by duplication in the network)
-//            }
-//            else {
-//                error = -1; // TODO error: bad step => invalidate all trajectory and ask new one
-//            }
-//        }
-//        // Too much trajectory steps received
-//        else {
-//            error = -2; // TODO
-//        }
-//    }
-//    // We received some step of the next trajectory, but we didn't switch to those (next tid is valid)
-//    else if (next_traj_insert_sid > 0 && te->tid == next_tid) {
-//        // Enough size in the array to add more trajectory elements
-//        if (next_traj_insert_sid < TRAJ_MAX_SLOTS) {
-//            memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
-//            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
-//            next_traj_insert_sid++;
-//
-//            state = S_CHG_TRAJ; // New trajectory to follow
-//        }
-//        else if (te->sid < next_traj_insert_sid) {
-//            // Step already received (no error, could be caused by duplication in the network)
-//        }
-//        else {
-//            error = -3; // TODO error: bad step => invalidate all trajectory and ask new one
-//        }
-//    }
-//    // We received the first step of a new trajectory
-//    else {
-//        if (te->sid == 0) {
-//            next_traj_insert_sid = 0; // Reset the index for the next trajectory
-//            next_tid = te->tid; // get the next tid
-//            memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
-//            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
-//            next_traj_insert_sid++;
-//
-//            state = S_CHG_TRAJ;
-//        }
-//        else {
-//            error = -5; // TODO
-//        }
-//    }
-//
-//    // Processing of the error
-//    if (error) {
-//        // TODO
-//    }
+    sTrajSlot_t* s1 = &tm->slots[tm->slots_insert_idx];
+    sTrajSlot_t* s2 = &tm->slots[(tm->slots_insert_idx + 1) % TRAJ_MAX_SLOTS];
+
+    if(s1->state != SLOT_EMPTY || s2->state != SLOT_EMPTY) {
+        return -1; // no more empty slots
+    }
+
+    int nb = _convertMsg2Slots(te, s1, s2);
+    tm->slots_insert_idx = (tm->slots_insert_idx + nb) % TRAJ_MAX_SLOTS;
+
+    error = error?: trajmngr_new_traj_slot(tm, s1);
+    if(nb > 1) {
+        error = error?: trajmngr_new_traj_slot(tm, s2);
+    }
 
     return error;
 }
@@ -101,14 +151,14 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te) {
  */
 void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos) {
     if (pos->id == ELT_PRIMARY) { // Keep information for primary robot
-        tm->x = isD2I(pos->x); // (I << SHIFT)
-        tm->y = isD2I(pos->y); // (I << SHIFT)
-        tm->theta = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
+        tm->ctlr->x = isD2I(pos->x); // (I << SHIFT)
+        tm->ctlr->y = isD2I(pos->y); // (I << SHIFT)
+        tm->ctlr->theta = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
 
         if (tm->state == S_WAIT) {
-            tm->gx = tm->x;
-            tm->gy = tm->y;
-            tm->gtheta = tm->theta;
+            tm->ctlr->gx = tm->ctlr->x;
+            tm->ctlr->gy = tm->ctlr->y;
+            tm->ctlr->gtheta = tm->ctlr->theta;
         }
     }
 }
