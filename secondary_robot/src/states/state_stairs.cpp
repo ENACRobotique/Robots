@@ -30,7 +30,7 @@ void initHardStairs(int pin_servo){
 sState *testStairs()
 	{
 	static int timeForArtefact = 0;
-	int attitudeCmdStairs = _attitudeCmd;
+	int attitudeCmdStairs = attitudeGetCmd();
 	if (90+attitudeCmdStairs <= 160 && timeStairsStarted == 0 && timeForArtefact == 0){
 		timeForArtefact = millis();
 #ifdef DEBUG
@@ -61,7 +61,7 @@ void initStairs(sState *prev)
 	{
 	fanSetCon(FAN_SPEED);
 	move(10,0);
-	attitudeCmdStartStairs = _attitudeCmd;
+	attitudeCmdStartStairs = attitudeGetCmd();
 	#ifdef DEBUG
 		Serial.println("Starting stairs");
 	#endif

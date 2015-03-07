@@ -33,7 +33,14 @@ void attitudeAsserTemp();
 
 extern int _attitudeCon;
 extern int _attitudeCmd;
+
+inline int attitudeGetCmd(){
+    return _attitudeCmd;
+}
 inline void attitudeSetCon(int attitude){
 	_attitudeCon=attitude;
+}
+inline int attitudeGetCon(int attitude){
+    return _attitudeCon;
 }
 #endif /* LIB_ATTITUDE_H_ */
