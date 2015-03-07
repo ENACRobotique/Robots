@@ -22,7 +22,7 @@ int _pinServo;
 Servo servoAttitude;
 
 //initializes the PINs for motor speed and direction
-//REQUIRES : odoinitHard()
+//REQUIRES : initInertial()
 void servoInitHard(int pinservo){
 	_pinServo=pinservo;
 	servoAttitude.attach(_pinServo);
