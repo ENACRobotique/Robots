@@ -68,7 +68,6 @@ typedef struct {
     uint16_t slots_used_number;
     sTrajSlot_t slots[TRAJ_MAX_SLOTS]; // circular buffer to store steps of current and next trajectory
 
-
     // current goal
     int gx, gy; // (in I << SHIFT)
     int gtheta; // (in R << (RAD_SHIFT + SHIFT))

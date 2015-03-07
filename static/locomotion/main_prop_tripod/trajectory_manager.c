@@ -139,7 +139,7 @@ int trajmngr_new_traj_slot(trajectory_manager_t* tm, sTrajSlot_t* ts) {
 int trajmngr_update(trajectory_manager_t* tm) {
     int x_sp, y_sp, theta_sp;
 
-    uint32_t t = micros();
+    uint32_t t = micros(); // FIXME Check if t and s->seg_start_date are synchronous (same time origin)
 
     switch(tm->state) {
     case S_WAIT:
@@ -148,13 +148,38 @@ int trajmngr_update(trajectory_manager_t* tm) {
         theta_sp = tm->gtheta;
         break;
     case S_FOLLOWING:
+        sTrajSlot_t* s = &tm->slots[tm->curr_slot_idx >> 1];
+
         if(tm->curr_slot_idx&1) { // following the arc
-            // TODO check if time greater than next start of segment (be careful, check if next slot present before trying to access it)
+            // Check if the next slot is present
+            if(tm->slots_insert_idx < (tm->curr_slot_idx + 2)){
+                tm->state = S_WAIT; // We wait if the next slot is not present yet
+            }
+            else{
+                // Check if time is greater than the next start of the segment
+                if(t > s->arc_start_date){ // FIXME Check if t and s->seg_start_date are synchronous
+                    // TODO: Send a message to IA?
+                }
+                else{
+                    // Compute the delta of time on the arc
+                    int32_t dur = t - s->arc_start_date;
+                    dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
+
+                    //// Compute the desired set point (position)
+                    // compute (co)sinus of the rope
+                    int cl = ((int64_t)(s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
+                    int sl = ((int64_t)(s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
+
+                    // compute desired speed for x and y
+                    int vx = ((int64_t)s->arc_spd * (int64_t)cl) >> SHIFT;
+                    int vy = ((int64_t)s->arc_spd * (int64_t)sl) >> SHIFT;
+                }
+            }
+
 
             // TODO
         }
         else { // following the straight line
-            sTrajSlot_t* s = &tm->slots[tm->curr_slot_idx >> 1];
 
             if(t > s->arc_start_date) {
                 // TODO error, go to arc follow?
@@ -164,9 +189,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
             int32_t dur = t - s->seg_start_date;
             dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
 
-            /**
-             * Compute next desired position
-             */
+            ////Compute next desired position
             // compute (co)sinus of line
             int cl = ((int64_t)(s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
             int sl = ((int64_t)(s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
@@ -186,10 +209,12 @@ int trajmngr_update(trajectory_manager_t* tm) {
             x_sp = s->p1_x + dx;
             y_sp = s->p1_y + dy;
 
-            /**
-             * Compute next desired orientation
-             */
-            // TODO
+            //// Compute next desired orientation theta_sp
+            // Compute the angular speed
+            int ang_speed = (s->rot2_dir - s->rot1_dir) / (s->arc_start_date - s->seg_start_date);
+            // Compute the next desired orientation
+            t = micros();
+            theta_sp = ang_speed * dur;
         }
 
 
