@@ -52,16 +52,12 @@ void _update_pos_orien(trajectory_controller_t* ctl, MT_VEC *spd_pv_rob);
 void _trajectory_control(trajectory_controller_t* ctl, int x_sp, int y_sp, MT_VEC* spd_cmd_rob);
 void _orientation_control(trajectory_controller_t* ctl, int theta_sp, MT_VEC* spd_cmd_rob);
 
-void trajctlr_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */) {
+void trajctlr_update(trajectory_controller_t* ctl, int x_sp, int y_sp, int theta_sp) {
     int i;
     MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_pv, V2_pv, V3_pv)
     MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT);// (Vx_pv, Vy_pv, Oz_pv)
-    int x_sp, y_sp, theta_sp;
     MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv)
     MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd)
-
-    // Update ctl from trajectory_sp(t), orientation_sp(t)
-    // TODO update x_sp, y_sp,theta_sp
 
     // Gets speed process values from the three encoders
     // => V1_pv, V2_pv, V3_pv and backups the nbticks

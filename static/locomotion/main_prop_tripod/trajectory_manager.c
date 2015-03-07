@@ -15,6 +15,9 @@
 #include <string.h>
 #ifdef ARCH_X86_LINUX
 #include <assert.h>
+#include <millis.h>
+#elif defined(ARCH_LPC21XX)
+#include <sys_time.h>
 #endif
 
 #include "params.h"
@@ -37,6 +40,7 @@ int trajmngr_new_traj_slot(trajectory_manager_t* tm, sTrajSlot_t* ts) {
     switch(tm->state) {
     case S_WAIT:
         // TODO
+        error = -1;
         break;
 
     case S_FOLLOWING:
@@ -44,14 +48,27 @@ int trajmngr_new_traj_slot(trajectory_manager_t* tm, sTrajSlot_t* ts) {
             if(ts->sid == tm->next_sid) {
                 tm->next_sid = (tm->next_sid + 1)&15;
             }
-            else if((ts->sid + 1)&15 == tm->next_sid) {
+            else if(((ts->sid + 1)&15) == tm->next_sid) {
                 // received at least twice the same message, ignoring
             }
             else {
                 error = -1;
             }
         }
-        // TODO...
+        else if(ts->tid != tm->curr_tid) {
+            if(ts->sid == 0) {
+                error = -1;
+                // TODO
+            }
+            else {
+                // did not receive the first element of a new trajectory
+                error = -5;
+            }
+        }
+        else {
+            error = -1;
+            // TODO
+        }
         break;
     }
 
@@ -116,7 +133,75 @@ int trajmngr_new_traj_slot(trajectory_manager_t* tm, sTrajSlot_t* ts) {
     //        // TODO
     //    }
 
-    return -1;
+    return error;
+}
+
+int trajmngr_update(trajectory_manager_t* tm) {
+    int x_sp, y_sp, theta_sp;
+
+    uint32_t t = micros();
+
+    switch(tm->state) {
+    case S_WAIT:
+        x_sp = tm->gx;
+        y_sp = tm->gy;
+        theta_sp = tm->gtheta;
+        break;
+    case S_FOLLOWING:
+        if(tm->curr_slot_idx&1) { // following the arc
+            // TODO check if time greater than next start of segment (be careful, check if next slot present before trying to access it)
+
+            // TODO
+        }
+        else { // following the straight line
+            sTrajSlot_t* s = &tm->slots[tm->curr_slot_idx >> 1];
+
+            if(t > s->arc_start_date) {
+                // TODO error, go to arc follow?
+                // check if position is consistent with arc start
+            }
+
+            int32_t dur = t - s->seg_start_date;
+            dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
+
+            /**
+             * Compute next desired position
+             */
+            // compute (co)sinus of line
+            int cl = ((int64_t)(s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
+            int sl = ((int64_t)(s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
+
+            // get duration in periods (from microseconds)
+            dur /= USpP;
+
+            // compute desired speed for x and y
+            int vx = ((int64_t)s->seg_spd * (int64_t)cl) >> SHIFT;
+            int vy = ((int64_t)s->seg_spd * (int64_t)sl) >> SHIFT;
+
+            // get expected dx/dy from start of line wrt to desired speed
+            int dx = vx * dur;
+            int dy = vy * dur;
+
+            // compute next position set point
+            x_sp = s->p1_x + dx;
+            y_sp = s->p1_y + dy;
+
+            /**
+             * Compute next desired orientation
+             */
+            // TODO
+        }
+
+
+        x_sp = 0; // TODO ...
+        y_sp = 0; // TODO ...
+        theta_sp = 0; // TODO ...
+        break;
+    }
+
+    trajctlr_update(tm->ctlr, x_sp, y_sp, theta_sp);
+
+    return 0;
 }
 
 int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te) {
@@ -156,9 +241,9 @@ void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos) {
         tm->ctlr->theta = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
 
         if (tm->state == S_WAIT) {
-            tm->ctlr->gx = tm->ctlr->x;
-            tm->ctlr->gy = tm->ctlr->y;
-            tm->ctlr->gtheta = tm->ctlr->theta;
+            tm->gx = tm->ctlr->x;
+            tm->gy = tm->ctlr->y;
+            tm->gtheta = tm->ctlr->theta;
         }
     }
 }

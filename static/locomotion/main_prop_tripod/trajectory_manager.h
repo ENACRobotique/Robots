@@ -62,10 +62,16 @@ typedef struct {
 
     uint16_t curr_tid :12;
     uint8_t next_sid :4;
+    uint16_t curr_slot_idx; // slot index + sub sub step id
 
     uint16_t slots_insert_idx;
     uint16_t slots_used_number;
     sTrajSlot_t slots[TRAJ_MAX_SLOTS]; // circular buffer to store steps of current and next trajectory
+
+
+    // current goal
+    int gx, gy; // (in I << SHIFT)
+    int gtheta; // (in R << (RAD_SHIFT + SHIFT))
 } trajectory_manager_t;
 
 void trajmngr_init(trajectory_manager_t* tm, trajectory_controller_t* tc);

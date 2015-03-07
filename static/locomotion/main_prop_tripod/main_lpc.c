@@ -125,7 +125,7 @@ int main() {
             prevControl = micros();
 
             // Control trajectory
-            trajctlr_update(&traj_ctlr);
+            trajmngr_update(&traj_mngr);
         }
     } // ############## End loop ############################################
 }
