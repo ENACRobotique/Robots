@@ -10,13 +10,14 @@ this library contains the different functions useful for the motor and its contr
 #define ATTITUDE_ASSER_PERIOD 20 // milliseconds
 #define ANGLE_TO_ASSERV X_ANGLE
 #define MAX_ANGLE 15
-#define MIN_ANGLE 160
+#define MIN_ANGLE 180
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
 
 //globals
-int _attitudeCon = -5;
+int _attitudeCon = -8;
+int _attitudeCmd=0;
 int _pinServo;
 Servo servoAttitude;
 
@@ -34,9 +35,8 @@ void servoInitHard(int pinservo){
 void attitudeAsser(){
 
     unsigned long int time=millis();
-    static int intEps=0;
+    static int intEps=256;
     static unsigned long time_prev_asser=millis();
-    static int _attitudeCmd=0;
 	int eps;
 
 
@@ -65,11 +65,11 @@ Serial.print(_attitudeCon);
 Serial.print("\t");
 Serial.print(read);
 Serial.print("\t");
-Serial.print(_attitudeCmd);
+Serial.print(90+_attitudeCmd);
 //Serial.print("\t");
 //Serial.print(CLAMP(15,abs(_attitudeCmd),175));
-//Serial.print("\t");
-//Serial.print(eps);
+Serial.print("\t");
+Serial.print(eps);
 Serial.print("\t");
 Serial.print(intEps);
 //Serial.print("\t");

@@ -12,7 +12,7 @@
 #include "../params.h"
 #include "Servo.h"
 #include "Wire.h"
-#define DEBUG_ATTITUDE
+//#define DEBUG_ATTITUDE
 
 #define X_ANGLE 1
 #define Y_ANGLE 2

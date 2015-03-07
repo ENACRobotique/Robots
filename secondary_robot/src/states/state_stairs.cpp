@@ -29,10 +29,22 @@ void initHardStairs(int pin_servo){
 
 sState *testStairs()
 	{
+	static int timeForArtefact = 0;
 	int attitudeCmdStairs = _attitudeCmd;
-	if (90+attitudeCmdStairs <= 100 && timeStairsStarted == 0){
+	if (90+attitudeCmdStairs <= 160 && timeStairsStarted == 0 && timeForArtefact == 0){
+		timeForArtefact = millis();
+#ifdef DEBUG
+		Serial.println(timeForArtefact);
+#endif
+	}
+	if (90+attitudeCmdStairs > 160 && timeStairsStarted == 0){
+			timeForArtefact = 0;
+		}
+	if (millis() - timeForArtefact > 1000 && timeForArtefact != 0 && timeStairsStarted == 0)
+	{
 		timeStairsStarted = millis();
 	}
+
 	if (timeStairsStarted != 0){
 		if (millis()-timeStairsStarted >= TIME_RAG_RLSD){
 			servoCarpet.write(40);
