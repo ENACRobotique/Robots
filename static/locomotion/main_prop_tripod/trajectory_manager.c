@@ -19,6 +19,7 @@
 #elif defined(ARCH_LPC21XX)
 #include <sys_time.h>
 #endif
+#include "bn_intp.h"
 
 #include "params.h"
 
@@ -46,9 +47,9 @@ int trajmngr_new_traj_slot(trajectory_manager_t* tm, sTrajSlot_t* ts) {
     case S_FOLLOWING:
         if(ts->tid == tm->curr_tid) {
             if(ts->sid == tm->next_sid) {
-                tm->next_sid = (tm->next_sid + 1)&15;
+                tm->next_sid = (tm->next_sid + 1)&31;
             }
-            else if(((ts->sid + 1)&15) == tm->next_sid) {
+            else if(((ts->sid + 1)&31) == tm->next_sid) {
                 // received at least twice the same message, ignoring
             }
             else {
@@ -139,92 +140,122 @@ int trajmngr_new_traj_slot(trajectory_manager_t* tm, sTrajSlot_t* ts) {
 int trajmngr_update(trajectory_manager_t* tm) {
     int x_sp, y_sp, theta_sp;
 
-    uint32_t t = micros(); // FIXME Check if t and s->seg_start_date are synchronous (same time origin)
+    trajctlr_begin_update(tm->ctlr);
 
     switch(tm->state) {
+    default:
     case S_WAIT:
         x_sp = tm->gx;
         y_sp = tm->gy;
         theta_sp = tm->gtheta;
         break;
+
     case S_FOLLOWING:
-        sTrajSlot_t* s = &tm->slots[tm->curr_slot_idx >> 1];
+        {
+            uint32_t t = bn_intp_micros2s(micros());
+            sTrajSlot_t* s = &tm->slots[tm->curr_slot_idx >> 1];
+            sTrajSlot_t* s_next = &tm->slots[((tm->curr_slot_idx >> 1) + 1)%TRAJ_MAX_SLOTS];
 
-        if(tm->curr_slot_idx&1) { // following the arc
-            // Check if the next slot is present
-            if(tm->slots_insert_idx < (tm->curr_slot_idx + 2)){
-                tm->state = S_WAIT; // We wait if the next slot is not present yet
+            if(s_next->state == SLOT_EMPTY || s_next->tid != s->tid || s_next->sid != ((s->sid + 1)&31)) {
+                s_next = NULL;
             }
-            else{
-                // Check if time is greater than the next start of the segment
-                if(t > s->arc_start_date){ // FIXME Check if t and s->seg_start_date are synchronous
-                    // TODO: Send a message to IA?
+
+            if(s->state == SLOT_WAITING_NEXT && s_next) {
+                _updateSlotKnowingNext(s, s_next);
+            }
+
+#ifdef ARCH_X86_LINUX
+            assert(
+                    (s->state == SLOT_WAITING_NEXT && !s_next) ||
+                    (s->state == SLOT_OK && !s_next && s->is_last_element) ||
+                    (s->state == SLOT_OK && s_next && s_next->state != SLOT_EMPTY)
+            );
+            assert(s->arc_start_date >= s->seg_start_date);
+#endif
+
+            // FIXME implements cache system stored in the trajectory_manager for once per element computations
+
+            if(tm->curr_slot_idx & 1) { // following the arc
+                // Check if the next slot is present
+                if(!s_next) {
+                    tm->state = S_WAIT; // We wait if the next slot is not present yet
+                    // FIXME handle case when message we are waiting for just arrived
                 }
-                else{
-                    // Compute the delta of time on the arc
-                    int32_t dur = t - s->arc_start_date;
-                    dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                else {
+                    // Check if time is greater than the next start of the segment
+                    if (t > s_next->seg_start_date) {
+                        // TODO go to next step seg follow?
+                        // check if position is consistent with next step seg start
+                    }
 
-                    //// Compute the desired set point (position)
-                    // compute (co)sinus of the rope
-                    int cl = ((int64_t)(s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
-                    int sl = ((int64_t)(s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
-
-                    // compute desired speed for x and y
-                    int vx = ((int64_t)s->arc_spd * (int64_t)cl) >> SHIFT;
-                    int vy = ((int64_t)s->arc_spd * (int64_t)sl) >> SHIFT;
+//                    // Compute the delta of time on the arc
+//                    int dur = t - s->arc_start_date;
+//                    dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
+//
+//                    // compute (co)sinus of the rope
+//                    int cl = ((int64_t)(s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
+//                    int sl = ((int64_t)(s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
+//
+//                    // compute desired speed for x and y
+//                    int vx = ((int64_t)s->arc_spd * (int64_t)cl) >> SHIFT;
+//                    int vy = ((int64_t)s->arc_spd * (int64_t)sl) >> SHIFT;
                 }
+
+                // TODO
+                x_sp = 0; // TODO ...
+                y_sp = 0; // TODO ...
+                theta_sp = 0; // TODO ...
             }
+            else { // following the straight line
+                if(t > s->arc_start_date) {
+                    // TODO go to arc follow?
+                    // check if position is consistent with arc start
+                }
 
+                // compute current duration from start of line
+                int dur = t - s->seg_start_date;
+                dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
 
-            // TODO
-        }
-        else { // following the straight line
+                // convert duration to periods (from microseconds)
+                dur /= USpP;
 
-            if(t > s->arc_start_date) {
-                // TODO error, go to arc follow?
-                // check if position is consistent with arc start
+                // compute (co)sinus of line (XXX may be done once per segment)
+                int cl = ((int64_t) (s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
+                int sl = ((int64_t) (s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
+
+                // compute desired speed for x and y (XXX may be done once per segment)
+                int vx = ((int64_t) s->seg_spd * (int64_t) cl) >> SHIFT; // (IpP << SHIFT)
+                int vy = ((int64_t) s->seg_spd * (int64_t) sl) >> SHIFT; // (IpP << SHIFT)
+
+                // compute next position set point
+                x_sp = s->p1_x + vx * dur;
+                y_sp = s->p1_y + vy * dur;
+
+                // compute delta theta between begin and end of line (XXX may be done once per segment)
+                int dtheta = s->arc_start_theta - s->seg_start_theta; // (rad << (RAD_SHIFT + SHIFT))
+                if(s->rot1_dir) {
+                    while(dtheta > 0) {
+                        dtheta -= (issPI << 1 /* 2*PI */); // if s->rot1_dir==1, dtheta must be negative
+                    }
+                }
+                else {
+                    while(dtheta < 0) {
+                        dtheta += (issPI << 1 /* 2*PI */); // if s->rot1_dir==0, dtheta must be positive
+                    }
+                }
+
+                // compute segment duration (XXX may be done once per segment)
+                int seg_dur = s->arc_start_date - s->seg_start_date; // in microseconds
+                seg_dur /= USpP; // in periods
+
+                // compute the next desired orientation
+                theta_sp = s->seg_start_theta + (int64_t)dtheta * (int64_t)dur / seg_dur;
             }
-
-            int32_t dur = t - s->seg_start_date;
-            dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
-
-            ////Compute next desired position
-            // compute (co)sinus of line
-            int cl = ((int64_t)(s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
-            int sl = ((int64_t)(s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
-
-            // get duration in periods (from microseconds)
-            dur /= USpP;
-
-            // compute desired speed for x and y
-            int vx = ((int64_t)s->seg_spd * (int64_t)cl) >> SHIFT;
-            int vy = ((int64_t)s->seg_spd * (int64_t)sl) >> SHIFT;
-
-            // get expected dx/dy from start of line wrt to desired speed
-            int dx = vx * dur;
-            int dy = vy * dur;
-
-            // compute next position set point
-            x_sp = s->p1_x + dx;
-            y_sp = s->p1_y + dy;
-
-            //// Compute next desired orientation theta_sp
-            // Compute the angular speed
-            int ang_speed = (s->rot2_dir - s->rot1_dir) / (s->arc_start_date - s->seg_start_date);
-            // Compute the next desired orientation
-            t = micros();
-            theta_sp = ang_speed * dur;
+            break;
         }
-
-
-        x_sp = 0; // TODO ...
-        y_sp = 0; // TODO ...
-        theta_sp = 0; // TODO ...
-        break;
     }
 
-    trajctlr_update(tm->ctlr, x_sp, y_sp, theta_sp);
+    trajctlr_end_update(tm->ctlr, x_sp, y_sp, theta_sp);
 
     return 0;
 }
@@ -260,12 +291,12 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te) {
  * If the robot is motionless, the goal of robot is actualized
  */
 void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos) {
-    if (pos->id == ELT_PRIMARY) { // Keep information for primary robot
+    if(pos->id == ELT_PRIMARY) { // Keep information for primary robot
         tm->ctlr->x = isD2I(pos->x); // (I << SHIFT)
         tm->ctlr->y = isD2I(pos->y); // (I << SHIFT)
         tm->ctlr->theta = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
 
-        if (tm->state == S_WAIT) {
+        if(tm->state == S_WAIT) {
             tm->gx = tm->ctlr->x;
             tm->gy = tm->ctlr->y;
             tm->gtheta = tm->ctlr->theta;
@@ -281,11 +312,15 @@ void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos) {
 #define _SPDCALC(d, t) (int32_t)((t)>0 ? ((int64_t)(d) * (int64_t)USpP / (int64_t)(t)) : 0)
 void _convertMsg2Slot(sTrajOrientElRaw_t* m, sTrajSlot_t* s, int8_t ssid) {
     s->tid = m->tid;
-    s->sid = m->sid;
-    s->ssid = ssid;
+    s->sid = (m->sid << 1) + ssid;
+    s->is_last_element = m->elts[ssid].is_last_element;
 
     s->seg_start_date = m->t + (ssid ? (m->dt1 + m->dt2) * 1000 : 0);
-    s->seg_start_theta = isD2Isi(m->elts[ssid].theta1, 13);
+#if RAD_SHIFT + SHIFT > 13
+    s->seg_start_theta = m->elts[ssid].theta1 << (RAD_SHIFT + SHIFT - 13);
+#else
+    s->seg_start_theta = m->elts[ssid].theta1 >> (13 - (RAD_SHIFT + SHIFT));
+#endif
     s->rot1_dir = m->elts[ssid].rot1_dir;
     s->p1_x = isD2Isi(m->elts[ssid].p1_x, 6);
     s->p1_y = isD2Isi(m->elts[ssid].p1_y, 6);
@@ -294,7 +329,11 @@ void _convertMsg2Slot(sTrajOrientElRaw_t* m, sTrajSlot_t* s, int8_t ssid) {
     s->seg_len = isD2Isi(m->elts[ssid].seg_len, 5);
 
     s->arc_start_date = m->t + (m->dt1 + (ssid ? m->dt2 + m->dt3 : 0)) * 1000;
-    s->arc_start_theta = isD2Isi(m->elts[ssid].theta2, 13);
+#if RAD_SHIFT + SHIFT > 13
+    s->arc_start_theta = m->elts[ssid].theta2 << (RAD_SHIFT + SHIFT - 13);
+#else
+    s->arc_start_theta = m->elts[ssid].theta2 >> (13 - (RAD_SHIFT + SHIFT));
+#endif
     s->rot2_dir = m->elts[ssid].rot2_dir;
     s->c_x = isD2Isi(m->elts[ssid].c_x, 6);
     s->c_y = isD2Isi(m->elts[ssid].c_y, 6);
@@ -320,7 +359,7 @@ void _updateSlotKnowingNext(sTrajSlot_t* curr, sTrajSlot_t* next) {
             next->state != SLOT_EMPTY &&
             next->seg_start_date >= curr->arc_start_date &&
             next->tid == curr->tid &&
-            (next->sid == curr->sid || next->sid == curr->sid + 1 || next->sid - 1 == curr->sid)
+            next->sid == ((curr->sid + 1)&31)
     ) {
         int32_t dt_us = next->seg_start_date - curr->arc_start_date; // duration for arc item in microseconds
         curr->arc_spd = _SPDCALC(curr->arc_len, dt_us);
@@ -334,7 +373,7 @@ int _convertMsg2Slots(sTrajOrientElRaw_t* m, sTrajSlot_t* s1, sTrajSlot_t* s2) {
 
     _convertMsg2Slot(m, s1, 0);
 
-    if (!m->elts[0].is_last_element) {
+    if(!m->elts[0].is_last_element) {
         ret = 2;
 
         _convertMsg2Slot(m, s2, 1);

@@ -98,6 +98,8 @@ int main() {
     int ret;
     sMsg inMsg = {{0}};//, outMsg = {{0}};
 
+    // FIXME need to have a first loop here to wait for time synchronization
+
     while (1) { // ############## Loop ############################################
         sys_time_update();
 

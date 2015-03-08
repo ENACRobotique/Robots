@@ -22,7 +22,7 @@
 typedef struct {
     // segment
     uint32_t seg_start_date;        // (in microseconds)
-    int32_t seg_start_theta;        // (I.rad << SHIFT)
+    int32_t seg_start_theta;        // (rad << (RAD_SHIFT + SHIFT))
     int32_t p1_x;                   // (I << SHIFT)
     int32_t p1_y;                   // (I << SHIFT)
     int32_t p2_x;                   // (I << SHIFT)
@@ -32,7 +32,7 @@ typedef struct {
 
     // arc
     uint32_t arc_start_date;        // (in microseconds)
-    int32_t arc_start_theta;        // (I.rad << SHIFT)
+    int32_t arc_start_theta;        // (rad << (RAD_SHIFT + SHIFT))
     int32_t c_x;                    // (I << SHIFT)
     int32_t c_y;                    // (I << SHIFT)
     int32_t c_r;                    // (>0 ClockWise | <0 CounterClockWise) (I << SHIFT)
@@ -41,10 +41,10 @@ typedef struct {
 
     // extra packed data
     uint16_t tid :12;               // original trajectory id
-    uint8_t sid :4;                 // original step id
-    uint8_t ssid :1;                // first or second element of original message
+    uint8_t sid :5;                 // original step id on 4 MSB  +  lsb: first:0 or second:1 element of original message
     int8_t rot1_dir :1;             // sign bit for the rotation 1 (from theta1@p1 to theta2@p2) direction (0: CW | 1: CCW)
     int8_t rot2_dir :1;             // sign bit for the rotation 2 (from theta2@p2 to next theta1@p1) direction (0: CW | 1: CCW)
+    int8_t is_last_element :1;      // true if last element of trajectory
     enum {
         SLOT_EMPTY,
         SLOT_WAITING_NEXT,
