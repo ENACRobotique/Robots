@@ -1,7 +1,7 @@
 #ifndef _A_STAR_H
 #define _A_STAR_H
 
-#include <astar_tools.h>
+#include <a_star_tools.h>
 #include <main_ai_tools/path.h>
 
 

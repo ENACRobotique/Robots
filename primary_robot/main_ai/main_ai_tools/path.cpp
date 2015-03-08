@@ -5,9 +5,9 @@
  *      Author: seb
  */
 
+#include <a_star_tools.h>
 #include "path.h"
 
-#include <astar_tools.h>
 #include <main_ai_tools/path.h>
 #include <main_ai_tools/statuses.h>
 #include <tools.h>

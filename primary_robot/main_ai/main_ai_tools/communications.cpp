@@ -21,7 +21,7 @@ extern "C"{
 #include "bn_utils.h"
 
 
-#include <astar_tools.h>
+#include <a_star_tools.h>
 #include <tools.h>
 #include "ai_types.h"
 

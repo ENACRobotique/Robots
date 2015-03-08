@@ -1,4 +1,4 @@
-#include <astar_tools.h>
+#include <a_star_tools.h>
 #include <math.h>
 #include <stdio.h>
 #include "math_ops.h"
@@ -16,39 +16,6 @@ extern "C"{
 #define CHECK_LIMITS
 
 // array of physical obstacles (256B)
-#if PROG_TRAJ
-sObs_t obs[]= {
-        // robots
-        {{0., 0.}, 0., 1, 1, 1},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-        {{0., 0.}, 0., 0, 0},
-
-        // feux
-        {{40. , 90. }, R_ROBOT+7, 1, 1, 1},//12
-        {{90. , 40. }, R_ROBOT+7, 1, 1, 1},
-        {{90. , 140.}, R_ROBOT+7, 1, 1, 1},
-        {{210., 40. }, R_ROBOT+7, 1, 1, 1},
-        {{210., 140.}, R_ROBOT+7, 1, 1, 1},
-        {{260., 90. }, R_ROBOT+7, 1, 1, 1},
-
-        {{1.  , 120.}, R_ROBOT+2, 1, 1, 1},
-        {{130., 1.  }, R_ROBOT+2, 1, 1, 1},
-        {{170., 1.  }, R_ROBOT+2, 1, 1, 1},
-        {{299., 120.}, R_ROBOT+2, 1, 1, 1},
-
-        {{0., 0.}, R_ROBOT+2, 1, 1, 1},
-};
-
-#else
 sObs_t obs[] = {
     // robots
     {{0., 0.}, 0., 1, 1},               //primary
@@ -98,11 +65,22 @@ sObs_t obs[] = {
     {{125.,  5.}, 7. + R_ROBOT, 1, 1, 1},
     {{300 - 125.,  5.}, 7. + R_ROBOT, 1, 1, 1},
 
+    //Starting zone
+    {{39., 79.}, 2. + R_ROBOT, 1, 1, 1},
+    {{20., 79.}, 2. + R_ROBOT, 1, 1, 1},
+    {{39.,121.}, 2. + R_ROBOT, 1, 1, 1},
+    {{20.,121.}, 2. + R_ROBOT, 1, 1, 1},
+    {{300 - 39., 79.}, 2. + R_ROBOT, 1, 1, 1},
+    {{300 - 20., 79.}, 2. + R_ROBOT, 1, 1, 1},
+    {{300 - 39.,121.}, 2. + R_ROBOT, 1, 1, 1},
+    {{300 - 20.,121.}, 2. + R_ROBOT, 1, 1, 1},
 
+#if NON_HOLONOMIC
     //Cercles du robot anti-demi-tour
     {{0., 0. }, 0, 0, 0, 1},
     {{0., 0. }, 0, 0, 0, 1},//45
     {{0., 0. }, 0, 0, 0, 1},
+#endif
 
     //Cercles d'approches
     {{0., 0. }, 0, 0, 0, 1},//47
@@ -112,7 +90,7 @@ sObs_t obs[] = {
     // arrivée
     {{0. , 0.}, 0, 0, 1, 1} //51
 };
-#endif
+
 // tangents between physical obstacles (17kiB)
 sTgts_t tgts[N][N];
 // A* elements

@@ -7,9 +7,9 @@
 
 
 
+#include <a_star_tools.h>
 #include <ai.h>
 #include <ai_tools.h>
-#include <astar_tools.h>
 #include <iostream>
 
 extern "C"{

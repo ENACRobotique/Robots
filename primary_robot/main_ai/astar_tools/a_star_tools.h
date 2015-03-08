@@ -6,6 +6,8 @@
 #include "error.h"
 #include "math_types.h"
 
+#define NON_HOLONOMIC 1 //exist if the robot isn't an holonomic robot (for backward compatible)
+
 //#define AS_DEBUG 1
 #define AS_STATS
 // warning, activating AS_DEBUG adds a lot of time to the time statistics (time to print the debug information)
@@ -119,11 +121,13 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 // ==== global matrices ====
 
 // number of physical obstacles (16)
-#if 1
-#define N (41)
+
+#if NON_HOLONOMIC
+#define N (50)
 #else
-#define N (54)
+#define N (47)
 #endif
+
 
 extern sObs_t obs[N]; // array of N physical obstacles (256B)
 extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)

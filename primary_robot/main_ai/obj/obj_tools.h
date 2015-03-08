@@ -8,9 +8,7 @@
 #ifndef OBJ_OBJ_TOOLS_H_
 #define OBJ_OBJ_TOOLS_H_
 
-#include <astar_tools.h>
-
-#define NON_HOLONOMIC //exist if the robot isn't an holonomic robot (for backward compatible)
+#include <a_star_tools.h>
 
 void loadingPath(sPath_t _path, int num = -1);
 int checkCurrentPathLenght(sPath_t &path);
