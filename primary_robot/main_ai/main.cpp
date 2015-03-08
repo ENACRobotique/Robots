@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
                 break;
             case E_AI_AUTO:
             case E_AI_PROG:
-                obj_step(eAIState);
+                ret = obj_step(eAIState);
                 break;
             default:
                 break;
@@ -171,6 +171,10 @@ int main(int argc, char **argv) {
 
         // sending obstacles to monitoring
         sendObss();
+
+        // end
+        if(ret == 0)
+            break;
 
         // menu
 #ifdef CTRLC_MENU
@@ -313,7 +317,7 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    logs << INFO << "bye bye ...";
+    logs << INFO << "bye bye ... \n";
 
     return EXIT_SUCCESS;
 }
