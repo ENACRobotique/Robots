@@ -10,13 +10,31 @@
 
 #include <astar_tools.h>
 #include <vector>
-
+#include <deque>
 
 #define MAX_RETRIES 1 //FIXME bug with simulation
 
 
 using namespace std;
 
+typedef struct{
+    float t1;   // in us (synchronized time):
+    float t2;
+
+    sPt_t p1;
+    sPt_t p2;
+
+    sObs_t obs;//TODO change in circle type with the new math tools
+
+    float theta1;
+    float theta2;
+
+    float arc_len;
+    float seg_len;
+
+    bool rot1_dir; // (false: CW | true: CCW)
+    bool rot2_dir;
+}sTrajOrientEl_t;
 
 typedef struct {
     sPt_t p1;
@@ -51,6 +69,9 @@ class Path {
         void stopRobot();
         void go2Point(const sPt_t &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
         void followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l);
+        void convPathToPathOrient();
+        void computeOrientPathForHolonomic(float theta_end_obj);
+        void computeTimePathForHolonomic();
 
         //Get methods
         void const print(); //TODO Idee : reutiliser le parseur yaml
@@ -67,10 +88,12 @@ class Path {
         int same_obs(sObs_t *obs1, sObs_t *obs2);
         int checkSamePath(sPath_t &path);
         int checkRobotBlock();
+        void updateNoHaftTurn() ;
 
         sNum_t _dist;               //Computed sends
         unsigned int _path_len;     //Computed sends
-        vector <sTrajEl_t> _path;
+        deque <sTrajEl_t> _path;
+        deque <sTrajOrientEl_t> _path_orient;
 };
 
 

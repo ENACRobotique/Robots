@@ -17,7 +17,7 @@ extern "C"{
 }
 #include "messages.h"
 
-#define TRAJ_ORIENT 1 //1 active else 0
+#define TRAJ_ORIENT 0 //1 active else 0
 
 #define ROUND(a) ((a - (int) a) < 0.5 ? (a) : (a+1))
 #define CONV2TRAJORIENT(a, b) (int) ROUND(((double) a) * pow(2,b))
@@ -59,7 +59,7 @@ void Net::clearEl(){//TODO warning if no empty
 /*
  * Add a new path in the list of path ready to send
  */
-void Net::sendPath(vector <sTrajEl_t> &trajEl){
+void Net::sendPath(deque <sTrajEl_t> &trajEl){
     clearEl();
 
     for(sTrajEl_t i : trajEl){
@@ -70,7 +70,7 @@ void Net::sendPath(vector <sTrajEl_t> &trajEl){
 /*
  * Add a new path orient in the list of path ready to send
  */
-void Net::sendPathOrient(vector <sTrajOrientEl_t> &trajElOrient){
+void Net::sendPathOrient(deque <sTrajOrientEl_t> &trajElOrient){
     clearEl();
 
     for(sTrajOrientEl_t i : trajElOrient){
