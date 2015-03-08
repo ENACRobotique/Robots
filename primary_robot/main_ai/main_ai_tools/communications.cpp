@@ -33,7 +33,7 @@ extern "C"{
  */
 void sendPing(){
     int state = 0, ret ;
-
+/*
     while(1){
         switch(state){
             //Minimum necessary
@@ -45,7 +45,7 @@ void sendPing(){
                 printf("Ping debug bridge : %d\n", ret);
                 break;
             case 1:
-                if( (ret = bn_ping(ADDRU1_MAIN_IO)) >= 0){
+                if( (ret = bn_ping(ADDRI1_MAIN_IO)) >= 0){
                     state = 2;
                     }
                 printf("Ping main io : %d\n", ret);
@@ -56,7 +56,7 @@ void sendPing(){
                     }
                 printf("Ping main prop : %d\n", ret);
                 break;
-#endif
+#else
                 if( (ret = bn_ping(ADDRD1_MAIN_PROP_SIMU)) >= 0){
                     state = 3;
                     logs << INFO << "Ping main prop simu : " << ret;
@@ -64,6 +64,7 @@ void sendPing(){
                     }
                 logs << ERR << "Ping main prop simu error#" << -ret;
                 break;
+#endif
            //Optional
             case 3:
                 if( (ret = bn_ping(ADDRD1_MONITORING)) < 0){
@@ -92,7 +93,7 @@ void sendPing(){
 
             }
         if(state == 6) break;
-        }
+        }*/
 }
 
 /*
@@ -152,7 +153,7 @@ void sendObss(){
                     msgOut.payload.obss.obs[i].x = (int16_t) (obs[send_obss_idx].c.x * 100. + 0.5);
                     msgOut.payload.obss.obs[i].y = (int16_t) (obs[send_obss_idx].c.y * 100. + 0.5);
                     msgOut.payload.obss.obs[i].r = (int16_t) (obs[send_obss_idx].r * 100. + 0.5);
-
+                    logs << INFO << "element mis a jour :" << send_obss_idx;
                     i++;
                 }
             }
