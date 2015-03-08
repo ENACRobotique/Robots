@@ -47,7 +47,6 @@ void usage(char *cl) {
 
 int main(int argc, char **argv) {
     int ret;
-    ofstream file("log.txt");
     eAIState_t eAIState = E_AI_SLAVE;
 
 #ifdef CTRLC_MENU
@@ -76,8 +75,7 @@ int main(int argc, char **argv) {
                 }
                 break;
             case 'f':
-                file.close();
-                file.open(optarg);
+                logs.changeFile(optarg);
                 break;
             case 'v':
                 verbose++;
@@ -147,7 +145,7 @@ int main(int argc, char **argv) {
         usleep(500);
 
         // check if receiving new messages
-        checkInbox(verbose, file);
+        checkInbox(verbose);
 
         // calls loop functions
         switch (eAIState) {
@@ -315,8 +313,7 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    file.close();
-    cout << "bye bye ..." << endl;
+    logs << INFO << "bye bye ...";
 
     return EXIT_SUCCESS;
 }

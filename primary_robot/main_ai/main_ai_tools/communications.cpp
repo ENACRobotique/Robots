@@ -234,7 +234,7 @@ int sendSpeed(sNum_t speed) {
 /*
  * Check if a new message is available and do the appropriate operation
  */
-void checkInbox(int verbose, ofstream &file){
+void checkInbox(int verbose){
     sMsg msgIn;
     int ret;
 
@@ -256,8 +256,6 @@ void checkInbox(int verbose, ofstream &file){
     switch (msgIn.header.type) {
         case E_DEBUG:
             cout << "[DEBUG]" << msgIn.payload.debug << endl;
-            if (file)
-                file << "[DEBUG]" << msgIn.payload.debug << endl;
             break;
         case E_POS:
             logs << MES_V(E_V3) << "[POS] robot" << msgIn.payload.pos.id << "@(" << msgIn.payload.pos.x << ", " << msgIn.payload.pos.y << ", " << msgIn.payload.pos.theta * 180. / M_PI << ")";
@@ -280,7 +278,6 @@ void checkInbox(int verbose, ofstream &file){
             break;
         case E_GOAL:
             cout << "[GOAL] robot" << msgIn.payload.pos.id << "@(" << msgIn.payload.pos.x << ", " << msgIn.payload.pos.y << ", " << msgIn.payload.pos.theta * 180. / M_PI << ")" << endl;
-            if (file) {}
 
             sPt_t goal;
             goal.x = msgIn.payload.pos.x;
@@ -305,7 +302,6 @@ void checkInbox(int verbose, ofstream &file){
             break;
         default:
             cout << "[WARNING] message type not define or doesn't exist" << endl << endl;
-            if (file){}
     }
 }
 
