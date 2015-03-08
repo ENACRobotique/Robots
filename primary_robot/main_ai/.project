@@ -31,6 +31,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>lib/MathTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/tools/libraries/MathTools</locationURI>
+		</link>
+		<link>
 			<name>lib/Millis</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/static/core/linux/libraries/Millis</locationURI>
