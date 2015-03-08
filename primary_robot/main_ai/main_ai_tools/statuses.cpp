@@ -91,7 +91,7 @@ sPt_t Statuses::getLastPosXY(eElement el){
     return point;
 }
 
-float Statuses::getLastPosOrient(eElement el){
+float Statuses::getLastOrient(eElement el){
     sGenericStatus status = getLastStatus(el);
 
     return status.pos.theta;
@@ -108,9 +108,6 @@ float Statuses::getLastSpeed(eElement el){
 
         float dist;
         distPt2Pt(&pt1, &pt2, &dist);
-logs << INFO <<"DATE =" << status1.date;
-logs << INFO <<"DATE =" << status2.date;
-logs << INFO <<"dist =" << dist;
 
         return dist/(status1.date - status2.date)*1000000;
     }

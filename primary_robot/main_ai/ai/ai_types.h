@@ -13,7 +13,6 @@ extern "C"{
 #define SPEED_SECONDARY 10 // (cm/s)
 
 #define COLOR_SIMU GREEN
-#define DEBUG 1
 #define SIMU 1 //modify network_cfg.h
 #define PROG_TRAJ 1 //1 active
 #define RESO_POS 2

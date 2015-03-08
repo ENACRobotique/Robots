@@ -37,7 +37,7 @@ class Statuses {
 
         //Simple function define in the FRAME_PLAYGROUND
         sPt_t getLastPosXY(eElement el);
-        float getLastPosOrient(eElement el);
+        float getLastOrient(eElement el);
         float getLastSpeed(eElement el);
 
     private:

@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
             case E_AI_SLAVE:
                 sPt_t goal;
                 if (lastGoal(goal, true)) {
-                    cout << "[INFO] New goal available" << endl;
+                    logs << INFO << "New goal available";
                     path.go2Point(goal, true);
                 }
                 break;
@@ -166,13 +166,13 @@ int main(int argc, char **argv) {
                 break;
         }
 
-        // sending obstacles to monitoring
-        sendObss();
-
         // calls maintenance function
         statuses.maintenace();
         path.maintenace();
         net.maintenace();
+
+        // sending obstacles to monitoring
+        sendObss();
 
         // menu
 #ifdef CTRLC_MENU
