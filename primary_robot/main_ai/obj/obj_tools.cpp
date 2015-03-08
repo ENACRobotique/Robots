@@ -126,9 +126,9 @@ int checkCurrentPathLenght(sPath_t &path) {
     static sPath_t prev_path;
     int ret = -1;
 
-#ifdef DEBUG
-    cout << "checkCurrentPAthLenght : lenght_1 = " << path.path_len << " and lenght_2 = " << prev_path.path_len << endl;
-#endif
+
+    logs << DEBUG <<"checkCurrentPAthLenght : lenght_1 = " << path.path_len << " and lenght_2 = " << prev_path.path_len;
+
 
     ret = same_traj(&path, &prev_path);
     prev_path = path;
@@ -142,7 +142,7 @@ int next_obj(void) {
     int tmp_inx = -1; //index of the objective will be selected
     sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
 
-    cout << "[INFO] [obj_tools.cpp] Start next_obj()" << endl;
+    logs << INFO << "Start next_obj()";
 
     obs[N-1].active = 1;
 
@@ -150,21 +150,18 @@ int next_obj(void) {
         if (listObj[i]->active() == false)
             continue; //test if  objective is still active
 
-#if DEBUG //TODO if verbose == 2
-        //printObsActive();
-#endif
 
         if (listObj[i]->update(pos_robot) < 0) {
-#if DEBUG
-            printf("[INFO] [obj_tools.cpp] No find path to achieve the objective for objective n°%d\n\n", i);
-#endif
+
+            logs << DEBUG << "No find path to achieve the objective for objective n°" << i;
+
             continue;
         }
 
         tmp_val2 = listObj[i]->value();
-#if DEBUG
-        printf("objectif n°%hhi avec ratio=%f \n\n", i, tmp_val2);
-#endif
+
+        logs << DEBUG << "objectif n°" << i << "avec ratio=" << tmp_val2;
+
 
         if (tmp_val2 > tmp_val) {         //Update best objective
             tmp_val = tmp_val2;
@@ -182,10 +179,10 @@ int next_obj(void) {
         obs_updated[N - 1]++;
     }
 
-#if DEBUG
+
     printListObj();
-    printf("Objectif sélectionné : %i\n\n", tmp_inx);
-#endif
+    logs << INFO << "Objectif sélectionné :" << tmp_inx;
+
 
     return (tmp_inx);
 }

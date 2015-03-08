@@ -15,6 +15,7 @@
 #define WAR_V(a)  E_WAR  << a << "[WARNING] " << "[" << __FILE__ << ":" << __LINE__ << "] "
 #define INFO_V(a) E_INFO << a << "[INFO]    "
 #define MES_V(a)  E_MES  << a << "[MESSAGE] "
+#define DEBUG_V(a) E_DBG << a << "[DEBUG]   "
 #define OTHER_V(a) E_MES << a << "[OTHER]   "
 
 #define ERR ERR_V(E_V1)
@@ -22,8 +23,9 @@
 #define INFO INFO_V(E_V2)
 #define MES MES_V(E_V2)
 #define OTHER OTHER_V(E_V2)
+#define DEBUG DEBUG_V(E_V2)
 
-typedef enum {E_ERR, E_WAR, E_INFO, E_MES, E_OTHER} eLog_t;
+typedef enum {E_ERR, E_WAR, E_INFO, E_MES, E_DBG,E_OTHER} eLog_t;
 typedef enum {E_V1, E_V2, E_V3} eVer_t;
 
 using namespace std;
