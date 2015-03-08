@@ -6,15 +6,16 @@
  */
 
 #include <mt_mat.h>
-#include <params.h>
-#include <pins.h>
 #include <stdlib.h>
 #include <string.h>
-#include <tools.h>
-#include <trajectory_controller.h>
 
-#if NB_PODS != 3
-#error "You can't change NB_PODS without changing trajectory_controller.c as well!"
+#include "params.h"
+#include "tools.h"
+
+#include "trajectory_controller.h"
+
+#if SHIFT != VEC_SHIFT
+#error "trajectory_controller's implementation assumes SHIFT==VEC_SHIFT"
 #endif
 
 void trajctlr_init(trajectory_controller_t* ctl, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]) {
@@ -51,17 +52,12 @@ void _update_pos_orien(trajectory_controller_t* ctl, MT_VEC *spd_pv_rob);
 void _trajectory_control(trajectory_controller_t* ctl, int x_sp, int y_sp, MT_VEC* spd_cmd_rob);
 void _orientation_control(trajectory_controller_t* ctl, int theta_sp, MT_VEC* spd_cmd_rob);
 
-void trajctlr_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */) {
+void trajctlr_update(trajectory_controller_t* ctl, int x_sp, int y_sp, int theta_sp) {
     int i;
     MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_pv, V2_pv, V3_pv)
     MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT);// (Vx_pv, Vy_pv, Oz_pv)
-    int x_sp,
-    y_sp, theta_sp;
     MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv)
     MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd)
-
-    // Update ctl from trajectory_sp(t), orientation_sp(t)
-    // TODO update x_sp, y_sp,theta_sp
 
     // Gets speed process values from the three encoders
     // => V1_pv, V2_pv, V3_pv and backups the nbticks
@@ -102,15 +98,40 @@ void trajctlr_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientat
     }
 }
 
-void trajctlr_reset(trajectory_controller_t* ctl){
+void trajctlr_reset(trajectory_controller_t* ctl) {
     encoders_reset(ctl->encs);
 }
 
 void _update_pos_orien(trajectory_controller_t* ctl, MT_VEC* spd_pv_rob) {
-    // Compute the new position
-    ctl->x += spd_pv_rob->ve[0];
-    ctl->y += spd_pv_rob->ve[1];
-    ctl->theta += spd_pv_rob->ve[2]; // FIXME, make a modulo
+    // spd_pv_rob->ve[0..1] expressed in IpP << SHIFT
+    // spd_pv_rob->ve[2] expressed in RpP << (RAD_SHIFT + SHIFT)
+
+    // Update orientation in playground reference frame
+    ctl->theta += spd_pv_rob->ve[2];
+
+    // get theta's principal angle value
+    if(ctl->theta > issPI) {
+        ctl->theta -= (issPI << 1); // 2PI
+    }
+    else if(ctl->theta < -issPI) {
+        ctl->theta += (issPI << 1); // 2PI
+    }
+
+    // speed in robot reference frame (in IpP<<SHIFT)
+    int vx_rob = spd_pv_rob->ve[0];
+    int vy_rob = spd_pv_rob->ve[1];
+
+    int ct; // cos theta (in <<SHIFT)
+    int st; // sin theta (in <<SHIFT)
+    SINCOS(ctl->theta, &st, &ct);
+
+    // speed in playground reference frame (in IpP<<SHIFT)
+    int vx_pg = (int32_t)(((int64_t)ct * (int64_t)vx_rob - (int64_t)st * (int64_t)vy_rob) >> SHIFT);
+    int vy_pg = (int32_t)(((int64_t)st * (int64_t)vx_rob + (int64_t)ct * (int64_t)vy_rob) >> SHIFT);
+
+    // Update position in playground reference frame
+    ctl->x += vx_pg;
+    ctl->y += vy_pg;
 }
 
 void _trajectory_control(trajectory_controller_t* ctl, int x_sp, int y_sp, MT_VEC* spd_cmd_rob) {

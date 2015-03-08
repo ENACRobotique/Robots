@@ -1,8 +1,8 @@
 #ifndef _PARAMS_H
 #define _PARAMS_H
 
+#define __USE_GNU
 #include <math.h>
-
 
 /**
  * SHIFTS DEFINITION
@@ -30,6 +30,9 @@
 #define dMoRSHIFT ((double)(1 >> (RAD_SHIFT - MAT_SHIFT)))
 #endif
 
+// VEC times RAD shift, total shift for angles in radians
+#define dASHIFT ((double)(1 << (VEC_SHIFT + RAD_SHIFT)))
+
 // M_rob2pods produces (V1;V2;V3) in [IpP<<SHIFT x IpP<<SHIFT x IpP<<SHIFT] from (Vx;Vy;Oz) in [IpP<<SHIFT x IpP<<SHIFT x RpP<<(RAD_SHIFT+SHIFT)]
 
 /**
@@ -50,7 +53,9 @@
 
 #define PI (M_PI)
 #define sPI (PI*dSHIFT)
-#define isPI (iROUND(sPI))  // (rad<<SHIFT)
+#define ssPI (PI*dASHIFT)
+#define isPI iROUND(sPI)  // (rad<<SHIFT)
+#define issPI iROUND(ssPI)
 
 #define WDIAM (3.25*2.54)  // wheel diameter (cm)
 

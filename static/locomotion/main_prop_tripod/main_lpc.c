@@ -66,7 +66,7 @@ M_rob2pods =
   -5.00000000000000e-01  -8.66025403784439e-01   1.55000000000000e+01
    1.00000000000000e+00  -1.83690953073357e-16   1.55000000000000e+01
 */
-const int32_t mat_rob2pods[3][3] = {
+const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
     {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
     {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
     { 1.  * dMSHIFT,  0                 * dMSHIFT, D2I(15.5) * dMoRSHIFT}
@@ -75,20 +75,19 @@ const int32_t mat_rob2pods[3][3] = {
 int main() {
     //// Initialization
     gpio_init_all();
-    // Debug and LEDs
+    // Debug
     debug_leds_init();
-    // Small switches
     debug_switches_init();
     // Time
     sys_time_init();
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Trajectory manager (trajectory steps management)
-    trajectory_manager_t traj_mngr;
-    trajmngr_init(&traj_mngr);
     // Trajectory controller (trajectory control loop)
     trajectory_controller_t traj_ctlr;
     trajctlr_init(&traj_ctlr, mat_rob2pods);
+    // Trajectory manager (trajectory elements management)
+    trajectory_manager_t traj_mngr;
+    trajmngr_init(&traj_mngr, &traj_ctlr);
     // BotNet initialization (i²c + uart)
     //TODO
 
@@ -126,7 +125,7 @@ int main() {
             prevControl = micros();
 
             // Control trajectory
-            trajctlr_update(&traj_ctlr);
+            trajmngr_update(&traj_mngr);
         }
     } // ############## End loop ############################################
 }
