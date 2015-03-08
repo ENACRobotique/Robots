@@ -2,7 +2,7 @@
  * ai.hpp
  *
  *  Created on: 11 févr. 2015
- *      Author: seb
+ *      Author: Sebastien Malissard
  */
 
 #ifndef AI_AI_H_
@@ -16,10 +16,10 @@
 #include <cmath>
 #define MAX_RETRIES 1
 
-//#define ABS_POS
+#define ABS_POS 1
 
 
-void obj_step(eAIState_t AIState);
+int obj_step(eAIState_t AIState);
 extern int obj_init(eAIState_t AIState);
 
 extern std::vector<Obj*> listObj;

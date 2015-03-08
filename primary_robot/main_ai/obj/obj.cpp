@@ -75,7 +75,7 @@ sNum_t Obj::update(sPt_t posRobot) {
 
     _dist = -1;
     obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
-logs << INFO << "--------------------------------------------------------------";
+    logs << INFO << "--------------------------------------------------------------";
     if ((n = testInObs(&obs[0].c)) != 0) {
         projectPoint(posRobot.x, posRobot.y, obs[n].r, obs[n].c.x, obs[n].c.y, &obs[0].c);
         logs << INFO << "Robot in obstacle : " << n;

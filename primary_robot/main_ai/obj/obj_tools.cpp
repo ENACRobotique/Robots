@@ -37,7 +37,7 @@ void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
 
 void updateNoHaftTurn(sNum_t theta, sPt_t *pt) {
     int i;
-    sNum_t r;
+    sNum_t r, speed = statuses.getLastSpeed(ELT_PRIMARY);
     r = speed / 3;
     if (r > 15)
         r = 15;

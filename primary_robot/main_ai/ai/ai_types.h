@@ -25,27 +25,11 @@ extern "C"{
 
 
 typedef enum {
-    COLOR_SELECTION, WAITING_POS, WAIT_STARTING_CORD, WAIT_START, WAIT_SECONDARY, GAME, SHUT_DOWN
+    COLOR_SELECTION, WAIT_STARTING_CORD, WAIT_START, WAIT_SECONDARY, GAME, SHUT_DOWN
 } estate_t;
 
-typedef struct {
-        estate_t next;
-        sPt_t pos;
-        sNum_t theta;
-} sWaitPos;
-
-
-
-extern uint8_t obs_updated[];
-
 extern long _start_time;
-extern long last_time;
-extern sPt_t pt_select;
-extern sNum_t speed;
-extern sNum_t theta_robot;
-
-
-extern int current_obj;
+extern uint8_t obs_updated[];
 
 #endif
 

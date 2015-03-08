@@ -218,6 +218,7 @@ void posPrimary(void) {
             }
         }
         //if non holmic
+        float theta_robot = statuses.getLastOrient(ELT_ADV_PRIMARY);
         updateNoHaftTurn(theta_robot * 180 / M_PI, &obs[0].c);
         obs_updated[N - 5]++;
         obs_updated[N - 6]++;
