@@ -24,7 +24,7 @@ class Obj {
         virtual void initObj(){};
         virtual int loopObj(){return -1;};
         virtual eObj_t type() const {return E_NULL;} ;
-        virtual float gain(){return 0;};
+        virtual float gain(){return _dist;};
 
         void setEP(sObjPt_t &pt);
 
@@ -49,7 +49,7 @@ class Obj {
     protected:
         eObj_t _type;                       //objective type
         eStateObj_t _state;                 //if the objective is used or not //TODO group with probability
-        vector<unsigned int> _numObs;       //obstacle number associate to the objective
+        vector<unsigned int> _numObs;       //obstacle number associate to the objective need to deactivate
         sNum_t _dist;                       //distance robot-objective (the closest EntryPoint)
         sNum_t _time;                       //time robot-objective (the closest EntryPoint)
         sPath_t _path;                      //path robot-objective (the closest EntryPoint)

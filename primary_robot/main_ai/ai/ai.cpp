@@ -22,6 +22,7 @@ extern "C"{
 #include <obj_tools.h>
 #include <main_ai_tools/statuses.h>
 #include <clap.h>
+#include <spot.h>
 #include <obj.h>
 
 #include <main_ai_tools/path.h>
@@ -116,6 +117,24 @@ void obj_step(eAIState_t AIState) {
                     cerr << "[ERROR] [ai.cpp] Error selection color" << endl;
                 }
 
+
+                //init objective
+                if(color == YELLOW){
+                    listObj.push_back(new Clap(0));
+                    listObj.push_back(new Clap(2));
+                    listObj.push_back(new Clap(4));
+                }
+                else if(color == GREEN){
+                    listObj.push_back(new Clap(1));
+                    listObj.push_back(new Clap(3));
+                    listObj.push_back(new Clap(5));
+                }
+                else
+                    logs << ERR << "Color ???";
+
+                for(unsigned int i = 0 ; i < 8 ; i++)
+                    listObj.push_back(new Spot(i));
+
 #ifndef ABS_POS
                 sendPos(obs[0].c, theta_robot); //Sending initial position
                 state = WAIT_STARTING_CORD;
@@ -183,16 +202,15 @@ void obj_step(eAIState_t AIState) {
                     last_time = millis();
 
                     if ((current_obj = next_obj()) != -1) {
-                        //if (checkCurrentPathLenght(path) == 0 || checkRobotBlock() == 1) { //TODO in path class
+                        pt_select = listObj[current_obj]->destPoint();
 #ifdef NON_HOLONOMIC
                   /*      int k = listObj[current_obj]->_EP;
                         sObjPt_t ep = listObj[current_obj]->entryPoint(k);
                         updateEndTraj(ep.angleEP,  &ep.c, ep.radiusEP);
                         printEndTraj();*/
+#else
+                        path.convPathForHolonomic();
 #endif
-                        pt_select = listObj[current_obj]->destPoint();
-
-
                         path_loc = listObj[current_obj]->path();
                         path.addPath2(path_loc);
                         path.sendRobot();
@@ -245,9 +263,6 @@ int obj_init(eAIState_t AIState) {
     Path path;
 
     //path.go2Point(obs[0].c, {100, 100}, true);
-
-    listObj.push_back(new Clap(1));
-    listObj.push_back(new Clap(2));
 
     return 0;
 }

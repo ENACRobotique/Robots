@@ -5,35 +5,42 @@
  *      Author: seb
  */
 
-#include "clap.h"
+#include "spot.h"
 
 #include <iostream>
 #include <cmath>
 
 #include "math_types.h"
 #include "types.h"
+#include "tools.h"
 
 
-sPt_t obsClap[6]={{32., R_ROBOT}, {62., R_ROBOT}, {92., R_ROBOT}, {208. , R_ROBOT}, {238., R_ROBOT}, {268., R_ROBOT}} ;
 
-Clap::Clap(unsigned int num) : Obj(E_CLAP), _num(num){
 
-    if(num > 6){
-        cerr << "[Error] [clap.cpp] Num too big" << endl;
+Spot::Spot(unsigned int num) : Obj(E_SPOT), _num(num){
+
+    if(num > 8){
+        logs << ERR << "Num too big";
     }
     sObjPt_t objEP;
-    objEP.c = obsClap[num];
+    if(color == GREEN)
+        _numObs.push_back(START_STAND + num + 8);
+    else
+        _numObs.push_back(START_STAND + num);
+
+    objEP.c = obs[_numObs.back()].c;
     objEP.radiusEP = 8.;
     objEP.angleEP = M_PI_2;
 
     _entryPoint.push_back(objEP);
+
 }
 
-Clap::~Clap() {
+Spot::~Spot() {
     // TODO Auto-generated destructor stub
 }
 
-int Clap::loopObj(){
+int Spot::loopObj(){
     _active = false;
     return 0;
 };

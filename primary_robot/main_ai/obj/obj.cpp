@@ -13,6 +13,7 @@
 #include "math_ops.h"
 #include "obj_tools.h"
 #include "a_star.h"
+#include "tools.h"
 
 extern "C"{
 #include "millis.h"
@@ -75,37 +76,48 @@ sNum_t Obj::update(sPt_t posRobot) {
 
     if ((n = testInObs(&posRobot)) != 0) {
         projectPoint(posRobot.x, posRobot.y, obs[n].r, obs[n].c.x, obs[n].c.y, &obs[0].c);
-        cout << "[INFO] [obj.cpp] Robot in obstacle" << endl;
+        logs << INFO << "Robot in obstacle";
     }
 
     for (unsigned int i = 0; i < _entryPoint.size(); i++) {
         obs[N - 1].c = _entryPoint[i].c;
+        logs << DEBUG << "EP : " << _entryPoint[i].c.x << " : " << _entryPoint[i].c.y;
         obs[0].c = posRobot;
 
 #ifdef NON_HOLONOMIC
-            updateEndTraj(_entryPoint[i].angleEP, &_entryPoint[i].c, _entryPoint[i].radiusEP); //write the circle to arrive on objective in obs
+        updateEndTraj(_entryPoint[i].angleEP, &_entryPoint[i].c, _entryPoint[i].radiusEP); //write the circle to arrive on objective in obs
 
-            if ((g = testInObs(&posRobot)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
-                projectPoint(posRobot.x, posRobot.y, obs[g].r, obs[g].c.x, obs[g].c.y, &obs[0].c);
-                if ((m = testInObs(&obs[0].c)) != 0) { //Cas la projection se retrouve dans un obstacle après la premier projection
-                    printf("Fix this projection inside an obstacle n_%d\n", m); //FIXME or no : investigate
-                    continue;
-                }
-#if DEBUG
-                printf("pos current after projection : x=%f, y=%f, obs x=%f, y=%f et r=%f\n", posRobot.x, posRobot.y, obs[g].c.x, obs[g].c.y, obs[g].r);
+        if ((g = testInObs(&posRobot)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
+            projectPoint(posRobot.x, posRobot.y, obs[g].r, obs[g].c.x, obs[g].c.y, &obs[0].c);
+            if ((m = testInObs(&obs[0].c)) != 0) { //Cas la projection se retrouve dans un obstacle après la premier projection
+                printf("Fix this projection inside an obstacle n_%d\n", m); //FIXME or no : investigate
+                continue;
             }
-#endif
+        }
+            /*
+#if DEBUG
+            printf("pos current after projection : x=%f, y=%f, obs x=%f, y=%f et r=%f\n", posRobot.x, posRobot.y, obs[g].c.x, obs[g].c.y, obs[g].r);
+        }
+#endif*/
 #endif
 
-        //TODO déactivation d'un obstacle mobile si celui ci gene un point d'entré
+        //deactivate obs
+        for(unsigned int j = 0 ; j < _numObs.size() ; j++){
+            obs[_numObs[j]].active = 0;
+            logs << DEBUG << "deactivation of obstacle number :" << _numObs[j];
+        }
 
-        fill_tgts_lnk(); //TODO optimisation car uniquement la position de fin change dans la boucle
+        fill_tgts_lnk();
         a_star(A(0), A(N-1), &path_loc);
 
-        //TODO reactivation des obstacles mobile deactiver precedement
+        //reactivate obs
+        for(unsigned int j = 0 ; j < _numObs.size() ; j++){
+            obs[_numObs[j]].active = 1;
+            logs << DEBUG << "reactivation of obstacle number :" << _numObs[j];
+        }
 
         if (path_loc.dist == 0)
-            printf("[INFO] [obj.cpp] ATTENTION : A* retourne distance nul\n");
+            logs << INFO << "ATTENTION : A* retourne distance nul";
         else
             if (_dist > path_loc.dist || _dist == -1) {
                 _dist = path_loc.dist;

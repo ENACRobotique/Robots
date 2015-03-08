@@ -5,24 +5,25 @@
  *      Author: seb
  */
 
-#ifndef OBJ_CLAP_H_
-#define OBJ_CLAP_H_
+#ifndef OBJ_SPOT_H_
+#define OBJ_SPOT_H_
 
 
 #include <types.h>
 #include "obj.h"
 
+#define START_STAND 4 //number of the first stand element in obs[]
+
 using namespace std;
 
-class Clap : public Obj{
+class Spot : public Obj{
     public:
-        Clap(const unsigned int num);
-        virtual ~Clap();
+        Spot(const unsigned int num);
+        virtual ~Spot();
 
         void initObj(){};
         int loopObj();
-        eObj_t type() const {return E_CLAP;};
-        //float gain(){return 1;};
+        eObj_t type() const {return E_SPOT;};
 
     private :
         unsigned int _num;

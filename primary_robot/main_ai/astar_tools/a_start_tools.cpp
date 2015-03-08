@@ -56,8 +56,8 @@ sObs_t obs[] = {
     {{0., 0.}, R_ROBOT+20., 1, 0, 1},   //primary adv
     {{0., 0.}, R_ROBOT+15., 1, 0, 1},   //secondary adv
 
-    //Yellow spots
-    {{9.  ,180.}, 3. + R_ROBOT, 1, 1, 1},
+    //Yellow spots //if moved change START_STAND
+    {{9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //4
     {{85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
     {{85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
     {{87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
@@ -67,7 +67,7 @@ sObs_t obs[] = {
     {{130., 60.}, 3. + R_ROBOT, 1, 1, 1},
 
     //Green spots
-    {{300 - 9.  ,180.}, 3. + R_ROBOT, 1, 1, 1},
+    {{300 - 9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //12
     {{300 - 85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
     {{300 - 85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
     {{300 - 87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
