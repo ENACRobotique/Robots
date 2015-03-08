@@ -70,8 +70,8 @@ void loadingPath(sPath_t _path, int num) {
 
 #ifdef NON_HOLONOMIC
     if (num >= 0) {
-        sObjPt_t _ep = listObj[num]->entryPoint(listObj[num]->EP());
-        updateEndTraj(_ep.angleEP, &_ep.c, _ep.radiusEP);
+        sPt_t _ep = listObj[num]->getDestPoint();
+        //updateEndTraj(_ep.angleEP, &_ep.c, _ep.radiusEP);
         printEndTraj();
     }
     else
@@ -147,7 +147,7 @@ int next_obj(void) {
     obs[N-1].active = 1;
 
     for (unsigned int i = 0; i < listObj.size(); i++) {
-        if (listObj[i]->active() == false)
+        if (listObj[i]->getState() != ACTIVE)
             continue; //test if  objective is still active
 
 
@@ -158,7 +158,7 @@ int next_obj(void) {
             continue;
         }
 
-        tmp_val2 = listObj[i]->value();
+        tmp_val2 = listObj[i]->getYield();
 
         logs << DEBUG << "objectif n°" << i << "avec ratio=" << tmp_val2;
 
@@ -171,11 +171,11 @@ int next_obj(void) {
 
     if (tmp_inx >= 0) { //Update end of trajectory
 #ifdef NON_HOLONOMIC
-        loadingPath(listObj[tmp_inx]->path(), tmp_inx);
+        loadingPath(listObj[tmp_inx]->getPath(), tmp_inx);
 #else
         loadingPath(listObj[tmp_inx]->path());
 #endif
-        obs[N - 1].c = listObj[tmp_inx]->destPoint();
+        obs[N - 1].c = listObj[tmp_inx]->getDestPoint();
         obs_updated[N - 1]++;
     }
 

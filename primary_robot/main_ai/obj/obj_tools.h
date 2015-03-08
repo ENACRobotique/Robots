@@ -12,6 +12,7 @@
 
 void loadingPath(sPath_t _path, int num = -1);
 int checkCurrentPathLenght(sPath_t &path);
+void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
 void updateNoHaftTurn(sNum_t theta, sPt_t *pt);
 void set_traj(sPath_t *p, iABObs_t l[], int nb);
 

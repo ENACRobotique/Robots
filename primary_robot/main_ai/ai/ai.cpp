@@ -202,7 +202,8 @@ void obj_step(eAIState_t AIState) {
                     last_time = millis();
 
                     if ((current_obj = next_obj()) != -1) {
-                        pt_select = listObj[current_obj]->destPoint();
+                        pt_select = listObj[current_obj]->getDestPoint();
+                        logs << INFO << "point selected x=" << pt_select.x << " and y=" << pt_select.y;
 #ifdef NON_HOLONOMIC
                   /*      int k = listObj[current_obj]->_EP;
                         sObjPt_t ep = listObj[current_obj]->entryPoint(k);
@@ -211,7 +212,7 @@ void obj_step(eAIState_t AIState) {
 #else
                         path.convPathForHolonomic();
 #endif
-                        path_loc = listObj[current_obj]->path();
+                        path_loc = listObj[current_obj]->getPath();
                         path.addPath2(path_loc);
                         path.sendRobot();
                     }

@@ -14,6 +14,7 @@
 #include "obj_tools.h"
 #include "a_star.h"
 #include "tools.h"
+#include "ai_tools.h"
 
 extern "C"{
 #include "millis.h"
@@ -35,21 +36,21 @@ int testInObs(sPt_t *p) { //retourne le numéro de l'obstable si la position est
     return 0;
 }
 
-Obj::Obj() : _state(ACTIVE), _dist(-1), _time(-1), _point(-1), _EP(-1), _active(true), _done(0) {
+Obj::Obj() : _type(E_NULL), _point(-1), _state(ACTIVE), _dist(-1), _time(-1), _done(0){
 }
 
-Obj::Obj(eObj_t type) : _type(type), _state(ACTIVE), _dist(-1), _time(-1), _point(-1), _EP(-1), _active(true), _done(0) {
+Obj::Obj(eObj_t type) : _type(type), _point(-1), _state(ACTIVE), _dist(-1), _time(-1), _done(0){
 }
 
-Obj::Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjPt_t> &entryPoint) :
-        _type(type), _state(ACTIVE), _dist(-1), _time(-1), _point(-1), _EP(-1), _active(true), _done(0) {
+Obj::Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint) :
+        _type(type), _point(-1), _state(ACTIVE), _dist(-1), _time(-1), _done(0){
 
     for(unsigned int i : numObs){
-        _numObs.push_back(i);
+        _num_obs.push_back(i);
     }
 
-    for(sObjPt_t i : entryPoint){
-        _entryPoint.push_back(i);
+    for(sObjEntry_t i : entryPoint){
+        _access.push_back(i);
     }
 }
 
@@ -59,8 +60,8 @@ Obj::~Obj() {
 
 
 
-void Obj::setEP(sObjPt_t &pt){
-    _entryPoint.push_back(pt);
+void Obj::addAccess(sObjEntry_t &access){
+    _access.push_back(access);
 }
 
 /*
@@ -73,88 +74,135 @@ sNum_t Obj::update(sPt_t posRobot) {
     sPath_t path_loc;
 
     _dist = -1;
-
-    if ((n = testInObs(&posRobot)) != 0) {
+    obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
+logs << INFO << "--------------------------------------------------------------";
+    if ((n = testInObs(&obs[0].c)) != 0) {
         projectPoint(posRobot.x, posRobot.y, obs[n].r, obs[n].c.x, obs[n].c.y, &obs[0].c);
-        logs << INFO << "Robot in obstacle";
+        logs << INFO << "Robot in obstacle : " << n;
     }
 
-    for (unsigned int i = 0; i < _entryPoint.size(); i++) {
-        obs[N - 1].c = _entryPoint[i].c;
-        logs << DEBUG << "EP : " << _entryPoint[i].c.x << " : " << _entryPoint[i].c.y;
-        obs[0].c = posRobot;
+    for (sObjEntry_t i : _access) {
+        obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
+        switch(i.type){
+            case E_POINT :
+                logs << DEBUG << "Access type POINT";
+                obs[N - 1].c = i.pt.p;
+#ifdef NON_HOLONOMIC
+                updateEndTraj(i.pt.angle, &i.pt.p, i.radius);
+#endif
+            break;
+            case E_CIRCLE:
+                logs << DEBUG << "Access type CIRCLE";
+                obs[N - 1].c = i.cir.c;
+#ifdef NON_HOLONOMIC
+                obs[N - 2].active = 0;
+                obs[N - 3].active = 0;
+                obs[N - 4].active = 0;
+                obs[N - 5].active = 0;
+                obs[N - 6].active = 0;
+                obs[N - 7].active = 0;
+#endif
+                break;
+            case E_SEGMENT:
+                //TODO
+                break;
+            default:
+                logs << ERR << "Unknown type of access to objective";
+        }
 
 #ifdef NON_HOLONOMIC
-        updateEndTraj(_entryPoint[i].angleEP, &_entryPoint[i].c, _entryPoint[i].radiusEP); //write the circle to arrive on objective in obs
-
-        if ((g = testInObs(&posRobot)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
+        if ((g = testInObs(&obs[0].c)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
             projectPoint(posRobot.x, posRobot.y, obs[g].r, obs[g].c.x, obs[g].c.y, &obs[0].c);
             if ((m = testInObs(&obs[0].c)) != 0) { //Cas la projection se retrouve dans un obstacle après la premier projection
-                printf("Fix this projection inside an obstacle n_%d\n", m); //FIXME or no : investigate
+                logs << ERR << "Fix this projection inside an obstacle n°" << m; //FIXME or no : investigate
                 continue;
             }
         }
-            /*
-#if DEBUG
-            printf("pos current after projection : x=%f, y=%f, obs x=%f, y=%f et r=%f\n", posRobot.x, posRobot.y, obs[g].c.x, obs[g].c.y, obs[g].r);
-        }
-#endif*/
 #endif
+        logs << DEBUG << "Current position is : " << obs[0].c.x << " : " << obs[0].c.y;
+        logs << DEBUG << "Current access point chose is : " << obs[N - 1].c.x << " : " << obs[N - 1].c.y;
+        if(!_num_obs.empty())
+            logs << DEBUG << "Current obstacle position is : " << obs[_num_obs.front()].c.x << " : " << obs[_num_obs.front()].c.y;
 
         //deactivate obs
-        for(unsigned int j = 0 ; j < _numObs.size() ; j++){
-            obs[_numObs[j]].active = 0;
-            logs << DEBUG << "deactivation of obstacle number :" << _numObs[j];
+        for(unsigned int j : _num_obs){
+            obs[j].active = 0;
+            logs << DEBUG << "Deactivation of obstacle number :" << j;
         }
 
         fill_tgts_lnk();
         a_star(A(0), A(N-1), &path_loc);
 
         //reactivate obs
-        for(unsigned int j = 0 ; j < _numObs.size() ; j++){
-            obs[_numObs[j]].active = 1;
-            logs << DEBUG << "reactivation of obstacle number :" << _numObs[j];
+        for(unsigned int j : _num_obs){
+            obs[j].active = 1;
+            logs << DEBUG << "Reactivation of obstacle number :" << j;
         }
 
         if (path_loc.dist == 0)
-            logs << INFO << "ATTENTION : A* retourne distance nul";
-        else
-            if (_dist > path_loc.dist || _dist == -1) {
-                _dist = path_loc.dist;
-                _EP = i;
-                _path = path_loc;
+            logs << INFO << "A* return null distance";
+        else if (_dist > path_loc.dist || _dist == -1) {
+            _dist = path_loc.dist;
+            _path = path_loc;
+            _access_select = obs[N - 1].c;
+
+            if( i.type == E_CIRCLE){
+                float dist = 0;
+                distPt2Pt(&_path.path[_path.path_len - 1].p1, &_path.path[_path.path_len - 1].p2, &dist);
+                if(dist < i.cir.r)
+                    logs << ERR << "Very strange path"; //FIXME
+                else{
+                    sPt_t pt = _path.path[_path.path_len - 1].p1;
+                    if(projPtOnCircle(&i.cir.c, i.cir.r, &pt) < 0)
+                        logs << ERR << "Projection of point";
+                    _path.path[_path.path_len - 1].p2 = pt;
+                }
+                _access_select = _path.path[_path.path_len - 1].p2;
+                //_dist -= (i.cir.r + R_ROBOT);
             }
+        }//else not better, conserve the previous
     }
 
     return _dist;
 }
 
+float Obj::getDist() const{
+    return _dist;
+}
 
-sNum_t Obj::value(void) {
+sPath_t Obj::getPath() const{
+    return _path;
+}
+
+sPt_t Obj::getDestPoint() const{
+    return _access_select;
+}
+
+eStateObj_t Obj::getState() const{
+    return _state;
+}
+
+sNum_t Obj::getYield(void){
     sNum_t ratio = 0.;
 
-    if (_dist == 0) { //FIXME on est sur le point donc valeur max
-        printf("Attention : distance nul\n"); //Erreur ou objectif atteint
+    if (_dist == 0) { //FIXME on est sur le point donc valeur max : Erreur ou objectif atteint
+        logs << ERR << "getYield : distance null";
         return (-1);
     }
 
     if (_time > (END_MATCH - (millis() - _start_time))) { //insufficient time remaining
-        _active = false;
+        _state = NO_TIME;
         return 0;
     }
 
     switch (_type) {
         case E_CLAP:
         case E_SPOT:
-            ratio = _point / _time * 100; //TODO
+            ratio = 1/_dist * 100; //TODO
             break;
         default:
             return (-1);
     }
     return ratio * (1. - _done);
-}
-
-sPt_t Obj::destPoint(){
-    return _path.path[_path.path_len - 1].p2;
 }
 

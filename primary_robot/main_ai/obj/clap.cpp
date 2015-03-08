@@ -21,12 +21,13 @@ Clap::Clap(unsigned int num) : Obj(E_CLAP), _num(num){
     if(num > 6){
         cerr << "[Error] [clap.cpp] Num too big" << endl;
     }
-    sObjPt_t objEP;
-    objEP.c = obsClap[num];
-    objEP.radiusEP = 8.;
-    objEP.angleEP = M_PI_2;
+    sObjEntry_t objEP;
+    objEP.type = E_POINT;
+    objEP.pt.p = obsClap[num];
+    objEP.radius = 8.;
+    objEP.pt.angle = M_PI_2;
 
-    _entryPoint.push_back(objEP);
+    _access.push_back(objEP);
 }
 
 Clap::~Clap() {
@@ -34,7 +35,7 @@ Clap::~Clap() {
 }
 
 int Clap::loopObj(){
-    _active = false;
+    _state = FINISH;
     return 0;
 };
 
