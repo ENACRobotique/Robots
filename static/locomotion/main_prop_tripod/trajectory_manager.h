@@ -76,5 +76,6 @@ typedef struct {
 void trajmngr_init(trajectory_manager_t* tm, trajectory_controller_t* tc);
 int trajmngr_new_traj_el(trajectory_manager_t* tm, sTrajOrientElRaw_t *te);
 void trajmngr_new_pos(trajectory_manager_t* tm, sPosPayload *pos);
+int trajmngr_update(trajectory_manager_t* tm);
 
 #endif /* TRAJECTORY_MANAGER_H_ */

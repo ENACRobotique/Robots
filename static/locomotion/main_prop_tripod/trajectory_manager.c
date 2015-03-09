@@ -175,11 +175,22 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
             // FIXME implements cache system stored in the trajectory_manager for once per element computations
 
+            int dur; // duration since start of element (in P)
+            int elt_dur; // total duration of element (in P)
+            int dtheta; // delta theta for the element (theta_end - theta_start) (in rad << (RAD_SHIFT + SHIFT))
+            int dir; // direction of rotation (1: negative angle, 0: positive angle)
+            int theta0; // initial orientation at start of element (in rad << (RAD_SHIFT + SHIFT))
+
             if(tm->curr_slot_idx & 1) { // following the arc
                 // Check if the next slot is present
                 if(!s_next) {
                     tm->state = S_WAIT; // We wait if the next slot is not present yet
                     // FIXME handle case when message we are waiting for just arrived
+                    // FIXME handle out of this function without theta_sp computation
+
+                    x_sp = 0; // TODO ...
+                    y_sp = 0; // TODO ...
+                    theta_sp = 0; // TODO ...
                 }
                 else {
                     // Check if time is greater than the next start of the segment
@@ -188,23 +199,35 @@ int trajmngr_update(trajectory_manager_t* tm) {
                         // check if position is consistent with next step seg start
                     }
 
-//                    // Compute the delta of time on the arc
-//                    int dur = t - s->arc_start_date;
-//                    dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
-//
-//                    // compute (co)sinus of the rope
-//                    int cl = ((int64_t)(s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
-//                    int sl = ((int64_t)(s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
-//
-//                    // compute desired speed for x and y
-//                    int vx = ((int64_t)s->arc_spd * (int64_t)cl) >> SHIFT;
-//                    int vy = ((int64_t)s->arc_spd * (int64_t)sl) >> SHIFT;
-                }
+                    // Compute the delta of time on the arc
+                    dur = t - s->arc_start_date;
+                    dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                    dur /= USpP; // convert duration to periods (from microseconds)
 
-                // TODO
-                x_sp = 0; // TODO ...
-                y_sp = 0; // TODO ...
-                theta_sp = 0; // TODO ...
+                    int alpha = -dur * (((int64_t)s->arc_spd << (RAD_SHIFT + SHIFT)) / (int64_t)s->c_r); // (in rad << (RAD_SHIFT + SHIFT))
+
+                    // compute (co)sinus of the rope
+                    int ca = COS(alpha); // (<< SHIFT)
+                    int sa = SIN(alpha); // (<< SHIFT)
+
+                    int vec_x = s->p2_x - s->c_x; // (in I << SHIFT)
+                    int vec_y = s->p2_y - s->c_y; // (in I << SHIFT)
+
+                    int vec2_x = ((int64_t)vec_x * (int64_t)ca - (int64_t)vec_y * (int64_t)sa) >> SHIFT;
+                    int vec2_y = ((int64_t)vec_x * (int64_t)sa + (int64_t)vec_y * (int64_t)ca) >> SHIFT;
+
+                    x_sp = s->c_x + vec2_x; // (in I << SHIFT)
+                    y_sp = s->c_y + vec2_y; // (in I << SHIFT)
+
+                    // compute delta theta between begin and end of line (XXX may be done once per segment)
+                    dir = s->rot2_dir;
+                    dtheta = s_next->seg_start_theta - s->arc_start_theta; // (rad << (RAD_SHIFT + SHIFT))
+                    theta0 = s->arc_start_theta;
+
+                    // compute segment duration (XXX may be done once per segment)
+                    elt_dur = s_next->seg_start_date - s->arc_start_date; // in microseconds
+                    elt_dur /= USpP; // in periods
+                }
             }
             else { // following the straight line
                 if(t > s->arc_start_date) {
@@ -213,11 +236,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
                 }
 
                 // compute current duration from start of line
-                int dur = t - s->seg_start_date;
+                dur = t - s->seg_start_date;
                 dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
-
-                // convert duration to periods (from microseconds)
-                dur /= USpP;
+                dur /= USpP; // convert duration to periods (from microseconds)
 
                 // compute (co)sinus of line (XXX may be done once per segment)
                 int cl = ((int64_t) (s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
@@ -232,25 +253,30 @@ int trajmngr_update(trajectory_manager_t* tm) {
                 y_sp = s->p1_y + vy * dur;
 
                 // compute delta theta between begin and end of line (XXX may be done once per segment)
-                int dtheta = s->arc_start_theta - s->seg_start_theta; // (rad << (RAD_SHIFT + SHIFT))
-                if(s->rot1_dir) {
-                    while(dtheta > 0) {
-                        dtheta -= (issPI << 1 /* 2*PI */); // if s->rot1_dir==1, dtheta must be negative
-                    }
-                }
-                else {
-                    while(dtheta < 0) {
-                        dtheta += (issPI << 1 /* 2*PI */); // if s->rot1_dir==0, dtheta must be positive
-                    }
-                }
+                dir = s->rot1_dir;
+                dtheta = s->arc_start_theta - s->seg_start_theta; // (rad << (RAD_SHIFT + SHIFT))
+                theta0 = s->seg_start_theta;
 
                 // compute segment duration (XXX may be done once per segment)
-                int seg_dur = s->arc_start_date - s->seg_start_date; // in microseconds
-                seg_dur /= USpP; // in periods
-
-                // compute the next desired orientation
-                theta_sp = s->seg_start_theta + (int64_t)dtheta * (int64_t)dur / seg_dur;
+                elt_dur = s->arc_start_date - s->seg_start_date; // in microseconds
+                elt_dur /= USpP; // in periods
             }
+
+            // ensures dtheta is of the right sign
+            if(dir) {
+                while(dtheta > 0) {
+                    dtheta -= (issPI << 1 /* 2*PI */); // if dir==1, dtheta must be negative
+                }
+            }
+            else {
+                while(dtheta < 0) {
+                    dtheta += (issPI << 1 /* 2*PI */); // if dir==0, dtheta must be positive
+                }
+            }
+
+            // compute the next desired orientation (same calculation for seg and arc)
+            theta_sp = theta0 + (int64_t)dtheta * (int64_t)dur / elt_dur;
+
             break;
         }
     }
