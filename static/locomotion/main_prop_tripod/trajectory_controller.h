@@ -57,6 +57,7 @@ typedef struct {
 void trajctlr_init(trajectory_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
 void trajctlr_begin_update(trajectory_controller_t* tc);
 void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int theta_sp);
+void trajctlr_set_pos(trajectory_controller_t* tc, int x, int y, int theta);
 void trajctlr_reset(trajectory_controller_t* tc);
 
 #endif /* TRAJECTORY_CONTROLLER_H_ */

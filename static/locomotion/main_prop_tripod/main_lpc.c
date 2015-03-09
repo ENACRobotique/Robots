@@ -82,12 +82,9 @@ int main() {
     sys_time_init();
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Trajectory controller (trajectory control loop)
-    trajectory_controller_t traj_ctlr;
-    trajctlr_init(&traj_ctlr, mat_rob2pods);
-    // Trajectory manager (trajectory elements management)
+    // Trajectory manager
     trajectory_manager_t traj_mngr;
-    trajmngr_init(&traj_mngr, &traj_ctlr);
+    trajmngr_init(&traj_mngr, mat_rob2pods);
     // BotNet initialization (i²c + uart)
     //TODO
 
@@ -111,7 +108,7 @@ int main() {
                 trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
             case E_POS:
-                trajmngr_new_pos(&traj_mngr, &inMsg.payload.pos);
+                trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
                 break;
             }
         } // End: if(ret > 0)
@@ -121,7 +118,7 @@ int main() {
             // If there is too much delay we skip to the next increment of the loop
             if(micros() - prevControl > PER_ASSER_CRITIC){
                 prevControl = micros();
-                trajctlr_reset(&traj_ctlr);
+                trajmngr_reset(&traj_mngr);
                 continue;
             }
             prevControl = micros();

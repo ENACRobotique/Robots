@@ -103,6 +103,12 @@ void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int th
     }
 }
 
+void trajctlr_set_pos(trajectory_controller_t* tc, int x, int y, int theta) {
+    tc->x = x;
+    tc->y = y;
+    tc->theta = theta;
+}
+
 void trajctlr_reset(trajectory_controller_t* tc) {
     encoders_reset(tc->encs);
 }
