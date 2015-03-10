@@ -14,13 +14,9 @@
 #include "obj.h"
 #include <vector>
 #include <cmath>
-#define MAX_RETRIES 1
 
-#define ABS_POS 1
-
-
-int obj_step(eAIState_t AIState);
-extern int obj_init(eAIState_t AIState);
+int stepAI();
+int initAI();
 
 extern std::vector<Obj*> listObj;
 

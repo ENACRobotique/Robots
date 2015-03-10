@@ -17,12 +17,9 @@ extern "C"{
 
 #include "math_ops.h"
 #include <obj_tools.h>
-#include <main_ai_tools/statuses.h>
 #include <clap.h>
 #include <spot.h>
 #include <obj.h>
-
-#include <path.h>
 #include <tools.h>
 #include "communications.h"
 
@@ -86,7 +83,7 @@ void initObjective(){
 }
 
 
-int obj_step(eAIState_t AIState) {
+int stepAI() {
     static estate_t state = COLOR_SELECTION;
     static bool mode_obj = false;
     static int current_obj = -1;
@@ -213,7 +210,7 @@ int obj_step(eAIState_t AIState) {
     return 1;
 }
 
-int obj_init(eAIState_t AIState) {
+int initAI() {
 
     //Objectives are initialized in the loop step, because here we don't known the color selected.
 

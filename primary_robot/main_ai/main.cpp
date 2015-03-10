@@ -10,8 +10,6 @@
  *      Author: Seb
  */
 
-#include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h> //already exist extern "C"
@@ -112,7 +110,7 @@ int main(int argc, char **argv) {
     switch (eAIState) {
         case E_AI_AUTO:
         case E_AI_PROG:
-            ret = obj_init(eAIState);
+            ret = initAI();
             if (ret < 0) {
                 cerr << "[ERROR] [main.cpp] obj_init() error #" << -ret << endl;
             }
@@ -158,7 +156,7 @@ int main(int argc, char **argv) {
                 break;
             case E_AI_AUTO:
             case E_AI_PROG:
-                ret = obj_step(eAIState);
+                ret = stepAI();
                 break;
             default:
                 break;

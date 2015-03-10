@@ -36,14 +36,14 @@ int testInObs(sPt_t *p) { //retourne le numéro de l'obstable si la position est
     return 0;
 }
 
-Obj::Obj() : _type(E_NULL), _point(-1), _state(ACTIVE), _dist(-1), _time(-1), _done(0){
+Obj::Obj() : _type(E_NULL), _point(-1), _state(ACTIVE), _access_select_angle(0), _dist(-1), _time(-1), _done(0){
 }
 
-Obj::Obj(eObj_t type) : _type(type), _point(-1), _state(ACTIVE), _dist(-1), _time(-1), _done(0){
+Obj::Obj(eObj_t type) : _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _dist(-1), _time(-1), _done(0){
 }
 
 Obj::Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint) :
-        _type(type), _point(-1), _state(ACTIVE), _dist(-1), _time(-1), _done(0){
+        _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _dist(-1), _time(-1), _done(0){
 
     for(unsigned int i : numObs){
         _num_obs.push_back(i);
@@ -178,6 +178,10 @@ sPt_t Obj::getDestPoint() const{
     return _access_select;
 }
 
+float Obj::getDestPointOrient() const{
+    return _access_select_angle;
+}
+
 eStateObj_t Obj::getState() const{
     return _state;
 }
@@ -206,3 +210,44 @@ sNum_t Obj::getYield(void){
     return ratio * (1. - _done);
 }
 
+
+void Obj::print() const{
+    logs << DEBUG << "TODO";
+}
+
+/*
+void updateRatioObj(int numObj, int robot) { //robot = 1 to 3
+    static int mat[3][NB_OBJ] = { { 0, 0 } };  //3 is the number of other robot
+
+    if (!mat[robot - 1][numObj]) {
+        //    listObj[numObj].done += (1 - listObj[numObj].done)/2;
+        mat[robot - 1][numObj] = 1;
+    }
+}
+*/
+
+/*
+ void checkRobot2Obj(void){
+ int i, j, k;
+ sNum_t dist;
+ static int tab[NB_OBJ][2] ={{0, 0}};
+
+ for(i = 0 ; i < NB_OBJ ; i++){
+ if(tab[i][0]){
+ tab[i][0] = 0;
+ listObj[i].active = tab[i][1];
+ }
+ for(j = 1 ; j < 4 ; j++){
+ for(k = 0 ; k < listObj[i].nbObs ; k++){
+ distPt2Pt(&obs[listObj[i].numObs[k]].c, &obs[j].c, &dist);
+ if( (obs[listObj[i].numObs[k]].r + obs[j].r - R_ROBOT) > (dist - ERR_DIST) ){
+ updateRatioObj(i, j);
+ tab[i][0] = 1;
+ tab[i][1] = listObj[i].active;
+ listObj[i].active = 0;
+ }
+ }
+ }
+ }
+ }
+ */

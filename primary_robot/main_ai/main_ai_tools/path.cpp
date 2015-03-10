@@ -281,18 +281,33 @@ void Path::computeOrientPathForHolonomic(float theta_end_obj){
 }
 
 /*
- * Print to the display the trajectory element choose.
+ * Print the trajectory element choose.
  */
-void const Path::printElTraj(const unsigned int num){
+void Path::printElTraj(const unsigned int num) const{
 
     if(_path.size() > num)
-        cout << "El " << num << " : p1 x" << _path[num].p1.x << " p1 y" << _path[num].p1.y
-                             << " ; p2 x" << _path[num].p2.x << " p2 y" << _path[num].p2.y
-                             << " ; obs x" << _path[num].obs.c.x << " y" << _path[num].obs.c.y << " r" << _path[num].obs.r
-                             << " ; a_l" << _path[num].arc_len << " s_l" << _path[num].seg_len
-                             << endl;
+        logs << DEBUG << "El " << num << " : p1 x" << _path[num].p1.x << " p1 y" << _path[num].p1.y
+                               << " ; p2 x" << _path[num].p2.x << " p2 y" << _path[num].p2.y
+                               << " ; obs x" << _path[num].obs.c.x << " y" << _path[num].obs.c.y << " r" << _path[num].obs.r
+                               << " ; a_l" << _path[num].arc_len << " s_l" << _path[num].seg_len;
 }
 
+void Path::printElTrajOrient(const unsigned int num) const{
+    //TODO
+}
+
+void Path::printPath() const{
+    if(!_path.empty() & !_path_orient.empty())
+        logs << ERR << "_path and _path_orient are not empty";
+
+    if(!_path.empty())
+        for(unsigned int i = 0 ; i < _path.size() ; i++)
+            printElTraj(i);
+    else
+        for(unsigned int i = 0 ; i < _path_orient.size() ; i++)
+            printElTrajOrient(i);
+
+}
 
 
 sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t ori, sPt_t *p2_3) {

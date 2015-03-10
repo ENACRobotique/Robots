@@ -68,14 +68,18 @@ class Obj {
         float getDist() const;
         sPath_t getPath() const;
         sPt_t getDestPoint() const;
+        float getDestPointOrient() const;
         eStateObj_t getState() const;
         sNum_t getYield();
+
+        void print() const;
 
     protected:
         eObj_t _type;                       //objective type
         int _point;                         //point number of the objective
         eStateObj_t _state;                 //if the objective is used or not
         sPt_t _access_select;               //the closest access select
+        float _access_select_angle;         //angle of the access select
         sNum_t _dist;                       //distance robot-objective (the closest access)
         sNum_t _time;                       //time robot-objective (the closest access) TODO no compute for the moment
         sPath_t _path;                      //path robot-objective (the closest access)

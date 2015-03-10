@@ -74,8 +74,10 @@ class Path {
         void computeTimePathForHolonomic();
 
         //Get methods
-        void const print(); //TODO Idee : reutiliser le parseur yaml
-        void const printElTraj(const unsigned int num);
+        void print() const; //TODO Idee : reutiliser le parseur yaml
+        void printElTraj(const unsigned int num) const;
+        void printElTrajOrient(const unsigned int num) const;
+        void printPath() const;
 
         //Set methods
         sNum_t length();

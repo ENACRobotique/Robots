@@ -8,8 +8,8 @@
 #ifndef MAIN_AI_TOOLS_TOOLS_H_
 #define MAIN_AI_TOOLS_TOOLS_H_
 
-#include <main_ai_tools/path.h>
-#include <main_ai_tools/statuses.h>
+#include "path.h"
+#include "statuses.h"
 #include "ihm.h"
 #include "net.h"
 #include "log.h"

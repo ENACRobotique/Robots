@@ -71,7 +71,9 @@ void loadingPath(sPath_t _path, int num) {
 #ifdef NON_HOLONOMIC
     if (num >= 0) {
         sPt_t _ep = listObj[num]->getDestPoint();
-        //updateEndTraj(_ep.angleEP, &_ep.c, _ep.radiusEP);
+        float  angle = listObj[num]->getDestPointOrient();
+
+        updateEndTraj(angle, &_ep, 5);
         printEndTraj();
     }
     else
