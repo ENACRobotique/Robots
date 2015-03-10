@@ -20,6 +20,9 @@ class Point {
 
         ERROR sqdistPt2Pt(const Point& p, float& d) const;
         ERROR distPt2Pt(const Point& p, float& d) const;
+        ERROR equal(const Point& p, const float& tolerance, bool ret) const;
+        ERROR translation(const float& _x, const float& _y);
+        ERROR rotation(const float& a);
 
         float x;
         float y;
