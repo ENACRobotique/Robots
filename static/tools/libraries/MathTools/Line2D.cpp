@@ -1,22 +1,22 @@
 /*
- * line.cpp
+ * Line2D.cpp
  *
  *  Created on: 8 mars 2015
  *      Author: Sébastien Malissard
  */
 
-#include "line.h"
+#include "Line2D.h"
 
-Line::Line(float _a, float _b, float _c) : a(_a), b(_b), c(_c), norm(false) {
+Line2D::Line2D(float _a, float _b, float _c) : a(_a), b(_b), c(_c), norm(false) {
 }
 
-Line::~Line() {
+Line2D::~Line2D() {
 }
 
-ERROR Line::normLine() {
+ERROR Line2D::normLine() {
 
     if (!norm) {
-        Vector nv(-b, a);
+        Vector2D nv(-b, a);
         float n;
 
         nv.normVec(n);
@@ -33,7 +33,7 @@ ERROR Line::normLine() {
     return 0;
 }
 
-ERROR Line::interLine2Line(const Line& l, int& nb, Point& pt) const{
+ERROR Line2D::interLine2Line(const Line2D& l, int& nb, Point2D& pt) const{
     float det;
 
     if (!(det = a * l.b - b * l.a)) { //parallel
@@ -48,7 +48,7 @@ ERROR Line::interLine2Line(const Line& l, int& nb, Point& pt) const{
     return 0;
 }
 
-ERROR Line::convPts2Line(const Point& p1, const Point& p2, bool& _norm){
+ERROR Line2D::convPts2Line(const Point2D& p1, const Point2D& p2, bool& _norm){
 
     norm = _norm;
 
@@ -69,7 +69,7 @@ ERROR Line::convPts2Line(const Point& p1, const Point& p2, bool& _norm){
     return 0;
 }
 
-ERROR Line::convVecPt2Line(const Vector& v, const Point& p, bool& _norm){
+ERROR Line2D::convVecPt2Line(const Vector2D& v, const Point2D& p, bool& _norm){
 
     norm = _norm;
 
@@ -91,7 +91,7 @@ ERROR Line::convVecPt2Line(const Vector& v, const Point& p, bool& _norm){
 }
 
 
-ERROR Line::distPt2Line(const Point& p, float& d, Point& h){
+ERROR Line2D::distPt2Line(const Point2D& p, float& d, Point2D& h){
 
     this->normLine();
 
@@ -104,8 +104,8 @@ ERROR Line::distPt2Line(const Point& p, float& d, Point& h){
     return 0;
 }
 
-ERROR Line::symPtprLine(Point& p){
-    Point pp(0,0), pc(p);
+ERROR Line2D::symPtprLine(Point2D& p){
+    Point2D pp(0,0), pc(p);
     float d;
 
     this->distPt2Line(p, d, pp);

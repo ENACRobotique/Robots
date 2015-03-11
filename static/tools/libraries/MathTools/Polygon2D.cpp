@@ -5,17 +5,16 @@
  *      Author: Sebastien Malissard
  */
 
-#include "polygon.h"
-
+#include "Polygon2D.h"
 #include <array>
 
-Polygon::Polygon() {
+Polygon2D::Polygon2D() {
 }
 
-Polygon::~Polygon() {
+Polygon2D::~Polygon2D() {
 }
 
-ERROR Polygon::checkPtInPoligon(const Point pt, bool& ret) const{
+ERROR Polygon2D::checkPtInPolygon(const Point2D pt, bool& ret) const{
   /*  std::array <Line, this->p.size()> l; //FIXME
 
     for (unsigned int i = 0; i < this->p.size(); i++) {

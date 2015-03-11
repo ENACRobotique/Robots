@@ -1,26 +1,26 @@
 /*
- * circle.cpp
+ * Circle2D.cpp
  *
  *  Created on: 8 mars 2015
  *      Author: Sébastien Malissard
  */
 
-#include <circle.h>
+#include "Circle2D.h"
 
 #include <cmath>
 
-Circle::Circle(Point _c, float _r) : c(_c), r(_r){
+Circle2D::Circle2D(Point2D _c, float _r) : c(_c), r(_r){
 }
 
-Circle::Circle(float _x, float _y, float _r) : c(_x,_y), r(_r){
+Circle2D::Circle2D(float _x, float _y, float _r) : c(_x,_y), r(_r){
 }
 
-Circle::~Circle(){
+Circle2D::~Circle2D(){
 }
 
-ERROR Circle::interCircle2Line(const Line& l, int& nb, Point& pt1, Point& pt2) const{
+ERROR Circle2D::interCircle2Line(const Line2D& l, int& nb, Point2D& pt1, Point2D& pt2) const{
     float a, b, d, det;
-    Point p1, p2;
+    Point2D p1, p2;
 
     RET_IF_((l.a == 0) , ERR_BADPAR);
     RET_IF_((l.b == 0) , ERR_BADPAR);
@@ -65,8 +65,8 @@ ERROR Circle::interCircle2Line(const Line& l, int& nb, Point& pt1, Point& pt2) c
     return 0;
 }
 
-ERROR Circle::projPtOnCircle(Point& p) const{
-    Vector v;
+ERROR Circle2D::projPtOnCircle(Point2D& p) const{
+    Vector2D v;
     float n;
 
     p.distPt2Pt(c, n);
@@ -82,7 +82,7 @@ ERROR Circle::projPtOnCircle(Point& p) const{
     return 0;
 }
 
-ERROR Circle::checkPtOnArc(const Point& p1, const Point& p2, Point& p, bool& ret) const{
+ERROR Circle2D::checkPtOnArc(const Point2D& p1, const Point2D& p2, Point2D& p, bool& ret) const{
     float theta1, theta2, theta;
 
     if ((theta1 = atan2(p1.y - c.y, p1.x - c.x)) < 0) {

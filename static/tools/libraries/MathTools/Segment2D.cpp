@@ -1,22 +1,22 @@
 /*
- * segment.cpp
+ * Segment2D.cpp
  *
  *  Created on: 8 mars 2015
  *      Author: Sébastien Malissard
  */
 
-#include "segment.h"
+#include "Segment2D.h"
 
-Segment::Segment() : p1(0,0), p2(0,0){
+Segment2D::Segment2D() : p1(0,0), p2(0,0){
 }
 
-Segment::Segment(Point _p1, Point _p2) : p1(_p1), p2(_p2){
+Segment2D::Segment2D(Point2D _p1, Point2D _p2) : p1(_p1), p2(_p2){
 }
 
-Segment::~Segment() {
+Segment2D::~Segment2D() {
 }
 
-ERROR Segment::convPts2Seg(const Point& a, const Point& b) {
+ERROR Segment2D::convPts2Seg(const Point2D& a, const Point2D& b) {
 
     p1 = a;
     p2 = b;
@@ -24,9 +24,9 @@ ERROR Segment::convPts2Seg(const Point& a, const Point& b) {
     return 0;
 }
 
-ERROR Segment::sqdistPt2Seg(const Point& p, float& d, Point& h) const{
+ERROR Segment2D::sqdistPt2Seg(const Point2D& p, float& d, Point2D& h) const{
     float l2, t;
-    Vector p1p(p1, p), p1p2(p1, p2);
+    Vector2D p1p(p1, p), p1p2(p1, p2);
 
     p1.sqdistPt2Pt(p2, l2);
     if (l2 == 0.){
