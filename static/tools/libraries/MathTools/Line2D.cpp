@@ -7,17 +7,20 @@
 
 #include "Line2D.h"
 
-Line2D::Line2D(float _a, float _b, float _c) : a(_a), b(_b), c(_c), norm(false) {
+template<typename T>
+Line2D<T>::Line2D(T _a, T _b, T _c) : a(_a), b(_b), c(_c), norm(false) {
 }
 
-Line2D::~Line2D() {
+template<typename T>
+Line2D<T>::~Line2D() {
 }
 
-ERROR Line2D::normLine() {
+template<typename T>
+ERROR Line2D<T>::normLine() {
 
     if (!norm) {
-        Vector2D nv(-b, a);
-        float n;
+        Vector2D<T> nv(-b, a);
+        T n;
 
         nv.normVec(n);
 
@@ -33,8 +36,9 @@ ERROR Line2D::normLine() {
     return 0;
 }
 
-ERROR Line2D::interLine2Line(const Line2D& l, int& nb, Point2D& pt) const{
-    float det;
+template<typename T>
+ERROR Line2D<T>::interLine2Line(const Line2D& l, int& nb, Point2D<T>& pt) const{
+    T det;
 
     if (!(det = a * l.b - b * l.a)) { //parallel
         nb = 0;
@@ -48,7 +52,8 @@ ERROR Line2D::interLine2Line(const Line2D& l, int& nb, Point2D& pt) const{
     return 0;
 }
 
-ERROR Line2D::convPts2Line(const Point2D& p1, const Point2D& p2, bool& _norm){
+template<typename T>
+ERROR Line2D<T>::convPts2Line(const Point2D<T>& p1, const Point2D<T>& p2, bool& _norm){
 
     norm = _norm;
 
@@ -57,7 +62,7 @@ ERROR Line2D::convPts2Line(const Point2D& p1, const Point2D& p2, bool& _norm){
         b = p1.x - p2.x;
     }
     else {
-        float n;
+        T n;
         p1.distPt2Pt(p2, n);
 
         a = (p2.y - p1.y) / n;
@@ -69,7 +74,8 @@ ERROR Line2D::convPts2Line(const Point2D& p1, const Point2D& p2, bool& _norm){
     return 0;
 }
 
-ERROR Line2D::convVecPt2Line(const Vector2D& v, const Point2D& p, bool& _norm){
+template<typename T>
+ERROR Line2D<T>::convVecPt2Line(const Vector2D<T>& v, const Point2D<T>& p, bool& _norm){
 
     norm = _norm;
 
@@ -78,7 +84,7 @@ ERROR Line2D::convVecPt2Line(const Vector2D& v, const Point2D& p, bool& _norm){
         b = -v.x;
     }
     else {
-        float n;
+        T n;
         v.normVec(n);
 
         a = v.y / n;
@@ -90,8 +96,8 @@ ERROR Line2D::convVecPt2Line(const Vector2D& v, const Point2D& p, bool& _norm){
     return 0;
 }
 
-
-ERROR Line2D::distPt2Line(const Point2D& p, float& d, Point2D& h){
+template<typename T>
+ERROR Line2D<T>::distPt2Line(const Point2D<T>& p, T& d, Point2D<T>& h){
 
     this->normLine();
 
@@ -104,9 +110,10 @@ ERROR Line2D::distPt2Line(const Point2D& p, float& d, Point2D& h){
     return 0;
 }
 
-ERROR Line2D::symPtprLine(Point2D& p){
-    Point2D pp(0,0), pc(p);
-    float d;
+template<typename T>
+ERROR Line2D<T>::symPtprLine(Point2D<T>& p){
+    Point2D<T> pp(0,0), pc(p);
+    T d;
 
     this->distPt2Line(p, d, pp);
 

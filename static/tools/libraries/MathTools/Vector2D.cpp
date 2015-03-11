@@ -8,25 +8,32 @@
 #include "Vector2D.h"
 #include <cmath>
 
-Vector2D::Vector2D() : x(0), y(0) {
+template<typename T>
+Vector2D<T>::Vector2D() : x(0), y(0) {
 }
 
-Vector2D::Vector2D(const Point2D& a, const Point2D& b) : x(b.x - a.x), y(b.y - a.y){
+template<typename T>
+Vector2D<T>::Vector2D(const Point2D<T>& a, const Point2D<T>& b) : x(b.x - a.x), y(b.y - a.y){
 }
 
-Vector2D::Vector2D(float _x, float _y) : x(_x), y(_y) {
+template<typename T>
+Vector2D<T>::Vector2D(T _x, T _y) : x(_x), y(_y) {
 }
 
-Vector2D::~Vector2D() {
+template<typename T>
+Vector2D<T>::~Vector2D() {
 }
-ERROR Vector2D::normVec(float& n)const{
+
+template<typename T>
+ERROR Vector2D<T>::normVec(T& n)const{
 
     n = sqrt(x * x + y * y);
 
     return 0;
 }
 
-ERROR Vector2D::convPts2Vec(const Point2D& a, const Point2D& b){
+template<typename T>
+ERROR Vector2D<T>::convPts2Vec(const Point2D<T>& a, const Point2D<T>& b){
 
     x = b.x - a.x;
     y = b.y - a.y;
@@ -34,21 +41,24 @@ ERROR Vector2D::convPts2Vec(const Point2D& a, const Point2D& b){
     return 0;
 }
 
-ERROR Vector2D::dotVecs(const Vector2D& v, float& d) const{
+template<typename T>
+ERROR Vector2D<T>::dotVecs(const Vector2D& v, T& d) const{
 
     d = x * v.x + y * v.y;
 
     return 0;
 }
 
-ERROR Vector2D::crossVecs(const Vector2D& v, float& c) const{
+template<typename T>
+ERROR Vector2D<T>::crossVecs(const Vector2D& v, T& c) const{
 
     c = x * v.y - y * v.x;
 
     return 0;
 }
 
-ERROR Vector2D::rotVec(const float& theta){
+template<typename T>
+ERROR Vector2D<T>::rotVec(const T& theta){
     Vector2D vc = *this;
 
     x = vc.x * cos(theta) - vc.y * sin(theta);

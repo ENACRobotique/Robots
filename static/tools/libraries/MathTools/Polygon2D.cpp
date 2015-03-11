@@ -8,13 +8,16 @@
 #include "Polygon2D.h"
 #include <array>
 
-Polygon2D::Polygon2D() {
+template<typename T>
+Polygon2D<T>::Polygon2D() {
 }
 
-Polygon2D::~Polygon2D() {
+template<typename T>
+Polygon2D<T>::~Polygon2D() {
 }
 
-ERROR Polygon2D::checkPtInPolygon(const Point2D pt, bool& ret) const{
+template<typename T>
+ERROR Polygon2D<T>::checkPtInPolygon(const Point2D<T> pt, bool& ret) const{
   /*  std::array <Line, this->p.size()> l; //FIXME
 
     for (unsigned int i = 0; i < this->p.size(); i++) {

@@ -12,20 +12,21 @@
 
 #include "error.h"
 
+template<typename T>
 class Point2D {
     public:
         Point2D();
-        Point2D(float _x, float _y);
+        Point2D(T _x, T _y);
         ~Point2D();
 
-        ERROR sqdistPt2Pt(const Point2D& p, float& d) const;
-        ERROR distPt2Pt(const Point2D& p, float& d) const;
-        ERROR equal(const Point2D& p, const float& tolerance, bool ret) const;
-        ERROR translation(const float& _x, const float& _y);
-        ERROR rotation(const float& a);
+        ERROR sqdistPt2Pt(const Point2D& p, T& d) const;
+        ERROR distPt2Pt(const Point2D& p, T& d) const;
+        ERROR equal(const Point2D& p, const T& tolerance, bool ret) const;
+        ERROR translation(const T& _x, const T& _y);
+        ERROR rotation(const T& a);
 
-        float x;
-        float y;
+        T x;
+        T y;
 };
 
 #endif /* LIB_GEOMETRYTOOLS_POIN2D_H_ */

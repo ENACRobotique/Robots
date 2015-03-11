@@ -7,16 +7,20 @@
 
 #include "Segment2D.h"
 
-Segment2D::Segment2D() : p1(0,0), p2(0,0){
+template<typename T>
+Segment2D<T>::Segment2D() : p1(0,0), p2(0,0){
 }
 
-Segment2D::Segment2D(Point2D _p1, Point2D _p2) : p1(_p1), p2(_p2){
+template<typename T>
+Segment2D<T>::Segment2D(Point2D<T> _p1, Point2D<T> _p2) : p1(_p1), p2(_p2){
 }
 
-Segment2D::~Segment2D() {
+template<typename T>
+Segment2D<T>::~Segment2D() {
 }
 
-ERROR Segment2D::convPts2Seg(const Point2D& a, const Point2D& b) {
+template<typename T>
+ERROR Segment2D<T>::convPts2Seg(const Point2D<T>& a, const Point2D<T>& b) {
 
     p1 = a;
     p2 = b;
@@ -24,9 +28,10 @@ ERROR Segment2D::convPts2Seg(const Point2D& a, const Point2D& b) {
     return 0;
 }
 
-ERROR Segment2D::sqdistPt2Seg(const Point2D& p, float& d, Point2D& h) const{
+template<typename T>
+ERROR Segment2D<T>::sqdistPt2Seg(const Point2D<T>& p, float& d, Point2D<T>& h) const{
     float l2, t;
-    Vector2D p1p(p1, p), p1p2(p1, p2);
+    Vector2D<T> p1p(p1, p), p1p2(p1, p2);
 
     p1.sqdistPt2Pt(p2, l2);
     if (l2 == 0.){

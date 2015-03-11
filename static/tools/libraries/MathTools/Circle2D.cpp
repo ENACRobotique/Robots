@@ -9,18 +9,22 @@
 
 #include <cmath>
 
-Circle2D::Circle2D(Point2D _c, float _r) : c(_c), r(_r){
+template<typename T>
+Circle2D<T>::Circle2D(Point2D<T> _c, T _r) : c(_c), r(_r){
 }
 
-Circle2D::Circle2D(float _x, float _y, float _r) : c(_x,_y), r(_r){
+template<typename T>
+Circle2D<T>::Circle2D(T _x, T _y, T _r) : c(_x,_y), r(_r){
 }
 
-Circle2D::~Circle2D(){
+template<typename T>
+Circle2D<T>::~Circle2D(){
 }
 
-ERROR Circle2D::interCircle2Line(const Line2D& l, int& nb, Point2D& pt1, Point2D& pt2) const{
-    float a, b, d, det;
-    Point2D p1, p2;
+template<typename T>
+ERROR Circle2D<T>::interCircle2Line(const Line2D<T>& l, int& nb, Point2D<T>& pt1, Point2D<T>& pt2) const{
+    T a, b, d, det;
+    Point2D<T> p1, p2;
 
     RET_IF_((l.a == 0) , ERR_BADPAR);
     RET_IF_((l.b == 0) , ERR_BADPAR);
@@ -65,9 +69,10 @@ ERROR Circle2D::interCircle2Line(const Line2D& l, int& nb, Point2D& pt1, Point2D
     return 0;
 }
 
-ERROR Circle2D::projPtOnCircle(Point2D& p) const{
-    Vector2D v;
-    float n;
+template<typename T>
+ERROR Circle2D<T>::projPtOnCircle(Point2D<T>& p) const{
+    Vector2D<T> v;
+    T n;
 
     p.distPt2Pt(c, n);
     if(n < 0.1)
@@ -82,8 +87,9 @@ ERROR Circle2D::projPtOnCircle(Point2D& p) const{
     return 0;
 }
 
-ERROR Circle2D::checkPtOnArc(const Point2D& p1, const Point2D& p2, Point2D& p, bool& ret) const{
-    float theta1, theta2, theta;
+template<typename T>
+ERROR Circle2D<T>::checkPtOnArc(const Point2D<T>& p1, const Point2D<T>& p2, Point2D<T>& p, bool& ret) const{
+    T theta1, theta2, theta;
 
     if ((theta1 = atan2(p1.y - c.y, p1.x - c.x)) < 0) {
         theta1 += 2 * M_PI;

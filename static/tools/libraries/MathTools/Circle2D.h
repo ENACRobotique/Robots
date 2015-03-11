@@ -12,18 +12,19 @@
 #include "Line2D.h"
 #include "Point2D.h"
 
+template<typename T>
 class Circle2D {
     public:
-        Circle2D(Point2D _c, float _r);
-        Circle2D(float _x, float _y, float _r);
+        Circle2D(Point2D<T> _c, T _r);
+        Circle2D(T _x, T _y, T _r);
         ~Circle2D();
 
-        ERROR interCircle2Line(const Line2D& l, int& nb, Point2D& pt1, Point2D& pt2) const;
-        ERROR projPtOnCircle(Point2D& p) const;
-        ERROR checkPtOnArc(const Point2D& p1, const Point2D& p2, Point2D& p, bool& ret) const;
+        ERROR interCircle2Line(const Line2D<T>& l, int& nb, Point2D<T>& pt1, Point2D<T>& pt2) const;
+        ERROR projPtOnCircle(Point2D<T>& p) const;
+        ERROR checkPtOnArc(const Point2D<T>& p1, const Point2D<T>& p2, Point2D<T>& p, bool& ret) const;
 
-        Point2D c;
-        float r;
+        Point2D<T> c;
+        T r;
 };
 
 #endif /* LIB_GEOMETRYTOOLS_CIRCLE2D_H_ */
