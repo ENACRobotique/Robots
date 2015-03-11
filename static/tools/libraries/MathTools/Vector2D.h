@@ -19,11 +19,11 @@ class Vector2D {
         Vector2D(const Point2D<T>& a, const Point2D<T>& b);
         ~Vector2D();
 
-        ERROR normVec(T& n)const;
-        ERROR convPts2Vec(const Point2D<T>& a, const Point2D<T>& b);
-        ERROR dotVecs(const Vector2D& v, T& d)const;
-        ERROR crossVecs(const Vector2D& v, T& c)const;
-        ERROR rotVec(const T& theta);
+        void normVec(T& n)const;
+        void convPts2Vec(const Point2D<T>& a, const Point2D<T>& b);
+        void dotVecs(const Vector2D& v, T& d)const;
+        void crossVecs(const Vector2D& v, T& c)const;
+        void rotVec(const T& theta);
 
         T x;
         T y;

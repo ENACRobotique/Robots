@@ -8,6 +8,8 @@
 #ifndef LIB_GEOMETRYTOOLS_CIRCLE2D_H_
 #define LIB_GEOMETRYTOOLS_CIRCLE2D_H_
 
+#include <utility>
+
 #include "error.h"
 #include "Line2D.h"
 #include "Point2D.h"
@@ -19,9 +21,9 @@ class Circle2D {
         Circle2D(T _x, T _y, T _r);
         ~Circle2D();
 
-        ERROR interCircle2Line(const Line2D<T>& l, int& nb, Point2D<T>& pt1, Point2D<T>& pt2) const;
-        ERROR projPtOnCircle(Point2D<T>& p) const;
-        ERROR checkPtOnArc(const Point2D<T>& p1, const Point2D<T>& p2, Point2D<T>& p, bool& ret) const;
+        std::pair<Point2D<T>, Point2D<T>> interCircle2Line(const Line2D<T>& l) const;
+        Point2D<T> projPtOnCircle(Point2D<T>& p) const;
+        bool checkPtOnArc(const Point2D<T>& p1, const Point2D<T>& p2, Point2D<T>& p) const;
 
         Point2D<T> c;
         T r;

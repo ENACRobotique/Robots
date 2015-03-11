@@ -16,7 +16,7 @@ Line2D<T>::~Line2D() {
 }
 
 template<typename T>
-ERROR Line2D<T>::normLine() {
+void Line2D<T>::normLine() {
 
     if (!norm) {
         Vector2D<T> nv(-b, a);
@@ -24,7 +24,7 @@ ERROR Line2D<T>::normLine() {
 
         nv.normVec(n);
 
-        RET_IF_(n == 0, ERR_DIV0);
+        //RET_IF_(n == 0, ERR_DIV0); FIXME
 
         a = a / n;
         b = b / n;
@@ -32,28 +32,27 @@ ERROR Line2D<T>::normLine() {
 
         norm = true;
     }
-
-    return 0;
 }
 
 template<typename T>
-ERROR Line2D<T>::interLine2Line(const Line2D& l, int& nb, Point2D<T>& pt) const{
+Point2D<T> Line2D<T>::interLine2Line(const Line2D& l) const{
     T det;
+    Point2D<T> p;
 
     if (!(det = a * l.b - b * l.a)) { //parallel
-        nb = 0;
+        //nb = 0; FIXME
     }
     else {
-        pt.x = (1 / det) * (b * l.c - c * l.b);
-        pt.y = (1 / det) * (c * l.a - a * l.c);
-        nb = 1;
+        p.x = (1 / det) * (b * l.c - c * l.b);
+        p.y = (1 / det) * (c * l.a - a * l.c);
+        //nb = 1; FIXME
     }
 
-    return 0;
+    return p;
 }
 
 template<typename T>
-ERROR Line2D<T>::convPts2Line(const Point2D<T>& p1, const Point2D<T>& p2, bool& _norm){
+void Line2D<T>::convPts2Line(const Point2D<T>& p1, const Point2D<T>& p2, bool& _norm){
 
     norm = _norm;
 
@@ -70,12 +69,10 @@ ERROR Line2D<T>::convPts2Line(const Point2D<T>& p1, const Point2D<T>& p2, bool& 
     }
 
     c = -a * p1.x - b * p1.y;
-
-    return 0;
 }
 
 template<typename T>
-ERROR Line2D<T>::convVecPt2Line(const Vector2D<T>& v, const Point2D<T>& p, bool& _norm){
+void Line2D<T>::convVecPt2Line(const Vector2D<T>& v, const Point2D<T>& p, bool& _norm){
 
     norm = _norm;
 
@@ -92,12 +89,11 @@ ERROR Line2D<T>::convVecPt2Line(const Vector2D<T>& v, const Point2D<T>& p, bool&
     }
 
     c = -a * p.x - b * p.y;
-
-    return 0;
 }
 
 template<typename T>
-ERROR Line2D<T>::distPt2Line(const Point2D<T>& p, T& d, Point2D<T>& h){
+T Line2D<T>::distPt2Line(const Point2D<T>& p, Point2D<T>& h){
+    T d;
 
     this->normLine();
 
@@ -107,18 +103,19 @@ ERROR Line2D<T>::distPt2Line(const Point2D<T>& p, T& d, Point2D<T>& h){
     h.y = -a * (b * p.x - a * p.y) - b * c;
 
 
-    return 0;
+    return d;
 }
 
 template<typename T>
-ERROR Line2D<T>::symPtprLine(Point2D<T>& p){
+Point2D<T> Line2D<T>::symPtprLine(Point2D<T>& p){
     Point2D<T> pp(0,0), pc(p);
+    Point2D<T> pt;
     T d;
 
-    this->distPt2Line(p, d, pp);
+    this->distPt2Line(p, pp);
 
-    p.x = pc.x - 2 * (pc.x - pp.x);
-    p.y = pc.y - 2 * (pc.y - pp.y);
+    pt.x = pc.x - 2 * (pc.x - pp.x);
+    pt.y = pc.y - 2 * (pc.y - pp.y);
 
-    return 0;
+    return pt;
 }

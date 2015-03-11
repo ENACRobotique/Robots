@@ -19,11 +19,10 @@ class Point2D {
         Point2D(T _x, T _y);
         ~Point2D();
 
-        ERROR sqdistPt2Pt(const Point2D& p, T& d) const;
-        ERROR distPt2Pt(const Point2D& p, T& d) const;
-        ERROR equal(const Point2D& p, const T& tolerance, bool ret) const;
-        ERROR translation(const T& _x, const T& _y);
-        ERROR rotation(const T& a);
+        T sqdistPt2Pt(const Point2D<T>& p) const;
+        T distPt2Pt(const Point2D<T>& p) const;
+        void translation(const T& _x, const T& _y);
+        void rotation(const T& a);
 
         T x;
         T y;

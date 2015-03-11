@@ -17,7 +17,7 @@ Polygon2D<T>::~Polygon2D() {
 }
 
 template<typename T>
-ERROR Polygon2D<T>::checkPtInPolygon(const Point2D<T> pt, bool& ret) const{
+void Polygon2D<T>::checkPtInPolygon(const Point2D<T> pt, bool& ret) const{
   /*  std::array <Line, this->p.size()> l; //FIXME
 
     for (unsigned int i = 0; i < this->p.size(); i++) {
@@ -37,5 +37,4 @@ ERROR Polygon2D<T>::checkPtInPolygon(const Point2D<T> pt, bool& ret) const{
 
     ret = true;
 */
-    return 0;
 }

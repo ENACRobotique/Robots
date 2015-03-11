@@ -20,7 +20,7 @@ Segment2D<T>::~Segment2D() {
 }
 
 template<typename T>
-ERROR Segment2D<T>::convPts2Seg(const Point2D<T>& a, const Point2D<T>& b) {
+void Segment2D<T>::convPts2Seg(const Point2D<T>& a, const Point2D<T>& b) {
 
     p1 = a;
     p2 = b;
@@ -29,7 +29,7 @@ ERROR Segment2D<T>::convPts2Seg(const Point2D<T>& a, const Point2D<T>& b) {
 }
 
 template<typename T>
-ERROR Segment2D<T>::sqdistPt2Seg(const Point2D<T>& p, float& d, Point2D<T>& h) const{
+void Segment2D<T>::sqdistPt2Seg(const Point2D<T>& p, float& d, Point2D<T>& h) const{
     float l2, t;
     Vector2D<T> p1p(p1, p), p1p2(p1, p2);
 
@@ -42,18 +42,18 @@ ERROR Segment2D<T>::sqdistPt2Seg(const Point2D<T>& p, float& d, Point2D<T>& h) c
 
     if (t < 0.){
         h = p1;
-        return p.sqdistPt2Pt(p1, d);
+        p.sqdistPt2Pt(p1, d);
+        return;
     }
 
     if (t > l2) {
         h = p2;
-        return p.sqdistPt2Pt(p2, d);
+        p.sqdistPt2Pt(p2, d);
+        return;
     }
 
     t = t / l2;
 
     h.x = p1.x + t * p1p2.x;
     h.y = p1.y + t * p1p2.y;
-
-    return p.sqdistPt2Pt(h, d);
 }

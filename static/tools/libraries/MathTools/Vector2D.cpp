@@ -25,44 +25,34 @@ Vector2D<T>::~Vector2D() {
 }
 
 template<typename T>
-ERROR Vector2D<T>::normVec(T& n)const{
+void Vector2D<T>::normVec(T& n)const{
 
     n = sqrt(x * x + y * y);
-
-    return 0;
 }
 
 template<typename T>
-ERROR Vector2D<T>::convPts2Vec(const Point2D<T>& a, const Point2D<T>& b){
+void Vector2D<T>::convPts2Vec(const Point2D<T>& a, const Point2D<T>& b){
 
     x = b.x - a.x;
     y = b.y - a.y;
-
-    return 0;
 }
 
 template<typename T>
-ERROR Vector2D<T>::dotVecs(const Vector2D& v, T& d) const{
+void Vector2D<T>::dotVecs(const Vector2D& v, T& d) const{
 
     d = x * v.x + y * v.y;
-
-    return 0;
 }
 
 template<typename T>
-ERROR Vector2D<T>::crossVecs(const Vector2D& v, T& c) const{
+void Vector2D<T>::crossVecs(const Vector2D& v, T& c) const{
 
     c = x * v.y - y * v.x;
-
-    return 0;
 }
 
 template<typename T>
-ERROR Vector2D<T>::rotVec(const T& theta){
+void Vector2D<T>::rotVec(const T& theta){
     Vector2D vc = *this;
 
     x = vc.x * cos(theta) - vc.y * sin(theta);
     y = vc.x * sin(theta) + vc.y * cos(theta);
-
-    return 0;
 }

@@ -19,7 +19,7 @@ class Polygon2D {
         Polygon2D();
         ~Polygon2D();
 
-        ERROR checkPtInPolygon(const Point2D<T> pt, bool& ret) const;
+        void checkPtInPolygon(const Point2D<T> pt, bool& ret) const;
 
         std::vector <Point2D<T>> p;
 };
