@@ -36,146 +36,128 @@ void trajmngr_reset(trajectory_manager_t* tm) {
     trajctlr_reset(&tm->ctlr);
 }
 
-int trajmngr_new_traj_slot(trajectory_manager_t* tm, const sTrajSlot_t* ts) {
+int _new_traj_slot(trajectory_manager_t* tm, uint16_t idx) {
     int error = 0;
+    sTrajSlot_t* ts = &tm->slots[idx];
 
     switch(tm->state) {
-    case TM_STATE_WAIT:
-        // TODO
-        error = -1;
+    case TM_STATE_WAIT_TRAJ:
+        if(ts->sid == 0) {
+            tm->curr_tid = ts->tid;
+            tm->next_sid = 1;
+            tm->curr_element = idx << 1;
+
+            tm->gx = ts->p1_x;
+            tm->gy = ts->p1_y;
+            tm->gtheta = ts->seg_start_theta;
+
+            tm->state = TM_STATE_WAIT_START;
+        }
         break;
 
+    case TM_STATE_WAIT_START:
     case TM_STATE_FOLLOWING:
         if(ts->tid == tm->curr_tid) {
             if(ts->sid == tm->next_sid) {
                 tm->next_sid = (tm->next_sid + 1)&31;
             }
-            else if(((ts->sid + 1)&31) == tm->next_sid) {
-                // received at least twice the same message, ignoring
-            }
-            else {
-                error = -1;
-            }
-        }
-        else if(ts->tid != tm->curr_tid) {
-            if(ts->sid == 0) {
-                error = -1;
-                // TODO
-            }
-            else {
-                // did not receive the first element of a new trajectory
-                error = -5;
-            }
         }
         else {
-            error = -1;
-            // TODO
+            if(ts->sid == 0) {
+                tm->curr_tid = ts->tid;
+                tm->next_sid = 1;
+                tm->curr_element = idx << 1;
+
+                tm->gx = ts->p1_x;
+                tm->gy = ts->p1_y;
+                tm->gtheta = ts->seg_start_theta;
+
+                tm->state = TM_STATE_WAIT_START;
+            }
         }
         break;
     }
 
-    //    // We received some step of the current trajectory that we are following
-    //    if (curr_traj_insert_sid > 0 && te->tid == curr_tid) {
-    //        // Enough size in the array to add more trajectory elements
-    //        if (curr_traj_insert_sid < TRAJ_MAX_SLOTS) {
-    //            // Expected follow up
-    //            if (te->sid == curr_traj_insert_sid) {
-    //                memcpy(&traj[curr_traj][curr_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
-    //                traj[curr_traj][curr_traj_insert_sid].is_ok = 0;
-    //                curr_traj_insert_sid++;
-    //                state = S_RUN_TRAJ; // Follow the trajectory
-    //            }
-    //            else if (te->sid < curr_traj_insert_sid) {
-    //                // Step already received (no error, could be caused by duplication in the network)
-    //            }
-    //            else {
-    //                error = -1; // TODO error: bad step => invalidate all trajectory and ask new one
-    //            }
-    //        }
-    //        // Too much trajectory steps received
-    //        else {
-    //            error = -2; // TODO
-    //        }
-    //    }
-    //    // We received some step of the next trajectory, but we didn't switch to those (next tid is valid)
-    //    else if (next_traj_insert_sid > 0 && te->tid == next_tid) {
-    //        // Enough size in the array to add more trajectory elements
-    //        if (next_traj_insert_sid < TRAJ_MAX_SLOTS) {
-    //            memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
-    //            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
-    //            next_traj_insert_sid++;
-    //
-    //            state = S_CHG_TRAJ; // New trajectory to follow
-    //        }
-    //        else if (te->sid < next_traj_insert_sid) {
-    //            // Step already received (no error, could be caused by duplication in the network)
-    //        }
-    //        else {
-    //            error = -3; // TODO error: bad step => invalidate all trajectory and ask new one
-    //        }
-    //    }
-    //    // We received the first step of a new trajectory
-    //    else {
-    //        if (te->sid == 0) {
-    //            next_traj_insert_sid = 0; // Reset the index for the next trajectory
-    //            next_tid = te->tid; // get the next tid
-    //            memcpy(&traj[!curr_traj][next_traj_insert_sid].raw, te, sizeof(sTrajElRaw_t));
-    //            traj[!curr_traj][next_traj_insert_sid].is_ok = 0;
-    //            next_traj_insert_sid++;
-    //
-    //            state = S_CHG_TRAJ;
-    //        }
-    //        else {
-    //            error = -5; // TODO
-    //        }
-    //    }
-    //
-    //    // Processing of the error
-    //    if (error) {
-    //        // TODO
-    //    }
+    return error;
+}
+
+int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te) {
+    /* Description:
+     * If a valid trajectory element is received thus the information within the message are
+     * stored in one of the two array following the current or the next trajectory
+     * Return a negative value if an error occurs and 0 if no error
+     */
+    int error = 0;
+
+    sTrajSlot_t* s1 = &tm->slots[tm->slots_insert_idx];
+    sTrajSlot_t* s2 = &tm->slots[(tm->slots_insert_idx + 1) % TRAJ_MAX_SLOTS];
+
+    if(s1->state != SLOT_EMPTY || s2->state != SLOT_EMPTY) {
+        return -1; // no more empty slots
+    }
+
+    int nb = trajslot_create_from_msg(te, s1, s2);
+
+    error = error?: _new_traj_slot(tm, tm->slots_insert_idx);
+    if(nb > 1) {
+        error = error?: _new_traj_slot(tm, (tm->slots_insert_idx + 1) % TRAJ_MAX_SLOTS);
+    }
+
+    tm->slots_insert_idx = (tm->slots_insert_idx + nb) % TRAJ_MAX_SLOTS;
 
     return error;
 }
 
 int trajmngr_update(trajectory_manager_t* tm) {
-    int x_sp, y_sp, theta_sp;
+    int x_sp = tm->gx;
+    int y_sp = tm->gy;
+    int theta_sp = tm->gtheta;
+    uint32_t t = bn_intp_micros2s(micros());
 
     trajctlr_begin_update(&tm->ctlr);
 
     switch(tm->state) {
     default:
-    case TM_STATE_WAIT:
+    case TM_STATE_WAIT_TRAJ:
         x_sp = tm->gx;
         y_sp = tm->gy;
         theta_sp = tm->gtheta;
-
-        // TODO do not forget to have a mean to go out of wait if message we are waiting for just arrived (in trajmngr_new_traj_el?)
         break;
 
+    case TM_STATE_WAIT_START:
+        {
+            sTrajSlot_t* s = &tm->slots[tm->curr_element >> 1];
+
+            if(t <= s->seg_start_date) {
+                x_sp = tm->gx;
+                y_sp = tm->gy;
+                theta_sp = tm->gtheta;
+                break;
+            }
+        }
+        /* no break */
     case TM_STATE_FOLLOWING:
         {
-            uint32_t t = bn_intp_micros2s(micros());
             typeof(tm->cache)* sc = &tm->cache;
             sTrajSlot_t* s;
             sTrajSlot_t* s_next;
 
             do {
                 // get current slot
-                s = &tm->slots[tm->curr_slot_idx >> 1];
+                s = &tm->slots[tm->curr_element >> 1];
 #ifdef ARCH_X86_LINUX
                 assert(s->state != SLOT_EMPTY && s->tid == tm->curr_tid);
 #endif
 
                 // get next slot and check its consistency
-                s_next = &tm->slots[((tm->curr_slot_idx >> 1) + 1)%TRAJ_MAX_SLOTS];
+                s_next = &tm->slots[((tm->curr_element >> 1) + 1)%TRAJ_MAX_SLOTS];
                 if(s_next->state == SLOT_EMPTY || s_next->tid != s->tid || s_next->sid != ((s->sid + 1)&31)) {
                     s_next = NULL;
                 }
 
-                if(tm->curr_slot_idx&1) { // following arc
-                    if(!s_next) {
-                        tm->state = TM_STATE_WAIT;
+                if(tm->curr_element&1) { // following arc
+                    if(!s_next || s->is_last_element) {
+                        tm->state = TM_STATE_WAIT_TRAJ;
 
                         x_sp = tm->gx = s->p2_x;
                         y_sp = tm->gy = s->p2_y;
@@ -189,7 +171,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                         // switch to next element's segment
                         if(t >= s_next->seg_start_date) {
-                            tm->curr_slot_idx++;
+                            tm->curr_element++;
                             continue;
                         }
                     }
@@ -201,13 +183,13 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                     // switch to arc
                     if(t >= s->arc_start_date) {
-                        tm->curr_slot_idx++;
+                        tm->curr_element++;
                         continue;
                     }
                 }
             } while(0);
 
-            if(tm->state == TM_STATE_WAIT) {
+            if(tm->state == TM_STATE_WAIT_TRAJ) {
                 break;
             }
 
@@ -226,9 +208,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
 #endif
 
             // check cache consistency
-            if(sc->id != s->id || ((tm->curr_slot_idx&1) && sc->state != TM_CACHE_STATE_ARC && s_next) || (!(tm->curr_slot_idx&1) && sc->state != TM_CACHE_STATE_LINE)) {
+            if(sc->id != s->id || ((tm->curr_element&1) && sc->state != TM_CACHE_STATE_ARC && s_next) || (!(tm->curr_element&1) && sc->state != TM_CACHE_STATE_LINE)) {
                 sc->id = s->id;
-                sc->state = (tm->curr_slot_idx&1) ? TM_CACHE_STATE_ARC : TM_CACHE_STATE_LINE;
+                sc->state = (tm->curr_element&1) ? TM_CACHE_STATE_ARC : TM_CACHE_STATE_LINE;
 
                 switch(sc->state){
                 case TM_CACHE_STATE_ARC:
@@ -263,8 +245,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
             int theta0; // initial orientation at start of element (in rad << (RAD_SHIFT + SHIFT))
 
             // TODO check if we are too far from the assumed current position
+            // TODO handle deceleration before segment or arc
 
-            if(tm->curr_slot_idx & 1) { // following the arc
+            if(tm->curr_element & 1) { // following the arc
 #ifdef ARCH_X86_LINUX
                 assert(s_next);
                 assert(sc->id == s->id && sc->state == TM_CACHE_STATE_ARC);
@@ -344,32 +327,6 @@ int trajmngr_update(trajectory_manager_t* tm) {
     return 0;
 }
 
-int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te) {
-    /* Description:
-     * If a valid trajectory element is received thus the information within the message are
-     * stored in one of the two array following the current or the next trajectory
-     * Return a negative value if an error occurs and 0 if no error
-     */
-    int error = 0;
-
-    sTrajSlot_t* s1 = &tm->slots[tm->slots_insert_idx];
-    sTrajSlot_t* s2 = &tm->slots[(tm->slots_insert_idx + 1) % TRAJ_MAX_SLOTS];
-
-    if(s1->state != SLOT_EMPTY || s2->state != SLOT_EMPTY) {
-        return -1; // no more empty slots
-    }
-
-    int nb = trajslot_create_from_msg(te, s1, s2);
-    tm->slots_insert_idx = (tm->slots_insert_idx + nb) % TRAJ_MAX_SLOTS;
-
-    error = error?: trajmngr_new_traj_slot(tm, s1);
-    if(nb > 1) {
-        error = error?: trajmngr_new_traj_slot(tm, s2);
-    }
-
-    return error;
-}
-
 /** Description:
  * Store and convert the position and heading in robot units received by "bn_received function"
  * If the robot is motionless, the goal of robot is actualized
@@ -384,7 +341,7 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sPosPayload *pos) {
 
         trajctlr_set_pos(&tm->ctlr, x, y, theta);
 
-        if(tm->state == TM_STATE_WAIT) {
+        if(tm->state == TM_STATE_WAIT_TRAJ) {
             tm->gx = x;
             tm->gy = y;
             tm->gtheta = theta;

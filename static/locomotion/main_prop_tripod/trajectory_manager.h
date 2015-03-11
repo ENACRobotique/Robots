@@ -22,13 +22,14 @@ typedef struct {
     trajectory_controller_t ctlr;
 
     enum {
-        TM_STATE_WAIT, // no action asked (we are stopped)
+        TM_STATE_WAIT_TRAJ, // no action asked (we are stopped)
+        TM_STATE_WAIT_START, // new trajectory received, waiting for the right time to start
         TM_STATE_FOLLOWING // we are following a trajectory
     } state; // state of the trajectory follow
 
     uint16_t curr_tid :12;
     uint8_t next_sid :4;
-    uint16_t curr_slot_idx; // slot index + sub sub step id
+    uint16_t curr_element; // slot index + sub step id
 
     uint16_t slots_insert_idx;
     uint16_t slots_used_number;
