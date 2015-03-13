@@ -33,7 +33,7 @@
 		<link>
 			<name>lib/GeometryTools</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/static/tools/libraries/MathTools</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/static/tools/libraries/GeometryTools</locationURI>
 		</link>
 		<link>
 			<name>lib/Millis</name>
