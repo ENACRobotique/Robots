@@ -9,16 +9,19 @@
 #define LIB_GEOMETRYTOOLS_VECTOR2D_H_
 
 #include <iostream>
+#include <cmath>
 
-#include "Point2D.h"
+template<typename T>
+class Point2D;
 
 template<typename T>
 class Vector2D {
     public:
-        Vector2D() : x(0), y(0){};
-        Vector2D(T _x, T _y) : x(_x), y(_y){};
-        Vector2D(const Point2D<T>& a, const Point2D<T>& b) : x(b.x - a.x), y(b.y - a.y){};
-        ~Vector2D(){};
+        Vector2D() : x(0), y(0){}
+        Vector2D(const Vector2D<T>& v) : x(v.x), y(v.y){}
+        Vector2D(const T _x, const T _y) : x(_x), y(_y){}
+        Vector2D(const Point2D<T>& a, const Point2D<T>& b) : x(b.x - a.x), y(b.y - a.y){}
+        ~Vector2D(){}
 
         T operator*(const Vector2D& v) const{ //dot product
             return x * v.x + y * v.y;
