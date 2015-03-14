@@ -20,19 +20,11 @@ class Vector2D {
         Vector2D(const Point2D<T>& a, const Point2D<T>& b) : x(b.x - a.x), y(b.y - a.y){};
         ~Vector2D(){};
 
-
         T operator*(const Vector2D& v) const{ //dot product
             return x * v.x + y * v.y;
         }
         T operator^(const Vector2D& v) const{ // cross product
             return x * v.y - y * v.x;
-        }
-
-        T& operator*=(const Vector2D& v){
-            return *this = *this * v;
-        }
-        T& operator^=(const Vector2D& v){
-            return *this = *this ^ v;
         }
 
         Vector2D operator+(const Vector2D& v) const{
@@ -79,24 +71,22 @@ class Vector2D {
         }
 
         bool operator==(const Vector2D& v) const{
-            if(v.x == x && v.y == y)
-                return true;
-            return false;
+            return v.x == x && v.y == y;
         }
         bool operator!=(const Vector2D& v) const{
             return !(*this == v);
         }
 
 
-        void normVec(T& n)const{
-            n = sqrt(x * x + y * y);
+        T norm()const{
+            return sqrt(x * x + y * y);
         }
         void rotate(const T& theta){
             Vector2D vc = *this;
-
             x = vc.x * cos(theta) - vc.y * sin(theta);
             y = vc.x * sin(theta) + vc.y * cos(theta);
         }
+
 
         T x;
         T y;
@@ -107,6 +97,5 @@ std::ostream& operator<<(std::ostream& out, Vector2D<T>& v){
     out << "(" << v.x << ";" << v.y << ")";
     return out;
 }
-
 
 #endif /* LIB_GEOMETRYTOOLS_VECTOR2D_H_ */
