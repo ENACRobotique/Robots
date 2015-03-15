@@ -46,7 +46,7 @@ void motAsser(){
 		int eps;
 		// asservissement vitesse
 		if((time-time_prev_asser[i])>=MOT_ASSER_PERIOD) {
-			if ( (time-time_prev_asser[i]) < MOT_ASSER_PERIOD+MOT_ASSER_PERIOD>>1 ){
+			if ( (time-time_prev_asser[i]) < MOT_ASSER_PERIOD+(MOT_ASSER_PERIOD>>1) ){
 				time_prev_asser[i] = time_prev_asser[i] + MOT_ASSER_PERIOD;
 				//compute error (epsilon)
 				int read=odoRead(i);
