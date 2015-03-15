@@ -10,7 +10,7 @@ this library contains the different functions useful for the motor and its contr
 #define ATTITUDE_ASSER_PERIOD 20 // milliseconds
 #define ANGLE_TO_ASSERV X_ANGLE
 #define MAX_ANGLE 15
-#define MIN_ANGLE 180
+#define MIN_ANGLE 176
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
@@ -45,7 +45,7 @@ void attitudeAsser(){
 		if ( (time-time_prev_asser) < ATTITUDE_ASSER_PERIOD+ATTITUDE_ASSER_PERIOD/2 ){
 			time_prev_asser = time_prev_asser + ATTITUDE_ASSER_PERIOD;
 			//compute error (epsilon)
-			int read=-readInertial(ANGLE_TO_ASSERV);
+			int read=readInertial(ANGLE_TO_ASSERV);
 			eps = _attitudeCon - read;
 
 			//compute error integral
