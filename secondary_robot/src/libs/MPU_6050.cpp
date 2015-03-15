@@ -63,7 +63,7 @@ int read_gyro_accel_vals(uint8_t* accel_t_gyro_ptr) {
 
 
 void calibrate_sensors() {
-  int num_readings = 1;
+  int num_readings = 10;
   float                 x_accel = 0;
   float                 y_accel = 0;
   float                 z_accel = 0;
@@ -87,7 +87,7 @@ void calibrate_sensors() {
     x_gyro += accel_t_gyro.value.x_gyro;
     y_gyro += accel_t_gyro.value.y_gyro;
     z_gyro += accel_t_gyro.value.z_gyro;
-//    delay(100);
+    delay(100);
   }
   x_accel /= num_readings;
   y_accel /= num_readings;
