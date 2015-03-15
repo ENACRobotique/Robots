@@ -113,6 +113,16 @@ class Circle2D {
         T perimeter() const{
             return 2 * M_PI * r;
         }
+        T arcLenght(const Point2D<T>& p1, const Point2D<T>& p2){ // p1 and p2 is an angle
+            if (p1 == c || p2 == c)
+                return 0;
+
+            Vector2D<T> v1(c, p1), v2(c, p2);
+            T d = v1.angle(v2) / (2 * M_PI);
+            d *= perimeter();
+
+            return d < 0 ? -d : d;
+        }
 
         Point2D<T> c;
         T r;

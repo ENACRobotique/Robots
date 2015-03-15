@@ -89,6 +89,9 @@ class Vector2D {
             x = vc.x * cos(theta) - vc.y * sin(theta);
             y = vc.x * sin(theta) + vc.y * cos(theta);
         }
+        T angle(const Vector2D& v){
+            return acos(*this * v /( norm() * v.norm()));
+        }
 
 
         T x;
