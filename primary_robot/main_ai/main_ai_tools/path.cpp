@@ -129,6 +129,7 @@ void Path::go2Point(const sPt_t &dest, const bool f){
     obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
     obs[N-1].c = dest;
 
+    logs << DEBUG << "position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
     sNum_t dist;
     distPt2Pt(&obs[0].c, &obs[N-1].c, &dist);
     if(dist < 2.){
@@ -143,12 +144,11 @@ void Path::go2Point(const sPt_t &dest, const bool f){
         printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N - 1, path.dist, path.path_len);
 
         addPath2(path);
+        sendRobot();
     }
     else {
-        printf("no path from 0a to %ua\n", N - 1);
+        logs << INFO << "No path from 0a to " << N - 1;
     }
-
-    sendRobot();
 }
 
 

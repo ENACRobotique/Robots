@@ -2,7 +2,7 @@
  * GeometryTools.h
  *
  *  Created on: 14 mars 2015
- *      Author: seb
+ *      Author: Sebastien Malissard
  */
 
 #ifndef GEOMETRYTOOLS_GEOMETRYTOOLS_H_

@@ -127,6 +127,8 @@ int main(int argc, char **argv) {
         if(obs[i].active)
             obs_updated[i] = 1;
 
+    ret = 1;
+
     logs << INFO << "Initialization is finished";
 
 #ifdef CTRLC_MENU

@@ -123,9 +123,9 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 // number of physical obstacles (16)
 
 #if NON_HOLONOMIC
-#define N (50)
+#define N (49)
 #else
-#define N (44)
+#define N (43)
 #endif
 
 
