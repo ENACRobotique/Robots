@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
                 sPt_t goal;
                 if (lastGoal(goal, true)) {
                     logs << INFO << "New goal available";
-                    path.go2Point(goal, true);
+                    path.go2Point(goal, false);
                 }
                 break;
             case E_AI_AUTO:

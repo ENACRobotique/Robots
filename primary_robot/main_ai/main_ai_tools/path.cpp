@@ -19,6 +19,7 @@
 #include "tools.h"
 #include "ai_types.h"
 #include "obj_tools.h"
+#include "GeometryTools.h"
 
 extern "C"{
 #include "roles.h"
@@ -31,36 +32,47 @@ Path::Path() : _dist(0), _path_len(0){
 }
 
 Path::Path(vector <sTrajEl_t*> list) : _dist(0), _path_len(list.size()){
-    //FIXME _path list
+    for(sTrajEl_t* i : list)
+        _path.push_back(*i);
+}
+
+Path::Path(vector <sTrajOrientEl_t*> list) : _dist(0), _path_len(list.size()){
+    for(sTrajOrientEl_t* i : list)
+        _path_orient.push_back(*i);
 }
 
 Path::~Path() {
-    // TODO Auto-generated destructor stub
 }
 
 void Path::clear(){
     _dist = 0;
     _path_len = 0 ;
-
     _path.clear();
+    _path_orient.clear();
 }
 
+/*
+ * Maintenance :
+ * - Check if the robot is block
+ * - Update circle no half return for non holonomic robot
+ */
 void Path::maintenace(){
-    static unsigned int prevTime = 0, prevTime2 = 0;
+    static unsigned int prevTime = 0;
 
     if(millis() - prevTime > 200){
-        checkRobotBlock();
+        if(checkRobotBlock())
+            //sendRobot(); FIXME depuis la position courante
         prevTime = millis();
     }
 
-#if 0
+#if NON_HOLONOMIC
+    static unsigned int prevTime2 = 0;
     if(millis() - prevTime2 > 100){
         updateNoHaftTurn();
         prevTime2 = millis();
     }
 #endif
 }
-
 
 /*
  * Send the path to the robot.
@@ -70,40 +82,57 @@ void Path::maintenace(){
 void Path::sendRobot() {
     static sPath_t path;
 
-    length(); //compute _dist, arc_len and seg_len //TODO check length between compute and save to the path.
-    _path_len = _path.size();
+    if(!_path.empty() && !_path_orient.empty()){
+        logs << ERR << "Try to send a path : _path and _path_orient not empty";
+        return;
+    }
+    if(_path.empty() && _path_orient.empty()){
+        logs << ERR << "Try to send a path : _path and _path_orient are empty ";
+        return;
+    }
 
-    cout << "[INFO] Try to send a path" << endl;
+    length();
 
     if (!checkSamePath(path) || checkRobotBlock()){
+        logs << INFO << "Preparation to send a path";
         if (!_path.empty()){
             //delete the previous path sent;
             delete path.path;
 
             //save the new path sent
             path.dist = _dist;
-            path.path_len = _path_len;
-            path.path = new sTrajEl_t[_path_len];
-            for(unsigned int i = 0 ; i < _path_len ; i++){
+            path.path_len = _path.size();
+            path.path = new sTrajEl_t[path.path_len];
+            for(unsigned int i = 0 ; i < path.path_len ; i++){
                 path.path[i] = _path[i];
             }
-
             //sends the path
             net.sendPath(_path);
 
-            //print the traj to the display
-            for(unsigned int i = 0 ; i < _path_len ; i++)
+            //print the path to the display
+            for(unsigned int i = 0 ; i < _path.size() ; i++)
                 printElTraj(i);
+        }
+        else{ //!_path_orient.empty()
+            //sends the path
+            net.sendPathOrient(_path_orient);
+
+            //print the path to the display
+            for(unsigned int i = 0 ; i < _path_orient.size() ; i++)
+                printElTrajOrient(i);
         }
     }
 }
 
+/*
+ * Stop the robot
+ */
 void Path::stopRobot() {
-    sTrajEl_t *traj = new sTrajEl_t{ { obs[0].c.x, obs[0].c.y }, { obs[0].c.x, obs[0].c.y }, { { obs[0].c.x, obs[0].c.y }, 0, 0, 1 }, 0, 0, 0 }; //TODO used get generic status
+    sTrajEl_t traj = sTrajEl_t{statuses.getLastPosXY(ELT_PRIMARY), statuses.getLastPosXY(ELT_PRIMARY), {statuses.getLastPosXY(ELT_PRIMARY), 0, 0, 1, 0}, 0, 0, 0 };
 
     clear();
 
-    _path.push_back(*traj);
+    _path.push_back(traj);
 
     sendRobot();
 }
@@ -111,52 +140,46 @@ void Path::stopRobot() {
 
 /*
  * The robot go to the destination point.
- * "f" to force the robot to go, even if the destination point is in obstacle.
+ * "f" to force the robot to go, even if the destination point is in obstacle or if there are obstacles in the trajectory.
  */
 void Path::go2Point(const sPt_t &dest, const bool f){
-#if 0
-    clear();
-
-    sTrajEl_t *traj = new sTrajEl_t;
-
-    traj->p1 = robot;
-    traj->p2 = dest;
-    traj->obs = {{0., 0.}, 0. ,0 ,0 ,0};
-
-    _path.push_back(traj);
-#endif
+    sPath_t path;
 
     obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
     obs[N-1].c = dest;
-
     logs << DEBUG << "position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
-    sNum_t dist;
-    distPt2Pt(&obs[0].c, &obs[N-1].c, &dist);
-    if(dist < 2.){
+
+    Point2D<float> p1(obs[0].c.x, obs[0].c.y),  p2(obs[N-1].c.x, obs[N-1].c.y);
+    if(p1.distance(p2) < 2.)
         return;
-    }
 
-    fill_tgts_lnk();
+    if(f){
+        clear();
+        sTrajEl_t traj = sTrajEl_t{statuses.getLastPosXY(ELT_PRIMARY), dest, {dest, 0., 0, 1, 0}, 0, 0, 0 };
 
-    sPath_t path;
-    a_star(A(0), A(N-1), &path);
-    if (path.path) {
-        printf("new path from 0a to %ua (%.2fcm, %u steps):\n", N - 1, path.dist, path.path_len);
-
-        addPath2(path);
+        _path.push_back(traj);
         sendRobot();
     }
     else {
-        logs << INFO << "No path from 0a to " << N - 1;
+        fill_tgts_lnk();
+        a_star(A(0), A(N-1), &path);
+        if (path.path) {
+            logs << INFO << "New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
+            addPath2(path);
+            sendRobot();
+        }
+        else {
+            logs << INFO << "No path from 0a to " << N - 1;
+        }
     }
 }
 
 
-void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tableau statique
+void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tableau statique //for traj prog
     clear();
 
-
    //copier _obs dans obs
+    //TODO if there are an adversaire
 
     for (unsigned int i = 0; i < l.size()-1; i++) {
         sTrajEl_t* el = new sTrajEl_t;
@@ -204,21 +227,27 @@ void Path::convPathToPathOrient(){
         _path.pop_front();
         _path_orient.push_back(trajOrient);
     }
+
+    computeTimePathForHolonomic();
+    computeOrientPathForHolonomic(0); //FIXME
 }
 
+/*
+ * Computes time path holonomic robot
+ */
 void Path::computeTimePathForHolonomic(){
     float dist = 0, time = bn_intp_millis2s(millis());
 
     for(sTrajOrientEl_t i : _path_orient){
-        i.t1 = dist*MAX_SPEED + time;
+        i.t1 = dist*MAX_SPEED + time + DELAY;
         dist += i.seg_len;
-        i.t2 = dist*MAX_SPEED + time;
+        i.t2 = dist*MAX_SPEED + time + DELAY;
         dist += i.arc_len;
     }
 }
 
 /*
- * Computes a orient path for holonomic robot from a path non orient
+ * Computes a orient path for holonomic robot
  */
 void Path::computeOrientPathForHolonomic(float theta_end_obj){
     //computes theta and rot_dir for all path
@@ -284,16 +313,24 @@ void Path::computeOrientPathForHolonomic(float theta_end_obj){
  * Print the trajectory element choose.
  */
 void Path::printElTraj(const unsigned int num) const{
-
     if(_path.size() > num)
-        logs << DEBUG << "El " << num << " : p1 x" << _path[num].p1.x << " p1 y" << _path[num].p1.y
+        logs << DEBUG << "El " << num
+                               << " : p1 x" << _path[num].p1.x << " p1 y" << _path[num].p1.y
                                << " ; p2 x" << _path[num].p2.x << " p2 y" << _path[num].p2.y
                                << " ; obs x" << _path[num].obs.c.x << " y" << _path[num].obs.c.y << " r" << _path[num].obs.r
                                << " ; a_l" << _path[num].arc_len << " s_l" << _path[num].seg_len;
 }
 
 void Path::printElTrajOrient(const unsigned int num) const{
-    //TODO
+    if(_path_orient.size() > num)
+        logs << DEBUG << "El " << num
+                               << " : t1" << _path_orient[num].t1 << " t2" << _path_orient[num].t2
+                               << " ; p1 x" << _path_orient[num].p1.x << " p1 y" << _path_orient[num].p1.y
+                               << " ; p2 x" << _path_orient[num].p2.x << " p2 y" << _path_orient[num].p2.y
+                               << " ; obs x" << _path_orient[num].obs.c.x << " y" << _path_orient[num].obs.c.y << " r" << _path_orient[num].obs.r
+                               << " ; theta1" << _path_orient[num].theta1 << " theta2" << _path_orient[num].theta2
+                               << " ; a_l" << _path_orient[num].arc_len << " s_l" << _path_orient[num].seg_len
+                               << " : rot1_dir " << _path_orient[num].rot1_dir << " rot1_dir " << _path_orient[num].rot2_dir;
 }
 
 void Path::printPath() const{
@@ -303,58 +340,14 @@ void Path::printPath() const{
     if(!_path.empty())
         for(unsigned int i = 0 ; i < _path.size() ; i++)
             printElTraj(i);
-    else
+    else if(!_path_orient.empty())
         for(unsigned int i = 0 ; i < _path_orient.size() ; i++)
             printElTrajOrient(i);
-
 }
-
-
-sNum_t arc_len2(sPt_t *p2_1, sPt_t *oc, sNum_t ori, sPt_t *p2_3) {
-    sVec_t v1, v3;
-    sNum_t d, c;
-
-    if (fabs(ori) < LOW_THR)
-        return 0.;
-
-    convPts2Vec(oc, p2_1, &v1);
-    convPts2Vec(oc, p2_3, &v3);
-
-    dotVecs(&v1, &v3, &d);
-    crossVecs(&v1, &v3, &c);
-
-    d = d / (ori * ori);
-    // d must be between -1 and 1 but because we do not use the true length of v1 and v3
-    // (we use r instead to avoid some heavy calculations) it may be a little outside of this interval
-    // so, let's just be sure we stay in this interval for acos to give a result
-    if (d > 1.) {
-        d = 1.;
-    }
-    else
-        if (d < -1.) {
-            d = -1.;
-        }
-
-    d = acos(d);
-
-    if (ori > 0.) {  // clock wise
-        if (c > 0) {
-            d = 2 * M_PI - d;
-        }
-    }
-    else {  // counter clock wise
-        if (c < 0) {
-            d = 2 * M_PI - d;
-        }
-    }
-
-    return fabs(d * ori);
-}
-
-
 
 /*
  * Return the total length path
+ * compute _dist, arc_len and seg_len
  */
 sNum_t Path::length(){
 
@@ -394,40 +387,53 @@ void Path::setPathLength() {
 
     if(!_path.empty()){
         for (unsigned int i = 0; i < _path.size() - 1; i++) {
-            _path[i].arc_len = arc_len2(&(_path[i].p2), &(_path[i].obs.c), _path[i].obs.r, &(_path[i+1].p1));
+            Circle2D<float> c(_path[i].obs.c.x, _path[i].obs.c.y, _path[i].obs.r);
+            Point2D<float> p1(_path[i].p2.x, _path[i].p2.y), p2(_path[i+1].p1.x, _path[i+1].p1.y);
+            _path[i].arc_len = c.arcLenght(p1, p2);
             distPt2Pt(&_path[i].p1, &_path[i].p2, &_path[i].seg_len );
         }
 
         _path[_path.size() - 1].arc_len = 0;
         distPt2Pt(&_path[_path.size() - 1].p1, &_path[_path.size() - 1].p2, &_path[_path.size() - 1].seg_len);
     }
+    else if(!_path_orient.empty()){
+        for (unsigned int i = 0; i < _path_orient.size() - 1; i++) {
+            Circle2D<float> c(_path_orient[i].obs.c.x, _path_orient[i].obs.c.y, _path_orient[i].obs.r);
+            Point2D<float> p1(_path_orient[i].p2.x, _path_orient[i].p2.y), p2(_path_orient[i+1].p1.x, _path_orient[i+1].p1.y);
+            _path_orient[i].arc_len = c.arcLenght(p1, p2);
+            distPt2Pt(&_path_orient[i].p1, &_path_orient[i].p2, &_path_orient[i].seg_len );
+        }
+
+        _path_orient[_path_orient.size() - 1].arc_len = 0;
+        distPt2Pt(&_path_orient[_path_orient.size() - 1].p1, &_path_orient[_path_orient.size() - 1].p2, &_path_orient[_path_orient.size() - 1].seg_len);
+    }
 }
 
-
-int Path::same_obs (sObs_t *obs1, sObs_t *obs2){
-    if(verbose > 2)
-        printf("r1=%f r2=%f\n",obs1->r,obs2->r);
-    return ( obs1->r == obs2->r && obs1->c.x == obs2->c.x && obs1->c.y == obs2->c.y);
+/*
+ * Return true(1) if the 2 obs are identical else false(0)
+ */
+bool Path::checkSameObs(sObs_t& obs1, sObs_t& obs2){
+    return ( obs1.r == obs2.r && obs1.c.x == obs2.c.x && obs1.c.y == obs2.c.y);
     }
 
 /*
  * Return 1 if the same path else 0.
  */
-int Path::checkSamePath(sPath_t &path) {
+bool Path::checkSamePath(sPath_t &path){
     unsigned int t1_ind = path.path_len;
     unsigned int t2_ind = _path_len;
 
-    cout << "[INFO] Check if the same path" << endl;
+    logs << INFO << "Check if the same path";
 
-    if(path.path_len==0 || _path_len==0)
-        return 0;
+    if(path.path_len==0 || _path.size()==0)
+        return false;
     if(verbose > 2)
         cout << "same_t 1.0" << endl;
 
     while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminer
         if(verbose > 2)
             cout << "same_t 2.0" << endl;
-        if (same_obs(&(path.path[t1_ind-1].obs), &(_path[t2_ind-1].obs)) ){
+        if (checkSameObs((path.path[t1_ind-1].obs), (_path[t2_ind-1].obs)) ){
           t1_ind--;
            t2_ind--;
            }
@@ -435,7 +441,7 @@ int Path::checkSamePath(sPath_t &path) {
     }
     if(verbose > 2)
         cout << "same_t 3.0" << endl;
-    if (!(same_obs (&(path.path[t1_ind].obs), &(_path[t2_ind].obs))))
+    if (!(checkSameObs((path.path[t1_ind].obs), (_path[t2_ind].obs))))
         return 0;
 
     if ( (fabs(path.path[t1_ind].p2.x - _path[t2_ind].p2.x ) > 2.) && (fabs(path.path[t1_ind].p2.y - _path[t2_ind].p2.y) > 2.) )
@@ -444,8 +450,27 @@ int Path::checkSamePath(sPath_t &path) {
         if(verbose > 2)
             cout << "same_t 4.0" << endl;
 
-    cout << "[INFO] Same path" << endl;
+    logs << INFO << "Same path";
     return 1 ;
+}
+
+/*
+ * Return 1 if the same path else 0.
+ */
+bool Path::checkSamePath2(deque<sTrajEl_t>& path){
+    int i = path.size(), j = _path.size();
+
+    if(i != j)
+        return false;
+
+    while (i >= 0 && j >= 0) {
+        if(checkSameObs(path[i].obs, _path[j].obs)){
+            i--;
+            j--;
+        }else
+            return false;
+    }
+    return true;
 }
 
 /*
@@ -469,8 +494,7 @@ int Path::checkRobotBlock() {
                 cpt++;
         }
         if (cpt >= 10) {
-            if(verbose >= 2)
-                cout << "[INFO] Robot is blocked" << endl;
+            logs << DEBUG << "Robot is blocked";
             return 1;
         }
         lastTime = millis();
@@ -484,18 +508,22 @@ void Path::updateNoHaftTurn() {
     sNum_t r;
     sPt_t pt = statuses.getLastPosXY(ELT_PRIMARY);
     float theta = statuses.getLastOrient(ELT_PRIMARY);
+    static sObs_t _obs[3];
 
     r = statuses.getLastSpeed(ELT_PRIMARY); //15=speed
     r /= 3;
     if (r > 15)
         r = 15;
 
-    for (i = 1; i < 4; i++) {
-        obs[N - i - 4].c.x = pt.x + (r) * cos(theta + i * M_PI_2);
-        obs[N - i - 4].c.y = pt.y + (r) * sin(theta + i * M_PI_2);
-        obs[N - i - 4].active = 1;
-        obs[N - i - 4].r = r - 0.5;
-        obs_updated[N - i - 4]++;
+    for (i = 0; i < 3; i++) {
+        obs[N - i - 5].c.x = pt.x + (r) * cos(theta + i * M_PI_2);
+        obs[N - i - 5].c.y = pt.y + (r) * sin(theta + i * M_PI_2);
+        obs[N - i - 5].active = 1;
+        obs[N - i - 5].r = r - 0.5;
+        if(_obs[i].c.x != obs[N - i - 5].c.x && _obs[i].c.y != obs[N - i - 5].c.y){
+            obs_updated[N - i - 5]++;
+            _obs[i] = obs[N - i - 5];
+        }
     }
     if (r < 0.1) {
         for (i = 1; i < 4; i++)

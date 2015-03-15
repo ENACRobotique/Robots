@@ -59,7 +59,8 @@ typedef struct {
 class Path {
     public:
         Path();
-        Path(vector <sTrajEl_t*> list); //FIXME
+        Path(vector <sTrajEl_t*> list);
+        Path(vector <sTrajOrientEl_t*> list);
         ~Path();
         void clear();
         void maintenace();
@@ -87,8 +88,9 @@ class Path {
 
     private:
         void setPathLength();
-        int same_obs(sObs_t *obs1, sObs_t *obs2);
-        int checkSamePath(sPath_t &path);
+        bool checkSameObs(sObs_t& obs1, sObs_t& obs2);
+        bool checkSamePath(sPath_t& path);
+        bool checkSamePath2(deque<sTrajEl_t>& path);
         int checkRobotBlock();
         void updateNoHaftTurn() ;
 

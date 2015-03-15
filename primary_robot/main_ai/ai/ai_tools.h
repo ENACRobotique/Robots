@@ -21,7 +21,6 @@ void simuSecondary(void);
 void posPrimary(void);
 void checkRobot2Obj(void);
 int checkAdvOnRobot(void);
-int checkRobotBlock(void);
 void startColor(void);
 
 #endif /* OBJ_FCT_H_ */
