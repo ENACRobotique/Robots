@@ -13,7 +13,8 @@
 #include "lib_line.h"
 #include "../params.h"
 #include "../tools.h"
-
+#include "state_ALACON.h"
+#include "state_stairs.h"
 #include "lib_move.h"
 #include "sharp_2d120x.h"
 
@@ -30,7 +31,7 @@ sState* testTirette()
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
     	{
         if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenInit;
-        else return &sTrajYellowInit;
+        else /*return &sAlacon*/return &sTrajYellowInit;
     	}
     return 0;
 	}

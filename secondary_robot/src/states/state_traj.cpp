@@ -10,7 +10,7 @@
 #include "../params.h"
 #include "state_traj.h"
 #include "state_pause.h"
-#include "state_stairs.h"
+#include "state_Prestairs.h"
 #include "state_wait.h"
 #include "state_lineMonit.h"
 
@@ -66,7 +66,7 @@ sState *testTrajGreenInit()
 				Serial.println("\tTrajet 1 fini !");
 			#endif
 
-	    	 return &sStairs;
+	    	 return &sPrestairs;
 	    }
 
 	    if (radarIntrusion()) return &sPause;
@@ -125,7 +125,7 @@ sState *testTrajYellowInit()
 		    static unsigned long prev_millis=0;
 		    if(periodicProgTraj(start_yellow,&st_saveTime,&i,&prev_millis))
 		   	    {
-		    	return &sStairs;
+		    	return &sPrestairs;
 		   	    }
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
@@ -172,7 +172,6 @@ void deinitTrajEndStairsYellow(sState *next)
 }
 
 trajElem Final_yellow[]={
-				{0,-10,3000},
 		        {0,0,0},
 
 		};
@@ -240,7 +239,6 @@ void deinitTrajEndStairsGreen(sState *next)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 trajElem Final_green[]={
-		{0,10,3000},
         {0,0,0},
        };
 

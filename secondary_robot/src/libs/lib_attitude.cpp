@@ -16,7 +16,7 @@ this library contains the different functions useful for the motor and its contr
 #endif
 
 //globals
-int _attitudeCon = -8;
+int _attitudeCon = -12;
 int _attitudeCmd=0;
 int _pinServo;
 Servo servoAttitude;
@@ -29,7 +29,7 @@ void servoInitHard(int pinservo){
 	servoAttitude.write(MIN_ANGLE);
 }
 
-#define KP  4// >>2
+#define KP  2// >>2
 #define KI  2// >>8
 
 void attitudeAsser(){

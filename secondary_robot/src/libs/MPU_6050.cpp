@@ -110,7 +110,8 @@ void calibrate_sensors() {
 
 int MPU6050_read(int start, uint8_t *buffer, int size)
 {
-  int i, n, error;
+  int i, n;
+  //int error;
 
   Wire.beginTransmission(MPU6050_I2C_ADDRESS);
   n = Wire.write(start);
@@ -221,12 +222,12 @@ void initInertial()
 
 int readInertial(int value)
 {
-  int error;
-  double dT;
+  //int error;
+//  double dT;
   accel_t_gyro_union accel_t_gyro;
 
   // Read the raw values.
-  error = read_gyro_accel_vals((uint8_t*) &accel_t_gyro);
+  int error = read_gyro_accel_vals((uint8_t*) &accel_t_gyro);
 
   // Get the time of reading for rotation computations
   unsigned long t_now = millis();

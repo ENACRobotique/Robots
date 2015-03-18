@@ -17,7 +17,7 @@
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
 
-#define DERIVE 1
+#define DERIVE 0
 
 #ifdef TRIKE
 Servo _dirServo;
