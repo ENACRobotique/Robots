@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/time.h>
 
 #include "mt_io.h"
 #include "mt_mat.h"
@@ -103,14 +104,30 @@ void test_linearsolve(){
 }
 
 void test_invmatrix() {
-#define MAT_SHIFT (25)
+#define MAT_SHIFT (27)
+
+#define RAD_SHIFT (13)
+// MAT over RAD shift
+#if MAT_SHIFT > RAD_SHIFT
+#define dMoRSHIFT ((double)(1 << (MAT_SHIFT - RAD_SHIFT)))
+#else
+#define dMoRSHIFT ((double)(1 >> (RAD_SHIFT - MAT_SHIFT)))
+#endif
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+#define PI (M_PI)
+#define WDIAM (3.25*2.54)  // wheel diameter (cm)
+#define IpR (500.*676./49.) // increments per revolution (6897.959183673)
+#define DpR (PI*WDIAM) // distance per revolution (25.933847355 cm)
+#define D2I(d) ((d)*IpR/DpR) // (265.982871309 increments per centimeter)
 
     int ret;
 
     const int32_t mat_rob2pods[3][3] = {
-            {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-            {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-            { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
+    	    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    	    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    	    { 1.  * dMSHIFT,  0                 * dMSHIFT, D2I(15.5) * dMoRSHIFT}
     };
 
     // static allocation on stack matrices (no need to free those)
@@ -125,20 +142,40 @@ void test_invmatrix() {
         }
     }
 
-    ret = mt_m_inv(&M_rob2pods, &M_pods2rob);
-    assert(!ret);
+//#define TIME_PERFS
 
-    ret = mt_mm_mlt(&M_rob2pods, &M_pods2rob, &M_product);
-    assert(!ret);
+#ifdef TIME_PERFS
+    struct timeval time;
+    gettimeofday(&time, 0);
+    long start_time = 1000000 * time.tv_sec + time.tv_usec;
 
+    for(int i = 0; i < 1000000; i++){
+#endif
+        ret = mt_m_inv(&M_rob2pods, &M_pods2rob);
+        assert(!ret);
+
+        ret = mt_mm_mlt(&M_rob2pods, &M_pods2rob, &M_product);
+        assert(!ret);
+#ifdef TIME_PERFS
+    }
+
+    gettimeofday(&time, 0);
+    long cur_time = 1000000 * time.tv_sec + time.tv_usec;
+
+    printf("duration: %li\n", cur_time - start_time);
+#else
     printf("M_rob2pods, ");
     mt_m_output(&M_rob2pods);
     printf("M_pods2rob, ");
     mt_m_output(&M_pods2rob);
     printf("M_product, ");
     mt_m_output(&M_product);
+#endif
 
 #undef MAT_SHIFT
+#undef RAD_SHIFT
+#undef WDIAM
+#undef IpR
 }
 
 struct{

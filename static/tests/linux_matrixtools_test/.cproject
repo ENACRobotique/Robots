@@ -31,6 +31,9 @@
 								<option id="gnu.c.compiler.option.include.paths.1535880217" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/MatrixTools}&quot;"/>
 								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.198152248" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="ARCH_X86_LINUX"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.940540537" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.82072600" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">

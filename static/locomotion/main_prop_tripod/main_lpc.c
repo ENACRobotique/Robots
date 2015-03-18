@@ -66,29 +66,25 @@ M_rob2pods =
   -5.00000000000000e-01  -8.66025403784439e-01   1.55000000000000e+01
    1.00000000000000e+00  -1.83690953073357e-16   1.55000000000000e+01
 */
-const int32_t mat_rob2pods[3][3] = {
-    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, 15.5 * dMSHIFT},
-    { 1.  * dMSHIFT,  0                 * dMSHIFT, 15.5 * dMSHIFT}
+const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
+    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
+    { 1.  * dMSHIFT,  0                 * dMSHIFT, D2I(15.5) * dMoRSHIFT}
 };
 
 int main() {
     //// Initialization
     gpio_init_all();
-    // Debug and LEDs
+    // Debug
     debug_leds_init();
-    // Small switches
     debug_switches_init();
     // Time
     sys_time_init();
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Trajectory manager (trajectory steps management)
+    // Trajectory manager
     trajectory_manager_t traj_mngr;
-    trajmngr_init(&traj_mngr);
-    // Trajectory controller (trajectory control loop)
-    trajectory_controller_t traj_ctlr;
-    trajctlr_init(&traj_ctlr, mat_rob2pods);
+    trajmngr_init(&traj_mngr, mat_rob2pods);
     // BotNet initialization (i²c + uart)
     //TODO
 
@@ -98,6 +94,8 @@ int main() {
     unsigned int prevControl = millis();
     int ret;
     sMsg inMsg = {{0}};//, outMsg = {{0}};
+
+    // FIXME need to have a first loop here to wait for time synchronization
 
     while (1) { // ############## Loop ############################################
         sys_time_update();
@@ -110,7 +108,7 @@ int main() {
                 trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
             case E_POS:
-                trajmngr_new_pos(&traj_mngr, &inMsg.payload.pos);
+                trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
                 break;
             }
         } // End: if(ret > 0)
@@ -120,13 +118,13 @@ int main() {
             // If there is too much delay we skip to the next increment of the loop
             if(micros() - prevControl > PER_ASSER_CRITIC){
                 prevControl = micros();
-                trajctlr_reset(&traj_ctlr);
+                trajmngr_reset(&traj_mngr);
                 continue;
             }
             prevControl = micros();
 
             // Control trajectory
-            trajctlr_update(&traj_ctlr);
+            trajmngr_update(&traj_mngr);
         }
     } // ############## End loop ############################################
 }

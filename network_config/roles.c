@@ -32,14 +32,14 @@ bn_Address addr_role_dbg = ADDR_DEBUG_DFLT;
 
 sRoleActions role_actions[3] = {
 #if MYROLE == ROLE_AI
-        { // E_TRAJ messages
+        { // E_TRAJ && E_TRAJ_ORIENT_EL messages
                 .sendTo.first = ROLE_PROPULSION,
                 .sendTo.second = ROLE_MONITORING,
                 .relayTo.n1 = 0,
                 .relayTo.n2 = 0
         },
 #else
-        { // E_TRAJ messages
+        { // E_TRAJ && E_TRAJ_ORIENT_EL messages
                 .sendTo.first = 0,
                 .sendTo.second = 0,
                 .relayTo.n1 = 0,
@@ -93,6 +93,7 @@ void role_setup(sMsg *msg){
 //            printf("auto update actions %s (=%hhu)\n", eType2str(s->type), s->type);
             switch(s->type){
             case E_TRAJ:
+            case E_TRAJ_ORIENT_EL:
                 memcpy((void*)ACT_MSG_TRAJ, (void*)&s->actions, sizeof(*ACT_MSG_TRAJ));
                 break;
             case E_POS:
@@ -244,6 +245,7 @@ int role_send(sMsg *msg){
 
     switch(msg->header.type){
     case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
         SEND_BLOCK(ACT_MSG_TRAJ);
         break;
     case E_POS:
@@ -282,6 +284,7 @@ int role_sendAck(sMsg *msg){
 
     switch(msg->header.type){
     case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
         SEND_BLOCK(ACT_MSG_TRAJ);
         break;
     case E_POS:
@@ -320,8 +323,6 @@ int role_sendRetry(sMsg *msg, int retries){
 
     switch(msg->header.type){
     case E_TRAJ:
-        SEND_BLOCK(ACT_MSG_TRAJ);
-        break;
     case E_TRAJ_ORIENT_EL:
         SEND_BLOCK(ACT_MSG_TRAJ);
         break;
@@ -369,6 +370,7 @@ int role_relay(sMsg *msg){
 
     switch(msg->header.type){
     case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
         RELAY_BLOCK(ACT_MSG_TRAJ);
         break;
     case E_POS:

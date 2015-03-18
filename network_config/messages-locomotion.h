@@ -54,7 +54,9 @@ typedef struct {
 		// circle arc
 		int16_t c_x; // circle x coordinate in playground reference frame (cm<<6)
 		int16_t c_y; // circle y coordinate in playground reference frame (cm<<6)
-		int16_t c_r; // circle radius (cm<<6 ; >0 CW | <0 CCW)
+		int16_t c_r :15; // circle radius (cm<<5 ; >0 CW | <0 CCW)
+
+		int16_t is_last_element :1; // 1 if is last element
 
 	// orientation
 		int16_t theta1; // orientation at p1 (rad<<13)
