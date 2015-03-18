@@ -19,7 +19,7 @@ void mt_v_foutput(const MT_VEC* v, FILE* f) {
     }
 
     for (i = 0; i < v->elts; i++) {
-        fprintf(f, "  % 10.6f\n", (double) v->ve[i] / (double) (1 << v->shift));
+        fprintf(f, "  % 12.8f\n", (double) v->ve[i] / (double) (1 << v->shift));
     }
 }
 
@@ -33,9 +33,9 @@ void mt_m_foutput(const MT_MAT* M, FILE* f) {
     }
 
     for (i = 0; i < M->rows; i++) {
-        fprintf(f, "  % 10.6f", (double) MRC(M, i, 0) / (double) (1 << M->shift));
+        fprintf(f, "  % 12.8f", (double) MRC(M, i, 0) / (double) (1 << M->shift));
         for (j = 1; j < M->cols; j++) {
-            fprintf(f, ", % 10.6f", (double) MRC(M, i, j) / (double) (1 << M->shift));
+            fprintf(f, ", % 12.8f", (double) MRC(M, i, j) / (double) (1 << M->shift));
         }
         fprintf(f, "\n");
     }

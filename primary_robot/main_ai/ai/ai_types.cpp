@@ -8,13 +8,6 @@
 #include <ai_types.h>
 
 long _start_time;
-long last_time = 0;
-
-sPt_t pt_select;
-
-sNum_t speed = 0;
-sNum_t theta_robot = 0.;
-
 
 uint8_t obs_updated[N] ;
 

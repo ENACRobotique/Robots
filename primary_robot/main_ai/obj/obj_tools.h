@@ -8,12 +8,11 @@
 #ifndef OBJ_OBJ_TOOLS_H_
 #define OBJ_OBJ_TOOLS_H_
 
-#include <astar_tools.h>
-
-#define NON_HOLONOMIC //exist if the robot isn't an holonomic robot (for backward compatible)
+#include <a_star_tools.h>
 
 void loadingPath(sPath_t _path, int num = -1);
 int checkCurrentPathLenght(sPath_t &path);
+void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
 void updateNoHaftTurn(sNum_t theta, sPt_t *pt);
 void set_traj(sPath_t *p, iABObs_t l[], int nb);
 

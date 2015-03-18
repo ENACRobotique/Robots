@@ -10,8 +10,6 @@
  *      Author: Seb
  */
 
-#include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h> //already exist extern "C"
@@ -47,7 +45,6 @@ void usage(char *cl) {
 
 int main(int argc, char **argv) {
     int ret;
-    ofstream file("log.txt");
     eAIState_t eAIState = E_AI_SLAVE;
 
 #ifdef CTRLC_MENU
@@ -76,8 +73,7 @@ int main(int argc, char **argv) {
                 }
                 break;
             case 'f':
-                file.close();
-                file.open(optarg);
+                logs.changeFile(optarg);
                 break;
             case 'v':
                 verbose++;
@@ -114,7 +110,7 @@ int main(int argc, char **argv) {
     switch (eAIState) {
         case E_AI_AUTO:
         case E_AI_PROG:
-            ret = obj_init(eAIState);
+            ret = initAI();
             if (ret < 0) {
                 cerr << "[ERROR] [main.cpp] obj_init() error #" << -ret << endl;
             }
@@ -130,6 +126,8 @@ int main(int argc, char **argv) {
     for(int i = 0 ; i < N ; i++)
         if(obs[i].active)
             obs_updated[i] = 1;
+
+    ret = 1;
 
     logs << INFO << "Initialization is finished";
 
@@ -147,32 +145,36 @@ int main(int argc, char **argv) {
         usleep(500);
 
         // check if receiving new messages
-        checkInbox(verbose, file);
+        checkInbox(verbose);
 
         // calls loop functions
         switch (eAIState) {
             case E_AI_SLAVE:
                 sPt_t goal;
                 if (lastGoal(goal, true)) {
-                    cout << "[INFO] New goal available" << endl;
-                    path.go2Point(goal, true);
+                    logs << INFO << "New goal available";
+                    path.go2Point(goal, false);
                 }
                 break;
             case E_AI_AUTO:
             case E_AI_PROG:
-                obj_step(eAIState);
+                ret = stepAI();
                 break;
             default:
                 break;
         }
 
-        // sending obstacles to monitoring
-        sendObss();
-
         // calls maintenance function
         statuses.maintenace();
         path.maintenace();
         net.maintenace();
+
+        // sending obstacles to monitoring
+        sendObss();
+
+        // end
+        if(ret == 0)
+            break;
 
         // menu
 #ifdef CTRLC_MENU
@@ -315,8 +317,7 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    file.close();
-    cout << "bye bye ..." << endl;
+    logs << INFO << "bye bye ... \n";
 
     return EXIT_SUCCESS;
 }

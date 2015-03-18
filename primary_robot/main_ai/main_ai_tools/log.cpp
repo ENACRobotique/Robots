@@ -114,6 +114,21 @@ Log& operator<<(Log& log, const int num){
     return log;
 }
 
+Log& operator<<(Log& log, const float num){
+    log.putNum(num);
+    return log;
+}
+
+Log& operator<<(Log& log, const double num){
+    log.putNum((float) num);
+    return log;
+}
+
+Log& operator<<(Log& log, const uint32_t num){
+    log.putNum((float) num);
+    return log;
+}
+
 Log& operator<<(Log& log, eLog_t type){
     log.setType(type);
     return log;

@@ -364,6 +364,9 @@ ERROR projPtOnCircle(const sPt_t *c, const sNum_t r, sPt_t *p) {
     sNum_t n;
 
     RET_IF_NOT_(c && p, ERR_BADPAR);
+    distPt2Pt(c, p, &n);
+    if(n < 0.1)
+        return -1;
 
     convPts2Vec(c, p, &v);
     normVec(&v, &n);

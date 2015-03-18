@@ -73,6 +73,12 @@ int main(int argc, char *argv[]){
 
                 new_pos(&inMsg.payload.pos);
                 break;
+            case E_TRAJ_ORIENT_EL:
+                ret = new_traj_orient_el(&inMsg.payload.traj);
+                    if(ret < 0){
+                        printf("new_traj_el_orient() error #%i\n", -ret);
+                    }
+                break;
             case E_POS_QUERY:
                 if(inMsg.payload.posQuery.id == ELT_PRIMARY){
                     outMsg.header.destAddr = inMsg.header.srcAddr;
