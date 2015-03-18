@@ -87,14 +87,14 @@ sNum_t Obj::update(sPt_t posRobot) {
             case E_POINT :
                 logs << DEBUG << "Access type POINT";
                 obs[N - 1].c = i.pt.p;
-#ifdef NON_HOLONOMIC
+#if NON_HOLONOMIC
                 updateEndTraj(i.pt.angle, &i.pt.p, i.radius);
 #endif
             break;
             case E_CIRCLE:
                 logs << DEBUG << "Access type CIRCLE";
                 obs[N - 1].c = i.cir.c;
-#ifdef NON_HOLONOMIC
+#if NON_HOLONOMIC
                 obs[N - 2].active = 0;
                 obs[N - 3].active = 0;
                 obs[N - 4].active = 0;
@@ -110,7 +110,7 @@ sNum_t Obj::update(sPt_t posRobot) {
                 logs << ERR << "Unknown type of access to objective";
         }
 
-#ifdef NON_HOLONOMIC
+#if NON_HOLONOMIC
         if ((g = testInObs(&obs[0].c)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
             projectPoint(posRobot.x, posRobot.y, obs[g].r, obs[g].c.x, obs[g].c.y, &obs[0].c);
             if ((m = testInObs(&obs[0].c)) != 0) { //Cas la projection se retrouve dans un obstacle après la premier projection

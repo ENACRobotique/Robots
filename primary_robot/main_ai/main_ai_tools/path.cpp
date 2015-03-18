@@ -83,7 +83,7 @@ void Path::sendRobot() {
     static sPath_t path;
 
     if(!_path.empty() && !_path_orient.empty()){
-        logs << ERR << "Try to send a path : _path and _path_orient not empty";
+        logs << ERR << "Try to send a path : _path and _path_orient are not empty";
         return;
     }
     if(_path.empty() && _path_orient.empty()){
@@ -92,6 +92,10 @@ void Path::sendRobot() {
     }
 
     length();
+
+#if !NON_HOLONOMIC
+    convPathToPathOrient();
+#endif
 
     if (!checkSamePath(path) || checkRobotBlock()){
         logs << INFO << "Preparation to send a path";
@@ -114,7 +118,7 @@ void Path::sendRobot() {
                 printElTraj(i);
         }
         else{ //!_path_orient.empty()
-            //sends the path
+            //sends the path //TODO save path and compare if the same
             net.sendPathOrient(_path_orient);
 
             //print the path to the display
@@ -238,11 +242,11 @@ void Path::convPathToPathOrient(){
 void Path::computeTimePathForHolonomic(){
     float dist = 0, time = bn_intp_millis2s(millis());
 
-    for(sTrajOrientEl_t i : _path_orient){
-        i.t1 = dist*MAX_SPEED + time + DELAY;
-        dist += i.seg_len;
-        i.t2 = dist*MAX_SPEED + time + DELAY;
-        dist += i.arc_len;
+    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
+        _path_orient[i].t1 = dist/MAX_SPEED*1000000 + time; //in us
+        dist += _path_orient[i].seg_len;
+        _path_orient[i].t2 = dist/MAX_SPEED*1000000 + time; //in us
+        dist += _path_orient[i].arc_len;
     }
 }
 
@@ -251,22 +255,22 @@ void Path::computeTimePathForHolonomic(){
  */
 void Path::computeOrientPathForHolonomic(float theta_end_obj){
     //computes theta and rot_dir for all path
-    for(sTrajOrientEl_t i : _path_orient){
-        if((i.theta1 = atan2(i.p1.x - i.p2.x, i.p1.y - i.p2.y) - M_PI/6) > 0)
-            i.rot1_dir = true;
+    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
+        if((_path_orient[i].theta1 = atan2(_path_orient[i].p1.x - _path_orient[i].p2.x, _path_orient[i].p1.y - _path_orient[i].p2.y) - M_PI/6) > 0)
+            _path_orient[i].rot1_dir = true;
         else
-            i.rot1_dir = false;
+            _path_orient[i].rot1_dir = false;
 
-        i.theta2 = i.theta1;
+        _path_orient[i].theta2 = _path_orient[i].theta1;
         float sig;
         sVec_t v1, v2;
-        convPts2Vec(&i.p2, &i.p1, &v1);
-        convPts2Vec(&i.obs.c, &i.p1, &v2);
+        convPts2Vec(&_path_orient[i].p2, &_path_orient[i].p1, &v1);
+        convPts2Vec(&_path_orient[i].obs.c, &_path_orient[i].p1, &v2);
         crossVecs(&v1, &v2, &sig);
         if(sig >0)
-            i.rot2_dir = true;
+            _path_orient[i].rot2_dir = true;
         else
-            i.rot2_dir = false;
+            _path_orient[i].rot2_dir = false;
     }
 
     //adjusts for the first element
@@ -324,13 +328,13 @@ void Path::printElTraj(const unsigned int num) const{
 void Path::printElTrajOrient(const unsigned int num) const{
     if(_path_orient.size() > num)
         logs << DEBUG << "El " << num
-                               << " : t1" << _path_orient[num].t1 << " t2" << _path_orient[num].t2
+                               << " : t1=" << _path_orient[num].t1 << " t2=" << _path_orient[num].t2
                                << " ; p1 x" << _path_orient[num].p1.x << " p1 y" << _path_orient[num].p1.y
                                << " ; p2 x" << _path_orient[num].p2.x << " p2 y" << _path_orient[num].p2.y
                                << " ; obs x" << _path_orient[num].obs.c.x << " y" << _path_orient[num].obs.c.y << " r" << _path_orient[num].obs.r
-                               << " ; theta1" << _path_orient[num].theta1 << " theta2" << _path_orient[num].theta2
+                               << " ; theta1=" << _path_orient[num].theta1 << " theta2=" << _path_orient[num].theta2
                                << " ; a_l" << _path_orient[num].arc_len << " s_l" << _path_orient[num].seg_len
-                               << " : rot1_dir " << _path_orient[num].rot1_dir << " rot1_dir " << _path_orient[num].rot2_dir;
+                               << " : rot1_dir " << _path_orient[num].rot1_dir << " rot2_dir " << _path_orient[num].rot2_dir;
 }
 
 void Path::printPath() const{
@@ -479,6 +483,7 @@ bool Path::checkSamePath2(deque<sTrajEl_t>& path){
 int Path::checkRobotBlock() {
     static sPt_t pos[10] = { { 0., 0. } };
     static int pt = 0;
+    static int block = 0;
     static unsigned int lastTime = 0;
     int i, cpt = 0;
     sNum_t dist;
@@ -494,10 +499,14 @@ int Path::checkRobotBlock() {
                 cpt++;
         }
         if (cpt >= 10) {
-            logs << DEBUG << "Robot is blocked";
+            if(block == 0){
+                logs << DEBUG << "Robot is blocked";
+                block = 1;
+            }
             return 1;
         }
         lastTime = millis();
+        block = 0;
     }
 
     return 0;

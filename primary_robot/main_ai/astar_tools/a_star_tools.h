@@ -6,7 +6,7 @@
 #include "error.h"
 #include "math_types.h"
 
-#define NON_HOLONOMIC 1 //exist if the robot isn't an holonomic robot (for backward compatible)
+#define NON_HOLONOMIC 0 //exist if the robot isn't an holonomic robot (for backward compatible)
 
 //#define AS_DEBUG 1
 #define AS_STATS

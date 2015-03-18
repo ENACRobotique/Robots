@@ -16,6 +16,7 @@ extern "C"{
 #include "roles.h"
 }
 #include "messages.h"
+#include "tools.h"
 
 #define TRAJ_ORIENT 0 //1 active else 0
 
@@ -36,7 +37,7 @@ Net::~Net() {
 
 void Net::maintenace(){
 
-#if TRAJ_ORIENT
+#if TRAJ_ORIENT || !NON_HOLONOMIC
     convTrajToTrajOrient();
     sendPathOrientToNet();
 #else
@@ -142,9 +143,9 @@ void Net::sendPathToNet(){
             _trajEl.pop();
 
             if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                printf("[ERROR] [path.cpp] : role_sendRetry(E_TRAJ) failed #%i\n", -ret);
+                logs << ERR << "role_sendRetry(E_TRAJ) failed #" << -ret;
             }else
-                cout << "[INFO] A new path was send" << endl;
+                logs << INFO <<"A new path was send : tid=" << tid << " and sid=" << i;
 
             usleep(1000);
         }
@@ -186,6 +187,14 @@ void Net::sendPathOrientToNet(){
                 outMsg.payload.trajOrientEl.elts[j].arc_len = CONV2TRAJORIENT(_trajOrientEl.front().arc_len, 5);
                 outMsg.payload.trajOrientEl.elts[j].rot2_dir = _trajOrientEl.front().rot2_dir;
 
+                if(j == 0){
+                    outMsg.payload.trajOrientEl.t   =  _trajOrientEl.front().t1 + DELAY*1000;
+                    outMsg.payload.trajOrientEl.dt1 = (_trajOrientEl.front().t2 - outMsg.payload.trajOrientEl.t)/1000 + DELAY;
+                }else{
+                    outMsg.payload.trajOrientEl.dt2 = (_trajOrientEl.front().t1 - outMsg.payload.trajOrientEl.t)/1000 - outMsg.payload.trajOrientEl.dt1 + DELAY;
+                    outMsg.payload.trajOrientEl.dt3 = (_trajOrientEl.front().t2 - outMsg.payload.trajOrientEl.t)/1000 - outMsg.payload.trajOrientEl.dt1 - outMsg.payload.trajOrientEl.dt2 + DELAY;
+                }
+
                 _trajOrientEl.pop();
                 if(_trajOrientEl.empty()){
                     outMsg.payload.trajOrientEl.elts[j].is_last_element = 1;
@@ -193,18 +202,13 @@ void Net::sendPathOrientToNet(){
                 }
             }
 
-            outMsg.payload.trajOrientEl.t = 0; //TODO define reference time and add a delta (time to send the message)
-            outMsg.payload.trajOrientEl.dt1 = 0; //TODO
-            outMsg.payload.trajOrientEl.dt2 = 0; //TODO
-            outMsg.payload.trajOrientEl.dt3 = 0; //TODO
-
             outMsg.payload.trajOrientEl.tid = tid;
             outMsg.payload.trajOrientEl.sid = i;
 
             if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0) {
-                printf("[ERROR] [%s:%i] : role_sendRetry(E_TRAJ_ORIENT_EL) failed #%i\n", __FILE__, __LINE__, -ret);
+                logs << ERR << "role_sendRetry(E_TRAJ_ORIENT_EL) failed #" << -ret;
             }else
-                cout << "[INFO] A new path orient was send" << endl;
+                logs << INFO << "A new path orient was send : tid=" << tid << " and sid=" << i;
 
             i++;
 

@@ -24,7 +24,9 @@ Clap::Clap(unsigned int num) : Obj(E_CLAP), _num(num){
     sObjEntry_t objEP;
     objEP.type = E_POINT;
     objEP.pt.p = obsClap[num];
+#if NON_HOLONOMIC
     objEP.radius = 8.;
+#endif
     objEP.pt.angle = M_PI_2;
 
     _access.push_back(objEP);
