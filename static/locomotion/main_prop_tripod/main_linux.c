@@ -80,10 +80,15 @@ int main() {
 
             switch (inMsg.header.type) {
             case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
+                printf("got traj elt: tid%hu, sid%hhu\n", (uint16_t)inMsg.payload.trajOrientEl.tid, (uint8_t)inMsg.payload.trajOrientEl.sid);
                 trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
             case E_POS:
+                printf("got position: %.2fcm %.2fcm %.2f°\n", inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta * 180. / M_PI);
                 trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
+                break;
+            default:
+                printf("got unhandled message with type: %s (%i)\n", eType2str(inMsg.header.type), inMsg.header.type);
                 break;
             }
         }
@@ -105,11 +110,20 @@ int main() {
         if (millis() - prevPos_ms >= 100) {
             prevPos_ms = millis();
 
-            outMsg.header.type = E_GENERIC_STATUS;
-            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
-
             // FIXME todo
+//            outMsg.header.type = E_GENERIC_STATUS;
+//            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
 //            trajmngr_fill_pos(&traj_mngr, &outMsg.payload.genericStatus);
+
+            {
+                //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
+                outMsg.header.type = E_POS;
+                outMsg.header.size = sizeof(outMsg.payload.pos);
+                outMsg.payload.pos.id = ELT_PRIMARY; // main robot
+                outMsg.payload.pos.x = I2Ds(traj_mngr.ctlr.x);
+                outMsg.payload.pos.y = I2Ds(traj_mngr.ctlr.y);
+                outMsg.payload.pos.theta = (double)traj_mngr.ctlr.theta / dASHIFT;
+            }
 
             role_send(&outMsg);
         }
