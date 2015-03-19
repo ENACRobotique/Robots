@@ -15,6 +15,7 @@
 #include "state_lineMonit.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
+int _backFromPause = 0;
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 void initTrajGreenInit(sState *prev)
 	{
@@ -28,6 +29,7 @@ void initTrajGreenInit(sState *prev)
 				Serial.println("\tback from pause");
 			#endif
 	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+	        _backFromPause = 1;
 	    	}
 	    uint16_t limits[RAD_NB_PTS]={3,40};
 	   	    		radarSetLim(limits);
@@ -68,13 +70,12 @@ sState *testTrajGreenInit()
 
 	    	 return &sPrestairs;
 	    }
-
 	    if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
 
 sState sTrajGreenInit={
-        BIT(E_MOTOR)|BIT(E_RADAR),
+        BIT(E_MOTOR)|BIT(E_RADAR)|BIT(E_HEADING),
         &initTrajGreenInit,
         &deinitTrajGreenInit,
         &testTrajGreenInit
@@ -94,6 +95,7 @@ void initTrajYellowInit(sState *prev)
 					Serial.println("\tback from pause");
 				#endif
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		        _backFromPause = 1;
 		    	}
 		    uint16_t limits[RAD_NB_PTS]={40,3};
 		        radarSetLim(limits);
@@ -131,7 +133,7 @@ sState *testTrajYellowInit()
 	    return 0;
 	}
 sState sTrajYellowInit={
-		BIT(E_MOTOR) |BIT(E_RADAR),
+		BIT(E_MOTOR) |BIT(E_RADAR)|BIT(E_HEADING),
         &initTrajYellowInit,
         &deinitTrajYellowInit,
         &testTrajYellowInit
@@ -277,14 +279,22 @@ sState sTrajEndStairsGreen={
 //******************************************************************************************************************
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
 
-    if (!(*prev_millis)) *prev_millis=millis();
-    move(tab[*i].speed,tab[*i].omega);
+    if (!(*prev_millis)){
+    	*prev_millis=millis();
+        move(tab[*i].speed,tab[*i].omega);
+    }
 
+    if(_backFromPause){
+    	_backFromPause = 0;
+    	move(tab[*i].speed,tab[*i].omega);
+
+    }
 
     if ( (millis()-*prev_millis-*pausetime)>tab[*i].duration ) {
         (*i)++;
         *prev_millis=millis();
         *pausetime=0;
+        move(tab[*i].speed,tab[*i].omega);
     }
     if ( tab[*i].omega==0 && tab[*i].duration==0 && tab[*i].speed==0) {
         *i=0;

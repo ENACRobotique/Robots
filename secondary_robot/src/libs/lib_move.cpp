@@ -7,6 +7,7 @@
 #include "Arduino.h"
 #include "Servo.h"
 #include "lib_move.h"
+#include "lib_heading.h"
 
 #if defined(TANK) && defined(TRIKE)
 #error "TANK and TRIKE defined. Only one possible."
@@ -37,7 +38,8 @@ void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
 #endif
 
 //sets speed motors (omega=0 means straight line)
-void move(int speed,int omega){
+void move(int speed,int omega, int setCon){
+	if (!setCon) headingSetCon(speed, omega);
 #ifdef TANK
 	int derive = 0;
 	if (speed || omega)
