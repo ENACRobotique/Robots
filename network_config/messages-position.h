@@ -14,12 +14,19 @@
 typedef enum{FRAME_PLAYGROUND, FRAME_PRIMARY}frame_t;
 
 typedef struct __attribute__((packed)){
-// position in frame (specified in field "frame")
+// position in reference frame (specified in field "frame")
     float x;            // (cm)
     float y;            // (cm)
     float theta;        // (rad)
     frame_t frame:8;
 } s2DPosAtt; // 2D position & attitude
+
+typedef struct __attribute__((packed)){
+// speed in reference frame
+    float vx; // linear velocity along x axis of specified reference frame (cm/s)
+    float vy; // linear velocity along y axis of specified reference frame (cm/s)
+    float oz; // angular velocity along z axis of specified reference frame (cm/s)
+} s2DSpeed; // 2D linear and angular speeds
 
 typedef struct __attribute__((packed)){
 // uncertainty (oriented 2D ellipse)

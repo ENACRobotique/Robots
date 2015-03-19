@@ -19,7 +19,7 @@
 #include "roles.h"
 
 #include "params.h"
-#include "../../global_errors.h"
+#include "global_errors.h"
 #include "node_cfg.h"
 
 #include "pos_history.h"

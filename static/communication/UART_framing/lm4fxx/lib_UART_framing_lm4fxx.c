@@ -9,7 +9,7 @@
 
 #include "UART_bufferized.h"
 #include "time.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 
 /* initSerial : Initializes the UART serial interface

@@ -50,7 +50,9 @@ void testmain_pos_history(){
         s.prop_status.tid = 0;
         s.prop_status.sid = 0;
         s.prop_status.ssid = 0;
-        s.prop_status.speed = 45;
+        s.prop_status.spd.vx = 45;
+        s.prop_status.spd.vy = 45;
+        s.prop_status.spd.oz = 45;
 
         printf("\tx:%.2fcm, y:%.2fcm, theta:%.2f°\n", s.prop_status.pos.x, s.prop_status.pos.y, s.prop_status.pos.theta * 180. / M_PI);
 

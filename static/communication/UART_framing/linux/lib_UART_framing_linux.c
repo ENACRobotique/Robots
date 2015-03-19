@@ -9,7 +9,7 @@
 #ifdef ARCH_X86_LINUX
 
 #include "lib_UART_framing_linux.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 #include <stdio.h>
 #include <fcntl.h>

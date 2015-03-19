@@ -10,7 +10,7 @@ extern "C"{
 }
 #include "loc_tools_turret.h"
 #include "lib_domitille.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 #include "../../../communication/network_tools/bn_debug.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "math.h"
@@ -111,7 +111,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     msg.payload.genericStatus.adv_status.pos.x=(float)(pLoad->value)/10.*sin(angle);
     msg.payload.genericStatus.adv_status.pos.y=(float)(pLoad->value)/10.*cos(angle);
     msg.payload.genericStatus.adv_status.pos.theta=0;
-    msg.payload.genericStatus.adv_status.pos.frame=msg.payload.genericStatus.adv_status.pos.FRAME_PRIMARY;
+    msg.payload.genericStatus.adv_status.pos.frame=FRAME_PRIMARY;
 
     msg.payload.genericStatus.adv_status.pos_u.a_angle=-1;
     msg.payload.genericStatus.adv_status.pos_u.a_var=-1;

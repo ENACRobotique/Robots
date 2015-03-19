@@ -255,7 +255,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                 // Compute the delta of time on the arc
                 dur = t - s->arc_start_date;
-                dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                dur += PER_CTRL_LOOP; // to anticipate the position (might be updated later if doesn't anticipate enough)
                 dur /= USpP; // convert duration to periods (from microseconds)
 
                 int alpha = -dur * sc->arc.omega_z; // (in rad << (RAD_SHIFT + SHIFT))
@@ -287,7 +287,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                 // compute current duration from start of line
                 dur = t - s->seg_start_date;
-                dur += PER_ASSER; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                dur += PER_CTRL_LOOP; // to anticipate the position (might be updated later if doesn't anticipate enough)
                 dur /= USpP; // convert duration to periods (from microseconds)
 
                 // compute next position set point (get speed along x and y in cache to avoid storing it in tm and calculating it each loop)
