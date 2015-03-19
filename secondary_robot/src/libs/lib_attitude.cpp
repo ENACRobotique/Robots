@@ -31,13 +31,16 @@ void servoInitHard(int pinservo){
 
 #define KP  2// >>2
 #define KI  2// >>8
+#define KD  0
 
 void attitudeAsser(){
 
     unsigned long int time=millis();
     static int intEps=256;
+    static int prevEps = 0;
     static unsigned long time_prev_asser=millis();
 	int eps;
+	int derEps;
 
 
 	// asservissement attitude
@@ -48,6 +51,10 @@ void attitudeAsser(){
 			int read=readInertial(ANGLE_TO_ASSERV);
 			eps = _attitudeCon - read;
 
+			//compute error derivate
+			derEps = CLAMP( -(64<<2) ,eps - prevEps, (64<<2));
+			prevEps = eps;
+
 			//compute error integral
 			intEps= CLAMP( -(64<<2) ,intEps+eps, (64<<2));
 			//compute command
@@ -55,7 +62,7 @@ void attitudeAsser(){
 //				_attitudeCmd=0;
 //			}
 //			else{
-				_attitudeCmd = ((KP*eps)>>2) + ((KI*intEps)>>3);
+				_attitudeCmd = ((KP*eps)>>2) + ((KI*intEps)>>3) + ((KD*derEps)>>2);
 //			}
 
 #ifdef DEBUG_ATTITUDE
