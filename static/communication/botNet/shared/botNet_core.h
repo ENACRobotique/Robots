@@ -13,7 +13,6 @@
 #include "bn_inbuf.h"
 #include "bn_attach.h"
 #include "messages.h"
-#include "network_cfg.h"
 
 // other required libraries
 

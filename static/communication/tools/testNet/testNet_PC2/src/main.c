@@ -168,7 +168,7 @@ int main(){
     }
 
     printf("bye\n");
-    bn_deattach(E_DEBUG_SIGNALLING);
+    bn_detach(E_DEBUG_SIGNALLING);
 
     return 0;
 }
