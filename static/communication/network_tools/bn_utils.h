@@ -20,6 +20,7 @@ typedef struct{
 }sTraceInfo;
 
 int bn_ping(bn_Address dest);
+int bn_pingLink(bn_Address dest, uint32_t waitingDelay, sTraceInfo retArray[], int retSize);
 int bn_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout);
 
 #ifdef __cplusplus

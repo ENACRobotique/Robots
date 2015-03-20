@@ -7,7 +7,7 @@
 
 #include "bn_utils.h"
 #include "../../tools/libraries/Timeout/timeout.h"
-
+#include "../../global_errors.h"
 
 /* ping : what we can expect from anything called ping. Sends one message and returns the time required to receive the acknowledgement.
  * Argument :
@@ -26,6 +26,45 @@ int bn_ping(bn_Address dest){
     stopwatch(&sw);
     if ( (ret=bn_sendAck(&msg)) <0) return ret;
     else return (stopwatch(&sw)/1000);
+}
+
+
+/* pingLink : Sends one message in linkcast and returns the time required to receive the acknowledgement for each reply. Will wait for
+ * answers during waitingDelay.
+ * Argument :
+ *  dest : bn_address of the thing to ping (unless it's a teapot, is this case return value is undefined, but should be between 3 and 5 minutes depending on the variety of the tea).
+ *  waitingDelay : duration in ms during which we will wait for replies.
+ *  retArray : pointer to an array of sTraceIfo which will store the results of the ping.
+ *  sizeRet : size of retArray. Only the first retArray will be stored, the rest will be dropped.
+ * Return value :
+ *  >=0 number of answers received during waitingDelay. May exceed sizeRet, user should check this to detect dropped messages.
+ *  <0 on error (see error codes)
+ */
+int bn_pingLink(bn_Address dest, uint32_t waitingDelay, sTraceInfo retArray[], int retSize){
+    sMsg msg={{0}};
+    int ret;
+    uint32_t sw=0;
+    int index=0;
+    if (bn_isLinkcast(dest)){
+        msg.header.type=E_PING;
+        msg.header.size=0;
+        msg.header.destAddr=dest;
+        msg.header.ack=1;
+        stopwatch(&sw);
+        if ( (ret=bn_sendAck(&msg)) <0) return ret;
+        while (stopwatch(&sw)/1000 <= waitingDelay){
+            // read incoming
+
+            // if ack answer put it in return array if free space in array
+            if (index < retSize){
+                retArray[index].addr; //= todo XXX
+                retArray[index].ping = stopwatch(&sw);
+            }
+            index++;
+
+        }
+    }
+    return -ERR_BN_NO_LCAST_ADDR;
 }
 
 
