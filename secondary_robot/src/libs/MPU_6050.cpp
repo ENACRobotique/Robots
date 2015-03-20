@@ -207,6 +207,7 @@ void initInertial()
 
   // Clear the 'sleep' bit to start the sensor.
   MPU6050_write_reg (MPU6050_PWR_MGMT_1, 0);
+  delay(50);
 
   //Initialize the angles
   calibrate_sensors();
