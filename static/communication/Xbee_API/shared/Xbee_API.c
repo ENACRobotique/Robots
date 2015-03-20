@@ -36,7 +36,7 @@
 
 // other required libraries
 #include "../../UART_framing/shared/lib_UART_framing.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 #include "../../../tools/libraries/Timeout/timeout.h"
 
 // standard libraries

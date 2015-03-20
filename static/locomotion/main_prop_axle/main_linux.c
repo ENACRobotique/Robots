@@ -19,7 +19,7 @@
 #include "roles.h"
 
 #include "params.h"
-#include "../../global_errors.h"
+#include "global_errors.h"
 #include "node_cfg.h"
 
 #include "pos_history.h"
@@ -177,10 +177,10 @@ int main(int argc, char *argv[]){
                 }
                 break;
             case E_TRAJ_ORIENT_EL:
-                ret = new_traj_orient_el(&inMsg.payload.traj);
-                    if(ret < 0){
-                        printf("new_traj_el_orient() error #%i\n", -ret);
-                    }
+                ret = new_traj_orient_el(&inMsg.payload.trajOrientEl);
+                if(ret < 0){
+                    printf("new_traj_el_orient() error #%i\n", -ret);
+                }
                 break;
             case E_POS:
                 bn_printDbg("got pos");

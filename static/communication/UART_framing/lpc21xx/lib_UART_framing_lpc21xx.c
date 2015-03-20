@@ -9,7 +9,7 @@
 
 #include <uart0.h>
 #include <sys_time.h>
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 #include "lib_UART_framing_lpc21xx.h"
 

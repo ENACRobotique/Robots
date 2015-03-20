@@ -1,4 +1,6 @@
+#ifdef ARCH_LPC21XX
 #include <pins.h>
+#endif
 #include "debug.h"
 
 void debug_leds_init(void) {

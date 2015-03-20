@@ -26,7 +26,7 @@
 #include "node_cfg.h"
 
 // other required libraries
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 // UART_FRAMING specific libraries
 #include "lib_UART_framing.h"

@@ -15,7 +15,7 @@
 #include "../../../tools/libraries/Timeout/timeout.h"
 #include "../../Xbee_API/shared/Xbee_API.h"
 #include "../../UART_framing/shared/lib_UART_framing.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 // botNet specific libraries
 #include "Xbee4bn.h"

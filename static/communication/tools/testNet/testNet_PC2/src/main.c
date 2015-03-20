@@ -24,7 +24,7 @@
 #include "../../../../network_tools/bn_utils.h"
 #include "../../../../network_tools/bn_debug.h"
 #include "../testNet_functions/bn_testFunc.h"
-#include "../../../../global_errors.h"
+#include "global_errors.h"
 #include "node_cfg.h"
 
 

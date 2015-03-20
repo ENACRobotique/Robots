@@ -72,4 +72,6 @@ enum{
     ERR_NUMBERRCODES
 };
 
+const char* getErrorStr(int err);
+
 #endif /* GLOBAL_ERRORS_H_ */

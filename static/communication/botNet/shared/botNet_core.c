@@ -11,7 +11,7 @@
 
 // other required libraries
 #include "../../../tools/libraries/Timeout/timeout.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 // botNet specific libraries
 #include "botNet_core.h"

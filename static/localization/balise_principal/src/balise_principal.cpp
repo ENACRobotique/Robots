@@ -19,7 +19,7 @@
 #include "lib_sync_turret.h"
 #include "roles.h"
 #include "loc_tools_turret.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 mainState state=S_SYNC_ELECTION;
 

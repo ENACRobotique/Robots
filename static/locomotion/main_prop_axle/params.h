@@ -9,6 +9,10 @@
 #define lROUND(d) ((long long)( (d)+0.5 )) // the +0.5 is here to get a round instead of a floor when casting to int
 #define lsROUND(d) lROUND((d)*dSHIFT)
 
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+
 #define PI (M_PI)
 #define sPI (PI*dSHIFT)
 #define isPI (iROUND(sPI))  // (rad<<SHIFT)
