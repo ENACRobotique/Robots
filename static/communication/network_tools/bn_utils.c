@@ -7,7 +7,7 @@
 
 #include "bn_utils.h"
 #include "../../tools/libraries/Timeout/timeout.h"
-#include "../../global_errors.h"
+#include "global_errors.h"
 
 /* ping : what we can expect from anything called ping. Sends one message and returns the time required to receive the acknowledgement.
  * Argument :
