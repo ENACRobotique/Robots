@@ -337,7 +337,7 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sPosPayload *pos) {
 
         x = isD2I(pos->x); // (I << SHIFT)
         y = isD2I(pos->y); // (I << SHIFT)
-        theta = isROUND(D2I(WDIAM)*pos->theta); // (I.rad << SHIFT)
+        theta = iROUND(dASHIFT*pos->theta); // (rad << (RAD_SHIFT + SHIFT))
 
         trajctlr_set_pos(&tm->ctlr, x, y, theta);
 
