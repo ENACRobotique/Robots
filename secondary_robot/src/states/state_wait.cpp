@@ -9,7 +9,7 @@
 #include "../params.h"
 #include "../tools.h"
 #include "state_wait.h"
-#include "state_funny.h"
+#include "state_dead.h"
 #include "lib_move.h"
 
 
@@ -23,7 +23,7 @@ void initWait(sState *prev)
 	}
 
 sState* testWait(){
-    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
+    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
     return 0;
 }
 

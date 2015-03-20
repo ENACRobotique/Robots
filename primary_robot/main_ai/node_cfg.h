@@ -8,15 +8,13 @@
 #ifndef NODE_CFG_H_
 #define NODE_CFG_H_
 
-#include "network_cfg.h"
-
 #define MYADDRX 0 // ADDRX_DEBUG
 #define MYADDRI 0
 #define MYADDRU 0
-#define MYADDRD ADDRD1_MAIN_IA_SIMU
+#define MYADDRD ADDRD1_MAIN_AI_SIMU
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
-#define MYROLE ROLE_IA
+#define MYROLE ROLE_AI
 // MYROLE must be equal to role_get_role(MYADDR)
 
 #define BN_INC_MSG_BUF_SIZE     4
@@ -30,6 +28,5 @@
 #define UART_READBYTE_TIMEOUT   100000  //in µs
 
 #define XBEE_UART_PATH "/dev/ttyUSB0"
-
 
 #endif /* NODE_CFG_H_ */

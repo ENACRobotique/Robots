@@ -75,7 +75,7 @@ int bn_printfDbg(const char *format, ...){
     return bn_printDbg(string);
 }
 
-/* bn_debugSendAddr : sends the new debug address to dest. MUST be issued ONLY by the debugger.
+/* bn_debugSignalling : sends the new debug address to dest. MUST be issued ONLY by the debugger.
  * Arguments :
  *  dest : address of the node whitch we want up update
  * Return value : like bn_send.

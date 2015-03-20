@@ -15,11 +15,11 @@
 
 static int irq_state = 0;
 
-inline void mutexLock(){
+inline void bn_mutexLock(){
     irq_state = global_IRQ_disable();
 }
 
-inline void mutexUnlock(){
+inline void bn_mutexUnlock(){
     global_IRQ_restore(irq_state);
 }
 

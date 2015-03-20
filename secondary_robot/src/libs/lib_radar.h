@@ -13,7 +13,7 @@
 #include "lib_us.h"
 
 //defines
-#define DEBUG_RADAR
+//#define DEBUG_RADAR
 
 #define RAD_TIMER_1 70//70    //time between call for mesure and mesure reading (cf sensor datasheet)
 #define RAD_TIMER_2 70//0   //time between mesure reading and call for next mesure (cf servo sweeping speed)
@@ -44,7 +44,7 @@ void radarInitServo(int);
 void radarRefresh();
 
 //returns the shortest range measured
-uint16_t radarCloser();
+uint16_t radarClosest();
 
 //returns the number of range measures shorter than the limit defined in C_rad_limits
 //(for the direction assiciated to each measure).

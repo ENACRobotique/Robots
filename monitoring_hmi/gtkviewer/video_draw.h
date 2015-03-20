@@ -20,6 +20,8 @@ void video_draw_arc(unsigned char *rgb, unsigned int w, unsigned int h, unsigned
 #define GREEN(i) 0, (i), 0
 #define BLUE(i) 0, 0, (i)
 
+#define YELLOW(i) (i), (i), 0
+
 #define ORANGE(i) (i), (i)>>1, 0
 
 #endif

@@ -104,7 +104,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             break;
         case E_OBSS:
             if(!nb_obss){
-                outMsg.header.destAddr = role_get_addr(ROLE_IA);
+                outMsg.header.destAddr = role_get_addr(ROLE_AI);
                 outMsg.header.type = E_OBS_CFG;
                 outMsg.header.size = sizeof(outMsg.payload.obsCfg);
 
@@ -166,7 +166,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             // send trajectory if event
             if(ctx->mouse_event){
-                outMsg.header.destAddr = role_get_addr(ROLE_IA);
+                outMsg.header.destAddr = role_get_addr(ROLE_AI);
                 outMsg.header.type = E_GOAL;
                 outMsg.header.size = sizeof(outMsg.payload.pos);
 
@@ -205,9 +205,22 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             for(i = 0; i < BUFSZ(); i+=3){
                 *p++ = 0;
                 *p++ = 127;
-                *p++ = 0;
+                *p++ = 255;
             }
         }
+
+        //yellow starting
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(80.), X_CM2PX(45.), Y_CM2PX(120.), YELLOW(255), 255);
+        video_draw_filled_circle(ctx->pos_data[ctx->pos_cur]   , WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(45.), Y_CM2PX(100.), CM2PX(20.), YELLOW(255), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 0.), Y_CM2PX( 40.), X_CM2PX(40.), Y_CM2PX(80.), GREEN(200), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 0.), Y_CM2PX(120.), X_CM2PX(40.), Y_CM2PX(160.), GREEN(200), 255);
+
+        //green starting
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 300-0.), Y_CM2PX(80.), X_CM2PX(300-45.), Y_CM2PX(120.), GREEN(200), 255);
+        video_draw_filled_circle(ctx->pos_data[ctx->pos_cur]   , WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(300-45.), Y_CM2PX(100.), CM2PX(20.), GREEN(200), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 300-0.), Y_CM2PX( 40.), X_CM2PX(300-40.), Y_CM2PX(80.), YELLOW(255), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 300-0.), Y_CM2PX(120.), X_CM2PX(300-40.), Y_CM2PX(160.), YELLOW(255), 255);
+
 
         // draw inactive obstacles
         for(i = 0; obss && i < nb_obss; i++){
@@ -230,10 +243,14 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             }
         }
         // draw limits
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(x_min), Y_CM2PX(ctx->pos_maxy), ORANGE(255), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(y_min), ORANGE(255), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(y_max), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), ORANGE(255), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(x_max), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), ORANGE(255), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.+x_min), X_CM2PX(x_min), Y_CM2PX(ctx->pos_maxy-x_min), RED(255), 150);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(y_min), RED(255), 150);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(y_max), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), RED(255), 150);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(x_max), Y_CM2PX(0.+x_min), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy-x_min), RED(255), 150);
+
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(96.7-x_min), Y_CM2PX(142.-x_min), X_CM2PX(203.3+x_min), Y_CM2PX(200.-x_min), RED(255), 150);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(120.-x_min), Y_CM2PX(0.+x_min), X_CM2PX(180.+x_min), Y_CM2PX(10.+x_min), RED(255), 150);
+
         // draw active obstacles
         for(i = 0; obss && i < nb_obss; i++){
             x = X_CM2PX(obss[i].x);
@@ -241,7 +258,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             r = CM2PX(obss[i].r);
 
             if(obss[i].active && r > 0){
-                video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, ORANGE(255), 255);
+                video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, GREY(150), 150);
             }
         }
         // draw limits
@@ -257,6 +274,17 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         if(x_max + r_robot <= ctx->pos_maxx){
             video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(x_max + r_robot), Y_CM2PX(0.), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), RED(255), 255);
         }
+
+        // draw current position
+        x = X_CM2PX(curr_x);
+        y = Y_CM2PX(curr_y);
+        r = CM2PX(r_robot);
+        dx = DX_CM2PX(r_robot*cos(curr_theta));
+        dy = DY_CM2PX(r_robot*sin(curr_theta));
+
+        video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, 174, 136, 86, 255);
+        video_draw_arrow(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, dx, dy, 10, BLACK(), 255);
+
         // draw active obstacles
         for(i = 0; obss && i < nb_obss; i++){
             if(obss[i].active){
@@ -270,13 +298,19 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
                 }
 
                 if(r > 0){
-                    video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, RED(255), 255);
+                    video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, ORANGE(255), 255);
                 }
                 else{
-                    video_draw_cross(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, CM2PX(8.), RED(255), 255);
+                    video_draw_cross(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, CM2PX(8.), ORANGE(255), 255);
                 }
             }
         }
+
+        // draw fixed elements
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(96.7), Y_CM2PX(142.), X_CM2PX(150.), Y_CM2PX(200.), YELLOW(255), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(150.), Y_CM2PX(142.), X_CM2PX(203.3), Y_CM2PX(200.), GREEN(200), 255);
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(120.), Y_CM2PX(0.), X_CM2PX(180.), Y_CM2PX(10.), RED(255), 255);
+
         // draw obstacles' label
         for(i = 0; obss && i < nb_obss; i++){
             float f_dx, f_dy, f_tmp;
@@ -368,16 +402,6 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             video_draw_pixel(ctx->pos_data[ctx->pos_cur], ROWSTRIDE(), HEIGHT(), x, y, BLUE(255), 255*(i + ctx->poslist.maxlen - ctx->poslist.len)/ctx->poslist.maxlen);
             video_draw_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, BLUE(255), 255*(i + ctx->poslist.maxlen - ctx->poslist.len)/ctx->poslist.maxlen);
         }
-
-        // draw current position
-        x = X_CM2PX(curr_x);
-        y = Y_CM2PX(curr_y);
-        r = CM2PX(r_robot);
-        dx = DX_CM2PX(r_robot*cos(curr_theta));
-        dy = DY_CM2PX(r_robot*sin(curr_theta));
-
-        video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, GREY(150), 150);
-        video_draw_arrow(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, dx, dy, 10, BLACK(), 255);
 
         // switch drawing buffer in gui
         gv_media_update(ctx->pos_mid, ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), (gv_destroy)NULL, NULL);
@@ -534,7 +558,7 @@ int main(int argc, char *argv[]) {
 //        }
 
 // ask obstacles
-        outMsg.header.destAddr = role_get_addr(ROLE_IA);
+        outMsg.header.destAddr = role_get_addr(ROLE_AI);
         outMsg.header.type = E_OBS_CFG;
         outMsg.header.size = sizeof(outMsg.payload.obsCfg);
 

@@ -16,11 +16,11 @@
 static volatile tBoolean SREG_save;
 
 //pseudo-mutex for botNet central Buffer access management
-inline void mutexLock(){
+inline void bn_mutexLock(){
     SREG_save = IntMasterDisable();
 }
 
-inline void mutexUnlock(){
+inline void bn_mutexUnlock(){
     if(!SREG_save) IntMasterEnable();
 }
 
