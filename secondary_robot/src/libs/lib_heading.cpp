@@ -24,7 +24,7 @@ int _headingCon = 0;
 //initializes the PINs for motor speed and direction
 //REQUIRES : initInertial()
 
-#define KP  2// >>2
+#define KP  3// >>2
 #define KI  0// >>8
 #define KD  0
 
@@ -36,7 +36,6 @@ void headingSetCon(int speed, int omega){
 }
 
 void headingAsser(){
-	if (!_moveCon[1] /*&& _moveCon[0]*/) {
     unsigned long int time=millis();
     static int intEps=0;
     static int prevEps = 0;
@@ -60,12 +59,7 @@ void headingAsser(){
 			//compute error integral
 			intEps= CLAMP( -(64<<2) ,intEps+eps, (64<<2));
 			//compute command
-//			if(_attitudeCon==0){
-//				_attitudeCmd=0;
-//			}
-//			else{
-				_moveCmdOmega = ((KP*eps)>>2) + ((KI*intEps)>>3) + ((KD*derEps)>>2);
-//			}
+			_moveCmdOmega = ((KP*eps)>>2) + ((KI*intEps)>>3) + (KD*derEps);
 
 Serial.print(_headingCon);
 Serial.print("\t");
@@ -82,10 +76,7 @@ Serial.print(_moveCmdOmega);
 ////Serial.print(millis());
 //Serial.println();
 
-			//if(_attitudeCmd>=0) servoAttitude.write(180-_attitudeCmd);
-			//else servoAttitude.write(180-_attitudeCmd);
-
-			move(_moveCon[0], _moveCon[1] + _moveCmdOmega, 1);
+			move(_moveCon[0], _moveCmdOmega, 1);
 		}
 		else {//to avoid problems due to long loop
 			  time_prev_asser=millis();
@@ -93,6 +84,5 @@ Serial.print(_moveCmdOmega);
 			  move(_moveCon[0], _moveCon[1] + _moveCmdOmega, 1);
 			  readInertial(ANGLE_TO_ASSERV);
 			}
-	}
 	}
 }

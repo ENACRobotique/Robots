@@ -25,11 +25,20 @@
 #define Y_ANGLE_ACCEL 22
 #define Z_ANGLE_ACCEL 23
 
+extern int _headingCon;
 
 void headingAsser();
 
 
 void headingSetCon(int speed, int omega);
+
+inline void tetaSetCon(int teta){
+	_headingCon = teta;
+}
+
+inline int headingGetCon(){
+	return _headingCon;
+}
 
 extern int _headingCon;
 extern int _moveCmdOmega;
