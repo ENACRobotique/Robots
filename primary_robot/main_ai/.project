@@ -31,6 +31,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>lib/Core</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/core/shared/Core</locationURI>
+		</link>
+		<link>
 			<name>lib/GeometryTools</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/static/tools/libraries/GeometryTools</locationURI>

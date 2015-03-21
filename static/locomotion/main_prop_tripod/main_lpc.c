@@ -91,7 +91,7 @@ int main() {
     global_IRQ_enable();
 
     //// Global variables
-    unsigned int prevControl = millis();
+    unsigned int prevControl = micros();
     int ret;
     sMsg inMsg = {{0}};//, outMsg = {{0}};
 
@@ -114,9 +114,9 @@ int main() {
         } // End: if(ret > 0)
 
         // Automatic control
-        if (micros() - prevControl >= PER_ASSER) {
+        if (micros() - prevControl >= PER_CTRL_LOOP) {
             // If there is too much delay we skip to the next increment of the loop
-            if(micros() - prevControl > PER_ASSER_CRITIC){
+            if(micros() - prevControl > PER_CTRL_LOOP_CRITIC){
                 prevControl = micros();
                 trajmngr_reset(&traj_mngr);
                 continue;

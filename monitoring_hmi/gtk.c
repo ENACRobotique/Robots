@@ -9,7 +9,7 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../network_tools/bn_debug.h"
-#include "../../global_errors.h"
+#include "global_errors.h"
 #include "roles.h"
 #include "node_cfg.h"
 

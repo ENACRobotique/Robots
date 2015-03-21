@@ -30,6 +30,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>lib/Core</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/core/shared/Core</locationURI>
+		</link>
+		<link>
 			<name>lib/Millis</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
@@ -62,7 +67,7 @@
 		<link>
 			<name>lib/network_tools</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/communication/network_tools/</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/network_tools</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

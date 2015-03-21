@@ -8,7 +8,7 @@
 #ifdef ARCH_328P_ARDUINO
 
 #include "lib_UART_framing_arduino.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 #include "Arduino.h"
 
 
