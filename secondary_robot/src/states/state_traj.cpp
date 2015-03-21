@@ -6,6 +6,7 @@
 #include "lib_line.h"
 #include "lib_wall.h"
 #include "lib_attitude.h"
+#include "lib_heading.h"
 #include "../tools.h"
 #include "../params.h"
 #include "state_traj.h"
@@ -278,10 +279,15 @@ sState sTrajEndStairsGreen={
 };
 //******************************************************************************************************************
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
+	static int teta0 = headingGetCon();
+	int dt = millis() - *prev_millis;    //time since start of the current traj element
+	int teta = tab[*i].omega*min(dt*1.5,tab[*i].duration)/1000;
+	tetaSetCon( teta + teta0);
 
     if (!(*prev_millis)){
     	*prev_millis=millis();
         move(tab[*i].speed,tab[*i].omega);
+        teta0 = headingGetCon();
     }
 
     if(_backFromPause){
@@ -294,6 +300,7 @@ int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned l
         (*i)++;
         *prev_millis=millis();
         *pausetime=0;
+        teta0 = headingGetCon();
         move(tab[*i].speed,tab[*i].omega);
     }
     if ( tab[*i].omega==0 && tab[*i].duration==0 && tab[*i].speed==0) {
