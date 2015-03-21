@@ -240,12 +240,13 @@ void Path::convPathToPathOrient(){
  * Computes time path holonomic robot
  */
 void Path::computeTimePathForHolonomic(){
-    float dist = 0, time = bn_intp_millis2s(millis());
+    float dist = 0;
+    uint32_t time_us = bn_intp_micros2s(micros());
 
     for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        _path_orient[i].t1 = dist/MAX_SPEED*1000000 + time; //in us
+        _path_orient[i].t1 = dist/MAX_SPEED*1000000 + time_us; //in us
         dist += _path_orient[i].seg_len;
-        _path_orient[i].t2 = dist/MAX_SPEED*1000000 + time; //in us
+        _path_orient[i].t2 = dist/MAX_SPEED*1000000 + time_us; //in us
         dist += _path_orient[i].arc_len;
     }
 }
