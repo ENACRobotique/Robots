@@ -66,15 +66,6 @@ Serial.print("\t");
 Serial.print(read);
 Serial.print("\t");
 Serial.print(_moveCmdOmega);
-//Serial.print("\t");
-//Serial.print(CLAMP(15,abs(_attitudeCmd),175));
-////Serial.print("\t");
-//Serial.print(eps);
-//Serial.print("\t");
-//Serial.print(intEps);
-////Serial.print("\t");
-////Serial.print(millis());
-//Serial.println();
 
 			move(_moveCon[0], _moveCmdOmega, 1);
 		}
