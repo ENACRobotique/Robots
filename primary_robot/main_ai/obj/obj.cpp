@@ -70,7 +70,10 @@ void Obj::addAccess(sObjEntry_t &access){
  * //TODO Considering the orientation of the robot
  */
 sNum_t Obj::update(sPt_t posRobot) {
-    int g, m, n;
+    int n;
+#if NON_HOLONOMIC
+    int g, m;
+#endif
     sPath_t path_loc;
 
     _dist = -1;
