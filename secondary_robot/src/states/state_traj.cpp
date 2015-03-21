@@ -15,6 +15,8 @@
 #include "state_wait.h"
 #include "state_lineMonit.h"
 
+#define FACTOR_HEADING_ASSERV 1.5
+
 unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
 int _backFromPause = 0;
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
@@ -52,7 +54,7 @@ void deinitTrajGreenInit(sState *next)
 
 trajElem start_green[]={
 				{30,0,4500},
-				{15,-10,4000},
+				{15,-20,4500},
 				{15,0,750},
 				{0,0,0},
 				};
@@ -281,7 +283,7 @@ sState sTrajEndStairsGreen={
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
 	static int teta0 = headingGetCon();
 	int dt = millis() - *prev_millis;    //time since start of the current traj element
-	int teta = tab[*i].omega*min(dt*1.5,tab[*i].duration)/1000;
+	int teta = tab[*i].omega*min(dt*FACTOR_HEADING_ASSERV,tab[*i].duration)/1000;
 	tetaSetCon( teta + teta0);
 
     if (!(*prev_millis)){
