@@ -61,7 +61,7 @@ void deinitTirette(sState *next)
 	}
 
 sState sTirette={
-        BIT(E_MOTOR)|BIT(E_RADAR),
+        BIT(E_MOTOR),
         &initTirette,
         &deinitTirette,
         &testTirette

@@ -58,32 +58,26 @@ void deinitTrajRedInit(sState *next)
 }
 
 trajElem start_red[]={
-
-#ifdef MUR_R
 		{0,0,100}, //to wait until the servo is in the good position
-				{-360,0,320},
-				{-360,-7,800},
-				{-360,-5,350},
-				{-360,-2,200},
+				{100,0,1000},
+				{0,10,1000},
+				{200,20,1000},
+				{0,30,1000},
+				{300,40,1000},
+				{0,0,1000},
+				{400,50,1000},
+				{0,0,1000},
+				{500,100,1000},
+				{0,0,1000},
+				{600,120,1000},
+				{0,0,1000},
+				{-300,150,1000},
+				{0,180,1000},
+				{-600,10,1000},
+				{0,0,1000},
+				{360,90,10000},
+				{0,0,1000},
 				{0,0,0},
-//	{0,0,100}, //to wait until the servo is in the good position
-//	{-360,0,100},
-//    {-360,-7,900},
-//    {-360,-1,400},
-//    {-360,0,300},
-//    {0,0,0},
-#endif
-
-
-
-#ifdef Int_R
-	{0,0,100}, //to wait until the servo is in the good position
-	{-360,0,70},
-    {-360,-55,1300},
-    {-360,-1,600},
-    {-360,0,200},
-    {0,0,0},
-#endif
        };
 
 sState *testTrajRedInit()
@@ -105,7 +99,7 @@ sState *testTrajRedInit()
 	}
 
 sState sTrajRedInit={
-        BIT(E_MOTOR)|BIT(E_RADAR),
+        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
         &initTrajRedInit,
         &deinitTrajRedInit,
         &testTrajRedInit
@@ -145,24 +139,7 @@ void deinitTrajYellowInit(sState *next)
 }
 
 trajElem start_yellow[]={ //A MODIFIER
-#ifdef MUR_Y
-		{0,0,100}, //to wait until the servo is in the good position
-		{360,0,320},
-		{360,-7,800},
-		{360,-5,350},
-		{360,-2,200},
 	    {0,0,0},
-#endif
-
-
-#ifdef INT_Y
-		{0,0,100}, //to wait until the servo is in the good position
-		{360,0,470},
-		{360,-50,1300},
-		{360,-5,350},
-		{360,-2,200},
-		{0,0,0},
-#endif
 		};
 sState *testTrajYellowInit()
 	{
@@ -178,7 +155,7 @@ sState *testTrajYellowInit()
 	    return 0;
 	}
 sState sTrajYellowInit={
-		BIT(E_MOTOR) |BIT(E_RADAR),
+		BIT(E_MOTOR) /*|BIT(E_RADAR)*/,
         &initTrajYellowInit,
         &deinitTrajYellowInit,
         &testTrajYellowInit
@@ -219,19 +196,7 @@ void deinitTrajYellowFinal(sState *next)
 }
 
 trajElem Final_yellow[]={
-
-				{360,0,1800},
-				{360,-85,900},
-		        {360,-30,500},
-		        {0,0,300},
-
-		        {-160,-60,500},
 		        {0,0,0},
-
-//		        {-290,-55,1100},
-//		        {-280,0,250},
-//		        {-200,0,700},
-//		        {0,0,0},
 		};
 
 sState *testTrajYellowFinal()
@@ -261,7 +226,7 @@ sState *testTrajYellowFinal()
 	}
 
 sState sTrajYellowFinal={
-        BIT(E_MOTOR)|BIT(E_RADAR),
+        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
         &initTrajYellowFinal,
         &deinitTrajYellowFinal,
         &testTrajYellowFinal
@@ -303,19 +268,7 @@ void deinitTrajRedFinal(sState *next)
 }
 
 trajElem Final_red[]={
-		{-360,0,1100},
-		{-360,-60,1000},
-        {-360,-5,800},
-        {0,0,200},
-        {160,-60,500},
         {0,0,0},
-
-//        {360,0,600},
-//        {240,-50,1100},
-//        {260,-42,200},
-        //{340,-1,300},
-        //{240,-1,200},
-//        {0,0,0},
        };
 
 sState *testTrajRedFinal()
@@ -345,7 +298,7 @@ sState *testTrajRedFinal()
 	}
 
 sState sTrajRedFinal={
-        BIT(E_MOTOR)|BIT(E_RADAR),
+        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
         &initTrajRedFinal,
         &deinitTrajRedFinal,
         &testTrajRedFinal

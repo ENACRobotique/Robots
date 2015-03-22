@@ -11,7 +11,7 @@
 #include "Arduino.h"
 #include "lib_odo.h"
 
-//#define DEBUG_MOTOR
+#define DEBUG_MOTOR
 
 void motorInitHard(int pinDir,int pinPWM);
 void motAsser();
