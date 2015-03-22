@@ -240,13 +240,13 @@ void Path::convPathToPathOrient(){
  * Computes time path holonomic robot
  */
 void Path::computeTimePathForHolonomic(){
-    float dist = 0;
+    double dist = 0;
     uint32_t time_us = bn_intp_micros2s(micros());
 
     for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        _path_orient[i].t1 = dist/MAX_SPEED*1000000 + time_us; //in us
+        _path_orient[i].t1 = (uint32_t)((dist/MAX_SPEED)*1e6) + time_us; //in us
         dist += _path_orient[i].seg_len;
-        _path_orient[i].t2 = dist/MAX_SPEED*1000000 + time_us; //in us
+        _path_orient[i].t2 = (uint32_t)((dist/MAX_SPEED)*1e6) + time_us; //in us
         dist += _path_orient[i].arc_len;
     }
 }
@@ -435,7 +435,7 @@ bool Path::checkSamePath(sPath_t &path){
     if(verbose > 2)
         cout << "same_t 1.0" << endl;
 
-    while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminer
+    while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminé
         if(verbose > 2)
             cout << "same_t 2.0" << endl;
         if (checkSameObs((path.path[t1_ind-1].obs), (_path[t2_ind-1].obs)) ){

@@ -51,6 +51,7 @@
 typedef struct {
     sPt_t c;    // center of obstacle
     sNum_t r;   // radius
+    //TODO change in circle type with the new geometry tools
 
     uint8_t moved:4;
     uint8_t active:4;

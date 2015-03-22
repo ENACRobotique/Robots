@@ -32,6 +32,7 @@ class Net {
         void sendPathToNet();
         void sendPathOrientToNet();
 
+        static unsigned int _tid; // common to all Net instances
         queue <sTrajEl_t> _trajEl;
         queue <sTrajOrientEl_t> _trajOrientEl;
 
