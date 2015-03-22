@@ -301,7 +301,7 @@ void checkInbox(int verbose){
             ihm.receivedNewIhm(msgIn.payload.ihmStatus);
             break;
         default:
-            cout << "[WARNING] message type not define or doesn't exist" << endl << endl;
+            cout << "[WARNING] message type not define or doesn't exist" << eType2str((E_TYPE)msgIn.header.type) << endl;
     }
 }
 

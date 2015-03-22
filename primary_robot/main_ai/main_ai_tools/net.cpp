@@ -14,6 +14,7 @@
 extern "C"{
 #include <unistd.h>
 #include "roles.h"
+#include "global_errors.h"
 }
 #include "messages.h"
 #include "tools.h"
@@ -219,7 +220,7 @@ void Net::sendPathOrientToNet(){
             outMsg.payload.trajOrientEl.sid = sid;
 
             if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0)
-                logs << ERR << "role_sendRetry(E_TRAJ_ORIENT_EL) failed #" << -ret;
+                logs << ERR << "role_sendRetry(E_TRAJ_ORIENT_EL) failed " << getErrorStr(-ret) << " (#" << -ret << ")";
             else
                 logs << INFO << "A new path orient has been sent: tid=" << _tid << " and sid=" << sid;
 
