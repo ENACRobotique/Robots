@@ -105,7 +105,8 @@ void Path::sendRobot() {
         logs << INFO << "Preparation to send a path";
         if (!_path.empty()){
             //delete the previous path sent;
-            delete path.path;
+            if(path.path)
+                delete path.path;
 
             //save the new path sent
             path.dist = _dist;
@@ -190,18 +191,18 @@ void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tab
     //TODO if there are an adversaire
 
     for (unsigned int i = 0; i < l.size()-1; i++) {
-        sTrajEl_t* el = new sTrajEl_t;
+        sTrajEl_t el;
 
         sSeg_t *s = tgt(l[i], l[i + 1]);
 
-        el->p1 = s->p1;
-        el->p2 = s->p2;
-        el->obs.active = 1;
-        el->obs.c = obs[O(l[i + 1])].c;
-        el->obs.moved = 1;
-        el->obs.r = fabs(obs[O(l[i + 1])].r) * (1 - 2 * DIR(l[i + 1]));
+        el.p1 = s->p1;
+        el.p2 = s->p2;
+        el.obs.active = 1;
+        el.obs.c = obs[O(l[i + 1])].c;
+        el.obs.moved = 1;
+        el.obs.r = fabs(obs[O(l[i + 1])].r) * (1 - 2 * DIR(l[i + 1]));
 
-        _path.push_back(*el);
+        _path.push_back(el);
     }
 
     sendRobot();
