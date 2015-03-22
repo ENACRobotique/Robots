@@ -5,49 +5,49 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-#include "state_dead.h"
-#include "state_ALACON.h"
-#include "state_traj.h"
-#include "state_Manualdrive.h"
+#include "state_funny.h"
+#include "state_wall.h"
 #include "state_tirette.h"
-#include "state_traj.h"
 
-#include "../libs/lib_attitude.h"
-#include "../libs/MPU_6050.h"
+
 #include "../libs/lib_move.h"
 #include "../libs/lib_motor.h"
 #include "../libs/lib_radar.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
-//	return &sTirette;
-//	return &sAlacon;
-    return &sTrajGreenInit;
+    return &sTirette;
 }
-
 void initHard(sState *prev){
 
 #ifdef DEBUG
     Serial.println("debut init matérielles");
 #endif
     //movements
-    int pin_motors_dir[NB_MOTORS];
-    int pin_motors_pwm[NB_MOTORS];
-    pin_motors_dir[0]=PIN_MOTOR_DIR;
-    pin_motors_pwm[0]=PIN_MOTOR_PWM;
-    motorInitHard(pin_motors_dir,pin_motors_pwm);
-    int pin_odo_int[NB_MOTORS]={PIN_ODO_INT};
-    int pin_odo_sen[NB_MOTORS]={PIN_ODO_SEN};
-    odoInitHard(pin_odo_int,pin_odo_sen);
+    moveInitHard(PIN_DIR_SERVO, ANGLE_ZERO, DIR_SERVO_START);
+    motorInitHard(PIN_MOTOR_DIR,PIN_MOTOR_PWM);
+    odoInitHard(PIN_ODO_INT,PIN_ODO_SEN);
 
     //radar
-    //Wire.begin();
-    //initInertial();
-    //servoInitHard(PIN_SERVO_ATTITUDE);
+    Wire.begin();
+
     //line following/detector
     //Wire.begin(); already done
-    //fan
 
+    //launcher
+    pinMode(PIN_LAUNCHER_1,OUTPUT);
+    pinMode(PIN_LAUNCHER_2,OUTPUT);
+    pinMode(PIN_LAUNCHER_NET,OUTPUT);
+    launcherServoUp.attach(PIN_LAUNCHER_1);
+    launcherServoUp.write(LAUNCHER_UP_POS_0);
+    launcherServoDown.attach(PIN_LAUNCHER_2);
+    launcherServoDown.write(LAUNCHER_DOWN_POS_0);
+    launcherServoNet.attach(PIN_LAUNCHER_NET);
+    launcherServoNet.write(LAUNCHER_NET_POS_0);
+
+
+    //wall
+    wallInitHard(PIN_SHARP_FRONT_RIGHT ,PIN_SHARP_BACK_RIGHT,PIN_SHARP_FRONT_LEFT  ,PIN_SHARP_BACK_LEFT);
 
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);
@@ -55,6 +55,9 @@ void initHard(sState *prev){
     //"color" (start side) button
     pinMode(PIN_COLOR,INPUT_PULLUP);
 
+    //led pin
+    pinMode( PIN_LED , OUTPUT);
+    digitalWrite(PIN_LED,LOW);
 
 #ifdef DEBUG
     Serial.println("fin init matérielles");

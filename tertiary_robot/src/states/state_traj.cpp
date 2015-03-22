@@ -1,3 +1,12 @@
+/*
+ * state_traj.cpp
+ *
+ *  Created on: 8 mai 2013
+ *      Author: quentin
+ *   Modify on: janvier 2014
+ *   		By: Seb
+ */
+
 
 #include "Arduino.h"
 #include "state_types.h"
@@ -5,20 +14,22 @@
 #include "lib_radar.h"
 #include "lib_line.h"
 #include "lib_wall.h"
-#include "lib_attitude.h"
 #include "../tools.h"
 #include "../params.h"
 #include "state_traj.h"
 #include "state_pause.h"
+#include "state_wall.h"
+#include "state_funny.h"
 #include "state_wait.h"
+#include "state_fresco.h"
 #include "state_lineMonit.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
-void initTrajGreenInit(sState *prev)
+void initTrajRedInit(sState *prev)
 	{
 		#ifdef DEBUG
-			Serial.println("debut traj rouge (premier trajet)");
+			Serial.println("debut traj rouge");
 		#endif
 
 	    if (prev==&sPause)
@@ -32,7 +43,7 @@ void initTrajGreenInit(sState *prev)
 	   	    		radarSetLim(limits);
 	}
 
-void deinitTrajGreenInit(sState *next)
+void deinitTrajRedInit(sState *next)
 	{
 	    if (next==&sPause)
 	    	{
@@ -44,39 +55,60 @@ void deinitTrajGreenInit(sState *next)
 	        st_saveTime=0;
 	        st_prevSaveTime=0;
 	    	}
-	}
+}
 
-trajElem start_green[]={
-				{20,0,3000},
-				{0,0,3000},
-				{300,0,2000},
+trajElem start_red[]={
+
+#ifdef MUR_R
+		{0,0,100}, //to wait until the servo is in the good position
+				{-360,0,320},
+				{-360,-7,800},
+				{-360,-5,350},
+				{-360,-2,200},
 				{0,0,0},
-				};
+//	{0,0,100}, //to wait until the servo is in the good position
+//	{-360,0,100},
+//    {-360,-7,900},
+//    {-360,-1,400},
+//    {-360,0,300},
+//    {0,0,0},
+#endif
 
-sState *testTrajGreenInit()
+
+
+#ifdef Int_R
+	{0,0,100}, //to wait until the servo is in the good position
+	{-360,0,70},
+    {-360,-55,1300},
+    {-360,-1,600},
+    {-360,0,200},
+    {0,0,0},
+#endif
+       };
+
+sState *testTrajRedInit()
 	{
 		static int i=0;
 	    static unsigned long prev_millis=0;
 
-	    if(periodicProgTraj(start_green,&st_saveTime,&i,&prev_millis))
+	    if(periodicProgTraj(start_red,&st_saveTime,&i,&prev_millis))
 	    {
 
-			#ifdef DEBUG
-				Serial.println("\tTrajet 1 fini !");
-			#endif
+	    	launcherServoDown.write(120);
+	    	launcherServoUp.write(10);
 
-	    	 return &sTrajEndStairsGreen;
+	    	 return &sTrajRedFinal;
 	    }
 
 	    if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
 
-sState sTrajGreenInit={
-        BIT(E_MOTOR),
-        &initTrajGreenInit,
-        &deinitTrajGreenInit,
-        &testTrajGreenInit
+sState sTrajRedInit={
+        BIT(E_MOTOR)|BIT(E_RADAR),
+        &initTrajRedInit,
+        &deinitTrajRedInit,
+        &testTrajRedInit
 };
 //*****************************************************************************************************************
 
@@ -113,10 +145,24 @@ void deinitTrajYellowInit(sState *next)
 }
 
 trajElem start_yellow[]={ //A MODIFIER
-			{10,0,3000},
-			{20,50,3000},
-			{50,-20,2000},
-			{0,0,0},
+#ifdef MUR_Y
+		{0,0,100}, //to wait until the servo is in the good position
+		{360,0,320},
+		{360,-7,800},
+		{360,-5,350},
+		{360,-2,200},
+	    {0,0,0},
+#endif
+
+
+#ifdef INT_Y
+		{0,0,100}, //to wait until the servo is in the good position
+		{360,0,470},
+		{360,-50,1300},
+		{360,-5,350},
+		{360,-2,200},
+		{0,0,0},
+#endif
 		};
 sState *testTrajYellowInit()
 	{
@@ -124,13 +170,15 @@ sState *testTrajYellowInit()
 		    static unsigned long prev_millis=0;
 		    if(periodicProgTraj(start_yellow,&st_saveTime,&i,&prev_millis))
 		   	    {
-		    	return &sTrajEndStairsYellow;
+		    	launcherServoDown.write(120);
+		    	launcherServoUp.write(10);
+		    	return &sTrajYellowFinal;
 		   	    }
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
 sState sTrajYellowInit={
-		BIT(E_MOTOR),
+		BIT(E_MOTOR) |BIT(E_RADAR),
         &initTrajYellowInit,
         &deinitTrajYellowInit,
         &testTrajYellowInit
@@ -138,7 +186,7 @@ sState sTrajYellowInit={
 
 
 //******************************************************************************************************************
-void initTrajEndStairsYellow(sState *prev)
+void initTrajYellowFinal(sState *prev)
 	{
 
 			#ifdef DEBUG
@@ -156,7 +204,7 @@ void initTrajEndStairsYellow(sState *prev)
 		    	radarSetLim(limits);
 	}
 
-void deinitTrajEndStairsYellow(sState *next)
+void deinitTrajYellowFinal(sState *next)
 	{
 		    if (next==&sPause)
 		    	{
@@ -171,44 +219,60 @@ void deinitTrajEndStairsYellow(sState *next)
 }
 
 trajElem Final_yellow[]={
-				{0,-10,3000},
+
+				{360,0,1800},
+				{360,-85,900},
+		        {360,-30,500},
+		        {0,0,300},
+
+		        {-160,-60,500},
 		        {0,0,0},
 
+//		        {-290,-55,1100},
+//		        {-280,0,250},
+//		        {-200,0,700},
+//		        {0,0,0},
 		};
 
-sState *testTrajEndStairsYellow()
+sState *testTrajYellowFinal()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
 
 			if(periodicProgTraj(Final_yellow,&st_saveTime,&i,&prev_millis))
 			 	{
-				return &sWait;
+				return &sFunny;
 			 	}
 
-//
-//			if((millis()-st_saveTime)-TimeToLauncher > 3000 ){
-//				    	 uint16_t limits[RAD_NB_PTS]={3,40};
-//				    		    		radarSetLim(limits);
-//				   	     	}
-//
-//		if (radarIntrusion()) return &sPause;
+
+			if((millis()-st_saveTime)-TimeToLauncher > 1500 && TimeToLauncher!=0 ){
+				    	 	 launcherServoDown.write(15);
+				    	 	TimeToLauncher=0;
+				    	 	 }
+
+
+			if((millis()-st_saveTime)-TimeToLauncher > 3000 ){
+				    	 uint16_t limits[RAD_NB_PTS]={3,40};
+				    		    		radarSetLim(limits);
+				   	     	}
+
+		if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
 
-sState sTrajEndStairsYellow={
-        BIT(E_MOTOR),
-        &initTrajEndStairsYellow,
-        &deinitTrajEndStairsYellow,
-        &testTrajEndStairsYellow
+sState sTrajYellowFinal={
+        BIT(E_MOTOR)|BIT(E_RADAR),
+        &initTrajYellowFinal,
+        &deinitTrajYellowFinal,
+        &testTrajYellowFinal
 };
 
 
 //******************************************************************************************************************
-void initTrajEndStairsGreen(sState *prev)
+void initTrajRedFinal(sState *prev)
 	{
 	  	#ifdef DEBUG
-			Serial.println("debut traj rouge final");
+			Serial.println("debut traj rouge");
 		#endif
 
 	    if (prev==&sPause)
@@ -224,7 +288,7 @@ void initTrajEndStairsGreen(sState *prev)
 	    		radarSetLim(limits);
 	}
 
-void deinitTrajEndStairsGreen(sState *next)
+void deinitTrajRedFinal(sState *next)
 	{
 	    if (next==&sPause)
 	    	{
@@ -237,20 +301,31 @@ void deinitTrajEndStairsGreen(sState *next)
 	        st_prevSaveTime=0;
 	    	}
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-trajElem Final_green[]={
-		{0,10,3000},
+
+trajElem Final_red[]={
+		{-360,0,1100},
+		{-360,-60,1000},
+        {-360,-5,800},
+        {0,0,200},
+        {160,-60,500},
         {0,0,0},
+
+//        {360,0,600},
+//        {240,-50,1100},
+//        {260,-42,200},
+        //{340,-1,300},
+        //{240,-1,200},
+//        {0,0,0},
        };
 
-sState *testTrajEndStairsGreen()
+sState *testTrajRedFinal()
 	{
 		static int i=0;
 	    static unsigned long prev_millis=0;
 
-	    if(periodicProgTraj(Final_green,&st_saveTime,&i,&prev_millis))
+	    if(periodicProgTraj(Final_red,&st_saveTime,&i,&prev_millis))
 		{
-	    	return &sWait;
+	    	return &sFunny;
 		}
 
 
@@ -260,26 +335,26 @@ sState *testTrajEndStairsGreen()
 		}
 
 
-//	     if((millis()-st_saveTime)-TimeToLauncher > 3100 ){
-//	    	 uint16_t limits[RAD_NB_PTS]={40,3};
-//	    		    		radarSetLim(limits);
-//	     	     				    	 	 }
-//
-//	if (radarIntrusion()) return &sPause;
+	     if((millis()-st_saveTime)-TimeToLauncher > 3100 ){
+	    	 uint16_t limits[RAD_NB_PTS]={40,3};
+	    		    		radarSetLim(limits);
+	     	     				    	 	 }
+
+	if (radarIntrusion()) return &sPause;
 	 	    return 0;
 	}
 
-sState sTrajEndStairsGreen={
-        BIT(E_MOTOR),
-        &initTrajEndStairsGreen,
-        &deinitTrajEndStairsGreen,
-        &testTrajEndStairsGreen
+sState sTrajRedFinal={
+        BIT(E_MOTOR)|BIT(E_RADAR),
+        &initTrajRedFinal,
+        &deinitTrajRedFinal,
+        &testTrajRedFinal
 };
 //******************************************************************************************************************
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
 
     if (!(*prev_millis)) *prev_millis=millis();
-    move(tab[*i].speed,tab[*i].omega);
+    move(tab[*i].speed,tab[*i].angle);
 
 
     if ( (millis()-*prev_millis-*pausetime)>tab[*i].duration ) {
@@ -287,12 +362,11 @@ int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned l
         *prev_millis=millis();
         *pausetime=0;
     }
-    if ( tab[*i].omega==0 && tab[*i].duration==0 && tab[*i].speed==0) {
+    if ( tab[*i].angle==0 && tab[*i].duration==0 && tab[*i].speed==0) {
         *i=0;
         *prev_millis=0;
         return 1;
     }
-
 
     return 0;
 }

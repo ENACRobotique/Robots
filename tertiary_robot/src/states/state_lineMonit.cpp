@@ -6,8 +6,9 @@
 #include "../params.h"
 #include "../tools.h"
 #include "state_types.h"
+#include "state_funny.h"
 #include "state_pause.h"
-#include "lib_radar.h"
+#include "lib_radar2.h"
 
 unsigned long int saveTime=0,prev_Time=0;
 

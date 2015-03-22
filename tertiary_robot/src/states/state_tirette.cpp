@@ -29,7 +29,7 @@ sState* testTirette()
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
     	{
-        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenInit;
+        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajRedInit;
         else return &sTrajYellowInit;
     	}
     return 0;
@@ -38,6 +38,12 @@ sState* testTirette()
 void initTirette(sState *prev)
 	{
     move(0,0);
+
+    launcherServoDown.write(LAUNCHER_DOWN_POS_1);
+
+    launcherServoUp.write(LAUNCHER_UP_POS_0);
+
+    launcherServoNet.write(LAUNCHER_NET_POS_0 );
 #ifdef DEBUG
     Serial.println("j'entre en tirette");
 #endif

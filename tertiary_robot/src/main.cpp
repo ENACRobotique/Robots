@@ -12,11 +12,10 @@
 #include "states/state_hardinit.h"
 #include "states/state_blink.h"
 #include "Arduino.h"
-#include "lib_radar.h"
+#include "lib_radar2.h"
 #include "lib_motor.h"
 #include "lib_wall.h"
 #include "lib_line.h"
-#include "lib_attitude.h"
 
 
 
@@ -39,7 +38,7 @@ void setup(){
 #ifdef DEBUG
     Serial.println("sortie init mat");
 #endif
-    current->init(NULL);
+    current->init(0);
     }
 
 }
@@ -52,7 +51,7 @@ void loop(){
     static char ledState=0;
     if ( (millis()-prevBlink)>500){
         ledState^=1;
-        //digitalWrite(PIN_LED,ledState);
+        digitalWrite(PIN_LED,ledState);
         prevBlink=millis();
     }
 #endif
@@ -62,7 +61,6 @@ void loop(){
     if (current->flag & BIT(E_RADAR) ) radarRefresh();
     if (current->flag & BIT(E_MOTOR) ) motAsser();
     if (current->flag & BIT(E_LINE) )  asserLine();
-    if (current->flag & BIT(E_ATTITUDE) )  attitudeAsser();
 
     sState *next;
     if (current->testFunction){
