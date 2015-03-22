@@ -18,6 +18,10 @@ extern "C"{
 #include "messages.h"
 #include "tools.h"
 
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
+
 #define TRAJ_ORIENT 0 //1 active else 0
 
 #define ROUND(a) ((int)((a) + 0.5))
@@ -29,7 +33,6 @@ unsigned int Net::_tid = 0; //the same tid is used by all path object
 
 Net::Net() {
     // TODO Auto-generated constructor stub
-
 }
 
 Net::~Net() {
@@ -38,7 +41,7 @@ Net::~Net() {
 
 void Net::maintenace(){
 
-#if TRAJ_ORIENT || !NON_HOLONOMIC
+#if TRAJ_ORIENT || HOLONOMIC
     convTrajToTrajOrient();
     sendPathOrientToNet();
 #else

@@ -28,6 +28,10 @@ extern "C"{
 #include "bn_intp.h"
 }
 
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
+
 Path::Path() : _dist(0), _path_len(0){
 }
 
@@ -65,7 +69,7 @@ void Path::maintenace(){
         prevTime = millis();
     }
 
-#if NON_HOLONOMIC
+#if !HOLONOMIC
     static unsigned int prevTime2 = 0;
     if(millis() - prevTime2 > 100){
         updateNoHaftTurn();
@@ -93,7 +97,7 @@ void Path::sendRobot() {
 
     length();
 
-#if !NON_HOLONOMIC
+#if HOLONOMIC
     convPathToPathOrient();
 #endif
 

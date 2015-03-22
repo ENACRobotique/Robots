@@ -20,10 +20,11 @@ extern "C"{
 #include <malloc.h>
 }
 
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
 
 using namespace std;
-
-
 
 void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
     int i;
@@ -68,7 +69,7 @@ void printEndTraj() {
 void loadingPath(sPath_t _path, int num) {
     //path = _path; //FIXME
 
-#ifdef NON_HOLONOMIC
+#if !HOLONOMIC
     if (num >= 0) {
         sPt_t _ep = listObj[num]->getDestPoint();
         float  angle = listObj[num]->getDestPointOrient();
@@ -172,11 +173,7 @@ int next_obj(void) {
     }
 
     if (tmp_inx >= 0) { //Update end of trajectory
-#ifdef NON_HOLONOMIC
         loadingPath(listObj[tmp_inx]->getPath(), tmp_inx);
-#else
-        loadingPath(listObj[tmp_inx]->path());
-#endif
         obs[N - 1].c = listObj[tmp_inx]->getDestPoint();
         obs_updated[N - 1]++;
     }

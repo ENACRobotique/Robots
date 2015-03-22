@@ -6,7 +6,7 @@
 #include "error.h"
 #include "math_types.h"
 
-#define NON_HOLONOMIC 0 //exist if the robot isn't an holonomic robot (for backward compatible)
+#define HOLONOMIC 1 // 0 if the robot isn't an holonomic robot (for backward compatibility)
 
 //#define AS_DEBUG 1
 #define AS_STATS
@@ -123,7 +123,7 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 
 // number of physical obstacles (16)
 
-#if NON_HOLONOMIC
+#if !HOLONOMIC
 #define N (49)
 #else
 #define N (43)
