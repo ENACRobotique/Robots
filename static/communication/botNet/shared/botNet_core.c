@@ -432,14 +432,8 @@ int bn_receive(sMsg *msg){
 void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
     int i=0;
 
-    // if this message is for this node  XXX enable I2C linkcast rx
-    if ( ifFrom!=IF_LOCAL && bn_isLocalAddress(msg->header.destAddr) ){
-        routeInfo->ifTo=IF_LOCAL;
-        routeInfo->nextHop=msg->header.destAddr;
-        return;
-    }
-    //if this message is from this node , for this node AND not a linkcast one (ie. dest address is exactly ours), treat it like an incoming message for this node
-    if ( ifFrom==IF_LOCAL && bn_isLocalAddress(msg->header.destAddr) ){
+    // if this message is for this node, "send" it to local interface.
+    if ( bn_isLocalAddress(msg->header.destAddr) ){
         routeInfo->ifTo=IF_LOCAL;
         routeInfo->nextHop=msg->header.destAddr;
         return;
