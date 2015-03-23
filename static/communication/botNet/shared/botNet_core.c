@@ -439,18 +439,32 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         return;
     }
 
-    // if this msg's destination is directly reachable and the message does not come from the associated interface, send directly to dest
 #if MYADDRX!=0
+    // xxx use the following code as an example to implement linkcast over other link technologies
+    // if this msg's destination is the local xbee subnet (it is not a unicast message for us, otherwise it would have been catched earlier)
     if ((msg->header.destAddr & SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ){
+        // if the message does not come from the associated interface, send directly to dest
         if (ifFrom!=IF_XBEE ) {
             routeInfo->ifTo=IF_XBEE;
             routeInfo->nextHop=msg->header.destAddr;
+            // if the message is a linkcast that we should also receive, "send" also a local copy to self (put a copy in buffer for local reception)
+            if (bn_isLinkcast(msg->header.destAddr)){
+                sMsgIf *copy=bn_getAllocInBufLast();
+                if (copy){
+                    copy->msg=(*msg);
+                    copy->msg.header.destAddr=MYADDRX;
+                    copy->iFace=ifFrom;
+                }
+                // copy blatantly dropped if no space is available in memory
+            }
             return;
         }
+        // If the message is received from the Xbee interface and is a linkcast, we should receive it (we already know that the destination is the local subnet)
         else if (bn_isLinkcast(msg->header.destAddr)){
             routeInfo->ifTo=IF_LOCAL;
-            routeInfo->nextHop=msg->header.destAddr;
+            routeInfo->nextHop=MYADDRX;
         }
+        // otherwise, drop it (routing error from the previous node)
         else {
             routeInfo->ifTo=IF_DROP;
             return;
