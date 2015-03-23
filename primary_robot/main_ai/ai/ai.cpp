@@ -23,6 +23,10 @@ extern "C"{
 #include <tools.h>
 #include "communications.h"
 
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
+
 using namespace std;
 
 std::vector<Obj*> listObj;
@@ -160,13 +164,11 @@ int stepAI() {
                     if ((current_obj = next_obj()) != -1) {
                         pt_select = listObj[current_obj]->getDestPoint();
                         logs << INFO << "Selected point is (" << pt_select.x << " ; " << pt_select.y << ")";
-#ifdef NON_HOLONOMIC
+#if !HOLONOMIC
                   /*      int k = listObj[current_obj]->_EP;
                         sObjPt_t ep = listObj[current_obj]->entryPoint(k);
                         updateEndTraj(ep.angleEP,  &ep.c, ep.radiusEP);
                         printEndTraj();*/
-#else
-                        path.convPathForHolonomic();
 #endif
                         sPath_t path_loc = listObj[current_obj]->getPath();
                         path.addPath2(path_loc);

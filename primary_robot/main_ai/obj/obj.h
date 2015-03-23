@@ -12,6 +12,10 @@
 #include "types.h"
 #include <vector>
 
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
+
 using namespace std;
 
 typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
@@ -19,7 +23,7 @@ typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
 typedef struct {
     eTypeEntry_t type;      //type of access
 
-#if NON_HOLONOMIC
+#if !HOLONOMIC
     float radius;           //size of the 3 approach circles
 #endif
 

@@ -4,15 +4,15 @@
  *  Created on: 11 févr. 2015
  */
 
-#include <speed_controller.h>
+#include "params.h"
 
-#define SHIFT_PID (8)
+#include <speed_controller.h>
 
 void spdctlr_init(speed_controller_t* sc, encoder_t* enc) {
     sc->enc = enc;
     sc->cmd_cache = 0;
 
-    pid_init(&sc->pid, 2 << SHIFT_PID, (2 * 2 / 1) << (SHIFT_PID - 3), /*(2*2/1)<<(SHIFT_PID-3)*/0, 900 << SHIFT_PID, SHIFT_PID);
+    pid_init(&sc->pid, 1 << SHIFT_PID_SPD, 0, 0, 0, SHIFT_PID_SPD);
 }
 
 void spdctlr_update(speed_controller_t* sc, int setpoint) {

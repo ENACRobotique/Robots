@@ -30,7 +30,7 @@ typedef struct {
     int32_t c_y;                    // (I << SHIFT)
     int32_t c_r;                    // (>0 ClockWise | <0 CounterClockWise) (I << SHIFT)
     int32_t arc_len;                // (I << SHIFT)
-    int32_t arc_spd;                // (IpP << SHIFT)
+    int32_t arc_spd;                // >=0 (IpP << SHIFT)
 
     // extra packed data
     union {

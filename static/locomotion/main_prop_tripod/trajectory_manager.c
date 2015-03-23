@@ -134,6 +134,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
                 theta_sp = tm->gtheta;
                 break;
             }
+
+            // time is ok, let's go
+            tm->state = TM_STATE_FOLLOWING;
         }
         /* no break */
     case TM_STATE_FOLLOWING:
@@ -215,7 +218,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
                 switch(sc->state){
                 case TM_CACHE_STATE_ARC:
                     // compute angular speed
-                    sc->arc.omega_z = (((int64_t)s->arc_spd << (RAD_SHIFT + SHIFT)) / (int64_t)s->c_r);
+                    if(s->c_r){
+                        sc->arc.omega_z = (((int64_t)s->arc_spd << (RAD_SHIFT + SHIFT)) / (int64_t)s->c_r);
+                    }
 
                     // compute arc total duration in periods
                     sc->arc.dur = (int32_t)(s_next->seg_start_date - s->arc_start_date) / USpP;
@@ -255,7 +260,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                 // Compute the delta of time on the arc
                 dur = t - s->arc_start_date;
-                dur += PER_CTRL_LOOP; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                dur += PER_CTRL_LOOP_US; // to anticipate the position (might be updated later if doesn't anticipate enough)
                 dur /= USpP; // convert duration to periods (from microseconds)
 
                 int alpha = -dur * sc->arc.omega_z; // (in rad << (RAD_SHIFT + SHIFT))
@@ -287,7 +292,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                 // compute current duration from start of line
                 dur = t - s->seg_start_date;
-                dur += PER_CTRL_LOOP; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                dur += PER_CTRL_LOOP_US; // to anticipate the position (might be updated later if doesn't anticipate enough)
                 dur /= USpP; // convert duration to periods (from microseconds)
 
                 // compute next position set point (get speed along x and y in cache to avoid storing it in tm and calculating it each loop)
@@ -305,13 +310,13 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
             // ensures dtheta is of the right sign
             if(dir) {
-                while(dtheta > 0) {
-                    dtheta -= (issPI << 1 /* 2*PI */); // if dir==1, dtheta must be negative
+                while(dtheta < 0) {
+                    dtheta += (issPI << 1 /* 2*PI */); // if dir==1, dtheta must be positive
                 }
             }
             else {
-                while(dtheta < 0) {
-                    dtheta += (issPI << 1 /* 2*PI */); // if dir==0, dtheta must be positive
+                while(dtheta > 0) {
+                    dtheta -= (issPI << 1 /* 2*PI */); // if dir==0, dtheta must be negative
                 }
             }
 

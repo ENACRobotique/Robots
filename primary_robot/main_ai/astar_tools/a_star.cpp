@@ -96,7 +96,7 @@ void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {
                 // arc section
                 path->path[i].obs = obs[O(current.o2)];
                 path->path[i].obs.r = fabs(path->path[i].obs.r) * (1 - 2 * DIR(current.o2)); // r>0 CW/A ; r<0 CCW/B
-                if (i == path->path_len - 1) {
+                if ((unsigned)i + 1 == path->path_len) {
                     path->path[i].arc_len = 0.;
                 }
                 if (i > 0) {

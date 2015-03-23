@@ -9,16 +9,20 @@
 
 #include <iostream>
 
-#include <geometry_tools.h>
 #include "math_ops.h"
 #include "obj_tools.h"
 #include "a_star.h"
 #include "tools.h"
 #include "ai_tools.h"
+#include "GeometryTools.h"
 
 extern "C"{
 #include "millis.h"
 }
+
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
 
 int testInObs(sPt_t *p) { //retourne le numéro de l'obstable si la position est a l'interieur de celui ci
     //FIXME si le robot dans plusieurs obstable
@@ -70,14 +74,21 @@ void Obj::addAccess(sObjEntry_t &access){
  * //TODO Considering the orientation of the robot
  */
 sNum_t Obj::update(sPt_t posRobot) {
-    int g, m, n;
+    int n;
+#if !HOLONOMIC
+    int g, m;
+#endif
     sPath_t path_loc;
 
     _dist = -1;
     obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
     logs << INFO << "--------------------------------------------------------------";
+
     if ((n = testInObs(&obs[0].c)) != 0) {
-        projectPoint(posRobot.x, posRobot.y, obs[n].r, obs[n].c.x, obs[n].c.y, &obs[0].c);
+        Point2D<float> p(posRobot.x, posRobot.y);
+        Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
+        p = c.projecte(p);
+        obs[0].c = {p.x, p.y};
         logs << INFO << "Robot in obstacle : " << n;
     }
 
@@ -87,14 +98,14 @@ sNum_t Obj::update(sPt_t posRobot) {
             case E_POINT :
                 logs << DEBUG << "Access type POINT";
                 obs[N - 1].c = i.pt.p;
-#if NON_HOLONOMIC
+#if !HOLONOMIC
                 updateEndTraj(i.pt.angle, &i.pt.p, i.radius);
 #endif
             break;
             case E_CIRCLE:
                 logs << DEBUG << "Access type CIRCLE";
                 obs[N - 1].c = i.cir.c;
-#if NON_HOLONOMIC
+#if !HOLONOMIC
                 obs[N - 2].active = 0;
                 obs[N - 3].active = 0;
                 obs[N - 4].active = 0;
@@ -110,7 +121,7 @@ sNum_t Obj::update(sPt_t posRobot) {
                 logs << ERR << "Unknown type of access to objective";
         }
 
-#if NON_HOLONOMIC
+#if !HOLONOMIC
         if ((g = testInObs(&obs[0].c)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
             projectPoint(posRobot.x, posRobot.y, obs[g].r, obs[g].c.x, obs[g].c.y, &obs[0].c);
             if ((m = testInObs(&obs[0].c)) != 0) { //Cas la projection se retrouve dans un obstacle après la premier projection

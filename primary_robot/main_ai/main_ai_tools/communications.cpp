@@ -32,8 +32,8 @@ extern "C"{
  * If the interface is critical a new ping is send in loop and a message error is print.
  */
 void sendPing(){
-    int state = 0, ret ;
 /*
+    int state = 0, ret ;
     while(1){
         switch(state){
             //Minimum necessary
@@ -301,7 +301,7 @@ void checkInbox(int verbose){
             ihm.receivedNewIhm(msgIn.payload.ihmStatus);
             break;
         default:
-            cout << "[WARNING] message type not define or doesn't exist" << endl << endl;
+            cout << "[WARNING] message type not define or doesn't exist" << eType2str((E_TYPE)msgIn.header.type) << endl;
     }
 }
 

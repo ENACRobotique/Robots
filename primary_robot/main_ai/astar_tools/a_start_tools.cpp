@@ -13,6 +13,10 @@ extern "C"{
 }
 #endif
 
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
+
 #define CHECK_LIMITS
 
 // array of physical obstacles (256B)
@@ -75,7 +79,7 @@ sObs_t obs[] = {
     {{300 - 39.,121.}, 2. + R_ROBOT, 1, 1, 1},
     {{300 - 20.,121.}, 2. + R_ROBOT, 1, 1, 1},
 
-#if NON_HOLONOMIC
+#if !HOLONOMIC
     //Cercles du robot anti-demi-tour
     {{0., 0. }, 0, 0, 0, 1}, //42
     {{0., 0. }, 0, 0, 0, 1},

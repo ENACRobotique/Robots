@@ -18,13 +18,13 @@
 using namespace std;
 
 typedef struct{
-    float t1;   // in us (synchronized time):
-    float t2;
+    uint32_t t1;   // in us (synchronized time):
+    uint32_t t2;
 
     sPt_t p1;
     sPt_t p2;
 
-    sObs_t obs;//TODO change in circle type with the new math tools
+    sObs_t obs;
 
     float theta1;
     float theta2;

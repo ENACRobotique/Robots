@@ -44,22 +44,23 @@ void trajctlr_init(trajectory_controller_t* tc, const int32_t mat_rob2pods[NB_PO
     }
 
     // Init PID
-    pid_init(&tc->pid_traj, 1, 0, 0, 0, 0); // TODO find good values
-    pid_init(&tc->pid_orien, 1, 0, 0, 0, 0); // TODO find good values
+    pid_init(&tc->pid_xtraj, 1 << SHIFT_PID_TRAJ_POS, 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
+    pid_init(&tc->pid_ytraj, 1 << SHIFT_PID_TRAJ_POS, 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
+    pid_init(&tc->pid_orien, 1 << SHIFT_PID_TRAJ_ANG, 0, 0, 0, SHIFT_PID_TRAJ_ANG); // TODO find good values
 }
 
 void _update_pos_orien(trajectory_controller_t* tc, MT_VEC *spd_pv_rob);
 
 void trajctlr_begin_update(trajectory_controller_t* tc) {
     int i;
-    MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_pv, V2_pv, V3_pv)
-    MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT);// (Vx_pv, Vy_pv, Oz_pv)
+    MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_pv, V2_pv, V3_pv) (in IpP<<SHIFT)
+    MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT);// (Vx_pv, Vy_pv, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
 
     // Gets speed process values from the three encoders
     // => V1_pv, V2_pv, V3_pv and backups the nbticks
     for (i = 0; i < NB_PODS; i++) {
         encoder_update(&tc->encs[i]);
-        spd_pv_pods.ve[i] = encoder_get(&tc->encs[i]);
+        spd_pv_pods.ve[i] = encoder_get(&tc->encs[i]) << SHIFT;
     }
 
     // Send previously computed command to the motors
@@ -81,8 +82,8 @@ void _orientation_control(trajectory_controller_t* tc, int theta_sp, MT_VEC* spd
 
 void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int theta_sp) {
     int i;
-    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv)
-    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd)
+    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
+    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
 
     // Trajectory control
     //(some pid... ; gives speed orientation set point: Vx_cmd, Vy_cmd)
@@ -96,9 +97,9 @@ void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int th
     // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
     mt_mv_mlt(&tc->M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
 
-    // call speed controller with V1_cmd, V2_cmd, V3_cmd
+    // call speed controller with V1_cmd, V2_cmd, V3_cmd (in IpP<<SHIFT)
     for (i = 0; i < NB_PODS; i++) {
-        spdctlr_update(&tc->spd_ctls[i], spd_cmd_pods.ve[i]);
+        spdctlr_update(&tc->spd_ctls[i], spd_cmd_pods.ve[i] >> SHIFT);
         tc->next_spd_cmds[i] = spdctlr_get(&tc->spd_ctls[i]);
     }
 }
@@ -146,25 +147,9 @@ void _update_pos_orien(trajectory_controller_t* tc, MT_VEC* spd_pv_rob) {
 }
 
 void _trajectory_control(trajectory_controller_t* tc, int x_sp, int y_sp, MT_VEC* spd_cmd_rob) {
-//    int errx, erry;
-//
-//    // Limit acceleration
-//    errx = x_sp - ctl->x;
-//    erry = y_sp - ctl->y;
-//
-//    if (abs(errx) >= MAX_ACC) {
-//        errx = SIGN(errx) * MAX_ACC;
-//        x_sp = ctl->x + errx;
-//    }
-//
-//    if (abs(erry) >= MAX_ACC) {
-//        erry = SIGN(erry) * MAX_ACC;
-//        y_sp = ctl->y + erry;
-//    }
-
     // Compute the speeds command Vx_cmd, Vy_cmd
-    spd_cmd_rob->ve[0] = pid_update(&tc->pid_traj, x_sp, tc->x);
-    spd_cmd_rob->ve[1] = pid_update(&tc->pid_traj, y_sp, tc->y);
+    spd_cmd_rob->ve[0] = pid_update(&tc->pid_xtraj, x_sp >> SHIFT, tc->x >> SHIFT) << SHIFT;
+    spd_cmd_rob->ve[1] = pid_update(&tc->pid_ytraj, y_sp >> SHIFT, tc->y >> SHIFT) << SHIFT;
 }
 
 void _orientation_control(trajectory_controller_t* tc, int theta_sp, MT_VEC* spd_cmd_rob) {
@@ -176,16 +161,7 @@ void _orientation_control(trajectory_controller_t* tc, int theta_sp, MT_VEC* spd
         theta_sp += (issPI << 1);
     }
 
-//    int erro;
-//
-//    // Limit angular acceleration
-//    erro = o_sp - ctl->o;
-//
-//    if (abs(erro) >= MAX_ANG_ACC) {
-//        erro = SIGN(erro) * MAX_ANG_ACC;
-//        o_sp = ctl->o + erro;
-//    }
 
     // Compute the angular speed command Omega_cmd
-    spd_cmd_rob->ve[2] = pid_update(&tc->pid_orien, theta_sp, tc->theta);
+    spd_cmd_rob->ve[2] = pid_update(&tc->pid_orien, theta_sp >> SHIFT, tc->theta >> SHIFT) << SHIFT; // do not right shift inputs of RAD_SHIFT, keep resolution
 }
