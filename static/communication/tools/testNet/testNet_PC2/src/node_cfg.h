@@ -29,5 +29,6 @@
 #define UART_WAITFRAME_TIMEOUT 10       //in µs
 #define UART_READBYTE_TIMEOUT 10000    //in µs
 
+//#define DEBUG_PC_RT
 
 #endif /* NODE_CFG_H_ */

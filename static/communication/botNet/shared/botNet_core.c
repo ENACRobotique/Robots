@@ -209,7 +209,7 @@ int bn_sendAck(sMsg *msg){
     uint8_t tmpSeqNum=seqNum;
 
     // check if user is asking for a linkcast ack
-    if ( (tmpAddr & !SUBNET_MASK) == (BIT(DEVICE_ADDR_SIZE)-1) ) return -ERR_BN_NO_LCAST_ADDR;
+    if ( bn_isLinkcast(tmpAddr) ) return -ERR_BN_NO_LCAST_ADDR;
 
     // sets ack bit
     msg->header.ack=1;
@@ -432,28 +432,14 @@ int bn_receive(sMsg *msg){
 void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
     int i=0;
 
-    // if this message is for this node (including linkcast possibilities) but not from this node XXX enable I2C linkcast rx
-    if ( ifFrom!=IF_LOCAL &&
-        (
-            ( (msg->header.destAddr & SUBNET_MASK)==(MYADDRX & SUBNET_MASK) && (msg->header.destAddr & MYADDRX & DEVICEX_MASK) ) ||
-            msg->header.destAddr==MYADDRI ||
-            msg->header.destAddr==MYADDRU ||
-            msg->header.destAddr==MYADDRD
-        )
-    ){// xxx improve test
+    // if this message is for this node  XXX enable I2C linkcast rx
+    if ( ifFrom!=IF_LOCAL && bn_isLocalAddress(msg->header.destAddr) ){
         routeInfo->ifTo=IF_LOCAL;
         routeInfo->nextHop=msg->header.destAddr;
         return;
     }
     //if this message is from this node , for this node AND not a linkcast one (ie. dest address is exactly ours), treat it like an incoming message for this node
-    if ( ifFrom==IF_LOCAL &&
-        (
-            msg->header.destAddr==MYADDRX ||
-            msg->header.destAddr==MYADDRI ||
-            msg->header.destAddr==MYADDRU ||
-            msg->header.destAddr==MYADDRD
-        )
-    ){
+    if ( ifFrom==IF_LOCAL && bn_isLocalAddress(msg->header.destAddr) ){
         routeInfo->ifTo=IF_LOCAL;
         routeInfo->nextHop=msg->header.destAddr;
         return;

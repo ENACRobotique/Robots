@@ -56,7 +56,7 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom);
 
 
 /*
- * bn_isLinkcast : test if an adress is a linkcast one
+ * bn_isLinkcast : test if an address is a linkcast one
  * Arguments :
  *      addr : adress to test
  * Return Value :
@@ -66,6 +66,44 @@ int bn_forward(const sMsg *msg, E_IFACE ifFrom);
 static inline int bn_isLinkcast(bn_Address addr){
     if ( !(addr & LCAST_SUBNET) || (addr & ~SUBNET_MASK) != (BIT(DEVICE_ADDR_SIZE)-1) ) return 0;
     return 1;
+}
+
+/*
+ * bn_isLocalAddress : test if an address is equal to one of this node's addresses
+ * Arguments :
+ *      addr : adress to test
+ * Return Value :
+ *      1 if  the adress is a local one;
+ *      0 if it is not.
+ */
+static inline int bn_isLocalAddress(bn_Address addr){
+    if (    addr==MYADDRX ||
+            addr==MYADDRI ||
+            addr==MYADDRU ||
+            addr==MYADDRD ) {
+        return 1;
+    }
+    return 0;
+}
+
+/*
+ * bn_isLocalSubnet : test if an address is on any subnet this node is also on (i.e. this address is directly reachable).
+ * Works also with subnet addresses
+ * Arguments :
+ *      addr : adress to test
+ * Return Value :
+ *      1 if  the local node is on the same subnet as address;
+ *      0 if it is not.
+ */
+static inline int bn_isLocalSubnet(bn_Address addr){
+    if (    (addr & SUBNET_MASK) == (MYADDRX & SUBNET_MASK) ||
+            (addr & SUBNET_MASK) == (MYADDRI & SUBNET_MASK) ||
+            (addr & SUBNET_MASK) == (MYADDRU & SUBNET_MASK) ||
+            (addr & SUBNET_MASK) == (MYADDRD & SUBNET_MASK)
+    ) {
+        return 1;
+    }
+    return 0;
 }
 
 #ifdef __cplusplus

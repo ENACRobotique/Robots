@@ -27,7 +27,7 @@ extern volatile bn_Address debug_addr;
 int bn_printDbg(const char * str);
 int bn_printfDbg(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
 int bn_debugSendAddr(bn_Address dest);
-int bn_debugSendAddrBroadcast(bn_Address dest);
+int bn_debugSendAddrLinkcast(bn_Address dest);
 
 #ifdef __cplusplus
 }

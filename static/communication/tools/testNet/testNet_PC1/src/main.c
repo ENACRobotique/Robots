@@ -132,7 +132,7 @@ int main(){
                 case 'D' :
                     printf("enter broadcast destination address\n");
                     scanf("%hx",&destAd);
-                    if ( (err=bn_debugSendAddrBroadcast(destAd)) > 0){
+                    if ( (err=bn_debugSendAddrLinkast(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;
                     }

@@ -50,7 +50,7 @@ int main(){
     bn_attach(E_ROLE_SETUP,role_setup);
 
 
-    printf("init terminé, mon adresse est : %hx\n",MYADDRU);
+    printf("init terminée, mon adresse est : %hx\n",MYADDRU);
 
     signal(SIGINT, intHandler);
     printf("listening, CTRL+C  for menu\n");
@@ -65,7 +65,7 @@ int main(){
         //message reception
         if ( (ret=bn_receive(&msgIn))>0 ){
             // some display and message handling
-            printf("message received from %hx, type : %u\n",msgIn.header.srcAddr,msgIn.header.type);
+            printf("message received from %hx, type : %u, payload size %d\n",msgIn.header.srcAddr,msgIn.header.type,msgIn.header.size);
             switch (msgIn.header.type){
             case E_DEBUG : printf("%s\n",msgIn.payload.debug); break;
             case E_ACK_RESPONSE : printf("ack response : %d, ack addr %hx\n",msgIn.payload.ack.ans,msgIn.payload.ack.addr); break;

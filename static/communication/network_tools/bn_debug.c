@@ -97,12 +97,14 @@ int bn_debugSendAddr(bn_Address dest){
     msg.payload.roleSetup.steps[1].role = ROLE_DEBUG;                   \
     msg.payload.roleSetup.steps[1].address = MYADDR;                    \
 
+    SETUP_DBG_MSG_BLOCK
+
     return bn_send(&msg);
 }
 
 /* bn_debugSendAddrBroadcast : broadcast version of bn_debugSendAddr
  */
-int bn_debugSendAddrBroadcast(bn_Address dest){
+int bn_debugSendAddrLinkast(bn_Address dest){
     sMsg msg = {{0}};
 
     SETUP_DBG_MSG_BLOCK

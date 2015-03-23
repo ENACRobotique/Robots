@@ -9,6 +9,7 @@
 //#include <stdio.h> // printf()
 
 #include "../../../../static/communication/botNet/shared/botNet_core.h"
+#include "../../../../static/communication/network_tools/bn_debug.h"
 #include "network_cfg.h"
 
 #include "roles.h"
@@ -53,10 +54,14 @@ void role_setup(sMsg *msg){
         switch(s->step){
         case UPDATE_ADDRESS:
             role_set_addr(s->role, s->address);
-//            printf("auto update address %hhu %hx\n", s->role, s->address);
+#ifdef DEBUG_ROLES
+            bn_printfDbg("auto update address %hhu %hx\n", s->role, s->address);
+#endif
             break;
         case UPDATE_ACTIONS:
-//            printf("auto update actions %s (=%hhu)\n", eType2str(s->type), s->type);
+#ifdef DEBUG_ROLES
+            bn_printfDbg("auto update actions %s (=%hhu)\n", eType2str(s->type), s->type);
+#endif
             switch(s->type){
             case E_DEBUG:
                 memcpy((void*)ACT_MSG_DBG, (void*)&s->actions, sizeof(*ACT_MSG_DBG));
