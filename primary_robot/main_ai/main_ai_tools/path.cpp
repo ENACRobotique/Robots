@@ -306,7 +306,7 @@ void Path::computeOrientPathForHolonomic(float theta_end_obj){
 //    diff = fabs(_path_orient.back().theta1 - theta_end_obj)/MAX_SPEED_ROT - _path_orient.back().seg_len/MAX_SPEED;
 //    if(diff < 0){
         _path_orient.back().theta2 = theta_end_obj;
-        _path_orient.back().rot1_dir = getPrincipalAngleValue(_path_orient.front().theta2 - _path_orient.front().theta1) > 0; // select shortest rotation
+        _path_orient.back().rot1_dir = getPrincipalAngleValue(_path_orient.back().theta2 - _path_orient.back().theta1) > 0; // select shortest rotation
 //    }
 //    else{
 //        float theta_inter = diff*MAX_SPEED_ROT;
