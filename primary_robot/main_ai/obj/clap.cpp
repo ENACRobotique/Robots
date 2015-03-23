@@ -12,6 +12,7 @@
 
 #include "math_types.h"
 #include "types.h"
+#include "tools.h"
 
 #ifndef HOLONOMIC
 #error "HOLONOMIC must be defined"
@@ -22,7 +23,7 @@ sPt_t obsClap[6]={{32., R_ROBOT}, {62., R_ROBOT}, {92., R_ROBOT}, {208. , R_ROBO
 Clap::Clap(unsigned int num) : Obj(E_CLAP), _num(num){
 
     if(num > 6){
-        cerr << "[Error] [clap.cpp] Num too big" << endl;
+        logs << ERR << "Num too big";
     }
     sObjEntry_t objEP;
     objEP.type = E_POINT;
