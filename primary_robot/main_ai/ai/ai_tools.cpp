@@ -7,7 +7,7 @@
 
 
 #include <ai_tools.h>
-#include <geometry_tools.h>
+#include <GeometryTools.h>
 #include <obj_tools.h>
 #include "math_ops.h"
 #include "ai.h"
@@ -168,7 +168,10 @@ void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de 
 
             obs_updated[i]++;
         }
-        projectPoint(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x, obs[i].c.y, &_current_pos);
+        Point2D<float> p(_current_pos.x, _current_pos.y);
+        Circle2D<float> c(obs[i].c.x, obs[i].c.y, obs[i].r);
+        p = c.projecte(p);
+        _current_pos = {p.x, p.y};
         if (sqrt(pow(_current_pos.x - obs[0].c.x, 2) + pow(_current_pos.y - obs[0].c.y, 2) < 2)) {
             memcpy(&obs[0].c, &_current_pos, sizeof(obs[0].c));
             obs_updated[0]++;

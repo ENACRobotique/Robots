@@ -9,12 +9,12 @@
 
 #include <iostream>
 
-#include <geometry_tools.h>
 #include "math_ops.h"
 #include "obj_tools.h"
 #include "a_star.h"
 #include "tools.h"
 #include "ai_tools.h"
+#include "GeometryTools.h"
 
 extern "C"{
 #include "millis.h"
@@ -83,8 +83,12 @@ sNum_t Obj::update(sPt_t posRobot) {
     _dist = -1;
     obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
     logs << INFO << "--------------------------------------------------------------";
+
     if ((n = testInObs(&obs[0].c)) != 0) {
-        projectPoint(posRobot.x, posRobot.y, obs[n].r, obs[n].c.x, obs[n].c.y, &obs[0].c);
+        Point2D<float> p(posRobot.x, posRobot.y);
+        Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
+        p = c.projecte(p);
+        obs[0].c = {p.x, p.y};
         logs << INFO << "Robot in obstacle : " << n;
     }
 
