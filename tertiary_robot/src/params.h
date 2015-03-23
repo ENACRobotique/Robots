@@ -53,28 +53,13 @@
 #define COLOR_RED HIGH
 #define COLOR_YELLOW LOW
 
-#define LAUNCHER_DOWN_POS_0 120
-#define LAUNCHER_DOWN_POS_1 20
-
-#define LAUNCHER_UP_POS_0 120
-#define LAUNCHER_UP_POS_1 20 //Droit
-
-
-
-#define LAUNCHER_NET_POS_0 100
-#define LAUNCHER_NET_POS_1 10
-
-#define ARM_RAISE_TIME 3000//in millis
-#define ARM_2WAY_FAST 500   //in millis
 
 #define UPPERCUT
 
 #define RADAR_SAFETY_DST 30 //in cm
 #define RADAR_SAFETY_TIME 500 //in ms
 
-#define TIME_READY_LAUNCHER 500 //in ms
-
-#define DEBUG 1
+#define DEBUG
 
 /* endDefines *********************************************/
 

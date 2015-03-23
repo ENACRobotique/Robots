@@ -39,11 +39,6 @@ void initTirette(sState *prev)
 	{
     move(0,0);
 
-    launcherServoDown.write(LAUNCHER_DOWN_POS_1);
-
-    launcherServoUp.write(LAUNCHER_UP_POS_0);
-
-    launcherServoNet.write(LAUNCHER_NET_POS_0 );
 #ifdef DEBUG
     Serial.println("j'entre en tirette");
 #endif

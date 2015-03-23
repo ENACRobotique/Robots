@@ -20,7 +20,7 @@ sState* testFunny(){
 
 
     if ((millis()-_matchStart) > TIME_MATCH_STOP)
-    	launcherServoNet.write(LAUNCHER_NET_POS_1);
+    	Serial.println("Go funny !");//do what you want to
     return 0;
 }
 void initFunny(sState *prev)

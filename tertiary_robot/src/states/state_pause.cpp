@@ -16,8 +16,7 @@ sState* testPause(){
     if( (millis()-lastSeen)>= RADAR_SAFETY_TIME ) return pausePrevState;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sFunny;
     if ((millis()-_matchStart) > TIME_MATCH_LAUN ) {
-	launcherServoUp.write(10);
-	launcherServoNet.write(LAUNCHER_NET_POS_1);}
+	launcherServoUp.write(10);}
     return 0;
 }
 

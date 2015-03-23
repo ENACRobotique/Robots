@@ -39,11 +39,9 @@ void initHard(sState *prev){
     pinMode(PIN_LAUNCHER_2,OUTPUT);
     pinMode(PIN_LAUNCHER_NET,OUTPUT);
     launcherServoUp.attach(PIN_LAUNCHER_1);
-    launcherServoUp.write(LAUNCHER_UP_POS_0);
     launcherServoDown.attach(PIN_LAUNCHER_2);
-    launcherServoDown.write(LAUNCHER_DOWN_POS_0);
     launcherServoNet.attach(PIN_LAUNCHER_NET);
-    launcherServoNet.write(LAUNCHER_NET_POS_0);
+
 
 
     //wall
