@@ -14,6 +14,7 @@
 #include "lib_radar.h"
 #include "lib_line.h"
 #include "lib_wall.h"
+#include "lib_trajectory.h"
 #include "../tools.h"
 #include "../params.h"
 #include "state_traj.h"
@@ -25,7 +26,7 @@
 #include "state_lineMonit.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
-int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
+//int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 void initTrajRedInit(sState *prev)
 	{
 		#ifdef DEBUG
@@ -303,23 +304,3 @@ sState sTrajRedFinal={
         &deinitTrajRedFinal,
         &testTrajRedFinal
 };
-//******************************************************************************************************************
-int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
-
-    if (!(*prev_millis)) *prev_millis=millis();
-    move(tab[*i].speed,tab[*i].angle);
-
-
-    if ( (millis()-*prev_millis-*pausetime)>tab[*i].duration ) {
-        (*i)++;
-        *prev_millis=millis();
-        *pausetime=0;
-    }
-    if ( tab[*i].angle==0 && tab[*i].duration==0 && tab[*i].speed==0) {
-        *i=0;
-        *prev_millis=0;
-        return 1;
-    }
-
-    return 0;
-}
