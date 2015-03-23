@@ -11,6 +11,7 @@
 #include "trajectory_controller.h"
 #include "trajectory_manager.h"
 #include "global_errors.h"
+#include "bn_intp.h"
 
 /*
  *      y axis
@@ -52,6 +53,8 @@ int main() {
     trajmngr_init(&traj_mngr, mat_rob2pods);
 
     // BotNet initialization (i²c + uart)
+    bn_attach(E_ROLE_SETUP, role_setup);
+    bn_intp_install();
     ret = bn_init();
     if(ret < 0){
         printf("bn_init() failed, err: %s (%i)\n", getErrorStr(-ret), -ret);
@@ -94,9 +97,9 @@ int main() {
         }
 
         // Automatic control
-        if (micros() - prevControl_us >= PER_CTRL_LOOP) {
+        if (micros() - prevControl_us >= PER_CTRL_LOOP_US) {
             // If there is too much delay we skip to the next increment of the loop
-            if (micros() - prevControl_us > PER_CTRL_LOOP_CRITIC) {
+            if (micros() - prevControl_us > PER_CTRL_LOOP_CRITIC_US) {
                 prevControl_us = micros();
                 trajmngr_reset(&traj_mngr);
                 continue;

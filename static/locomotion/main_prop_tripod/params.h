@@ -40,7 +40,6 @@
  */
 
 #define SHIFT (VEC_SHIFT)
-#define SHIFT_PID (8)
 #define dSHIFT ((double)(1<<SHIFT))
 #define iROUND(d) ((int)( (d)+0.5 )) // the +0.5 is here to get a round instead of a floor when casting to int
 #define isROUND(d) iROUND((d)*dSHIFT)
@@ -52,9 +51,7 @@
 #endif
 
 #define PI (M_PI)
-#define sPI (PI*dSHIFT)
-#define ssPI (PI*dASHIFT)
-#define isPI iROUND(sPI)  // (rad<<SHIFT)
+#define ssPI (PI*dASHIFT) // (rad<<(RAD_SHIFT+SHIFT))
 #define issPI iROUND(ssPI)
 
 #define WDIAM (3.25*2.54)  // wheel diameter (cm)
@@ -94,9 +91,12 @@
 #define PWM_RANGE 1024  // If you want to change the resolution of the motor command, just don't change this value, you're doing it wrong...
 
 // Parameters for control loops
-#define PER_CTRL_LOOP 20000 // in µs
-#define PER_CTRL_LOOP_CRITIC 30000 // in µs
+#define PER_CTRL_LOOP_US 20000 // in µs
+#define PER_CTRL_LOOP_CRITIC_US 30000 // in µs
 #define SPEED_NOMI 20 // in cm/s
+#define SHIFT_PID_TRAJ_POS (4)
+#define SHIFT_PID_TRAJ_ANG (4)
+#define SHIFT_PID_SPD (4)
 
 // Simulator parameters (when code running on linux)
 #ifdef ARCH_X86_LINUX

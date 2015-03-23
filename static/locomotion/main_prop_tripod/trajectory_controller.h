@@ -42,7 +42,8 @@ typedef struct {
     int theta; // (in R << (RAD_SHIFT + SHIFT))
 
     // PID
-    PID_t pid_traj;
+    PID_t pid_xtraj;
+    PID_t pid_ytraj;
     PID_t pid_orien;
 
     // Hardware objects
@@ -51,7 +52,7 @@ typedef struct {
 
     // Control object for speed of a POD
     speed_controller_t spd_ctls[NB_PODS];
-    int next_spd_cmds[NB_PODS];
+    int next_spd_cmds[NB_PODS]; // in IpP
 } trajectory_controller_t;
 
 void trajctlr_init(trajectory_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);

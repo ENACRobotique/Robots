@@ -51,7 +51,7 @@ typedef struct {
                 int dur; // (periods)
             } line;
             struct {
-                int omega_z; // (in radpP << (RAD_SHIFT + SHIFT))
+                int omega_z; // (>0 ClockWise | <0 CounterClockWise) (in radpP << (RAD_SHIFT+SHIFT))
 
                 int dur; // (periods)
             } arc;
