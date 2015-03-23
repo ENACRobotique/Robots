@@ -256,67 +256,71 @@ void Path::computeTimePathForHolonomic(){
     }
 }
 
+float getPrincipalAngleValue(float a){
+    while(a > M_PI)
+        a -= 2*M_PI;
+    while(a < -M_PI)
+        a += 2*M_PI;
+    return a;
+}
+
 /*
  * Computes a orient path for holonomic robot
  */
 void Path::computeOrientPathForHolonomic(float theta_end_obj){
     //computes theta and rot_dir for all path
     for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        if((_path_orient[i].theta1 = atan2(_path_orient[i].p1.x - _path_orient[i].p2.x, _path_orient[i].p1.y - _path_orient[i].p2.y) - M_PI/6) > 0)
-            _path_orient[i].rot1_dir = true;
-        else
-            _path_orient[i].rot1_dir = false;
+        // in this case, the robot's orientation follows the linear speed vector
 
+        _path_orient[i].theta1 = atan2(_path_orient[i].p2.y - _path_orient[i].p1.y, _path_orient[i].p2.x - _path_orient[i].p1.x);
         _path_orient[i].theta2 = _path_orient[i].theta1;
-        float sig;
-        sVec_t v1, v2;
-        convPts2Vec(&_path_orient[i].p2, &_path_orient[i].p1, &v1);
-        convPts2Vec(&_path_orient[i].obs.c, &_path_orient[i].p1, &v2);
-        crossVecs(&v1, &v2, &sig);
-        if(sig >0)
-            _path_orient[i].rot2_dir = true;
-        else
-            _path_orient[i].rot2_dir = false;
+        _path_orient[i].rot1_dir = true; // unused because theta1 == theta2
+
+        // r>0 CW  => dir=0
+        // r<0 CCW => dir=1
+        _path_orient[i].rot2_dir = _path_orient[i].obs.r < 0;
     }
 
     //adjusts for the first element
     float theta = statuses.getLastOrient(ELT_PRIMARY);
-    float diff = fabs(_path_orient.front().theta1 - theta)/MAX_SPEED_ROT - _path_orient.front().seg_len/MAX_SPEED;
-    if(diff < 0){
+//    float diff = fabs(_path_orient.front().theta1 - theta /* XXX you need to get the principal angle value here */)/MAX_SPEED_ROT - _path_orient.front().seg_len/MAX_SPEED;
+//    if(diff < 0){
         _path_orient.front().theta1 = theta;
-    }
-    else{ //insert rotation
-        float theta_inter = diff*MAX_SPEED_ROT;
-        sTrajOrientEl_t traj;
-        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
-        traj.p2 = traj.p1;
-        traj.obs.c = traj.p1;
-        traj.obs.r = 0;
-        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
-        traj.theta2 = theta_inter;
-
-        _path_orient.front().theta1 = theta_inter;
-        _path_orient.push_front(traj);
-    }
+        _path_orient.front().rot1_dir = getPrincipalAngleValue(_path_orient.front().theta2 - _path_orient.front().theta1) > 0; // select shortest rotation
+//    }
+//    else{ //insert rotation
+//        float theta_inter = diff*MAX_SPEED_ROT;
+//        sTrajOrientEl_t traj;
+//        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
+//        traj.p2 = traj.p1;
+//        traj.obs.c = traj.p1;
+//        traj.obs.r = 0;
+//        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
+//        traj.theta2 = theta_inter;
+//
+//        _path_orient.front().theta1 = theta_inter;
+//        _path_orient.push_front(traj);
+//    }
 
     //adjusts for the last element
-    diff = fabs(_path_orient.back().theta1 - theta_end_obj)/MAX_SPEED_ROT - _path_orient.back().seg_len/MAX_SPEED;
-    if(diff < 0){
-        _path_orient.front().theta1 = theta_end_obj;
-    }
-    else{
-        float theta_inter = diff*MAX_SPEED_ROT;
-        sTrajOrientEl_t traj;
-        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
-        traj.p2 = traj.p1;
-        traj.obs.c = traj.p1;
-        traj.obs.r = 0;
-        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
-        traj.theta2 = theta_inter;
-
-        _path_orient.front().theta1 = theta_inter;
-        _path_orient.push_front(traj);
-    }
+//    diff = fabs(_path_orient.back().theta1 - theta_end_obj)/MAX_SPEED_ROT - _path_orient.back().seg_len/MAX_SPEED;
+//    if(diff < 0){
+        _path_orient.back().theta2 = theta_end_obj;
+        _path_orient.back().rot1_dir = getPrincipalAngleValue(_path_orient.front().theta2 - _path_orient.front().theta1) > 0; // select shortest rotation
+//    }
+//    else{
+//        float theta_inter = diff*MAX_SPEED_ROT;
+//        sTrajOrientEl_t traj;
+//        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
+//        traj.p2 = traj.p1;
+//        traj.obs.c = traj.p1;
+//        traj.obs.r = 0;
+//        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
+//        traj.theta2 = theta_inter;
+//
+//        _path_orient.back().theta1 = theta_inter;
+//        _path_orient.push_back(traj);
+//    }
 }
 
 /*
