@@ -94,6 +94,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>arduinolib/PCA9685</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/core/arduino/libraries/PCA9685</locationURI>
+		</link>
+		<link>
 			<name>arduinolib/Servo</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/static/core/arduino/libraries/Servo</locationURI>
