@@ -128,18 +128,15 @@ void _update_pos_orien(trajectory_controller_t* tc, MT_VEC* spd_pv_rob) {
     else if(tc->theta < -issPI) {
         tc->theta += (issPI << 1); // 2PI
     }
+    SINCOS(tc->theta, &tc->sin_theta, &tc->cos_theta);
 
     // speed in robot reference frame (in IpP<<SHIFT)
     int vx_rob = spd_pv_rob->ve[0];
     int vy_rob = spd_pv_rob->ve[1];
 
-    int ct; // cos theta (in <<SHIFT)
-    int st; // sin theta (in <<SHIFT)
-    SINCOS(tc->theta, &st, &ct);
-
     // speed in playground reference frame (in IpP<<SHIFT)
-    int vx_pg = (int32_t)(((int64_t)ct * (int64_t)vx_rob - (int64_t)st * (int64_t)vy_rob) >> SHIFT);
-    int vy_pg = (int32_t)(((int64_t)st * (int64_t)vx_rob + (int64_t)ct * (int64_t)vy_rob) >> SHIFT);
+    int vx_pg = (int32_t)(((int64_t)tc->cos_theta * (int64_t)vx_rob - (int64_t)tc->sin_theta * (int64_t)vy_rob) >> SHIFT);
+    int vy_pg = (int32_t)(((int64_t)tc->sin_theta * (int64_t)vx_rob + (int64_t)tc->cos_theta * (int64_t)vy_rob) >> SHIFT);
 
     // Update position in playground reference frame
     tc->x += vx_pg;
@@ -147,9 +144,13 @@ void _update_pos_orien(trajectory_controller_t* tc, MT_VEC* spd_pv_rob) {
 }
 
 void _trajectory_control(trajectory_controller_t* tc, int x_sp, int y_sp, MT_VEC* spd_cmd_rob) {
-    // Compute the speeds command Vx_cmd, Vy_cmd
-    spd_cmd_rob->ve[0] = pid_update(&tc->pid_xtraj, x_sp >> SHIFT, tc->x >> SHIFT) << SHIFT;
-    spd_cmd_rob->ve[1] = pid_update(&tc->pid_ytraj, y_sp >> SHIFT, tc->y >> SHIFT) << SHIFT;
+    // Compute the speeds command Vx_cmd, Vy_cmd (in playground reference frame)
+    int vx_pg = pid_update(&tc->pid_xtraj, x_sp >> SHIFT, tc->x >> SHIFT) << SHIFT;
+    int vy_pg = pid_update(&tc->pid_ytraj, y_sp >> SHIFT, tc->y >> SHIFT) << SHIFT;
+
+    // and in robot reference frame
+    spd_cmd_rob->ve[0] = (int32_t)(( (int64_t)tc->cos_theta * (int64_t)vx_pg + (int64_t)tc->sin_theta * (int64_t)vy_pg) >> SHIFT);
+    spd_cmd_rob->ve[1] = (int32_t)((-(int64_t)tc->sin_theta * (int64_t)vx_pg + (int64_t)tc->cos_theta * (int64_t)vy_pg) >> SHIFT);
 }
 
 void _orientation_control(trajectory_controller_t* tc, int theta_sp, MT_VEC* spd_cmd_rob) {
