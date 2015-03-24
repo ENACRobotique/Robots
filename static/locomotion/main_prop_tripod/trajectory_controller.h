@@ -40,6 +40,7 @@ typedef struct {
     // Last known status
     int x, y; // (in I << SHIFT)
     int theta; // (in R << (RAD_SHIFT + SHIFT))
+    int cos_theta, sin_theta; // (in <<SHIFT)
 
     // PID
     PID_t pid_xtraj;
