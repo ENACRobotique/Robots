@@ -113,6 +113,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
     int y_sp = tm->gy;
     int theta_sp = tm->gtheta;
     uint32_t t = bn_intp_micros2s(micros());
+    int32_t dt;
 
     trajctlr_begin_update(&tm->ctlr);
 
@@ -128,7 +129,8 @@ int trajmngr_update(trajectory_manager_t* tm) {
         {
             sTrajSlot_t* s = &tm->slots[tm->curr_element >> 1];
 
-            if(t <= s->seg_start_date) {
+            dt = t - s->seg_start_date;
+            if(dt <= 0) {
                 x_sp = tm->gx;
                 y_sp = tm->gy;
                 theta_sp = tm->gtheta;
@@ -171,11 +173,13 @@ int trajmngr_update(trajectory_manager_t* tm) {
                     }
                     else {
 #ifdef ARCH_X86_LINUX
-                        assert(t >= s->arc_start_date);
+                        dt = t - s->arc_start_date;
+                        assert(dt >= 0);
 #endif
 
                         // switch to next element's segment
-                        if(t >= s_next->seg_start_date) {
+                        dt = t - s_next->seg_start_date;
+                        if(dt >= 0) {
                             tm->curr_element++;
 
                             quit = 0; // one more loop
@@ -184,11 +188,13 @@ int trajmngr_update(trajectory_manager_t* tm) {
                 }
                 else { // following segment
 #ifdef ARCH_X86_LINUX
-                    assert(t >= s->seg_start_date);
+                    dt = t - s->seg_start_date;
+                    assert(dt >= 0);
 #endif
 
                     // switch to arc
-                    if(t >= s->arc_start_date) {
+                    dt = t - s->arc_start_date;
+                    if(dt >= 0) {
                         tm->curr_element++;
 
                         quit = 0; // one more loop
@@ -211,7 +217,8 @@ int trajmngr_update(trajectory_manager_t* tm) {
                     (s->state == SLOT_OK && !s_next && s->is_last_element) ||
                     (s->state == SLOT_OK && s_next && s_next->state != SLOT_EMPTY)
             );
-            assert(s->arc_start_date >= s->seg_start_date);
+            dt = s->arc_start_date - s->seg_start_date;
+            assert(dt >= 0);
 #endif
 
             // check cache consistency
@@ -227,7 +234,8 @@ int trajmngr_update(trajectory_manager_t* tm) {
                     }
 
                     // compute arc total duration in periods
-                    sc->arc.dur = (int32_t)(s_next->seg_start_date - s->arc_start_date) / USpP;
+                    dt = s_next->seg_start_date - s->arc_start_date;
+                    sc->arc.dur = dt / USpP;
                     break;
                 case TM_CACHE_STATE_LINE:
                     {
@@ -240,7 +248,8 @@ int trajmngr_update(trajectory_manager_t* tm) {
                         sc->line.spd_y = ((int64_t) s->seg_spd * (int64_t) sl) >> SHIFT; // (IpP << SHIFT)
 
                         // compute line total duration in periods
-                        sc->line.dur = (int32_t)(s->arc_start_date - s->seg_start_date) / USpP;
+                        dt = s->arc_start_date - s->seg_start_date;
+                        sc->line.dur = dt / USpP;
                     }
                 case TM_CACHE_STATE_EMPTY:
                     break;
