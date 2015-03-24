@@ -26,8 +26,8 @@
 #include "state_lineMonit.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
-//int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
-void initTrajRedInit(sState *prev)
+
+void initTrajRed(sState *prev)
 	{
 		#ifdef DEBUG
 			Serial.println("debut traj rouge");
@@ -44,7 +44,7 @@ void initTrajRedInit(sState *prev)
 	   	    		radarSetLim(limits);
 	}
 
-void deinitTrajRedInit(sState *next)
+void deinitTrajRed(sState *next)
 	{
 	    if (next==&sPause)
 	    	{
@@ -59,29 +59,16 @@ void deinitTrajRedInit(sState *next)
 }
 
 trajElem start_red[]={
-		{0,0,100}, //to wait until the servo is in the good position
-				{100,0,1000},
-				{0,10,1000},
-				{200,20,1000},
-				{0,30,1000},
-				{300,40,1000},
-				{0,0,1000},
-				{400,50,1000},
-				{0,0,1000},
-				{500,100,1000},
-				{0,0,1000},
-				{600,120,1000},
-				{0,0,1000},
-				{-300,150,1000},
-				{0,180,1000},
-				{-600,10,1000},
-				{0,0,1000},
-				{360,90,10000},
-				{0,0,1000},
-				{0,0,0},
-       };
+	{0,-15,200}, //to wait until the servo is in the good position
+	{-100,-15,3000},
+	{-100,20,3000},
+	{-100,0,1000},
+	{0,0,1000},
+	{100,0,1000},
+	{0,0,0},
+};
 
-sState *testTrajRedInit()
+sState *testTrajRed()
 	{
 		static int i=0;
 	    static unsigned long prev_millis=0;
@@ -99,16 +86,16 @@ sState *testTrajRedInit()
 	    return 0;
 	}
 
-sState sTrajRedInit={
+sState sTrajRed={
         BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-        &initTrajRedInit,
-        &deinitTrajRedInit,
-        &testTrajRedInit
+        &initTrajRed,
+        &deinitTrajRed,
+        &testTrajRed
 };
 //*****************************************************************************************************************
 
 
-void initTrajYellowInit(sState *prev)
+void initTrajYellow(sState *prev)
 	{
 		    #ifdef DEBUG
 				Serial.println("debut traj jaune");
@@ -125,7 +112,7 @@ void initTrajYellowInit(sState *prev)
 		        radarSetLim(limits);
 	}
 
-void deinitTrajYellowInit(sState *next)
+void deinitTrajYellow(sState *next)
 	{
 		    if (next==&sPause)
 		    	{
@@ -142,7 +129,7 @@ void deinitTrajYellowInit(sState *next)
 trajElem start_yellow[]={ //A MODIFIER
 	    {0,0,0},
 		};
-sState *testTrajYellowInit()
+sState *testTrajYellow()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
@@ -155,11 +142,11 @@ sState *testTrajYellowInit()
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
-sState sTrajYellowInit={
+sState sTrajYellow={
 		BIT(E_MOTOR) /*|BIT(E_RADAR)*/,
-        &initTrajYellowInit,
-        &deinitTrajYellowInit,
-        &testTrajYellowInit
+        &initTrajYellow,
+        &deinitTrajYellow,
+        &testTrajYellow
 };
 
 

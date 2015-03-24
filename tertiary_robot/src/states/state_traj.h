@@ -13,14 +13,14 @@
 #include "state_types.h"
 
 
-extern sState sTrajRedInit;
-extern sState sTrajYellowInit;
+extern sState sTrajRed;
+extern sState sTrajYellow;
 extern sState sTrajRedFinal;
 extern sState sTrajYellowFinal;
 
 
-extern sState sTrajRedInit;
-extern sState sTrajYellowInit;
+extern sState sTrajRed;
+extern sState sTrajYellow;
 
 
 #endif /* STATE_TRAJ_H_ */

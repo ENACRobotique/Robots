@@ -48,7 +48,7 @@
 #define WALL_SPEED 80
 
 #define ANGLE_ZERO      30
-#define DIR_SERVO_START 8// rem : en tenant compte de ANGLE_ZERO
+#define DIR_SERVO_START 0// rem : en tenant compte de ANGLE_ZERO
 
 #define COLOR_RED HIGH
 #define COLOR_YELLOW LOW
