@@ -144,8 +144,11 @@ int trajmngr_update(trajectory_manager_t* tm) {
             typeof(tm->cache)* sc = &tm->cache;
             sTrajSlot_t* s;
             sTrajSlot_t* s_next;
+            int quit;
 
             do {
+                quit = 1;
+
                 // get current slot
                 s = &tm->slots[tm->curr_element >> 1];
 #ifdef ARCH_X86_LINUX
@@ -165,7 +168,6 @@ int trajmngr_update(trajectory_manager_t* tm) {
                         x_sp = tm->gx = s->p2_x;
                         y_sp = tm->gy = s->p2_y;
                         theta_sp = tm->gtheta = s->arc_start_theta;
-                        break;
                     }
                     else {
 #ifdef ARCH_X86_LINUX
@@ -175,7 +177,8 @@ int trajmngr_update(trajectory_manager_t* tm) {
                         // switch to next element's segment
                         if(t >= s_next->seg_start_date) {
                             tm->curr_element++;
-                            continue;
+
+                            quit = 0; // one more loop
                         }
                     }
                 }
@@ -187,10 +190,11 @@ int trajmngr_update(trajectory_manager_t* tm) {
                     // switch to arc
                     if(t >= s->arc_start_date) {
                         tm->curr_element++;
-                        continue;
+
+                        quit = 0; // one more loop
                     }
                 }
-            } while(0);
+            } while(!quit);
 
             if(tm->state == TM_STATE_WAIT_TRAJ) {
                 break;
