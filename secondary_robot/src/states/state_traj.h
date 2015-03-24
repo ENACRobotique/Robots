@@ -11,17 +11,12 @@
 #define STATE_TRAJ_H_
 
 #include "state_types.h"
+#include "lib_trajectory.h"
 
 #define MUR_R
 //#define Int_R
 #define MUR_Y
 //#define INT_Y
-
-typedef struct {
-    int speed;      // speed/1.77 = real_speed in cm/s
-    int omega;      //in ... ?
-    unsigned long duration;   //in ms
-}trajElem;
 
 int progTraj(trajElem tab[]);
 
@@ -30,9 +25,6 @@ extern sState sTrajGreenInit;
 extern sState sTrajYellowInit;
 extern sState sTrajEndStairsGreen;
 extern sState sTrajEndStairsYellow;
-
-
-int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
 extern sState sTrajGreenInit;
 extern sState sTrajYellowInit;
