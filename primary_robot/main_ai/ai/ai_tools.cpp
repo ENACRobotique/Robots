@@ -111,36 +111,47 @@ void startColor(void) {
 
 
 void simuSecondary(void) { //TODO if a other robot on trajectory
-    sPt_t trjS[4] = {{ 10., 100. }, { 100., 100. }, { 125., 120. }, { 125., 190. }}; //trajectory of the secondary robot : Yellow
-
+    static vector<Point2D<float>> trjS{{ 10., 100. }, { 100., 100. }, { 125., 120. }, { 125., 190. }}; //trajectory of the secondary robot : Yellow
+    static bool update = true;
+    static bool first = true;
     static unsigned int state = 0;
     static unsigned int lastTime = 0;
-    static sPt_t pos;
+    static Point2D<float> pos;
+    static Vector2D<float> spd;
 
-    if(color == GREEN)
-        for(unsigned int i = 0 ; i < (sizeof(trjS) / sizeof(*trjS)); i++)
-            trjS[i].x = 300 - trjS[i].x;
+    if (state < trjS.size() - 1) {
+        if(first) {
+            if(color == GREEN) {
+                for(Point2D<float>& pt : trjS)
+                    pt.x = 300. - pt.x;
+            }
 
-    unsigned int time = millis();
-    sNum_t theta;
+            lastTime = millis();
 
-    obs[1].active = 1;
-
-    if (!lastTime) {
-        lastTime = millis();
-        pos = trjS[0];
-    }
-
-    if (state < (sizeof(trjS) / sizeof(*trjS) - 1)) {
-        theta = atan2((trjS[state + 1].y - trjS[state].y), (trjS[state + 1].x - trjS[state].x));
-        pos.x += (SPEED_SECONDARY * (time - lastTime) * cos(theta)) / 1000;
-        pos.y += (SPEED_SECONDARY * (time - lastTime) * sin(theta)) / 1000;
-
-     /*   if (testPtInPt(&pos, &trjS[state + 1], 1)) { //FIXME use new lib MathTools
-            state++;
+            first = false;
         }
-*/
-        obs[1].c = pos;
+
+        unsigned int time = millis();
+
+        if(update) {
+            pos = trjS[state];
+            float theta, ctheta, stheta;
+            theta = atan2f((trjS[state + 1].y - trjS[state].y), (trjS[state + 1].x - trjS[state].x));
+            sincosf(theta, &stheta, &ctheta);
+            spd = Vector2D<float>(ctheta, stheta) * SPEED_SECONDARY;
+
+            update = false;
+        }
+
+        pos += spd * (int)(time - lastTime) / 1000.;
+
+        if (pos.distanceSqTo(trjS[state + 1]) < 1) {
+            state++;
+            update = true;
+        }
+
+        obs[1].active = 1;
+        obs[1].c = {pos.x, pos.y};
         obs_updated[1]++;
 
         lastTime = millis();

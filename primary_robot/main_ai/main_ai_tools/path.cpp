@@ -159,7 +159,7 @@ void Path::go2Point(const sPt_t &dest, const bool f){
     logs << DEBUG << "position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
 
     Point2D<float> p1(obs[0].c.x, obs[0].c.y),  p2(obs[N-1].c.x, obs[N-1].c.y);
-    if(p1.distance(p2) < 2.)
+    if(p1.distanceSqTo(p2) < 2.*2.)
         return;
 
     if(f){
