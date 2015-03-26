@@ -30,15 +30,13 @@ void printObsActive() {
 }
 
 
-int test_in_obs(sPt_t *p) { //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
+int test_in_obs(Point2D<float> p) { //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
     //FIXME si le robot dans plusieurs obstable
-    int i;
-    sNum_t dist;
-    for (i = 1; i < N - 1; i++) {
+    for (unsigned int i = 1; i < N - 1; i++) {
         if (obs[i].active == 0)
             continue;
-        distPt2Pt(&obs[i].c, p, &dist);
-        if (dist < obs[i].r) {
+        Point2D<float> c(obs[i].c.x, obs[i].c.y);
+        if (c.distanceTo(p) < obs[i].r) {
             //printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
             return i;
         }
@@ -163,9 +161,9 @@ void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de 
     int i;
     sPt_t pt;
     sVec_t v;
-    sPt_t _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
 
-    if (((i = test_in_obs(&_current_pos)) != 0)) {
+    if (((i = test_in_obs(_current_pos)) != 0)) {
         if (obs[i].moved == 1) {
             pt = obs[0].c;
             projPtOnCircle(&obs[i].c, obs[i].r, &pt);
@@ -182,11 +180,11 @@ void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de 
         _current_pos = {p.x, p.y};
         if (sqrt(pow(_current_pos.x - obs[0].c.x, 2) + pow(_current_pos.y - obs[0].c.y, 2) < 2)) {
 
-            obs[0].c = _current_pos;
+            obs[0].c = {_current_pos.x, _current_pos.y};
             obs_updated[0]++;
         }
         else {
-            _current_pos = obs[0].c;
+            _current_pos = {obs[0].c.x, obs[0].c.y};
             obs_updated[0]++;
         }
     }

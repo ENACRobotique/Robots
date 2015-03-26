@@ -11,6 +11,7 @@
 #include <fstream>
 
 #include "math_types.h"
+#include "GeometryTools.h"
 
 using namespace std;
 
@@ -23,6 +24,6 @@ int sendSpeed(sNum_t speed);
 
 //Receive message
 void checkInbox(int verbose);
-bool lastGoal(sPt_t &goal, bool get);
+bool lastGoal(Point2D<float> goal, bool get);
 
 #endif /* COMMUNICATIONS_TOOLS_H_ */

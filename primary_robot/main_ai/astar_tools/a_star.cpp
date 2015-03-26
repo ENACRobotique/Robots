@@ -90,8 +90,8 @@ void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {
 
                 // segment section
                 seg = tgt(current.o1, current.o2);
-                path->path[i].p1 = seg->p1;
-                path->path[i].p2 = seg->p2;
+                path->path[i].p1 = {seg->p1.x, seg->p1.x};
+                path->path[i].p2 = {seg->p2.x, seg->p2.y};
                 distPt2Pt(&seg->p1, &seg->p2, &path->path[i].seg_len);
                 // arc section
                 path->path[i].obs = obs[O(current.o2)];

@@ -79,9 +79,10 @@ sNum_t Obj::update(sPt_t posRobot) {
     int g, m;
 #endif
     sPath_t path_loc;
+    Point2D<float> posRobotp = statuses.getLastPosXY(ELT_PRIMARY);
 
     _dist = -1;
-    obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
+    obs[0].c = {posRobotp.x, posRobotp.y};
     logs << INFO << "--------------------------------------------------------------";
 
     if ((n = testInObs(&obs[0].c)) != 0) {
@@ -93,7 +94,7 @@ sNum_t Obj::update(sPt_t posRobot) {
     }
 
     for (sObjEntry_t i : _access) {
-        obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
+        obs[0].c = {posRobotp.x, posRobotp.y};
         switch(i.type){
             case E_POINT :
                 logs << DEBUG << "Access type POINT";
@@ -155,17 +156,17 @@ sNum_t Obj::update(sPt_t posRobot) {
         else if (_dist > path_loc.dist || _dist == -1) {
             _dist = path_loc.dist;
             _path = path_loc;
-            _access_select = obs[N - 1].c;
+            _access_select = {obs[N - 1].c.x, obs[N - 1].c.y};
 
             if( i.type == E_CIRCLE){
-                float dist = 0;
-                distPt2Pt(&_path.path[_path.path_len - 1].p1, &_path.path[_path.path_len - 1].p2, &dist);
-                if(dist < i.cir.r)
+                if(_path.path[_path.path_len - 1].p1.distanceSqTo(_path.path[_path.path_len - 1].p2) < i.cir.r)
                     logs << ERR << "Very strange path"; //FIXME
                 else{
-                    sPt_t pt = _path.path[_path.path_len - 1].p1;
-                    if(projPtOnCircle(&i.cir.c, i.cir.r, &pt) < 0)
-                        logs << ERR << "Projection of point";
+                    Point2D<float> pt = _path.path[_path.path_len - 1].p1;
+                    Circle2D<float> cir(i.cir.c.x, i.cir.c.y, i.cir.r);
+                    if(cir.c.distanceTo(pt) == 0)
+                        logs << ERR << "Can't project point";
+                    pt = cir.projecte(pt);
                     _path.path[_path.path_len - 1].p2 = pt;
                 }
                 _access_select = _path.path[_path.path_len - 1].p2;
@@ -185,7 +186,7 @@ sPath_t Obj::getPath() const{
     return _path;
 }
 
-sPt_t Obj::getDestPoint() const{
+Point2D<float> Obj::getDestPoint() const{
     return _access_select;
 }
 

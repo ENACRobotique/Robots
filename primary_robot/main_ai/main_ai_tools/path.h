@@ -11,6 +11,7 @@
 #include <a_star_tools.h>
 #include <vector>
 #include <deque>
+#include "GeometryTools.h"
 
 #define MAX_RETRIES 1 //FIXME bug with simulation
 
@@ -21,8 +22,8 @@ typedef struct{
     uint32_t t1;   // in us (synchronized time):
     uint32_t t2;
 
-    sPt_t p1;
-    sPt_t p2;
+    Point2D<float> p1;
+    Point2D<float> p2;
 
     sObs_t obs;
 
@@ -37,8 +38,8 @@ typedef struct{
 }sTrajOrientEl_t;
 
 typedef struct {
-    sPt_t p1;
-    sPt_t p2;
+    Point2D<float> p1;
+    Point2D<float> p2;
     sObs_t obs;
 
     sNum_t arc_len;
@@ -68,7 +69,7 @@ class Path {
         //Send methods
         void sendRobot();
         void stopRobot();
-        void go2Point(const sPt_t &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
+        void go2Point(const Point2D<float> &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
         void followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l);
         void convPathToPathOrient();
         void computeOrientPathForHolonomic(float theta_end_obj);

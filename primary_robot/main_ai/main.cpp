@@ -23,6 +23,7 @@ extern "C"{
 #include "tools.h"
 #include "ai.h"
 #include "net.h"
+#include "GeometryTools.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -148,9 +149,9 @@ int main(int argc, char **argv) {
         checkInbox(verbose);
 
         // calls loop functions
+        Point2D<float> goal;
         switch (eAIState) {
             case E_AI_SLAVE:
-                sPt_t goal;
                 if (lastGoal(goal, true)) {
                     logs << INFO << "New goal available";
                     path.go2Point(goal, false);

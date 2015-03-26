@@ -81,7 +81,7 @@ sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
     return status;
 }
 
-sPt_t Statuses::getLastPosXY(eElement el){
+Point2D<float> Statuses::getLastPosXY(eElement el){
     sGenericStatus& status = getLastStatus(el);
 
     return {status.pos.x, status.pos.y};

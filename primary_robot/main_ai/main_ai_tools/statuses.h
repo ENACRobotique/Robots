@@ -13,6 +13,7 @@
 
 #include "messages-statuses.h"
 #include "math_types.h"
+#include "GeometryTools.h"
 
 using namespace std;
 
@@ -36,7 +37,7 @@ class Statuses {
         sGenericStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);
 
         //Simple function define in the FRAME_PLAYGROUND
-        sPt_t getLastPosXY(eElement el);
+        Point2D<float> getLastPosXY(eElement el);
         float getLastOrient(eElement el);
         float getLastSpeed(eElement el);
 
