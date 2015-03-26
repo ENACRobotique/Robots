@@ -22,7 +22,7 @@ class Line2D {
         Line2D(const Line2D& l) : a(l.a), b(l.b), c(l.c), norm(l.norm){}
         Line2D(const T _a, const T _b, const T _c) : a(_a), b(_b), c(_c), norm(false){}
         Line2D(const Vector2D<T>& v) : a(v.y), b(-v.x), c(0), norm(false){}
-        Line2D(const Point2D<T>& p, const Vector2D<T>& v) : a(v.y), b(-v.x), c(c = -a * p.x - b * p.y), norm(false){}
+        Line2D(const Point2D<T>& p, const Vector2D<T>& v) : a(v.y), b(-v.x), c(-a * p.x - b * p.y), norm(false){}
         Line2D(const Point2D<T>& p1, const Point2D<T>& p2) : a(p2.y - p1.y), b(p1.x - p2.x), c(-a * p1.x - b * p1.y), norm(false){}
         ~Line2D(){};
 

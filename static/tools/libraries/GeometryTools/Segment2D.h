@@ -47,16 +47,16 @@ class Segment2D {
                 return p2;
 
             Line2D<T> l(p1, p2);
-            return l.projecte(p);
+            return l.project(p);
         }
         T squareDistance(const Point2D<T>& p) const{
-            return p.distance(projecte(p));
+            return p.distanceTo(projecte(p));
         }
         T distance(const Point2D<T>& p) const{
             return sqrt(squareDistance(p));
         }
         T lenght() const{
-            return p1.distance(p2);
+            return p1.distanceTo(p2);
         }
 
         Point2D<T> p1;
