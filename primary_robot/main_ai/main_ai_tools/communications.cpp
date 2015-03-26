@@ -310,7 +310,7 @@ void checkInbox(int verbose){
  * get == true -> get
  * get == false -> set
  */
-bool lastGoal(Point2D<float> goal, bool get){
+bool lastGoal(Point2D<float>& goal, bool get){
     static Point2D<float> pt;
     static bool new_goal = false;
 
