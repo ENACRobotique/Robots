@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
                 new_pos(&inMsg.payload.pos);
                 break;
             case E_TRAJ_ORIENT_EL:
-                new_traj_orient_el(&inMsg.payload.traj);
+                new_traj_orient_el(&inMsg.payload.trajOrientEl);
                 break;
             case E_POS_QUERY:
                 if(inMsg.payload.posQuery.id == ELT_PRIMARY){
