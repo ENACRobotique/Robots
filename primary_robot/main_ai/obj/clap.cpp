@@ -10,7 +10,6 @@
 #include <iostream>
 #include <cmath>
 
-#include "math_types.h"
 #include "types.h"
 #include "tools.h"
 

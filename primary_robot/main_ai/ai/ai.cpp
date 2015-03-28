@@ -15,7 +15,6 @@ extern "C"{
 #include <millis.h>
 }
 
-#include "math_ops.h"
 #include <obj_tools.h>
 #include <clap.h>
 #include <spot.h>
@@ -111,7 +110,8 @@ int stepAI() {
 
                 initObjective();
 
-                sendPos(obs[0].c, theta_robot); //Sending approximate initial position
+                Point2D<float> p(obs[0].c.x, obs[0].c.y);
+                sendPos(p, theta_robot); //Sending approximate initial position
 
                 //TODO procedure de mise en place
 

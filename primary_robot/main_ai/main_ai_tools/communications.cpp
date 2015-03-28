@@ -177,7 +177,7 @@ void sendObss(){
 /*
  * Send a new position imposed to the robot
  */
-int sendPos(sPt_t &p, sNum_t theta) {
+int sendPos(Point2D<float> &p, float theta) {
     sMsg msgOut ;
     int ret;
 
@@ -209,7 +209,7 @@ int sendPos(sPt_t &p, sNum_t theta) {
 /*
  * Send a new speed imposed to the robot
  */
-int sendSpeed(sNum_t speed) {
+int sendSpeed(float speed) {
     sMsg msgOut;
     int ret;
 

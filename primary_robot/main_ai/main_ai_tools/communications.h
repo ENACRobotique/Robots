@@ -10,7 +10,6 @@
 
 #include <fstream>
 
-#include "math_types.h"
 #include "GeometryTools.h"
 
 using namespace std;
@@ -19,8 +18,8 @@ using namespace std;
 void sendPing();
 void sendObsCfg();
 void sendObss();
-int sendPos(sPt_t &p, sNum_t theta);
-int sendSpeed(sNum_t speed);
+int sendPos(Point2D<float>& p, float theta);
+int sendSpeed(float speed);
 
 //Receive message
 void checkInbox(int verbose);

@@ -4,7 +4,6 @@
 
 #include <a_star_tools.h>
 #include <main_ai_tools/path.h>
-#include "math_types.h"
 extern "C"{
 #include <stdint.h>
 #include "messages-interactions.h"
