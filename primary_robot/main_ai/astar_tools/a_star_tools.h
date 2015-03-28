@@ -122,16 +122,18 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 // ==== global matrices ====
 
 extern std::vector<sObs_t> obs;                     // array of N physical obstacles (256B)
-extern const int N;                                 // number of physical obstacles
+extern int N;                                       // number of physical obstacles
 extern std::vector<std::vector<sTgts_t>> tgts;      // NxN tangents between physical obstacles (17kiB)
 extern std::vector<std::vector<sASEl_t>> aselts;    // 2Nx2N elements (an A* node is a trajectory from an iABObs_t to another)
+extern std::vector<uint8_t> obs_updated;            // array not used by A*, available for the user
 #define ASELT(n) aselts[(n).o1][(n).o2]
 // NxN distances between obstacles
 #define DIST(i, j) (tgts[(iObs_t)(i)][(iObs_t)(j)].d)
 
 // ==== function prototypes ====
 
-void    fill_tgts_lnk   ();
+void init_obs(const std::vector<sObs_t>& init);
+void fill_tgts_lnk();
 
 // functions on objects (0:N-1)
 uint8_t o_check_segment (iObs_t o1, sSeg_t *s, iObs_t o2);

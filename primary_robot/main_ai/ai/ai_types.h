@@ -30,7 +30,7 @@ typedef enum {
 } estate_t;
 
 extern long _start_time;
-extern std::vector<uint8_t> obs_updated;
+
 
 #endif
 

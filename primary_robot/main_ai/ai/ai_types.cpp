@@ -9,5 +9,4 @@
 
 long _start_time;
 
-std::vector<uint8_t> obs_updated(N) ;
 

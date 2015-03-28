@@ -32,7 +32,7 @@ void printObsActive() {
 
 int test_in_obs(Point2D<float> p) { //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
     //FIXME si le robot dans plusieurs obstable
-    for (unsigned int i = 1; i < N - 1; i++) {
+    for (int i = 1; i < N - 1; i++) {
         if (obs[i].active == 0)
             continue;
         Point2D<float> c(obs[i].c.x, obs[i].c.y);
