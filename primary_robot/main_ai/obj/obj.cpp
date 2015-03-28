@@ -9,7 +9,6 @@
 
 #include <iostream>
 
-#include "math_ops.h"
 #include "obj_tools.h"
 #include "a_star.h"
 #include "tools.h"
@@ -24,14 +23,15 @@ extern "C"{
 #error "HOLONOMIC must be defined"
 #endif
 
-int testInObs(sPt_t *p) { //retourne le numéro de l'obstable si la position est a l'interieur de celui ci
+int testInObs() { //retourne le numéro de l'obstable si la position est a l'interieur de celui ci
     //FIXME si le robot dans plusieurs obstable
+    Point2D<float>p = statuses.getLastPosXY(ELT_PRIMARY);
     int i;
     sNum_t dist;
     for (i = 1; i < N - 1; i++) {
         if (obs[i].active == 0)
             continue;
-        distPt2Pt(&obs[i].c, p, &dist);
+        dist = p.distanceTo({obs[i].c.x, obs[i].c.y});
         if (dist < obs[i].r) {
             //printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
             return i;
@@ -73,7 +73,7 @@ void Obj::addAccess(sObjEntry_t &access){
  * And update the others parameters
  * //TODO Considering the orientation of the robot
  */
-sNum_t Obj::update(sPt_t posRobot) {
+float Obj::update(sPt_t posRobot) {
     int n;
 #if !HOLONOMIC
     int g, m;
@@ -85,7 +85,7 @@ sNum_t Obj::update(sPt_t posRobot) {
     obs[0].c = {posRobotp.x, posRobotp.y};
     logs << INFO << "--------------------------------------------------------------";
 
-    if ((n = testInObs(&obs[0].c)) != 0) {
+    if ((n = testInObs()) != 0) {
         Point2D<float> p(posRobot.x, posRobot.y);
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         p = c.projecte(p);

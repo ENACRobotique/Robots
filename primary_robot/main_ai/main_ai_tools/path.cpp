@@ -13,7 +13,6 @@
 #include <tools.h>
 #include <cmath>
 #include <iostream>
-#include "math_ops.h"
 #include "a_star.h"
 #include "time_tools.h"
 #include "tools.h"

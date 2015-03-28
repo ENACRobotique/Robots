@@ -9,7 +9,6 @@
 #include <ai_tools.h>
 #include <GeometryTools.h>
 #include <obj_tools.h>
-#include "math_ops.h"
 #include "ai.h"
 #include "botNet_core.h"
 
@@ -159,15 +158,15 @@ void simuSecondary(void) { //TODO if a other robot on trajectory
 
 void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de contact
     int i;
-    sPt_t pt;
-    sVec_t v;
+    Point2D<float> pt;
     Point2D<float> _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
 
     if (((i = test_in_obs(_current_pos)) != 0)) {
         if (obs[i].moved == 1) {
-            pt = obs[0].c;
-            projPtOnCircle(&obs[i].c, obs[i].r, &pt);
-            convPts2Vec(&pt, &obs[0].c, &v);
+            pt = {obs[0].c.x, obs[0].c.y};
+            Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);
+            pt = cir.projecte(pt);
+            Vector2D<float> v(pt, {obs[0].c.x, obs[0].c.y});
 
             obs[i].c.x += v.x;
             obs[i].c.y += v.y;

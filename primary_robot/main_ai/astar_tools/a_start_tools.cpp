@@ -13,10 +13,6 @@ extern "C"{
 }
 #endif
 
-#ifndef HOLONOMIC
-#error "HOLONOMIC must be defined"
-#endif
-
 #define CHECK_LIMITS
 
 
