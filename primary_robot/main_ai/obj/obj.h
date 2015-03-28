@@ -27,22 +27,21 @@ typedef struct {
     float radius;           //size of the 3 approach circles
 #endif
 
-    union{
-        struct{
-            sPt_t p;        //point
-            float angle;    //approach angle between 0 and 2 M_PI
-        }pt;
+    struct{
+        Point2D<float> p;        //point
+        float angle;    //approach angle between 0 and 2 M_PI
+    }pt;
 
-        struct{
-            sPt_t c;        //enter of the circle
-            float r;        //radius of the circle
-        }cir;
+    struct{
+            Point2D<float> c;        //enter of the circle
+        float r;        //radius of the circle
+    }cir;
 
-        struct{
-            sSeg_t s;       //segment
-            bool dir;       //true if (p1;p2)^(p1;probot) > 0
-        }seg;
-    };
+    struct{
+        Segment2D<float> s;       //segment
+        bool dir;       //true if (p1;p2)^(p1;probot) > 0
+    }seg;
+
 } sObjEntry_t;
 
 typedef enum {

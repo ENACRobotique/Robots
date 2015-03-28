@@ -12,8 +12,8 @@
 
 void loadingPath(sPath_t _path, int num = -1);
 int checkCurrentPathLenght(sPath_t &path);
-void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
-void updateNoHaftTurn(sNum_t theta, sPt_t *pt);
+void updateEndTraj(float theta, Point2D<float> *pt, float r);
+void updateNoHaftTurn(float theta, Point2D<float>& pt);
 void set_traj(sPath_t *p, iABObs_t l[], int nb);
 
 int next_obj(void);

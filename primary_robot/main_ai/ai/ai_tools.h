@@ -15,7 +15,6 @@
 void printObsActive(void);
 void init_ele(void);
 void printListObj(void);
-int test_in_obs(sPt_t *p);
 int test_tirette(void);
 void simuSecondary(void);
 void posPrimary(void);

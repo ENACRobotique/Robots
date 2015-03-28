@@ -189,7 +189,8 @@ void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de 
     }
     //if non holmic
     float theta_robot = statuses.getLastOrient(ELT_ADV_PRIMARY);
-    updateNoHaftTurn(theta_robot * 180 / M_PI, &obs[0].c);
+    Point2D<float> p = {obs[0].c.x, obs[0].c.y};
+    updateNoHaftTurn(theta_robot * 180 / M_PI, pt);
     obs_updated[N - 5]++;
     obs_updated[N - 6]++;
     obs_updated[N - 7]++;

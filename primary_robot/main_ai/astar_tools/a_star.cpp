@@ -1,16 +1,17 @@
-#include <a_star_tools.h>
 #include "a_star.h"
 
+#include "a_star_tools.h"
 #include "math_ops.h"
 
-extern "C"{
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 
 #ifdef AS_STATS
+extern "C"{
 #include "millis.h"
-#endif
 }
+#endif
+
 
 
 void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {

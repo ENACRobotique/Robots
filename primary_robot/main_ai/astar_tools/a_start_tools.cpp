@@ -1,17 +1,12 @@
-#include <a_star_tools.h>
-#include <math.h>
+#include "a_star_tools.h"
+
+#include <cmath>
 #include <stdio.h>
+
 #include "math_ops.h"
-
 extern "C"{
 #include "millis.h"
 }
-
-#ifdef AS_STATS
-extern "C"{
-#include "millis.h"
-}
-#endif
 
 #define CHECK_LIMITS
 

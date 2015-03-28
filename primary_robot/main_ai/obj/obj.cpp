@@ -98,14 +98,14 @@ float Obj::update(sPt_t posRobot) {
         switch(i.type){
             case E_POINT :
                 logs << DEBUG << "Access type POINT";
-                obs[N - 1].c = i.pt.p;
+                obs[N - 1].c = {i.pt.p.x, i.pt.p.y};
 #if !HOLONOMIC
                 updateEndTraj(i.pt.angle, &i.pt.p, i.radius);
 #endif
             break;
             case E_CIRCLE:
                 logs << DEBUG << "Access type CIRCLE";
-                obs[N - 1].c = i.cir.c;
+                obs[N - 1].c = {i.cir.c.x, i.cir.c.y};
 #if !HOLONOMIC
                 obs[N - 2].active = 0;
                 obs[N - 3].active = 0;

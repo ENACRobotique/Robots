@@ -17,7 +17,7 @@
 #error "HOLONOMIC must be defined"
 #endif
 
-sPt_t obsClap[6]={{32., R_ROBOT}, {62., R_ROBOT}, {92., R_ROBOT}, {208. , R_ROBOT}, {238., R_ROBOT}, {268., R_ROBOT}} ;
+Point2D<float> obsClap[6]={{32., R_ROBOT}, {62., R_ROBOT}, {92., R_ROBOT}, {208. , R_ROBOT}, {238., R_ROBOT}, {268., R_ROBOT}} ;
 
 Clap::Clap(unsigned int num) : Obj(E_CLAP), _num(num){
 
