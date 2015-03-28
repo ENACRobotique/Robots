@@ -20,9 +20,9 @@ extern "C"{
 #define CHECK_LIMITS
 
 // array of physical obstacles (256B)
-sObs_t obs[] = {
+std::vector<sObs_t> obs = {
     // robots
-    {{0., 0.}, 0., 1, 1},               //primary
+    {{0., 0.},          0., 1, 1, 1},   //primary
     {{0., 0.}, R_ROBOT+12., 1, 0, 1},   //secondary
     {{0., 0.}, R_ROBOT+20., 1, 0, 1},   //primary adv
     {{0., 0.}, R_ROBOT+15., 1, 0, 1},   //secondary adv
@@ -95,10 +95,11 @@ sObs_t obs[] = {
     {{0. , 0.}, 0, 0, 1, 1} //48
 };
 
+const int N = obs.size();
 // tangents between physical obstacles (17kiB)
-sTgts_t tgts[N][N];
+std::vector<std::vector<sTgts_t>> tgts(N, std::vector<sTgts_t>(N));
 // A* elements
-sASEl_t aselts[N*2][N*2];
+std::vector<std::vector<sASEl_t>> aselts(N*2, std::vector<sASEl_t>(N*2));
 
 
 static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o2

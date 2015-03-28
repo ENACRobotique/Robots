@@ -9,6 +9,7 @@ extern "C"{
 #include <stdint.h>
 #include "messages-interactions.h"
 }
+#include <vector>
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
@@ -29,7 +30,7 @@ typedef enum {
 } estate_t;
 
 extern long _start_time;
-extern uint8_t obs_updated[];
+extern std::vector<uint8_t> obs_updated;
 
 #endif
 
