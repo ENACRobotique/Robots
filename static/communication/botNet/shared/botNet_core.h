@@ -43,6 +43,8 @@ extern "C" {
 #define MIN(m, n) ((m)>(n)?(n):(m))
 #endif
 
+extern uint8_t seqNum;
+
 int bn_init();
 int bn_send(sMsg *msg);
 int bn_sendLinkcast(sMsg *msg);
@@ -53,6 +55,7 @@ int bn_routine();
 int bn_receive(sMsg *msg);
 void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo);
 int bn_forward(const sMsg *msg, E_IFACE ifFrom);
+static inline uint8_t bn_getCurrentSeqNum(){ return seqNum; };
 
 
 /*
