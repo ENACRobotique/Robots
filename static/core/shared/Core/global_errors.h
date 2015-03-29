@@ -43,9 +43,9 @@ enum{
     ERR_BN_WRONG_TYPE,
     ERR_BN_OVERSIZE,
     ERR_BN_CSUM,
-    ERR_BN_NO_SUCH_INTERFACE,   //no such interface on this device
+    ERR_BN_NO_SUCH_INTERFACE,   // no such interface on this device
     ERR_BN_UNKNOWN_ADDR,
-    ERR_BN_NO_LCAST_ADDR,
+    ERR_BN_NO_LCAST_ADDR,       // the given address is not a linkcast one
     ERR_BN_BUFFER_FULL, //24
 
     // UART (and UART_FRAMING) errors

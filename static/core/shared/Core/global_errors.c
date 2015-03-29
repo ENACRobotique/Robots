@@ -29,8 +29,9 @@ const char* getErrorStr(int err){
     case ERR_BN_WRONG_TYPE:                             return "BN_WRONG_TYPE";
     case ERR_BN_OVERSIZE:                               return "BN_OVERSIZE";
     case ERR_BN_CSUM:                                   return "BN_CSUM";
-    case ERR_BN_NO_SUCH_INTERFACE:                      return "BN_NO_SUCH_INTERFACE";   //no such interface on this device
+    case ERR_BN_NO_SUCH_INTERFACE:                      return "BN_NO_SUCH_INTERFACE";   // no such interface on this device
     case ERR_BN_UNKNOWN_ADDR:                           return "BN_UNKNOWN_ADDR";
+    case ERR_BN_NO_LCAST_ADDR:                          return "ERR_BN_NO_LCAST_ADDR";   // the given address is not a linkcast one
     case ERR_BN_BUFFER_FULL:                            return "BN_BUFFER_FULL";
 
     // UART (and UART_FRAMING) errors
