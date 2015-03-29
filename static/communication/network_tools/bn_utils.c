@@ -39,32 +39,62 @@ int bn_ping(bn_Address dest){
  * Return value :
  *  >=0 number of answers received during waitingDelay. May exceed sizeRet, user should check this to detect dropped messages.
  *  <0 on error (see error codes)
+ *
+ * XXX source of sequence loss. Do not use in game
  */
 int bn_pingLink(bn_Address dest, uint32_t waitingDelay, sTraceInfo retArray[], int retSize){
     sMsg msg={{0}};
     int ret;
     uint32_t sw=0;
     int index=0;
+    int receiveVal=0;
+    uint8_t tmpSeqNum=seqNum;
+    uint8_t ackValue=0;
+
     if (bn_isLinkcast(dest)){
         msg.header.type=E_PING;
         msg.header.size=0;
         msg.header.destAddr=dest;
         msg.header.ack=1;
+
         stopwatch(&sw);
-        if ( (ret=bn_sendAck(&msg)) <0) return ret;
+        if ( (ret=bn_genericSend(&msg)) <0) return ret;
         while (stopwatch(&sw)/1000 <= waitingDelay){
             // read incoming
-
-            // if ack answer put it in return array if free space in array
-            if (index < retSize){
-                retArray[index].addr; //= todo XXX
-                retArray[index].ping = stopwatch(&sw);
+            if ( (receiveVal=bn_receive(&msg)) > 0 ) {
+                //if this message is not an ack response,  put it back in the incoming buffer (sent to self)
+                if ( msg.header.type != E_ACK_RESPONSE ){
+                    bn_pushInBufLast(&msg,IF_LOCAL);
+                }
+                // if this msg is not the ack expected (not the good destination or seqnum), drop it (do nothing)
+                else if ( msg.payload.ack.addr != dest || msg.payload.ack.seqNum != tmpSeqNum) continue;
+                // if this message is an ack , from the requested destination and with the correct seqnum
+                else {
+                    // increments the number of recorded acks
+                    index++;
+                    // store details if free space in array
+                    if (index < retSize){
+                        retArray[index].addr = msg.header.srcAddr;
+                        retArray[index].ping = stopwatch(&sw);
+                        if ( msg.payload.ack.ans == A_ACK) {
+                            retArray[index].error = 0;
+                        }
+                        else if ( msg.payload.ack.ans == A_NACK_BROKEN_LINK) {
+                            retArray[index].error = -ERR_BN_NACK_BROKEN_LINK;
+                        }
+                        else if ( msg.payload.ack.ans == A_NACK_BUFFER_FULL) {
+                            retArray[index].error = -ERR_BN_NACK_FULL_BUFFER; //XXX behavior?
+                        }
+                    }
+                }
             }
-            index++;
-
+            else if (receiveVal < 0) {
+                return receiveVal;
+            }
         }
+        return index;
     }
-    return -ERR_BN_NO_LCAST_ADDR;
+    else return -ERR_BN_NO_LCAST_ADDR;
 }
 
 
@@ -109,6 +139,7 @@ int bn_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t tim
                 if ( i < maxDpth ){
                     retVals[i].addr=msg.header.srcAddr;
                     retVals[i].ping=stopwatch(&sw)/1000;
+                    retVals[i].error = 0;
                     i++;
                 }
                 //if the sender of the message is the ultimate destination, return

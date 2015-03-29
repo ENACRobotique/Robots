@@ -17,6 +17,7 @@ extern "C" {
 typedef struct{
     bn_Address addr;
     uint32_t ping;
+    uint8_t error;
 }sTraceInfo;
 
 int bn_ping(bn_Address dest);
