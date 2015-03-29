@@ -48,8 +48,7 @@ int bn_pingLink(bn_Address dest, uint32_t waitingDelay, sTraceInfo retArray[], i
     uint32_t sw=0;
     int index=0;
     int receiveVal=0;
-    uint8_t tmpSeqNum=seqNum;
-    uint8_t ackValue=0;
+    uint8_t tmpSeqNum=bn_getCurrentSeqNum();
 
     if (bn_isLinkcast(dest)){
         msg.header.type=E_PING;
@@ -70,12 +69,10 @@ int bn_pingLink(bn_Address dest, uint32_t waitingDelay, sTraceInfo retArray[], i
                 else if ( msg.payload.ack.addr != dest || msg.payload.ack.seqNum != tmpSeqNum) continue;
                 // if this message is an ack , from the requested destination and with the correct seqnum
                 else {
-                    // increments the number of recorded acks
-                    index++;
                     // store details if free space in array
                     if (index < retSize){
                         retArray[index].addr = msg.header.srcAddr;
-                        retArray[index].ping = stopwatch(&sw);
+                        retArray[index].ping = stopwatch(&sw)/1000;
                         if ( msg.payload.ack.ans == A_ACK) {
                             retArray[index].error = 0;
                         }
@@ -86,6 +83,8 @@ int bn_pingLink(bn_Address dest, uint32_t waitingDelay, sTraceInfo retArray[], i
                             retArray[index].error = -ERR_BN_NACK_FULL_BUFFER; //XXX behavior?
                         }
                     }
+                    // increments the number of recorded acks
+                    index++;
                 }
             }
             else if (receiveVal < 0) {

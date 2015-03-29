@@ -330,7 +330,7 @@ int bn_routine(){
         //handle the acknowledgment
         if ( pTmp->msg.header.ack == 1){
             //if the message is for us, send acknowledgment to the initial sender
-            if (bn_isLocalAddress(pTmp->msg.header.destAddr)){
+            if (bn_isLocalAddress(pTmp->msg.header.destAddr) || (bn_isLinkcast(pTmp->msg.header.destAddr) && bn_isLocalSubnet(pTmp->msg.header.destAddr)) ){
                 temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
                 temp.msg.header.type=E_ACK_RESPONSE;
                 temp.msg.header.size=sizeof(sAckPayload);
