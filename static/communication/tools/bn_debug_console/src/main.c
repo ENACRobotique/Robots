@@ -319,13 +319,13 @@ int main(int argc, char **argv){
                 }
                 case 'h':
                     printf("Syncing propulsion..."); fflush(stdout);
-                    bn_intp_sync(role_get_addr(ROLE_PROPULSION), 100);
+                    bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 100);
                     printf("done\n");
                     break;
                 case 'w':{
                     sMsg msg = {{0}};
 
-                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
                     msg.header.type = E_POS_QUERY;
                     msg.header.size = sizeof(msg.payload.posQuery);
 
@@ -340,7 +340,7 @@ int main(int argc, char **argv){
                 case 'd':{ // sends new setpoint to the propulsion // FIXME: use sGenericStatus
                     sMsg msg = {{0}};
 
-                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
                     msg.header.type = E_SPEED_SETPOINT;
                     msg.header.size = sizeof(msg.payload.speedSetPoint);
 

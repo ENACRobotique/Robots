@@ -155,7 +155,7 @@ void Net::sendPathToNet(){
 
         _trajEl.pop();
 
-        if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0)
+        if ((ret = role_sendRetry(&outMsg, ROLE_PRIM_PROPULSION, MAX_RETRIES)) <= 0)
             logs << ERR << "role_sendRetry(E_TRAJ) failed #" << -ret;
         else
             logs << INFO <<"A new path was send : tid=" << _tid << " and sid=" << _sid;
@@ -217,7 +217,7 @@ void Net::sendPathOrientToNet(){
         outMsg.payload.trajOrientEl.tid = _tid;
         outMsg.payload.trajOrientEl.sid = _sid;
 
-        if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0)
+        if ((ret = role_sendRetry(&outMsg, ROLE_PRIM_PROPULSION, MAX_RETRIES)) <= 0)
             logs << ERR << "role_sendRetry(E_TRAJ_ORIENT_EL) failed " << getErrorStr(-ret) << " (#" << -ret << ")";
         else
             logs << INFO << "A new path orient has been sent: tid=" << _tid << " and sid=" << _sid;
