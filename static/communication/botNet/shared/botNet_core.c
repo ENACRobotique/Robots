@@ -144,7 +144,7 @@ int bn_send(sMsg *msg){
  */
 int bn_sendLinkcast(sMsg *msg){
     // checks if linkcast address
-    if (bn_isLinkcast(msg->header.destAddr)) return -ERR_BN_NO_LCAST_ADDR;
+    if (!bn_isLinkcast(msg->header.destAddr)) return -ERR_BN_NO_LCAST_ADDR;
     //sets ack bit
     msg->header.ack=0;
 
