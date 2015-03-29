@@ -1,15 +1,20 @@
+% theoretical geometric data
+v1 = [13.458; -4.289]; % (cm)
+v2 = [13.458; -4.289]; % (cm)
+v3 = [13.458; -4.289]; % (cm)
+
 % computation model, geometric data (L#, theta#, phi#)
-L1 = 15.5 % (cm)
-L2 = 15.5 % (cm)
-L3 = 15.5 % (cm)
+L1 = norm(v1) % (cm)
+L2 = norm(v2) % (cm)
+L3 = norm(v3) % (cm)
 
-theta1 =  30*pi/180; % (rad)
-theta2 = 150*pi/180; % (rad)
-theta3 = 270*pi/180; % (rad)
+phi1 = 30*pi/180; % (rad)
+phi2 = 150*pi/180; % (rad)
+phi3 = 270*pi/180; % (rad)
 
-phi1 = theta1 + 0; % (rad)
-phi2 = theta2 + 0; % (rad)
-phi3 = theta3 + 0; % (rad)
+theta1 = phi1 + atan2(v1(2), v1(1)); % (rad)
+theta2 = phi2 + atan2(v2(2), v2(1)); % (rad)
+theta3 = phi3 + atan2(v3(2), v3(1)); % (rad)
 
 % compute translation for each pod
 OP1_rob = L1*[cos(theta1); sin(theta1); 0]; % (cm)
@@ -43,7 +48,7 @@ v_p1 = v_v_p1 + v_o_p1 % (cm/s)
 v_p2 = v_v_p2 + v_o_p2 % (cm/s)
 v_p3 = v_v_p3 + v_o_p3 % (cm/s)
 
-% formula extracted from operations above
+% formula extracted from operations above (_v_p# must be equal to previously computed v_p#)
 _v_p1 = -v_rob(1)*sin(phi1) + v_rob(2)*cos(phi1) + L1*omega_rob(3)*cos(phi1 - theta1) % (cm/s)
 _v_p2 = -v_rob(1)*sin(phi2) + v_rob(2)*cos(phi2) + L2*omega_rob(3)*cos(phi2 - theta2) % (cm/s)
 _v_p3 = -v_rob(1)*sin(phi3) + v_rob(2)*cos(phi3) + L3*omega_rob(3)*cos(phi3 - theta3) % (cm/s)
@@ -70,13 +75,16 @@ disp(["    => ", num2str(_vo_rob(3)*180/pi), "°/s"])
 A = M_rob2pods;
 _sphi1 = -A(1, 1);
 _cphi1 =  A(1, 2);
-disp(["    => phi1=", num2str(atan2(_sphi1, _cphi1)*180/pi), "°"])
+_phi1 = atan2(_sphi1, _cphi1);
+disp(["    => phi1=", num2str(_phi1*180/pi), "°"])
 _sphi2 = -A(2, 1);
 _cphi2 =  A(2, 2);
-disp(["    => phi2=", num2str(atan2(_sphi2, _cphi2)*180/pi), "°"])
+_phi2 = atan2(_sphi2, _cphi2);
+disp(["    => phi2=", num2str(_phi2*180/pi), "°"])
 _sphi3 = -A(3, 1);
 _cphi3 =  A(3, 2);
-disp(["    => phi3=", num2str(atan2(_sphi3, _cphi3)*180/pi), "°"])
+_phi3 = atan2(_sphi3, _cphi3);
+disp(["    => phi3=", num2str(_phi3*180/pi), "°"])
 _L1 = A(1, 3) % (cm)
 _L2 = A(2, 3) % (cm)
 _L3 = A(3, 3) % (cm)
@@ -85,7 +93,7 @@ _L3 = A(3, 3) % (cm)
 _theta1 =  30*pi/180; % (rad)
 _theta2 = 150*pi/180; % (rad)
 _theta3 = 270*pi/180; % (rad)
-__L1 = A(1, 3)/(_sphi1*sin(_theta1) + _cphi1*cos(_theta1))
-__L2 = A(2, 3)/(_sphi2*sin(_theta2) + _cphi2*cos(_theta2))
-__L3 = A(3, 3)/(_sphi3*sin(_theta3) + _cphi3*cos(_theta3))
+__L1 = A(1, 3)/cos(_phi1 - _theta1)
+__L2 = A(2, 3)/cos(_phi2 - _theta2)
+__L3 = A(3, 3)/cos(_phi3 - _theta3)
 
