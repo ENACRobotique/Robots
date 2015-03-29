@@ -318,12 +318,7 @@ int bn_routine(){
             temp.msg.header.size=0;
             bn_send(&(temp.msg));
             //destroy the incoming message if we were the destination
-            if (
-                pTmp->msg.header.destAddr == MYADDRX ||
-                pTmp->msg.header.destAddr == MYADDRI ||
-                pTmp->msg.header.destAddr == MYADDRU ||
-                pTmp->msg.header.destAddr == MYADDRD
-            ){
+            if (bn_isLocalAddress(pTmp->msg.header.destAddr)){
                 bn_freeInBufFirst();
                 return count;
             }
@@ -335,12 +330,7 @@ int bn_routine(){
         //handle the acknowledgment
         if ( pTmp->msg.header.ack == 1){
             //if the message is for us, send acknowledgment to the initial sender
-            if (
-                pTmp->msg.header.destAddr == MYADDRX ||
-                pTmp->msg.header.destAddr == MYADDRI ||
-                pTmp->msg.header.destAddr == MYADDRU ||
-                pTmp->msg.header.destAddr == MYADDRD
-            ){
+            if (bn_isLocalAddress(pTmp->msg.header.destAddr)){
                 temp.msg.header.destAddr=pTmp->msg.header.srcAddr;
                 temp.msg.header.type=E_ACK_RESPONSE;
                 temp.msg.header.size=sizeof(sAckPayload);
