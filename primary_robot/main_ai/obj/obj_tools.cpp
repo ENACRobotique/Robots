@@ -14,7 +14,6 @@
 #include <obj.h>
 #include <obj_tools.h>
 #include <tools.h>
-#include "math_ops.h"
 #include "clap.h"
 
 
@@ -24,7 +23,7 @@
 
 using namespace std;
 
-void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
+void updateEndTraj(float theta, Point2D<float> *pt, float r) {
     int i;
     for (i = 1; i < 4; i++) {
         obs[N - i - 1].c.x = pt->x + (r) * cos(theta + i * M_PI_2);
@@ -34,7 +33,7 @@ void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
     }
 }
 
-void updateNoHaftTurn(sNum_t theta, sPt_t *pt) {
+void updateNoHaftTurn(float theta, Point2D<float>& pt) {
     int i;
     sNum_t r, speed = statuses.getLastSpeed(ELT_PRIMARY);
     r = speed / 3;
@@ -42,8 +41,8 @@ void updateNoHaftTurn(sNum_t theta, sPt_t *pt) {
         r = 15;
 
     for (i = 1; i < 4; i++) {
-        obs[N - i - 4].c.x = pt->x + (r) * cos(theta * M_PI / 180 + i * M_PI_2);
-        obs[N - i - 4].c.y = pt->y + (r) * sin(theta * M_PI / 180 + i * M_PI_2);
+        obs[N - i - 4].c.x = pt.x + (r) * cos(theta * M_PI / 180 + i * M_PI_2);
+        obs[N - i - 4].c.y = pt.y + (r) * sin(theta * M_PI / 180 + i * M_PI_2);
         obs[N - i - 4].active = 1;
         obs[N - i - 4].r = r - 0.5;
     }
@@ -89,7 +88,7 @@ int next_obj(void) {
     sNum_t tmp_val = 0.;
     sNum_t tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
-    sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
 
     logs << INFO << "Start next_obj()";
 
@@ -100,7 +99,7 @@ int next_obj(void) {
             continue; //test if  objective is still active
 
 
-        if (listObj[i]->update(pos_robot) < 0) {
+        if (listObj[i]->update({pos_robot.x, pos_robot.y}) < 0) {
 
             logs << DEBUG << "No find path to achieve the objective for objective n°" << i;
 
@@ -120,7 +119,7 @@ int next_obj(void) {
 
     if (tmp_inx >= 0) { //Update end of trajectory
         loadingPath(listObj[tmp_inx]->getPath(), tmp_inx);
-        obs[N - 1].c = listObj[tmp_inx]->getDestPoint();
+        obs[N - 1].c = {listObj[tmp_inx]->getDestPoint().x, listObj[tmp_inx]->getDestPoint().y};
         obs_updated[N - 1]++;
     }
 

@@ -13,7 +13,6 @@
 #include <tools.h>
 #include <cmath>
 #include <iostream>
-#include "math_ops.h"
 #include "a_star.h"
 #include "time_tools.h"
 #include "tools.h"
@@ -137,7 +136,8 @@ void Path::sendRobot() {
  * Stop the robot
  */
 void Path::stopRobot() {
-    sTrajEl_t traj = sTrajEl_t{statuses.getLastPosXY(ELT_PRIMARY), statuses.getLastPosXY(ELT_PRIMARY), {statuses.getLastPosXY(ELT_PRIMARY), 0, 0, 1, 0}, 0, 0, 0 };
+    Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
+    sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
 
     clear();
 
@@ -151,20 +151,21 @@ void Path::stopRobot() {
  * The robot go to the destination point.
  * "f" to force the robot to go, even if the destination point is in obstacle or if there are obstacles in the trajectory.
  */
-void Path::go2Point(const sPt_t &dest, const bool f){
+void Path::go2Point(const Point2D<float> &dest, const bool f){
     sPath_t path;
+    Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
 
-    obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
-    obs[N-1].c = dest;
+    obs[0].c = {posRobot.x, posRobot.y};
+    obs[N-1].c = {dest.x, dest.y};
     logs << DEBUG << "position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
 
     Point2D<float> p1(obs[0].c.x, obs[0].c.y),  p2(obs[N-1].c.x, obs[N-1].c.y);
-    if(p1.distance(p2) < 2.)
+    if(p1.distanceSqTo(p2) < 2.*2.)
         return;
 
     if(f){
         clear();
-        sTrajEl_t traj = sTrajEl_t{statuses.getLastPosXY(ELT_PRIMARY), dest, {dest, 0., 0, 1, 0}, 0, 0, 0 };
+        sTrajEl_t traj = sTrajEl_t{posRobot, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
 
         _path.push_back(traj);
         sendRobot();
@@ -195,8 +196,8 @@ void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tab
 
         sSeg_t *s = tgt(l[i], l[i + 1]);
 
-        el.p1 = s->p1;
-        el.p2 = s->p2;
+        el.p1 = {s->p1.x, s->p1.y};
+        el.p2 = {s->p2.x, s->p2.y};
         el.obs.active = 1;
         el.obs.c = obs[O(l[i + 1])].c;
         el.obs.moved = 1;
@@ -404,22 +405,22 @@ void Path::setPathLength() {
             Circle2D<float> c(_path[i].obs.c.x, _path[i].obs.c.y, _path[i].obs.r);
             Point2D<float> p1(_path[i].p2.x, _path[i].p2.y), p2(_path[i+1].p1.x, _path[i+1].p1.y);
             _path[i].arc_len = c.arcLenght(p1, p2);
-            distPt2Pt(&_path[i].p1, &_path[i].p2, &_path[i].seg_len );
+            _path[i].seg_len = _path[i].p1.distanceTo(_path[i].p2);
         }
 
         _path[_path.size() - 1].arc_len = 0;
-        distPt2Pt(&_path[_path.size() - 1].p1, &_path[_path.size() - 1].p2, &_path[_path.size() - 1].seg_len);
+        _path[_path.size() - 1].seg_len = _path[_path.size() - 1].p1.distanceTo(_path[_path.size() - 1].p2);
     }
     else if(!_path_orient.empty()){
         for (unsigned int i = 0; i < _path_orient.size() - 1; i++) {
             Circle2D<float> c(_path_orient[i].obs.c.x, _path_orient[i].obs.c.y, _path_orient[i].obs.r);
             Point2D<float> p1(_path_orient[i].p2.x, _path_orient[i].p2.y), p2(_path_orient[i+1].p1.x, _path_orient[i+1].p1.y);
             _path_orient[i].arc_len = c.arcLenght(p1, p2);
-            distPt2Pt(&_path_orient[i].p1, &_path_orient[i].p2, &_path_orient[i].seg_len );
+            _path_orient[i].seg_len = _path_orient[i].p1.distanceTo(_path_orient[i].p2);
         }
 
         _path_orient[_path_orient.size() - 1].arc_len = 0;
-        distPt2Pt(&_path_orient[_path_orient.size() - 1].p1, &_path_orient[_path_orient.size() - 1].p2, &_path_orient[_path_orient.size() - 1].seg_len);
+        _path_orient[_path_orient.size() - 1].seg_len = _path_orient[_path_orient.size() - 1].p1.distanceTo(_path_orient[_path_orient.size() - 1].p2);
     }
 }
 
@@ -491,21 +492,19 @@ bool Path::checkSamePath2(deque<sTrajEl_t>& path){
  * Return 1 if the robot is block else 0.
  */
 int Path::checkRobotBlock() {
-    static sPt_t pos[10] = { { 0., 0. } };
+    static Point2D<float> pos[10] = { { 0., 0. } };
     static int pt = 0;
     static int block = 0;
     static unsigned int lastTime = 0;
     int i, cpt = 0;
-    sNum_t dist;
-    sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
 
     if (fabs(time_diff(millis(), lastTime)) > 200) {
         pos[pt] = pos_robot;
         pt++;
         pt = pt % 10;
         for (i = 0; i < 10; i++) {
-            distPt2Pt(&pos_robot, &pos[i], &dist);
-            if (dist < 1.)
+            if (pos_robot.distanceTo(pos[i]) < 1.)
                 cpt++;
         }
         if (cpt >= 10) {
@@ -525,7 +524,7 @@ int Path::checkRobotBlock() {
 void Path::updateNoHaftTurn() {
     int i;
     sNum_t r;
-    sPt_t pt = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> pt = statuses.getLastPosXY(ELT_PRIMARY);
     float theta = statuses.getLastOrient(ELT_PRIMARY);
     static sObs_t _obs[3];
 

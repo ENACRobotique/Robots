@@ -60,16 +60,16 @@
  *         P3
  */
 
-/* from theoric data
-M_rob2pods =
-  -5.00000000000000e-01   8.66025403784439e-01   1.55000000000000e+01
-  -5.00000000000000e-01  -8.66025403784439e-01   1.55000000000000e+01
-   1.00000000000000e+00  -1.83690953073357e-16   1.55000000000000e+01
-*/
+/* from theoretical data
+ M_rob2pods =
+ -5.00000000000000e-01   8.66025403784439e-01   1.34580000000000e+01
+ -5.00000000000000e-01  -8.66025403784439e-01   1.34580000000000e+01
+ 1.00000000000000e+00  -1.83697019872103e-16   1.34580000000000e+01
+ */
 const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
-    {-0.5 * dMSHIFT,  0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
-    {-0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, D2I(15.5) * dMoRSHIFT},
-    { 1.  * dMSHIFT,  0                 * dMSHIFT, D2I(15.5) * dMoRSHIFT}
+        { -0.5 * dMSHIFT, 0.866025403784439 * dMSHIFT, D2I(13.458) * dMoRSHIFT },
+        { -0.5 * dMSHIFT, -0.866025403784439 * dMSHIFT, D2I(13.458) * dMoRSHIFT },
+        { 1. * dMSHIFT, 0 * dMSHIFT, D2I(13.458) * dMoRSHIFT }
 };
 
 int main() {
@@ -88,22 +88,30 @@ int main() {
     // BotNet initialization (i²c + uart)
     //TODO
 
+    // sets the I/O {1,24} and {0,31}  (leds) as outputs
+    gpio_output(1, 24);
+    gpio_output(0, 31);
+
     global_IRQ_enable();
 
     //// Global variables
-    unsigned int prevControl = micros();
+    unsigned int prevControl_us = micros();
+    unsigned int prevLed_ms = millis();
+    unsigned int prevPos_ms = millis();
+    unsigned int time_ms, time_us;
+    int state = 0;
     int ret;
-    sMsg inMsg = {{0}};//, outMsg = {{0}};
+    sMsg inMsg = { { 0 } }, outMsg = { { 0 } };
 
     // FIXME need to have a first loop here to wait for time synchronization
 
-    while (1) { // ############## Loop ############################################
+    while (1) {
         sys_time_update();
 
         // Reception and processing of the message
         ret = bn_receive(&inMsg);
-        if(ret > 0){
-            switch(inMsg.header.type){
+        if (ret > 0) {
+            switch (inMsg.header.type) {
             case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
                 trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
@@ -114,24 +122,47 @@ int main() {
         } // End: if(ret > 0)
 
         // Automatic control
-        if (micros() - prevControl >= PER_CTRL_LOOP) {
-            // If there is too much delay we skip to the next increment of the loop
-            if(micros() - prevControl > PER_CTRL_LOOP_CRITIC){
-                prevControl = micros();
+        time_us = micros();
+        if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
+            if (time_us - prevControl_us > PER_CTRL_LOOP_CRITIC_US) {
+                // If there is too much delay we skip the step
                 trajmngr_reset(&traj_mngr);
-                continue;
             }
-            prevControl = micros();
+            else {
+                // Control trajectory
+                trajmngr_update(&traj_mngr);
+            }
 
-            // Control trajectory
-            trajmngr_update(&traj_mngr);
+            prevControl_us = time_us;
         }
-    } // ############## End loop ############################################
+
+        time_ms = millis();
+        if (time_ms - prevPos_ms >= 100) {
+            prevPos_ms = time_ms;
+
+            // FIXME todo
+//            outMsg.header.type = E_GENERIC_STATUS;
+//            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
+//            trajmngr_fill_pos(&traj_mngr, &outMsg.payload.genericStatus);
+
+            {
+                //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
+                outMsg.header.type = E_POS;
+                outMsg.header.size = sizeof(outMsg.payload.pos);
+                outMsg.payload.pos.id = ELT_PRIMARY; // main robot
+                outMsg.payload.pos.x = I2Ds(traj_mngr.ctlr.x);
+                outMsg.payload.pos.y = I2Ds(traj_mngr.ctlr.y);
+                outMsg.payload.pos.theta = (double) traj_mngr.ctlr.theta / dASHIFT;
+            }
+
+            role_send(&outMsg);
+        }
+
+        time_ms = millis();
+        if ((time_ms - prevLed_ms) > 500) {
+            prevLed_ms = time_ms;
+            state ^= 1; // toggle state (led blinking)
+            gpio_write(1, 24, state);
+        }
+    }
 }
-
-
-
-/*
- * ############## Remarks ####################
- *
- */

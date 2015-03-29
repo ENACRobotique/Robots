@@ -62,11 +62,12 @@ void trajslot_update_with_next(sTrajSlot_t* curr, const sTrajSlot_t* next) {
             next->tid == curr->tid &&
             next->sid == ((curr->sid + 1)&31)
     ) {
+        int32_t dt_us = next->seg_start_date - curr->arc_start_date; // duration for arc item in microseconds
+
 #ifdef ARCH_X86_LINUX
-        assert(next->seg_start_date >= curr->arc_start_date);
+        assert(dt_us >= 0);
 #endif
 
-        int32_t dt_us = next->seg_start_date - curr->arc_start_date; // duration for arc item in microseconds
         curr->arc_spd = _SPDCALC(curr->arc_len, dt_us);
 
         curr->state = SLOT_OK;

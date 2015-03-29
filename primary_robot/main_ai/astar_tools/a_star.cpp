@@ -1,16 +1,17 @@
-#include <a_star_tools.h>
 #include "a_star.h"
 
+#include "a_star_tools.h"
 #include "math_ops.h"
 
-extern "C"{
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 
 #ifdef AS_STATS
+extern "C"{
 #include "millis.h"
-#endif
 }
+#endif
+
 
 
 void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {
@@ -90,8 +91,8 @@ void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {
 
                 // segment section
                 seg = tgt(current.o1, current.o2);
-                path->path[i].p1 = seg->p1;
-                path->path[i].p2 = seg->p2;
+                path->path[i].p1 = {seg->p1.x, seg->p1.y};
+                path->path[i].p2 = {seg->p2.x, seg->p2.y};
                 distPt2Pt(&seg->p1, &seg->p2, &path->path[i].seg_len);
                 // arc section
                 path->path[i].obs = obs[O(current.o2)];

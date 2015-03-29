@@ -27,22 +27,21 @@ typedef struct {
     float radius;           //size of the 3 approach circles
 #endif
 
-    union{
-        struct{
-            sPt_t p;        //point
-            float angle;    //approach angle between 0 and 2 M_PI
-        }pt;
+    struct{
+        Point2D<float> p;        //point
+        float angle;    //approach angle between 0 and 2 M_PI
+    }pt;
 
-        struct{
-            sPt_t c;        //enter of the circle
-            float r;        //radius of the circle
-        }cir;
+    struct{
+            Point2D<float> c;        //enter of the circle
+        float r;        //radius of the circle
+    }cir;
 
-        struct{
-            sSeg_t s;       //segment
-            bool dir;       //true if (p1;p2)^(p1;probot) > 0
-        }seg;
-    };
+    struct{
+        Segment2D<float> s;       //segment
+        bool dir;       //true if (p1;p2)^(p1;probot) > 0
+    }seg;
+
 } sObjEntry_t;
 
 typedef enum {
@@ -71,7 +70,7 @@ class Obj {
 
         float getDist() const;
         sPath_t getPath() const;
-        sPt_t getDestPoint() const;
+        Point2D<float> getDestPoint() const;
         float getDestPointOrient() const;
         eStateObj_t getState() const;
         sNum_t getYield();
@@ -82,7 +81,7 @@ class Obj {
         eObj_t _type;                       //objective type
         int _point;                         //point number of the objective
         eStateObj_t _state;                 //if the objective is used or not
-        sPt_t _access_select;               //the closest access select
+        Point2D<float> _access_select;               //the closest access select
         float _access_select_angle;         //angle of the access select
         sNum_t _dist;                       //distance robot-objective (the closest access)
         sNum_t _time;                       //time robot-objective (the closest access) TODO no compute for the moment

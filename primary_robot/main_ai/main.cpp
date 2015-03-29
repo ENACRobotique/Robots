@@ -23,6 +23,83 @@ extern "C"{
 #include "tools.h"
 #include "ai.h"
 #include "net.h"
+#include "GeometryTools.h"
+
+std::vector<sObs_t> initObs= {
+   // robots
+   {{0., 0.},          0., 1, 1, 1},   //primary
+   {{0., 0.}, R_ROBOT+12., 1, 0, 1},   //secondary
+   {{0., 0.}, R_ROBOT+20., 1, 0, 1},   //primary adv
+   {{0., 0.}, R_ROBOT+15., 1, 0, 1},   //secondary adv
+
+   //Yellow spots //if moved change START_STAND
+   {{9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //4
+   {{85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
+   {{85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
+   {{87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
+   {{9.  , 15.}, 3. + R_ROBOT, 1, 1, 1},
+   {{9.  , 25.}, 3. + R_ROBOT, 1, 1, 1},
+   {{110., 23.}, 3. + R_ROBOT, 1, 1, 1},
+   {{130., 60.}, 3. + R_ROBOT, 1, 1, 1},
+
+   //Green spots
+   {{300 - 9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //12
+   {{300 - 85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
+   {{300 - 85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
+   {{300 - 87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
+   {{300 - 9.  , 15.}, 3. + R_ROBOT, 1, 1, 1},
+   {{300 - 9.  , 25.}, 3. + R_ROBOT, 1, 1, 1},
+   {{300 - 110., 23.}, 3. + R_ROBOT, 1, 1, 1},
+   {{300 - 130., 60.}, 3. + R_ROBOT, 1, 1, 1},
+
+   //Cup
+   {{25. , 25.}, 5. + R_ROBOT, 1, 1, 1}, //20
+   {{91. ,120.}, 5. + R_ROBOT, 1, 1, 1},
+   {{150., 35.}, 5. + R_ROBOT, 1, 1, 1},
+   {{300 - 25. , 25.}, 5. + R_ROBOT, 1, 1, 1},
+   {{300 - 91. ,120.}, 5. + R_ROBOT, 1, 1, 1},
+
+   //Popcorn machine
+   {{30. ,196.5}, 5. + R_ROBOT, 0, 1, 1}, //25
+   {{60. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
+   {{300 - 30. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
+   {{300 - 60. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
+
+   //Stairs
+   {{102. ,147.}, 7. + R_ROBOT, 1, 1, 1}, //29
+   {{150.,200.}, 53. + R_ROBOT, 1, 1, 1},
+   {{300 - 102. ,147.}, 7. + R_ROBOT, 1, 1, 1},
+
+   //Platform
+   {{125.,  5.}, 7. + R_ROBOT, 1, 1, 1}, //32
+   {{300 - 125.,  5.}, 7. + R_ROBOT, 1, 1, 1},
+
+   //Starting zone
+   {{39., 79.}, 2. + R_ROBOT, 1, 1, 1}, //34
+   {{20., 79.}, 2. + R_ROBOT, 1, 1, 1},
+   {{39.,121.}, 2. + R_ROBOT, 1, 1, 1},
+   {{20.,121.}, 2. + R_ROBOT, 1, 1, 1},
+   {{300 - 39., 79.}, 2. + R_ROBOT, 1, 1, 1},
+   {{300 - 20., 79.}, 2. + R_ROBOT, 1, 1, 1},
+   {{300 - 39.,121.}, 2. + R_ROBOT, 1, 1, 1},
+   {{300 - 20.,121.}, 2. + R_ROBOT, 1, 1, 1},
+
+#if !HOLONOMIC
+   //Cercles du robot anti-demi-tour
+   {{0., 0. }, 0, 0, 0, 1}, //42
+   {{0., 0. }, 0, 0, 0, 1},
+   {{0., 0. }, 0, 0, 0, 1},
+
+   //Cercles d'approches
+   {{0., 0. }, 0, 0, 0, 1},//45
+   {{0., 0. }, 0, 0, 0, 1},
+   {{0., 0. }, 0, 0, 0, 1},
+#endif
+
+   // arrivée
+   {{0. , 0.}, 0, 0, 1, 1} //48
+};
+
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -107,6 +184,7 @@ int main(int argc, char **argv) {
     sendPing();
 
     // calls initialization functions
+    init_obs(initObs);
     switch (eAIState) {
         case E_AI_AUTO:
         case E_AI_PROG:
@@ -116,7 +194,7 @@ int main(int argc, char **argv) {
             }
             break;
         case E_AI_SLAVE:
-            sPt_t pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
+            Point2D<float> pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
             sendPos(pt, INIT_ANGLE_SLAVE);
             break;
     }
@@ -148,9 +226,9 @@ int main(int argc, char **argv) {
         checkInbox(verbose);
 
         // calls loop functions
+        Point2D<float> goal;
         switch (eAIState) {
             case E_AI_SLAVE:
-                sPt_t goal;
                 if (lastGoal(goal, true)) {
                     logs << INFO << "New goal available";
                     path.go2Point(goal, false);

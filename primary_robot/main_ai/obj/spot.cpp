@@ -10,7 +10,6 @@
 #include <iostream>
 #include <cmath>
 
-#include "math_types.h"
 #include "types.h"
 #include "tools.h"
 
@@ -30,7 +29,7 @@ Spot::Spot(unsigned int num) : Obj(E_SPOT), _num(num){
 
     sObjEntry_t objEP;
     objEP.type = E_CIRCLE;
-    objEP.cir.c = obs[_num_obs.back()].c;
+    objEP.cir.c = {obs[_num_obs.back()].c.x, obs[_num_obs.back()].c.y};
     objEP.cir.r = 3. + R_ROBOT;
 
     _access.push_back(objEP);

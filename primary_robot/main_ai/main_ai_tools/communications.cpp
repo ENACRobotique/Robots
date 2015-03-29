@@ -177,7 +177,7 @@ void sendObss(){
 /*
  * Send a new position imposed to the robot
  */
-int sendPos(sPt_t &p, sNum_t theta) {
+int sendPos(Point2D<float> &p, float theta) {
     sMsg msgOut ;
     int ret;
 
@@ -209,7 +209,7 @@ int sendPos(sPt_t &p, sNum_t theta) {
 /*
  * Send a new speed imposed to the robot
  */
-int sendSpeed(sNum_t speed) {
+int sendSpeed(float speed) {
     sMsg msgOut;
     int ret;
 
@@ -236,6 +236,7 @@ int sendSpeed(sNum_t speed) {
  */
 void checkInbox(int verbose){
     sMsg msgIn;
+    Point2D<float> goal;
     int ret;
 
     if((ret = bn_receive(&msgIn)) < 0){ //get the message
@@ -279,7 +280,6 @@ void checkInbox(int verbose){
         case E_GOAL:
             cout << "[GOAL] robot" << msgIn.payload.pos.id << "@(" << msgIn.payload.pos.x << ", " << msgIn.payload.pos.y << ", " << msgIn.payload.pos.theta * 180. / M_PI << ")" << endl;
 
-            sPt_t goal;
             goal.x = msgIn.payload.pos.x;
             goal.y = msgIn.payload.pos.y;
             lastGoal(goal, false);
@@ -310,8 +310,8 @@ void checkInbox(int verbose){
  * get == true -> get
  * get == false -> set
  */
-bool lastGoal(sPt_t &goal, bool get){
-    static sPt_t pt;
+bool lastGoal(Point2D<float>& goal, bool get){
+    static Point2D<float> pt;
     static bool new_goal = false;
 
     if(!get){

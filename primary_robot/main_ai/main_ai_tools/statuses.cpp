@@ -11,7 +11,6 @@
 #include <cmath>
 #include "ai_types.h"
 #include "tools.h"
-#include "math_ops.h"
 #include "time_tools.h"
 
 
@@ -81,7 +80,7 @@ sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
     return status;
 }
 
-sPt_t Statuses::getLastPosXY(eElement el){
+Point2D<float> Statuses::getLastPosXY(eElement el){
     sGenericStatus& status = getLastStatus(el);
 
     return {status.pos.x, status.pos.y};
@@ -97,13 +96,12 @@ float Statuses::getLastSpeed(eElement el){
 
     if(_list[el].size() >=2){
         sGenericStatus& status1 = getLastStatus(el);
-        sPt_t pt1 = {status1.pos.x, status1.pos.y};
+        Point2D<float> pt1 = {status1.pos.x, status1.pos.y};
 
         sGenericStatus& status2 =_list[el][_list[el].size() - 2];
-        sPt_t pt2 = {status2.pos.x, status2.pos.y};
+        Point2D<float> pt2 = {status2.pos.x, status2.pos.y};
 
-        float dist;
-        distPt2Pt(&pt1, &pt2, &dist);
+        float dist = pt1.distanceTo(pt2);
 
         return dist/(status1.date - status2.date)*1000000;
     }

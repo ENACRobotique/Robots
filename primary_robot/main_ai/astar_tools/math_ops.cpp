@@ -1,9 +1,7 @@
 
 #include "math_ops.h"
 
-extern "C"{
-#include <math.h>
-}
+#include <cmath>
 
 
 ERROR normVec(const sVec_t *v, sNum_t *n) {
