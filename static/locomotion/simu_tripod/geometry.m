@@ -1,41 +1,42 @@
-% geometric data with imperfections
-L1 = 15.5 * 1.02; % (cm)
-L2 = 15.5 * 0.99; % (cm)
-L3 = 15.5 * 1.01; % (cm)
+% computation model, geometric data (L#, theta#, phi#)
+L1 = 15.5 % (cm)
+L2 = 15.5 % (cm)
+L3 = 15.5 % (cm)
 
-theta1 =  30*pi/180 * 1.01; % (rad)
-theta2 = 150*pi/180 * 0.99; % (rad)
-theta3 = 270*pi/180 * 0.99; % (rad)
+theta1 =  30*pi/180; % (rad)
+theta2 = 150*pi/180; % (rad)
+theta3 = 270*pi/180; % (rad)
 
-phi1 = theta1 +  1*pi/180; % (rad)
-phi2 = theta2 + -2*pi/180; % (rad)
-phi3 = theta3 +  0*pi/180; % (rad)
+phi1 = theta1 + 0; % (rad)
+phi2 = theta2 + 0; % (rad)
+phi3 = theta3 + 0; % (rad)
 
-% compute rotation + translation for each pod
-OP1_rob = L1*[cos(theta1); sin(theta1)]; % (cm)
-OP2_rob = L2*[cos(theta2); sin(theta2)]; % (cm)
-OP3_rob = L3*[cos(theta3); sin(theta3)]; % (cm)
+% compute translation for each pod
+OP1_rob = L1*[cos(theta1); sin(theta1); 0]; % (cm)
+OP2_rob = L2*[cos(theta2); sin(theta2); 0]; % (cm)
+OP3_rob = L3*[cos(theta3); sin(theta3); 0]; % (cm)
 
-R1 = [cos(phi1) sin(phi1); -sin(phi1) cos(phi1)]; % rob2p1
-R2 = [cos(phi2) sin(phi2); -sin(phi2) cos(phi2)]; % rob2p2
-R3 = [cos(phi3) sin(phi3); -sin(phi3) cos(phi3)]; % rob2p3
+% compute rotation for each pod (rotation matrices based on angle between the 2 reference frames)
+R_rob2p1 = [cos(phi1) sin(phi1) 0; -sin(phi1) cos(phi1) 0; 0 0 1]; % rob2p1
+R_rob2p2 = [cos(phi2) sin(phi2) 0; -sin(phi2) cos(phi2) 0; 0 0 1]; % rob2p2
+R_rob2p3 = [cos(phi3) sin(phi3) 0; -sin(phi3) cos(phi3) 0; 0 0 1]; % rob2p3
 
 % transformation matrices for each pod (not used here)
-P_rob2p1 = [R1 -R1*OP1_rob; 0 0 1];
-P_rob2p2 = [R2 -R2*OP2_rob; 0 0 1];
-P_rob2p3 = [R3 -R3*OP3_rob; 0 0 1];
+P_rob2p1 = [R_rob2p1 -R_rob2p1*OP1_rob; 0 0 0 1];
+P_rob2p2 = [R_rob2p2 -R_rob2p2*OP2_rob; 0 0 0 1];
+P_rob2p3 = [R_rob2p3 -R_rob2p3*OP3_rob; 0 0 0 1];
 
 % calculate setpoint for each pod for linear speed only
-v_rob = 10*[cos(10*pi/180); sin(10*pi/180)]; % (cm/s)
-v_v_p1 = (R1*v_rob)' * [0;1] % (cm/s)
-v_v_p2 = (R2*v_rob)' * [0;1] % (cm/s)
-v_v_p3 = (R3*v_rob)' * [0;1] % (cm/s)
+v_rob = 10*[cos(10*pi/180); sin(10*pi/180); 0]; % (cm/s)
+v_v_p1 = dot(R_rob2p1*v_rob, [0;1;0]) % (cm/s)
+v_v_p2 = dot(R_rob2p2*v_rob, [0;1;0]) % (cm/s)
+v_v_p3 = dot(R_rob2p3*v_rob, [0;1;0]) % (cm/s)
 
 % calculate setpoint for each pod for angular speed only
 omega_rob = [0;0;5*pi/180]; % (rad/s)
-v_o_p1 = ([R1 [0;0]; 0 0 1] * cross(omega_rob, [OP1_rob; 0]))' * [0;1;0] % (cm/s)
-v_o_p2 = ([R2 [0;0]; 0 0 1] * cross(omega_rob, [OP2_rob; 0]))' * [0;1;0] % (cm/s)
-v_o_p3 = ([R3 [0;0]; 0 0 1] * cross(omega_rob, [OP3_rob; 0]))' * [0;1;0] % (cm/s)
+v_o_p1 = dot(R_rob2p1*cross(omega_rob, OP1_rob), [0;1;0]) % (cm/s)
+v_o_p2 = dot(R_rob2p2*cross(omega_rob, OP2_rob), [0;1;0]) % (cm/s)
+v_o_p3 = dot(R_rob2p3*cross(omega_rob, OP3_rob), [0;1;0]) % (cm/s)
 
 % get speed setpoint for each pod
 v_p1 = v_v_p1 + v_o_p1 % (cm/s)
@@ -54,7 +55,7 @@ M_rob2pods = [ -sin(phi1) cos(phi1) L1*cos(phi1 - theta1);
 M_pods2rob = inv(M_rob2pods)
 
 % verify results
-vo_rob = [v_rob;0] + omega_rob;
+vo_rob = v_rob + omega_rob;
 v_pods = M_rob2pods*vo_rob
 _vo_rob = M_pods2rob*v_pods
 disp(["    => ", num2str(atan2(_vo_rob(2), _vo_rob(1))*180/pi), "°"])
