@@ -132,7 +132,7 @@ int main(){
                 case 'D' :
                     printf("enter broadcast destination address\n");
                     scanf("%hx",&destAd);
-                    if ( (err=bn_debugSendAddrLinkast(destAd)) > 0){
+                    if ( (err=bn_debugSendAddrLinkcast(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;
                     }
@@ -171,7 +171,6 @@ int main(){
                         case 1 : msgSend++; break;
                         case -ERR_BN_ACK_TIMEOUT : msgNStatused++; break;
                         case -ERR_BN_NACK_BROKEN_LINK : msgNOk++; break;
-//                        default : printf("blah %d %d\n",ret,msg2send);break;
                         }
 
                         gettimeofday(&currentClock,NULL);

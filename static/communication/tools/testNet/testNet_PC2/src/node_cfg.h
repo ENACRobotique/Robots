@@ -30,5 +30,6 @@
 #define UART_READBYTE_TIMEOUT 10000    //in µs
 
 //#define DEBUG_PC_RT
+//#define DEBUG_PC_ACK
 
 #endif /* NODE_CFG_H_ */

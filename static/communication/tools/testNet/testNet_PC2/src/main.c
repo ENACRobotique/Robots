@@ -29,7 +29,7 @@
 
 
 #define DEBUG
-
+#define PINGTABSIZE 8
 
 static int menu = 0;
 
@@ -96,7 +96,9 @@ int main(){
             while (!quitMenu){
                 printf("\ndebug reader menu\n");
                 printf("s : send debugger address\n");
+                printf("w : linkcast send debugger address\n");
                 printf("p : ping\n");
+                printf("l : ping linkcast\n");
                 printf("t : traceroute\n");
                 printf("r : return\n");
                 printf("q : quit\n");
@@ -117,11 +119,43 @@ int main(){
                         quitMenu=1;
                     }
                     else {
-                        printf("error while sending : %d\n", err);
+                        printf("error while sending : %s\n", getErrorStr(err));
+
+                    }
+                    break;
+                case 'W' :
+                    do{
+                        printf("enter destination address\n");
+                        err = scanf("%hx",&destAd);
+                        if (err != 1){
+                            printf("error getting destination address\n");
+                        }
+                        else {
+                            printf("address %hx is%s linkcast\n",destAd,(bn_isLinkcast(destAd)?"":" not"));
+                        }
+                    }while(err != 1 || !bn_isLinkcast(destAd));
+                    if ( (err=bn_debugSendAddrLinkcast(destAd)) > 0){
+                        printf("signalling send\n");
+                        quitMenu=1;
+                    }
+                    else {
+                        printf("error while sending : %s\n", getErrorStr(err));
 
                     }
                     break;
                 case 'P' :
+                    do{
+                        printf("enter destination address\n");
+                        err = scanf("%hx",&destAd);
+                        if (err != 1){
+                            printf("error getting destination address\n");
+                        }
+                    }while(err != 1);
+                    int pingVal=bn_ping(destAd);
+                    if (pingVal >= 0) printf("ping %hx : %d ms\n",destAd,pingVal);
+                    else printf("ping %hx : error %s\n",destAd,getErrorStr(pingVal));
+                    break;
+                case 'L' :
                     do{
                          printf("enter destination address\n");
                          err = scanf("%hx",&destAd);
@@ -129,7 +163,17 @@ int main(){
                              printf("error getting destination address\n");
                          }
                      }while(err != 1);
-                     printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
+                    sTraceInfo pingTab[PINGTABSIZE];
+                    int plRet=bn_pingLink(destAd,2000,pingTab,PINGTABSIZE);
+                    if (plRet >= 0) {
+                        printf("%d replies received\n",plRet);
+                        int i;
+                        for (i=0; i<MIN(plRet,PINGTABSIZE); i++){
+                            if (pingTab[i].error == 0) printf("reply %d from %hx : %u ms\n",i,pingTab[i].addr,pingTab[i].ping);
+                            else printf("reply %d from %hx : error %s (%d)\n",i,pingTab[i].addr,getErrorStr(pingTab[i].error),pingTab[i].error);
+                        }
+                    }
+                    else printf("error %s\n",getErrorStr(plRet));
                     break;
                 case 'T' :
                     {

@@ -104,7 +104,7 @@ int bn_debugSendAddr(bn_Address dest){
 
 /* bn_debugSendAddrBroadcast : broadcast version of bn_debugSendAddr
  */
-int bn_debugSendAddrLinkast(bn_Address dest){
+int bn_debugSendAddrLinkcast(bn_Address dest){
     sMsg msg = {{0}};
 
     SETUP_DBG_MSG_BLOCK

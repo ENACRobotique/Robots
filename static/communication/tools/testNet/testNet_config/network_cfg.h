@@ -36,7 +36,7 @@ extern "C" {
 //subnet addresses
     #define SUBNETX         ((1<<DEVICE_ADDR_SIZE) | (LCAST_SUBNET) )
     #define SUBNETI         (2<<DEVICE_ADDR_SIZE)
-    #define SUBNETU1        (3<<DEVICE_ADDR_SIZE)
+    #define SUBNETU1        ((3<<DEVICE_ADDR_SIZE) | (LCAST_SUBNET))
     #define SUBNETU2        (4<<DEVICE_ADDR_SIZE)
 
 
