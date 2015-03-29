@@ -438,7 +438,7 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
             routeInfo->ifTo=IF_XBEE;
             routeInfo->nextHop=msg->header.destAddr;
             // if the message is a linkcast that we should also receive, "send" also a local copy to self (put a copy in buffer for local reception)
-            if (bn_isLinkcast(msg->header.destAddr)){
+            if (bn_isLinkcast(msg->header.destAddr) && !bn_isLocalAddress(msg->header.srcAddr) ){
                 sMsgIf *copy=bn_getAllocInBufLast();
                 if (copy){
                     copy->msg=(*msg);
@@ -453,6 +453,7 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         else if (bn_isLinkcast(msg->header.destAddr)){
             routeInfo->ifTo=IF_LOCAL;
             routeInfo->nextHop=MYADDRX;
+            return;
         }
         // otherwise, drop it (routing error from the previous node)
         else {
@@ -481,6 +482,21 @@ void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo){
         if (ifFrom!=IF_UART ) {
             routeInfo->ifTo=IF_UART;
             routeInfo->nextHop=msg->header.destAddr;
+            // if the message is a linkcast that we should also receive, "send" also a local copy to self (put a copy in buffer for local reception)
+            if (bn_isLinkcast(msg->header.destAddr) && !bn_isLocalAddress(msg->header.srcAddr) ){
+                sMsgIf *copy=bn_getAllocInBufLast();
+                if (copy){
+                    copy->msg=(*msg);
+                    copy->msg.header.destAddr=MYADDRU;
+                    copy->iFace=ifFrom;
+                }
+                // copy blatantly dropped if no space is available in memory
+            }
+            return;
+        }
+        else if (bn_isLinkcast(msg->header.destAddr)){
+            routeInfo->ifTo=IF_LOCAL;
+            routeInfo->nextHop=MYADDRU;
             return;
         }
         else {
