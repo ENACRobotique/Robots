@@ -48,7 +48,7 @@ void Statuses::maintenace(){
 
 int Statuses::receivedNewStatus(sGenericStatus &status){
 
-    if(status.id < 0 || status.id > NUM_E_ELEMENT){
+    if(status.id >= NUM_E_ELEMENT){
         cerr << "[ERROR] [statuses.cpp] Unknown status id" << endl;
         return -1;
     }

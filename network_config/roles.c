@@ -38,44 +38,64 @@ bn_Address role_addresses[] = {
 sRoleActions role_actions[] = {
         // ROLEMSG_DEBUG messages
         {
-                .sendTo.first = ADDR_DEBUG_DFLT?ROLE_DEBUG:0,
-                .sendTo.second = 0,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
+                .sendTo={
+                    .first = ADDR_DEBUG_DFLT?ROLE_DEBUG:0,
+                    .second = 0,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
         },
 
 #if MYROLE
         // ROLEMSG_PRIM_TRAJ messages
 #   if MYROLE == ROLE_PRIM_AI
         {
-                .sendTo.first = ROLE_PRIM_PROPULSION,
-                .sendTo.second = ROLE_PRIM_MONITORING,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
+                .sendTo={
+                    .first = ROLE_PRIM_PROPULSION,
+                    .second = ROLE_PRIM_MONITORING,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
         },
 #   else
         {
-                .sendTo.first = 0,
-                .sendTo.second = 0,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
+                .sendTo={
+                    .first = 0,
+                    .second = 0,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
         },
 #   endif
 
         // ROLEMSG_PRIM_POS messages
 #   if MYROLE == ROLE_PRIM_AI
         {
-                .sendTo.first = ROLE_PRIM_PROPULSION,
-                .sendTo.second = ROLE_PRIM_MONITORING,
-                .relayTo.n1 = ROLE_PRIM_PROPULSION,
-                .relayTo.n2 = ROLE_PRIM_MONITORING
+                .sendTo={
+                    .first = ROLE_PRIM_PROPULSION,
+                    .second = ROLE_PRIM_MONITORING,
+                },
+                .relayTo={
+                    .n1 = ROLE_PRIM_PROPULSION,
+                    .n2 = ROLE_PRIM_MONITORING
+                }
         },
 #   else
         {
-                .sendTo.first = ROLE_AI,
-                .sendTo.second = 0,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
+                .sendTo={
+                    .first = ROLE_PRIM_AI,
+                    .second = 0,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
         },
 #   endif
 #endif
@@ -97,7 +117,7 @@ void role_setup(sMsg *msg){
             role_set_addr(s->role, s->address);
             break;
         case UPDATE_ACTIONS:
-            if(s->type >= 0 || s->type < NB_ROLE_ACTIONS){
+            if(s->type >= 0 && s->type < NB_ROLE_ACTIONS){
                 memcpy((void*)&role_actions[s->type], (void*)&s->actions, sizeof(*role_actions));
             }
             break;
@@ -237,13 +257,9 @@ const char *role_string(uint8_t role){
     }
 }
 
-int role_send(sMsg *msg, uint8_t destRole){
+int role_send(sMsg *msg, eRoleMsgClass mc){
     int ret = 0;
 
-    eRoleMsgClass mc;
-    if((ret = role_get_msgclass(msg->header.type, destRole, &mc)) < 0){
-        return ret;
-    }
     if(mc >= NB_ROLE_ACTIONS){
         return -1;
     }
@@ -265,13 +281,9 @@ int role_send(sMsg *msg, uint8_t destRole){
     return 0;
 }
 
-int role_sendAck(sMsg *msg, uint8_t destRole){
+int role_sendAck(sMsg *msg, eRoleMsgClass mc){
     int ret = 0;
 
-    eRoleMsgClass mc;
-    if((ret = role_get_msgclass(msg->header.type, destRole, &mc)) < 0){
-        return ret;
-    }
     if(mc >= NB_ROLE_ACTIONS){
         return -1;
     }
@@ -293,13 +305,9 @@ int role_sendAck(sMsg *msg, uint8_t destRole){
     return 0;
 }
 
-int role_sendRetry(sMsg *msg, uint8_t destRole, int retries){
+int role_sendRetry(sMsg *msg, eRoleMsgClass mc, int retries){
     int ret = 0;
 
-    eRoleMsgClass mc;
-    if((ret = role_get_msgclass(msg->header.type, destRole, &mc)) < 0){
-        return ret;
-    }
     if(mc >= NB_ROLE_ACTIONS){
         return -1;
     }

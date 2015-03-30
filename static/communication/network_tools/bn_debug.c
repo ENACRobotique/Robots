@@ -36,7 +36,8 @@
  */
 int bn_printDbg(const char *str){
     int ret;
-    sMsg tmp = {{0}};
+    sMsg tmp;
+    memset(&tmp, 0, sizeof(tmp));
 
 //    tmp.header.destAddr=addr; role_send() => useless
     tmp.header.type=E_DEBUG;
@@ -45,8 +46,8 @@ int bn_printDbg(const char *str){
     tmp.payload.debug[tmp.header.size-1]=0; //strncpy does no ensure the null-termination, so we force it
 
     ret = role_send(&tmp, ROLE_DEBUG);
-    if(ret > sizeof(tmp.header)){
-        ret -= sizeof(tmp.header);
+    if(ret > (int)sizeof(tmp.header)){
+        ret -= (int)sizeof(tmp.header);
     }
     else{
         ret = -1;
@@ -81,7 +82,9 @@ int bn_printfDbg(const char *format, ...){
  * Return value : like bn_send.
  */
 int bn_debugSendAddr(bn_Address dest){
-    sMsg msg = {{0}};
+    sMsg msg;
+
+    memset(&msg, 0, sizeof(msg));
 
     msg.header.type = E_ROLE_SETUP;
     msg.header.destAddr = dest;

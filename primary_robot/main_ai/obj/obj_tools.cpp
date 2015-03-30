@@ -63,7 +63,7 @@ void printEndTraj() {
  * And update the display on the screen.
  * The second argument is used for a non holonomic robot with the 3 circles anti half turn.
  */
-void loadingPath(sPath_t _path, int num) {
+void loadingPath(sPath_t /*_path*/, int /*num*/) {
     //path = _path; //FIXME
 
 #if !HOLONOMIC

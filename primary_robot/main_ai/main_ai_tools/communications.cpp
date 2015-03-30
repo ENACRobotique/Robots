@@ -197,7 +197,7 @@ int sendPos(Point2D<float> &p, float theta) {
 
     //XXX Created an intern message generic status for update the position, and if message not pos not receive --> position problem !!!
 
-    if ((ret = role_sendRetry(&msgOut, ROLE_PRIM_PROPULSION, MAX_RETRIES)) <= 0) {
+    if ((ret = role_sendRetry(&msgOut, ROLEMSG_PRIM_POS, MAX_RETRIES)) <= 0) {
         logs << ERR << "bn_sendRetry(E_POS) error #" << -ret;
         return -2;
     }

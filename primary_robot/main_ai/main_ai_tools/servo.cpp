@@ -24,7 +24,7 @@ Servo::~Servo() {
 
 
 int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if no use
-    sMsg msg = { { 0 } };
+    sMsg msg;
     Point2D<float> p1, p2;
     int i = 0;
 
@@ -53,7 +53,7 @@ int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if n
 
     msg.header.destAddr = ADDRI1_MAIN_IO;
     msg.header.type = E_SERVOS;
-    msg.header.size = 2 + 3;
+    msg.header.size = 2 + 1 * sizeof(msg.payload.servos.servos[0]);
     msg.payload.servos.nb_servos = 1;
     msg.payload.servos.servos[0].id = s;
     msg.payload.servos.servos[0].us = us;

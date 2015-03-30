@@ -106,6 +106,7 @@ int stepAI() {
                 }
                 else {
                     cerr << "[ERROR] [ai.cpp] Error selection color" << endl;
+                    return -1;
                 }
 
                 initObjective();
