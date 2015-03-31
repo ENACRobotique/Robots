@@ -53,6 +53,8 @@ extern "C" {
 #include "../arduino/Xbee_API_arduino_drivers.h"
 #elif defined(ARCH_X86_LINUX)
 #include <stdio.h>
+#elif defined(ARCH_LM4FXX)
+#include "../lm4fxx/Xbee_API_lm4fxx_drivers.h"
 #else
 #error will not compile, check architecture define and driver library
 #endif

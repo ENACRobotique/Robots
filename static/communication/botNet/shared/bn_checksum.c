@@ -6,7 +6,7 @@
  */
 
 #include "bn_checksum.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 
 /*

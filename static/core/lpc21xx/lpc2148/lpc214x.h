@@ -43,6 +43,7 @@ typedef volatile unsigned char * pREG8;
 #define VIC_VectAddr            (*((pREG32) (0xfffff030)))
 #define VIC_DefVectAddr         (*((pREG32) (0xfffff034)))
 
+#define VIC_VectAddrN(n)        (*(&VIC_VectAddr0 + (n)))
 #define VIC_VectAddr0           (*((pREG32) (0xfffff100)))
 #define VIC_VectAddr1           (*((pREG32) (0xfffff104)))
 #define VIC_VectAddr2           (*((pREG32) (0xfffff108)))
@@ -60,6 +61,7 @@ typedef volatile unsigned char * pREG8;
 #define VIC_VectAddr14          (*((pREG32) (0xfffff138)))
 #define VIC_VectAddr15          (*((pREG32) (0xfffff13c)))
 
+#define VIC_VectCntlN(n)        (*(&VIC_VectCntl0 + (n)))
 #define VIC_VectCntl0           (*((pREG32) (0xfffff200)))
 #define VIC_VectCntl1           (*((pREG32) (0xfffff204)))
 #define VIC_VectCntl2           (*((pREG32) (0xfffff208)))
@@ -679,19 +681,19 @@ typedef volatile unsigned char * pREG8;
 ## UART0 / UART1
 ##############################################################################*/
 
-#define UART0_RBR       (*((pREG32) (0xe000c000)))
-#define UART0_THR       (*((pREG32) (0xe000c000)))
+#define UART0_RBR       (*((pREG8) (0xe000c000)))
+#define UART0_THR       (*((pREG8) (0xe000c000)))
 #define UART0_IER       (*((pREG32) (0xe000c004)))
 #define UART0_IIR       (*((pREG32) (0xe000c008)))
-#define UART0_FCR       (*((pREG32) (0xe000c008)))
-#define UART0_LCR       (*((pREG32) (0xe000c00c)))
-#define UART0_LSR       (*((pREG32) (0xe000c014)))
-#define UART0_SCR       (*((pREG32) (0xe000c01c)))
+#define UART0_FCR       (*((pREG8) (0xe000c008)))
+#define UART0_LCR       (*((pREG8) (0xe000c00c)))
+#define UART0_LSR       (*((pREG8) (0xe000c014)))
+#define UART0_SCR       (*((pREG8) (0xe000c01c)))
 #define UART0_ACR       (*((pREG32) (0xe0000020)))
 #define UART0_FDR       (*((pREG32) (0xe0000028)))
 #define UART0_TER       (*((pREG32) (0xe0000030)))
-#define UART0_DLL       (*((pREG32) (0xe000c000)))
-#define UART0_DLM       (*((pREG32) (0xe000c004)))
+#define UART0_DLL       (*((pREG8) (0xe000c000)))
+#define UART0_DLM       (*((pREG8) (0xe000c004)))
 
 #define UART1_RBR       (*((pREG32) (0xe0010000)))
 #define UART1_THR       (*((pREG32) (0xe0010000)))

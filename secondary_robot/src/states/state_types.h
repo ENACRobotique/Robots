@@ -15,7 +15,7 @@ typedef enum {
     E_MOTOR,
     E_WALL, //(c) sneydi
     E_LINE,
-    E_FUNNY
+    E_ATTITUDE
 }eBlocks;
 
 //pointeur de fonction

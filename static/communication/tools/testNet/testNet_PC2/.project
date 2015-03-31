@@ -30,6 +30,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>lib/Core</name>
+			<type>2</type>
+			<locationURI>PARENT-4-PROJECT_LOC/core/shared/Core</locationURI>
+		</link>
+		<link>
 			<name>lib/Millis</name>
 			<type>2</type>
 			<locationURI>PARENT-4-PROJECT_LOC/core/linux/libraries/Millis</locationURI>
@@ -48,6 +53,11 @@
 			<name>lib/botNet</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/botNet</locationURI>
+		</link>
+		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/network_tools/</locationURI>
 		</link>
 		<link>
 			<name>lib/testNet_config</name>

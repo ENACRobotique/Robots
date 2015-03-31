@@ -1,5 +1,5 @@
 /*
- * lib_superbus.h
+ * botNet_core.h
  *
  *  Created on: 28 mai 2013
  *      Author: quentin
@@ -10,8 +10,10 @@
 
 
 // config files
-#include "network_cfg.h"
+#include "bn_inbuf.h"
+#include "bn_attach.h"
 #include "messages.h"
+#include "network_cfg.h"
 
 // other required libraries
 
@@ -42,30 +44,15 @@ extern "C" {
 #define MIN(m, n) ((m)>(n)?(n):(m))
 #endif
 
-//function pointeur type for attach function
-typedef void(*pfvpm)(sMsg*);
-
-//incoming message & IF structure
-typedef struct {
-    sMsg msg;       //message
-    E_IFACE iFace;  //interface where it has been received
-} sMsgIf;
-
 int bn_init();
 int bn_send(sMsg *msg);
 int bn_genericSend(sMsg *msg);
 int bn_sendAck(sMsg *msg);
+int bn_sendRetry(sMsg *msg, int retries);
 int bn_routine();
 int bn_receive(sMsg *msg);
 void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo);
 int bn_forward(const sMsg *msg, E_IFACE ifFrom);
-int bn_attach(E_TYPE type,pfvpm ptr);
-int bn_deattach(E_TYPE type);
-int bn_pushInBufLast(const sMsg *msg, E_IFACE iFace);
-sMsgIf * bn_getAllocInBufLast();
-int bn_popInBuf(sMsgIf * msg);
-sMsgIf *bn_getInBufFirst();
-void bn_freeInBufFirst();
 
 #ifdef __cplusplus
 }

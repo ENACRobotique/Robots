@@ -10,11 +10,12 @@
 #include "network_cfg.h"
 #include "messages.h"
 
+#if MYADDRX
 // other required libraries
 #include "../../../tools/libraries/Timeout/timeout.h"
 #include "../../Xbee_API/shared/Xbee_API.h"
 #include "../../UART_framing/shared/lib_UART_framing.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 // superBus specific libraries
 #include "Xbee4bn.h"
@@ -24,7 +25,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#if MYADDRX
 
 
 
@@ -40,9 +40,34 @@ int Xbee_setup(){
     int frID=12;
     int ret;
 
+    // /!\ you need to set BD=7 and AP=2 /!\ .
+
+//writes CH parameter on the xbee (channel)
+    if ( (ret=Xbee_ATCmd("CH",frID,XBEE_ATCMD_SET,0x0E))<0 ) return ret;
+
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
+
+//writes ID parameter on the xbee (PAN-id)
+    if ( (ret=Xbee_ATCmd("ID",frID,XBEE_ATCMD_SET,0x34ac))<0 ) return ret;
+
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
 
 //writes node's address on the xbee
     if ( (ret=Xbee_ATCmd("MY",frID,XBEE_ATCMD_SET,MYADDRX))<0 ) return ret;
+
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
+
+//writes MM parameter on the xbee to match peer-to-peer use (mac mode)
+    if ( (ret=Xbee_ATCmd("MM",frID,XBEE_ATCMD_SET,2))<0 ) return ret;
+
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
+    frID++;
+
+//writes RN parameter on the xbee (random delay)
+    if ( (ret=Xbee_ATCmd("RN",frID,XBEE_ATCMD_SET,0x01))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
@@ -60,17 +85,17 @@ int Xbee_setup(){
     frID++;
 
 
-    //writes A1 parameter on the xbee to match peer-to-peer use
-    if ( (ret=Xbee_ATCmd("MM",frID,XBEE_ATCMD_SET,2))<0 ) return ret;
+
+//writes RN parameter on the xbee to enable collision avoidance on first iteration of CSMA/CA
+    if ( (ret=Xbee_ATCmd("RN",frID,XBEE_ATCMD_SET,1))<0 ) return ret;
 
     if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL))<0 ) return ret;
     frID++;
 
-
     //saves changes in non-volatile memory
     if ( (ret=Xbee_ATCmd("WR",frID,XBEE_ATCMD_SET,MYADDRX))<0 ) return ret;
 
-    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL*4))<0 ) return ret;
+    if ( (ret=Xbee_waitATAck(frID,BN_WAIT_XBEE_SND_FAIL*4L))<0 ) return ret;
     frID++;
 
     return 0;
@@ -132,7 +157,10 @@ int Xbee_send(const sMsg *msg, uint16_t nexthop){
             bn_pushInBufLast((sMsg*)&(stru.data.RX16Data.payload),IF_XBEE);
             byteRead=0;
         }
-    } while( !(stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
+        else if(byteRead < 0){
+            return byteRead;
+        }
+    } while( !(byteRead>0 && stru.APID==XBEE_APID_TXS && stru.data.TXStatus.frameID==37) && testTimeout(BN_WAIT_XBEE_SND_FAIL,&sw));
 
     if (!byteRead || stru.APID!=XBEE_APID_TXS || stru.data.TXStatus.frameID!=37) return -ERR_XBEE_NOSTAT;
 

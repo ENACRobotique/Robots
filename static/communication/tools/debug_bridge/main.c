@@ -11,8 +11,8 @@
 #include <errno.h> // errno
 
 #include "../botNet/shared/botNet_core.h"
-#include "../botNet/shared/bn_debug.h"
-#include "../../global_errors.h"
+#include "../network_tools/bn_debug.h"
+#include "global_errors.h"
 #include "node_cfg.h"
 
 //#define CTRLC_MENU
@@ -109,7 +109,10 @@ int main(int argc, char *argv[]){
 #endif
             {
                 fprintf(stderr, "bn_receive() error #%i\n", -ret);
-                exit(1);
+                if(ret == -ERR_SYSERRNO){
+                    fprintf(stderr, "errno=%i\n", errno);
+                }
+//                exit(1);
             }
         }
 

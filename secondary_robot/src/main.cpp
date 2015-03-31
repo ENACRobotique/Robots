@@ -15,9 +15,12 @@
 #include "lib_radar.h"
 #include "lib_motor.h"
 #include "lib_wall.h"
+#include "lib_line.h"
+#include "lib_attitude.h"
 
 
-Servo armServoLeft,armServoRight;
+
+Servo launcherServoUp,launcherServoDown, launcherServoNet;
 
 sState *current=&sInitHard;
 
@@ -36,11 +39,10 @@ void setup(){
 #ifdef DEBUG
     Serial.println("sortie init mat");
 #endif
-    current->init(0);
+    current->init(NULL);
     }
 
 }
-
 
 
 void loop(){
@@ -50,7 +52,7 @@ void loop(){
     static char ledState=0;
     if ( (millis()-prevBlink)>500){
         ledState^=1;
-        digitalWrite(PIN_LED,ledState);
+        //digitalWrite(PIN_LED,ledState);
         prevBlink=millis();
     }
 #endif
@@ -59,6 +61,8 @@ void loop(){
     if (current->flag & BIT(E_WALL)  ) periodicWall();
     if (current->flag & BIT(E_RADAR) ) radarRefresh();
     if (current->flag & BIT(E_MOTOR) ) motAsser();
+    if (current->flag & BIT(E_LINE) )  asserLine();
+    if (current->flag & BIT(E_ATTITUDE) )  attitudeAsser();
 
     sState *next;
     if (current->testFunction){
@@ -70,3 +74,5 @@ void loop(){
     }
 
 }
+
+

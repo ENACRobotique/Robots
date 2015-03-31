@@ -8,7 +8,7 @@
 #ifndef BN_TESTFUNC_H_
 #define BN_TESTFUNC_H_
 
-#include "../../../botNet/shared/bn_debug.h"
+#include "../../../network_tools/bn_debug.h"
 #include "../../../botNet/shared/botNet_core.h"
 
 #ifdef __cplusplus

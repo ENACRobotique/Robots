@@ -3,10 +3,9 @@
 
 // functions to range using I²C ultrasons
 // needs a Wire.begin() in setup()
-
-
+// sends it in fact to the device at i²c address US_LOWEST_ADDR + nb
 int startRange(uint8_t nb) {
-  uint8_t addr = (0xE0 >> 1) + (nb & 0x3);
+  uint8_t addr = (US_LOWEST_ADDR >> 1) + ( nb & (US_NB_DEVICES-1)) ; //lowest address + nb (with safety)
 
   // send command to start ranging
   Wire.beginTransmission(addr);
@@ -15,9 +14,10 @@ int startRange(uint8_t nb) {
   return (int)Wire.endTransmission();
 }
 
-uint16_t getRangeResult(uint8_t nb) {
+// sends it in fact to the device at i²c address US_LOWEST_ADDR + nb
+uint16_t getRangeResult(uint8_t nb) { //retourner plutot la valeur mediane
   uint16_t range;
-  uint8_t addr = (0xE0 >> 1) + (nb & 0x3);
+  uint8_t addr = (US_LOWEST_ADDR >> 1) + ( nb & (US_NB_DEVICES-1)) ; //lowest address + nb (with safety)
 
   // ask data
   Wire.beginTransmission(addr);
@@ -31,13 +31,15 @@ uint16_t getRangeResult(uint8_t nb) {
 
   // read, prepare and return data
   range = Wire.read() << 8;
-  return range | Wire.read();
+
+  range |= Wire.read();
+
+  return range;
 }
 
 uint16_t doRange(uint8_t nb) {
   // start ranging
-  if(startRange(nb))
-    return uint16_t(-1);
+  if(startRange(nb)) return uint16_t(-1);
 
   // wait for ranging to happen
   delay(70);

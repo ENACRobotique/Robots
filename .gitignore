@@ -1,4 +1,6 @@
 *.o
 *.a
 *~
-
+*.zip
+.gitignore
+*.guiperso

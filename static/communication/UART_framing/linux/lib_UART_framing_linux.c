@@ -9,7 +9,7 @@
 #ifdef ARCH_X86_LINUX
 
 #include "lib_UART_framing_linux.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -168,6 +168,64 @@ int serialWrite(uint8_t byte){
         return -ERR_SYSERRNO;
     }
     fflush(NULL); //flushes all stream
+    return ret;
+}
+
+//int serialReadBytes(uint8_t *bytes, uint32_t size, uint32_t timeout){
+//    int ret, try=3;
+//    fd_set rs;
+//    struct timeval tv;
+//
+//    FD_ZERO(&rs);
+//    FD_SET(serial_port, &rs);
+//    tv.tv_sec = timeout/1000000;
+//    tv.tv_usec = timeout%1000000;
+//
+//    ret = select(serial_port+1, &rs, NULL, NULL, &tv);
+//    if(ret < 0){
+//        perror("select() @ serialReadBytes");
+//        return -ERR_SYSERRNO;
+//    }
+//    else if(!ret){
+//        return 0;
+//    }
+//
+//    do{
+//        ret = read(serial_port, bytes, size);
+//    }while(ret < 0 && (errno == EAGAIN || errno == EWOULDBLOCK) && try-- > 0);
+//    if (ret < 0) {
+//        perror("write() @ serialReadBytes");
+//        return -ERR_SYSERRNO;
+//    }
+//    return ret;
+//}
+
+int serialWriteBytes(uint8_t *bytes, uint8_t size){
+    int ret, try=3;
+    fd_set ws;
+    struct timeval tv;
+
+    FD_ZERO(&ws);
+    FD_SET(serial_port, &ws);
+    tv.tv_sec = 0;
+    tv.tv_usec = 500;
+
+    ret = select(serial_port+1, NULL, &ws, NULL, &tv);
+    if(ret < 0){
+        perror("select() @ serialWriteBytes");
+        return -ERR_SYSERRNO;
+    }
+    else if(!ret){
+        return 0;
+    }
+
+    do{
+        ret = write(serial_port, bytes, size);
+    }while(ret < 0 && (errno == EAGAIN || errno == EWOULDBLOCK) && try-- > 0);
+    if(ret < 0) {
+        perror("write() @ serialWriteBytes");
+        return -ERR_SYSERRNO;
+    }
     return ret;
 }
 

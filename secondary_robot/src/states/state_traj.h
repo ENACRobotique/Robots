@@ -3,6 +3,8 @@
  *
  *  Created on: 8 mai 2013
  *      Author: quentin
+ *   Modify on: janvier 2014
+ *   		By: Seb
  */
 
 #ifndef STATE_TRAJ_H_
@@ -10,23 +12,30 @@
 
 #include "state_types.h"
 
+#define MUR_R
+//#define Int_R
+#define MUR_Y
+//#define INT_Y
+
 typedef struct {
-    int speed;      //in inc/s
-    int angle;      //in degree, 0°=straight forward
+    int speed;      // speed/1.77 = real_speed in cm/s
+    int omega;      //in ... ?
     unsigned long duration;   //in ms
 }trajElem;
 
 int progTraj(trajElem tab[]);
 
 
-extern sState sTrajBlue;
-extern sState sTrajRed;
-extern sState sTrajBlueFinal;
-extern sState sTrajRedFinal;
+extern sState sTrajGreenInit;
+extern sState sTrajYellowInit;
+extern sState sTrajEndStairsGreen;
+extern sState sTrajEndStairsYellow;
 
 
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
+extern sState sTrajGreenInit;
+extern sState sTrajYellowInit;
 
 
 #endif /* STATE_TRAJ_H_ */

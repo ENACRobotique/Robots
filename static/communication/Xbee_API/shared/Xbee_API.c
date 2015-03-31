@@ -36,7 +36,7 @@
 
 // other required libraries
 #include "../../UART_framing/shared/lib_UART_framing.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 #include "../../../tools/libraries/Timeout/timeout.h"
 
 // standard libraries
@@ -146,9 +146,12 @@ int Xbee_waitATAck(int frID, uint32_t timeOut){
     //waits for acknowledgement
     do {
         byteRead=Xbee_readFrame(&stru);
+        if(byteRead < 0){
+            return byteRead;
+        }
     } while( !(byteRead>0 && stru.APID==XBEE_APID_ATRESPONSE && stru.data.TXStatus.frameID==frID) && testTimeout(timeOut,&sw));
 
-    if (byteRead<=0 || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=frID) return -ERR_XBEE_NOSTAT;
+    if (!byteRead || stru.APID!=XBEE_APID_ATRESPONSE || stru.data.TXStatus.frameID!=frID) return -ERR_XBEE_NOSTAT;
     else if (stru.data.ATResponse.status==XBEE_ATR_S_ERROR) return -ERR_XBEE_AT_ERR;
     else if (stru.data.ATResponse.status==XBEE_ATR_S_INVCOM) return -ERR_XBEE_AT_WRONG_CMD;
     else if (stru.data.ATResponse.status==XBEE_ATR_S_INVPAR) return -ERR_XBEE_AT_WRONG_PAR;
@@ -187,6 +190,9 @@ int Xbee_init(){
 #ifdef ARCH_X86_LINUX
     ret=UART_init(XBEE_UART_PATH,E_115200_8N2);
 #elif defined(ARCH_328P_ARDUINO)
+    Xbee_rst();
+    ret=UART_init(NULL,111111);
+#elif defined(ARCH_LM4FXX)
     Xbee_rst();
     ret=UART_init(NULL,111111);
 #else

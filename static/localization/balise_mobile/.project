@@ -28,6 +28,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>lib/Core</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/core/shared/Core</locationURI>
+		</link>
+		<link>
 			<name>lib/MemoryFree</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/MemoryFree</locationURI>
@@ -53,9 +58,19 @@
 			<locationURI>PARENT-2-PROJECT_LOC/communication/botNet</locationURI>
 		</link>
 		<link>
+			<name>lib/laser_lib</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/tools/laser_lib/</locationURI>
+		</link>
+		<link>
 			<name>lib/network_config</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/network_config/</locationURI>
+		</link>
+		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/communication/network_tools/</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

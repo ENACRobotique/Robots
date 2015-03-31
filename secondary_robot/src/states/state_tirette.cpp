@@ -9,44 +9,56 @@
 #include "Arduino.h"
 #include "state_tirette.h"
 #include "state_traj.h"
+#include "lib_radar.h"
+#include "lib_line.h"
 #include "../params.h"
 #include "../tools.h"
-
+#include "state_ALACON.h"
+#include "state_stairs.h"
 #include "lib_move.h"
+#include "sharp_2d120x.h"
 
-/* State : tirerre, first state of all, waits until the tirette is pulled
+/* State : tirette, first state of all, waits until the tirette is pulled
  *
  * tirette pulled -> next state, according to the "start side swich"
  *
  */
-sState* testTirette(){
+
+sState* testTirette()
+	{
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
-    if ( ( millis() - prevIn) > DEBOUNCE_DELAY) {
-        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajRed;
-        else return &sTrajBlue;
-    }
+    if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
+    	{
+        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenInit;
+        else /*return &sAlacon*/return &sTrajYellowInit;
+    	}
     return 0;
-}
+	}
 
-void initTirette(sState *prev){
-    move(0,DIR_SERVO_START);
-    armServoLeft.write(ARM_LEFT_UP);
-    armServoRight.write(ARM_RIGHT_UP);
-}
-
-void deinitTirette(sState *next){
-    _matchStart=millis();
+void initTirette(sState *prev)
+	{
+    move(0,0);
 #ifdef DEBUG
-    Serial.println("fin tirette");
+    Serial.println("j'entre en tirette");
 #endif
 
-}
+
+	}
+
+void deinitTirette(sState *next)
+	{
+    _matchStart=millis();
+
+	#ifdef DEBUG
+		Serial.println("fin tirette");
+	#endif
+	}
+
 sState sTirette={
-        BIT(E_MOTOR),
+        BIT(E_MOTOR)|BIT(E_RADAR),
         &initTirette,
         &deinitTirette,
         &testTirette
 };
-
 

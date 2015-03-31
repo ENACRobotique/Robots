@@ -8,16 +8,21 @@
 #include "Servo.h"
 #include "lib_move.h"
 
-//globals
-int _servo_zero=0;
-Servo _dirServo;
+#if defined(TANK) && defined(TRIKE)
+#error "TANK and TRIKE defined. Only one possible."
+#endif
 
 //macros
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
 
-//define
+#define DERIVE 0
+
+#ifdef TRIKE
+Servo _dirServo;
+int _servo_zero=0;
+
 #define MAX_ANGLE 180
 #define MIN_ANGLE 0
 
@@ -28,13 +33,25 @@ void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
     _servo_zero=zeroAngle;
     _dirServo.attach(pinDirServo);
     _dirServo.write(CLAMP(MIN_ANGLE , startAngle+_servo_zero, MAX_ANGLE));
-
 }
+#endif
 
-//sets speed and servo dir (angle=0 means straight line)
-void move(int speed,int angle){
-    motSetCon(speed);
+//sets speed motors (omega=0 means straight line)
+void move(int speed,int omega){
+#ifdef TANK
+	int derive = 0;
+	if (speed || omega)
+	{
+		derive = DERIVE;
+	}
+	int speeds[NB_MOTORS]={-speed - omega, -speed + omega + derive};
+    motSetCon(speeds);
+#else
+#ifdef TRIKE
+    motSetCon({speed});
     _dirServo.write(CLAMP(MIN_ANGLE , angle+_servo_zero, MAX_ANGLE));
+#endif
+#endif
 }
 
 

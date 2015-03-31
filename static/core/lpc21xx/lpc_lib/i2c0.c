@@ -5,6 +5,7 @@
 #include "i2c0.h"
 
 //#define I2C_DEBUG
+//#define I2C_STATS
 
 #ifndef BIT
 #define BIT(b) (1<<(b))
@@ -36,6 +37,29 @@ struct {
 } debug_tab[128];
 #endif
 
+#ifdef I2C_STATS
+// FIXME only valid when MT&SR modes are used
+struct {
+    uint32_t nb_unexpected_states;
+    uint32_t t_first_err;
+    uint32_t t_last_err;
+
+    // master transmitter statistics
+    uint32_t nb_MT_trials;
+    uint32_t nb_MT_ok;
+    uint32_t nb_MT_retry;
+    uint32_t nb_MT_err_nack;
+    uint32_t nb_MT_err_arblst;
+    uint32_t nb_MT_err_bus;
+    uint32_t nb_MT_err_buffer_full;
+
+    // slave receiver statistics
+    uint32_t nb_SR_trials;
+    uint32_t nb_SR_ok;
+    uint32_t nb_SR_err_bus;
+} stats = {0};
+#endif
+
 // TODO reflect failure cases to the state of the transaction
 void _i2c0_isr() __attribute__((interrupt("IRQ")));
 void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
@@ -62,6 +86,9 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
     else
       I2C0_DAT = trans->slave_addr | BIT(0); // bit0 is direction (1 is read)
 
+#ifdef I2C_STATS
+    stats.nb_MT_trials++;
+#endif
     trans->status = I2CTransRunning;
     p.status = I2CDevBusy;
     I2C0_CONSET = BIT(2 /*AA*/);
@@ -82,6 +109,9 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
       }
       else {
         I2C0_CONSET = BIT(4 /*STO*/); // ask stop condition
+#ifdef I2C_STATS
+        stats.nb_MT_ok++;
+#endif
         trans->status = I2CTransSuccess;
         I2cNextTransaction();
         I2cEndOfTransaction();
@@ -95,10 +125,18 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
     I2C0_CONSET = BIT(4 /*STO*/) | BIT(2 /*AA*/);
 
     if(trans->nb_retry > I2C_MAX_NB_RETRY) {
+#ifdef I2C_STATS
+      stats.nb_MT_err_nack++;
+      if(!stats.t_first_err) stats.t_first_err = micros();
+      stats.t_last_err = micros();
+#endif
       trans->status = I2CTransFailed;
       I2cNextTransaction();
     }
     else {
+#ifdef I2C_STATS
+      stats.nb_MT_retry++;
+#endif
       trans->nb_retry++;
       trans->status = I2CTransPending;
     }
@@ -107,21 +145,37 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
     break;
   case 0x48: // [MR] slave_addr+R transmitted, /ACK received
     I2C0_CONSET = BIT(4 /*STO*/) | BIT(2 /*AA*/);
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
+    trans->status = I2CTransFailed;
     I2cNextTransaction();
     I2cEndOfTransaction();
     break;
   case 0x38: // [MT/MR] slave_addr+R/W | data byte transmitted, arbitration lost
     I2C0_CONSET = BIT(2 /*AA*/);
+#ifdef I2C_STATS
+    stats.nb_MT_err_arblst++;
+    if(!stats.t_first_err) stats.t_first_err = micros();
+    stats.t_last_err = micros();
+#endif
+    trans->status = I2CTransFailed;
     I2cNextTransaction();
     I2cEndOfTransaction();
     break;
 
   case 0x40: // [MR from 08|10] slave_addr+R transmitted, ACK received
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
     if (p.idx_buf < trans->len_r - 1) I2C0_CONSET = BIT(2 /*AA*/);  // set AA
     else I2C0_CONCLR = BIT(2 /*AA*/); // clear AA (last character will be received => 0x58)
     break;
 
   case 0x50: // [MR] data received, ACK transmitted, will receive data
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
     if (p.idx_buf < trans->len_r) {
       trans->buf[p.idx_buf++] = I2C0_DAT;
       if (p.idx_buf < trans->len_r - 1) I2C0_CONSET = BIT(2 /*AA*/);  // set AA
@@ -130,6 +184,9 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
     break;
 
   case 0x58: // [MR] last data byte received, /ACK transmitted
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
     if(p.idx_buf < trans->len_r)
       trans->buf[p.idx_buf] = I2C0_DAT;
 
@@ -151,6 +208,9 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
     p.trans_sla.type = I2CTransRx;
     p.status = I2CDevBusy;
     p.idx_buf = 0;
+#ifdef I2C_STATS
+    stats.nb_SR_trials++;
+#endif
     break;
 
   case 0x70: // [SR-GCA] gca+W received, ACK transmitted
@@ -161,6 +221,9 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
     p.trans_sla.type = I2CTransRx;
     p.status = I2CDevBusy;
     p.idx_buf = 0;
+#ifdef I2C_STATS
+    stats.nb_SR_trials++;
+#endif
     break;
 
   case 0x90: // [SR-GCA] data byte received, ACK transmitted
@@ -172,12 +235,19 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
   case 0x98: // [SR-GCA] data byte received, /ACK transmitted
   case 0x88: // [SR] data byte received, /ACK transmitted
     // In theory, we do not transmit back /ACK to the master so we shouldn't get those 2 status codes
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
     I2C0_CONSET = BIT(2 /*AA*/);  // send AA
     I2cEndOfTransaction();
     break;
 
   case 0xA0: // [SR] no more bytes to get (stop or repeated start condition received)
     I2C0_CONSET = BIT(2 /*AA*/);  // send AA
+#ifdef I2C_STATS
+    stats.nb_SR_ok++;
+#endif
+    p.trans_sla.status = I2CTransSuccess;
     p.trans_sla.len_r = p.idx_buf;
     p.trans_sla.len_w = 0;
     p.handler(&p.trans_sla, p.userp);
@@ -189,6 +259,9 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
 
   case 0xA8: // [ST] own slave_addr+R received, ACK transmitted
   case 0xB0: // [ST] arbitration lost, own slave_addr+R received, ACK transmitted
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
     p.idx_buf = 0;
 
     if(!p.trans_sla.len_w) {
@@ -210,12 +283,18 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
     break;
 
   case 0xB8: // [ST] data byte transmitted, ACK received, transmit next byte
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
     I2C0_DAT = p.trans_sla.buf[p.idx_buf++];
     I2C0_CONSET = BIT(2 /*AA*/);  // send AA
     break;
 
   case 0xC0: // [ST] last data byte transmitted, /ACK received
   case 0xC8: // [ST] last data byte transmitted, ACK received
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
     p.trans_sla.len_w = 0;
 //    p.trans_sla.status = I2cTransSuccess; useless
     I2C0_CONSET = BIT(2 /*AA*/);  // send AA
@@ -226,7 +305,22 @@ void _i2c0_isr() { // SI bit is set in I2C0_CONSET => state change
   // error cases
   default: /* unimplemented case... */
   case 0xF8: // shouldn't happen, we are interrupts driven
+#ifdef I2C_STATS
+    stats.nb_unexpected_states++;
+#endif
+    /* no break */
   case 0x00:
+#ifdef I2C_STATS
+    if(trans->type == I2CTransRx){
+        stats.nb_SR_err_bus++;
+    }
+    else{
+        stats.nb_MT_err_bus++;
+    }
+    if(!stats.t_first_err) stats.t_first_err = micros();
+    stats.t_last_err = micros();
+#endif
+    trans->status = I2CTransFailed;
     I2C0_CONSET = BIT(4 /*STO*/) | BIT(2 /*AA*/); // release bus (set STO and AA bits)
     break;
   }
@@ -289,6 +383,11 @@ int i2c0_submit(struct i2c_transaction* t) {
   idx = (p.trans_insert_idx + 1)%I2C_TRANSACTION_QUEUE_LEN;
   if (idx == p.trans_extract_idx) {
     t->status = I2CTransFailed;
+#ifdef I2C_STATS
+    stats.nb_MT_err_buffer_full++;
+    if(!stats.t_first_err) stats.t_first_err = micros();
+    stats.t_last_err = micros();
+#endif
     return 1;  /* queue full */
   }
   t->status = I2CTransPending;

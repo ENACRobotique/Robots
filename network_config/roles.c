@@ -13,15 +13,15 @@
 
 #include "roles.h"
 
-#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_IA && MYROLE!=ROLE_PROPULSION && MYROLE!=ROLE_DEBUG)
-#error "MYROLE must be correct and defined in node_cfg.h"
+#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_AI && MYROLE!=ROLE_PROPULSION && MYROLE!=ROLE_DEBUG)
+#error "MYROLE must be defined and correct in node_cfg.h"
 #endif
 
 #if MYROLE != ROLE_MONITORING
 bn_Address addr_role_mon = ADDR_MONITORING_DFLT;
 #endif
-#if MYROLE != ROLE_IA
-bn_Address addr_role_ia = ADDR_IA_DFLT;
+#if MYROLE != ROLE_AI
+bn_Address addr_role_ai = ADDR_AI_DFLT;
 #endif
 #if MYROLE != ROLE_PROPULSION
 bn_Address addr_role_prop = ADDR_PROP_DFLT;
@@ -31,15 +31,15 @@ bn_Address addr_role_dbg = ADDR_DEBUG_DFLT;
 #endif
 
 sRoleActions role_actions[3] = {
-#if MYROLE == ROLE_IA
-        { // E_TRAJ messages
+#if MYROLE == ROLE_AI
+        { // E_TRAJ && E_TRAJ_ORIENT_EL messages
                 .sendTo.first = ROLE_PROPULSION,
                 .sendTo.second = ROLE_MONITORING,
                 .relayTo.n1 = 0,
                 .relayTo.n2 = 0
         },
 #else
-        { // E_TRAJ messages
+        { // E_TRAJ && E_TRAJ_ORIENT_EL messages
                 .sendTo.first = 0,
                 .sendTo.second = 0,
                 .relayTo.n1 = 0,
@@ -47,7 +47,7 @@ sRoleActions role_actions[3] = {
         },
 #endif
 
-#if MYROLE == ROLE_IA
+#if MYROLE == ROLE_AI
         { // E_POS messages
                 .sendTo.first = ROLE_PROPULSION,
                 .sendTo.second = ROLE_MONITORING,
@@ -56,7 +56,7 @@ sRoleActions role_actions[3] = {
         },
 #else
         { // E_POS messages
-                .sendTo.first = ROLE_IA,
+                .sendTo.first = ROLE_AI,
                 .sendTo.second = 0,
                 .relayTo.n1 = 0,
                 .relayTo.n2 = 0
@@ -82,7 +82,7 @@ void role_setup(sMsg *msg){
         return;
     }
 
-    for(i = 0; i < rs->nb_steps; i++){
+    for(i = 0; i < MIN(13, rs->nb_steps); i++){
         typeof(rs->steps[0]) *s = &rs->steps[i];
         switch(s->step){
         case UPDATE_ADDRESS:
@@ -93,6 +93,7 @@ void role_setup(sMsg *msg){
 //            printf("auto update actions %s (=%hhu)\n", eType2str(s->type), s->type);
             switch(s->type){
             case E_TRAJ:
+            case E_TRAJ_ORIENT_EL:
                 memcpy((void*)ACT_MSG_TRAJ, (void*)&s->actions, sizeof(*ACT_MSG_TRAJ));
                 break;
             case E_POS:
@@ -120,9 +121,9 @@ int role_set_addr(uint8_t role, bn_Address address){
 #else
         return -1;
 #endif
-    case ROLE_IA:
-#if MYROLE != ROLE_IA
-        addr_role_ia = address;
+    case ROLE_AI:
+#if MYROLE != ROLE_AI
+        addr_role_ai = address;
         break;
 #else
         return -1;
@@ -149,24 +150,28 @@ int role_set_addr(uint8_t role, bn_Address address){
 
 bn_Address role_get_addr(uint8_t role){
     switch(role){
+    // monitoring
     case ROLE_MONITORING:
 #if MYROLE != ROLE_MONITORING
         return addr_role_mon;
 #else
         return MYADDR;
 #endif
-    case ROLE_IA:
-#if MYROLE != ROLE_IA
-        return addr_role_ia;
+    // ai
+    case ROLE_AI:
+#if MYROLE != ROLE_AI
+        return addr_role_ai;
 #else
         return MYADDR;
 #endif
+    // propulsion
     case ROLE_PROPULSION:
 #if MYROLE != ROLE_PROPULSION
         return addr_role_prop;
 #else
         return MYADDR;
 #endif
+    // debug
     case ROLE_DEBUG:
 #if MYROLE != ROLE_DEBUG
         return addr_role_dbg;
@@ -180,17 +185,23 @@ bn_Address role_get_addr(uint8_t role){
 
 uint8_t role_get_role(bn_Address address){
     switch(address){
-    case ADDRD_MONITORING:
+    // monitoring
+    case ADDRD1_MONITORING:
         return ROLE_MONITORING;
-    case ADDRD_MAIN_IA_SIMU:
-        return ROLE_IA;
-    case ADDRD_MAIN_PROP_SIMU:
-    case ADDRI_MAIN_PROP:
+    // ai
+    case ADDRD1_MAIN_AI_SIMU:
+    case ADDRD2_MAIN_AI:
+    case ADDRU2_MAIN_AI:
+        return ROLE_AI;
+    // propulsion
+    case ADDRD1_MAIN_PROP_SIMU:
+    case ADDRI1_MAIN_PROP:
+    case ADDRU2_MAIN_PROP:
         return ROLE_PROPULSION;
-    case ADDRD_DEBUG1:
-    case ADDRD_DEBUG2:
-    case ADDRD_DEBUG3:
-    case ADDRU_DEBUG:
+    // debug
+    case ADDRD1_DEBUG1:
+    case ADDRD1_DEBUG2:
+    case ADDRD1_DEBUG3:
     case ADDRX_DEBUG:
         return ROLE_DEBUG;
     default:
@@ -202,8 +213,8 @@ const char *role_string(uint8_t role){
     switch(role){
     case ROLE_MONITORING:
         return "monitoring";
-    case ROLE_IA:
-        return "ia";
+    case ROLE_AI:
+        return "ai";
     case ROLE_PROPULSION:
         return "propulsion";
     case ROLE_DEBUG:
@@ -234,6 +245,85 @@ int role_send(sMsg *msg){
 
     switch(msg->header.type){
     case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
+        SEND_BLOCK(ACT_MSG_TRAJ);
+        break;
+    case E_POS:
+        SEND_BLOCK(ACT_MSG_POS);
+        break;
+    case E_DEBUG:
+        SEND_BLOCK(ACT_MSG_DBG);
+        break;
+    default:
+        break;
+    }
+
+#undef SEND_BLOCK
+
+    return ret;
+}
+
+int role_sendAck(sMsg *msg){
+    int ret = 0;
+
+#define SEND_BLOCK(act) \
+    do{                                                                     \
+        if((act)->sendTo.first){                                            \
+            msg->header.destAddr = role_get_addr((act)->sendTo.first);      \
+            ret = bn_sendAck(msg);                                          \
+            if(ret < 0)                                                     \
+                break;                                                      \
+        }                                                                   \
+        if((act)->sendTo.second){                                           \
+            msg->header.destAddr = role_get_addr((act)->sendTo.second);     \
+            ret = bn_sendAck(msg);                                          \
+            if(ret < 0)                                                     \
+                break;                                                      \
+        }                                                                   \
+    }while(0)
+
+    switch(msg->header.type){
+    case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
+        SEND_BLOCK(ACT_MSG_TRAJ);
+        break;
+    case E_POS:
+        SEND_BLOCK(ACT_MSG_POS);
+        break;
+    case E_DEBUG:
+        SEND_BLOCK(ACT_MSG_DBG);
+        break;
+    default:
+        break;
+    }
+
+#undef SEND_BLOCK
+
+    return ret;
+}
+
+int role_sendRetry(sMsg *msg, int retries){
+    int ret = 0;
+
+#define SEND_BLOCK(act) \
+    do{                                                                     \
+        if((act)->sendTo.first){                                            \
+            msg->header.destAddr = role_get_addr((act)->sendTo.first);      \
+            ret = bn_sendRetry(msg, retries);                                          \
+            if(ret < 0)                                                     \
+                break;                                                      \
+        }                                                                   \
+        if((act)->sendTo.second){                                           \
+            msg->header.destAddr = role_get_addr((act)->sendTo.second);     \
+            ret = bn_sendRetry(msg, retries);                                          \
+            if(ret < 0)                                                     \
+                break;                                                      \
+        }                                                                   \
+    }while(0)
+
+    switch(msg->header.type){
+    case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
         SEND_BLOCK(ACT_MSG_TRAJ);
         break;
     case E_POS:
@@ -280,6 +370,7 @@ int role_relay(sMsg *msg){
 
     switch(msg->header.type){
     case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
         RELAY_BLOCK(ACT_MSG_TRAJ);
         break;
     case E_POS:

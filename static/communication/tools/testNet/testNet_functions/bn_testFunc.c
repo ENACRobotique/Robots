@@ -12,7 +12,7 @@
 
 #include "bn_testFunc.h"
 #include "../../../../tools/libraries/Timeout/timeout.h"
-#include "../../../../global_errors.h"
+#include "global_errors.h"
 #include "node_cfg.h"
 
 #include <stdlib.h>

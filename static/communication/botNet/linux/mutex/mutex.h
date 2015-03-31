@@ -14,11 +14,11 @@
 
 //pseudo-mutex for superBus central Buffer access management
 
-inline void mutexLock(){
+inline void bn_mutexLock(){
     return;
 }
 
-inline void mutexUnlock(){
+inline void bn_mutexUnlock(){
     return;
 }
 

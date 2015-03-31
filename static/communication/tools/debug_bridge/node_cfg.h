@@ -10,10 +10,10 @@
 
 #include "network_cfg.h"
 
-#define MYADDRX ADDRX_DBGBRIDGE
+#define MYADDRX 0 //ADDRX_DBGBRIDGE
 #define MYADDRI 0
-#define MYADDRU 0 // ADDRU_DEBUG
-#define MYADDRD ADDRD_DBGBRIDGE
+#define MYADDRU ADDRU1_DBGBRIDGE
+#define MYADDRD ADDRD1_DBGBRIDGE
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
 #define MYROLE 0
@@ -30,6 +30,12 @@
 #define UART_READBYTE_TIMEOUT 100000    //in µs
 
 #define XBEE_UART_PATH "/dev/ttyUSB0"
-#define BN_UART_PATH "/dev/ttyACM0"
+#if 1
+// Bluetooth
+#define BN_UART_PATH "/dev/rfcomm0"
+#else
+// USB
+#define BN_UART_PATH "/dev/ttyUSB0"
+#endif
 
 #endif /* NODE_CFG_H_ */

@@ -15,7 +15,7 @@
 
 // a role of 0 is considered unavailable
 #define ROLE_MONITORING (1)
-#define ROLE_IA         (2)
+#define ROLE_AI         (2)
 #define ROLE_PROPULSION (3)
 #define ROLE_DEBUG      (4)
 
@@ -24,8 +24,8 @@
 // 4 nodes are currently defined with specific roles (MONITORING,IA,PROPULSION,DEBUG)
 // without rebuilding any device, a user can change the logic topology of the network
 //
-// ex1: ia & monitoring on a pc ; prop on the robot
-// ex2: ia & prop on the robot ; monitoring on a pc
+// ex1: ai & monitoring on a pc ; prop on the robot
+// ex2: ai & prop on the robot ; monitoring on a pc
 // those two examples needs different address configurations to do their job,
 //      a role_setup message sent from monitoring_hmi to each node will setup the addresses
 //
@@ -42,6 +42,8 @@ uint8_t     role_get_role   (bn_Address address);
 const char *role_string(uint8_t role);
 // sends data according to the rules defined during setup
 int         role_send       (sMsg *msg);
+int         role_sendAck    (sMsg *msg);
+int         role_sendRetry  (sMsg *msg, int retries);
 #if MYROLE
 // relays data according to the rules defined durring setup
 int         role_relay      (sMsg *msg);
