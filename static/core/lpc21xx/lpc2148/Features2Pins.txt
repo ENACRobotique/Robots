@@ -14,7 +14,7 @@ EINT*
     EINT0   P0.1    EXT1.2      !UART0 !PWM3
             P0.16   EXT1.17
     EINT1   P0.3    EXT1.4      !I²C0
-            P0.14   EXT1.15     !I²C1 ~UART1
+            P0.14   EXT1.15     !I²C1 ~UART1            low at reset forces bootloader to take over
     EINT2   P0.7    EXT1.8      !PWM2
             P0.15   EXT1.16     ~UART1
     EINT3   P0.9    EXT1.10     !UART1 !PWM6

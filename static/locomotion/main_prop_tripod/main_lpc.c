@@ -13,19 +13,19 @@
 #include "shared/botNet_core.h"
 
 /*
- * pins usage and mapping (board Rev2):
+ * pins usage and mapping (board Rev3):
  *      UART0-TXD   P0.0    EXT1.1      TX_LPC              !PWM1
  *      UART0-RXD   P0.1    EXT1.2      RX_LPC              !PWM3 ~EINT0
  *      I²C0-SCL    P0.2    EXT1.3      SCL_LPC
  *      I²C0-SDA    P0.3    EXT1.4      SDA_LPC             ~EINT1
- *      GPIO-OUT    P0.4    EXT1.5      DIR_POD1_LPC
- *      GPIO-OUT    P0.5    EXT1.6      DIR_POD2_LPC
+ *      GPIO-OUT    P0.4    EXT1.5      DIR_POD2_LPC
+ *      GPIO-OUT    P0.5    EXT1.6      DIR_POD1_LPC
  *      GPIO-OUT    P0.6    EXT1.7      DIR_POD3_LPC
  *      PWM2        P0.7    EXT1.8      PWM_POD1_LPC        ~EINT2
  *      PWM4        P0.8    EXT1.9      PWM_POD2_LPC        !UART1
  *      PWM6        P0.9    EXT1.10     PWM_POD3_LPC        !UART1 ~EINT3
- *      EINT1       P0.14   EXT1.15     CHB_POD1_LPC        !I²C1 ~UART1
- *      GPIO-IN     P0.15   EXT1.16     CHA_POD1_LPC
+ *      GPIO-IN     P0.12   EXT1.13     CHA_POD1_LPC
+ *      EINT2       P0.15   EXT1.16     CHB_POD1_LPC        ~UART1
  *      EINT0       P0.16   EXT1.17     CHB_POD2_LPC
  *      GPIO-IN     P0.17   EXT1.18     CHA_POD2_LPC
  *      EINT3       P0.20   EXT1.21     CHB_POD3_LPC
@@ -88,12 +88,6 @@ int main() {
     // BotNet initialization (i²c + uart)
     //TODO
 
-    // sets the I/O {1,24} and {0,31}  (leds) as outputs
-    gpio_output(1, 24);
-    gpio_output(0, 31);
-
-    global_IRQ_enable();
-
     //// Global variables
     unsigned int prevControl_us = micros();
     unsigned int prevLed_ms = millis();
@@ -104,6 +98,8 @@ int main() {
     sMsg inMsg = { { 0 } }, outMsg = { { 0 } };
 
     // FIXME need to have a first loop here to wait for time synchronization
+
+    global_IRQ_enable();
 
     while (1) {
         sys_time_update();
