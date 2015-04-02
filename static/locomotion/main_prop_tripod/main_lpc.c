@@ -8,7 +8,7 @@
 #include "pins.h"
 #include "params.h"
 #include "messages.h"
-#include "trajectory_controller.h"
+#include "position_controller.h"
 #include "trajectory_manager.h"
 #include "shared/botNet_core.h"
 
@@ -99,35 +99,15 @@ int main() {
 
     // FIXME need to have a first loop here to wait for time synchronization
 
-    motor_t mots[3];
-    motors_init(mots);
+    position_controller_t tc;
+    posctlr_init(&tc, mat_rob2pods);
 
-    encoder_t encs[3];
-    encoders_init(encs, mots);
-
-    speed_controller_t sc[3];
-    int i;
-    for(i = 0; i < 3; i++){
-        spdctlr_init(&sc[i], &encs[i]);
-    }
+    unsigned int t0_ms = millis();
 
     global_IRQ_enable();
 
     while (1) {
         sys_time_update();
-
-        // Automatic control
-        time_us = micros();
-        if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
-            for(i = 0; i < 3; i++){
-                encoder_update(&encs[i]);
-                spdctlr_update(&sc[i], 50);
-
-                motor_update(&mots[i], spdctlr_get(&sc[i]));
-            }
-
-            prevControl_us = time_us;
-        }
 
 //        // Reception and processing of the message
 //        ret = bn_receive(&inMsg);
@@ -142,6 +122,22 @@ int main() {
 //            }
 //        } // End: if(ret > 0)
 //
+        // Automatic control
+        time_us = micros();
+        if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
+            posctlr_begin_update(&tc);
+
+            unsigned int dt_ms = millis() - t0_ms;
+
+            int x_sp = isROUND(D2I(0.001)*(double)dt_ms);
+            int y_sp = 0;
+            int theta_sp = 0;
+
+            posctlr_end_update(&tc, x_sp, y_sp, theta_sp);
+
+            prevControl_us = time_us;
+        }
+
 //        // Automatic control
 //        time_us = micros();
 //        if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {

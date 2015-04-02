@@ -8,7 +8,7 @@
 #include "debug.h"
 #include "tools.h"
 #include "params.h"
-#include "trajectory_controller.h"
+#include "position_controller.h"
 #include "trajectory_manager.h"
 #include "global_errors.h"
 #include "bn_intp.h"

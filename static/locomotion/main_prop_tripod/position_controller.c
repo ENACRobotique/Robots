@@ -1,5 +1,5 @@
 /*
- * controller_trajectory.c
+ * position_controller.c
  *
  *  Created on: 11 févr. 2015
  *      Authors: Ludovic Lacoste, yoyo
@@ -12,13 +12,13 @@
 #include "params.h"
 #include "tools.h"
 
-#include "trajectory_controller.h"
+#include "position_controller.h"
 
 #if SHIFT != VEC_SHIFT
 #error "trajectory_controller's implementation assumes SHIFT==VEC_SHIFT"
 #endif
 
-void trajctlr_init(trajectory_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]) {
+void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]) {
     int i, j;
     memset(tc, 0, sizeof(*tc));
 
@@ -44,14 +44,14 @@ void trajctlr_init(trajectory_controller_t* tc, const int32_t mat_rob2pods[NB_PO
     }
 
     // Init PID
-    pid_init(&tc->pid_xtraj, 1 << SHIFT_PID_TRAJ_POS, 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
-    pid_init(&tc->pid_ytraj, 1 << SHIFT_PID_TRAJ_POS, 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
-    pid_init(&tc->pid_orien, 1 << SHIFT_PID_TRAJ_ANG, 0, 0, 0, SHIFT_PID_TRAJ_ANG); // TODO find good values
+    pid_init(&tc->pid_xtraj, 1 << (SHIFT_PID_TRAJ_POS - 1), 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
+    pid_init(&tc->pid_ytraj, 1 << (SHIFT_PID_TRAJ_POS - 1), 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
+    pid_init(&tc->pid_orien, 1 << (SHIFT_PID_TRAJ_ANG - 1), 0, 0, 0, SHIFT_PID_TRAJ_ANG); // TODO find good values
 }
 
-void _update_pos_orien(trajectory_controller_t* tc, MT_VEC *spd_pv_rob);
+void _update_pos_orien(position_controller_t* tc, MT_VEC *spd_pv_rob);
 
-void trajctlr_begin_update(trajectory_controller_t* tc) {
+void posctlr_begin_update(position_controller_t* tc) {
     int i;
     MT_VEC spd_pv_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_pv, V2_pv, V3_pv) (in IpP<<SHIFT)
     MT_VEC spd_pv_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT);// (Vx_pv, Vy_pv, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
@@ -77,10 +77,10 @@ void trajctlr_begin_update(trajectory_controller_t* tc) {
     _update_pos_orien(tc, &spd_pv_rob);
 }
 
-void _trajectory_control(trajectory_controller_t* tc, int x_sp, int y_sp, MT_VEC* spd_cmd_rob);
-void _orientation_control(trajectory_controller_t* tc, int theta_sp, MT_VEC* spd_cmd_rob);
+void _trajectory_control(position_controller_t* tc, int x_sp, int y_sp, MT_VEC* spd_cmd_rob);
+void _orientation_control(position_controller_t* tc, int theta_sp, MT_VEC* spd_cmd_rob);
 
-void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int theta_sp) {
+void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp) {
     int i;
     MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
     MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
@@ -104,17 +104,17 @@ void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int th
     }
 }
 
-void trajctlr_set_pos(trajectory_controller_t* tc, int x, int y, int theta) {
+void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta) {
     tc->x = x;
     tc->y = y;
     tc->theta = theta;
 }
 
-void trajctlr_reset(trajectory_controller_t* tc) {
+void posctlr_reset(position_controller_t* tc) {
     encoders_reset(tc->encs);
 }
 
-void _update_pos_orien(trajectory_controller_t* tc, MT_VEC* spd_pv_rob) {
+void _update_pos_orien(position_controller_t* tc, MT_VEC* spd_pv_rob) {
     // spd_pv_rob->ve[0..1] expressed in IpP << SHIFT
     // spd_pv_rob->ve[2] expressed in RpP << (RAD_SHIFT + SHIFT)
 
@@ -143,7 +143,7 @@ void _update_pos_orien(trajectory_controller_t* tc, MT_VEC* spd_pv_rob) {
     tc->y += vy_pg;
 }
 
-void _trajectory_control(trajectory_controller_t* tc, int x_sp, int y_sp, MT_VEC* spd_cmd_rob) {
+void _trajectory_control(position_controller_t* tc, int x_sp, int y_sp, MT_VEC* spd_cmd_rob) {
     // Compute the speeds command Vx_cmd, Vy_cmd (in playground reference frame)
     int vx_pg = pid_update(&tc->pid_xtraj, x_sp >> SHIFT, tc->x >> SHIFT) << SHIFT;
     int vy_pg = pid_update(&tc->pid_ytraj, y_sp >> SHIFT, tc->y >> SHIFT) << SHIFT;
@@ -153,7 +153,7 @@ void _trajectory_control(trajectory_controller_t* tc, int x_sp, int y_sp, MT_VEC
     spd_cmd_rob->ve[1] = (int32_t)((-(int64_t)tc->sin_theta * (int64_t)vx_pg + (int64_t)tc->cos_theta * (int64_t)vy_pg) >> SHIFT);
 }
 
-void _orientation_control(trajectory_controller_t* tc, int theta_sp, MT_VEC* spd_cmd_rob) {
+void _orientation_control(position_controller_t* tc, int theta_sp, MT_VEC* spd_cmd_rob) {
     while(theta_sp - tc->theta > issPI) {
         theta_sp -= (issPI << 1);
     }

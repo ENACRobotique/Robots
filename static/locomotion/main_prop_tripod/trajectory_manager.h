@@ -14,12 +14,12 @@
 
 #include "tools.h"
 #include "trajectory_slot.h"
-#include "trajectory_controller.h"
+#include "position_controller.h"
 
 #define TRAJ_MAX_SLOTS (32)
 
 typedef struct {
-    trajectory_controller_t ctlr;
+    position_controller_t ctlr;
 
     enum {
         TM_STATE_WAIT_TRAJ, // no action asked (we are stopped)

@@ -29,11 +29,11 @@ void trajmngr_init(trajectory_manager_t* tm, const int32_t mat_rob2pods[NB_PODS]
     // will set the indexes to 0 and the slots' state to empty
     memset(tm, 0, sizeof(*tm));
 
-    trajctlr_init(&tm->ctlr, mat_rob2pods);
+    posctlr_init(&tm->ctlr, mat_rob2pods);
 }
 
 void trajmngr_reset(trajectory_manager_t* tm) {
-    trajctlr_reset(&tm->ctlr);
+    posctlr_reset(&tm->ctlr);
 }
 
 int _new_traj_slot(trajectory_manager_t* tm, uint16_t idx) {
@@ -115,7 +115,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
     uint32_t t = bn_intp_micros2s(micros());
     int32_t dt;
 
-    trajctlr_begin_update(&tm->ctlr);
+    posctlr_begin_update(&tm->ctlr);
 
     switch(tm->state) {
     default:
@@ -340,7 +340,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
         }
     }
 
-    trajctlr_end_update(&tm->ctlr, x_sp, y_sp, theta_sp);
+    posctlr_end_update(&tm->ctlr, x_sp, y_sp, theta_sp);
 
     return 0;
 }
@@ -357,7 +357,7 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sPosPayload *pos) {
         y = isD2I(pos->y); // (I << SHIFT)
         theta = iROUND(dASHIFT*pos->theta); // (rad << (RAD_SHIFT + SHIFT))
 
-        trajctlr_set_pos(&tm->ctlr, x, y, theta);
+        posctlr_set_pos(&tm->ctlr, x, y, theta);
 
         if(tm->state == TM_STATE_WAIT_TRAJ) {
             tm->gx = x;

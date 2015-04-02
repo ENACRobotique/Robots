@@ -1,13 +1,13 @@
 /*
- * trajectory_controller.h
+ * position_controller.h
  *
  *  Created on: 11 févr. 2015
  *      Authors: yoyo
  *               Ludovic Lacoste
  */
 
-#ifndef TRAJECTORY_CONTROLLER_H_
-#define TRAJECTORY_CONTROLLER_H_
+#ifndef POSITION_CONTROLLER_H_
+#define POSITION_CONTROLLER_H_
 
 #include <encoder.h>
 #include <encoders.h>
@@ -54,12 +54,12 @@ typedef struct {
     // Control object for speed of a POD
     speed_controller_t spd_ctls[NB_PODS];
     int next_spd_cmds[NB_PODS]; // in IpP
-} trajectory_controller_t;
+} position_controller_t;
 
-void trajctlr_init(trajectory_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
-void trajctlr_begin_update(trajectory_controller_t* tc);
-void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int theta_sp);
-void trajctlr_set_pos(trajectory_controller_t* tc, int x, int y, int theta);
-void trajctlr_reset(trajectory_controller_t* tc);
+void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
+void posctlr_begin_update(position_controller_t* tc);
+void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp);
+void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta);
+void posctlr_reset(position_controller_t* tc);
 
-#endif /* TRAJECTORY_CONTROLLER_H_ */
+#endif /* POSITION_CONTROLLER_H_ */
