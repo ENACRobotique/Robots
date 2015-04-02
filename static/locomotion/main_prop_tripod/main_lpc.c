@@ -83,8 +83,8 @@ int main() {
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
     // Trajectory manager
-    trajectory_manager_t traj_mngr;
-    trajmngr_init(&traj_mngr, mat_rob2pods);
+//    trajectory_manager_t traj_mngr;
+//    trajmngr_init(&traj_mngr, mat_rob2pods);
     // BotNet initialization (i²c + uart)
     //TODO
 
@@ -99,60 +99,85 @@ int main() {
 
     // FIXME need to have a first loop here to wait for time synchronization
 
+    motor_t mots[3];
+    motors_init(mots);
+
+    encoder_t encs[3];
+    encoders_init(encs, mots);
+
+    speed_controller_t sc[3];
+    int i;
+    for(i = 0; i < 3; i++){
+        spdctlr_init(&sc[i], &encs[i]);
+    }
+
     global_IRQ_enable();
 
     while (1) {
         sys_time_update();
 
-        // Reception and processing of the message
-        ret = bn_receive(&inMsg);
-        if (ret > 0) {
-            switch (inMsg.header.type) {
-            case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
-                trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
-                break;
-            case E_POS:
-                trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
-                break;
-            }
-        } // End: if(ret > 0)
-
         // Automatic control
         time_us = micros();
         if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
-            if (time_us - prevControl_us > PER_CTRL_LOOP_CRITIC_US) {
-                // If there is too much delay we skip the step
-                trajmngr_reset(&traj_mngr);
-            }
-            else {
-                // Control trajectory
-                trajmngr_update(&traj_mngr);
+            for(i = 0; i < 3; i++){
+                encoder_update(&encs[i]);
+                spdctlr_update(&sc[i], 50);
+
+                motor_update(&mots[i], spdctlr_get(&sc[i]));
             }
 
             prevControl_us = time_us;
         }
 
-        time_ms = millis();
-        if (time_ms - prevPos_ms >= 100) {
-            prevPos_ms = time_ms;
+//        // Reception and processing of the message
+//        ret = bn_receive(&inMsg);
+//        if (ret > 0) {
+//            switch (inMsg.header.type) {
+//            case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
+//                trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
+//                break;
+//            case E_POS:
+//                trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
+//                break;
+//            }
+//        } // End: if(ret > 0)
+//
+//        // Automatic control
+//        time_us = micros();
+//        if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
+//            if (time_us - prevControl_us > PER_CTRL_LOOP_CRITIC_US) {
+//                // If there is too much delay we skip the step
+//                trajmngr_reset(&traj_mngr);
+//            }
+//            else {
+//                // Control trajectory
+//                trajmngr_update(&traj_mngr);
+//            }
+//
+//            prevControl_us = time_us;
+//        }
 
-            // FIXME todo
-//            outMsg.header.type = E_GENERIC_STATUS;
-//            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
-//            trajmngr_fill_pos(&traj_mngr, &outMsg.payload.genericStatus);
-
-            {
-                //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
-                outMsg.header.type = E_POS;
-                outMsg.header.size = sizeof(outMsg.payload.pos);
-                outMsg.payload.pos.id = ELT_PRIMARY; // main robot
-                outMsg.payload.pos.x = I2Ds(traj_mngr.ctlr.x);
-                outMsg.payload.pos.y = I2Ds(traj_mngr.ctlr.y);
-                outMsg.payload.pos.theta = (double) traj_mngr.ctlr.theta / dASHIFT;
-            }
-
-            role_send(&outMsg);
-        }
+//        time_ms = millis();
+//        if (time_ms - prevPos_ms >= 100) {
+//            prevPos_ms = time_ms;
+//
+//            // FIXME todo
+////            outMsg.header.type = E_GENERIC_STATUS;
+////            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
+////            trajmngr_fill_pos(&traj_mngr, &outMsg.payload.genericStatus);
+//
+//            {
+//                //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
+//                outMsg.header.type = E_POS;
+//                outMsg.header.size = sizeof(outMsg.payload.pos);
+//                outMsg.payload.pos.id = ELT_PRIMARY; // main robot
+//                outMsg.payload.pos.x = I2Ds(traj_mngr.ctlr.x);
+//                outMsg.payload.pos.y = I2Ds(traj_mngr.ctlr.y);
+//                outMsg.payload.pos.theta = (double) traj_mngr.ctlr.theta / dASHIFT;
+//            }
+//
+//            role_send(&outMsg);
+//        }
 
         time_ms = millis();
         if ((time_ms - prevLed_ms) > 500) {
