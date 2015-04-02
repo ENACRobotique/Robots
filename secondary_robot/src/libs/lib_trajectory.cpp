@@ -18,19 +18,21 @@ int _backFromPause = 0;
 
 int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
 	static int teta0 = headingGetCon();
-	int dt = millis() - *prev_millis;    //time since start of the current traj element
-	int teta = tab[*i].omega*min(dt*FACTOR_HEADING_ASSERV,tab[*i].duration)/1000;
-	tetaSetCon( teta + teta0);
+	int dt = millis() - *prev_millis -*pausetime;    //time since start of the current traj element
+	int teta = tab[*i].teta*min((dt*FACTOR_HEADING_ASSERV/tab[*i].duration),1);
+	headingSetCon( teta + teta0);
 
     if (!(*prev_millis)){
     	*prev_millis=millis();
-        move(tab[*i].speed,tab[*i].omega);
+    	speedSetCon(tab[*i].speed);
+        //move(tab[*i].speed,tab[*i].teta);
         teta0 = headingGetCon();
     }
 
     if(_backFromPause){
     	_backFromPause = 0;
-    	move(tab[*i].speed,tab[*i].omega);
+    	speedSetCon(tab[*i].speed);
+    	//move(tab[*i].speed,tab[*i].teta);
 
     }
 
@@ -39,9 +41,10 @@ int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned l
         *prev_millis=millis();
         *pausetime=0;
         teta0 = headingGetCon();
-        move(tab[*i].speed,tab[*i].omega);
+        speedSetCon(tab[*i].speed);
+        //move(tab[*i].speed,tab[*i].teta);
     }
-    if ( tab[*i].omega==0 && tab[*i].duration==0 && tab[*i].speed==0) {
+    if ( tab[*i].teta==0 && tab[*i].duration==0 && tab[*i].speed==0) {
         *i=0;
         *prev_millis=0;
         return 1;

@@ -16,8 +16,8 @@ this library contains the different functions useful for the motor and its contr
 #endif
 
 //globals
-int _moveCon[2] = {0};
-int _moveCmdOmega=0;
+int _speedCon = 0;
+int _OmegaCmd=0;
 int _headingCon = 0;
 
 //TODO : Check if lib_motor is initialized !
@@ -28,11 +28,9 @@ int _headingCon = 0;
 #define KI  0// >>8
 #define KD  0
 
-void headingSetCon(int speed, int omega){
-		Serial.println("Le cap a asservir est enregistré");
-		_moveCon[0]=speed;
-		_moveCon[1]=omega;
-		_headingCon = readInertial(ANGLE_TO_ASSERV);
+int headingGetCurrent()
+{
+	return readInertial(ANGLE_TO_ASSERV);
 }
 
 void headingAsser(){
@@ -59,20 +57,20 @@ void headingAsser(){
 			//compute error integral
 			intEps= CLAMP( -(64<<2) ,intEps+eps, (64<<2));
 			//compute command
-			_moveCmdOmega = ((KP*eps)>>2) + ((KI*intEps)>>3) + (KD*derEps);
+			_OmegaCmd = ((KP*eps)>>2) + ((KI*intEps)>>3) + (KD*derEps);
 
 Serial.print(_headingCon);
 Serial.print("\t");
 Serial.print(read);
 Serial.print("\t");
-Serial.print(_moveCmdOmega);
+Serial.print(_OmegaCmd);
 
-			move(_moveCon[0], _moveCmdOmega, 1);
+			move(_speedCon, _OmegaCmd);
 		}
 		else {//to avoid problems due to long loop
 			  time_prev_asser=millis();
 			  intEps=0;//<=>resets the integral term
-			  move(_moveCon[0], _moveCon[1] + _moveCmdOmega, 1);
+			  move(_speedCon, _OmegaCmd);
 			  readInertial(ANGLE_TO_ASSERV);
 			}
 	}

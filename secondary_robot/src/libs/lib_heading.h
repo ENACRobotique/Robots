@@ -26,21 +26,22 @@
 #define Z_ANGLE_ACCEL 23
 
 extern int _headingCon;
+extern int _OmegaCmd;
+extern int _speedCon;
 
 void headingAsser();
+int headingGetCurrent();
 
-
-void headingSetCon(int speed, int omega);
-
-inline void tetaSetCon(int teta){
+inline void headingSetCon(int teta){
 	_headingCon = teta;
+}
+
+inline void speedSetCon(int speed){
+	_speedCon = speed;
 }
 
 inline int headingGetCon(){
 	return _headingCon;
 }
-
-extern int _headingCon;
-extern int _moveCmdOmega;
 
 #endif

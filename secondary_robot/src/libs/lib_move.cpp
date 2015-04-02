@@ -36,8 +36,7 @@ void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
 #endif
 
 //sets speed motors (omega=0 means straight line)
-void move(int speed,int omega, int setCon){
-	if (!setCon) headingSetCon(speed, omega);
+void move(int speed,int omega){
 #ifdef TANK
 	int speeds[NB_MOTORS]={-speed - omega, -speed + omega};
     motSetCon(speeds);

@@ -11,7 +11,7 @@
 #include "lib_motor.h"
 #include "Arduino.h"
 
-void move(int speed,int angle, int setCon=0);
+void move(int speed,int angle);
 
 
 
