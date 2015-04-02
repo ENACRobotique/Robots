@@ -44,8 +44,8 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
     }
 
     // Init PID
-    pid_init(&tc->pid_xtraj, 1 << (SHIFT_PID_TRAJ_POS - 1), 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
-    pid_init(&tc->pid_ytraj, 1 << (SHIFT_PID_TRAJ_POS - 1), 0, 0, 0, SHIFT_PID_TRAJ_POS); // TODO find good values
+    pid_init(&tc->pid_xtraj, 1 << (SHIFT_PID_TRAJ_POS - 1), 1 << (SHIFT_PID_TRAJ_POS - 3), 0, 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
+    pid_init(&tc->pid_ytraj, 1 << (SHIFT_PID_TRAJ_POS - 1), 1 << (SHIFT_PID_TRAJ_POS - 3), 0, 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
     pid_init(&tc->pid_orien, 1 << (SHIFT_PID_TRAJ_ANG - 1), 0, 0, 0, SHIFT_PID_TRAJ_ANG); // TODO find good values
 }
 

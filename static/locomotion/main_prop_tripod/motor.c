@@ -37,11 +37,11 @@ void motor_update(motor_t* m, int cmd) {
 #ifdef ARCH_LPC21XX
     if (cmd >= 0) {
         pwm_update(m->pwm_ch, cmd);
-        gpio_write(m->dir_bank, m->dir_pin, 0);
+        gpio_write(m->dir_bank, m->dir_pin, 1);
     }
     else {
         pwm_update(m->pwm_ch, -cmd);
-        gpio_write(m->dir_bank, m->dir_pin, 1);
+        gpio_write(m->dir_bank, m->dir_pin, 0);
     }
 #elif defined(ARCH_X86_LINUX)
     m->setPoint = (cmd>1024) ? (1024) : (cmd<-1024 ? -1024 : cmd); // Bound cmd between -+1024
