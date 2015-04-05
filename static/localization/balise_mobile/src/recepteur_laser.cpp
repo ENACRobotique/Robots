@@ -11,9 +11,14 @@
 #include "params.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"
-#include "shared/lib_synchro_beacon.h"
 #include "../../../communication/network_tools/bn_debug.h"
 
+#ifdef SYNC_WIRELESS
+#include "shared/lib_synchro_beacon.h"
+#endif
+#ifdef SYNC_WIRED
+#include "shared/lib_synchro_wire.h"
+#endif
 
 unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;
 unsigned long time_prev_led=0, sw=0, time_data_send=0;
@@ -134,6 +139,7 @@ void loop() {
 
 //STATE MACHINE
     switch (state){
+#ifdef SYNC_WIRELESS
         case S_SYNC_ELECTION :
             if (prevState!=state) {
                 // reset counters
@@ -177,16 +183,6 @@ void loop() {
                 }
             }
         	break;
-#if 0   // probably not usefull, so skipped.
-        case S_SYNCED : // waiting the signal from main to go to game mode
-            if (prevState!=state) {
-                prevState=state;
-            }
-            if (rxB && inMsg.header.type==E_SYNC_OK && inMsg.header.srcAddr==ADDRX_MAIN){
-                state=S_GAME;
-            }
-
-            break;
 #endif
         case S_GAME :
             if (prevState!=state) {
