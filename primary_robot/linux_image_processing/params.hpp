@@ -35,8 +35,8 @@
 //######################
 //#### Para de simu ####
 //######################
-#define SAVE true
-#define RGL_HSV true
+#define SAVE false
+#define RGL_HSV false
 
 
 

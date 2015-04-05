@@ -6,11 +6,11 @@
  */
 
 #include <opencv2/core/core.hpp>
-#include "params.hpp"
 
 using namespace cv;
 using namespace std;
 
+#include "params.hpp"
 #include "tools.hpp"
 #include "process.hpp"
 
