@@ -2,15 +2,15 @@
 
 int initCapture(VideoCapture& srcCap, int valBegVid, bool offsetVid){
 	// Open the video file for reading
-	switch(1){ //
+	switch(SRC_VID){ //
 	case 0:
-		VideoCapture cap(0); // FIXME: check the argument
+		srcCap.open(0);  // FIXME: check the argument
 		break;
 	case 1:
-		srcCap("/home/yoyo/Robots/primary_robot/linux_image_processing/Videos/Feux.mp4");
+		srcCap.open("/home/yoyo/Robots/primary_robot/linux_image_processing/Videos/Feux.mp4");
 		break;
 	case 2:
-		srcCap("/home/Ludo...");
+		srcCap.open("/home/Ludo...");
 		break;
 	}
 

@@ -17,8 +17,7 @@ int initSave(VideoCapture frameCap, VideoWriter& oVideoWriter){
 	cout << "Frame size : " << dWidth << " x " << dHeight << endl;
 
 	// Initialize the VideoWriter object
-	VideoWriter oVideoWriter("saveVideo.avi", CV_FOURCC('P','I','M','1'), 20, frameSize, true);
-
+	oVideoWriter.open("saveVideo.avi", CV_FOURCC('P','I','M','1'), 20, frameSize, true);
 	//if not initialize the VideoWriter successfully, exit the program
 	if ( !oVideoWriter.isOpened() ) {
 		cout << "ERROR: Failed to write the video" << endl;

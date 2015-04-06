@@ -3,6 +3,7 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "iostream"
+#include "params.hpp"
 
 
 using namespace cv;

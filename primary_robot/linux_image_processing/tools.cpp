@@ -5,14 +5,11 @@
  *      Author: yoyo
  */
 
-#include <opencv2/core/core.hpp>
+#include "tools.hpp"
 
 using namespace cv;
 using namespace std;
 
-#include "params.hpp"
-#include "tools.hpp"
-#include "process.hpp"
 
 //#######################
 //###### Fonctions ######
@@ -84,3 +81,18 @@ bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r)
     return true;
 }
 
+/**
+ * \brief Give information to know if a special key "key" (decimal value of the ASCII table)
+ * 		has been pressed during the delay "dalay_us" in microsecond.
+ * 		Return 1 if the specified key is pressed, 0 otherwise
+ * \param int key
+ * \param int delay_us
+ * \return int
+ */
+int getKey(int key, int delay_us){
+	if(waitKey(delay_us) == key){
+		cout << "Special key: "<< (char)key<<" is pressed by user" << endl;
+		return 1;
+	}
+	return 0;
+}

@@ -50,15 +50,25 @@ using namespace std;
 //##################################
 int main(int argc, char* argv[]){
     sPerf sValPerf;
+    sPosOrien posOriRobot;
+
+    // Init postion and orientation of robot
+    // TODO: Later use the information sent by the AI
+    posOriRobot.x = 0;
+    posOriRobot.y = 0;
+    posOriRobot.theta = 0;
 
 	// Init video source
 	VideoCapture cap;
 	initCapture(cap);
 
     // Create  windows
-	namedWindow("MyVideo",CV_WINDOW_AUTOSIZE);
-	namedWindow("Video_thresh_R",CV_WINDOW_AUTOSIZE);
-	//namedWindow("Video_thresh_J",CV_WINDOW_AUTOSIZE);
+	namedWindow("rawFrame",CV_WINDOW_AUTOSIZE);
+	namedWindow("frameTopView",CV_WINDOW_AUTOSIZE);
+	namedWindow("frameGreen",CV_WINDOW_AUTOSIZE);
+	namedWindow("frameRed",CV_WINDOW_AUTOSIZE);
+	namedWindow("frameBlue",CV_WINDOW_AUTOSIZE);
+	namedWindow("frameYellow",CV_WINDOW_AUTOSIZE);
 
     // Settings HSV
 	if(SETTINGS_HSV){
@@ -85,10 +95,9 @@ int main(int argc, char* argv[]){
 
     while(1){
     	cmptPerfFrame(StartPerf, sValPerf);
-
         Mat frameRaw;
 
-        // Read a new frame from video
+        // Read a new frame from the video source
         if (!cap.read(frameRaw)){  //if not success, break loop
 			cout << "Cannot read the frame from source video file" << endl;
 	        cap = VideoCapture("/home/yoyo/Robots/primary_robot/linux_image_processing/Videos/Feux.mp4");
@@ -102,7 +111,7 @@ int main(int argc, char* argv[]){
         }
 
         // Image processing
-		if(process_frame(frameRaw)){
+		if(frameProcess(frameRaw, posOriRobot)){
 			break;
 		}
 
