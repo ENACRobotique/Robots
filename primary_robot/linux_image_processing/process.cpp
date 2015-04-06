@@ -18,7 +18,6 @@ using namespace std;
 #include "params.hpp"
 #include "process.hpp"
 
-Info_Feu Infos_feux[NBR_FEUX], Infos_feux_cap[NBR_FEUX];
 Scalar hsv_min,hsv_max;
 /// Global Variables
 const int h_slider_max = 180, sv_slider_max = 256;
@@ -59,130 +58,11 @@ Mat Pass_R_T = (Mat_<float>(4,4) << Pass_R_T11, Pass_R_T12, Pass_R_T13, Pass_R_T
 									Pass_R_T41, Pass_R_T42, Pass_R_T43, Pass_R_T44);
 
 
-void order_fire(){
-	printf("\n-----------------\n"
-			"st order_fire\n");
-
-	// Convert position of fire in the reference of table
-		Mat Pt_fx_R, Pt_fx_T;
-		cout << "Pass_R_T = "<< endl << " "  << Pass_R_T << endl << endl;
-
-	// Convert to the reference of the table
-		printf("\t\tnb_fx_frame = %d\n",nb_fx_frame);
-		for(int k=0; k<(nb_fx_frame); k++){
-				Pt_fx_R = (Mat_<float>(4,1) << Infos_feux_cap[k].x_feu,
-											   Infos_feux_cap[k].y_feu,
-											   0,
-											   1);
-				Pt_fx_T = Pass_R_T * Pt_fx_R;
-				cout << "Pt_fx_T = "<< endl << " "  << Pt_fx_T << endl << endl;
-
-				Infos_feux_cap[k].x_feu = Pt_fx_T.at<float>(0,0);
-				printf("\n\t\t Pt_fx_T.at<float>(0,0) = %.2f\n"
-						 "\t\t Pt_fx_T.at<float>(1,0) = %.2f\n", Pt_fx_T.at<float>(0,0), Pt_fx_T.at<float>(1,0));
-				Infos_feux_cap[k].y_feu = Pt_fx_T.at<float>(1,0);
-		}
-		printf("\t\t\nConvert to the table\n");
-//		affich_Infos_feux(NBR_FEUX, true, true, true);
-
-	// MAJ of Infos_feux[] and remove the same fire in Infos_feux_cap[]
-		for( int k=0; k<NBR_FEUX; k++){
-//			printf("\t\t k = %d\n",k);
-//			printf("\t\t nb_fx_frame = %d\n",nb_fx_frame);
-
-			Point2f pt_fx, pt_fx_cap;
-			pt_fx.x = Infos_feux[k].x_feu;
-			pt_fx.y = Infos_feux[k].y_feu;
-
-			int cpt_l=0;
-			for( int l=0; l<(nb_fx_frame); l++){
-//				printf("\t\t l = %d\n",l);
-				pt_fx_cap.x = Infos_feux_cap[l].x_feu;
-				pt_fx_cap.y = Infos_feux_cap[l].y_feu;
-				// MAJ Infos_feux[]
-				if(norm(pt_fx - pt_fx_cap) < TOL_MAJ_FEUX  &&
-				  (Infos_feux[k].coul_feu == Infos_feux_cap[l].coul_feu) &&
-				  (Infos_feux[k].etat_feu == Infos_feux_cap[l].etat_feu)){
-					printf("\n\tFeux n°%d maj\n",k);
-					Infos_feux[k].x_feu = Infos_feux_cap[l].x_feu;
-					Infos_feux[k].y_feu = Infos_feux_cap[l].y_feu;
-					Infos_feux[k].theta_feu = Infos_feux_cap[l].theta_feu;
-					Infos_feux[k].coul_feu = Infos_feux_cap[l].coul_feu;
-					Infos_feux[k].etat_feu = Infos_feux_cap[l].etat_feu;
-					Infos_feux[k].obj_supp = Infos_feux_cap[l].obj_supp;
-
-					Infos_feux_cap[l].x_feu = -1.;
-					l = nb_fx_frame+1;
-					cpt_l++;
-//					affich_Infos_feux(NBR_FEUX, true, false, true);
-				}
-
-				// Add new fire in Infos_feux[]
-				else if(Infos_feux_cap[l].x_feu != -1) {
-					for(int u=0; u<NBR_FEUX; u++){
-						if(Infos_feux[u].x_feu == -1 && Infos_feux_cap[l].x_feu != -1){
-							Infos_feux[u].x_feu     = Infos_feux_cap[l].x_feu;
-							Infos_feux[u].y_feu     = Infos_feux_cap[l].y_feu;
-							Infos_feux[u].theta_feu = Infos_feux_cap[l].theta_feu;
-							Infos_feux[u].coul_feu  = Infos_feux_cap[l].coul_feu;
-							Infos_feux[u].etat_feu  = Infos_feux_cap[l].etat_feu;
-							Infos_feux[u].obj_supp  = Infos_feux_cap[l].obj_supp;
-							printf("\tAdd new fire n° %d\n"
-									"\t\t Infos_feux[%d].x_feu = %.2f\n"
-									"\t\t Infos_feux[%d].y_feu = %.2f\n"
-									"\t\t Infos_feux[%d].theta_feu = %.2f\n"
-									"\t\t Infos_feux[%d].coul_feu =  \n"
-									"\t\t Infos_feux[%d].etat_feu =  \n"
-									"\t\t Infos_feux[%d].obj_supp =  \n",
-									u, u, Infos_feux[u].x_feu, u, Infos_feux[u].y_feu, u, Infos_feux[u].theta_feu, u, u, u);
-							u=NBR_FEUX;
-							Infos_feux_cap[l].x_feu = -1.;
-						}
-					}
-					affich_Infos_feux(NBR_FEUX, true, false, true);
-					cpt_l++;
-				}
-				if(cpt_l == nb_fx_frame) k = NBR_FEUX;
-			}
-		}
-
-	// Remove the case with removed fire
-		for(int k=0; k<NBR_FEUX; k++){
-			if(Infos_feux[k].x_feu == -1){
-				for(int j=k+1; j<NBR_FEUX; j++){
-					if(j == (NBR_FEUX -1)){
-						Infos_feux[j].x_feu = -1;
-						j = NBR_FEUX;
-					}
-					else{
-						Infos_feux[j].x_feu     = Infos_feux[j+1].x_feu;
-						Infos_feux[j].y_feu     = Infos_feux[j+1].y_feu;
-						Infos_feux[j].theta_feu = Infos_feux[j+1].theta_feu;
-						Infos_feux[j].coul_feu  = Infos_feux[j+1].coul_feu;
-						Infos_feux[j].etat_feu  = Infos_feux[j+1].etat_feu;
-						Infos_feux[j].obj_supp  = Infos_feux[j+1].obj_supp;
-					}
-				}
-			}
-		}
-
-	affich_Infos_feux(NBR_FEUX, true, true, true);
-
-	printf("\nfn order_fire\n"
-			"-----------------\n");
-}
-
-
 
 int process_frame(Mat img_brut){
 	Mat img_topview = Mat(IR_HEIGHT, IR_WIDTH, CV_8UC3);
 
-	// Init or reinit of Infos_feux_cap for the next frame
-	for(int v=0; v<NBR_FEUX; v++){
-		Infos_feux_cap[v].x_feu = -1;
-	}
-
-    // Redressement image
+    // Straightened frame
 	int j,i,u,v;
 	for(j=0;j<IR_HEIGHT;j++){
 		for(i=0;i<IR_WIDTH;i++){
@@ -233,7 +113,6 @@ int process_frame(Mat img_brut){
 												 Size( 8, 8 ),
 												 Point( 0, 0 ) );
 	/// For red
-//        	inRange(img_HSV , cv::Scalar(105,70,45), cv::Scalar(180,256,256), img_thres_R);
     	inRange(img_HSV , hsv_min, hsv_max, img_thres_R);
 
 
@@ -1115,35 +994,6 @@ int process_frame(Mat img_brut){
 
 
 
-	/// For yellow
-//	        inRange(img_HSV , cv::Scalar(60,20,45), cv::Scalar(100,256,256), img_thres_J);
-//			erode( img_thres_J, img_thres_J, element );
-//			dilate( img_thres_J, img_thres_J, element_dilate );
-//
-//			imshow("Video_thresh_J",img_thres_J);
-//
-//			// Find contours
-//			std::vector<std::vector<cv::Point> > contoursJ;
-//			Mat contourOutputJ = img_thres_J.clone();
-//			findContours( contourOutputJ, contoursJ, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );//CV_CHAIN_APPROX_SIMPLE, CV_CHAIN_APPROX_NONE
-//
-//			//Draw the contours
-////			Mat contourImageJ(img_topview.size(), CV_8UC3, cv::Scalar(0,0,0));
-//			Scalar colorsJ;
-//			colorsJ = cv::Scalar(0, 255, 255);
-//			for (size_t idx = 0; idx < contoursJ.size(); idx++) {
-//				cv::drawContours(img_topview, contoursJ, idx, colorsJ,4);
-//			}
-
-
-	// Order fire
-			order_fire();
-
-	// Number of fires detected
-			printf("\nnb_fx_frame max = %d\n", nb_fx_frame);
-			nb_fx_frame = 0;
-
-
     // Show the frame in "MyVideo" window
     imshow("MyVideo", img_brut);
 	imshow("brute redressee", img_topview);
@@ -1160,98 +1010,5 @@ int process_frame(Mat img_brut){
 
 
 
-
-
-void affich_Infos_feux(int nb_affich, bool affic_Infos_feux, bool affic_Infos_feux_cap, bool only_fire_detected){
-//	printf("\n"
-//			"\tNmbre de feux a afficher = %d\t affic_Infos_feux = %s\t affic_Infos_feux_cap = %s\t only_fire_detected = %s\n\n",
-//			nb_affich, affic_Infos_feux ? "true" : "false", affic_Infos_feux_cap ? "true" : "false", only_fire_detected ? "true" : "false");
-
-	if(only_fire_detected){
-		for(int k=0; k<nb_affich; k++){
-//			printf("\t\t k = %d\n",k);
-//			printf("\t\t Infos_feux[%d].x_feu = %.2f\n",k, Infos_feux[k].x_feu);
-//			printf("\t\t = %s\n", affic_Infos_feux ? "true" : "false");
-			if(Infos_feux[k].x_feu != -1. && affic_Infos_feux){
-				printf( "\t\t\tInfos_feux[%d].x_feu = %.2f mm\n"
-						"\t\t\tInfos_feux[%d].y_feu = %.2f mm\n"
-						"\t\t\tInfos_feux[%d].theta_feu = %.2f deg\n"
-						"\t\t\tInfos_feux[%d].etat_feu = %s\n"
-						"\t\t\tInfos_feux[%d].coul_feu = Rouge\n\n",
-						k, Infos_feux[k].x_feu,
-						k, Infos_feux[k].y_feu,
-						k, Infos_feux[k].theta_feu,
-						k, affich_etat_feu(Infos_feux[k].etat_feu),
-						k );
-			}
-		}
-		for(int k=0; k<nb_affich; k++){
-			if(Infos_feux_cap[k].x_feu != -1. && affic_Infos_feux_cap){
-				printf( "\t\t\tInfos_feux_cap[%d].x_feu = %.2f mm\n"
-						"\t\t\tInfos_feux_cap[%d].y_feu = %.2f mm\n"
-						"\t\t\tInfos_feux_cap[%d].theta_feu = %.2f deg\n"
-						"\t\t\tInfos_feux_cap[%d].etat_feu = %s\n"
-						"\t\t\tInfos_feux_cap[%d].coul_feu = Rouge\n\n",
-						k, Infos_feux_cap[k].x_feu,
-						k, Infos_feux_cap[k].y_feu,
-						k, Infos_feux_cap[k].theta_feu,
-						k, affich_etat_feu(Infos_feux[k].etat_feu),
-						k );
-			}
-			//else k = NBR_FEUX;
-		}
-	}
-	else{
-		for(int k=0; k<nb_affich; k++){
-			if( affic_Infos_feux){
-				printf( "\t\t\tInfos_feux[%d].x_feu = %.2f mm\n"
-						"\t\t\tInfos_feux[%d].y_feu = %.2f mm\n"
-						"\t\t\tInfos_feux[%d].theta_feu = %.2f deg\n"
-						"\t\t\tInfos_feux[%d].etat_feu = %s\n"
-						"\t\t\tInfos_feux[%d].coul_feu = Rouge\n\n",
-						k, Infos_feux[k].x_feu,
-						k, Infos_feux[k].y_feu,
-						k, Infos_feux[k].theta_feu,
-						k, affich_etat_feu(Infos_feux[k].etat_feu),
-						k );
-				//printf("Infos_feux[%d].etat_feu = %d\n",k, (int)Infos_feux[k].etat_feu);
-			}
-		}
-		for(int k=0; k<nb_affich; k++){
-			if( affic_Infos_feux_cap){
-				printf( "\t\t\tInfos_feux_cap[%d].x_feu = %.2f mm\n"
-						"\t\t\tInfos_feux_cap[%d].y_feu = %.2f mm\n"
-						"\t\t\tInfos_feux_cap[%d].theta_feu = %.2f deg\n"
-						"\t\t\tInfos_feux_cap[%d].etat_feu = %s\n"
-						"\t\t\tInfos_feux_cap[%d].coul_feu = Rouge\n\n",
-						k, Infos_feux_cap[k].x_feu,
-						k, Infos_feux_cap[k].y_feu,
-						k, Infos_feux_cap[k].theta_feu,
-						k, affich_etat_feu(Infos_feux[k].etat_feu),
-						k );
-			}
-		}
-	}
-}
-
-
-
-
-const char* affich_etat_feu(int etat_feu){
-	//printf("etat_feu = %d\n", (int) etat_feu);
-	switch(etat_feu){
-	case Vertical:    return "Vertical";
-	case Horizontal:  return "Horizontal";
-	case Oblique:     return "Oblique";
-	default: return 0;
-	}
-//	Vertical, Horizontal, Oblique
-//	}Etat_Feu;
-}
-
-
-//void affich_mat_float(Mat M, int rows, int cols){
-//	printf("\nMatrix = %s", )
-//}
 
 

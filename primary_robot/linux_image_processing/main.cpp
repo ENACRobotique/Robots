@@ -52,39 +52,36 @@ int main(int argc, char* argv[]){
     sPerf sValPerf;
 
 	// Init video source
-		VideoCapture cap;
-		initCapture(cap);
+	VideoCapture cap;
+	initCapture(cap);
 
     // Create  windows
-		namedWindow("MyVideo",CV_WINDOW_AUTOSIZE);
-		namedWindow("Video_thresh_R",CV_WINDOW_AUTOSIZE);
-		//namedWindow("Video_thresh_J",CV_WINDOW_AUTOSIZE);
+	namedWindow("MyVideo",CV_WINDOW_AUTOSIZE);
+	namedWindow("Video_thresh_R",CV_WINDOW_AUTOSIZE);
+	//namedWindow("Video_thresh_J",CV_WINDOW_AUTOSIZE);
 
-    // Réglage HSV
-		if(RGL_HSV){
-			namedWindow("RGL_HSV");
+    // Settings HSV
+	if(SETTINGS_HSV){
+		namedWindow("RGL_HSV");
 
-			createTrackbar("H min", "RGL_HSV", &hmin_slider, h_slider_max, on_trackbar );
-			createTrackbar("H max", "RGL_HSV", &hmax_slider, h_slider_max, on_trackbar );
-			createTrackbar("S min", "RGL_HSV", &smin_slider, sv_slider_max, on_trackbar );
-			createTrackbar("S max", "RGL_HSV", &smax_slider, sv_slider_max, on_trackbar );
-			createTrackbar("V min", "RGL_HSV", &vmin_slider, sv_slider_max, on_trackbar );
-			createTrackbar("V max", "RGL_HSV", &vmax_slider, sv_slider_max, on_trackbar );
+		createTrackbar("H min", "RGL_HSV", &hmin_slider, h_slider_max, on_trackbar );
+		createTrackbar("H max", "RGL_HSV", &hmax_slider, h_slider_max, on_trackbar );
+		createTrackbar("S min", "RGL_HSV", &smin_slider, sv_slider_max, on_trackbar );
+		createTrackbar("S max", "RGL_HSV", &smax_slider, sv_slider_max, on_trackbar );
+		createTrackbar("V min", "RGL_HSV", &vmin_slider, sv_slider_max, on_trackbar );
+		createTrackbar("V max", "RGL_HSV", &vmax_slider, sv_slider_max, on_trackbar );
 
-			on_trackbar(0,NULL);
-		}
+		on_trackbar(0,NULL);
+	}
 
 	// Iinit the record of the video
-		VideoWriter oVideoWriter;
-		if(SAVE){
-			if(initSave(cap, oVideoWriter) == -1){
-				cout<<"Error: Failed to init the VideoWritter"<<endl;
-				return -1;
-			}
+	VideoWriter oVideoWriter;
+	if(SAVE){
+		if(initSave(cap, oVideoWriter) == -1){
+			cout<<"Error: Failed to initialize the VideoWritter"<<endl;
+			return -1;
 		}
-
-	// Initialisations
-		Init_Info_Feux();
+	}
 
     while(1){
     	cmptPerfFrame(StartPerf, sValPerf);
@@ -105,16 +102,15 @@ int main(int argc, char* argv[]){
         }
 
         // Image processing
-        	if(process_frame(frameRaw)){
-        		break;
-        	}
+		if(process_frame(frameRaw)){
+			break;
+		}
 
         // End of measurements
         cmptPerfFrame(EndPerf, sValPerf);
     }// End while
 
     printf("End loop\n");
-    affich_Infos_feux(NBR_FEUX, true, false, true);
 
     return 0;
 }
