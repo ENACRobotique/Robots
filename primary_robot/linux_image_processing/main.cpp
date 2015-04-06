@@ -51,6 +51,8 @@ using namespace std;
 int main(int argc, char* argv[]){
     sPerf sValPerf;
     sPosOrien posOriRobot;
+    Mat framePattern;
+    Mat frameRaw;
 
     // Init postion and orientation of robot
     // TODO: Later use the information sent by the AI
@@ -58,30 +60,40 @@ int main(int argc, char* argv[]){
     posOriRobot.y = 0;
     posOriRobot.theta = 0;
 
-	// Init video source
+	// Init video sources
+    VideoCapture srcFramePattern;  // For the pattern of the table
 	VideoCapture cap;
+    initFramePattern(srcFramePattern, framePattern);  //// Initialize the pattern frame
 	initCapture(cap);
+
+	// For calibration
+	Mat frameHSVPattern;
+	Mat frameHSVCalib;
+	VideoCapture srcHSVPattern;
+	VideoCapture srcHSVCalib;
+
+    // Initialize calibration
+    initCalibHSV(srcHSVPattern, frameHSVPattern);
+    initCalibHSV(srcHSVCalib, frameHSVCalib);
+    initTrackbarCalib(frameHSVCalib);
+
+    // Apply a threshold
+	inRange(frameHSVCalib , hsvCalib_min, hsvCalib_max, frameHSVCalib);
 
     // Create  windows
 	namedWindow("rawFrame",CV_WINDOW_AUTOSIZE);
-	namedWindow("frameTopView",CV_WINDOW_AUTOSIZE);
-	namedWindow("frameGreen",CV_WINDOW_AUTOSIZE);
-	namedWindow("frameRed",CV_WINDOW_AUTOSIZE);
-	namedWindow("frameBlue",CV_WINDOW_AUTOSIZE);
-	namedWindow("frameYellow",CV_WINDOW_AUTOSIZE);
+	namedWindow("framePattern",CV_WINDOW_AUTOSIZE);
+	namedWindow("HSVPattern", CV_WINDOW_AUTOSIZE);
+	namedWindow("HSVCalib", CV_WINDOW_AUTOSIZE);
+//	namedWindow("frameTopView",CV_WINDOW_AUTOSIZE);
+//	namedWindow("frameGreen",CV_WINDOW_AUTOSIZE);
+//	namedWindow("frameRed",CV_WINDOW_AUTOSIZE);
+//	namedWindow("frameBlue",CV_WINDOW_AUTOSIZE);
+//	namedWindow("frameYellow",CV_WINDOW_AUTOSIZE);
 
     // Settings HSV
 	if(SETTINGS_HSV){
-		namedWindow("RGL_HSV");
 
-		createTrackbar("H min", "RGL_HSV", &hmin_slider, h_slider_max, on_trackbar );
-		createTrackbar("H max", "RGL_HSV", &hmax_slider, h_slider_max, on_trackbar );
-		createTrackbar("S min", "RGL_HSV", &smin_slider, sv_slider_max, on_trackbar );
-		createTrackbar("S max", "RGL_HSV", &smax_slider, sv_slider_max, on_trackbar );
-		createTrackbar("V min", "RGL_HSV", &vmin_slider, sv_slider_max, on_trackbar );
-		createTrackbar("V max", "RGL_HSV", &vmax_slider, sv_slider_max, on_trackbar );
-
-		on_trackbar(0,NULL);
 	}
 
 	// Iinit the record of the video
@@ -95,13 +107,10 @@ int main(int argc, char* argv[]){
 
     while(1){
     	cmptPerfFrame(StartPerf, sValPerf);
-        Mat frameRaw;
 
         // Read a new frame from the video source
         if (!cap.read(frameRaw)){  //if not success, break loop
 			cout << "Cannot read the frame from source video file" << endl;
-	        cap = VideoCapture("/home/yoyo/Robots/primary_robot/linux_image_processing/Videos/Feux.mp4");
-			cap.read(frameRaw);
 			break;
 		}
 
@@ -111,9 +120,13 @@ int main(int argc, char* argv[]){
         }
 
         // Image processing
-		if(frameProcess(frameRaw, posOriRobot)){
+		if(frameProcess(frameRaw, framePattern, posOriRobot)){
 			break;
 		}
+
+		// Show calibration
+	    imshow("HSVPattern", frameHSVPattern);
+	    imshow("HSVCalib", frameHSVCalib);
 
         // End of measurements
         cmptPerfFrame(EndPerf, sValPerf);
