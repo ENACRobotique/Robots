@@ -140,10 +140,8 @@ void syncComputationFinal(sSyncPayload *pload){
     if (det!=0){ //todo : handle det==0
         sum_OO>>=EVIL_SHIFT;
         sum_OD>>=EVIL_SHIFT;
-        syncStruc tmpStruc;
+        syncStruc tmpStruc = getSyncParam();
         tmpStruc.initialDelay=(sum_OO*sum_D-sum_O*sum_OD)/det;
-        tmpStruc.driftUpdatePeriod=HARDUPDATEPERIOD;
-        tmpStruc.inc=HARDUPDATESIGN;
         setSyncParam(tmpStruc);
 #ifdef DEBUG_SYNC
         sum_O>>=EVIL_SHIFT;
