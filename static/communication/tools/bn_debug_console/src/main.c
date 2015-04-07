@@ -249,6 +249,13 @@ int main(int argc, char **argv){
                 while(*p && isspace(*p)) p++;
 
                 switch (*p){
+                case 'v':
+                    verbose++;
+                    break;
+                case 'V':
+                    verbose--;
+                    verbose=(verbose<0?0:verbose);
+                    break;
                 case 'e':{
                     sMsg msg = {{0}};
                     static int us = 1200;
