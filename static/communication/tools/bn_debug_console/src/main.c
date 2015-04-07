@@ -379,7 +379,9 @@ int main(int argc, char **argv){
                         }
                     }while(err != 1);
                     while(getchar() != '\n');
-                    printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
+                    int retVal = bn_ping(destAd);
+                    if (retVal>= 0 ) printf("ping %hx : %d ms\n",destAd,retVal);
+                    else printf("ping %hx : error %s\n",destAd,getErrorStr(retVal));
                     break;
                 case 't' :
                     {
