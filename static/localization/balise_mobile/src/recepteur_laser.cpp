@@ -53,7 +53,7 @@ void setup() {
   setupFreeTest();
 
 #ifdef SYNC_WIRED
-  wiredSync_receiverInit(8);
+  wiredSync_receiverInit(PIN_SYNC);
 #endif
 }
 

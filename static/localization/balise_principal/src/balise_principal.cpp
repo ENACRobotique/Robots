@@ -26,6 +26,7 @@
 
 #ifdef SYNC_WIRED
 #include "shared/lib_synchro_wire.h"
+
 #endif
 
 
@@ -73,6 +74,10 @@ void setup(){
 #endif
 
     pinMode(PIN_DBG_LED,OUTPUT);
+#ifdef SYNC_WIRED
+    wiredSync_senderInit(PIN_SYNC);
+    wiredSync_sendSignal();
+#endif
 }
 
 
@@ -111,7 +116,7 @@ void loop(){
 
     //blinking
 #ifdef BLINK_1S
-    if((time - time_prev_led)>=10000) {
+    if((time - time_prev_led)>=1000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
 #ifdef DEBUG
@@ -137,7 +142,7 @@ void loop(){
 
     ///////state machine
     switch (state){
-
+#ifdef SYNC_WIRELESS
     case S_SYNC_ELECTION :
         if (!sw){
             // set speed to high
@@ -188,7 +193,7 @@ void loop(){
         }
         state=S_GAME;
         break;
-
+#endif
     case S_GAME :
         // if new turn
         if (lastIndex!=domi_nbTR()){

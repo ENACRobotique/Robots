@@ -28,6 +28,8 @@ typedef enum{
 //#define DEBUG_PRINTLASER
 //#define DEBUG_CALIBRATION
 
+#define PIN_SYNC    8
+
 #define SYNC_WIRED
 //#define SYNC_WIRELESS
 

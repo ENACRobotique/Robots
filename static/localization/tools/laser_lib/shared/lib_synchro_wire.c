@@ -26,10 +26,10 @@ int wiredSync_waitSignal(){
     while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
     // if signal stayed here for more than debounce time, update initial time delay.
     uint32_t end = micros();
-    if (end-begin > WIREDSYNC_DEBOUNCE){
-        int32_t offset = end - WIREDSYNC_INITIAL;
-        tmpStruc.initialDelay = offset;
+    if ((end-begin)/1000 > WIREDSYNC_DEBOUNCE){
+        tmpStruc.initialDelay = end - WIREDSYNC_INITIAL;
         setSyncParam(tmpStruc);
+        updateSync();
         synchronized = 1;
     }
     return (synchronized?SYNC_SYNCHRONIZED:SYNC_OUT_OF_SYNC);
@@ -44,12 +44,13 @@ int wiredSync_waitSignal(){
  *  None
  */
 void wiredSync_sendSignal(){
-    uint32_t sw=0;
     syncStruc tmpStruc = getSyncParam();
-    wiredSync_sendSignal(WIREDSYNC_SIGNALISHERE);
-    while(testTimeout(WIREDSYNC_LOWTIME,&sw));
+    wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
+    uint32_t begin = millis();
+    while(millis()-begin < WIREDSYNC_LOWTIME);
     wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
     uint32_t end=micros();
     tmpStruc.initialDelay = end-WIREDSYNC_INITIAL;
     setSyncParam(tmpStruc);
+    updateSync();
 }
