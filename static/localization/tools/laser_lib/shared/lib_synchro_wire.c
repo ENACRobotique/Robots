@@ -23,7 +23,7 @@ int wiredSync_waitSignal(){
     // record current time
     uint32_t begin = micros();
     // if signal is here
-    while (wiredSync_signalPresent());
+    while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
     // if signal stayed here for more than debounce time, update initial time delay.
     uint32_t end = micros();
     if (end-begin > WIREDSYNC_DEBOUNCE){

@@ -13,6 +13,10 @@
 #define WIREDSYNC_SIGNALISHERE LOW
 #define WIREDSYNC_SIGNANOTHERE HIGH
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* wiredSync_{sender,receiver}Init : init function for sender/receiver of the synchronization signal.
  * There MUST be exactly ONE sender, and possibly multiple receiver.
  */
@@ -32,5 +36,9 @@ int wiredSync_signalPresent();
  *
  */
 void wiredSync_setSignal(int val);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIB_SYNCHRO_WIRE_ARDUINO_H_ */

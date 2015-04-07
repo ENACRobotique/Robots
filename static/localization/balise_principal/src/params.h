@@ -59,11 +59,15 @@ typedef struct{
 //#define DEBUG_SYNC
 //#define DEBUG_LOC
 //#define DEBUG_CALIBRATION
+//#define DEBUG_PRINT
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
 
+#define HARDUPDATEPERIOD  0    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
+#define HARDUPDATESIGN    0
+#define SYNC_WIRED
+#define SYNC_WIRELESS
 
-//#define DEBUG_PRINT
 
 #endif /* PARAMS_H_ */

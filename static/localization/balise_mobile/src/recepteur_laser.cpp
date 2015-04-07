@@ -51,6 +51,10 @@ void setup() {
   bn_attach(E_PERIOD,&periodHandle);
   bn_printfDbg("start mobile %hx\n",MYADDR);
   setupFreeTest();
+
+#ifdef SYNC_WIRED
+  wiredSync_receiverInit(8);
+#endif
 }
 
 void loop() {
@@ -74,6 +78,9 @@ void loop() {
 //MUST ALWAYS BE DONE (any state)
 
     updateSync();
+#ifdef SYNC_WIRED
+    wiredSync_waitSignal()==SYNC_SYNCHRONIZED;
+#endif
 
     // routine and receive
     rxB=bn_receive(&inMsg);

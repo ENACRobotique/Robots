@@ -21,6 +21,10 @@
 #include "arduino/lib_synchro_wire_arduino.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define WIREDSYNC_INITIAL 0     // time to set when we receive the first sync signal.
 #define WIREDSYNC_LOWTIME 1000  // in ms
 #define WIREDSYNC_MAXLOOP 200   // maximum main loop duration in ms
@@ -49,5 +53,7 @@ int wiredSync_waitSignal();
  */
 void wiredSync_sendSignal();
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* LIB_SYNCHRO_WIRE_H_ */
