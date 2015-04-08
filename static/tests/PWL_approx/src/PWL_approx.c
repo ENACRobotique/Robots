@@ -135,7 +135,7 @@ int lin_approx(pfunc1D f, pfunc1D fp, double t1, double t2, int nb_seg, double *
 
 double g(double t, double alphai[], double betai[]){
     int i = 0;
-    while(t < alphai[i]){
+    while(t > alphai[i+1]){
         i++;
     }
 
