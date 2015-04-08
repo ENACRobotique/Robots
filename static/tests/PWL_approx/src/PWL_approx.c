@@ -13,6 +13,8 @@
 #include <limits.h>
 #include <float.h>
 
+//#define DEBUG_LIN_APPROX 1
+
 typedef double (*pfunc1D)(double);
 
 #define SIGN(v) (((v)>=0) - ((v)<0))
@@ -42,7 +44,6 @@ double fp_1ox(double t){
     return -1./pow(t, 2);
 }
 
-
 int lin_approx(pfunc1D f, pfunc1D fp, double t1, double t2, int nb_seg, double *epsilon_final, double alphai[], double betai[]){
     int j=0,i;
     double delta=1, t[nb_seg][2], alpha[nb_seg+1][2], epsilon[nb_seg+1][2], epsilon_max=0,epsilon_min=0,epsilon_max_old=DBL_MAX,param_delta=0.01;
@@ -54,33 +55,49 @@ int lin_approx(pfunc1D f, pfunc1D fp, double t1, double t2, int nb_seg, double *
         t[i][j] = alpha[0][j] + ((i + 0.5)/nb_seg)*(alpha[nb_seg][j] - alpha[0][j]);
     }
 
+#if DEBUG_LIN_APPROX > 0
     int nb_iter = 0;
+#endif
     while (1){
+#if DEBUG_LIN_APPROX > 0
         nb_iter++;
+#endif
 
+#if DEBUG_LIN_APPROX > 1
         for (i=0;i<nb_seg;i++){
             printf("t[%i][%i]=%.6g\n", i, j, t[i][j]);
         }
-//        getchar();
+#if DEBUG_LIN_APPROX > 2
+        getchar();
+#endif
+#endif
 
         for (i=1;i<nb_seg;i++){
             alpha[i][j]=( f(t[i-1][j]) - f(t[i][j]) + fp(t[i][j])*t[i][j] - fp(t[i-1][j])*t[i-1][j] ) / ( fp(t[i][j]) - fp(t[i-1][j]) );
         }
 
+#if DEBUG_LIN_APPROX > 1
         for (i=0;i<=nb_seg;i++){
             printf("alpha[%i][%i]=%.6g\n", i, j, alpha[i][j]);
         }
-//        getchar();
+#if DEBUG_LIN_APPROX > 2
+        getchar();
+#endif
+#endif
 
         for (i=0;i<nb_seg;i++){
             epsilon[i][j] = fp(t[i][j])*(alpha[i][j] - t[i][j]) + f(t[i][j]) - f(alpha[i][j]);
         }
         epsilon[nb_seg][j] = fp(t[nb_seg-1][j])*(alpha[nb_seg][j] - t[nb_seg-1][j]) + f(t[nb_seg-1][j]) - f(alpha[nb_seg][j]);
 
+#if DEBUG_LIN_APPROX > 1
         for (i=0;i<=nb_seg;i++){
             printf("epsilon[%i][%i]=%.6g\n", i, j, epsilon[i][j]);
         }
-//        getchar();
+#if DEBUG_LIN_APPROX > 2
+        getchar();
+#endif
+#endif
 
         for (i=0;i<=nb_seg;i++){
             double feij = fabs(epsilon[i][j]);
@@ -98,8 +115,10 @@ int lin_approx(pfunc1D f, pfunc1D fp, double t1, double t2, int nb_seg, double *
             }
         }
 
+#if DEBUG_LIN_APPROX > 1
         printf("epsilon_max=%.6g (%c)\n", epsilon_max, epsilon_max_sign>0?'+':'-');
         printf("epsilon_min=%.6g\n", epsilon_min);
+#endif
 
         if (epsilon_max/epsilon_min - 1. < param_delta){
             *epsilon_final = 0.5*epsilon_max*epsilon_max_sign;
@@ -121,7 +140,9 @@ int lin_approx(pfunc1D f, pfunc1D fp, double t1, double t2, int nb_seg, double *
 
         epsilon_max_old = epsilon_max;
 
+#if DEBUG_LIN_APPROX > 1
         printf("delta=%.6g\n", delta);
+#endif
 
         for (i=0;i<nb_seg;i++){
             t[i][!j] = t[i][j] + delta * (epsilon[i+1][j] - epsilon[i][j]) / ( (epsilon[i+1][j] / (alpha[i+1][j] - t[i][j])) + (epsilon[i][j] / (t[i][j] - alpha[i][j])));
@@ -129,7 +150,10 @@ int lin_approx(pfunc1D f, pfunc1D fp, double t1, double t2, int nb_seg, double *
         j=!j;
     }
 
+#if DEBUG_LIN_APPROX > 0
     printf("nb_iter=%i\n", nb_iter);
+    return nb_iter;
+#endif
 
     return 0;
 }
