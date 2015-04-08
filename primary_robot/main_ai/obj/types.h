@@ -8,8 +8,6 @@
 #ifndef OBJ_TYPES_H_
 #define OBJ_TYPES_H_
 
-#include "math_types.h"
-
 
 #define SPEED 1
 

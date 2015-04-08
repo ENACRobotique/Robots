@@ -12,7 +12,6 @@
 #include <array>
 
 #include "messages-statuses.h"
-#include "math_types.h"
 #include "GeometryTools.h"
 
 using namespace std;

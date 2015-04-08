@@ -1,5 +1,5 @@
 /*
- * variables.cpp
+ * tools.cpp
  *
  *  Created on: 22 févr. 2015
  *      Author: seb

@@ -13,7 +13,6 @@
 #include <tools.h>
 #include <cmath>
 #include <iostream>
-#include "math_ops.h"
 #include "a_star.h"
 #include "time_tools.h"
 #include "tools.h"
@@ -186,7 +185,7 @@ void Path::go2Point(const Point2D<float> &dest, const bool f){
 }
 
 
-void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tableau statique //for traj prog
+void Path::followPath(vector <sObs_t> &/*_obs*/, vector <iABObs_t> &l) { // todo tableau statique //for traj prog
     clear();
 
    //copier _obs dans obs
@@ -203,6 +202,9 @@ void Path::followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l) { // todo tab
         el.obs.c = obs[O(l[i + 1])].c;
         el.obs.moved = 1;
         el.obs.r = fabs(obs[O(l[i + 1])].r) * (1 - 2 * DIR(l[i + 1]));
+        el.seg_len = 0; // FIXME
+        el.arc_len = 0; // FIXME
+        el.sid = i;
 
         _path.push_back(el);
     }

@@ -9,6 +9,7 @@
 #define AI_PATH_H_
 
 #include <a_star_tools.h>
+#include "a_star.h"
 #include <vector>
 #include <deque>
 #include "GeometryTools.h"
@@ -36,25 +37,6 @@ typedef struct{
     bool rot1_dir; // (false: CW | true: CCW)
     bool rot2_dir;
 }sTrajOrientEl_t;
-
-typedef struct {
-    Point2D<float> p1;
-    Point2D<float> p2;
-    sObs_t obs;
-
-    sNum_t arc_len;
-    sNum_t seg_len;
-
-    unsigned short sid;
-} sTrajEl_t;
-
-typedef struct {
-    sNum_t dist;
-    unsigned short tid;
-
-    unsigned int path_len;
-    sTrajEl_t *path;
-} sPath_t;
 
 
 class Path {

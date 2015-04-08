@@ -4,11 +4,11 @@
 
 #include <a_star_tools.h>
 #include <main_ai_tools/path.h>
-#include "math_types.h"
 extern "C"{
 #include <stdint.h>
 #include "messages-interactions.h"
 }
+#include <vector>
 
 #define SPEED_SECONDARY 10 // (cm/s)
 
@@ -29,7 +29,7 @@ typedef enum {
 } estate_t;
 
 extern long _start_time;
-extern uint8_t obs_updated[];
+
 
 #endif
 

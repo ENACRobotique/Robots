@@ -9,7 +9,6 @@
 #include <ai_tools.h>
 #include <GeometryTools.h>
 #include <obj_tools.h>
-#include "math_ops.h"
 #include "ai.h"
 #include "botNet_core.h"
 
@@ -32,7 +31,7 @@ void printObsActive() {
 
 int test_in_obs(Point2D<float> p) { //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
     //FIXME si le robot dans plusieurs obstable
-    for (unsigned int i = 1; i < N - 1; i++) {
+    for (int i = 1; i < N - 1; i++) {
         if (obs[i].active == 0)
             continue;
         Point2D<float> c(obs[i].c.x, obs[i].c.y);
@@ -159,15 +158,15 @@ void simuSecondary(void) { //TODO if a other robot on trajectory
 
 void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de contact
     int i;
-    sPt_t pt;
-    sVec_t v;
+    Point2D<float> pt;
     Point2D<float> _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
 
     if (((i = test_in_obs(_current_pos)) != 0)) {
         if (obs[i].moved == 1) {
-            pt = obs[0].c;
-            projPtOnCircle(&obs[i].c, obs[i].r, &pt);
-            convPts2Vec(&pt, &obs[0].c, &v);
+            pt = {obs[0].c.x, obs[0].c.y};
+            Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);
+            pt = cir.projecte(pt);
+            Vector2D<float> v(pt, {obs[0].c.x, obs[0].c.y});
 
             obs[i].c.x += v.x;
             obs[i].c.y += v.y;
@@ -190,7 +189,8 @@ void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de 
     }
     //if non holmic
     float theta_robot = statuses.getLastOrient(ELT_ADV_PRIMARY);
-    updateNoHaftTurn(theta_robot * 180 / M_PI, &obs[0].c);
+    Point2D<float> p = {obs[0].c.x, obs[0].c.y};
+    updateNoHaftTurn(theta_robot * 180 / M_PI, pt);
     obs_updated[N - 5]++;
     obs_updated[N - 6]++;
     obs_updated[N - 7]++;

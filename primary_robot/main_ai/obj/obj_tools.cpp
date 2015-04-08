@@ -14,7 +14,6 @@
 #include <obj.h>
 #include <obj_tools.h>
 #include <tools.h>
-#include "math_ops.h"
 #include "clap.h"
 
 
@@ -24,7 +23,7 @@
 
 using namespace std;
 
-void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
+void updateEndTraj(float theta, Point2D<float> *pt, float r) {
     int i;
     for (i = 1; i < 4; i++) {
         obs[N - i - 1].c.x = pt->x + (r) * cos(theta + i * M_PI_2);
@@ -34,7 +33,7 @@ void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
     }
 }
 
-void updateNoHaftTurn(sNum_t theta, sPt_t *pt) {
+void updateNoHaftTurn(float theta, Point2D<float>& pt) {
     int i;
     sNum_t r, speed = statuses.getLastSpeed(ELT_PRIMARY);
     r = speed / 3;
@@ -42,8 +41,8 @@ void updateNoHaftTurn(sNum_t theta, sPt_t *pt) {
         r = 15;
 
     for (i = 1; i < 4; i++) {
-        obs[N - i - 4].c.x = pt->x + (r) * cos(theta * M_PI / 180 + i * M_PI_2);
-        obs[N - i - 4].c.y = pt->y + (r) * sin(theta * M_PI / 180 + i * M_PI_2);
+        obs[N - i - 4].c.x = pt.x + (r) * cos(theta * M_PI / 180 + i * M_PI_2);
+        obs[N - i - 4].c.y = pt.y + (r) * sin(theta * M_PI / 180 + i * M_PI_2);
         obs[N - i - 4].active = 1;
         obs[N - i - 4].r = r - 0.5;
     }
@@ -64,7 +63,7 @@ void printEndTraj() {
  * And update the display on the screen.
  * The second argument is used for a non holonomic robot with the 3 circles anti half turn.
  */
-void loadingPath(sPath_t _path, int num) {
+void loadingPath(sPath_t /*_path*/, int /*num*/) {
     //path = _path; //FIXME
 
 #if !HOLONOMIC

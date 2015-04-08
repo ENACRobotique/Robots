@@ -1,5 +1,5 @@
 /*
- * variables.h
+ * tools.h
  *
  *  Created on: 22 févr. 2015
  *      Author: seb

@@ -9,5 +9,4 @@
 
 long _start_time;
 
-uint8_t obs_updated[N] ;
 
