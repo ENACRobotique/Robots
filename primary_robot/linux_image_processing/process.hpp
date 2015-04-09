@@ -9,56 +9,52 @@
 #define PROCESS_HPP_
 
 #include "tools.hpp"
+#include "params.hpp"
 
-// ################## declarations ##################
-typedef struct Info_Feu Info_Feu;
-//typedef enum Etat_Feu Etat_Feu;
-//typedef enum Coul_Feu Coul_Feu;
+using namespace cv;  // Check if declaration here is relevant
 
-typedef enum {
-	Vertical, Horizontal, Oblique
-}Etat_Feu;
-
-typedef enum{
-	Rien, Torche, Foyer, Torche_fixe, Feu_R, Feu_J, Autre_Obj
-}Obj_Supp;
 
 typedef enum {
 	Rouge, Jaune, Autre_Coul
 }Coul_Feu;
 
-struct Info_Feu{
-	float x_feu;
-	float y_feu;
-	float theta_feu;
-	Etat_Feu etat_feu;
-	Coul_Feu coul_feu;
-	Obj_Supp obj_supp;
+typedef struct sPosOrien{
+	double x;
+	double y;
+	double theta;
+}sPosOrien;
 
-};
-
-
-
-void on_trackbar(int, void*);
-int process_frame(Mat img_brut);
-void affich_Infos_feux(int nb_affich, bool affic_Infos_feux, bool affic_Infos_feux_cap,bool only_fire_detected);
-const char* affich_etat_feu(int etat_feu);
+typedef struct sFieldCam2Draw{
+	Point2i v1;  // Relative to center
+	Point2i v2;	 // Relative to center
+	Point2i v3;  // Relative to center
+	Point2i v4;  // Relative to center
+	Point2i center;
+}sFieldCam2Draw;
 
 
-extern Info_Feu Infos_feux[NBR_FEUX], Infos_feux_cap[NBR_FEUX];
 extern Scalar hsv_min,hsv_max;
+
 /// Global Variables
 extern const int h_slider_max, sv_slider_max;
 extern int hmin_slider, hmax_slider, smin_slider, smax_slider, vmin_slider, vmax_slider;
+//extern int hMinCalib_slider, hMaxCalib_slider,
+//	sMinCalib_slider, sMaxCalib_slider,
+//	vMinCalib_slider, vMaxCalib_slider;
+extern Scalar hsvCalib_min,hsvCalib_max;
 
-extern int nb_fx_frame;
-extern float pos_robot_x;
-extern float pos_robot_y;
-extern float angl_robot;
-
-
-
-
+void on_trackbar(int, void*);
+int frameProcess(Mat& rawFrame, Mat& framePattern, sPosOrien& posOrienRob);
+int frameStraight(Mat& frameIn, Mat& frameOut);
+int frameCrop2Circle(Mat& frame, Point2i& center, int radius);
+int frameThresh(Mat frameIn, Mat frameOut, Scalar hsvMin, Scalar hsvMax, int sizeErode = 5, int sizeDilate = 8);
+int initFramePattern(VideoCapture& srcFramePattern, Mat& matFramePattern);
+void drawTrapeze(Mat& frameSrc, sFieldCam2Draw& trapeze);
+void setFieldCam2Draw(sFieldCam2Draw& trapeze, Point2i c, Point2i vert1, Point2i vert2, Point2i vert3, Point2i vert4);
+int initCalibHSV(VideoCapture& srcHSVPattern, Mat& matHSVPattern);
+void initTrackbar();
+void initTrackbarCalib(Mat& frameCalib);
+void on_trackbarCalib(Mat& frameCalib);
 
 
 #endif /* PROCESS_HPP_ */
