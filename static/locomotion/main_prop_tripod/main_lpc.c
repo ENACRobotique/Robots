@@ -90,6 +90,8 @@ int main() {
 
     //// Global variables
     unsigned int prevControl_us = micros();
+    unsigned int prevTraj_us = micros();
+    int spd_state = 0;
     unsigned int prevLed_ms = millis();
     unsigned int prevPos_ms = millis();
     unsigned int time_ms, time_us;
@@ -99,8 +101,18 @@ int main() {
 
     // FIXME need to have a first loop here to wait for time synchronization
 
-    position_controller_t tc;
-    posctlr_init(&tc, mat_rob2pods);
+    motor_t mots[3];
+    motors_init(mots);
+    encoder_t encs[3];
+    encoders_init(encs, mots);
+
+    speed_controller_t scs[3];
+    int i;
+    for(i = 0; i < 3; i++) {
+        spdctlr_init(&scs[i], &encs[i]);
+    }
+
+    int sps[3] = {0, 0, 0};
 
     unsigned int t0_ms = millis();
 
@@ -125,17 +137,30 @@ int main() {
         // Automatic control
         time_us = micros();
         if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
-            posctlr_begin_update(&tc);
-
-            unsigned int dt_ms = millis() - t0_ms;
-
-            int x_sp = isROUND(D2I(0.001)*(double)dt_ms);
-            int y_sp = 0;
-            int theta_sp = 0;
-
-            posctlr_end_update(&tc, x_sp, y_sp, theta_sp);
+            for(i = 0; i < 3; i++) {
+                encoder_update(&encs[i]);
+                int cmd = spdctlr_update(&scs[i], sps[i]);
+                motor_update(&mots[i], cmd);
+            }
 
             prevControl_us = time_us;
+        }
+
+        if (time_us - prevTraj_us >= 1000000ull) {
+            prevTraj_us = time_us;
+
+            spd_state = !spd_state;
+
+            if(spd_state) {
+                sps[0] = isDpS2IpP(1.);
+                sps[1] = isDpS2IpP(1.);
+                sps[2] = isDpS2IpP(-2.);
+            }
+            else {
+                sps[0] = 0;
+                sps[1] = 0;
+                sps[2] = 0;
+            }
         }
 
 //        // Automatic control
