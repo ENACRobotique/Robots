@@ -3,7 +3,8 @@
  Name        : PWL_approx.c
  Author      :
  Version     :
- Description :
+ Description : Implémentation de l'algorithme d'approximation linéaire par morceaux décrit ici:
+     http://www.iaeng.org/publication/WCECS2008/WCECS2008_pp1191-1194.pdf
  ============================================================================
  */
 
@@ -153,9 +154,9 @@ int lin_approx(pfunc1D f, pfunc1D fp, double t1, double t2, int nb_seg, double *
 #if DEBUG_LIN_APPROX > 0
     printf("nb_iter=%i\n", nb_iter);
     return nb_iter;
-#endif
-
+#else
     return 0;
+#endif
 }
 
 double g(double t, double alphai[], double betai[]){
@@ -171,31 +172,54 @@ double g(double t, double alphai[], double betai[]){
 }
 
 int main(){
-    int ret, i;
 
-    double epsilon;
-    int nb_seg = 4;
-    double alphai[nb_seg+1];
-    double betai[nb_seg+1];
+#if DEBUG_LIN_APPROX > 0
+    {
+        int ret;
+        double epsilon;
+        int nb_seg;
+        FILE* fout = fopen("out_stats.csv", "wb+");
+        for(nb_seg = 1; nb_seg < 20; nb_seg++){
+            printf("nb_seg=%i, ", nb_seg);
 
-//    ret = lin_approx(f, fp, 0., 1.,  nb_seg, &epsilon, alphai, betai);
-    ret = lin_approx(f_1ox, fp_1ox, 1., 2.,  nb_seg, &epsilon, alphai, betai);
+            double alphai[nb_seg+1];
+            double betai[nb_seg+1];
 
-    double t = 1;
-    FILE* fout = fopen("out.csv", "wb+");
-    for(t = 1; t < 2; t+=0.001){
-        fprintf(fout, "%.10g;%.10g\n", t, g(t, alphai, betai) - f_1ox(t));
+            ret = lin_approx(f, fp, 0., 1.,  nb_seg, &epsilon, alphai, betai);
+
+            printf("epsilon=%.6g\n", epsilon);
+
+            fprintf(fout, "%i;%i;%.10g\n", nb_seg, ret, epsilon);
+        }
+        fclose(fout);
     }
-    fclose(fout);
+#endif
 
-    for (i=0;i<=nb_seg;i++){
-        printf("alpha[%i]=%.10g\n", i, alphai[i]);
-    }
-    for (i=0;i<=nb_seg;i++){
-        printf("beta[%i]=%.10g\n", i, betai[i]);
-    }
-    printf("epsilon=%.10g\n", epsilon);
+    { // cas du papier
+        int i;
+        double epsilon;
+        int nb_seg = 8;
+        double alphai[nb_seg+1];
+        double betai[nb_seg+1];
 
-    return ret<0;
+        lin_approx(f_1ox, fp_1ox, 1., 2.,  nb_seg, &epsilon, alphai, betai);
+
+        FILE* fout = fopen("out_1ox.csv", "wb+");
+        double t;
+        for(t = 1; t < 2; t+=0.001){
+            fprintf(fout, "%.10g;%.10g\n", t, g(t, alphai, betai) - f_1ox(t));
+        }
+        fclose(fout);
+
+        for (i=0;i<=nb_seg;i++){
+            printf("alpha[%i]=%.10g\n", i, alphai[i]);
+        }
+        for (i=0;i<=nb_seg;i++){
+            printf("beta[%i]=%.10g\n", i, betai[i]);
+        }
+        printf("epsilon=%.10g\n", epsilon);
+    }
+
+    return EXIT_SUCCESS;
 }
 
