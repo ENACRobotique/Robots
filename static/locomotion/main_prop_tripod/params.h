@@ -96,7 +96,7 @@
 #define SPEED_NOMI 20 // in cm/s
 #define SHIFT_PID_TRAJ_POS (4)
 #define SHIFT_PID_TRAJ_ANG (4)
-#define SHIFT_PID_SPD (4)
+#define SHIFT_PID_SPD (10)
 
 // Simulator parameters (when code running on linux)
 #ifdef ARCH_X86_LINUX

@@ -3,6 +3,8 @@
 #include <ime.h>
 #include <pwm.h>
 #include <sys_time.h>
+#include <uart0.h>
+#include <stdio.h>
 
 #include "tools.h"
 #include "pins.h"
@@ -101,6 +103,8 @@ int main() {
 
     // FIXME need to have a first loop here to wait for time synchronization
 
+    uart0_init(115200);
+
     motor_t mots[3];
     motors_init(mots);
     encoder_t encs[3];
@@ -139,27 +143,46 @@ int main() {
         if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
             for(i = 0; i < 3; i++) {
                 encoder_update(&encs[i]);
-                int cmd = spdctlr_update(&scs[i], sps[i]);
-                motor_update(&mots[i], cmd);
+                spdctlr_update(&scs[i], sps[i]);
+                motor_update(&mots[i], spdctlr_get(&scs[i]));
             }
+
+            printf("%u, %i, %i, %i, %i, %i, %i, %i, %i, %i\n",
+                    time_us,
+                    encs[0].nbticks_cache, encs[1].nbticks_cache, encs[2].nbticks_cache,
+                    scs[0].cmd_cache, scs[1].cmd_cache, scs[2].cmd_cache,
+                    sps[0], sps[1], sps[2]);
 
             prevControl_us = time_us;
         }
 
-        if (time_us - prevTraj_us >= 1000000ull) {
+        if (time_us - prevTraj_us >= 2000000ull) {
             prevTraj_us = time_us;
 
-            spd_state = !spd_state;
+            spd_state = (spd_state + 1)%4;
 
-            if(spd_state) {
-                sps[0] = isDpS2IpP(1.);
-                sps[1] = isDpS2IpP(1.);
-                sps[2] = isDpS2IpP(-2.);
-            }
-            else {
+            switch(spd_state) {
+            default:
+            case 0:
                 sps[0] = 0;
                 sps[1] = 0;
                 sps[2] = 0;
+                break;
+            case 1:
+                sps[0] = iDpS2IpP(-8.);
+                sps[1] = iDpS2IpP(-8.);
+                sps[2] = iDpS2IpP(16.);
+                break;
+            case 2:
+                sps[0] = 0;
+                sps[1] = 0;
+                sps[2] = 0;
+                break;
+            case 3:
+                sps[0] = iDpS2IpP(  8.);
+                sps[1] = iDpS2IpP(  8.);
+                sps[2] = iDpS2IpP(-16.);
+                break;
             }
         }
 
@@ -201,7 +224,7 @@ int main() {
 //        }
 
         time_ms = millis();
-        if ((time_ms - prevLed_ms) > 500) {
+        if ((time_ms - prevLed_ms) > 200) {
             prevLed_ms = time_ms;
             state ^= 1; // toggle state (led blinking)
             gpio_write(1, 24, state);
