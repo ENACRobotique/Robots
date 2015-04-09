@@ -36,7 +36,7 @@ class Log {
         Log(char* file);
         ~Log();
 
-        void setOption(eLog_t op){};
+       // void setOption(eLog_t op){};
         void changeFile(const char* file);
         void setType(const eLog_t& log);
         void setVer(const eVer_t& ver);
