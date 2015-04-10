@@ -85,15 +85,13 @@ int main() {
     // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
     // Trajectory manager
-//    trajectory_manager_t traj_mngr;
-//    trajmngr_init(&traj_mngr, mat_rob2pods);
+    trajectory_manager_t traj_mngr;
+    trajmngr_init(&traj_mngr, mat_rob2pods);
     // BotNet initialization (i²c + uart)
     //TODO
 
     //// Global variables
     unsigned int prevControl_us = micros();
-    unsigned int prevTraj_us = micros();
-    int spd_state = 0;
     unsigned int prevLed_ms = millis();
     unsigned int prevPos_ms = millis();
     unsigned int time_ms, time_us;
@@ -103,125 +101,60 @@ int main() {
 
     // FIXME need to have a first loop here to wait for time synchronization
 
-    uart0_init(115200);
-
-    position_controller_t pc;
-    posctlr_init(&pc, mat_rob2pods);
-    int i;
-    int x_sp = 0, y_sp = 0, theta_sp = 0;
-    int sps[3] = {0, 0, 0};
-
-    unsigned int t0_ms = millis();
-
     global_IRQ_enable();
 
     while (1) {
         sys_time_update();
 
-//        // Reception and processing of the message
-//        ret = bn_receive(&inMsg);
-//        if (ret > 0) {
-//            switch (inMsg.header.type) {
-//            case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
-//                trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
-//                break;
-//            case E_POS:
-//                trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
-//                break;
-//            }
-//        } // End: if(ret > 0)
-//
+        // Reception and processing of the message
+        ret = bn_receive(&inMsg);
+        if (ret > 0) {
+            switch (inMsg.header.type) {
+            case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
+                trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
+                break;
+            case E_POS:
+                trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
+                break;
+            }
+        } // End: if(ret > 0)
+
         // Automatic control
         time_us = micros();
         if (time_us - prevControl_us >= USpP) {
-            posctlr_begin_update(&pc);
-
-            {
-                sps[0] = isDpS2IpP(50.*sin(2.*PI*(double)time_us/4000000.));;
-                sps[1] = 0;
-                sps[2] = 0;
+            if (time_us - prevControl_us > 1.5*USpP) {
+                // If there is too much delay we skip the step
+                trajmngr_reset(&traj_mngr);
             }
-
-            x_sp += sps[0];
-            y_sp += sps[1];
-            theta_sp += sps[2];
-
-            posctlr_end_update(&pc, x_sp, y_sp, theta_sp, sps[0], sps[1], sps[2]);
-
-            printf("%u, %i, %i, %i, %i, %i, %i\n",
-                    time_us,
-                    x_sp, y_sp, theta_sp,
-                    pc.x, pc.y, pc.theta);
+            else {
+                // Control trajectory
+                trajmngr_update(&traj_mngr);
+            }
 
             prevControl_us = time_us;
         }
 
-//        if (time_us - prevTraj_us >= 2000000ull) {
-//            prevTraj_us = time_us;
-//
-//            spd_state = (spd_state + 1)%4;
-//
-//            switch(spd_state) {
-//            default:
-//            case 0:
-//                sps[0] = 0;
-//                sps[1] = 0;
-//                sps[2] = 0;
-//                break;
-//            case 1:
-//                sps[0] = isDpS2IpP(-20.);
-//                sps[1] = 0;
-//                sps[2] = iROUND( 20.*PI/180.*SpP*dASHIFT);
-//                break;
-//            case 2:
-//                sps[0] = 0;
-//                sps[1] = 0;
-//                sps[2] = 0;
-//                break;
-//            case 3:
-//                sps[0] = isDpS2IpP( 20.);
-//                sps[1] = 0;
-//                sps[2] = iROUND(-20.*PI/180.*SpP*dASHIFT);
-//                break;
-//            }
-//        }
+        time_ms = millis();
+        if (time_ms - prevPos_ms >= 100) {
+            prevPos_ms = time_ms;
 
-//        // Automatic control
-//        time_us = micros();
-//        if (time_us - prevControl_us >= USpP) {
-//            if (time_us - prevControl_us > 1.5*USpP) {
-//                // If there is too much delay we skip the step
-//                trajmngr_reset(&traj_mngr);
-//            }
-//            else {
-//                // Control trajectory
-//                trajmngr_update(&traj_mngr);
-//            }
-//
-//            prevControl_us = time_us;
-//        }
+            // FIXME todo
+//            outMsg.header.type = E_GENERIC_STATUS;
+//            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
+//            trajmngr_fill_pos(&traj_mngr, &outMsg.payload.genericStatus);
 
-//        time_ms = millis();
-//        if (time_ms - prevPos_ms >= 100) {
-//            prevPos_ms = time_ms;
-//
-//            // FIXME todo
-////            outMsg.header.type = E_GENERIC_STATUS;
-////            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
-////            trajmngr_fill_pos(&traj_mngr, &outMsg.payload.genericStatus);
-//
-//            {
-//                //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
-//                outMsg.header.type = E_POS;
-//                outMsg.header.size = sizeof(outMsg.payload.pos);
-//                outMsg.payload.pos.id = ELT_PRIMARY; // main robot
-//                outMsg.payload.pos.x = I2Ds(traj_mngr.ctlr.x);
-//                outMsg.payload.pos.y = I2Ds(traj_mngr.ctlr.y);
-//                outMsg.payload.pos.theta = (double) traj_mngr.ctlr.theta / dASHIFT;
-//            }
-//
-//            role_send(&outMsg);
-//        }
+            {
+                //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
+                outMsg.header.type = E_POS;
+                outMsg.header.size = sizeof(outMsg.payload.pos);
+                outMsg.payload.pos.id = ELT_PRIMARY; // main robot
+                outMsg.payload.pos.x = I2Ds(traj_mngr.ctlr.x);
+                outMsg.payload.pos.y = I2Ds(traj_mngr.ctlr.y);
+                outMsg.payload.pos.theta = (double) traj_mngr.ctlr.theta / dASHIFT;
+            }
+
+            role_send(&outMsg);
+        }
 
         time_ms = millis();
         if ((time_ms - prevLed_ms) > 200) {

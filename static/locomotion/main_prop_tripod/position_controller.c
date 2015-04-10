@@ -45,9 +45,6 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
     }
 
     // Init PID
-//    pid_init(&tc->pid_xtraj, 1 << (SHIFT_PID_TRAJ_POS - 3), 1 << (SHIFT_PID_TRAJ_POS - 8), 0, 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
-//    pid_init(&tc->pid_ytraj, 1 << (SHIFT_PID_TRAJ_POS - 3), 1 << (SHIFT_PID_TRAJ_POS - 8), 0, 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
-
     pid_init(&tc->pid_xtraj, 1 << (SHIFT_PID_TRAJ_POS - 3), 1 << (SHIFT_PID_TRAJ_POS - 10), 1 << (SHIFT_PID_TRAJ_POS - 6), 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
     pid_init(&tc->pid_ytraj, 1 << (SHIFT_PID_TRAJ_POS - 3), 1 << (SHIFT_PID_TRAJ_POS - 10), 1 << (SHIFT_PID_TRAJ_POS - 6), 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
     pid_init(&tc->pid_orien, 1 << (SHIFT_PID_TRAJ_ANG - 4), 1 << (SHIFT_PID_TRAJ_ANG - 10), 1 << (SHIFT_PID_TRAJ_ANG - 6), 50 << SHIFT_PID_TRAJ_ANG, SHIFT_PID_TRAJ_ANG); // TODO find good values
@@ -71,8 +68,6 @@ void posctlr_begin_update(position_controller_t* tc) {
     for (i = 0; i < NB_PODS; i++) {
         motor_update(&tc->mots[i], tc->next_spd_cmds[i]);
     }
-
-//    printf("%i, %i, %i, ", tc->encs[0].nbticks_cache, tc->encs[1].nbticks_cache, tc->encs[2].nbticks_cache);
 
     // Get the speeds process values transformed in the robot's reference frame
     // (V1_pv, V2_pv, V3_pv) => (Vx_pv, Vy_pv, Oz_pv)
@@ -102,8 +97,6 @@ void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta
     // Calculate speed set points for each pod
     // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
     mt_mv_mlt(&tc->M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
-
-//    printf("%i, %i, %i\n", spd_cmd_pods.ve[0], spd_cmd_pods.ve[1], spd_cmd_pods.ve[2]);
 
     // call speed controller with V1_cmd, V2_cmd, V3_cmd (in IpP<<SHIFT)
     for (i = 0; i < NB_PODS; i++) {
