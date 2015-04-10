@@ -47,10 +47,6 @@ int _new_traj_slot(trajectory_manager_t* tm, uint16_t idx) {
             tm->next_sid = 1;
             tm->curr_element = idx << 1;
 
-            tm->gx = ts->p1_x;
-            tm->gy = ts->p1_y;
-            tm->gtheta = ts->seg_start_theta;
-
             tm->state = TM_STATE_WAIT_START;
         }
         break;
@@ -67,10 +63,6 @@ int _new_traj_slot(trajectory_manager_t* tm, uint16_t idx) {
                 tm->curr_tid = ts->tid;
                 tm->next_sid = 1;
                 tm->curr_element = idx << 1;
-
-                tm->gx = ts->p1_x;
-                tm->gy = ts->p1_y;
-                tm->gtheta = ts->seg_start_theta;
 
                 tm->state = TM_STATE_WAIT_START;
             }
@@ -109,9 +101,12 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te)
 }
 
 int trajmngr_update(trajectory_manager_t* tm) {
-    int x_sp = tm->gx;
-    int y_sp = tm->gy;
-    int theta_sp = tm->gtheta;
+    int x_sp = tm->ctlr.x;
+    int y_sp = tm->ctlr.y;
+    int theta_sp = tm->ctlr.theta;
+    int vx_sp = 0;
+    int vy_sp = 0;
+    int oz_sp = 0;
     uint32_t t = bn_intp_micros2s(micros());
     int32_t dt;
 
@@ -123,6 +118,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
         x_sp = tm->gx;
         y_sp = tm->gy;
         theta_sp = tm->gtheta;
+        vx_sp = 0;
+        vy_sp = 0;
+        oz_sp = 0;
         break;
 
     case TM_STATE_WAIT_START:
@@ -131,9 +129,12 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
             dt = t - s->seg_start_date;
             if(dt <= 0) {
-                x_sp = tm->gx;
-                y_sp = tm->gy;
-                theta_sp = tm->gtheta;
+                x_sp = s->p1_x;
+                y_sp = s->p1_y;
+                theta_sp = s->seg_start_theta;
+                vx_sp = 0;
+                vy_sp = 0;
+                oz_sp = 0;
                 break;
             }
 
@@ -170,6 +171,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
                         x_sp = tm->gx = s->p2_x;
                         y_sp = tm->gy = s->p2_y;
                         theta_sp = tm->gtheta = s->arc_start_theta;
+                        vx_sp = 0;
+                        vy_sp = 0;
+                        oz_sp = 0;
                     }
                     else {
 #ifdef ARCH_X86_LINUX
@@ -230,7 +234,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
                 case TM_CACHE_STATE_ARC:
                     // compute angular speed
                     if(s->c_r){
-                        sc->arc.omega_z = (((int64_t)s->arc_spd << (RAD_SHIFT + SHIFT)) / (int64_t)s->c_r);
+                        sc->arc.omega_z = -(((int64_t)s->arc_spd << (RAD_SHIFT + SHIFT)) / (int64_t)s->c_r);
                     }
 
                     // compute arc total duration in periods
@@ -273,10 +277,10 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                 // Compute the delta of time on the arc
                 dur = t - s->arc_start_date;
-                dur += PER_CTRL_LOOP_US; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                dur += USpP; // to anticipate the position (might be updated later if doesn't anticipate enough)
                 dur /= USpP; // convert duration to periods (from microseconds)
 
-                int alpha = -dur * sc->arc.omega_z; // (in rad << (RAD_SHIFT + SHIFT))
+                int alpha = dur * sc->arc.omega_z; // (in rad << (RAD_SHIFT + SHIFT))
 
                 int ca = COS(alpha); // (<< SHIFT)
                 int sa = SIN(alpha); // (<< SHIFT)
@@ -289,6 +293,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                 x_sp = s->c_x + vec2_x; // (in I << SHIFT)
                 y_sp = s->c_y + vec2_y; // (in I << SHIFT)
+
+                vx_sp = (-(int64_t)sc->arc.omega_z * (int64_t)vec2_y) >> (RAD_SHIFT + SHIFT);
+                vy_sp = ( (int64_t)sc->arc.omega_z * (int64_t)vec2_x) >> (RAD_SHIFT + SHIFT);
 
                 // compute delta theta between begin and end of line
                 dir = s->rot2_dir;
@@ -305,12 +312,15 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
                 // compute current duration from start of line
                 dur = t - s->seg_start_date;
-                dur += PER_CTRL_LOOP_US; // to anticipate the position (might be updated later if doesn't anticipate enough)
+                dur += USpP; // to anticipate the position (might be updated later if doesn't anticipate enough)
                 dur /= USpP; // convert duration to periods (from microseconds)
 
                 // compute next position set point (get speed along x and y in cache to avoid storing it in tm and calculating it each loop)
                 x_sp = s->p1_x + sc->line.spd_x * dur;
                 y_sp = s->p1_y + sc->line.spd_y * dur;
+
+                vx_sp = sc->line.spd_x;
+                vy_sp = sc->line.spd_y;
 
                 // compute delta theta between begin and end of line
                 dir = s->rot1_dir;
@@ -336,11 +346,13 @@ int trajmngr_update(trajectory_manager_t* tm) {
             // compute the next desired orientation (same calculation for seg and arc)
             theta_sp = theta0 + (int64_t)dtheta * (int64_t)dur / elt_dur;
 
+            oz_sp = dtheta / elt_dur;
+
             break;
         }
     }
 
-    posctlr_end_update(&tm->ctlr, x_sp, y_sp, theta_sp);
+    posctlr_end_update(&tm->ctlr, x_sp, y_sp, theta_sp, vx_sp, vy_sp, oz_sp);
 
     return 0;
 }

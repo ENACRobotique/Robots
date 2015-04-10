@@ -105,17 +105,10 @@ int main() {
 
     uart0_init(115200);
 
-    motor_t mots[3];
-    motors_init(mots);
-    encoder_t encs[3];
-    encoders_init(encs, mots);
-
-    speed_controller_t scs[3];
+    position_controller_t pc;
+    posctlr_init(&pc, mat_rob2pods);
     int i;
-    for(i = 0; i < 3; i++) {
-        spdctlr_init(&scs[i], &encs[i]);
-    }
-
+    int x_sp = 0, y_sp = 0, theta_sp = 0;
     int sps[3] = {0, 0, 0};
 
     unsigned int t0_ms = millis();
@@ -140,56 +133,63 @@ int main() {
 //
         // Automatic control
         time_us = micros();
-        if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
-            for(i = 0; i < 3; i++) {
-                encoder_update(&encs[i]);
-                spdctlr_update(&scs[i], sps[i]);
-                motor_update(&mots[i], spdctlr_get(&scs[i]));
+        if (time_us - prevControl_us >= USpP) {
+            posctlr_begin_update(&pc);
+
+            {
+                sps[0] = isDpS2IpP(50.*sin(2.*PI*(double)time_us/4000000.));;
+                sps[1] = 0;
+                sps[2] = 0;
             }
 
-            printf("%u, %i, %i, %i, %i, %i, %i, %i, %i, %i\n",
+            x_sp += sps[0];
+            y_sp += sps[1];
+            theta_sp += sps[2];
+
+            posctlr_end_update(&pc, x_sp, y_sp, theta_sp, sps[0], sps[1], sps[2]);
+
+            printf("%u, %i, %i, %i, %i, %i, %i\n",
                     time_us,
-                    encs[0].nbticks_cache, encs[1].nbticks_cache, encs[2].nbticks_cache,
-                    scs[0].cmd_cache, scs[1].cmd_cache, scs[2].cmd_cache,
-                    sps[0], sps[1], sps[2]);
+                    x_sp, y_sp, theta_sp,
+                    pc.x, pc.y, pc.theta);
 
             prevControl_us = time_us;
         }
 
-        if (time_us - prevTraj_us >= 2000000ull) {
-            prevTraj_us = time_us;
-
-            spd_state = (spd_state + 1)%4;
-
-            switch(spd_state) {
-            default:
-            case 0:
-                sps[0] = 0;
-                sps[1] = 0;
-                sps[2] = 0;
-                break;
-            case 1:
-                sps[0] = iDpS2IpP(-8.);
-                sps[1] = iDpS2IpP(-8.);
-                sps[2] = iDpS2IpP(16.);
-                break;
-            case 2:
-                sps[0] = 0;
-                sps[1] = 0;
-                sps[2] = 0;
-                break;
-            case 3:
-                sps[0] = iDpS2IpP(  8.);
-                sps[1] = iDpS2IpP(  8.);
-                sps[2] = iDpS2IpP(-16.);
-                break;
-            }
-        }
+//        if (time_us - prevTraj_us >= 2000000ull) {
+//            prevTraj_us = time_us;
+//
+//            spd_state = (spd_state + 1)%4;
+//
+//            switch(spd_state) {
+//            default:
+//            case 0:
+//                sps[0] = 0;
+//                sps[1] = 0;
+//                sps[2] = 0;
+//                break;
+//            case 1:
+//                sps[0] = isDpS2IpP(-20.);
+//                sps[1] = 0;
+//                sps[2] = iROUND( 20.*PI/180.*SpP*dASHIFT);
+//                break;
+//            case 2:
+//                sps[0] = 0;
+//                sps[1] = 0;
+//                sps[2] = 0;
+//                break;
+//            case 3:
+//                sps[0] = isDpS2IpP( 20.);
+//                sps[1] = 0;
+//                sps[2] = iROUND(-20.*PI/180.*SpP*dASHIFT);
+//                break;
+//            }
+//        }
 
 //        // Automatic control
 //        time_us = micros();
-//        if (time_us - prevControl_us >= PER_CTRL_LOOP_US) {
-//            if (time_us - prevControl_us > PER_CTRL_LOOP_CRITIC_US) {
+//        if (time_us - prevControl_us >= USpP) {
+//            if (time_us - prevControl_us > 1.5*USpP) {
 //                // If there is too much delay we skip the step
 //                trajmngr_reset(&traj_mngr);
 //            }

@@ -91,11 +91,9 @@
 #define PWM_RANGE 1024  // If you want to change the resolution of the motor command, just don't change this value, you're doing it wrong...
 
 // Parameters for control loops
-#define PER_CTRL_LOOP_US 20000 // in µs
-#define PER_CTRL_LOOP_CRITIC_US 30000 // in µs
 #define SPEED_NOMI 20 // in cm/s
-#define SHIFT_PID_TRAJ_POS (4)
-#define SHIFT_PID_TRAJ_ANG (4)
+#define SHIFT_PID_TRAJ_POS (14)
+#define SHIFT_PID_TRAJ_ANG (12)
 #define SHIFT_PID_SPD (10)
 
 // Simulator parameters (when code running on linux)

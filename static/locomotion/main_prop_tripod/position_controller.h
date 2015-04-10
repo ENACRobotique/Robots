@@ -58,7 +58,7 @@ typedef struct {
 
 void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
 void posctlr_begin_update(position_controller_t* tc);
-void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp);
+void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp);
 void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta);
 void posctlr_reset(position_controller_t* tc);
 
