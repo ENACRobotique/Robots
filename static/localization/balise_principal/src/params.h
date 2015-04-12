@@ -51,7 +51,7 @@ typedef struct{
 // fixme : we can not determine yet if the rotation is clockwise or anticlockwise. The above value is valid only for clockwise
 
 #define PIN_RST_XBEE    5
-#define PIN_SYNC        8
+#define PIN_SYNC        7
 #define PIN_DBG_LED     13
 
 #define ROT_PERIOD_BCAST 500 //in ms
