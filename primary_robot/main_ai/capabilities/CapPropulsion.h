@@ -8,12 +8,15 @@
 #ifndef CAPABILITIES_CAPPROPULSION_H_
 #define CAPABILITIES_CAPPROPULSION_H_
 
-#include <capabilities/Capability.h>
+#include <Capability.h>
 
 class CapPropulsion : public Capability {
     public:
-        CapPropulsion();
-        ~CapPropulsion();
+        CapPropulsion(Robot* robot_init, bn_Address address_init) : Capability(robot_init), address(address_init){};
+        ~CapPropulsion(){};
+
+    public:
+        bn_Address address;
 };
 
 #endif /* CAPABILITIES_CAPPROPULSION_H_ */

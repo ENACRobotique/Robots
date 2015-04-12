@@ -10,13 +10,16 @@
 
 #include "messages-elements.h"
 
+
+class Robot;
+
 class Capability {
     public:
-        Capability(eElement robot_init) : robot(robot_init){}
+        Capability(Robot* robot_init) : robot(robot_init){}
         ~Capability(){}
 
     protected:
-        eElement robot;
+        Robot* robot;
 };
 
 #endif /* CAPABILITY_H_ */

@@ -20,38 +20,39 @@ typedef enum {
     AI,
     PROP,
     HOLO,
-    AXLE
+    AXLE,
+    BEACON //balise mobile
 }eCap;
 
 
 class Robot {
     public:
-        Robot(std::string name, eElement el) : _el(el){
+        Robot(std::string name_, eElement el_) : el(el_){
             switch(el){
                 case(ELT_PRIMARY):
-                    _name = "Primary";
+                    name = "Primary";
                     break;
                 case(ELT_SECONDARY):
-                    _name = "Secondary";
+                    name = "Secondary";
                     break;
                 case(ELT_ADV_PRIMARY):
-                    _name = "AdvPrimary";
+                    name = "AdvPrimary";
                     break;
                 case(ELT_ADV_SECONDARY):
-                    _name = "AdvSecondary";
+                    name = "AdvSecondary";
                     break;
                 default:
                     logs << ERR << "This element is not a robot";
             }
             if(!name.empty())
-                _name << ":" << name;
+                name += ":" + name_;
         }
         ~Robot(){}
 
 
     public:
-        std::string _name;
-        eElement _el;
+        std::string name;
+        eElement el;
         std::map<eCap, Capability*> cap;
 };
 

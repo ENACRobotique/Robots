@@ -8,18 +8,27 @@
 #ifndef CAPABILITY_POS_H_
 #define CAPABILITY_POS_H_
 
-#include <capabilities/Capability.h>
+#include <Capability.h>
 #include "GeometryTools.h"
 #include "tools.h"
+#include "a_star_tools.h"
 
 class CapPosition : public Capability{
     public:
-        CapPosition();
-        ~CapPosition();
+        CapPosition(Robot* rob_init, iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){};
+        ~CapPosition(){};
 
         Point2D<float> getLastPosXY(){
-            return statuses.getLastPosXY(robot);
+            if(robot->cap[eCap::PROP] || robot->cap[eCap::BEACON]) //TODO Add video if use for positioning
+                return statuses.getLastPosXY(robot->el);
+            //if simu (example : secondary)
+
+            //else impossible robot has NOT POSITION capability
+            return {0, 0};
         }
+
+    public:
+        iABObs_t iobs; //obstacle associate to the robot
 
 };
 
