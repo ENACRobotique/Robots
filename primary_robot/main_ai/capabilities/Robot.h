@@ -21,7 +21,10 @@ typedef enum {
     PROP,
     HOLO,
     AXLE,
-    BEACON //balise mobile
+    BEACON, //balise mobile
+    IO_PROC,
+    HMI,
+    VIDEO
 }eCap;
 
 

@@ -27,7 +27,11 @@ class CapPosition : public Capability{
             return {0, 0};
         }
 
-    public:
+        iABObs_t getIobs(){
+            return iobs;
+        }
+
+    private:
         iABObs_t iobs; //obstacle associate to the robot
 
 };

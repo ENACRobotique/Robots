@@ -15,7 +15,12 @@ class CapPropulsion : public Capability {
         CapPropulsion(Robot* robot_init, bn_Address address_init) : Capability(robot_init), address(address_init){};
         ~CapPropulsion(){};
 
-    public:
+
+        bn_Address getAddress(){
+            return address;
+        }
+
+    private:
         bn_Address address;
 };
 
