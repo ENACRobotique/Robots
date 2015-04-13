@@ -16,7 +16,7 @@ class Robot;
 class Capability {
     public:
         Capability(Robot* robot_init) : robot(robot_init){}
-        ~Capability(){}
+        virtual ~Capability(){}
 
     protected:
         Robot* robot;

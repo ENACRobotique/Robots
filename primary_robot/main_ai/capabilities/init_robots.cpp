@@ -45,3 +45,15 @@ void initRobots(bool simu_primary, bool holo_primary){
     robots.push_back(new Robot("", ELT_SECONDARY));
     robots.back()->caps[eCap::POS] = new CapPosSimuSecondary(robots.back(), 2);
 }
+
+
+void loopRobots(){
+
+    for(Robot* r : robots){
+        if(CapPosition* capPos = dynamic_cast<CapPosition*> (r->caps[eCap::POS]))
+            obs[capPos->getIobs()].c = {capPos->getLastPosXY().x, capPos->getLastPosXY().y};
+
+        if(CapAI* capAI = dynamic_cast<CapAI*> (r->caps[eCap::AI]))
+            capAI->loop();
+    }
+}
