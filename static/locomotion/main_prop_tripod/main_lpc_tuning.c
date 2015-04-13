@@ -124,48 +124,80 @@ int main() {
         if (time_us - prevControl_us >= USpP) {
             prevControl_us = time_us;
 
+            {
+                double v;
+
+#define T (3500000.)
+#if 0
+                v = sin((double)time_us*2.*PI/T);
+#else
+                int alpha = (time_us + ((int)T >> 2)) % (int)T;
+
+                if(alpha < ((int)T >> 1)){
+                    v = -1. + (double)alpha * 4. / T;
+                }
+                else{
+                    v =  1. - (double)(alpha - ((int)T >> 1)) * 4. / T;
+                }
+#endif
+#undef T
+
+#define A (40.)
+                sps[0] = iDpS2IpP( A/2. *v);
+                sps[1] = iDpS2IpP( A/2. *v);
+                sps[2] = iDpS2IpP(-A    *v);
+#undef A
+            }
+
             for(i = 0; i < 3; i++) {
                 encoder_update(&encs[i]);
                 spdctlr_update(&scs[i], sps[i]);
                 motor_update(&mots[i], spdctlr_get(&scs[i]));
             }
 
-            printf("%u, %i, %i, %i, %i, %i, %i, %i, %i, %i\n",
+            printf("%u, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i\n",
                     time_us,
                     encs[0].nbticks_cache, encs[1].nbticks_cache, encs[2].nbticks_cache,
                     scs[0].cmd_cache, scs[1].cmd_cache, scs[2].cmd_cache,
-                    sps[0], sps[1], sps[2]);
+                    sps[0], sps[1], sps[2],
+                    scs[0].pid.sum, scs[1].pid.sum, scs[2].pid.sum);
         }
 
-        if (time_us - prevTraj_us >= 2000000ull) {
-            prevTraj_us = time_us;
-
-            spd_state = (spd_state + 1)%4;
-
-            switch(spd_state) {
-            default:
-            case 0:
-                sps[0] = 0;
-                sps[1] = 0;
-                sps[2] = 0;
-                break;
-            case 1:
-                sps[0] = iDpS2IpP(-8.);
-                sps[1] = iDpS2IpP(-8.);
-                sps[2] = iDpS2IpP(16.);
-                break;
-            case 2:
-                sps[0] = 0;
-                sps[1] = 0;
-                sps[2] = 0;
-                break;
-            case 3:
-                sps[0] = iDpS2IpP(  8.);
-                sps[1] = iDpS2IpP(  8.);
-                sps[2] = iDpS2IpP(-16.);
-                break;
-            }
-        }
+//        if (time_us - prevTraj_us >= 500000ull) {
+//            prevTraj_us = time_us;
+//
+//            spd_state = (spd_state + 1)%6;
+//
+//            switch(spd_state) {
+//            default:
+//            case 0:
+//                sps[0] = 0;
+//                sps[1] = 0;
+//                sps[2] = 0;
+//                break;
+//            case 1:
+//                sps[0] = iDpS2IpP( -8.);
+//                sps[1] = iDpS2IpP( -8.);
+//                sps[2] = iDpS2IpP( 16.);
+//                break;
+//            case 2:
+//                sps[0] = iDpS2IpP(-16.);
+//                sps[1] = iDpS2IpP(-16.);
+//                sps[2] = iDpS2IpP( 32.);
+//                break;
+//            case 3:
+//                sps[0] = 0;
+//                sps[1] = 0;
+//                sps[2] = 0;
+//                break;
+//            case 4:
+//            case 5:
+//                sps[0] = iDpS2IpP( 12.);
+//                sps[1] = iDpS2IpP( 12.);
+//                sps[2] = iDpS2IpP(-24.);
+//                break;
+//            }
+//        }
 
 #elif TUNING == 1
         time_us = micros();
