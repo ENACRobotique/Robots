@@ -14,6 +14,6 @@
 
 extern std::vector<Robot*> listRobot;
 
-void init_robots();
+void initRobots(bool simu_primary, bool holo_primary);
 
 #endif /* CAPABILITIES_INIT_ROBOTS_H_ */

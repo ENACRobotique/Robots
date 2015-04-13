@@ -25,16 +25,15 @@
 std::vector<Robot*> robots;
 
 
-void init_robots(bool simu_primary){
+void initRobots(bool simu_primary, bool holo_primary){
 
     //Primary
-    bool primary_holo = true; //TODO put in option
     bn_Address primary_addr_prop = simu_primary?ADDRD1_MAIN_PROP_SIMU:ADDRI1_MAIN_PROP;
 
     robots.push_back(new Robot("", ELT_PRIMARY));
 
     robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 1);
-    if(primary_holo)
+    if(holo_primary)
         robots.back()->caps[eCap::PROP] = new CapPropHolonome(robots.back(), primary_addr_prop);
     else
         robots.back()->caps[eCap::PROP] = new CapPropAxle(robots.back(), primary_addr_prop);

@@ -24,6 +24,7 @@ extern "C"{
 #include "ai.h"
 #include "net.h"
 #include "GeometryTools.h"
+#include "init_robots.h"
 
 std::vector<sObs_t> initObs= {
    // robots
@@ -113,7 +114,7 @@ void usage(char *cl) {
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
     printf("Options:\n");
-    printf("\t--mode,     -m        AI mode (slave | auto | prog | fire)\n");
+    printf("\t--mode,     -m        AI mode (slave | auto | prog)\n");
     printf("\t--log-file, -f        output log file of received messages (overwritten)\n");
     printf("\t--verbose,  -v        increases verbosity\n");
     printf("\t--quiet,    -q        not verbose\n");
@@ -123,6 +124,8 @@ void usage(char *cl) {
 int main(int argc, char **argv) {
     int ret;
     eAIState_t eAIState = E_AI_SLAVE;
+    bool simu_primary = true;
+    bool holo_primary = true;
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -132,9 +135,9 @@ int main(int argc, char **argv) {
 
     // arguments parsing
     while (1) {
-        static struct option long_options[] = { { "mode", required_argument, NULL, 'm' }, { "log-file", required_argument, NULL, 'f' }, { "verbose", no_argument, NULL, 'v' }, { "quiet", no_argument, NULL, 'q' }, { "help", no_argument, NULL, 'h' }, { NULL, 0, NULL, 0 } };
+        static struct option long_options[] = { { "mode", required_argument, NULL, 'm' }, { "log-file", required_argument, NULL, 'f' }, { "primary", required_argument, NULL, 'p' }, { "secondary", required_argument, NULL, 's' }, { "adv-primary", required_argument, NULL, 'a' }, { "adv-secondary", required_argument, NULL, 'b' }, { "verbose", no_argument, NULL, 'v' }, { "quiet", no_argument, NULL, 'q' }, { "help", no_argument, NULL, 'h' }, { NULL, 0, NULL, 0 } };
 
-        int c = getopt_long(argc, argv, "m:f:vqh?", long_options, NULL);
+        int c = getopt_long(argc, argv, "m:f:p:s:a:b:vqh?", long_options, NULL);
         if (c == -1)
             break;
         switch (c) {
@@ -151,6 +154,22 @@ int main(int argc, char **argv) {
                 break;
             case 'f':
                 logs.changeFile(optarg);
+                break;
+            case 'p':
+                if(strstr( optarg, "real"))
+                    simu_primary = false;
+                else if(!strcasecmp(optarg, "simu"))
+                    simu_primary = true;
+                if(strstr( optarg, "axle"))
+                    holo_primary = false;
+                else if(strstr( optarg, "holo"))
+                    holo_primary = true;
+                break;
+            case 's':
+                break;
+            case 'a':
+                break;
+            case 'b':
                 break;
             case 'v':
                 verbose++;
@@ -184,6 +203,8 @@ int main(int argc, char **argv) {
     sendPing();
 
     // calls initialization functions
+    initRobots(simu_primary, holo_primary);
+
     init_obs(initObs);
     switch (eAIState) {
         case E_AI_AUTO:
