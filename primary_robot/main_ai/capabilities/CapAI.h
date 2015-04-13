@@ -10,6 +10,7 @@
 
 #include <Capability.h>
 
+
 class CapAI: public Capability {
 public:
     CapAI(Robot* robot_init) :
@@ -18,9 +19,7 @@ public:
     ~CapAI() {
     }
 
-    void loop() {
-
-    }
+    int loop();
 
 };
 

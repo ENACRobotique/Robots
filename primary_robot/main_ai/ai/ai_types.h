@@ -10,7 +10,7 @@ extern "C"{
 }
 #include <vector>
 
-#define SPEED_SECONDARY 10 // (cm/s)
+
 
 #define COLOR_SIMU GREEN
 #define SIMU 1 //modify network_cfg.h

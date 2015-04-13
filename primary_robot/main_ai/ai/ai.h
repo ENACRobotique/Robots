@@ -15,6 +15,7 @@
 #include <vector>
 #include <cmath>
 
+void initObjective(eColor_t color);
 int stepAI();
 int initAI();
 

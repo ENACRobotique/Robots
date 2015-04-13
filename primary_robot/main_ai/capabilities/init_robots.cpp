@@ -50,8 +50,10 @@ void initRobots(bool simu_primary, bool holo_primary){
 void loopRobots(){
 
     for(Robot* r : robots){
-        if(CapPosition* capPos = dynamic_cast<CapPosition*> (r->caps[eCap::POS]))
-            obs[capPos->getIobs()].c = {capPos->getLastPosXY().x, capPos->getLastPosXY().y};
+        if(CapPosition* capPos = dynamic_cast<CapPosition*> (r->caps[eCap::POS])){
+            Point2D<float> pos = capPos->getLastPosXY();
+            obs[capPos->getIobs()].c = {pos.x, pos.y};
+        }
 
         if(CapAI* capAI = dynamic_cast<CapAI*> (r->caps[eCap::AI]))
             capAI->loop();

@@ -18,6 +18,7 @@ class CapIO : public Capability {
 // TODO setServo, getServo, getHMI, setHMI
 
         int getValue(const eIhmElement&){
+
             // TODO
             return 0;
         }

@@ -9,9 +9,8 @@
 #define CAPABILITY_H_
 
 #include "messages-elements.h"
+#include "Robot.h"
 
-
-class Robot;
 
 class Capability {
     public:

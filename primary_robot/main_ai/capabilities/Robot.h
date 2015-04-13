@@ -8,7 +8,6 @@
 #ifndef CAPABILITIES_ROBOT_H_
 #define CAPABILITIES_ROBOT_H_
 
-#include <capabilities/Capability.h>
 #include <map>
 #include <vector>
 
@@ -24,10 +23,11 @@ typedef enum {
     VIDEO
 }eCap;
 
+class Capability;
 
 class Robot {
     public:
-        Robot(std::string name_, eElement el_) : el(el_){
+        Robot(std::string name_, eElement el_) : el(el_), color(NONE){
             switch(el){
                 case(ELT_PRIMARY):
                     name = "Primary";
@@ -52,6 +52,7 @@ class Robot {
     public:
         std::string name;
         eElement el;
+        eColor_t color;
         std::map<eCap, Capability*> caps;
 };
 
