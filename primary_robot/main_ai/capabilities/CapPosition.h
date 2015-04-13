@@ -5,8 +5,8 @@
  *      Author: Sébastien Malissard
  */
 
-#ifndef CAPABILITY_POS_H_
-#define CAPABILITY_POS_H_
+#ifndef CAP_POSITION_H_
+#define CAP_POSITION_H_
 
 #include <Capability.h>
 #include "GeometryTools.h"
@@ -16,16 +16,9 @@
 class CapPosition : public Capability{
     public:
         CapPosition(Robot* rob_init, iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){};
-        ~CapPosition(){};
+        virtual ~CapPosition(){};
 
-        Point2D<float> getLastPosXY(){
-            if(robot->cap[eCap::PROP] || robot->cap[eCap::BEACON]) //TODO Add video if use for positioning
-                return statuses.getLastPosXY(robot->el);
-            //if simu (example : secondary)
-
-            //else impossible robot has NOT POSITION capability
-            return {0, 0};
-        }
+        virtual Point2D<float> getLastPosXY() = 0;
 
         iABObs_t getIobs(){
             return iobs;
@@ -36,4 +29,4 @@ class CapPosition : public Capability{
 
 };
 
-#endif /* CAPABILITY_POS_H_ */
+#endif /* CAP_POSITION_H_ */

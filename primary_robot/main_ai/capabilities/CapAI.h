@@ -10,15 +10,18 @@
 
 #include <Capability.h>
 
-class CapAI : public Capability {
-    public:
-        CapAI(Robot* robot_init) : Capability(robot_init){};
-        ~CapAI(){};
+class CapAI: public Capability {
+public:
+    CapAI(Robot* robot_init) :
+            Capability(robot_init) {
+    }
+    ~CapAI() {
+    }
 
-        void loop(){};
+    void loop() {
+
+    }
 
 };
-
-
 
 #endif /* CAPABILITIES_CAPAI_H_ */

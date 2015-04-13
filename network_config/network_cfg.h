@@ -90,12 +90,8 @@ extern "C" {
 
 //default debug address :
 #define ADDR_MONITORING_DFLT    (ADDRD1_MONITORING)
-#define ADDR_AI_DFLT            (ADDRD1_MAIN_AI_SIMU)
-#if 1
-#   define ADDR_PROP_DFLT       (ADDRD1_MAIN_PROP_SIMU)
-#else
-#   define ADDR_PROP_DFLT       (ADDRI1_MAIN_PROP)
-#endif
+#define ADDR_AI_DFLT            (ADDRD2_MAIN_AI)
+#define ADDR_PROP_DFLT          (ADDRI1_MAIN_PROP)
 #define ADDR_DEBUG_DFLT         (ADDRX_DEBUG)
 
 /* Interface enum

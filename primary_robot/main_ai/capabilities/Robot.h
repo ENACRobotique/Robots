@@ -19,11 +19,8 @@ typedef enum {
     POS,
     AI,
     PROP,
-    HOLO,
-    AXLE,
     BEACON, //balise mobile
-    IO_PROC,
-    HMI,
+    IO,
     VIDEO
 }eCap;
 
@@ -52,11 +49,10 @@ class Robot {
         }
         ~Robot(){}
 
-
     public:
         std::string name;
         eElement el;
-        std::map<eCap, Capability*> cap;
+        std::map<eCap, Capability*> caps;
 };
 
 #endif /* CAPABILITIES_ROBOT_H_ */
