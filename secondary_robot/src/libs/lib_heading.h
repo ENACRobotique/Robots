@@ -13,7 +13,7 @@
 #include "Servo.h"
 #include "Wire.h"
 #include "MPU_6050.h"
-//#define DEBUG_ATTITUDE
+#define DEBUG_HEADING
 
 #define X_ANGLE 1
 #define Y_ANGLE 2

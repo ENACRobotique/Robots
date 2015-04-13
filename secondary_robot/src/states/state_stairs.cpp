@@ -31,6 +31,7 @@ void initHardStairs(int pin_servo){
 
 sState *testStairs()
 	{
+#ifdef ATTITUDE
 	static unsigned long timeStopSoon = 0;
 	static unsigned long timeStairsStarted = 0;
 	int attitudeCmdStairs = servoAttitude.read();
@@ -56,6 +57,16 @@ sState *testStairs()
 		else return &sTrajEndStairsYellow;
 	}
 	return 0;
+#else
+	static unsigned long timestart = millis();
+
+	if(millis()-timestart > 10000){
+		if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
+				else return &sTrajEndStairsYellow;
+	}
+	return 0;
+	}
+#endif
 }
 
 void initStairs(sState *prev)

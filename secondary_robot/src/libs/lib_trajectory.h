@@ -22,6 +22,7 @@ typedef struct {
 
 extern int _backFromPause;
 
-int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
+int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
+int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 #endif /* STATE_TRAJECTORY_H_ */
