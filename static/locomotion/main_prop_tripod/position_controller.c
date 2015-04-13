@@ -45,9 +45,9 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
     }
 
     // Init PID
-    pid_init(&tc->pid_xtraj, 1 << (SHIFT_PID_TRAJ_POS - 3), 1 << (SHIFT_PID_TRAJ_POS - 10), 1 << (SHIFT_PID_TRAJ_POS - 6), 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
-    pid_init(&tc->pid_ytraj, 1 << (SHIFT_PID_TRAJ_POS - 3), 1 << (SHIFT_PID_TRAJ_POS - 10), 1 << (SHIFT_PID_TRAJ_POS - 6), 50 << SHIFT_PID_TRAJ_POS, SHIFT_PID_TRAJ_POS); // TODO find good values
-    pid_init(&tc->pid_orien, 1 << (SHIFT_PID_TRAJ_ANG - 4), 1 << (SHIFT_PID_TRAJ_ANG - 10), 1 << (SHIFT_PID_TRAJ_ANG - 6), 50 << SHIFT_PID_TRAJ_ANG, SHIFT_PID_TRAJ_ANG); // TODO find good values
+    pid_init(&tc->pid_xtraj, 1 << (SHIFT_PID_POS - 3), 1 << (SHIFT_PID_POS - 10), 1 << (SHIFT_PID_POS - 6), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
+    pid_init(&tc->pid_ytraj, 1 << (SHIFT_PID_POS - 3), 1 << (SHIFT_PID_POS - 10), 1 << (SHIFT_PID_POS - 6), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
+    pid_init(&tc->pid_orien, 1 << (SHIFT_PID_POS - 3), 1 << (SHIFT_PID_POS - 10), 1 << (SHIFT_PID_POS - 6), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
 }
 
 void _update_pos_orien(position_controller_t* tc, MT_VEC *spd_pv_rob);

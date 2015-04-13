@@ -92,8 +92,7 @@
 
 // Parameters for control loops
 #define SPEED_NOMI 20 // in cm/s
-#define SHIFT_PID_TRAJ_POS (14)
-#define SHIFT_PID_TRAJ_ANG (12)
+#define SHIFT_PID_POS (14)
 #define SHIFT_PID_SPD (10)
 
 // Simulator parameters (when code running on linux)

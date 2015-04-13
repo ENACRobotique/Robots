@@ -172,6 +172,9 @@ int main() {
     int x_sp = 0, y_sp = 0, theta_sp = 0;
 
     int sps[3] = {0, 0, 0};
+
+    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
+    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
 #endif
 
     global_IRQ_enable();
@@ -217,7 +220,7 @@ int main() {
         }
 #elif TUNING == 1
         time_us = micros();
-        if (time_us - prevControl_us >= USpP) {
+        if (time_us - prevControl_us >= USpP) { // takes ~290µs!
             prevControl_us = time_us;
 
             posctlr_begin_update(&pc);
@@ -235,18 +238,18 @@ int main() {
 
                 // just a linear sinus for orientation
                 double c = 15. * PI / 180.; // (rad)
-                double omegap = 2.*PI/7.; // (rad/s)
+                double omegap = 2.*PI/4.; // (rad/s)
                 double thetap = omegap*(double)time_us/1e6; // (rad)
 
 #if 0
                 sps[0] = isDpS2IpP(omega*a*p*cos(p*theta));
                 sps[1] = isDpS2IpP(omega*b*q*cos(q*theta + phi));
-                sps[2] = iROUND(omegap*c*lincos(thetap) * SpP * dASHIFT);
+                sps[2] = iROUND(omegap*c*cos(thetap) * SpP * dASHIFT);
 #else
-                // more representative, piecewise-linear continuous linear speed on each axis and piecewise-linear continuous orientation
+                // more representative, piecewise-linear continuous linear speed on each axis and piecewise-linear continuous angular speed
                 sps[0] = isDpS2IpP(omega*a*p*lincos(p*theta));
                 sps[1] = isDpS2IpP(omega*b*q*lincos(q*theta + phi));
-                sps[2] = iROUND(omegap*c*cstcos(thetap) * SpP * dASHIFT);
+                sps[2] = iROUND(omegap*c*lincos(thetap) * SpP * dASHIFT);
 #endif
             }
 
@@ -256,10 +259,26 @@ int main() {
 
             posctlr_end_update(&pc, x_sp, y_sp, theta_sp, sps[0], sps[1], sps[2]);
 
-            printf("%u, %i, %i, %i, %i, %i, %i\n",
+            int v1_sp, v2_sp, v3_sp;
+            {   // compute setpoint V1,V2,V3
+                spd_cmd_rob.ve[0] = sps[0];
+                spd_cmd_rob.ve[1] = sps[1];
+                spd_cmd_rob.ve[2] = sps[2];
+
+                mt_mv_mlt(&pc.M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
+
+                v1_sp = spd_cmd_pods.ve[0] >> VEC_SHIFT;
+                v2_sp = spd_cmd_pods.ve[1] >> VEC_SHIFT;
+                v3_sp = spd_cmd_pods.ve[2] >> VEC_SHIFT;
+            }
+
+            printf("%u, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %u\n",
                     time_us,
                     x_sp, y_sp, theta_sp,
-                    pc.x, pc.y, pc.theta);
+                    pc.x, pc.y, pc.theta,
+                    v1_sp, v2_sp, v3_sp,
+                    pc.encs[0].nbticks_cache, pc.encs[1].nbticks_cache, pc.encs[2].nbticks_cache,
+                    micros() - time_us);
         }
 #endif
 
