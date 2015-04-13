@@ -76,6 +76,21 @@ const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
 
 #define TUNING 0
 
+double lincos(double theta){
+    double alpha = theta >= 0 ? fmod(theta, 2*PI) : fmod(theta, 2*PI) + 2*PI;
+
+    if(alpha < PI){
+        return 1. - alpha*2./PI;
+    }
+    else{
+        return -3 + alpha*2./PI;
+    }
+}
+
+double linsin(double theta){
+    return lincos(PI/2. - theta);
+}
+
 int main() {
     gpio_init_all();
     debug_leds_init();
@@ -100,8 +115,6 @@ int main() {
         spdctlr_init(&scs[i], &encs[i]);
     }
 
-    unsigned int prevTraj_us = micros();
-    int spd_state = 0;
     int sps[3] = {0, 0, 0};
 #elif TUNING == 1
     position_controller_t pc;
@@ -126,27 +139,20 @@ int main() {
 
             {
                 double v;
+                double omega = 2.*PI/3.5; // (rad/s)
+                double theta = omega*(double)time_us/1e6; // (rad)
+                double a = 40.;
 
-#define T (3500000.)
 #if 0
-                v = sin((double)time_us*2.*PI/T);
+                v = sin(theta);
 #else
-                int alpha = (time_us + ((int)T >> 2)) % (int)T;
-
-                if(alpha < ((int)T >> 1)){
-                    v = -1. + (double)alpha * 4. / T;
-                }
-                else{
-                    v =  1. - (double)(alpha - ((int)T >> 1)) * 4. / T;
-                }
+                // more representative, piecewise linear speed
+                v = linsin(theta);
 #endif
-#undef T
 
-#define A (40.)
-                sps[0] = iDpS2IpP( A/2. *v);
-                sps[1] = iDpS2IpP( A/2. *v);
-                sps[2] = iDpS2IpP(-A    *v);
-#undef A
+                sps[0] = iDpS2IpP( a/2. *v);
+                sps[1] = iDpS2IpP( a/2. *v);
+                sps[2] = iDpS2IpP(-a    *v);
             }
 
             for(i = 0; i < 3; i++) {
@@ -162,43 +168,6 @@ int main() {
                     sps[0], sps[1], sps[2],
                     scs[0].pid.sum, scs[1].pid.sum, scs[2].pid.sum);
         }
-
-//        if (time_us - prevTraj_us >= 500000ull) {
-//            prevTraj_us = time_us;
-//
-//            spd_state = (spd_state + 1)%6;
-//
-//            switch(spd_state) {
-//            default:
-//            case 0:
-//                sps[0] = 0;
-//                sps[1] = 0;
-//                sps[2] = 0;
-//                break;
-//            case 1:
-//                sps[0] = iDpS2IpP( -8.);
-//                sps[1] = iDpS2IpP( -8.);
-//                sps[2] = iDpS2IpP( 16.);
-//                break;
-//            case 2:
-//                sps[0] = iDpS2IpP(-16.);
-//                sps[1] = iDpS2IpP(-16.);
-//                sps[2] = iDpS2IpP( 32.);
-//                break;
-//            case 3:
-//                sps[0] = 0;
-//                sps[1] = 0;
-//                sps[2] = 0;
-//                break;
-//            case 4:
-//            case 5:
-//                sps[0] = iDpS2IpP( 12.);
-//                sps[1] = iDpS2IpP( 12.);
-//                sps[2] = iDpS2IpP(-24.);
-//                break;
-//            }
-//        }
-
 #elif TUNING == 1
         time_us = micros();
         if (time_us - prevControl_us >= USpP) {
