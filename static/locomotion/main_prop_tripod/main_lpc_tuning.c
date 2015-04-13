@@ -74,7 +74,7 @@ const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
         { 1. * dMSHIFT, 0 * dMSHIFT, D2I(13.458) * dMoRSHIFT }
 };
 
-#define TUNING 0
+#define TUNING 1
 
 double lincos(double theta){
     double alpha = theta >= 0 ? fmod(theta, 2*PI) : fmod(theta, 2*PI) + 2*PI;
@@ -119,11 +119,8 @@ int main() {
 #elif TUNING == 1
     position_controller_t pc;
     posctlr_init(&pc, mat_rob2pods);
-    int i;
     int x_sp = 0, y_sp = 0, theta_sp = 0;
 
-    unsigned int prevTraj_us = micros();
-    int spd_state = 0;
     int sps[3] = {0, 0, 0};
 #endif
 
@@ -171,12 +168,31 @@ int main() {
 #elif TUNING == 1
         time_us = micros();
         if (time_us - prevControl_us >= USpP) {
+            prevControl_us = time_us;
+
             posctlr_begin_update(&pc);
 
             {
-                sps[0] = isDpS2IpP(50.*sin(2.*PI*(double)time_us/4000000.));;
-                sps[1] = 0;
+                // lissajous curve, why not?
+                double p = 3.; // must be integer
+                double q = 4.; // must be integer
+                double a = 20.; // (cm)
+                double b = 4.; // (cm)
+                double phi = 0; // (rad) (must be < PI/(2*p))
+
+                double omega = 2.*PI/15.; // (rad/s)
+                double theta = omega*(double)time_us/1e6; // (rad)
+
+#if 0
+                sps[0] = isDpS2IpP(omega*a*p*cos(p*theta));
+                sps[1] = isDpS2IpP(omega*b*q*cos(q*theta + phi));
                 sps[2] = 0;
+#else
+                // more representative, piecewise linear speed
+                sps[0] = isDpS2IpP(omega*a*p*lincos(p*theta));
+                sps[1] = isDpS2IpP(omega*b*q*lincos(q*theta + phi));
+                sps[2] = 0;
+#endif
             }
 
             x_sp += sps[0];
@@ -189,39 +205,7 @@ int main() {
                     time_us,
                     x_sp, y_sp, theta_sp,
                     pc.x, pc.y, pc.theta);
-
-            prevControl_us = time_us;
         }
-
-//        if (time_us - prevTraj_us >= 2000000ull) {
-//            prevTraj_us = time_us;
-//
-//            spd_state = (spd_state + 1)%4;
-//
-//            switch(spd_state) {
-//            default:
-//            case 0:
-//                sps[0] = 0;
-//                sps[1] = 0;
-//                sps[2] = 0;
-//                break;
-//            case 1:
-//                sps[0] = isDpS2IpP(-20.);
-//                sps[1] = 0;
-//                sps[2] = iROUND( 20.*PI/180.*SpP*dASHIFT);
-//                break;
-//            case 2:
-//                sps[0] = 0;
-//                sps[1] = 0;
-//                sps[2] = 0;
-//                break;
-//            case 3:
-//                sps[0] = isDpS2IpP( 20.);
-//                sps[1] = 0;
-//                sps[2] = iROUND(-20.*PI/180.*SpP*dASHIFT);
-//                break;
-//            }
-//        }
 #endif
 
         time_ms = millis();
