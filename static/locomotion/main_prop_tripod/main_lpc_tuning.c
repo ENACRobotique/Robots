@@ -76,19 +76,69 @@ const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
 
 #define TUNING 1
 
+/**
+ * 4/pi times:
+ *
+ *      ^
+ *      |
+ *   1  |\              /
+ *      | \            /
+ *      |  \          /
+ *   0  |___\________/__2*PI
+ *      |    \      /
+ *      |     \    /
+ *      |      \  /
+ *  -1  |       \/
+ *      |
+ */
 double lincos(double theta){
     double alpha = theta >= 0 ? fmod(theta, 2*PI) : fmod(theta, 2*PI) + 2*PI;
+    double v;
 
     if(alpha < PI){
-        return 1. - alpha*2./PI;
+        v = 1. - alpha*2./PI;
     }
     else{
-        return -3 + alpha*2./PI;
+        v = -3 + alpha*2./PI;
     }
+
+    return 4.*v/PI; // factor to get a 1-based primitive
 }
 
 double linsin(double theta){
     return lincos(PI/2. - theta);
+}
+
+/**
+ * 2/pi times:
+ *
+ *      ^
+ *      |
+ *   1  |_____
+ *      |     |
+ *      |     |
+ *   0  |_____|_____2*PI
+ *      |     |     |
+ *      |     |     |
+ *  -1  |     |_____|
+ *      |
+ */
+double cstsin(double theta){
+    double alpha = theta >= 0 ? fmod(theta, 2*PI) : fmod(theta, 2*PI) + 2*PI;
+    double v;
+
+    if(alpha < PI){
+        v = 1.;
+    }
+    else{
+        v = -1.;
+    }
+
+    return 2.*v/PI; // factor to get 1-based primitive
+}
+
+double cstcos(double theta){
+    return cstsin(PI/2. - theta);
 }
 
 int main() {
@@ -173,7 +223,7 @@ int main() {
             posctlr_begin_update(&pc);
 
             {
-                // lissajous curve, why not?
+                // lissajous curve for X/Y, why not?
                 double p = 3.; // must be integer
                 double q = 4.; // must be integer
                 double a = 20.; // (cm)
@@ -183,15 +233,20 @@ int main() {
                 double omega = 2.*PI/15.; // (rad/s)
                 double theta = omega*(double)time_us/1e6; // (rad)
 
+                // just a linear sinus for orientation
+                double c = 15. * PI / 180.; // (rad)
+                double omegap = 2.*PI/7.; // (rad/s)
+                double thetap = omegap*(double)time_us/1e6; // (rad)
+
 #if 0
                 sps[0] = isDpS2IpP(omega*a*p*cos(p*theta));
                 sps[1] = isDpS2IpP(omega*b*q*cos(q*theta + phi));
-                sps[2] = 0;
+                sps[2] = iROUND(omegap*c*lincos(thetap) * SpP * dASHIFT);
 #else
-                // more representative, piecewise linear speed
+                // more representative, piecewise-linear continuous linear speed on each axis and piecewise-linear continuous orientation
                 sps[0] = isDpS2IpP(omega*a*p*lincos(p*theta));
                 sps[1] = isDpS2IpP(omega*b*q*lincos(q*theta + phi));
-                sps[2] = 0;
+                sps[2] = iROUND(omegap*c*cstcos(thetap) * SpP * dASHIFT);
 #endif
             }
 
