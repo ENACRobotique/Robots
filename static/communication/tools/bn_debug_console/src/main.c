@@ -251,42 +251,46 @@ int main(int argc, char **argv){
                 switch (*p){
                 case 'e':{
                     sMsg msg = {{0}};
-                    static int us = 1200;
-                    us = 3000 - us;
+                    static int angle = 50;
+                    angle = 180 - angle;
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
+                    msg.header.destAddr = ADDRU1_MAIN_IO;
                     msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 3;
-                    msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
-                    msg.payload.servos.servos[0].us = us;
+                    msg.payload.servos.nb_servos = 3;
+                    msg.header.size = 2 + msg.payload.servos.nb_servos * sizeof(msg.payload.servos.servos[0]);
+                    msg.payload.servos.servos[0].id = SERVO_PRIM_CORN1_RAMP;
+                    msg.payload.servos.servos[0].angle = angle;
+                    msg.payload.servos.servos[1].id = SERVO_PRIM_CORN_DOOR;
+                    msg.payload.servos.servos[1].angle = 140 - angle;
+                    msg.payload.servos.servos[2].id = SERVO_PRIM_GLASS3_HOLD;
+                    msg.payload.servos.servos[2].angle = 30 + angle;
 
                     bn_send(&msg);
                     break;
                 }
                 case 'f':{
                     sMsg msg = {{0}};
-                    int us;
+                    float angle;
 
-                    printf("us: "); fflush(stdout);
-                    err = scanf("%i", &us);
+                    printf("angle (deg): "); fflush(stdout);
+                    err = scanf("%f", &angle);
                     if (err != 1){
                         printf("error getting us setpoint\n");
                     }
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
+                    msg.header.destAddr = ADDRU1_MAIN_IO;
                     msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 3;
+                    msg.header.size = 2 + 1 * sizeof(msg.payload.servos.servos[0]);
                     msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
-                    msg.payload.servos.servos[0].us = us;
+                    msg.payload.servos.servos[0].id = SERVO_PRIM_CORN1_RAMP;
+                    msg.payload.servos.servos[0].angle = angle;
 
                     bn_send(&msg);
                     break;
                 }
                 case 'g':{
                     sMsg msg = {{0}};
-                    int us;
+                    float angle;
                     int id;
 
                     printf(" 0:SERVO_PRIM_DOOR\n");
@@ -301,18 +305,18 @@ int main(int argc, char **argv){
                         printf("error getting servo id\n");
                     }
 
-                    printf("us: "); fflush(stdout);
-                    err = scanf("%i", &us);
+                    printf("angle (deg): "); fflush(stdout);
+                    err = scanf("%f", &angle);
                     if (err != 1){
-                        printf("error getting us setpoint\n");
+                        printf("error getting angle setpoint\n");
                     }
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
+                    msg.header.destAddr = ADDRU1_MAIN_IO;
                     msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 3;
+                    msg.header.size = 2 + 1 * sizeof(msg.payload.servos.servos[0]);
                     msg.payload.servos.nb_servos = 1;
                     msg.payload.servos.servos[0].id = id;
-                    msg.payload.servos.servos[0].us = us;
+                    msg.payload.servos.servos[0].angle = angle;
 
                     bn_send(&msg);
                     break;
