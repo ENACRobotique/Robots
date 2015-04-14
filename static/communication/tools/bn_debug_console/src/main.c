@@ -256,10 +256,14 @@ int main(int argc, char **argv){
 
                     msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 3;
-                    msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
-                    msg.payload.servos.servos[0].us = us;
+                    msg.payload.servos.nb_servos = 3;
+                    msg.header.size = 2 + msg.payload.servos.nb_servos * sizeof(msg.payload.servos.servos[0]);
+                    msg.payload.servos.servos[0].id = SERVO_PRIM_CORN1_RAMP;
+                    msg.payload.servos.servos[0].angle = angle;
+                    msg.payload.servos.servos[1].id = SERVO_PRIM_CORN_DOOR;
+                    msg.payload.servos.servos[1].angle = 140 - angle;
+                    msg.payload.servos.servos[2].id = SERVO_PRIM_GLASS3_HOLD;
+                    msg.payload.servos.servos[2].angle = 30 + angle;
 
                     bn_send(&msg);
                     break;
