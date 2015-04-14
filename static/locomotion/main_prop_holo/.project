@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>main_prop_pod</name>
+	<name>main_prop_holo</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -33,6 +33,11 @@
 			<name>lib/Core</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/core/shared/Core</locationURI>
+		</link>
+		<link>
+			<name>lib/MatrixTools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/tools/libraries/MatrixTools</locationURI>
 		</link>
 		<link>
 			<name>lib/Millis</name>
