@@ -27,7 +27,7 @@ sServoData servosTable[] = {
         {SERVO_PRIM_GLASS1_RAISE, 1, 1.1, 0},     //3
         {SERVO_PRIM_GLASS2_HOLD, 2, 2.1, 0.2},     //4
         {SERVO_PRIM_GLASS2_RAISE, 3, 3.3, 0.2},  //1
-        {SERVO_PRIM_GLASS3_HOLD, 4, 0.1, 1.3},
+        {SERVO_PRIM_GLASS3_HOLD, 4, 10, 520},
 		{SERVO_PRIM_GLASS3_RAISE, 5, 0.1, 1.3},
 		{SERVO_PRIM_LIFT1_UP, 6, 0.1, 1.3},
 		{SERVO_PRIM_LIFT1_DOOR, 7, 0.1, 1.3},
@@ -35,9 +35,9 @@ sServoData servosTable[] = {
 		{SERVO_PRIM_LIFT2_UP, 9, 0.1, 1.3},
 		{SERVO_PRIM_LIFT2_DOOR, 10, 0.1, 1.3},
 		{SERVO_PRIM_LIFT2_HOLD, 11, 0.1, 1.3},
-		{SERVO_PRIM_CORN1_RAMP, 12, 0.1, 1.3},
+		{SERVO_PRIM_CORN1_RAMP, 12, 10, 520},
 		{SERVO_PRIM_CORN2_RAMP, 13, 0.1, 1.3},
-		{SERVO_PRIM_CORN_DOOR, 14, 0.1, 1.3}//2
+		{SERVO_PRIM_CORN_DOOR, 14, 10, 520}//2
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
@@ -53,35 +53,42 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
-#define SERVO_FREQ 50 //the servo command frequency (Hz)
+#define SERVO_FREQ 50. //the servo command frequency (Hz)
 
 void fctModeSwitch(void);
 void fctStartingCord(void);
 
 
 void setup(){
-	pwm.begin();
-	pwm.setPWMFreq(SERVO_FREQ);  // 50Hz
-
     attachInterrupt(0, fctStartingCord, CHANGE);
     attachInterrupt(1, fctModeSwitch, CHANGE);
 
+    pinMode(PIN_LED_1, OUTPUT);
+    pinMode(PIN_LED_2, OUTPUT);
+    pinMode(PIN_DBG_LED, OUTPUT);
+
     //init led
-    digitalWrite(PIN_LED_1, LOW);
+    digitalWrite(PIN_LED_1, HIGH);
     digitalWrite(PIN_LED_2, LOW);
 
     bn_init();
+
+    // do not call init because I²C has already been initialized in bn_init
+    // be sure to call reset and setPWMFreq after bn_init...
+	pwm.reset();
+	pwm.setPWMFreq(SERVO_FREQ);  // 50Hz
 
     bn_printDbg("start arduino_bn_template");
 }
 
 
 sMsg inMsg, outMsg;
-int ledState = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwicth = 0, StartingCord = 0, Led = 0;
+int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwicth = 0, StartingCord = 0, Led = 0;
 int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, limitSwitchLeft = 0;
 unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord, timeLimitSwitchRight, timeLimitSwitchLeft;
+int periodLed = 10;
 
-int degreesTo4096th(float degrees, int a, int b);
+int degreesTo4096th(float degrees, float a, float b);
 
 void loop(){
     int ret;
@@ -90,6 +97,7 @@ void loop(){
     if(bn_receive(&inMsg) > 0){
         switch(inMsg.header.type){
         case E_SERVOS:
+        	periodLed = 1000 - periodLed;
             for(i = 0; i < (int)inMsg.payload.servos.nb_servos; i++){
                 for(j = 0; j < (int)NUM_SERVOS; j++){
                     if(servosTable[j].id == inMsg.payload.servos.servos[i].id){
@@ -154,7 +162,7 @@ void loop(){
         }
     }
 
-    if(time - led_prevT > 200){
+	if (time - led_prevT > periodLed) {
         led_prevT = time;
 
         digitalWrite(PIN_DBG_LED, ledState^=1);
@@ -177,6 +185,8 @@ void loop(){
 
     if( (time -  timeModeSwitch > 20) && flagModeSwitch){
         ModeSwicth = digitalRead(PIN_MODE_SWICTH);
+        digitalWrite(PIN_LED_1, ledState1^=1);
+        digitalWrite(PIN_LED_2, !ledState1);
 
         outMsg.header.destAddr = role_get_addr(ROLE_AI);
         outMsg.header.type = E_IHM_STATUS;
@@ -233,7 +243,7 @@ void fctStartingCord(void){
 }
 
 int degreesTo4096th(float degrees, float a, float b){
-	float fCmdOutOf4096 = SERVO_FREQ*4096*(a*degrees + b)/1000000;
+	float fCmdOutOf4096 = SERVO_FREQ*4096.*(a*degrees + b)/1000000.;
 	unsigned int cmdOutOf4096 (fCmdOutOf4096+0.5);
 	return cmdOutOf4096;
 }
