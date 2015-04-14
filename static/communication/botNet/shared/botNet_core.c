@@ -56,7 +56,7 @@ uint8_t seqNum=0;
  *  <0 if error
  */
 int bn_init(){
-#if MYADDRX!=0 || (MYADDRU!=0 && (defined(ARCH_X86_LINUX) || defined(ARCH_328P_ARDUINO))) || MYADDRD!=0
+#if MYADDRX!=0 || (MYADDRU!=0 && (defined(ARCH_X86_LINUX) || defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX))) || MYADDRD!=0
     int ret=0;
 #endif
 
@@ -68,16 +68,18 @@ int bn_init(){
 #if MYADDRI!=0
 #   if defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX)
     I2C_init(400000UL);
+#   else
+#       error "You can't use I²C without an I²C driver!"
 #   endif
 #endif
 
 #if MYADDRU!=0
-#   ifdef ARCH_X86_LINUX
+#   if defined(ARCH_X86_LINUX)
     if ( (ret=UART_init(BN_UART_PATH,E_115200_8N1|E_FRAMEBASED))<0 ) return ret;
-#   endif
-
-#   ifdef ARCH_328P_ARDUINO
+#   elif defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX)
     if ( (ret=UART_init(NULL,115200))<0 ) return ret;
+#   else
+#       error "You can't use UART without an UART driver!"
 #   endif
 #endif
 
