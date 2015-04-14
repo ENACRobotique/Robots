@@ -6,8 +6,7 @@
  */
 
 #include <main_ai_tools/servo.h>
-#include "math_types.h"
-#include "math_ops.h"
+#include "GeometryTools.h"
 
 extern "C"{
 #include "network_cfg.h"
@@ -26,8 +25,7 @@ Servo::~Servo() {
 
 int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if no use
     sMsg msg = { { 0 } };
-    sPt_t p1, p2;
-    sLin_t l;
+    Point2D<float> p1, p2;
     int i = 0;
 
     if (((us == -1) && (a == -1)) || ((us != -1) && (a != -1))) {
@@ -45,7 +43,7 @@ int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if n
         p1.y = _servo.u1;
         p2.x = _servo.a2;
         p2.y = _servo.u2;
-        convPts2Line(&p1, &p2, 0, &l);
+        Line2D<float> l(p1, p2);
 
         if (l.b == 0)
             return -1;
@@ -53,7 +51,7 @@ int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if n
         us = -(l.a * a + l.c) / l.b;
     }
 
-    msg.header.destAddr = ADDRI1_MAIN_IO;
+    msg.header.destAddr = ADDRI_MAIN_IO;
     msg.header.type = E_SERVOS;
     msg.header.size = 2 + 3;
     msg.payload.servos.nb_servos = 1;

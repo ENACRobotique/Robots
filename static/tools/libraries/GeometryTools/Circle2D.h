@@ -70,12 +70,10 @@ class Circle2D {
             return p1, p2;
         }
         Point2D<T> projecte(Point2D<T>& p) const{
-            Vector2D<T> v;
+            Vector2D<T> v(c, p);
             Point2D<T> pt;
-            T n;
+            T n = v.norm();
 
-            v.convPts2Vec(c, p);
-            v.normVec(n);
             pt.x = c.x + v.x * r / n;
             pt.y = c.y + v.y * r / n;
 

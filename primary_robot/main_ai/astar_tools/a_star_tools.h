@@ -2,11 +2,11 @@
 #define _TOOLS_H
 
 #include <stdint.h>
-
+#include <vector>
 #include "error.h"
 #include "math_types.h"
 
-#define NON_HOLONOMIC 0 //exist if the robot isn't an holonomic robot (for backward compatible)
+#define HOLONOMIC 1 // 0 if the robot isn't an holonomic robot (for backward compatibility)
 
 //#define AS_DEBUG 1
 #define AS_STATS
@@ -51,6 +51,7 @@
 typedef struct {
     sPt_t c;    // center of obstacle
     sNum_t r;   // radius
+    //TODO change in circle type with the new geometry tools
 
     uint8_t moved:4;
     uint8_t active:4;
@@ -120,25 +121,19 @@ typedef struct __attribute__((packed)){ // XXX this attribute reduces the size o
 
 // ==== global matrices ====
 
-// number of physical obstacles (16)
-
-#if NON_HOLONOMIC
-#define N (49)
-#else
-#define N (43)
-#endif
-
-
-extern sObs_t obs[N]; // array of N physical obstacles (256B)
-extern sTgts_t tgts[N][N];   // NxN tangents between physical obstacles (17kiB)
-extern sASEl_t aselts[N*2][N*2]; // 2Nx2N elements (an A* node is a trajectory from an iABObs_t to another)
+extern std::vector<sObs_t> obs;                     // array of N physical obstacles (256B)
+extern int N;                                       // number of physical obstacles
+extern std::vector<std::vector<sTgts_t>> tgts;      // NxN tangents between physical obstacles (17kiB)
+extern std::vector<std::vector<sASEl_t>> aselts;    // 2Nx2N elements (an A* node is a trajectory from an iABObs_t to another)
+extern std::vector<uint8_t> obs_updated;            // array not used by A*, available for the user
 #define ASELT(n) aselts[(n).o1][(n).o2]
 // NxN distances between obstacles
 #define DIST(i, j) (tgts[(iObs_t)(i)][(iObs_t)(j)].d)
 
 // ==== function prototypes ====
 
-void    fill_tgts_lnk   ();
+void init_obs(const std::vector<sObs_t>& init);
+void fill_tgts_lnk();
 
 // functions on objects (0:N-1)
 uint8_t o_check_segment (iObs_t o1, sSeg_t *s, iObs_t o2);

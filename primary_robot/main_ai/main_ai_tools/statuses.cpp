@@ -11,7 +11,6 @@
 #include <cmath>
 #include "ai_types.h"
 #include "tools.h"
-#include "math_ops.h"
 #include "time_tools.h"
 
 
@@ -50,7 +49,7 @@ void Statuses::maintenace(){
 int Statuses::receivedNewStatus(sGenericStatus &status){
 
     if(status.id < 0 || status.id > NUM_E_ELEMENT){
-        cerr << "[ERROR] [statuses.ccp] Unknown status id" << endl;
+        cerr << "[ERROR] [statuses.cpp] Unknown status id" << endl;
         return -1;
     }
     logs << INFO_V(E_V3) << "New status : " << status.pos.x << ", " << status.pos.y << ", " << status.pos.theta * 180 / M_PI;
@@ -81,18 +80,14 @@ sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
     return status;
 }
 
-sPt_t Statuses::getLastPosXY(eElement el){
-    sGenericStatus status = getLastStatus(el);
-    sPt_t point;
+Point2D<float> Statuses::getLastPosXY(eElement el){
+    sGenericStatus& status = getLastStatus(el);
 
-    point.x = status.pos.x;
-    point.y = status.pos.y;
-
-    return point;
+    return {status.pos.x, status.pos.y};
 }
 
 float Statuses::getLastOrient(eElement el){
-    sGenericStatus status = getLastStatus(el);
+    sGenericStatus& status = getLastStatus(el);
 
     return status.pos.theta;
 }
@@ -100,14 +95,13 @@ float Statuses::getLastOrient(eElement el){
 float Statuses::getLastSpeed(eElement el){
 
     if(_list[el].size() >=2){
-        sGenericStatus status1 = getLastStatus(el);
-        sPt_t pt1 = {status1.pos.x, status1.pos.y};
+        sGenericStatus& status1 = getLastStatus(el);
+        Point2D<float> pt1 = {status1.pos.x, status1.pos.y};
 
-        sGenericStatus status2 =_list[el][_list[el].size() - 2];
-        sPt_t pt2 = {status2.pos.x, status2.pos.y};
+        sGenericStatus& status2 =_list[el][_list[el].size() - 2];
+        Point2D<float> pt2 = {status2.pos.x, status2.pos.y};
 
-        float dist;
-        distPt2Pt(&pt1, &pt2, &dist);
+        float dist = pt1.distanceTo(pt2);
 
         return dist/(status1.date - status2.date)*1000000;
     }
@@ -140,7 +134,7 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
 }
 
 /*
- * Udapte the new position on monitoring
+ * Update the new position on monitoring
  */
 void Statuses::posUpdated(sGenericStatus &status) {
     if (status.id != ELT_PRIMARY) { //Only for element fix in obs such as robots

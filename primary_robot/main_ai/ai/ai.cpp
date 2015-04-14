@@ -15,7 +15,6 @@ extern "C"{
 #include <millis.h>
 }
 
-#include "math_ops.h"
 #include <obj_tools.h>
 #include <clap.h>
 #include <spot.h>
@@ -23,35 +22,34 @@ extern "C"{
 #include <tools.h>
 #include "communications.h"
 
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
+
 using namespace std;
 
 std::vector<Obj*> listObj;
 
 void colissionDetection(){
-    sPt_t ptPr = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> ptPr = statuses.getLastPosXY(ELT_PRIMARY);
     float anglePr = statuses.getLastOrient(ELT_PRIMARY);
-    sPt_t ptAPr = statuses.getLastPosXY(ELT_ADV_PRIMARY);
-    sPt_t ptASc = statuses.getLastPosXY(ELT_ADV_SECONDARY);
+    Point2D<float> ptAPr = statuses.getLastPosXY(ELT_ADV_PRIMARY);
+    Point2D<float> ptASc = statuses.getLastPosXY(ELT_ADV_SECONDARY);
     sNum_t d, dot;
-    sVec_t v1, v2;
     int contact = 0;
 
-    distPt2Pt(&ptPr, &ptAPr, &d);
-    v1.x = cos(anglePr);
-    v1.y = sin(anglePr);
-    convPts2Vec(&ptPr, &ptAPr, &v2);
-    dotVecs(&v1, &v2, &dot);
+    d = ptPr.distanceTo(ptAPr);
+    Vector2D<float> v1(cos(anglePr), sin(anglePr)), v2(ptPr, ptAPr);
+    dot = v1*v2;
 
     if (d < 50 && dot > 0.6 * d) {
         logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!"; // TODO
         contact = 1;
     }
 
-    distPt2Pt(&ptPr, &ptASc, &d);
-    v1.x = cos(anglePr);
-    v1.y = sin(anglePr);
-    convPts2Vec(&ptPr, &ptASc, &v2);
-    dotVecs(&v1, &v2, &dot);
+    d = ptPr.distanceTo(ptASc);
+    Vector2D<float> v3(ptPr, ptASc);
+    dot = v1 * v3;
 
     if (d < 40 && dot > 0.6 * d) {
         logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!"; // TODO
@@ -87,7 +85,7 @@ int stepAI() {
     static estate_t state = COLOR_SELECTION;
     static bool mode_obj = false;
     static int current_obj = -1;
-    static sPt_t pt_select;
+    static Point2D<float> pt_select;
     static unsigned int last_time = 0;
 
     switch (state) {
@@ -112,7 +110,8 @@ int stepAI() {
 
                 initObjective();
 
-                sendPos(obs[0].c, theta_robot); //Sending approximate initial position
+                Point2D<float> p(obs[0].c.x, obs[0].c.y);
+                sendPos(p, theta_robot); //Sending approximate initial position
 
                 //TODO procedure de mise en place
 
@@ -160,13 +159,11 @@ int stepAI() {
                     if ((current_obj = next_obj()) != -1) {
                         pt_select = listObj[current_obj]->getDestPoint();
                         logs << INFO << "Selected point is (" << pt_select.x << " ; " << pt_select.y << ")";
-#ifdef NON_HOLONOMIC
+#if !HOLONOMIC
                   /*      int k = listObj[current_obj]->_EP;
                         sObjPt_t ep = listObj[current_obj]->entryPoint(k);
                         updateEndTraj(ep.angleEP,  &ep.c, ep.radiusEP);
                         printEndTraj();*/
-#else
-                        path.convPathForHolonomic();
 #endif
                         sPath_t path_loc = listObj[current_obj]->getPath();
                         path.addPath2(path_loc);
@@ -175,7 +172,7 @@ int stepAI() {
                 }
 
                 //Test if the robot is on the entry point selected
-                sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
+                Point2D<float> pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
                 if ( (fabs(pt_select.x - pos_robot.x) < RESO_POS && fabs(pt_select.y - pos_robot.y) < RESO_POS) && (current_obj != -1) ){
                     mode_obj = true;
                 }

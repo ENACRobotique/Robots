@@ -9,25 +9,29 @@
 
 #include <iostream>
 
-#include <geometry_tools.h>
-#include "math_ops.h"
 #include "obj_tools.h"
 #include "a_star.h"
 #include "tools.h"
 #include "ai_tools.h"
+#include "GeometryTools.h"
 
 extern "C"{
 #include "millis.h"
 }
 
-int testInObs(sPt_t *p) { //retourne le numéro de l'obstable si la position est a l'interieur de celui ci
+#ifndef HOLONOMIC
+#error "HOLONOMIC must be defined"
+#endif
+
+int testInObs() { //retourne le numéro de l'obstable si la position est a l'interieur de celui ci
     //FIXME si le robot dans plusieurs obstable
+    Point2D<float>p = statuses.getLastPosXY(ELT_PRIMARY);
     int i;
     sNum_t dist;
     for (i = 1; i < N - 1; i++) {
         if (obs[i].active == 0)
             continue;
-        distPt2Pt(&obs[i].c, p, &dist);
+        dist = p.distanceTo({obs[i].c.x, obs[i].c.y});
         if (dist < obs[i].r) {
             //printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
             return i;
@@ -69,32 +73,40 @@ void Obj::addAccess(sObjEntry_t &access){
  * And update the others parameters
  * //TODO Considering the orientation of the robot
  */
-sNum_t Obj::update(sPt_t posRobot) {
-    int g, m, n;
+float Obj::update(sPt_t posRobot) {
+    int n;
+#if !HOLONOMIC
+    int g, m;
+#endif
     sPath_t path_loc;
+    Point2D<float> posRobotp = statuses.getLastPosXY(ELT_PRIMARY);
 
     _dist = -1;
-    obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
+    obs[0].c = {posRobotp.x, posRobotp.y};
     logs << INFO << "--------------------------------------------------------------";
-    if ((n = testInObs(&obs[0].c)) != 0) {
-        projectPoint(posRobot.x, posRobot.y, obs[n].r, obs[n].c.x, obs[n].c.y, &obs[0].c);
+
+    if ((n = testInObs()) != 0) {
+        Point2D<float> p(posRobot.x, posRobot.y);
+        Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
+        p = c.projecte(p);
+        obs[0].c = {p.x, p.y};
         logs << INFO << "Robot in obstacle : " << n;
     }
 
     for (sObjEntry_t i : _access) {
-        obs[0].c = statuses.getLastPosXY(ELT_PRIMARY);
+        obs[0].c = {posRobotp.x, posRobotp.y};
         switch(i.type){
             case E_POINT :
                 logs << DEBUG << "Access type POINT";
-                obs[N - 1].c = i.pt.p;
-#if NON_HOLONOMIC
+                obs[N - 1].c = {i.pt.p.x, i.pt.p.y};
+#if !HOLONOMIC
                 updateEndTraj(i.pt.angle, &i.pt.p, i.radius);
 #endif
             break;
             case E_CIRCLE:
                 logs << DEBUG << "Access type CIRCLE";
-                obs[N - 1].c = i.cir.c;
-#if NON_HOLONOMIC
+                obs[N - 1].c = {i.cir.c.x, i.cir.c.y};
+#if !HOLONOMIC
                 obs[N - 2].active = 0;
                 obs[N - 3].active = 0;
                 obs[N - 4].active = 0;
@@ -110,7 +122,7 @@ sNum_t Obj::update(sPt_t posRobot) {
                 logs << ERR << "Unknown type of access to objective";
         }
 
-#if NON_HOLONOMIC
+#if !HOLONOMIC
         if ((g = testInObs(&obs[0].c)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
             projectPoint(posRobot.x, posRobot.y, obs[g].r, obs[g].c.x, obs[g].c.y, &obs[0].c);
             if ((m = testInObs(&obs[0].c)) != 0) { //Cas la projection se retrouve dans un obstacle après la premier projection
@@ -144,17 +156,17 @@ sNum_t Obj::update(sPt_t posRobot) {
         else if (_dist > path_loc.dist || _dist == -1) {
             _dist = path_loc.dist;
             _path = path_loc;
-            _access_select = obs[N - 1].c;
+            _access_select = {obs[N - 1].c.x, obs[N - 1].c.y};
 
             if( i.type == E_CIRCLE){
-                float dist = 0;
-                distPt2Pt(&_path.path[_path.path_len - 1].p1, &_path.path[_path.path_len - 1].p2, &dist);
-                if(dist < i.cir.r)
+                if(_path.path[_path.path_len - 1].p1.distanceSqTo(_path.path[_path.path_len - 1].p2) < i.cir.r)
                     logs << ERR << "Very strange path"; //FIXME
                 else{
-                    sPt_t pt = _path.path[_path.path_len - 1].p1;
-                    if(projPtOnCircle(&i.cir.c, i.cir.r, &pt) < 0)
-                        logs << ERR << "Projection of point";
+                    Point2D<float> pt = _path.path[_path.path_len - 1].p1;
+                    Circle2D<float> cir(i.cir.c.x, i.cir.c.y, i.cir.r);
+                    if(cir.c.distanceTo(pt) == 0)
+                        logs << ERR << "Can't project point";
+                    pt = cir.projecte(pt);
                     _path.path[_path.path_len - 1].p2 = pt;
                 }
                 _access_select = _path.path[_path.path_len - 1].p2;
@@ -174,7 +186,7 @@ sPath_t Obj::getPath() const{
     return _path;
 }
 
-sPt_t Obj::getDestPoint() const{
+Point2D<float> Obj::getDestPoint() const{
     return _access_select;
 }
 

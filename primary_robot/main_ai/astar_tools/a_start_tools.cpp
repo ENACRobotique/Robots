@@ -1,101 +1,34 @@
-#include <a_star_tools.h>
-#include <math.h>
+#include "a_star_tools.h"
+
+#include <cmath>
 #include <stdio.h>
+
 #include "math_ops.h"
-
 extern "C"{
 #include "millis.h"
 }
-
-#ifdef AS_STATS
-extern "C"{
-#include "millis.h"
-}
-#endif
 
 #define CHECK_LIMITS
 
-// array of physical obstacles (256B)
-sObs_t obs[] = {
-    // robots
-    {{0., 0.}, 0., 1, 1},               //primary
-    {{0., 0.}, R_ROBOT+12., 1, 0, 1},   //secondary
-    {{0., 0.}, R_ROBOT+20., 1, 0, 1},   //primary adv
-    {{0., 0.}, R_ROBOT+15., 1, 0, 1},   //secondary adv
 
-    //Yellow spots //if moved change START_STAND
-    {{9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //4
-    {{85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
-    {{85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
-    {{87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
-    {{9.  , 15.}, 3. + R_ROBOT, 1, 1, 1},
-    {{9.  , 25.}, 3. + R_ROBOT, 1, 1, 1},
-    {{110., 23.}, 3. + R_ROBOT, 1, 1, 1},
-    {{130., 60.}, 3. + R_ROBOT, 1, 1, 1},
+std::vector<sObs_t> obs;                                                    // array of physical obstacles (256B)
+int N = 0;                                                                  // number of physical obstacles
+std::vector<std::vector<sTgts_t>> tgts(N, std::vector<sTgts_t>(N));         // tangents between physical obstacles (17kiB)
+std::vector<std::vector<sASEl_t>> aselts(N*2, std::vector<sASEl_t>(N*2));   // A* elements
+std::vector<uint8_t> obs_updated(N);                                        // array not used by A*, available for the user
 
-    //Green spots
-    {{300 - 9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //12
-    {{300 - 85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
-    {{300 - 85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
-    {{300 - 87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
-    {{300 - 9.  , 15.}, 3. + R_ROBOT, 1, 1, 1},
-    {{300 - 9.  , 25.}, 3. + R_ROBOT, 1, 1, 1},
-    {{300 - 110., 23.}, 3. + R_ROBOT, 1, 1, 1},
-    {{300 - 130., 60.}, 3. + R_ROBOT, 1, 1, 1},
+void init_obs(const std::vector<sObs_t>& _obs){
+    obs = _obs;
+    N = obs.size();
 
-    //Cup
-    {{25. , 25.}, 5. + R_ROBOT, 1, 1, 1}, //20
-    {{91. ,120.}, 5. + R_ROBOT, 1, 1, 1},
-    {{150., 35.}, 5. + R_ROBOT, 1, 1, 1},
-    {{300 - 25. , 25.}, 5. + R_ROBOT, 1, 1, 1},
-    {{300 - 91. ,120.}, 5. + R_ROBOT, 1, 1, 1},
+    std::vector<std::vector<sTgts_t>> _tgts(N, std::vector<sTgts_t>(N));
+    std::vector<std::vector<sASEl_t>> _aselts(N*2, std::vector<sASEl_t>(N*2));
+    std::vector<uint8_t> _obs_updated(N) ;
 
-    //Popcorn machine
-    {{30. ,196.5}, 5. + R_ROBOT, 0, 1, 1}, //25
-    {{60. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
-    {{300 - 30. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
-    {{300 - 60. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
-
-    //Stairs
-    {{102. ,147.}, 7. + R_ROBOT, 1, 1, 1}, //29
-    {{150.,200.}, 53. + R_ROBOT, 1, 1, 1},
-    {{300 - 102. ,147.}, 7. + R_ROBOT, 1, 1, 1},
-
-    //Platform
-    {{125.,  5.}, 7. + R_ROBOT, 1, 1, 1}, //32
-    {{300 - 125.,  5.}, 7. + R_ROBOT, 1, 1, 1},
-
-    //Starting zone
-    {{39., 79.}, 2. + R_ROBOT, 1, 1, 1}, //34
-    {{20., 79.}, 2. + R_ROBOT, 1, 1, 1},
-    {{39.,121.}, 2. + R_ROBOT, 1, 1, 1},
-    {{20.,121.}, 2. + R_ROBOT, 1, 1, 1},
-    {{300 - 39., 79.}, 2. + R_ROBOT, 1, 1, 1},
-    {{300 - 20., 79.}, 2. + R_ROBOT, 1, 1, 1},
-    {{300 - 39.,121.}, 2. + R_ROBOT, 1, 1, 1},
-    {{300 - 20.,121.}, 2. + R_ROBOT, 1, 1, 1},
-
-#if NON_HOLONOMIC
-    //Cercles du robot anti-demi-tour
-    {{0., 0. }, 0, 0, 0, 1}, //42
-    {{0., 0. }, 0, 0, 0, 1},
-    {{0., 0. }, 0, 0, 0, 1},
-
-    //Cercles d'approches
-    {{0., 0. }, 0, 0, 0, 1},//45
-    {{0., 0. }, 0, 0, 0, 1},
-    {{0., 0. }, 0, 0, 0, 1},
-#endif
-
-    // arrivée
-    {{0. , 0.}, 0, 0, 1, 1} //48
-};
-
-// tangents between physical obstacles (17kiB)
-sTgts_t tgts[N][N];
-// A* elements
-sASEl_t aselts[N*2][N*2];
-
+    tgts = _tgts;
+    aselts = _aselts;
+    obs_updated =_obs_updated;
+}
 
 static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o2
     sVec_t o1o2, t, n;

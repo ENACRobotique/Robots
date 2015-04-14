@@ -9,8 +9,10 @@
 #define AI_PATH_H_
 
 #include <a_star_tools.h>
+#include "a_star.h"
 #include <vector>
 #include <deque>
+#include "GeometryTools.h"
 
 #define MAX_RETRIES 1 //FIXME bug with simulation
 
@@ -18,13 +20,13 @@
 using namespace std;
 
 typedef struct{
-    float t1;   // in us (synchronized time):
-    float t2;
+    uint32_t t1;   // in us (synchronized time):
+    uint32_t t2;
 
-    sPt_t p1;
-    sPt_t p2;
+    Point2D<float> p1;
+    Point2D<float> p2;
 
-    sObs_t obs;//TODO change in circle type with the new math tools
+    sObs_t obs;
 
     float theta1;
     float theta2;
@@ -35,25 +37,6 @@ typedef struct{
     bool rot1_dir; // (false: CW | true: CCW)
     bool rot2_dir;
 }sTrajOrientEl_t;
-
-typedef struct {
-    sPt_t p1;
-    sPt_t p2;
-    sObs_t obs;
-
-    sNum_t arc_len;
-    sNum_t seg_len;
-
-    unsigned short sid;
-} sTrajEl_t;
-
-typedef struct {
-    sNum_t dist;
-    unsigned short tid;
-
-    unsigned int path_len;
-    sTrajEl_t *path;
-} sPath_t;
 
 
 class Path {
@@ -68,7 +51,7 @@ class Path {
         //Send methods
         void sendRobot();
         void stopRobot();
-        void go2Point(const sPt_t &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
+        void go2Point(const Point2D<float> &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
         void followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l);
         void convPathToPathOrient();
         void computeOrientPathForHolonomic(float theta_end_obj);
