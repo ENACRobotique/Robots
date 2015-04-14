@@ -41,7 +41,6 @@
 								<option id="gnu.c.compiler.option.dialect.std.561826190" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1079626372" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_LPC21XX"/>
-									<listOptionValue builtIn="false" value="STDSTREAMS_UART0"/>
 									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.flags.2119401320" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-std=gnu99" valueType="string"/>

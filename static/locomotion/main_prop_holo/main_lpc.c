@@ -13,6 +13,7 @@
 #include "position_controller.h"
 #include "trajectory_manager.h"
 #include "shared/botNet_core.h"
+#include "bn_intp.h"
 
 /*
  * pins usage and mapping (board Rev3):
@@ -87,8 +88,10 @@ int main() {
     // Trajectory manager
     trajectory_manager_t traj_mngr;
     trajmngr_init(&traj_mngr, mat_rob2pods);
-    // BotNet initialization (i²c + uart)
-    //TODO
+
+    bn_attach(E_ROLE_SETUP, role_setup);
+    bn_intp_install();
+    bn_init();
 
     //// Global variables
     unsigned int prevControl_us = micros();
