@@ -254,7 +254,7 @@ int main(int argc, char **argv){
                     static int us = 1200;
                     us = 3000 - us;
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
+                    msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
                     msg.header.size = 2 + 3;
                     msg.payload.servos.nb_servos = 1;
@@ -274,7 +274,7 @@ int main(int argc, char **argv){
                         printf("error getting us setpoint\n");
                     }
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
+                    msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
                     msg.header.size = 2 + 3;
                     msg.payload.servos.nb_servos = 1;
@@ -307,7 +307,7 @@ int main(int argc, char **argv){
                         printf("error getting us setpoint\n");
                     }
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
+                    msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
                     msg.header.size = 2 + 3;
                     msg.payload.servos.nb_servos = 1;

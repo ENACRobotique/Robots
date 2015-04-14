@@ -51,7 +51,7 @@ int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if n
         us = -(l.a * a + l.c) / l.b;
     }
 
-    msg.header.destAddr = ADDRI1_MAIN_IO;
+    msg.header.destAddr = ADDRI_MAIN_IO;
     msg.header.type = E_SERVOS;
     msg.header.size = 2 + 3;
     msg.payload.servos.nb_servos = 1;
