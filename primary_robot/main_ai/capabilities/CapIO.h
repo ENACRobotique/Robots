@@ -13,14 +13,12 @@
 class CapIO : public Capability {
     public:
         CapIO(Robot* robot_init) : Capability(robot_init){};
-        ~CapIO(){};
+        virtual ~CapIO(){};
 
 // TODO setServo, getServo, getHMI, setHMI
 
-        int getValue(const eIhmElement&){
-
-            // TODO
-            return 0;
+        unsigned int getValue(const eIhmElement& el){
+            return ihm.getValue(el);
         }
 };
 

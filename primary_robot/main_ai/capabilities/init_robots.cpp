@@ -14,6 +14,7 @@
 #include "Robot.h"
 #include "CapPosition.h"
 #include "CapPosSimuSecondary.h"
+#include "CapIOSimuPrimary.h"
 #include "CapPosStatuses.h"
 #include "CapPropulsion.h"
 #include "CapPropAxle.h"
@@ -33,11 +34,17 @@ void initRobots(bool simu_primary, bool holo_primary){
     robots.push_back(new Robot("", ELT_PRIMARY));
 
     robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 1);
+
     if(holo_primary)
         robots.back()->caps[eCap::PROP] = new CapPropHolonome(robots.back(), primary_addr_prop);
     else
         robots.back()->caps[eCap::PROP] = new CapPropAxle(robots.back(), primary_addr_prop);
-    robots.back()->caps[eCap::IO] = new CapIO(robots.back());
+
+    if(simu_primary)
+        robots.back()->caps[eCap::IO] = new CapIOSimuPrimary(robots.back());
+    else
+        robots.back()->caps[eCap::IO] = new CapIO(robots.back());
+
     robots.back()->caps[eCap::AI] = new CapAI(robots.back());
 
 

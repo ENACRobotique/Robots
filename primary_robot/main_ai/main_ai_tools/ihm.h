@@ -34,6 +34,9 @@ class Ihm {
         eIhmLed getLed(){
             return static_cast <eIhmLed>(list[eIhmElement::IHM_LED]);
         }
+        unsigned int getValue(const eIhmElement& id){
+            return list[id];
+        }
 
     private:
         map <eIhmElement, unsigned int> list;
