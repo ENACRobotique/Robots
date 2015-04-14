@@ -8,60 +8,47 @@
 #include <ihm.h>
 
 #include <iostream>
+
+#include "tools.h"
+#include "network_cfg.h"
+#include "botNet_core.h"
 extern "C"{
 #include <math.h>
-}
-Ihm::Ihm(): _starting_cord(CORD_OUT), _switch_color(SWITCH_OFF), _led(LED_OFF) {
-    //TODO send message to get ihm status
-
-}
-
-Ihm::~Ihm() {
-    // TODO Auto-generated destructor stub
 }
 
 void Ihm::receivedNewIhm(sIhmStatus &ihm){ //TODO check all value with arduino_io
     for(int i = 0 ; i < (int) ihm.nb_states ; i++){
         switch(ihm.states[i].id){
             case IHM_STARTING_CORD:
-                if(ihm.states[i].state == 0) //TODO check
-                    _starting_cord = CORD_OUT;
-                else
-                    _starting_cord = CORD_IN;
-                cout << "[INFO] [IHM] ## scord: " << _starting_cord << endl;
+                list[eIhmElement::IHM_STARTING_CORD] = ihm.states[i].state;
+                logs << MES << "[IHM] ## scord: " << list[eIhmElement::IHM_STARTING_CORD];
                 break;
             case IHM_MODE_SWICTH:
-                if(ihm.states[i].state == 1)
-                    _switch_color = SWITCH_ON;
-                else
-                    _switch_color = SWITCH_OFF;
-                cout << "[INFO] [IHM] ## smode: " << _switch_color << endl;
+                list[eIhmElement::IHM_MODE_SWICTH] = ihm.states[i].state;
+                logs << MES << "[IHM] ## smode: " << list[eIhmElement::IHM_MODE_SWICTH];
                 break;
             case IHM_LED:
-                if(ihm.states[i].state == 0)
-                    _led = LED_RED;
-                else if(ihm.states[i].state == 1)
-                    _led = LED_YELLOW;
-                else
-                    _led = LED_OFF;
-
-                cout << "[INFO] [IHM] ## sled:" << endl;
+                list[eIhmElement::IHM_LED] = ihm.states[i].state;
+                logs << MES << "[IHM] ## sled: " << list[eIhmElement::IHM_LED];
                 break;
             default:
-                cout << "[WARNING] id not define or doesn't exist" << endl;
+                logs << WAR << "id not define or doesn't exist";
             break;
          }
      }
 }
 
-eIhmCord Ihm::getStartingCord(){
-    return _starting_cord;
-}
+void Ihm::sendIhm(const eIhmElement& id, const unsigned int& state){
+    sMsg msgOut ;
 
-eIhmSwitch Ihm::getSwitchColr(){
-    return _switch_color;
-}
+    msgOut.header.destAddr = ADDRI1_MAIN_IO;
+    msgOut.header.type = E_IHM_STATUS;
+    msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
 
-eIhmLed Ihm::getLed(){
-    return _led;
+    msgOut.payload.ihmStatus.nb_states = 1;
+    msgOut.payload.ihmStatus.states[0].id = id;
+    msgOut.payload.ihmStatus.states[0].state = state;
+
+    bn_sendRetry(&msgOut, MAX_RETRIES);
+    logs << MES << "[IHM] Sending new status id=" << id << ", state=" << state;
 }
