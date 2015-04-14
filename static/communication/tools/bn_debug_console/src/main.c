@@ -44,7 +44,7 @@ void usage(char *cl){
 }
 
 int main(int argc, char **argv){
-    int quit=0,quitMenu=0,err,benchmark=0;
+    int quit=0,quitMenu=0,ret,benchmark=0;
     char oLF=1,verbose=1;           //booleans used for display options, add new line char if missing (default yes), pure console mode (default no)
     FILE *fd = NULL;
 
@@ -107,9 +107,9 @@ int main(int argc, char **argv){
 
     bn_attach(E_ROLE_SETUP, role_setup);
 
-    err = bn_init();
-    if (err < 0){
-        printf("bn_init() error #%i\n", -err);
+    ret = bn_init();
+    if (ret < 0){
+        printf("bn_init() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
         exit(1);
     }
 
@@ -123,11 +123,11 @@ int main(int argc, char **argv){
         usleep(500);
 
         //receives messages, displays string if message is a debug message
-        err = bn_receive(&msgIn);
-        if (err > 0){
-            err = role_relay(&msgIn);
-            if(err < 0){
-                printf("role_relay() error #%i\n", -err);
+        ret = bn_receive(&msgIn);
+        if (ret > 0){
+            ret = role_relay(&msgIn);
+            if(ret < 0){
+                printf("role_relay() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
             }
 
             if (verbose>=1) {
@@ -185,14 +185,14 @@ int main(int argc, char **argv){
                 break;
             }
         }
-        else if (err < 0){
-            if (err == -ERR_SYSERRNO && errno == EINTR){
+        else if (ret < 0){
+            if (ret == -ERR_SYSERRNO && errno == EINTR){
                 sigint=1;
             }
             else{
-                fprintf(stderr, "bn_receive() error #%i\n", -err);
-                if(err == -ERR_SYSERRNO){
-                    fprintf(stderr, "errno=%i\n", errno);
+                fprintf(stderr, "bn_receive() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
+                if(ret == -ERR_SYSERRNO){
+                    fprintf(stderr, "errno=%s (#%i)\n", strerror(errno), errno);
                 }
                 exit(1);
             }
@@ -244,7 +244,7 @@ int main(int argc, char **argv){
                 printf("r : return\n");
                 printf("q : quit\n");
 
-                err = !fgets(input, sizeof(input), stdin);
+                ret = !fgets(input, sizeof(input), stdin);
                 p = &input[0];
                 while(*p && isspace(*p)) p++;
 
@@ -269,8 +269,8 @@ int main(int argc, char **argv){
                     int us;
 
                     printf("us: "); fflush(stdout);
-                    err = scanf("%i", &us);
-                    if (err != 1){
+                    ret = scanf("%i", &us);
+                    if (ret != 1){
                         printf("error getting us setpoint\n");
                     }
 
@@ -296,14 +296,14 @@ int main(int argc, char **argv){
                     printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
 
                     printf("id: "); fflush(stdout);
-                    err = scanf("%i", &id);
-                    if (err != 1){
+                    ret = scanf("%i", &id);
+                    if (ret != 1){
                         printf("error getting servo id\n");
                     }
 
                     printf("us: "); fflush(stdout);
-                    err = scanf("%i", &us);
-                    if (err != 1){
+                    ret = scanf("%i", &us);
+                    if (ret != 1){
                         printf("error getting us setpoint\n");
                     }
 
@@ -346,9 +346,9 @@ int main(int argc, char **argv){
 
                     do{
                         printf("speed (cm/s): ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%f", &msg.payload.speedSetPoint.speed);
-                    }while(err != 1 || msg.payload.speedSetPoint.speed < -150. || msg.payload.speedSetPoint.speed > 150.);
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%f", &msg.payload.speedSetPoint.speed);
+                    }while(ret != 1 || msg.payload.speedSetPoint.speed < -150. || msg.payload.speedSetPoint.speed > 150.);
 
                     bn_send(&msg);
                     break;
@@ -356,30 +356,37 @@ int main(int argc, char **argv){
                 case 's' :  //sends debug address to distant node
                     do{
                         printf("enter destination address\n");
-                        err = scanf("%hx",&destAd);
-                        if (err != 1){
+                        ret = scanf("%hx",&destAd);
+                        if (ret != 1){
                             printf("error getting destination address\n");
                         }
-                    }while(err != 1);
+                    }while(ret != 1);
                     while(getchar() != '\n');
-                    if ( (err=bn_debugSendAddr(destAd)) > 0){
+                    if ( (ret=bn_debugSendAddr(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;
                     }
                     else {
-                        printf("error while sending : %d\n", err);
+                        printf("error while sending : %d\n", ret);
                     }
                     break;
                 case 'p' :
                     do{
                         printf("enter destination address\n");
-                        err = scanf("%hx",&destAd);
-                        if (err != 1){
+                        ret = scanf("%hx",&destAd);
+                        if (ret != 1){
                             printf("error getting destination address\n");
                         }
-                    }while(err != 1);
+                    }while(ret != 1);
                     while(getchar() != '\n');
-                    printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
+
+                    ret = bn_ping(destAd);
+                    if(ret < 0){
+                        printf("bn_ping(%hx) failed: %s (#%i)\n", destAd, getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("ping %hx : %d ms\n",destAd,ret);
+                    }
                     break;
                 case 't' :
                     {
@@ -387,19 +394,19 @@ int main(int argc, char **argv){
                         int depth;
                         do{
                              printf("enter destination address\n");
-                             err = scanf("%hx",&destAd);
-                             if (err != 1){
+                             ret = scanf("%hx",&destAd);
+                             if (ret != 1){
                                  printf("error getting destination address\n");
                              }
-                        }while(err != 1);
+                        }while(ret != 1);
                         while(getchar() != '\n');
                         do{
                              printf("enter depth\n");
-                             err = scanf("%i",&depth);
-                             if (err != 1 || depth <= 0){
+                             ret = scanf("%i",&depth);
+                             if (ret != 1 || depth <= 0){
                                  printf("error getting depth\n");
                              }
-                        }while(err != 1 || depth <= 0);
+                        }while(ret != 1 || depth <= 0);
                         while(getchar() != '\n');
                         trInfo = (sTraceInfo *)malloc(depth * sizeof(sTraceInfo));
                         nbTraces=bn_traceroute(destAd,trInfo,depth,1000);
@@ -412,21 +419,21 @@ int main(int argc, char **argv){
                 {
                     do{
                         printf("dest address: ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%hx", &bench_dest_addr);
-                    }while(err != 1);
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%hx", &bench_dest_addr);
+                    }while(ret != 1);
 
                     do{
                         printf("msg size: ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%i", &bench_sz_msg);
-                    }while(err != 1 || bench_sz_msg < 0 || bench_sz_msg > BN_MAX_PDU - sizeof(msgIn.header));
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%i", &bench_sz_msg);
+                    }while(ret != 1 || bench_sz_msg < 0 || bench_sz_msg > BN_MAX_PDU - sizeof(msgIn.header));
 
                     do{
                         printf("msg period: ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%i", &bench_period);
-                    }while(err != 1 || bench_period < 2);
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%i", &bench_period);
+                    }while(ret != 1 || bench_period < 2);
 
                     bench_time_ok = 0;
                     bench_time_ko = 0;
@@ -494,8 +501,8 @@ int main(int argc, char **argv){
                 msgOut.header.size = bench_sz_msg;
                 msgOut.header.type = E_DATA;
 
-                err = bn_sendAck(&msgOut);
-                if(err <= 0){
+                ret = bn_sendAck(&msgOut);
+                if(ret <= 0){
                     if(!bench_nb_msg_lost){
                         bench_time_ko = (millis() - prevBench)<<BENCH_TIME_SHIFT;
                     }
