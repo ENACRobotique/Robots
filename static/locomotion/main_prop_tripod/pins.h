@@ -2,26 +2,26 @@
 #define PINS_H
 
 ////// Pins LPC
-//// Pins for POD1
-// IN1
-#define PIN_DIR_POD1 4
-#define BK_DIR_POD1  0
 
-// PWM1
+//// Pins for POD1
+// DIR
+#define PIN_DIR_POD1 5
+#define BK_DIR_POD1  0
+// PWM
 #define PIN_PMW_POD1 7
 #define BK_PWM_POD1  0
 // Channel A
-#define PIN_CHA_POD1 15
+#define PIN_CHA_POD1 12
 #define BK_CHA_POD1  0
 // Channel B
-#define PIN_CHB_POD1 14
+#define PIN_CHB_POD1 15
 #define BK_CHB_POD1  0
 
 //// Pins for POD2
 // DIR
-#define PIN_DIR_POD2 5
+#define PIN_DIR_POD2 4
 #define BK_DIR_POD2  0
-// PWM1
+// PWM
 #define PIN_PMW_POD2 8
 #define BK_PWM_POD2  0
 // Channel A
@@ -35,7 +35,7 @@
 // DIR
 #define PIN_DIR_POD3 6
 #define BK_DIR_POD3  0
-// PWM1
+// PWM
 #define PIN_PMW_POD3 9
 #define BK_PWM_POD3  0
 // Channel A

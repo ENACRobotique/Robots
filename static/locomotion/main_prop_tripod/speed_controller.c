@@ -12,7 +12,7 @@ void spdctlr_init(speed_controller_t* sc, encoder_t* enc) {
     sc->enc = enc;
     sc->cmd_cache = 0;
 
-    pid_init(&sc->pid, 1 << SHIFT_PID_SPD, 0, 0, 0, SHIFT_PID_SPD);
+    pid_init(&sc->pid, 1 << SHIFT_PID_SPD, 1 << (SHIFT_PID_SPD - 2), 0, 900 << SHIFT_PID_SPD, SHIFT_PID_SPD);
 }
 
 void spdctlr_update(speed_controller_t* sc, int setpoint) {
