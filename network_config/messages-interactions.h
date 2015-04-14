@@ -36,11 +36,34 @@ typedef enum{
     IHM_LIMIT_SWITCH_LEFT
 } eIhmElement;
 
+typedef enum {
+    CORD_IN,
+    CORD_OUT
+} eIhmCord;
+
+typedef enum {
+    SWITCH_ON,
+    SWITCH_OFF,
+    SWITCH_INTER
+} eIhmSwitch;
+
+typedef enum {
+    LED_OFF,
+    LED_RED,
+    LED_YELLOW,
+    LED_GREEN
+}eIhmLed;
+
 typedef struct __attribute__((packed)){
     uint16_t nb_states; // must be <=18
     struct __attribute__((packed)){
         eIhmElement id :8; // identifier of the ihm element
-        uint16_t state; // status
+        union{
+            uint16_t state; // generic status
+            eIhmCord state_cord :16;
+            eIhmSwitch state_switch :16;
+            eIhmLed sate_led :16;
+        };
     } states[];
 } sIhmStatus;
 

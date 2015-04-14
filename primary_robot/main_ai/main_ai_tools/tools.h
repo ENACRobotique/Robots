@@ -40,7 +40,7 @@ typedef enum {
 
 extern int verbose;
 extern int mode_switch;
-extern eInOut_t starting_cord; //true = out and false = in
+extern eIhmCord starting_cord; //true = out and false = in
 extern Statuses statuses;
 extern Path path;
 extern Ihm ihm;

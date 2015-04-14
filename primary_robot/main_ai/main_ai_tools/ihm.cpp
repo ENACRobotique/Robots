@@ -8,8 +8,10 @@
 #include <ihm.h>
 
 #include <iostream>
-
-Ihm::Ihm(): _starting_cord(UNKNOWN_INOUT), _switch_color(UNKNOWN_SWITCH), _led(UNKNOWN_LED) {
+extern "C"{
+#include <math.h>
+}
+Ihm::Ihm(): _starting_cord(CORD_OUT), _switch_color(SWITCH_OFF), _led(LED_OFF) {
     //TODO send message to get ihm status
 
 }
@@ -23,16 +25,16 @@ void Ihm::receivedNewIhm(sIhmStatus &ihm){ //TODO check all value with arduino_i
         switch(ihm.states[i].id){
             case IHM_STARTING_CORD:
                 if(ihm.states[i].state == 0) //TODO check
-                    _starting_cord = OUT;
+                    _starting_cord = CORD_OUT;
                 else
-                    _starting_cord = IN;
+                    _starting_cord = CORD_IN;
                 cout << "[INFO] [IHM] ## scord: " << _starting_cord << endl;
                 break;
             case IHM_MODE_SWICTH:
                 if(ihm.states[i].state == 1)
-                    _switch_color = ON;
+                    _switch_color = SWITCH_ON;
                 else
-                    _switch_color = OFF;
+                    _switch_color = SWITCH_OFF;
                 cout << "[INFO] [IHM] ## smode: " << _switch_color << endl;
                 break;
             case IHM_LED:
@@ -52,14 +54,14 @@ void Ihm::receivedNewIhm(sIhmStatus &ihm){ //TODO check all value with arduino_i
      }
 }
 
-eInOut_t Ihm::getStartingCord(){
+eIhmCord Ihm::getStartingCord(){
     return _starting_cord;
 }
 
-eSwitch_t Ihm::getSwitchColr(){
+eIhmSwitch Ihm::getSwitchColr(){
     return _switch_color;
 }
 
-eLed_t Ihm::getLed(){
+eIhmLed Ihm::getLed(){
     return _led;
 }

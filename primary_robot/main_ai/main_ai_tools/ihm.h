@@ -12,18 +12,6 @@
 
 using namespace std;
 
-typedef enum {
-    IN, OUT, UNKNOWN_INOUT
-} eInOut_t;
-
-typedef enum {
-    ON, OFF, UNKNOWN_SWITCH
-} eSwitch_t;
-
-typedef enum {
-    LED_OFF, LED_RED, LED_YELLOW, UNKNOWN_LED
-}eLed_t;
-
 class Ihm {
     public:
         Ihm();
@@ -31,14 +19,14 @@ class Ihm {
 
         void receivedNewIhm(sIhmStatus &ihm);
 
-        eInOut_t getStartingCord();
-        eSwitch_t getSwitchColr();
-        eLed_t getLed();
+        eIhmCord getStartingCord();
+        eIhmSwitch getSwitchColr();
+        eIhmLed getLed();
 
     private:
-        eInOut_t _starting_cord;
-        eSwitch_t _switch_color;
-        eLed_t _led;
+        eIhmCord _starting_cord;
+        eIhmSwitch _switch_color;
+        eIhmLed _led;
 };
 
 #endif /* MAIN_AI_TOOLS_IHM_H_ */
