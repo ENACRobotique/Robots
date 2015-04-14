@@ -275,7 +275,7 @@ int main(int argc, char **argv){
                     printf("angle (deg): "); fflush(stdout);
                     ret = scanf("%f", &angle);
                     if (ret != 1){
-                        printf("error getting us setpoint\n");
+                        printf("error getting angle setpoint\n");
                     }
 
                     msg.header.destAddr = ADDRI_MAIN_IO;
@@ -293,11 +293,21 @@ int main(int argc, char **argv){
                     float angle;
                     int id;
 
-                    printf(" 0:SERVO_PRIM_DOOR\n");
-                    printf(" 1:SERVO_PRIM_FIRE1\n");
-                    printf(" 2:SERVO_PRIM_FIRE2\n");
-                    printf(" 3:SERVO_PRIM_ARM_LEFT\n");
-                    printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
+                    printf(" 0:SERVO_PRIM_GLASS1_HOLD\n");
+                    printf(" 1:SERVO_PRIM_GLASS1_RAISE\n");
+                    printf(" 2:SERVO_PRIM_GLASS2_HOLD\n");
+                    printf(" 3:SERVO_PRIM_GLASS2_RAISE\n");
+                    printf(" 4:SERVO_PRIM_GLASS3_HOLD\n");
+                    printf(" 5:SERVO_PRIM_GLASS3_RAISE\n");
+                    printf(" 6:SERVO_PRIM_LIFT1_UP\n");
+                    printf(" 7:SERVO_PRIM_LIFT1_DOOR\n");
+                    printf(" 8:SERVO_PRIM_LIFT1_HOLD\n");
+                    printf(" 9:SERVO_PRIM_LIFT2_UP\n");
+                    printf("10:SERVO_PRIM_LIFT2_DOOR\n");
+                    printf("11:SERVO_PRIM_LIFT2_HOLD\n");
+                    printf("12:SERVO_PRIM_CORN1_RAMP\n");
+                    printf("13:SERVO_PRIM_CORN2_RAMP\n");
+                    printf("14:SERVO_PRIM_CORN_DOOR\n");
 
                     printf("id: "); fflush(stdout);
                     ret = scanf("%i", &id);
