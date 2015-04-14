@@ -33,7 +33,7 @@ using namespace std;
 //#### TODO ####
 //##############
 /* To create build configuration for PC and BBB (BeagleBon Black)
- *
+ * Add bn communication
  */
 
 
@@ -63,47 +63,42 @@ int main(int argc, char* argv[]){
 	// Init video sources
     VideoCapture srcFramePattern;  // For the pattern of the table
 	VideoCapture cap;
-    initFramePattern(srcFramePattern, framePattern);  //// Initialize the pattern frame
-	initCapture(cap);
+	string titleFrameRaw("frameRaw");
+	initCapture(titleFrameRaw, cap, 0 , false);  // FIXME: default parameter not working
+	string titleFramePatt("framePattern");
+    initFramePattern(titleFramePatt, srcFramePattern, framePattern);  //// Initialize the pattern frame
 
-	// For calibration
+	#ifdef SETTINGS_HSV
+    // For calibration
 	Mat frameHSVPattern;
 	Mat frameHSVCalib;
 	VideoCapture srcHSVPattern;
 	VideoCapture srcHSVCalib;
-
     // Initialize calibration
+	Mat frameGlobCalib;
     initCalibHSV(srcHSVPattern, frameHSVPattern);
     initCalibHSV(srcHSVCalib, frameHSVCalib);
-    initTrackbarCalib(frameHSVCalib);
+    string titleCalib("HSV_Calib");
+    initTrackbarCalib(frameHSVCalib, titleCalib);
+	#endif
 
-    // Apply a threshold
-	inRange(frameHSVCalib , hsvCalib_min, hsvCalib_max, frameHSVCalib);
 
     // Create  windows
-	namedWindow("rawFrame",CV_WINDOW_AUTOSIZE);
-	namedWindow("framePattern",CV_WINDOW_AUTOSIZE);
-	namedWindow("HSVPattern", CV_WINDOW_AUTOSIZE);
-	namedWindow("HSVCalib", CV_WINDOW_AUTOSIZE);
+//	namedWindow("Anything", CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameTopView",CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameGreen",CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameRed",CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameBlue",CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameYellow",CV_WINDOW_AUTOSIZE);
 
-    // Settings HSV
-	if(SETTINGS_HSV){
-
-	}
-
 	// Iinit the record of the video
+	#ifdef SAVE
 	VideoWriter oVideoWriter;
-	if(SAVE){
-		if(initSave(cap, oVideoWriter) == -1){
-			cout<<"Error: Failed to initialize the VideoWritter"<<endl;
-			return -1;
-		}
+	if(initSave(cap, oVideoWriter) == -1){
+		cout<<"Error: Failed to initialize the VideoWritter"<<endl;
+		return -1;
 	}
+	#endif
 
     while(1){
     	cmptPerfFrame(StartPerf, sValPerf);
@@ -115,20 +110,27 @@ int main(int argc, char* argv[]){
 		}
 
         // Write the raw frame into the file
-        if(SAVE){
-        	save(oVideoWriter, frameRaw);
-        }
+		#ifdef SAVE
+		save(oVideoWriter, frameRaw);
+		#endif
 
         // Image processing
 		if(frameProcess(frameRaw, framePattern, posOriRobot)){
 			break;
 		}
 
+		//// Image calibration
+		#ifdef SETTINGS_HSV
+		// Apply a threshold
+		if(frameThresh(frameHSVCalib, frameHSVCalib, hsvCalib_min, hsvCalib_max, 5, 8) < 0){
+			cout<<"process_frame(): Error during the threshold operation"<<endl;
+			return -1;
+		}
 		// Show calibration
-	    imshow("HSVPattern", frameHSVPattern);
-	    imshow("HSVCalib", frameHSVCalib);
+	    displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
+		#endif
 
-        // End of measurements
+	    // End of measurements
         cmptPerfFrame(EndPerf, sValPerf);
     }// End while
 

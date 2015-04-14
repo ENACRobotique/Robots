@@ -1,17 +1,26 @@
 #include "sourceVid.h"
 
-int initCapture(VideoCapture& srcCap, int valBegVid, bool offsetVid){
+#ifdef YOYO
+// Path to the image sources for YOYO
+string strFramePattern("/home/yoyo/Robots/primary_robot/linux_image_processing/Images/Table2015.png");
+string strFrameRaw("/home/yoyo/Robots/primary_robot/linux_image_processing/Videos/Feux.mp4");
+string strFrameHSV("/home/yoyo/Robots/primary_robot/linux_image_processing/Images/HSV.png");
+#endif
+#ifdef LUDO
+// Path to the image sources for Ludo
+string strFramePattern("/home/ludo/.../Table2015.png");
+string strFrameRaw("/home/yoyo/ludo/.../Feux.mp4");
+#endif
+
+int initCapture(string& title, VideoCapture& srcCap, int valBegVid, bool offsetVid){
 	// Open the video file for reading
 	switch(SRC_VID){ //
 	case 0:
 		srcCap.open(0);  // FIXME: check the argument
 		break;
 	case 1:
-		srcCap.open("/home/yoyo/Robots/primary_robot/linux_image_processing/Videos/Feux.mp4");
-		break;
-	case 2:
-		srcCap.open("/home/Ludo...");
-		break;
+		srcCap.open(strFrameRaw.c_str());
+		break;;
 	}
 
     // if not success, exit program
@@ -23,6 +32,8 @@ int initCapture(VideoCapture& srcCap, int valBegVid, bool offsetVid){
     // Start the video at x ms
 	if(offsetVid)
 		srcCap.set(CV_CAP_PROP_POS_MSEC, valBegVid);
+
+	namedWindow(title.c_str(),CV_WINDOW_AUTOSIZE);
 
 	return 0;
 }
