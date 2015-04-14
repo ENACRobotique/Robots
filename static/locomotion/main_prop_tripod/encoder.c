@@ -4,6 +4,7 @@
 #include <ime.h>
 #elif defined(ARCH_X86_LINUX)
 #include <math.h>
+#include <stdlib.h>
 #include "millis.h"
 #include "params.h"
 #endif
@@ -117,6 +118,18 @@ void encoder_update(encoder_t* e) {
 #elif defined(ARCH_X86_LINUX)
     unsigned int time = millis();
     int input = e->m->setPoint; // here, the number of ticks per period is in the same order of magnitude than the pwm control of the motor (FIXME base 2015)
+
+#define MIN_CONS (26)
+
+    if(abs(input) < MIN_CONS) {
+        input = 0;
+    }
+    else if(input > 0) {
+        input = (input - MIN_CONS)*4/3;
+    }
+    else if(input < 0) {
+        input = (input + MIN_CONS)*4/3;
+    }
 
     // very simple motor model... (continuous-time low-pass filter)
     e->m->speed = (int) (input + (float)(e->m->speed - input)*expf(-(float) (time - e->lastticksquery)/MOT_TIME_CST));

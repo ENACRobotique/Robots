@@ -99,7 +99,7 @@
 #ifdef ARCH_X86_LINUX
 
 // Motor parameter
-#define MOT_TIME_CST (100.) // in ms
+#define MOT_TIME_CST (50.) // in ms
 
 #endif
 
