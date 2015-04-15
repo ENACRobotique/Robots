@@ -23,40 +23,15 @@ Servo::~Servo() {
 }
 
 
-int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if no use
+int Servo::sendPosServo(eServos s, float angle /* deg */) {
     sMsg msg = { { 0 } };
-    Point2D<float> p1, p2;
-    int i = 0;
-
-    if (((us == -1) && (a == -1)) || ((us != -1) && (a != -1))) {
-        return -1;
-    }
-
-    if (a != -1) {
-        i = 0;
-        while (s != _servo.id) {
-            i++;
-          //  if (i > sizeof(_servo) / sizeof(*_servo)) //FIXME
-                break;
-        }
-        p1.x = _servo.a1;
-        p1.y = _servo.u1;
-        p2.x = _servo.a2;
-        p2.y = _servo.u2;
-        Line2D<float> l(p1, p2);
-
-        if (l.b == 0)
-            return -1;
-
-        us = -(l.a * a + l.c) / l.b;
-    }
 
     msg.header.destAddr = ADDRI_MAIN_IO;
     msg.header.type = E_SERVOS;
-    msg.header.size = 2 + 3;
     msg.payload.servos.nb_servos = 1;
+    msg.header.size = 2 + 5*msg.payload.servos.nb_servos;
     msg.payload.servos.servos[0].id = s;
-    msg.payload.servos.servos[0].us = us;
+    msg.payload.servos.servos[0].angle = angle;
 
     bn_sendRetry(&msg, MAX_RETRIES_SERVO);
 

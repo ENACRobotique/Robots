@@ -52,7 +52,7 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
 //    pid_init(&tc->pid_ytraj, iROUND(0.125 * dPSHIFT), iROUND(0.977e-3 * dPSHIFT), iROUND(15.6e-3 * dPSHIFT), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
 //    pid_init(&tc->pid_orien, iROUND(0.125 * dPSHIFT), iROUND(0.977e-3 * dPSHIFT), iROUND(15.6e-3 * dPSHIFT), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
 
-    double mul = 0.5;
+    double mul = 0.4;
     int KP = iROUND(mul*dPSHIFT*    0.125);
     int KI = iROUND(mul*dPSHIFT*    0.977e-3);
     int KD = iROUND(mul*dPSHIFT*    0);
