@@ -43,11 +43,13 @@ int CapAI::loop(){
                 float theta_robot;
 
                 if (robot->color == YELLOW) {
+                    logs << INFO << "Color selected is YELLOW";
                     obs[0].c.x = INIT_POS_YELLOW_X;
                     obs[0].c.y = INIT_POS_YELLOW_Y;
                     theta_robot = INIT_ANGLE_YELLOW;
                 }
                 else if (robot->color == GREEN) {
+                    logs << INFO << "Color selected is GREEN";
                     obs[0].c.x = INIT_POS_GREEN_X;
                     obs[0].c.y = INIT_POS_GREEN_Y;
                     theta_robot = INIT_ANGLE_GREEN;
@@ -56,6 +58,7 @@ int CapAI::loop(){
                     logs << ERR << "Error selection color";
                     return -1;
                 }
+
 
                 initObjective(robot->color);
 
@@ -127,9 +130,7 @@ int CapAI::loop(){
 
         case SHUT_DOWN:
             logs << INFO << "SHUT_DOWN : time = " << (unsigned int) (millis() - start_time) / 1000;
-
             path.stopRobot();
-
             return 0;
             break;
 

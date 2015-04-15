@@ -126,6 +126,7 @@ int main(int argc, char **argv) {
     eAIState_t eAIState = E_AI_SLAVE;
     bool simu_primary = true;
     bool holo_primary = true;
+    eColor_t color_primary = GREEN;
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -164,6 +165,10 @@ int main(int argc, char **argv) {
                     holo_primary = false;
                 else if(strstr( optarg, "holo"))
                     holo_primary = true;
+                if(strstr( optarg, "green"))
+                    color_primary = GREEN;
+                else if(strstr( optarg, "yellow"))
+                    color_primary = YELLOW;
                 break;
             case 's':
                 break;
@@ -203,16 +208,11 @@ int main(int argc, char **argv) {
     sendPing();
 
     // calls initialization functions
-    initRobots(simu_primary, holo_primary);
-
     init_obs(initObs);
     switch (eAIState) {
         case E_AI_AUTO:
         case E_AI_PROG:
-            ret = initAI();
-            if (ret < 0) {
-                cerr << "[ERROR] [main.cpp] obj_init() error #" << -ret << endl;
-            }
+            setupRobots(simu_primary, holo_primary, color_primary);
             break;
         case E_AI_SLAVE:
             Point2D<float> pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
@@ -257,7 +257,7 @@ int main(int argc, char **argv) {
                 break;
             case E_AI_AUTO:
             case E_AI_PROG:
-                ret = stepAI();
+                loopRobots();
                 break;
             default:
                 break;

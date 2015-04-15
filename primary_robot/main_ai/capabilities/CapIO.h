@@ -17,15 +17,15 @@ class CapIO : public Capability {
 
 // TODO setServo, getServo, getHMI, setHMI
 
-        unsigned int getHMI(const eIhmElement& el){
+        virtual unsigned int getHMI(const eIhmElement& el){
             return ihm.getValue(el);
         }
 
-        void setHMI(const eIhmElement& el, const unsigned int& value){
+        virtual void setHMI(const eIhmElement& el, const unsigned int& value){
             ihm.sendIhm(el,value);
         }
 
-        void selectColor() {
+        virtual void selectColor() {
             static int state = 0;
 
             switch(state) {

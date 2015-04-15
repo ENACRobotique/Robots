@@ -26,7 +26,7 @@
 std::vector<Robot*> robots;
 
 
-void initRobots(bool simu_primary, bool holo_primary){
+void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
 
     //Primary
     bn_Address primary_addr_prop = simu_primary?ADDRD1_MAIN_PROP_SIMU:ADDRI1_MAIN_PROP;
@@ -40,8 +40,10 @@ void initRobots(bool simu_primary, bool holo_primary){
     else
         robots.back()->caps[eCap::PROP] = new CapPropAxle(robots.back(), primary_addr_prop);
 
-    if(simu_primary)
+    if(simu_primary){
         robots.back()->caps[eCap::IO] = new CapIOSimuPrimary(robots.back());
+        robots.back()->color = color_primary;
+    }
     else
         robots.back()->caps[eCap::IO] = new CapIO(robots.back());
 
