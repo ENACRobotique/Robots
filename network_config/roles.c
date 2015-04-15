@@ -201,7 +201,6 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
     case E_TRAJ:
     case E_TRAJ_ORIENT_EL:
         switch(destRole){
-        case ROLE_MONITORING:
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:
             *c = ROLEMSG_PRIM_TRAJ;
@@ -210,13 +209,13 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
         case ROLE_SEC_PROPULSION:
             *c = ROLEMSG_SEC_TRAJ;
             break;
+        case ROLE_MONITORING:
         default:
             return -1;
         }
         break;
     case E_POS:
         switch(destRole){
-        case ROLE_MONITORING:
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:
             *c = ROLEMSG_PRIM_POS;
@@ -225,6 +224,7 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
         case ROLE_SEC_PROPULSION:
             *c = ROLEMSG_SEC_POS;
             break;
+        case ROLE_MONITORING:
         default:
             return -1;
         }
