@@ -177,7 +177,7 @@ uint8_t role_get_role(bn_Address address){ // TODO update
     case ADDRU2_MAIN_AI:
         return ROLE_PRIM_AI;
     case ADDRD1_MAIN_PROP_SIMU:
-    case ADDRI1_MAIN_PROP:
+    case ADDRI_MAIN_PROP:
     case ADDRU2_MAIN_PROP:
         return ROLE_PRIM_PROPULSION;
     default:

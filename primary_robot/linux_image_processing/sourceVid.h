@@ -10,7 +10,13 @@ using namespace cv;
 using namespace std;
 
 
-int initCapture(VideoCapture& srcCap, int valBegVid = 0, bool offsetVid = false);
+// Path to the image sources for YOYO
+extern string strFramePattern;
+extern string strFrameRaw;
+extern string strFrameHSV;
+
+
+int initCapture(string& title, VideoCapture& srcCap, int valBegVid = 0, bool offsetVid = false);
 
 
 #endif  // SOURCEVID_H
