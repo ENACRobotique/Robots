@@ -72,9 +72,9 @@ typedef struct __attribute__((packed)){
         eIhmElement id :8; // identifier of the ihm element
         union{
             uint16_t state; // generic status
-            eIhmCord state_cord :16;
-            eIhmSwitch state_switch :16;
-            eIhmLed sate_led :16;
+            eIhmCord state_cord :8;
+            eIhmSwitch state_switch :8;
+            eIhmLed sate_led :8;
         };
     } states[];
 } sIhmStatus;

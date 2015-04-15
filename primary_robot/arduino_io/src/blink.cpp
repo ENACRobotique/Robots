@@ -15,6 +15,9 @@
 #include "../../../static/communication/network_tools/bn_debug.h"
 #include "../../../static/communication/botNet/shared/botNet_core.h"
 #include "../../../static/communication/botNet/shared/message_header.h"
+extern "C" {
+#include "roles.h"
+}
 
 typedef struct {
         eServos id;
@@ -168,7 +171,7 @@ void loop(){
     if( (time -  timeStartingCord > 20) && flagStartingCord){
         StartingCord = digitalRead(PIN_STARTING_CORD);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_AI);
+        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         outMsg.header.type = E_IHM_STATUS;
         outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         outMsg.payload.ihmStatus.nb_states = 1;
@@ -185,7 +188,7 @@ void loop(){
         digitalWrite(PIN_LED_1, ledState1^=1);
         digitalWrite(PIN_LED_2, !ledState1);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_AI);
+        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         outMsg.header.type = E_IHM_STATUS;
         outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         outMsg.payload.ihmStatus.nb_states = 1;
@@ -202,7 +205,7 @@ void loop(){
         if(limitSwitchRight != prevLimitSwitchRight){
             prevLimitSwitchRight = limitSwitchRight;
 
-            outMsg.header.destAddr = role_get_addr(ROLE_AI);
+            outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
             outMsg.header.type = E_IHM_STATUS;
             outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
             outMsg.payload.ihmStatus.nb_states = 1;
@@ -218,7 +221,7 @@ void loop(){
         if(limitSwitchLeft != prevLimitSwitchLeft){
             prevLimitSwitchLeft = limitSwitchLeft;
 
-            outMsg.header.destAddr = role_get_addr(ROLE_AI);
+            outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
             outMsg.header.type = E_IHM_STATUS;
             outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
             outMsg.payload.ihmStatus.nb_states = 1;

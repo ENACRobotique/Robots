@@ -9,7 +9,6 @@
 #define LIB_NETWORK_CONFIG_MESSAGES_NETWORK_H_
 
 #include <stdint.h>
-#include "messages.h"
 #include "../static/communication/botNet/shared/message_header.h"
 
 //Specific payloads
@@ -23,14 +22,13 @@ typedef struct __attribute__((packed)){
 // can't be an enum because we do things at preprocessor time
 #define ROLE_UNDEFINED          (0)
 #define ROLE_DEBUG              (1)
+#define ROLE_MONITORING         (2)
 // primary roles
-#define ROLE_PRIM_MONITORING    (2)
 #define ROLE_PRIM_AI            (3)
 #define ROLE_PRIM_PROPULSION    (4)
 // secondary roles
-#define ROLE_SEC_MONITORING     (5)
-#define ROLE_SEC_AI             (6)
-#define ROLE_SEC_PROPULSION     (7)
+#define ROLE_SEC_AI             (5)
+#define ROLE_SEC_PROPULSION     (6)
 
 typedef struct __attribute__((packed)){ // 2bytes
     struct __attribute__((packed)){

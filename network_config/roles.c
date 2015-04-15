@@ -13,7 +13,7 @@
 
 #include "roles.h"
 
-#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_DEBUG && MYROLE!=ROLE_PRIM_MONITORING && MYROLE!=ROLE_PRIM_AI && MYROLE!=ROLE_PRIM_PROPULSION && MYROLE!=ROLE_SEC_MONITORING && MYROLE!=ROLE_SEC_AI && MYROLE!=ROLE_SEC_PROPULSION)
+#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_DEBUG && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_PRIM_AI && MYROLE!=ROLE_PRIM_PROPULSION && MYROLE!=ROLE_SEC_AI && MYROLE!=ROLE_SEC_PROPULSION)
 #error "MYROLE must be defined and correct in node_cfg.h"
 #endif
 
@@ -54,7 +54,7 @@ sRoleActions role_actions[] = {
         {
                 .sendTo={
                     .first = ROLE_PRIM_PROPULSION,
-                    .second = ROLE_PRIM_MONITORING,
+                    .second = ROLE_MONITORING,
                 },
                 .relayTo={
                     .n1 = 0,
@@ -79,11 +79,11 @@ sRoleActions role_actions[] = {
         {
                 .sendTo={
                     .first = ROLE_PRIM_PROPULSION,
-                    .second = ROLE_PRIM_MONITORING,
+                    .second = ROLE_MONITORING,
                 },
                 .relayTo={
                     .n1 = ROLE_PRIM_PROPULSION,
-                    .n2 = ROLE_PRIM_MONITORING
+                    .n2 = ROLE_MONITORING
                 }
         },
 #   else
@@ -171,7 +171,7 @@ uint8_t role_get_role(bn_Address address){ // TODO update
     case ADDRX_DEBUG:
         return ROLE_DEBUG;
     case ADDRD1_MONITORING:
-        return ROLE_PRIM_MONITORING;
+        return ROLE_MONITORING;
     case ADDRD1_MAIN_AI_SIMU:
     case ADDRD2_MAIN_AI:
     case ADDRU2_MAIN_AI:
@@ -201,12 +201,11 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
     case E_TRAJ:
     case E_TRAJ_ORIENT_EL:
         switch(destRole){
-        case ROLE_PRIM_MONITORING:
+        case ROLE_MONITORING:
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:
             *c = ROLEMSG_PRIM_TRAJ;
             break;
-        case ROLE_SEC_MONITORING:
         case ROLE_SEC_AI:
         case ROLE_SEC_PROPULSION:
             *c = ROLEMSG_SEC_TRAJ;
@@ -217,12 +216,11 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
         break;
     case E_POS:
         switch(destRole){
-        case ROLE_PRIM_MONITORING:
+        case ROLE_MONITORING:
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:
             *c = ROLEMSG_PRIM_POS;
             break;
-        case ROLE_SEC_MONITORING:
         case ROLE_SEC_AI:
         case ROLE_SEC_PROPULSION:
             *c = ROLEMSG_SEC_POS;
@@ -240,14 +238,12 @@ const char *role_string(uint8_t role){
     switch(role){
     case ROLE_DEBUG:
         return "debug";
-    case ROLE_PRIM_MONITORING:
-        return "primary monitoring";
+    case ROLE_MONITORING:
+        return "monitoring";
     case ROLE_PRIM_AI:
         return "primary ai";
     case ROLE_PRIM_PROPULSION:
         return "primary propulsion";
-    case ROLE_SEC_MONITORING:
-        return "secondary monitoring";
     case ROLE_SEC_AI:
         return "secondary ai";
     case ROLE_SEC_PROPULSION:

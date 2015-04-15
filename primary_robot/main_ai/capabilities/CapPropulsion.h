@@ -8,7 +8,9 @@
 #ifndef CAPABILITIES_CAPPROPULSION_H_
 #define CAPABILITIES_CAPPROPULSION_H_
 
+extern "C" {
 #include "roles.h"
+}
 
 #include "messages-locomotion.h"
 #include "path.h"

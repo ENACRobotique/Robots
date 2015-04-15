@@ -41,7 +41,7 @@ void Ihm::receivedNewIhm(sIhmStatus &ihm){ //TODO check all value with arduino_i
 void Ihm::sendIhm(const eIhmElement& id, const unsigned int& state){
     sMsg msgOut ;
 
-    msgOut.header.destAddr = ADDRI1_MAIN_IO;
+    msgOut.header.destAddr = ADDRI_MAIN_IO;
     msgOut.header.type = E_IHM_STATUS;
     msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
 

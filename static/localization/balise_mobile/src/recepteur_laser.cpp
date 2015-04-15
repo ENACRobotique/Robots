@@ -13,6 +13,9 @@
 #include "MemoryFree.h"
 #include "shared/lib_synchro_beacon.h"
 #include "../../../communication/network_tools/bn_debug.h"
+extern "C" {
+#include "roles.h"
+}
 
 
 unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;

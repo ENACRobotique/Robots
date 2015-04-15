@@ -103,7 +103,7 @@ void sendObsCfg(){
     sMsg msgOut;
     int ret;
 
-    msgOut.header.destAddr = role_get_addr(ROLE_PRIM_MONITORING);
+    msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
     msgOut.header.type = E_OBS_CFG;
     msgOut.header.size = sizeof(msgOut.payload.obsCfg);
 
@@ -139,7 +139,7 @@ void sendObss(){
                 break;
         }
         if( i < N-1 ){ //send a message
-            msgOut.header.destAddr = role_get_addr(ROLE_PRIM_MONITORING);
+            msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
             msgOut.header.type = E_OBSS;
 
             for (i = 0 ; send_obss_idx < N-1 && i < MAX_NB_OBSS_PER_MSG ; send_obss_idx++) {

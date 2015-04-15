@@ -23,6 +23,7 @@
 #include "global_errors.h"
 #include "../../core/linux/libraries/Millis/millis.h"
 #include "node_cfg.h"
+#include "roles.h"
 
 
 static int sigint = 0;

@@ -104,7 +104,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             break;
         case E_OBSS:
             if(!nb_obss){
-                outMsg.header.destAddr = role_get_addr(ROLE_AI);
+                outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
                 outMsg.header.type = E_OBS_CFG;
                 outMsg.header.size = sizeof(outMsg.payload.obsCfg);
 
@@ -166,7 +166,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             // send trajectory if event
             if(ctx->mouse_event){
-                outMsg.header.destAddr = role_get_addr(ROLE_AI);
+                outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
                 outMsg.header.type = E_GOAL;
                 outMsg.header.size = sizeof(outMsg.payload.pos);
 
@@ -558,7 +558,7 @@ int main(int argc, char *argv[]) {
 //        }
 
 // ask obstacles
-        outMsg.header.destAddr = role_get_addr(ROLE_AI);
+        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         outMsg.header.type = E_OBS_CFG;
         outMsg.header.size = sizeof(outMsg.payload.obsCfg);
 

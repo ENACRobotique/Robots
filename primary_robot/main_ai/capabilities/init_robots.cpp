@@ -29,7 +29,7 @@ std::vector<Robot*> robots;
 void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
 
     //Primary
-    bn_Address primary_addr_prop = simu_primary?ADDRD1_MAIN_PROP_SIMU:ADDRI1_MAIN_PROP;
+    bn_Address primary_addr_prop = simu_primary?ADDRD1_MAIN_PROP_SIMU:ADDRI_MAIN_PROP;
 
     robots.push_back(new Robot("", ELT_PRIMARY));
 

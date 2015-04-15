@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "message_header.h"
+#include "node_cfg.h"
 
 #include "global_errors.h"
 

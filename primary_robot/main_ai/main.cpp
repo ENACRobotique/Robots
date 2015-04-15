@@ -15,7 +15,8 @@
 #include <getopt.h> //already exist extern "C"
 
 extern "C"{
-#include <unistd.h> //for uslepp
+#include <unistd.h> //for usleep
+#include "roles.h"
 }
 
 #include "botNet_core.h"
