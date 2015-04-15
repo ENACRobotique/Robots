@@ -84,7 +84,7 @@ Mat Pass_R_T = (Mat_<float>(4,4) << Pass_R_T11, Pass_R_T12, Pass_R_T13, Pass_R_T
 
 int frameProcess(Mat& frameRaw, Mat& framePattern, sPosOrien& posOrienRob){
 	sFieldCam2Draw FieldCam;  // To draw the fiel of cam on framePattern
-	Mat frameTopViewHSV = Mat(IR_HEIGHT, IR_WIDTH, CV_8UC3);
+	Mat frameTopView = Mat(IR_HEIGHT, IR_WIDTH, CV_8UC3);
 
     // Matrices for the colors of the playgrounds
     Mat frameThresGreen;
@@ -93,7 +93,7 @@ int frameProcess(Mat& frameRaw, Mat& framePattern, sPosOrien& posOrienRob){
     Mat frameThresBlue;
 
     // Initialize the straightened frame and put in HSV mode
-	if(frameStraight(frameRaw, frameTopViewHSV) == -1){
+	if(frameStraight(frameRaw, frameTopView) == -1){
 		cout<<"process_frame(): Error during the straightening"<<endl;
 		return -1;
 	}
@@ -105,16 +105,16 @@ int frameProcess(Mat& frameRaw, Mat& framePattern, sPosOrien& posOrienRob){
 
     // Threshold, erode and dilate operations
 		// FIXME: Default parameter doesn't working
-		//for red color
-		if(frameThresh(frameTopViewHSV, frameThresRed, hsvR_min, hsvR_max, 5, 8) < 0){
+		// For red color
+		if(frameThresh(frameTopView, frameThresRed, hsvR_min, hsvR_max, 5, 8) < 0){
 			cout<<"process_frame(): Error during the threshold operation"<<endl;
 			return -1;
 		}
-		// For blue color
-		if(frameThresh(frameTopViewHSV, frameThresBlue, hsvB_min, hsvB_max, 5, 8) < 0){
-			cout<<"process_frame(): Error during the threshold operation"<<endl;
-			return -1;
-		}
+//		// For blue color
+//		if(frameThresh(frameTopViewHSV, frameThresBlue, hsvB_min, hsvB_max, 5, 8) < 0){
+//			cout<<"process_frame(): Error during the threshold operation"<<endl;
+//			return -1;
+//		}
 
 
 	// TODO: Make the process and the other Mat
@@ -123,7 +123,7 @@ int frameProcess(Mat& frameRaw, Mat& framePattern, sPosOrien& posOrienRob){
     // Show the frame in "MyVideo" window
     imshow("frameRaw", frameRaw);
     imshow("framePattern", framePattern);
-	imshow("frameTopViewHSV", frameTopViewHSV);
+	imshow("frameTopViewHSV", frameTopView);
 //    imshow("frameGreen",frameThresGreen);
 //    imshow("frameYellow",frameThresYellow);
 //    imshow("frameRed",frameThresRed);
@@ -170,9 +170,6 @@ int frameStraight(Mat& frameIn, Mat& frameOut){
 			}
 		}
 	}
-
-	// Change the colorimetry mode from RGB to HSV
-	cvtColor(frameOut, frameOut, CV_RGB2HSV);
 	return 0;
 }
 
@@ -217,7 +214,9 @@ int frameCrop2Circle(Mat& frame, Point2i& center, int radius){
  * \param int sizeDilate
  * \return int: 0 if OK, -1 otherwise
  */
-int frameThresh(Mat frameIn, Mat frameOut, Scalar hsvMin, Scalar hsvMax, int sizeErode, int sizeDilate){
+int frameThresh(const Mat frameIn, Mat frameOut, Scalar hsvMin, Scalar hsvMax, int sizeErode, int sizeDilate){
+//	Mat frame2Tresh(frameIn);
+	frameIn.copyTo(frameOut);
 	// Create elements for erode and dilate operations
 	Mat elt_erode = getStructuringElement(
 					MORPH_ELLIPSE,
@@ -229,9 +228,9 @@ int frameThresh(Mat frameIn, Mat frameOut, Scalar hsvMin, Scalar hsvMax, int siz
 					Point( 0, 0 ) );
 
 	//RGB to HSV
-	cvtColor(frameIn, frameIn, CV_RGB2HSV);
+	cvtColor(frameOut, frameOut, CV_RGB2HSV);
 	// Apply a threshold
-	inRange(frameIn , hsvMin, hsvMax, frameOut);
+	inRange(frameOut , hsvMin, hsvMax, frameOut);
 
 	// Erode and dilate operations
 	erode( frameOut, frameOut, elt_erode );
