@@ -239,12 +239,14 @@ int main() {
         }
 #elif TUNING == 1
         time_us = micros();
+        time_ms = millis();
         if (time_us - prevControl_us >= USpP) { // takes ~290µs!
             prevControl_us = time_us;
 
             posctlr_begin_update(&pc);
 
-            if(time_ms - prevState_ms > 3000*2){
+            int dt = time_ms - prevState_ms;
+            if(dt > 3000*2){
                 state = (state + 1)%4;
                 prevState_ms = millis();
             }

@@ -76,15 +76,13 @@ int64_t sp2weight(speed_controller_t* sc, int setpoint) {
 void spdctlr_update(speed_controller_t* sc, int setpoint) {
     int processValue = encoder_get(sc->enc);
 
-#if 1
     int64_t pidRes = pid_update(&sc->pid, setpoint << SHIFT_PID_EXT, processValue << SHIFT_PID_EXT); // (in <<SHIFT_PID_EXT)
 
     int64_t weight = sp2weight(sc, setpoint); // (in <<SHIFT_PID_EXT)
 
+    sc->lastSP = setpoint;
+
     sc->cmd_cache = sp2cmd(setpoint) + ((weight * pidRes) >> (SHIFT_PID_EXT*2));
-#else
-    sc->cmd_cache = sp2cmd(setpoint) + pid_update(&sc->pid, setpoint, processValue);
-#endif
 }
 
 int spdctlr_get(speed_controller_t* sc) {
