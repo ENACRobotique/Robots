@@ -15,10 +15,10 @@
 
 #include "Capability.h"
 
-enum ePropType {
+typedef enum {
     AXLE,
     HOLO
-};
+}ePropType;
 
 class CapPropulsion: public Capability {
 protected:

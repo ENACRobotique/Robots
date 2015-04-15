@@ -11,7 +11,6 @@
 
 int verbose = 1;
 int mode_switch = 0;
-eIhmCord starting_cord;
 Statuses statuses;
 Path path;
 Ihm ihm;

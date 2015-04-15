@@ -73,7 +73,7 @@ class Obj {
         Point2D<float> getDestPoint() const;
         float getDestPointOrient() const;
         eStateObj_t getState() const;
-        sNum_t getYield();
+        sNum_t getYield(const unsigned int start_time);
 
         void print() const;
 

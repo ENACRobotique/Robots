@@ -15,7 +15,7 @@ class CapIOSimuPrimary : public CapIO {
         CapIOSimuPrimary(Robot* robot_init) : CapIO(robot_init){};
         ~CapIOSimuPrimary(){};
 
-        unsigned int getValue(const eIhmElement& el){
+        unsigned int getHMI(const eIhmElement& el){
             static eIhmCord cord = CORD_OUT;
 
             switch(el){
@@ -26,10 +26,7 @@ class CapIOSimuPrimary : public CapIO {
                         cord = CORD_OUT;
                     return static_cast <unsigned int>(cord);
                 case IHM_MODE_SWICTH:
-                    if(robot->color == YELLOW)
-                        return static_cast <unsigned int>(eIhmSwitch::SWITCH_ON); //FIXME link with the real
-                    else
-                        return static_cast <unsigned int>(eIhmSwitch::SWITCH_OFF); //FIXME link with the real
+                    return static_cast <unsigned int>(eIhmSwitch::SWITCH_OFF);
                 case IHM_LED:
                     if(robot->color == YELLOW)
                         return static_cast <unsigned int>(eIhmLed::LED_YELLOW);
@@ -41,6 +38,8 @@ class CapIOSimuPrimary : public CapIO {
                     return 0;
             }
         }
+
+        void selectColor(){}
 };
 
 

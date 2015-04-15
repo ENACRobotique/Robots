@@ -84,7 +84,7 @@ void loadingPath(sPath_t /*_path*/, int /*num*/) {
 }
 
 
-int next_obj(void) {
+int next_obj(const unsigned int start_time) {
     sNum_t tmp_val = 0.;
     sNum_t tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
@@ -106,7 +106,7 @@ int next_obj(void) {
             continue;
         }
 
-        tmp_val2 = listObj[i]->getYield();
+        tmp_val2 = listObj[i]->getYield(start_time);
 
         logs << DEBUG << "objectif n°" << i << "avec ratio=" << tmp_val2;
 

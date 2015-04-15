@@ -11,10 +11,6 @@ extern "C"{
 #include <vector>
 
 
-
-#define COLOR_SIMU GREEN
-#define SIMU 1 //modify network_cfg.h
-#define PROG_TRAJ 1 //1 active
 #define RESO_POS 2
 #define NB_OBJ 16
 #define END_MATCH 90000 //in ms
@@ -23,13 +19,9 @@ extern "C"{
 #define LOW_SPEED 10
 #define NB_MAX_PT_ZONE 10
 
-
 typedef enum {
     COLOR_SELECTION, WAIT_STARTING_CORD, WAIT_START, WAIT_SECONDARY, GAME, SHUT_DOWN
 } estate_t;
-
-extern long _start_time;
-
 
 #endif
 

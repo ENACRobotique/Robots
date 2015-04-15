@@ -198,7 +198,7 @@ eStateObj_t Obj::getState() const{
     return _state;
 }
 
-sNum_t Obj::getYield(void){
+sNum_t Obj::getYield(const unsigned int start_time){
     sNum_t ratio = 0.;
 
     if (_dist == 0) { //FIXME on est sur le point donc valeur max : Erreur ou objectif atteint
@@ -206,7 +206,7 @@ sNum_t Obj::getYield(void){
         return (-1);
     }
 
-    if (_time > (END_MATCH - (millis() - _start_time))) { //insufficient time remaining
+    if (_time > (END_MATCH - (millis() - start_time))) { //insufficient time remaining
         _state = NO_TIME;
         return 0;
     }

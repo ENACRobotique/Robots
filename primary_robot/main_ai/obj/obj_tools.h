@@ -16,7 +16,7 @@ void updateEndTraj(float theta, Point2D<float> *pt, float r);
 void updateNoHaftTurn(float theta, Point2D<float>& pt);
 void set_traj(sPath_t *p, iABObs_t l[], int nb);
 
-int next_obj(void);
+int next_obj(const unsigned int start_time);
 int metObj(int numObj);
 
 
