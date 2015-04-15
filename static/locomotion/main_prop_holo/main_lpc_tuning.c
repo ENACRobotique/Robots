@@ -152,7 +152,10 @@ int main() {
     unsigned int prevControl_us = micros();
     unsigned int prevLed_ms = millis();
     unsigned int time_ms, time_us;
+    int stateLed = 0;
+
     int state = 0;
+    unsigned int prevState_ms = millis();
 
 #if TUNING == 0
     motor_t mots[3];
@@ -175,6 +178,8 @@ int main() {
 
     MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
     MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
+
+    prevState_ms += 1500;
 #endif
 
     global_IRQ_enable();
@@ -184,14 +189,20 @@ int main() {
 
 #if TUNING == 0
         time_us = micros();
+        time_ms = millis();
         if (time_us - prevControl_us >= USpP) {
             prevControl_us = time_us;
+
+            if(time_ms - prevState_ms > 3500*2){
+                state = (state + 1)%4;
+                prevState_ms = millis();
+            }
 
             {
                 double v;
                 double omega = 2.*PI/3.5; // (rad/s)
                 double theta = omega*(double)time_us/1e6; // (rad)
-                double a = 40.;
+                double a = (state&2) ? 5. : 15.;
 
 #if 0
                 v = sin(theta);
@@ -200,9 +211,17 @@ int main() {
                 v = linsin(theta);
 #endif
 
-                sps[0] = iDpS2IpP( a/2. *v);
-                sps[1] = iDpS2IpP( a/2. *v);
-                sps[2] = iDpS2IpP(-a    *v);
+                if(state&1){
+                    sps[0] = iDpS2IpP( a/2. *v);
+                    sps[1] = iDpS2IpP( a/2. *v);
+                    sps[2] = iDpS2IpP(-a    *v);
+                }
+                else{
+                    double mul = 3./4.;
+                    sps[0] = iDpS2IpP( mul*a *v);
+                    sps[1] = iDpS2IpP( mul*a *v);
+                    sps[2] = iDpS2IpP( mul*a *v);
+                }
             }
 
             for(i = 0; i < 3; i++) {
@@ -225,6 +244,11 @@ int main() {
 
             posctlr_begin_update(&pc);
 
+            if(time_ms - prevState_ms > 3000*2){
+                state = (state + 1)%4;
+                prevState_ms = millis();
+            }
+
             {
                 // lissajous curve for X/Y, why not?
                 double p = 3.; // must be integer
@@ -237,9 +261,11 @@ int main() {
                 double theta = omega*(double)time_us/1e6; // (rad)
 
                 // just a linear sinus for orientation
-                double c = 15. * PI / 180.; // (rad)
-                double omegap = 2.*PI/4.; // (rad/s)
+                double c = 20. * PI / 180.; // (rad)
+                double omegap = 2.*PI/3.; // (rad/s)
                 double thetap = omegap*(double)time_us/1e6; // (rad)
+
+                c -= state * 5. * PI / 180.;
 
 #if 0
                 sps[0] = isDpS2IpP(omega*a*p*cos(p*theta));
@@ -272,21 +298,21 @@ int main() {
                 v3_sp = spd_cmd_pods.ve[2] >> VEC_SHIFT;
             }
 
-            printf("%u, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %u\n",
+            printf("%u, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i\n",
                     time_us,
                     x_sp, y_sp, theta_sp,
                     pc.x, pc.y, pc.theta,
                     v1_sp, v2_sp, v3_sp,
                     pc.encs[0].nbticks_cache, pc.encs[1].nbticks_cache, pc.encs[2].nbticks_cache,
-                    micros() - time_us);
+                    pc.spd_ctls[0].lastSP, pc.spd_ctls[1].lastSP, pc.spd_ctls[2].lastSP);
         }
 #endif
 
         time_ms = millis();
         if ((time_ms - prevLed_ms) > 200) {
             prevLed_ms = time_ms;
-            state ^= 1;
-            gpio_write(1, 24, state);
+            stateLed ^= 1;
+            gpio_write(1, 24, stateLed);
         }
     }
 }

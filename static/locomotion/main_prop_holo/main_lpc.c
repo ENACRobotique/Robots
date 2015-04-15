@@ -78,14 +78,11 @@ const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
 int main() {
     //// Initialization
     gpio_init_all();
-    // Debug
     debug_leds_init();
     debug_switches_init();
-    // Time
     sys_time_init();
-    // PWM
     pwm_init(0, PWM_RANGE); // frequency of the generated pwm signal: equal f_osc/((prescaler + 1)*range)
-    // Trajectory manager
+
     trajectory_manager_t traj_mngr;
     trajmngr_init(&traj_mngr, mat_rob2pods);
 
@@ -98,7 +95,7 @@ int main() {
     unsigned int prevLed_ms = millis();
     unsigned int prevPos_ms = millis();
     unsigned int time_ms, time_us;
-    int state = 0;
+    int ledState = 0;
     int ret;
     sMsg inMsg = { { 0 } }, outMsg = { { 0 } };
 
@@ -162,8 +159,8 @@ int main() {
         time_ms = millis();
         if ((time_ms - prevLed_ms) > 200) {
             prevLed_ms = time_ms;
-            state ^= 1; // toggle state (led blinking)
-            gpio_write(1, 24, state);
+            ledState ^= 1; // toggle state (led blinking)
+            gpio_write(1, 24, ledState);
         }
     }
 }

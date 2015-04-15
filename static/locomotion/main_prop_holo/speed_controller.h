@@ -10,11 +10,13 @@
 #include <encoder.h>
 #include <motor.h>
 #include <pid.h>
+#include "lowpass_filter.h"
 
 typedef struct {
     encoder_t* enc;
 
     PID_t pid;
+    lowpass_t lp;
     int cmd_cache;
 } speed_controller_t;
 
