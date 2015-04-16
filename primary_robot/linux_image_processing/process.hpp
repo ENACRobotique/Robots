@@ -10,7 +10,7 @@
 
 #include "tools.hpp"
 #include "params.hpp"
-#include "sourceVid.h"
+#include "sourceVid.hpp"
 
 using namespace cv;  // Check if declaration here is relevant
 

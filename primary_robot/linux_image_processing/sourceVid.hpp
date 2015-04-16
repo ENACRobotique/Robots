@@ -10,7 +10,6 @@ using namespace cv;
 using namespace std;
 
 
-// Path to the image sources for YOYO
 extern string strFramePattern;
 extern string strFrameRaw;
 extern string strFrameHSV;

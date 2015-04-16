@@ -22,9 +22,9 @@ using namespace std;
 #include "tools.hpp"
 #include "params.hpp"
 #include "process.hpp"
-#include "performance.h"
-#include "save.h"
-#include "sourceVid.h"
+#include "performance.hpp"
+#include "save.hpp"
+#include "sourceVid.hpp"
 
 //###############
 //#### TODO ####
@@ -42,7 +42,7 @@ using namespace std;
 //############## Main ##############
 //##################################
 int main(int argc, char* argv[]) {
-	sPerf sValPerf;
+    Perf p;
 	sPosOrien posOriRobot;
 	Mat framePattern;
 	Mat frameRaw;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 	VideoCapture srcFramePattern;  // For the pattern of the table
 	VideoCapture cap;
 	string titleFrameRaw("frameRaw");
-	initCapture(titleFrameRaw, cap, 0, false); // FIXME: default parameter not working
+	initCapture(titleFrameRaw, cap);
 	string titleFramePatt("framePattern");
 	initFramePattern(titleFramePatt, srcFramePattern, framePattern); //// Initialize the pattern frame
 
@@ -93,13 +93,16 @@ int main(int argc, char* argv[]) {
 #endif
 
 	while (1) {
-		cmptPerfFrame(StartPerf, sValPerf);
+	    p.beginFrame();
+
 
 		// Read a new frame from the video source
 		if (!cap.read(frameRaw)) {  //if not success, break loop
 			cout << "Cannot read the frame from source video file" << endl;
 			break;
 		}
+
+		p.endOfStep("reading frame");
 
 		// Write the raw frame into the file
 #ifdef SAVE
@@ -111,6 +114,8 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 
+        p.endOfStep("image processing");
+
 		//// Image calibration
 #ifdef SETTINGS_HSV
 		// Apply a threshold
@@ -120,10 +125,11 @@ int main(int argc, char* argv[]) {
 		}
 		// Show calibration
 		displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
+
+        p.endOfStep("HSV calib");
 #endif
 
-		// End of measurements
-		cmptPerfFrame(EndPerf, sValPerf);
+		p.endFrame();
 	}  // End while
 
 	printf("End loop\n");
