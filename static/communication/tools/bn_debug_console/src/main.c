@@ -295,7 +295,7 @@ int main(int argc, char **argv){
                 }
                 case 'h':{
                     printf("Syncing propulsion... "); fflush(stdout);
-                    ret = bn_intp_sync(role_get_addr(ROLE_PROPULSION), 100);
+                    ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 100);
                     if(ret < 0){
                         printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
                     }
@@ -386,11 +386,6 @@ int main(int argc, char **argv){
                     bn_send(&msg);
                     break;
                 }
-                case 'h':
-                    printf("Syncing propulsion..."); fflush(stdout);
-                    bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 100);
-                    printf("done\n");
-                    break;
                 case 'w':{
                     sMsg msg = {{0}};
 
