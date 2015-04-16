@@ -41,6 +41,7 @@ typedef struct __attribute__((packed)){ // 2bytes
     } relayTo;
 } sRoleActions;
 
+
 typedef enum {
     ROLEMSG_DEBUG,
     ROLEMSG_PRIM_TRAJ,
@@ -49,13 +50,15 @@ typedef enum {
     ROLEMSG_SEC_POS,
 } eRoleMsgClass;
 
+typedef enum{
+    UPDATE_ADDRESS,
+    UPDATE_ACTIONS
+} eStep;
+
 typedef struct __attribute__((packed)){
-    uint16_t nb_steps; // must be <=18 to fit in a sMsg payload (2+3*18=56)
-    struct __attribute__((packed)){ // 3bytes
-        enum{
-            UPDATE_ADDRESS,
-            UPDATE_ACTIONS
-        } step_type :4;
+    uint16_t nb_steps; // must be <=13 to fit in a sMsg payload (2+4*13=54)
+    struct{ // 3bytes
+            eStep step_type :4;
         union{
             // case update address
             struct __attribute__((packed)){

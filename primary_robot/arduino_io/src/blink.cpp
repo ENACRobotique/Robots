@@ -52,7 +52,7 @@ sServoData servosTable[] = {
 #define PIN_LIMIT_SWITCH_RIGHT (A2)
 #define PIN_LIMIT_SWITCH_LEFT (A3)
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
+Adafruit_PWMServoDriver pwm(0x40);
 
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
@@ -162,7 +162,7 @@ void loop(){
         }
     }
 
-    if (time - led_prevT > 10u) {
+    if (time - led_prevT > 200u) {
         led_prevT = time;
 
         digitalWrite(PIN_DBG_LED, ledState^=1);

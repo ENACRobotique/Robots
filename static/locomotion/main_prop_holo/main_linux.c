@@ -99,16 +99,15 @@ int main() {
 
         // Automatic control
         if (micros() - prevControl_us >= USpP) {
-            // If there is too much delay we skip to the next increment of the loop
             if (micros() - prevControl_us > 1.5*USpP) {
-                prevControl_us = micros();
+                // If there is too much delay we skip to the next increment of the loop
                 trajmngr_reset(&traj_mngr);
-                continue;
             }
-            prevControl_us = micros();
+            else {
+                trajmngr_update(&traj_mngr);
+            }
 
-            // Control trajectory
-            trajmngr_update(&traj_mngr);
+            prevControl_us = micros();
         }
 
         if (millis() - prevPos_ms >= 100) {

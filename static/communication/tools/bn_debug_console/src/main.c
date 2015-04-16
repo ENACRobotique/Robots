@@ -233,6 +233,8 @@ int main(int argc, char **argv){
                 char input[32];
 
                 printf("\ndebug reader menu\n");
+                printf("a : INIT: send RoleSetup messages to prop and moni to tell ai is simulated\n");
+                printf("h : INIT: synchronize time on propulsion\n");
                 printf("d : send speed setpoint to the primary robot\n");
                 printf("s : send debugger address\n");
                 printf("p : ping\n");
@@ -250,6 +252,58 @@ int main(int argc, char **argv){
                 while(*p && isspace(*p)) p++;
 
                 switch (*p){
+                case 'a':{ // setup nodes for simulated AI
+                    sMsg msg = {{0}};
+
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+                    printf("Sending RoleSetup message to propulsion... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = role_get_addr(ROLE_MONITORING);
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+                    printf("Sending RoleSetup message to monitoring... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+
+                    break;
+                }
+                case 'h':{
+                    printf("Syncing propulsion... "); fflush(stdout);
+                    ret = bn_intp_sync(role_get_addr(ROLE_PROPULSION), 100);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+                    break;
+                }
                 case 'e':{
                     sMsg msg = {{0}};
                     static int angle = 50;

@@ -11,7 +11,7 @@
 
 extern "C"{
 #include <stdio.h>
-
+#include "global_errors.h"
 #include "millis.h"
 #include "messages.h"
 #include "roles.h"
@@ -94,6 +94,40 @@ void sendPing(){
             }
         if(state == 6) break;
         }*/
+}
+
+
+void sendRoleSetup(){
+    int ret;
+    sMsg msg;
+
+    msg.header.type = E_ROLE_SETUP;
+    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
+    msg.payload.roleSetup.nb_steps = 1;
+    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+    // step #0
+    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+    printf("Sending RoleSetup message to propulsion... "); fflush(stdout);
+    ret = bn_sendAck(&msg);
+    if(ret < 0)
+        logs << ERR << "FAILED: "<< getErrorStr(-ret) << "(#" << -ret << ")";
+
+    msg.header.type = E_ROLE_SETUP;
+    msg.header.destAddr = role_get_addr(ROLE_MONITORING);
+    msg.payload.roleSetup.nb_steps = 1;
+    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+    // step #0
+    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+    printf("Sending RoleSetup message to monitoring... "); fflush(stdout);
+    ret = bn_sendAck(&msg);
+    if(ret < 0)
+        logs << ERR << "FAILED: "<< getErrorStr(-ret) << "(#" << -ret << ")";
 }
 
 /*

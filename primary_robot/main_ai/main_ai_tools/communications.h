@@ -16,6 +16,7 @@ using namespace std;
 
 //Send message
 void sendPing();
+void sendRoleSetup();
 void sendObsCfg();
 void sendObss();
 int sendPos(Point2D<float>& p, float theta);

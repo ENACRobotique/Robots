@@ -34,7 +34,7 @@ typedef enum{
 
 typedef struct __attribute__((packed)){
     uint16_t nb_servos; // must be <=10
-    struct __attribute__((packed)){
+    struct __attribute__((packed)){ // 5 bytes
             eServos id :8; // identifier of the servomotor
             float angle; // servo setpoint in degrees (0-*)
     } servos[];

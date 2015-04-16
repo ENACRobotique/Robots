@@ -15,6 +15,7 @@
 #include <motors.h>
 #include <mt_mat.h>
 #include <pid.h>
+#include <median_filter.h>
 #include <speed_controller.h>
 #include <stdint.h>
 
@@ -46,6 +47,11 @@ typedef struct {
     PID_t pid_xtraj;
     PID_t pid_ytraj;
     PID_t pid_orien;
+
+    // median filter associated to PID
+    median_t mf_xtraj;
+    median_t mf_ytraj;
+    median_t mf_orien;
 
     // Hardware objects
     encoder_t encs[NB_PODS];

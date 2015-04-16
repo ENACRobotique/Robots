@@ -10,12 +10,17 @@
 #include <encoder.h>
 #include <motor.h>
 #include <pid.h>
+#include "lowpass_filter.h"
 
 typedef struct {
     encoder_t* enc;
 
     PID_t pid;
+    lowpass_t lp;
     int cmd_cache;
+
+    // XXX
+    int lastSP;
 } speed_controller_t;
 
 void spdctlr_init(speed_controller_t* sc, encoder_t* enc);
