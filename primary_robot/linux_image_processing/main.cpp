@@ -19,6 +19,8 @@
 using namespace cv;
 using namespace std;
 
+#include "shared/botNet_core.h"
+
 #include "tools.hpp"
 #include "params.hpp"
 #include "process.hpp"
@@ -46,6 +48,8 @@ int main(int argc, char* argv[]) {
 	sPosOrien posOriRobot;
 	Mat framePattern;
 	Mat frameRaw;
+
+	bn_init();
 
 	// Init postion and orientation of robot
 	// TODO: Later use the information sent by the AI
