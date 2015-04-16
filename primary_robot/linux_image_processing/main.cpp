@@ -16,14 +16,6 @@
 #include <unistd.h>
 #include <math.h>
 
-// For communications
-//#include "../../network_config/messages.h"
-//#include "../../network_config/messages-elements.h"
-//#include "node_cfg.h"
-//#include "../../static/communication/botNet/shared/botNet_core.h"
-//#include "../../static/communication/botNet/shared/message_header.h"
-//#include "../../network_config/roles.h"  // FIXME: ??? Is it relevant ???
-
 using namespace cv;
 using namespace std;
 
@@ -54,11 +46,12 @@ int main(int argc, char* argv[]) {
 	sPosOrien posOriRobot;
 	Mat framePattern;
 	Mat frameRaw;
-//	int ret;
-//	sMsg inMsg = {{0}}, outMsg = {{0}};s
 
-    // botNet initialization
-//    bn_init();
+	// Init postion and orientation of robot
+	// TODO: Later use the information sent by the AI
+	posOriRobot.x = 0;
+	posOriRobot.y = 0;
+	posOriRobot.theta = 0;
 
 	// Init video sources
 	VideoCapture srcFramePattern;  // For the pattern of the table
@@ -84,6 +77,7 @@ int main(int argc, char* argv[]) {
 
 	// Create  windows
 //	namedWindow("Anything", CV_WINDOW_AUTOSIZE);
+//	namedWindow("frameTopView",CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameGreen",CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameRed",CV_WINDOW_AUTOSIZE);
 //	namedWindow("frameBlue",CV_WINDOW_AUTOSIZE);
@@ -99,50 +93,37 @@ int main(int argc, char* argv[]) {
 #endif
 
 	while (1) {
-//		ret = bn_receive(&inMsg);
-//
-//		switch(inMsg.header.type){
-//            case E_POS_CAM:
-				cmptPerfFrame(StartPerf, sValPerf);
-				// Read a new frame from the video source
-				if (!cap.read(frameRaw)) {  //if not success, break loop
-					cout << "Cannot read the frame from source video file" << endl;
-					break;
-				}
+		cmptPerfFrame(StartPerf, sValPerf);
 
-				// Write the raw frame into the file
-				#ifdef SAVE
-				save(oVideoWriter, frameRaw);
-				#endif
+		// Read a new frame from the video source
+		if (!cap.read(frameRaw)) {  //if not success, break loop
+			cout << "Cannot read the frame from source video file" << endl;
+			break;
+		}
 
-				// Image processing
-				if (frameProcess(frameRaw, framePattern, posOriRobot)) {
-					break;
-				}
+		// Write the raw frame into the file
+#ifdef SAVE
+		save(oVideoWriter, frameRaw);
+#endif
 
-				//// Image calibration
-				#ifdef SETTINGS_HSV
-				// Apply a threshold
-				if(frameThresh(frameHSVCalib, frameHSVCalib, hsvCalib_min, hsvCalib_max, 5, 8) < 0) {
-					cout<<"process_frame(): Error during the threshold operation"<<endl;
-					return -1;
-				}
-				// Show calibration
-				displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
-				#endif
+		// Image processing
+		if (frameProcess(frameRaw, framePattern, posOriRobot)) {
+			break;
+		}
 
-				// End of measurements
-				cmptPerfFrame(EndPerf, sValPerf);
-//
-//                break;
-//            case E_DATA:
-//            case E_PING:
-//                break;
-//            default:
-//                bn_printfDbg("got unhandled msg: type%hhu sz%hhu", inMsg.header.type, inMsg.header.size);
-//                break;
-//		}  // End switch
+		//// Image calibration
+#ifdef SETTINGS_HSV
+		// Apply a threshold
+		if(frameThresh(frameHSVCalib, frameHSVCalib, hsvCalib_min, hsvCalib_max, 5, 8) < 0) {
+			cout<<"process_frame(): Error during the threshold operation"<<endl;
+			return -1;
+		}
+		// Show calibration
+		displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
+#endif
 
+		// End of measurements
+		cmptPerfFrame(EndPerf, sValPerf);
 	}  // End while
 
 	printf("End loop\n");

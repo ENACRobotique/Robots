@@ -155,8 +155,8 @@ int frameStraight(Mat& frameIn, Mat& frameOut){
 	int u,v;
 	for(int j=0;j<IR_HEIGHT;j++){
 		for(int i=0;i<IR_WIDTH;i++){
-			u = int((3195.*j - 5213.*sqrt(2)*i + 2794168.*sqrt(2) - 3952854.)/(10.*j - 12372.));  // FIXME: Use matrices
-			v = int(-(7045.*j - 5151.)/(25.*j - 30930.));  // FIXME: Use matrices
+			u = int((3195.*j - 5213.*sqrt(2)*i + 2794168.*sqrt(2) - 3952854.)/(10.*j - 12372.));
+			v = int(-(7045.*j - 5151.)/(25.*j - 30930.));
 
 			if(u>=0 && u<640 && v>=0 && v<480){ // Access to a pixel
 				for(int a=0;a<3 ; a++){  // Over the three channel
