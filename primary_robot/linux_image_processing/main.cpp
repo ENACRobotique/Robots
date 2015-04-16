@@ -27,12 +27,14 @@
 using namespace cv;
 using namespace std;
 
+#include "shared/botNet_core.h"
+
 #include "tools.hpp"
 #include "params.hpp"
 #include "process.hpp"
-#include "performance.h"
-#include "save.h"
-#include "sourceVid.h"
+#include "performance.hpp"
+#include "save.hpp"
+#include "sourceVid.hpp"
 
 //###############
 //#### TODO ####
@@ -50,21 +52,21 @@ using namespace std;
 //############## Main ##############
 //##################################
 int main(int argc, char* argv[]) {
-	sPerf sValPerf;
+    Perf p;
 	sPosOrien posOriRobot;
 	Mat framePattern;
 	Mat frameRaw;
 //	int ret;
 //	sMsg inMsg = {{0}}, outMsg = {{0}};s
 
-    // botNet initialization
-//    bn_init();
+	// botNet initialization
+	bn_init();
 
 	// Init video sources
 	VideoCapture srcFramePattern;  // For the pattern of the table
 	VideoCapture cap;
 	string titleFrameRaw("frameRaw");
-	initCapture(titleFrameRaw, cap, 0, false); // FIXME: default parameter not working
+	initCapture(titleFrameRaw, cap);
 	string titleFramePatt("framePattern");
 	initFramePattern(titleFramePatt, srcFramePattern, framePattern); //// Initialize the pattern frame
 
@@ -103,36 +105,43 @@ int main(int argc, char* argv[]) {
 //
 //		switch(inMsg.header.type){
 //            case E_POS_CAM:
-				cmptPerfFrame(StartPerf, sValPerf);
-				// Read a new frame from the video source
-				if (!cap.read(frameRaw)) {  //if not success, break loop
-					cout << "Cannot read the frame from source video file" << endl;
-					break;
-				}
+		p.beginFrame();
 
-				// Write the raw frame into the file
-				#ifdef SAVE
-				save(oVideoWriter, frameRaw);
-				#endif
 
-				// Image processing
-				if (frameProcess(frameRaw, framePattern, posOriRobot)) {
-					break;
-				}
+		// Read a new frame from the video source
+		if (!cap.read(frameRaw)) {  //if not success, break loop
+			cout << "Cannot read the frame from source video file" << endl;
+			break;
+		}
 
-				//// Image calibration
-				#ifdef SETTINGS_HSV
-				// Apply a threshold
-				if(frameThresh(frameHSVCalib, frameHSVCalib, hsvCalib_min, hsvCalib_max, 5, 8) < 0) {
-					cout<<"process_frame(): Error during the threshold operation"<<endl;
-					return -1;
-				}
-				// Show calibration
-				displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
-				#endif
+		p.endOfStep("reading frame");
 
-				// End of measurements
-				cmptPerfFrame(EndPerf, sValPerf);
+		// Write the raw frame into the file
+#ifdef SAVE
+		save(oVideoWriter, frameRaw);
+#endif
+
+		// Image processing
+		if (frameProcess(frameRaw, framePattern, posOriRobot)) {
+			break;
+		}
+
+		p.endOfStep("image processing");
+
+		//// Image calibration
+#ifdef SETTINGS_HSV
+		// Apply a threshold
+		if(frameThresh(frameHSVCalib, frameHSVCalib, hsvCalib_min, hsvCalib_max, 5, 8) < 0) {
+			cout<<"process_frame(): Error during the threshold operation"<<endl;
+			return -1;
+		}
+		// Show calibration
+		displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
+
+		p.endOfStep("HSV calib");
+#endif
+
+		p.endFrame();
 //
 //                break;
 //            case E_DATA:

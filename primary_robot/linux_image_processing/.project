@@ -24,4 +24,41 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>lib</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>lib/Core</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/core/shared/Core</locationURI>
+		</link>
+		<link>
+			<name>lib/Millis</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/core/linux/libraries/Millis</locationURI>
+		</link>
+		<link>
+			<name>lib/Timeout</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/tools/libraries/Timeout</locationURI>
+		</link>
+		<link>
+			<name>lib/botNet</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/communication/botNet</locationURI>
+		</link>
+		<link>
+			<name>lib/network_config</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/network_config</locationURI>
+		</link>
+		<link>
+			<name>lib/network_tools</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/static/communication/network_tools</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
