@@ -9,6 +9,7 @@
 #include "CapIO.h"
 #include "CapPropulsion.h"
 #include "CapPosition.h"
+#include "CapTeam.h"
 #include "ai_types.h"
 #include "tools.h"
 #include "ai_tools.h"
@@ -31,6 +32,7 @@ int CapAI::loop(){
     CapIO* capIO = dynamic_cast<CapIO*> (robot->caps[eCap::IO]);
     CapPropulsion* capProp = dynamic_cast<CapPropulsion*> (robot->caps[eCap::PROP]);
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
+    CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
 
     if(!capIO)
         logs << ERR << "IA must be have an HMI interface real or simulate";
@@ -42,13 +44,13 @@ int CapAI::loop(){
             if(capIO->getHMI(IHM_STARTING_CORD) == CORD_OUT) {
                 float theta_robot;
 
-                if (robot->color == YELLOW) {
+                if (capTeam->getColor() == YELLOW) {
                     logs << INFO << "Color selected is YELLOW";
                     obs[0].c.x = INIT_POS_YELLOW_X;
                     obs[0].c.y = INIT_POS_YELLOW_Y;
                     theta_robot = INIT_ANGLE_YELLOW;
                 }
-                else if (robot->color == GREEN) {
+                else if (capTeam->getColor() == GREEN) {
                     logs << INFO << "Color selected is GREEN";
                     obs[0].c.x = INIT_POS_GREEN_X;
                     obs[0].c.y = INIT_POS_GREEN_Y;
@@ -60,7 +62,7 @@ int CapAI::loop(){
                 }
 
 
-                initObjective(robot->color);
+                initObjective(capTeam->getColor());
 
                 Point2D<float> p(obs[0].c.x, obs[0].c.y);
                 sendPos(p, theta_robot); //Sending approximate initial position

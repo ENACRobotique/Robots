@@ -7,6 +7,7 @@
 
 
 #include "CapPosSimuSecondary.h"
+#include "CapTeam.h"
 
 extern "C"{
 #include "millis.h"
@@ -20,10 +21,11 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
     static unsigned int lastTime = 0;
     static Point2D<float> pos;
     static Vector2D<float> spd;
+    CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
 
     if (state < trjS.size() - 1) {
         if(first) {
-            if(robot->color == GREEN) {
+            if(capTeam->getColor() == GREEN) {
                 for(Point2D<float>& pt : trjS)
                     pt.x = 300. - pt.x;
             }

@@ -20,14 +20,15 @@ typedef enum {
     PROP,
     BEACON, //balise mobile
     IO,
-    VIDEO
+    VIDEO,
+    TEAM
 }eCap;
 
 class Capability;
 
 class Robot {
     public:
-        Robot(std::string name_, eElement el_) : el(el_), color(NONE){
+        Robot(std::string name_, eElement el_) : el(el_){
             switch(el){
                 case(ELT_PRIMARY):
                     name = "Primary";
@@ -52,7 +53,6 @@ class Robot {
     public:
         std::string name;
         eElement el;
-        eColor_t color;
         std::map<eCap, Capability*> caps;
 };
 

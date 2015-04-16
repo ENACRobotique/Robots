@@ -34,6 +34,8 @@ void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
     robots.push_back(new Robot("", ELT_PRIMARY));
 
     robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 1);
+    robots.back()->caps[eCap::AI] = new CapAI(robots.back());
+    robots.back()->caps[eCap::POS] = new CapTeam(robots.back(), color_primary); //TODO if AI
 
     if(holo_primary)
         robots.back()->caps[eCap::PROP] = new CapPropHolonome(robots.back(), primary_addr_prop);
@@ -42,12 +44,10 @@ void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
 
     if(simu_primary){
         robots.back()->caps[eCap::IO] = new CapIOSimuPrimary(robots.back());
-        robots.back()->color = color_primary;
     }
     else
         robots.back()->caps[eCap::IO] = new CapIO(robots.back());
 
-    robots.back()->caps[eCap::AI] = new CapAI(robots.back());
 
 
     //Secondary

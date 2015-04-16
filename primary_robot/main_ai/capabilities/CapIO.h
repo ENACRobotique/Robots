@@ -9,6 +9,7 @@
 #define CAPABILITIES_CAPIO_H_
 
 #include <Capability.h>
+#include "CapTeam.h"
 
 class CapIO : public Capability {
     public:
@@ -27,12 +28,13 @@ class CapIO : public Capability {
 
         virtual void selectColor() {
             static int state = 0;
+            CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
 
             switch(state) {
                 case 0 :
                     if(getHMI(IHM_MODE_SWICTH) == 0) {
                         state = 1;
-                        robot->color = YELLOW;
+                        capTeam->setColor(YELLOW);
                         setHMI(IHM_LED, LED_YELLOW);
                     }
                     break;
@@ -43,7 +45,7 @@ class CapIO : public Capability {
                 case 2 :
                     if(getHMI(IHM_MODE_SWICTH) == 0) {
                         state = 3;
-                        robot->color = GREEN;
+                        capTeam->setColor(GREEN);
                         setHMI(IHM_LED, LED_GREEN);
                     }
                     break;

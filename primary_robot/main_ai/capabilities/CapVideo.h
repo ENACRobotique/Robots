@@ -12,8 +12,8 @@
 
 class CapVideo : public Capability {
     public:
-        CapVideo(Robot* robot_init) : Capability(robot_init){};
-        ~CapVideo(){};
+        CapVideo(Robot* robot_init) : Capability(robot_init){}
+        ~CapVideo(){}
 
 
 };
