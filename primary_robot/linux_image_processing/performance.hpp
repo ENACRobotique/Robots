@@ -8,18 +8,20 @@
 
 class Perf {
 private:
-    typedef std::chrono::microseconds time_unit;
+    using time_unit = std::chrono::microseconds;
+    using clock = std::chrono::high_resolution_clock;
+    using time_point = std::chrono::time_point<clock>;
 
     int currFrameNb = 0;
 
-    std::multimap<std::chrono::time_point<std::chrono::high_resolution_clock>, std::string> frameTimes;
+    std::multimap<time_point, std::string> frameTimes;
 
     string getPrefix() {
         return "frame #" + std::to_string(currFrameNb) + ": ";
     }
 
     void insertNow(string s) {
-        frameTimes.insert(std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>, std::string>(std::chrono::high_resolution_clock::now(), getPrefix() + s));
+        frameTimes.insert(std::pair<time_point, std::string>(clock::now(), getPrefix() + s));
     }
 
 public:
@@ -43,7 +45,7 @@ public:
 
         std::chrono::duration<double> frameDur = std::chrono::duration_cast<time_unit>(frameTimes.crbegin()->first - frameTimes.cbegin()->first);
 
-        multimap<std::chrono::time_point<std::chrono::high_resolution_clock>, std::string>::iterator prevIt;
+        multimap<time_point, std::string>::iterator prevIt;
         for(auto it = frameTimes.begin(); it != frameTimes.end(); it++) {
             if(it != frameTimes.begin()) {
                 std::chrono::duration<double> dur = std::chrono::duration_cast<time_unit>(it->first - prevIt->first);
