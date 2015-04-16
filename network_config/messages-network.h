@@ -30,13 +30,15 @@ typedef struct __attribute__((packed)){ // 2bytes
     } relayTo;
 } sRoleActions;
 
+typedef enum{
+    UPDATE_ADDRESS,
+    UPDATE_ACTIONS
+} step;
+
 typedef struct __attribute__((packed)){
     uint16_t nb_steps; // must be <=13 to fit in a sMsg payload (2+4*13=54)
     struct{ // 4bytes
-        enum{
-            UPDATE_ADDRESS,
-            UPDATE_ACTIONS
-        } step :8;
+            step step:8;
         union{
             struct __attribute__((packed)){
                 uint8_t role;
