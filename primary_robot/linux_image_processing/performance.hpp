@@ -9,8 +9,7 @@
 class Perf {
 private:
     using time_unit = std::chrono::microseconds;
-    using clock = std::chrono::high_resolution_clock;
-    using time_point = std::chrono::time_point<clock>;
+    using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
     int currFrameNb = 0;
 
@@ -21,7 +20,7 @@ private:
     }
 
     void insertNow(string s) {
-        frameTimes.insert(std::pair<time_point, std::string>(clock::now(), getPrefix() + s));
+        frameTimes.insert(std::pair<time_point, std::string>(time_point::clock::now(), getPrefix() + s));
     }
 
 public:
