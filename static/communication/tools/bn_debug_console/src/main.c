@@ -256,12 +256,12 @@ int main(int argc, char **argv){
                     sMsg msg = {{0}};
 
                     msg.header.type = E_ROLE_SETUP;
-                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
                     msg.payload.roleSetup.nb_steps = 1;
                     msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
                     // step #0
-                    msg.payload.roleSetup.steps[0].step = UPDATE_ADDRESS;
-                    msg.payload.roleSetup.steps[0].role = ROLE_AI;
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
                     msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
                     printf("Sending RoleSetup message to propulsion... "); fflush(stdout);
@@ -278,8 +278,8 @@ int main(int argc, char **argv){
                     msg.payload.roleSetup.nb_steps = 1;
                     msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
                     // step #0
-                    msg.payload.roleSetup.steps[0].step = UPDATE_ADDRESS;
-                    msg.payload.roleSetup.steps[0].role = ROLE_AI;
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
                     msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
                     printf("Sending RoleSetup message to monitoring... "); fflush(stdout);
