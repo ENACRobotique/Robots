@@ -15,10 +15,6 @@
 using namespace cv;  // Check if declaration here is relevant
 
 
-typedef enum {
-	Rouge, Jaune, Autre_Coul
-}Coul_Feu;
-
 typedef struct sPosOrien{
 	double x;
 	double y;
@@ -40,9 +36,6 @@ extern Scalar hsv_min,hsv_max;
 extern const int h_slider_max, sv_slider_max;
 extern int hmin_slider, hmax_slider, smin_slider, smax_slider, vmin_slider, vmax_slider;
 extern Scalar hsvCalib_min,hsvCalib_max;
-//extern int hMinCalib_slider, hMaxCalib_slider,
-//	sMinCalib_slider, sMaxCalib_slider,
-//	vMinCalib_slider, vMaxCalib_slider;
 extern Scalar hsvCalib_min,hsvCalib_max;
 
 void on_trackbar(int, void*);
@@ -56,7 +49,6 @@ void setFieldCam2Draw(sFieldCam2Draw& trapeze, Point2i c, Point2i vert1, Point2i
 int initCalibHSV(VideoCapture& srcHSVPattern, Mat& matHSVPattern);
 void initTrackbar();
 void initTrackbarCalib(Mat& frameCalib, string& title);
-//void on_trackbarCalib(Mat& frameCalib);
 void on_trackbarCalib(int, void* mat);
 int displTwinImages(string& title, int maxSizeEdgeImgOut, const Mat& imgIn1, const Mat& imgIn2, Mat& imgOut, int blackBand);
 

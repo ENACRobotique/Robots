@@ -37,4 +37,10 @@
 #define IR_HEIGHT (782)
 
 
+//#######################
+//#### Para of Cam   ####
+//#######################
+// cf frameTools.h
+
+
 #endif /* PARAMS_HPP_ */
