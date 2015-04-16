@@ -13,7 +13,7 @@
 
 typedef struct __attribute__((packed)){
 	float x; 
-	float f
+	float f;
 	float theta;
 	bool goCapture;  // To start a capture
 } sPosCam;
