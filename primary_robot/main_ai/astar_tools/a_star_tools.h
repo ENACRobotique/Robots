@@ -27,7 +27,7 @@
 #define LOW_THR ((sNum_t)0.001)
 
 #define R_SECU (5.)
-#define R_ROBOT (15.)
+#define R_ROBOT (17.5)
 
 #if 1
 #   define X_MIN (R_ROBOT)

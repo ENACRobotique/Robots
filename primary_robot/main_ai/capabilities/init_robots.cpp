@@ -41,12 +41,12 @@ void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
     else
         robots.back()->caps[eCap::PROP] = new CapPropAxle(robots.back(), primary_addr_prop);
 
-    if(simu_primary){
+//    if(simu_primary){
         robots.back()->caps[eCap::IO] = new CapIOSimuPrimary(robots.back());
-    }
+   /* }
     else
         robots.back()->caps[eCap::IO] = new CapIO(robots.back());
-
+*/
     //Secondary
     robots.push_back(new Robot("", ELT_SECONDARY));
     robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), color_primary);

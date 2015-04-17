@@ -17,6 +17,8 @@
 extern "C"{
 #include <unistd.h> //for usleep
 #include "roles.h"
+#include "global_errors.h"
+#include "bn_intp.h"
 }
 
 #include "botNet_core.h"
@@ -26,6 +28,8 @@ extern "C"{
 #include "net.h"
 #include "GeometryTools.h"
 #include "init_robots.h"
+
+
 
 std::vector<sObs_t> initObs= {
    // robots
@@ -158,17 +162,17 @@ int main(int argc, char **argv) {
                 logs.changeFile(optarg);
                 break;
             case 'p':
-                if(strstr( optarg, "real"))
+                if(strstr(optarg, "real"))
                     simu_primary = false;
-                else if(!strcasecmp(optarg, "simu"))
+                else if(strstr(optarg, "simu"))
                     simu_primary = true;
-                if(strstr( optarg, "axle"))
+                if(strstr(optarg, "axle"))
                     holo_primary = false;
-                else if(strstr( optarg, "holo"))
+                else if(strstr(optarg, "holo"))
                     holo_primary = true;
-                if(strstr( optarg, "green"))
+                if(strstr(optarg, "green"))
                     color_primary = GREEN;
-                else if(strstr( optarg, "yellow"))
+                else if(strstr(optarg, "yellow"))
                     color_primary = YELLOW;
                 break;
             case 's':
@@ -206,10 +210,17 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if(simu_primary)
-        role_set_addr(ROLE_PRIM_PROPULSION, ADDRD1_MAIN_PROP_SIMU);
-    sendRoleSetup();
+
+    if(roleSetup(true, simu_primary) < 0)
+        return -1;
+
+    if((ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 50)) < 0){
+        logs << ERR << "FAILED SYNC: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+        return -1;
+    }
+
     sendPing();
+
 
     // calls initialization functions
     init_obs(initObs);
