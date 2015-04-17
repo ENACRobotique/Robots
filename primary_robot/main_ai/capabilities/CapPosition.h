@@ -15,8 +15,8 @@
 
 class CapPosition : public Capability{
     public:
-        CapPosition(Robot* rob_init, iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){};
-        virtual ~CapPosition(){};
+        CapPosition(Robot* rob_init, iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){}
+        virtual ~CapPosition(){}
 
         virtual Point2D<float> getLastPosXY() = 0;
 

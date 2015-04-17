@@ -18,8 +18,10 @@
 
 class CapPosSimuSecondary : public CapPosition{
     public:
-        CapPosSimuSecondary(Robot* rob_init, iABObs_t iobs_init) : CapPosition(rob_init, iobs_init){};
-        virtual ~CapPosSimuSecondary(){};
+        CapPosSimuSecondary(Robot* rob_init, iABObs_t iobs_init) : CapPosition(rob_init, iobs_init){
+            obs[iobs_init].active = 1;
+        }
+        virtual ~CapPosSimuSecondary(){}
 
         virtual Point2D<float> getLastPosXY();
 };

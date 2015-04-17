@@ -15,8 +15,8 @@
 
 class CapPosStatuses : public CapPosition{
     public:
-        CapPosStatuses(Robot* rob_init, iABObs_t iobs_init) : CapPosition(rob_init,iobs_init){};
-        virtual ~CapPosStatuses(){};
+        CapPosStatuses(Robot* rob_init, iABObs_t iobs_init) : CapPosition(rob_init,iobs_init){}
+        virtual ~CapPosStatuses(){}
 
         virtual Point2D<float> getLastPosXY(){
             return statuses.getLastPosXY(robot->el);

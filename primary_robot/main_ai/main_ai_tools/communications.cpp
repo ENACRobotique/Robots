@@ -281,7 +281,6 @@ void checkInbox(int verbose){
 
     if ((ret = role_relay(&msgIn)) < 0 ) { // relay the message
         cerr << "[ERROR] [communication.cpp] role_relay() error #" << -ret << endl;
-        return;
     }
 
     // print message

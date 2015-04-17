@@ -18,11 +18,9 @@
 #endif
 
 bn_Address role_addresses[] = {
-#if MYROLE != ROLE_DEBUG
-        ADDR_DEBUG_DFLT,
-#endif
+    ADDR_DEBUG_DFLT,
 #if MYROLE
-#   if MYROLE != ROLE_PRIM_MONITORING
+#   if MYROLE != ROLE_MONITORING
         ADDR_MONITORING_DFLT,
 #   endif
 #   if MYROLE != ROLE_PRIM_AI
@@ -135,6 +133,7 @@ int role_set_addr(uint8_t role, bn_Address address){
     if(role > MYROLE){
         role--;
     }
+    role--; // roles are 1-based
 
     if(role >= NB_ROLE_ADDRESSES){
         return -1;
@@ -155,6 +154,7 @@ bn_Address role_get_addr(uint8_t role){
     if(role > MYROLE){
         role--;
     }
+    role--; // roles are 1-based
 
     if(role >= NB_ROLE_ADDRESSES){
         return 0;
@@ -338,8 +338,8 @@ int role_relay(sMsg *msg){
     }
 
     eRoleMsgClass mc;
-    if((ret = role_get_msgclass(msg->header.type, dest_role, &mc)) < 0){
-        return ret;
+    if(role_get_msgclass(msg->header.type, dest_role, &mc) < 0){
+        return 0; // not finding the class only means we have nothing to do
     }
     if(mc >= NB_ROLE_ACTIONS){
         return -1;

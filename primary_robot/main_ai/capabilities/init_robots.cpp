@@ -32,10 +32,9 @@ void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
     bn_Address primary_addr_prop = simu_primary?ADDRD1_MAIN_PROP_SIMU:ADDRI_MAIN_PROP;
 
     robots.push_back(new Robot("", ELT_PRIMARY));
-
+    robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), color_primary); //TODO if AI
     robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 1);
     robots.back()->caps[eCap::AI] = new CapAI(robots.back());
-    robots.back()->caps[eCap::POS] = new CapTeam(robots.back(), color_primary); //TODO if AI
 
     if(holo_primary)
         robots.back()->caps[eCap::PROP] = new CapPropHolonome(robots.back(), primary_addr_prop);
@@ -48,10 +47,9 @@ void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
     else
         robots.back()->caps[eCap::IO] = new CapIO(robots.back());
 
-
-
     //Secondary
     robots.push_back(new Robot("", ELT_SECONDARY));
+    robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), color_primary);
     robots.back()->caps[eCap::POS] = new CapPosSimuSecondary(robots.back(), 2);
 }
 
@@ -62,6 +60,7 @@ void loopRobots(){
         if(CapPosition* capPos = dynamic_cast<CapPosition*> (r->caps[eCap::POS])){
             Point2D<float> pos = capPos->getLastPosXY();
             obs[capPos->getIobs()].c = {pos.x, pos.y};
+            obs_updated[capPos->getIobs()]++;
         }
 
         if(CapAI* capAI = dynamic_cast<CapAI*> (r->caps[eCap::AI]))
