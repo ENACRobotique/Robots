@@ -8,7 +8,8 @@
 
 class Perf {
 private:
-    using time_unit = std::chrono::microseconds;
+    using duration = std::chrono::duration<double, std::milli>;
+    using seconds = std::chrono::duration<double>;
     using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
     int currFrameNb = 0;
@@ -24,12 +25,11 @@ private:
     }
 
 public:
-    Perf(){
-
-    };
+    Perf() {
+    }
 
     void beginFrame(int i = -1) {
-        currFrameNb = i < 0 ? currFrameNb+1 : i;
+        currFrameNb = i < 0 ? currFrameNb + 1 : i;
 
         frameTimes.clear();
         insertNow("BEGIN");
@@ -42,17 +42,17 @@ public:
     void endFrame() {
         insertNow("END");
 
-        std::chrono::duration<double> frameDur = std::chrono::duration_cast<time_unit>(frameTimes.crbegin()->first - frameTimes.cbegin()->first);
+        duration frameDur = std::chrono::duration_cast<duration>(frameTimes.crbegin()->first - frameTimes.cbegin()->first);
 
         multimap<time_point, std::string>::iterator prevIt;
-        for(auto it = frameTimes.begin(); it != frameTimes.end(); it++) {
-            if(it != frameTimes.begin()) {
-                std::chrono::duration<double> dur = std::chrono::duration_cast<time_unit>(it->first - prevIt->first);
+        for (auto it = frameTimes.begin(); it != frameTimes.end(); it++) {
+            if (it != frameTimes.begin()) {
+                duration dur = std::chrono::duration_cast<duration>(it->first - prevIt->first);
 
-                std::cout << "PERF: " << it->second << " (" << dur.count() << " µs ; " << dur / frameDur * 100. << " %)" << std::endl;
+                std::cout << "PERF: " << it->second << " (" << dur.count() << " ms ; " << dur / frameDur * 100. << " %)" << std::endl;
             }
             else {
-                std::cout << "PERF: " << it->second << std::endl;
+                std::cout << "PERF: " << it->second << " (total: " << frameDur.count() << " ms ; " << 1. / std::chrono::duration_cast<seconds>(frameDur).count() << " FPS)" << std::endl;
             }
 
             prevIt = it;
