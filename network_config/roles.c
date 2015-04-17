@@ -6,6 +6,9 @@
  */
 
 #include <string.h>
+#ifdef ARCH_X86_LINUX
+#   include <assert.h>
+#endif
 //#include <stdio.h> // printf()
 
 #include "../static/communication/botNet/shared/botNet_core.h"
@@ -18,7 +21,9 @@
 #endif
 
 bn_Address role_addresses[] = {
+#if MYROLE != ROLE_DEBUG
     ADDR_DEBUG_DFLT,
+#endif
 #if MYROLE
 #   if MYROLE != ROLE_MONITORING
         ADDR_MONITORING_DFLT,
@@ -126,6 +131,10 @@ void role_setup(sMsg *msg){
 }
 
 int role_set_addr(uint8_t role, bn_Address address){
+#ifdef ARCH_X86_LINUX
+    uint8_t inRole = role;
+#endif
+
     if(role == MYROLE){
         return -1;
     }
@@ -139,6 +148,10 @@ int role_set_addr(uint8_t role, bn_Address address){
         return -1;
     }
 
+#ifdef ARCH_X86_LINUX
+    assert(role_get_role(address) == inRole);
+#endif
+
     role_addresses[role] = address;
 
     return 0;
@@ -147,6 +160,10 @@ int role_set_addr(uint8_t role, bn_Address address){
 // role_get_role(role_get_addr(r)) must be equal to r
 
 bn_Address role_get_addr(uint8_t role){
+#ifdef ARCH_X86_LINUX
+    uint8_t inRole = role;
+#endif
+
     if(role == MYROLE){
         return MYADDR;
     }
@@ -160,7 +177,13 @@ bn_Address role_get_addr(uint8_t role){
         return 0;
     }
 
-    return role_addresses[role];
+    bn_Address address = role_addresses[role];
+
+#ifdef ARCH_X86_LINUX
+    assert(role_get_role(address) == inRole);
+#endif
+
+    return address;
 }
 
 uint8_t role_get_role(bn_Address address){ // TODO update
@@ -186,16 +209,17 @@ uint8_t role_get_role(bn_Address address){ // TODO update
 }
 
 int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
+    int ret = 0;
+
     switch(msgType){
-    default:
-        return -1;
     case E_DEBUG:
         switch(destRole){
         case ROLE_DEBUG:
             *c = ROLEMSG_DEBUG;
+            ret = 1;
             break;
         default:
-            return -1;
+            break;
         }
         break;
     case E_TRAJ:
@@ -204,14 +228,18 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:
             *c = ROLEMSG_PRIM_TRAJ;
+            ret = 1;
             break;
         case ROLE_SEC_AI:
         case ROLE_SEC_PROPULSION:
             *c = ROLEMSG_SEC_TRAJ;
+            ret = 1;
+            break;
+        default:
             break;
         case ROLE_MONITORING:
-        default:
-            return -1;
+            ret = -1;
+            break;
         }
         break;
     case E_POS:
@@ -219,19 +247,25 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:
             *c = ROLEMSG_PRIM_POS;
+            ret = 1;
             break;
         case ROLE_SEC_AI:
         case ROLE_SEC_PROPULSION:
             *c = ROLEMSG_SEC_POS;
+            ret = 1;
+            break;
+        default:
             break;
         case ROLE_MONITORING:
-        default:
-            return -1;
+            ret = -1;
+            break;
         }
+        break;
+    default:
         break;
     }
 
-    return 0;
+    return ret;
 }
 
 const char *role_string(uint8_t role){
@@ -254,7 +288,7 @@ const char *role_string(uint8_t role){
 }
 
 int role_send(sMsg *msg, eRoleMsgClass mc){
-    int ret = 0;
+    int ret = 0, ret2 = 0;
 
     if(mc >= NB_ROLE_ACTIONS){
         return -1;
@@ -266,19 +300,21 @@ int role_send(sMsg *msg, eRoleMsgClass mc){
         if((ret = bn_send(msg)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
     if(act->sendTo.second){
         msg->header.destAddr = role_get_addr(act->sendTo.second);
         if((ret = bn_send(msg)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
 
-    return 0;
+    return ret2;
 }
 
 int role_sendAck(sMsg *msg, eRoleMsgClass mc){
-    int ret = 0;
+    int ret = 0, ret2 = 0;
 
     if(mc >= NB_ROLE_ACTIONS){
         return -1;
@@ -290,19 +326,21 @@ int role_sendAck(sMsg *msg, eRoleMsgClass mc){
         if((ret = bn_sendAck(msg)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
     if(act->sendTo.second){
         msg->header.destAddr = role_get_addr(act->sendTo.second);
         if((ret = bn_sendAck(msg)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
 
-    return 0;
+    return ret2;
 }
 
 int role_sendRetry(sMsg *msg, eRoleMsgClass mc, int retries){
-    int ret = 0;
+    int ret = 0, ret2 = 0;
 
     if(mc >= NB_ROLE_ACTIONS){
         return -1;
@@ -314,15 +352,17 @@ int role_sendRetry(sMsg *msg, eRoleMsgClass mc, int retries){
         if((ret = bn_sendRetry(msg, retries)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
     if(act->sendTo.second){
         msg->header.destAddr = role_get_addr(act->sendTo.second);
         if((ret = bn_sendRetry(msg, retries)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
 
-    return 0;
+    return ret2;
 }
 
 #if MYROLE
@@ -331,15 +371,15 @@ int role_relay(sMsg *msg){
     bn_Address dest_addr_save = msg->header.destAddr;
     uint8_t src_role = role_get_role(msg->header.srcAddr);
     uint8_t dest_role = role_get_role(msg->header.destAddr);
-    int ret = 0;
+    int ret = 0, ret2 = 0;
 
     if(!src_role || !dest_role){
         return 0;
     }
 
     eRoleMsgClass mc;
-    if(role_get_msgclass(msg->header.type, dest_role, &mc) < 0){
-        return 0; // not finding the class only means we have nothing to do
+    if((ret = role_get_msgclass(msg->header.type, dest_role, &mc)) <= 0){
+        return ret;
     }
     if(mc >= NB_ROLE_ACTIONS){
         return -1;
@@ -351,17 +391,19 @@ int role_relay(sMsg *msg){
         if((ret = bn_send(msg)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
     if(act->relayTo.n2 == src_role){
         msg->header.destAddr = role_get_addr(act->relayTo.n1);
         if((ret = bn_send(msg)) < 0){
             return ret;
         }
+        ret2 += ret > 0;
     }
 
     msg->header.destAddr = dest_addr_save;
 
-    return 0;
+    return ret2;
 }
 
 #endif

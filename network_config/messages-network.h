@@ -58,7 +58,7 @@ typedef enum{
 typedef struct __attribute__((packed)){
     uint16_t nb_steps; // must be <=13 to fit in a sMsg payload (2+4*13=54)
     struct{ // 3bytes
-            eStep step_type :4;
+        eStep step_type :4;
         union{
             // case update address
             struct __attribute__((packed)){
