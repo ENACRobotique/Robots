@@ -18,7 +18,7 @@
 
 
 // Iterative sums for least-square computation (sum_bb=sum(for i=0..N, b_i*b_i)...)
-int64_t sum_OO=0,sum_D=0,sum_O=0,sum_OD=0,sum_ones=0;
+static int64_t sum_OO=0,sum_D=0,sum_O=0,sum_OD=0,sum_ones=0;
 
 sSyncPayload firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
 syncMesStruc firstLaserMeasure={0,-2},lastLaserMeasure={0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)

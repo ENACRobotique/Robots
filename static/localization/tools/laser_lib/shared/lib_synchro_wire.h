@@ -30,10 +30,10 @@ extern "C" {
 #define WIREDSYNC_MAXLOOP 200   // maximum main loop duration in ms
 #define WIREDSYNC_DEBOUNCE (WIREDSYNC_LOWTIME-WIREDSYNC_MAXLOOP)
 
+typedef double wsType_t; // because it is shorter than wiredSyncType_t, and to allow easy change in order to benchmark different solutions
 
-
-/* wiredSync_waitSignal : function that must be in the main loop, and wiats for the wired synchronization signal.
- * "SyncParam" is reset in EVERY TIME this signal is received.
+/* wiredSync_waitSignal : function that must be in the main loop, and waits for the wired synchronization signal.
+ * This function is to be called on the device which has NOT the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
  *  None
@@ -43,8 +43,31 @@ extern "C" {
  */
 int wiredSync_waitSignal();
 
+/* wiredSync_intermediateCompute :  records a new set of measures for the synchronization.
+ * The actual computation is done in wiredSync_finalCompute.
+ * This function is to be called on the device which has NOT the reference clock.
+ * Arguments :
+ *  gTime : global date of the event, i.e. time of the reference clock when the synchronizing event occurred
+ *  lTime : local date of the same event (this one is pretty self-explaining)
+ * Return value :
+ *  none
+ */
+void wiredSync_intermediateCompute(wsType_t gTime, wsType_t lTime);
+
+/* wiredSync_finalCompute : actual computation of the synchronization.
+ * This function is to be called on the device which has NOT the reference clock.
+ * Arguments :
+ *  reset : if reset != 0, will reset the sums (i.e. delete previous measures)
+ * Returned value :
+ *  SYNC_OUT_OF_SYNC while no synchronization has been successful
+ *  SYNC_SYNCHRONIZED after the synchronization is achieved, and syncParams updated
+ */
+int wiredSync_finalCompute();
+
+
 /* wiredSync_sendSignal : function that sends the synchronization signal.
  * "SyncParam" is reset in EVERY call to this function.
+ * This function is to be called on the device which has the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
  *  None
