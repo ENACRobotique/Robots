@@ -208,7 +208,7 @@ uint8_t role_get_role(bn_Address address){ // TODO update
     }
 }
 
-int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
+int role_get_msgclass(E_TYPE msgType, uint8_t srcRole, uint8_t destRole, eRoleMsgClass* c){
     int ret = 0;
 
     switch(msgType){
@@ -235,10 +235,23 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
             *c = ROLEMSG_SEC_TRAJ;
             ret = 1;
             break;
-        default:
-            break;
         case ROLE_MONITORING:
-            ret = -1;
+            switch(srcRole){
+            case ROLE_PRIM_AI:
+            case ROLE_PRIM_PROPULSION:
+                *c = ROLEMSG_PRIM_TRAJ;
+                ret = 1;
+                break;
+            case ROLE_SEC_AI:
+            case ROLE_SEC_PROPULSION:
+                *c = ROLEMSG_SEC_TRAJ;
+                ret = 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        default:
             break;
         }
         break;
@@ -254,10 +267,23 @@ int role_get_msgclass(E_TYPE msgType, uint8_t destRole, eRoleMsgClass* c){
             *c = ROLEMSG_SEC_POS;
             ret = 1;
             break;
-        default:
-            break;
         case ROLE_MONITORING:
-            ret = -1;
+            switch(destRole){
+            case ROLE_PRIM_AI:
+            case ROLE_PRIM_PROPULSION:
+                *c = ROLEMSG_PRIM_POS;
+                ret = 1;
+                break;
+            case ROLE_SEC_AI:
+            case ROLE_SEC_PROPULSION:
+                *c = ROLEMSG_SEC_POS;
+                ret = 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        default:
             break;
         }
         break;
@@ -378,7 +404,7 @@ int role_relay(sMsg *msg){
     }
 
     eRoleMsgClass mc;
-    if((ret = role_get_msgclass(msg->header.type, dest_role, &mc)) <= 0){
+    if((ret = role_get_msgclass(msg->header.type, src_role, dest_role, &mc)) <= 0){
         return ret;
     }
     if(mc >= NB_ROLE_ACTIONS){
