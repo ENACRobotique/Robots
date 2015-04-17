@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
     bn_attach(E_ROLE_SETUP, role_setup);
     ret = bn_init();
     if(ret < 0){
-        printf("bn_init() failed err#%i\n", -ret);
+        printf("bn_init() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
         exit(1);
     }
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]){
             else
 #endif
             {
-                fprintf(stderr, "bn_receive() error #%i\n", -ret);
+                fprintf(stderr, "bn_receive() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
                 if(ret == -ERR_SYSERRNO){
                     fprintf(stderr, "errno=%i\n", errno);
                 }

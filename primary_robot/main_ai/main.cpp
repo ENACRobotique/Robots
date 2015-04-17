@@ -181,6 +181,9 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    if(SIMU)
+        role_set_addr(ROLE_PROPULSION, ADDRD1_MAIN_PROP_SIMU);
+    sendRoleSetup();
     sendPing();
 
     // calls initialization functions
