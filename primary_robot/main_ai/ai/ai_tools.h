@@ -17,9 +17,6 @@
 #define LOW_SPEED 10
 #define NB_MAX_PT_ZONE 10
 
-typedef enum {
-    COLOR_SELECTION, WAIT_STARTING_CORD, WAIT_START, WAIT_SECONDARY, GAME, SHUT_DOWN
-} estate_t;
 
 void printObsActive();
 int checkPointInObs(Point2D<float>& p);

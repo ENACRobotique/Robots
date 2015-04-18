@@ -20,12 +20,16 @@ typedef enum{
 
 class CapTeam : public Capability {
     public:
-        CapTeam(Robot* robot_init, eColor_t color) : Capability(robot_init), _color(color){}
+        CapTeam(Robot* robot_init, eColor_t color) : Capability(robot_init), _color(color), _start_game(0){}
         ~CapTeam(){}
 
 
         void setColor(eColor_t color){
             _color = color;
+        }
+
+        void setStartGame(unsigned int start_game){
+            _start_game = start_game;
         }
 
         eColor_t getColor(){
@@ -36,9 +40,14 @@ class CapTeam : public Capability {
             return _el;
         }
 
+        unsigned int getStartGame(){
+            return _start_game;
+        }
+
     private:
         eColor_t _color;
         vector<objective> _el;
+        unsigned int _start_game;
 };
 
 

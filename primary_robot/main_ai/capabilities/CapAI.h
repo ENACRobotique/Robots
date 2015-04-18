@@ -23,10 +23,9 @@ class CapAI: public Capability {
         }
 
         int loop();
-
-    private:
         void initObjective();
 
+    private:
         std::vector<Obj*> listObj;
 
 };

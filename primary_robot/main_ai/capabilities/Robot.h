@@ -21,7 +21,8 @@ typedef enum {
     BEACON, //balise mobile
     IO,
     VIDEO,
-    TEAM
+    TEAM,
+    PREP
 }eCap;
 
 class Capability;
