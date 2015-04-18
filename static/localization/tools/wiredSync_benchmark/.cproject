@@ -25,7 +25,7 @@
 							<builder buildPath="${workspace_loc:/testNet_beacon1}/Debug" errorParsers="org.eclipse.cdt.core.MakeErrorParser" id="de.innot.avreclipse.target.builder.winavr.app.debug.1195825036" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="de.innot.avreclipse.target.builder.winavr.app.debug"/>
 							<tool command="avr-gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GASErrorParser" id="de.innot.avreclipse.tool.assembler.winavr.app.debug.1691882016" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.2036964563" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
-								<option id="de.innot.avreclipse.asm.option.include.paths.687207183" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath"/>
+								<option id="de.innot.avreclipse.asm.option.include.paths.687207183" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths"/>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1804822730" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
 							<tool command="avr-gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="de.innot.avreclipse.tool.compiler.winavr.app.debug.2061751825" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug">
@@ -123,7 +123,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="lib/laser_lib/shared/lib_int_laser.c|src/main.c|lib/laser_lib/lm4fxx/lib_laser_lm4fxx.c|lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="lib/Millis|lib/laser_lib/shared/lib_int_laser.c|src/main.c|lib/laser_lib/lm4fxx/lib_laser_lm4fxx.c|lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -139,7 +139,6 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.debug.1266699842" moduleId="org.eclipse.cdt.core.settings" name="linux">
 				<externalSettings/>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -147,80 +146,70 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.1266699842" name="linux" parent="de.innot.avreclipse.configuration.app.debug">
+				<configuration artifactExtension="" artifactName="${ProjName}" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.1266699842" name="linux" parent="de.innot.avreclipse.configuration.app.debug">
 					<folderInfo id="de.innot.avreclipse.configuration.app.debug.1266699842." name="/" resourcePath="">
-						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.419591813" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug">
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.643737608" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.13014648" name="Generate HEX file for EEPROM" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.1027627977" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1340526279" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.565835671" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug"/>
-							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.app.debug.1984072762" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.debug"/>
-							<builder buildPath="${workspace_loc:/wiredSync_benchmark}/linux" id="de.innot.avreclipse.target.builder.winavr.app.debug.1731197988" keepEnvironmentInBuildfile="false" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.debug"/>
-							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.1105687507" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug">
-								<option id="de.innot.avreclipse.assembler.option.debug.level.1011179134" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
-								<option id="de.innot.avreclipse.asm.option.include.paths.1282528970" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.871321815" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1085372758" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<builder buildPath="${workspace_loc:/wiredSync_benchmark}/linux" id="org.eclipse.cdt.build.core.internal.builder.1696139001" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1369103062" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1261285881" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option id="gnu.cpp.compiler.option.include.paths.334931869" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/laser_lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/timeout}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/network_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/Millis}&quot;"/>
 								</option>
-								<inputType id="de.innot.avreclipse.tool.assembler.input.853292250" superClass="de.innot.avreclipse.tool.assembler.input"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1732782326" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="WIREDSYNC_BENCHMARK"/>
+									<listOptionValue builtIn="false" value="ARCH_X86_LINUX"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.optimization.level.1699009752" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1327848920" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.361248902" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2031346095" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
-							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug">
-								<option id="de.innot.avreclipse.compiler.option.debug.level.437636083" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level"/>
-								<option id="de.innot.avreclipse.compiler.option.optimize.1148772208" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize"/>
-								<option id="de.innot.avreclipse.compiler.option.incpath.1100939030" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1920133898" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+								<option id="gnu.c.compiler.option.include.paths.8138761" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/shared}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/laser_lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/timeout}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/network_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/Millis}&quot;"/>
 								</option>
-								<option id="de.innot.avreclipse.compiler.option.def.656029446" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1234570246" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WIREDSYNC_SIGNALISHERE=0"/>
 									<listOptionValue builtIn="false" value="WIREDSYNC_SIGNANOTHERE=1"/>
 									<listOptionValue builtIn="false" value="WIREDSYNC_BENCHMARK"/>
+									<listOptionValue builtIn="false" value="ARCH_X86_LINUX"/>
 								</option>
-								<inputType id="de.innot.avreclipse.compiler.winavr.input.598808805" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1718618462" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.1034478787" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1349577044" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
-							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.161699907" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug">
-								<option id="de.innot.avreclipse.cppcompiler.option.debug.level.387307700" name="Generate Debugging Info" superClass="de.innot.avreclipse.cppcompiler.option.debug.level"/>
-								<option id="de.innot.avreclipse.cppcompiler.option.optimize.592017273" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize"/>
-								<option id="de.innot.avreclipse.cppcompiler.option.incpath.1212079115" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/shared}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/laser_lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/timeout}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/network_config}&quot;"/>
-								</option>
-								<option id="de.innot.avreclipse.cppcompiler.option.def.1377552794" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WIREDSYNC_BENCHMARK"/>
-								</option>
-								<inputType id="de.innot.avreclipse.cppcompiler.input.1553049238" superClass="de.innot.avreclipse.cppcompiler.input"/>
-							</tool>
-							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.1176981736" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug"/>
-							<tool id="de.innot.avreclipse.tool.cpplinker.app.debug.352820580" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug">
-								<inputType id="de.innot.avreclipse.tool.cpplinker.input.977009175" name="OBJ Files" superClass="de.innot.avreclipse.tool.cpplinker.input">
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.762124121" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.841125144" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.898292009" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
-							<tool id="de.innot.avreclipse.tool.archiver.winavr.base.605755826" name="AVR Archiver" superClass="de.innot.avreclipse.tool.archiver.winavr.base"/>
-							<tool id="de.innot.avreclipse.tool.objdump.winavr.app.debug.2117742448" name="AVR Create Extended Listing" superClass="de.innot.avreclipse.tool.objdump.winavr.app.debug"/>
-							<tool id="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.1301722854" name="AVR Create Flash image" superClass="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug"/>
-							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.202716047" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug"/>
-							<tool id="de.innot.avreclipse.tool.size.winavr.app.debug.408699157" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.debug"/>
-							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.87344447" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.637543361" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+								<option id="gnu.both.asm.option.include.paths.132403052" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1849582115" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1266699842.494008888" name="timeout.c" rcbsApplicability="disable" resourcePath="lib/timeout/timeout.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832.398245143">
-						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832.398245143" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832">
-							<option id="de.innot.avreclipse.compiler.option.def.831001586" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1266699842.494008888" name="timeout.c" rcbsApplicability="disable" resourcePath="lib/timeout/timeout.c" toolsToInvoke="cdt.managedbuild.tool.gnu.c.compiler.base.1611548383">
+						<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1611548383" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+							<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.274020627" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
+							<option id="gnu.c.compiler.option.debugging.level.994701924" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+							<option id="gnu.c.compiler.option.preprocessor.def.symbols.704473671" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 								<listOptionValue builtIn="false" value="ARCH_X86_LINUX"/>
 							</option>
-							<inputType id="de.innot.avreclipse.compiler.winavr.input.651007409" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+							<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1167410356" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 						</tool>
 					</fileInfo>
 					<sourceEntries>
@@ -243,6 +232,7 @@
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/testNet_beacon1"/>
 		</configuration>
+		<configuration configurationName="linux"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
@@ -260,6 +250,12 @@
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1266699842;de.innot.avreclipse.configuration.app.debug.1266699842.;de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832;de.innot.avreclipse.compiler.winavr.input.598808805">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1266699842;de.innot.avreclipse.configuration.app.debug.1266699842.;cdt.managedbuild.tool.gnu.c.compiler.base.1920133898;cdt.managedbuild.tool.gnu.c.compiler.input.1349577044">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1266699842;de.innot.avreclipse.configuration.app.debug.1266699842.;cdt.managedbuild.tool.gnu.cpp.compiler.base.1261285881;cdt.managedbuild.tool.gnu.cpp.compiler.input.2031346095">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.710589469;de.innot.avreclipse.configuration.app.release.710589469.;de.innot.avreclipse.tool.compiler.winavr.app.release.181146281;de.innot.avreclipse.compiler.winavr.input.1543626769">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>

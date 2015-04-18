@@ -8,6 +8,10 @@
 #include "timeout.h"
 #include "lib_synchro_wire.h"
 
+#if defined(WIREDSYNC_BENCHMARK) && defined(ARCH_X86_LINUX)
+#include <stdio.h>
+#endif
+
 #define SUM_SHIFT (0) // how much will the values be shifted before entering the sums
 
 #ifndef abs
@@ -89,9 +93,16 @@ int wiredSync_finalCompute(int reset){
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_gt_lt;
         offset = offset_num / det;
 #ifndef WIREDSYNC_BENCHMARK
-        syncStruc sStruc = {offset, abs(inv_delta)};
+        syncStruc sStruc = {offset, abs(inv_delta),(inv_delta>0?1:-1)};
         setSyncParam(sStruc);
+#else
+#ifdef ARCH_328P_ARDUINO
+#else
+        printf("inv_delta_den : %f, offset_num : %f\n",inv_delta_den,offset_num);
+        printf("det : %f, invdelta : %f, delta : %f, offset : %f\n",det, inv_delta, 1/inv_delta, offset);
 #endif
+#endif
+
         retVal = SYNC_SYNCHRONIZED;
     }
     else {
