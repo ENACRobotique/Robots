@@ -16,11 +16,6 @@ extern "C"{
 #include "millis.h"
 }
 
-void printListObj() {
-    for(Obj* i : listObj)
-        i->print();
-}
-
 void printObsActive() {
     int i;
     logs << INFO << "List of obs[i].active :\n";

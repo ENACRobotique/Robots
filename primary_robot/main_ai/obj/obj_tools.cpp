@@ -21,6 +21,7 @@
 #error "HOLONOMIC must be defined"
 #endif
 
+
 using namespace std;
 
 void updateEndTraj(float theta, Point2D<float> *pt, float r) {
@@ -100,16 +101,16 @@ int next_obj(const unsigned int start_time) {
 
 
         if (listObj[i]->update({pos_robot.x, pos_robot.y}) < 0) {
-
+#ifdef DEBUG_OBJ
             logs << DEBUG << "No find path to achieve the objective for objective n°" << i;
-
+#endif
             continue;
         }
 
         tmp_val2 = listObj[i]->getYield(start_time);
-
+#ifdef DEBUG_OBJ
         logs << DEBUG << "objectif n°" << i << "avec ratio=" << tmp_val2;
-
+#endif
 
         if (tmp_val2 > tmp_val) {         //Update best objective
             tmp_val = tmp_val2;
@@ -124,7 +125,8 @@ int next_obj(const unsigned int start_time) {
     }
 
 
-    printListObj();
+    for(Obj* i : listObj)
+        i->print();
     logs << INFO << "The selected objective is :" << tmp_inx;
 
 

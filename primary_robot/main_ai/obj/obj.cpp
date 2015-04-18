@@ -14,6 +14,7 @@
 #include "tools.h"
 #include "ai_tools.h"
 #include "GeometryTools.h"
+#include <iomanip>
 
 extern "C"{
 #include "millis.h"
@@ -83,28 +84,33 @@ float Obj::update(sPt_t posRobot) {
 
     _dist = -1;
     obs[0].c = {posRobotp.x, posRobotp.y};
-    logs << INFO << "--------------------------------------------------------------";
 
     if ((n = testInObs()) != 0) {
         Point2D<float> p(posRobot.x, posRobot.y);
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         p = c.projecte(p);
         obs[0].c = {p.x, p.y};
+#ifdef DEBUG_OBJ
         logs << INFO << "Robot in obstacle : " << n;
+#endif
     }
 
     for (sObjEntry_t i : _access) {
         obs[0].c = {posRobotp.x, posRobotp.y};
         switch(i.type){
             case E_POINT :
+#ifdef DEBUG_OBJ
                 logs << DEBUG << "Access type POINT";
+#endif
                 obs[N - 1].c = {i.pt.p.x, i.pt.p.y};
 #if !HOLONOMIC
                 updateEndTraj(i.pt.angle, &i.pt.p, i.radius);
 #endif
             break;
             case E_CIRCLE:
+#ifdef DEBUG_OBJ
                 logs << DEBUG << "Access type CIRCLE";
+#endif
                 obs[N - 1].c = {i.cir.c.x, i.cir.c.y};
 #if !HOLONOMIC
                 obs[N - 2].active = 0;
@@ -131,15 +137,19 @@ float Obj::update(sPt_t posRobot) {
             }
         }
 #endif
+#ifdef DEBUG_OBJ
         logs << DEBUG << "Current position is : " << obs[0].c.x << " : " << obs[0].c.y;
         logs << DEBUG << "Current access point chose is : " << obs[N - 1].c.x << " : " << obs[N - 1].c.y;
         if(!_num_obs.empty())
             logs << DEBUG << "Current obstacle position is : " << obs[_num_obs.front()].c.x << " : " << obs[_num_obs.front()].c.y;
+#endif
 
         //deactivate obs
         for(unsigned int j : _num_obs){
             obs[j].active = 0;
+#ifdef DEBUG_OBJ
             logs << DEBUG << "Deactivation of obstacle number :" << j;
+#endif
         }
 
         fill_tgts_lnk();
@@ -148,19 +158,27 @@ float Obj::update(sPt_t posRobot) {
         //reactivate obs
         for(unsigned int j : _num_obs){
             obs[j].active = 1;
+#ifdef DEBUG_OBJ
             logs << DEBUG << "Reactivation of obstacle number :" << j;
+#endif
         }
 
-        if (path_loc.dist == 0)
+        if (path_loc.dist == 0){
+#if DEBUG_OBJ
             logs << INFO << "A* return null distance";
+#endif
+        }
         else if (_dist > path_loc.dist || _dist == -1) {
             _dist = path_loc.dist;
             _path = path_loc;
             _access_select = {obs[N - 1].c.x, obs[N - 1].c.y};
 
             if( i.type == E_CIRCLE){
-                if(_path.path[_path.path_len - 1].p1.distanceSqTo(_path.path[_path.path_len - 1].p2) < i.cir.r)
-                    logs << ERR << "Very strange path"; //FIXME
+                if(_path.path[_path.path_len - 1].p1.distanceSqTo(_path.path[_path.path_len - 1].p2) < i.cir.r){
+#if DEBUG_OBJ
+                    logs << ERR << "Very strange path"; //FIXME deux obstable sont très provhe
+#endif
+                }
                 else{
                     Point2D<float> pt = _path.path[_path.path_len - 1].p1;
                     Circle2D<float> cir(i.cir.c.x, i.cir.c.y, i.cir.r);
@@ -223,8 +241,14 @@ sNum_t Obj::getYield(const unsigned int start_time){
 }
 
 
-void Obj::print() const{
-    logs << DEBUG << "TODO";
+void Obj::print(){
+    logs << DEBUG << fixed << setprecision(2) << "type : " << obsType() << " : " << obsState();
+    if(_state == ACTIVE){
+        if(_dist > 0)
+            logs << " : " << _dist << "cm to go" << _access_select << "(" << _access_select_angle << "°)";
+        else
+            logs << " : no path found";
+    }
 }
 
 /*

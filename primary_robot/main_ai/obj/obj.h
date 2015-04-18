@@ -16,6 +16,8 @@
 #error "HOLONOMIC must be defined"
 #endif
 
+//#define DEBUG_OBJ
+
 using namespace std;
 
 typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
@@ -75,9 +77,35 @@ class Obj {
         eStateObj_t getState() const;
         sNum_t getYield(const unsigned int start_time);
 
-        void print() const;
+        void print();
 
     protected:
+        string obsType(){
+            switch(_type){
+                case E_CLAP:
+                    return "CLAP";
+                case E_SPOT:
+                    return "SPOT";
+                default:
+                    return "Undefined";
+            }
+        }
+
+        string obsState(){
+            switch(_state){
+                case  ACTIVE:
+                    return "activated";
+                case WAIT_MES:
+                    return "waiting a message";
+                case NO_TIME:
+                    return "no time to go to the goal";
+                case FINISH:
+                    return "finished";
+                default:
+                    return "Unknown state !!!";
+            }
+        }
+
         eObj_t _type;                       //objective type
         int _point;                         //point number of the objective
         eStateObj_t _state;                 //if the objective is used or not
