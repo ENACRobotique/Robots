@@ -26,30 +26,27 @@
 std::vector<Robot*> robots;
 
 
-void setupRobots(bool simu_primary, bool holo_primary, eColor_t color_primary){
+void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hmi_simu, eColor_t primary_color){
 
     //Primary
-    bn_Address primary_addr_prop = simu_primary?ADDRD1_MAIN_PROP_SIMU:ADDRI_MAIN_PROP;
-
+    bn_Address primary_addr_prop = primary_prop_simu?ADDRD1_MAIN_PROP_SIMU:ADDRI_MAIN_PROP;
     robots.push_back(new Robot("", ELT_PRIMARY));
-    robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), color_primary); //TODO if AI
+
+    robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color);
     robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 1);
     robots.back()->caps[eCap::AI] = new CapAI(robots.back());
-
-    if(holo_primary)
+    if(primary_prop_holo)
         robots.back()->caps[eCap::PROP] = new CapPropHolonome(robots.back(), primary_addr_prop);
     else
         robots.back()->caps[eCap::PROP] = new CapPropAxle(robots.back(), primary_addr_prop);
-
-//    if(simu_primary){
+    if(primary_hmi_simu)
         robots.back()->caps[eCap::IO] = new CapIOSimuPrimary(robots.back());
-   /* }
     else
         robots.back()->caps[eCap::IO] = new CapIO(robots.back());
-*/
+
     //Secondary
     robots.push_back(new Robot("", ELT_SECONDARY));
-    robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), color_primary);
+    robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color);
     robots.back()->caps[eCap::POS] = new CapPosSimuSecondary(robots.back(), 2);
 }
 

@@ -34,7 +34,7 @@ extern "C"{
 std::vector<sObs_t> initObs= {
    // robots
    {{0., 0.},          0., 1, 1, 1},   //primary
-   {{0., 0.}, R_ROBOT+12., 1, 0, 1},   //secondary
+   {{0., 0.}, R_ROBOT+8., 1, 0, 1},   //secondary
    {{0., 0.}, R_ROBOT+20., 1, 0, 1},   //primary adv
    {{0., 0.}, R_ROBOT+15., 1, 0, 1},   //secondary adv
 
@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
     switch (eAIState) {
         case E_AI_AUTO:
         case E_AI_PROG:
-            setupRobots(simu_primary, holo_primary, color_primary);
+            setupRobots(simu_primary, holo_primary, true /*hmi simu*/,color_primary);
             break;
         case E_AI_SLAVE:
             Point2D<float> pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
