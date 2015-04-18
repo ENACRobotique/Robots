@@ -14,7 +14,7 @@
 #ifdef ARCH_328P_ARDUINO
 #include "Arduino.h"
 #endif
-syncStruc syncParam={0,HARDUPDATEPERIOD,HARDUPDATESIGN};    // Synchronization parameters
+syncStruc syncParam={0,0,0};    // Synchronization parameters
 int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
 
 void setSyncParam(syncStruc syncParameters){

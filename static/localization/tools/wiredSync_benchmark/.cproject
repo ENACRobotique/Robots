@@ -46,6 +46,7 @@
 								<option id="de.innot.avreclipse.compiler.option.def.993619742" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
 									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
+									<listOptionValue builtIn="false" value="WIREDSYNC_BENCHMARK"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1592145005" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
@@ -67,6 +68,7 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.def.2141482267" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
+									<listOptionValue builtIn="false" value="WIREDSYNC_BENCHMARK"/>
 								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.897622078" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
@@ -121,7 +123,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="lib/laser_lib/shared/lib_int_laser.c|src/main.c|lib/laser_lib/lm4fxx/lib_laser_lm4fxx.c|lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -176,6 +178,11 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/timeout}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/network_config}&quot;"/>
 								</option>
+								<option id="de.innot.avreclipse.compiler.option.def.656029446" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="WIREDSYNC_SIGNALISHERE=0"/>
+									<listOptionValue builtIn="false" value="WIREDSYNC_SIGNANOTHERE=1"/>
+									<listOptionValue builtIn="false" value="WIREDSYNC_BENCHMARK"/>
+								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.598808805" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.161699907" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug">
@@ -187,6 +194,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/timeout}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiredSync_benchmark/lib/network_config}&quot;"/>
+								</option>
+								<option id="de.innot.avreclipse.cppcompiler.option.def.1377552794" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="WIREDSYNC_BENCHMARK"/>
 								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.1553049238" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
@@ -205,8 +215,16 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.87344447" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1266699842.494008888" name="timeout.c" rcbsApplicability="disable" resourcePath="lib/timeout/timeout.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832.398245143">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832.398245143" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832">
+							<option id="de.innot.avreclipse.compiler.option.def.831001586" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+								<listOptionValue builtIn="false" value="ARCH_X86_LINUX"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.651007409" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="lib/laser_lib/arduino/lib_synchro_wire_arduino.c|lib/laser_lib/arduino/lib_laser_arduino.cpp|lib/laser_lib/shared/lib_int_laser.c|src/main.cpp|lib/laser_lib/lm4fxx/lib_laser_lm4fxx.c|lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

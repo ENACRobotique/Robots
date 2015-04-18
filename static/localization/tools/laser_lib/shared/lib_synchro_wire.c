@@ -20,7 +20,7 @@ static wsType_t sum_lt=0;      // sum of local dates
 static wsType_t sum_ltsq=0;     // sum of (local dates)^2
 static wsType_t sum_gt_lt=0;   // sum of (global date - local date)
 static wsType_t sum_lt_gt_lt=0;// sum of (local date)*(global date - local date)
-
+#ifndef WIREDSYNC_BENCHMARK
 /* wiredSync_waitSignal : function that must be in the main loop, and wiats for the wired synchronization signal.
  * "SyncParam" is reset in EVERY TIME this signal is received.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
@@ -47,7 +47,7 @@ int wiredSync_waitSignal(){
     }
     return (synchronized?SYNC_SYNCHRONIZED:SYNC_OUT_OF_SYNC);
 }
-
+#endif
 /* wiredSync_intermediateCompute :  records a new set of measures for the synchronization.
  * The actual computation is done in wiredSync_finalCompute.
  * This function is to be called on the device which has NOT the reference clock.
@@ -88,8 +88,10 @@ int wiredSync_finalCompute(int reset){
         inv_delta = det / inv_delta_den;
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_gt_lt;
         offset = offset_num / det;
+#ifndef WIREDSYNC_BENCHMARK
         syncStruc sStruc = {offset, abs(inv_delta)};
         setSyncParam(sStruc);
+#endif
         retVal = SYNC_SYNCHRONIZED;
     }
     else {
@@ -105,7 +107,7 @@ int wiredSync_finalCompute(int reset){
 
     return retVal;
 }
-
+#ifndef WIREDSYNC_BENCHMARK
 /* wiredSync_sendSignal : function that sends the synchronization signal.
  * "SyncParam" is reset in EVERY call to this function.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
@@ -125,3 +127,4 @@ void wiredSync_sendSignal(){
     setSyncParam(tmpStruc);
     updateSync();
 }
+#endif
