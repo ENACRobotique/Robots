@@ -14,7 +14,8 @@
 #include "tools.h"
 #include "a_star_tools.h"
 
-#define SPEED_SECONDARY 10 // (cm/s)
+#define SPEED_SECONDARY 10      // (cm/s)
+#define START_DELAY     2000    // (ms)
 
 class CapPosSimuSecondary : public CapPosition{
     public:

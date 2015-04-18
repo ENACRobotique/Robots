@@ -28,7 +28,7 @@ int testInObs() { //retourne le numéro de l'obstable si la position est a l'int
     //FIXME si le robot dans plusieurs obstable
     Point2D<float>p = statuses.getLastPosXY(ELT_PRIMARY);
     int i;
-    sNum_t dist;
+    float dist;
     for (i = 1; i < N - 1; i++) {
         if (obs[i].active == 0)
             continue;
@@ -216,8 +216,8 @@ eStateObj_t Obj::getState() const{
     return _state;
 }
 
-sNum_t Obj::getYield(const unsigned int start_time){
-    sNum_t ratio = 0.;
+float Obj::getYield(const unsigned int start_time){
+    float ratio = 0.;
 
     if (_dist == 0) { //FIXME on est sur le point donc valeur max : Erreur ou objectif atteint
         logs << ERR << "getYield : distance null";
@@ -265,7 +265,7 @@ void updateRatioObj(int numObj, int robot) { //robot = 1 to 3
 /*
  void checkRobot2Obj(void){
  int i, j, k;
- sNum_t dist;
+ float dist;
  static int tab[NB_OBJ][2] ={{0, 0}};
 
  for(i = 0 ; i < NB_OBJ ; i++){

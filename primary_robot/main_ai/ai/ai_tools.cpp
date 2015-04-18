@@ -1,49 +1,84 @@
 /*
- * obj_fct.c
+ * ai_tools.cpp
  *
  *  Created on: 29 mars 2014
- *      Author: seb
+ *      Author: Sebastien Malissard
  */
 
 
-#include <ai_tools.h>
-#include <GeometryTools.h>
-#include <obj_tools.h>
-#include "ai.h"
-#include "botNet_core.h"
+#include "ai_tools.h"
+#include "obj_tools.h"
+#include "tools.h"
 
-extern "C"{
-#include "millis.h"
-}
 
+/*
+ * Print to the screen the list of active obstacle
+ */
 void printObsActive() {
     int i;
     logs << INFO << "List of obs[i].active :\n";
     for (i = 0; i < N; i++)
-        logs << "obs[" << i << "].active=" << obs[i].active << "\n";
+        logs << "    obs[" << i << "].active=" << obs[i].active << "\n";
 }
 
 
-int test_in_obs(Point2D<float> p) { //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
-    //FIXME si le robot dans plusieurs obstable
+/*
+ * Returns the first obstacle number find if this point is inside else 0.
+ */
+int checkPointInObs(Point2D<float>& p) {
     for (int i = 1; i < N - 1; i++) {
         if (obs[i].active == 0)
             continue;
         Point2D<float> c(obs[i].c.x, obs[i].c.y);
-        if (c.distanceTo(p) < obs[i].r) {
-            //printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
+        if (c.distanceTo(p) < obs[i].r)
             return i;
-        }
     }
     return 0;
 }
 
-void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de contact
+/*
+ * Stops the robot if collision detected
+ */
+void colissionDetection(){
+    Point2D<float> ptPr = statuses.getLastPosXY(ELT_PRIMARY);
+    float anglePr = statuses.getLastOrient(ELT_PRIMARY);
+    Point2D<float> ptAPr = statuses.getLastPosXY(ELT_ADV_PRIMARY);
+    Point2D<float> ptASc = statuses.getLastPosXY(ELT_ADV_SECONDARY);
+    sNum_t d, dot;
+    int contact = 0;
+
+    d = ptPr.distanceTo(ptAPr);
+    Vector2D<float> v1(cos(anglePr), sin(anglePr)), v2(ptPr, ptAPr);
+    dot = v1*v2;
+
+    if (d < 50 && dot > 0.6 * d) {
+        logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+        contact = 1;
+    }
+
+    d = ptPr.distanceTo(ptASc);
+    Vector2D<float> v3(ptPr, ptASc);
+    dot = v1 * v3;
+
+    if (d < 40 && dot > 0.6 * d) {
+        logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+        contact = 1;
+    }
+
+    if (contact) {
+        path.stopRobot();
+    }
+}
+
+/*
+ * FIXME Check the utility
+ */
+void posPrimary() { //FIXME permet de deplacer les objects mobile en cas de contact
     int i;
     Point2D<float> pt;
     Point2D<float> _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
 
-    if (((i = test_in_obs(_current_pos)) != 0)) {
+    if (((i = checkPointInObs(_current_pos)) != 0)) {
         if (obs[i].moved == 1) {
             pt = {obs[0].c.x, obs[0].c.y};
             Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);

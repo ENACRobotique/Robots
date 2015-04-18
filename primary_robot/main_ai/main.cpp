@@ -24,7 +24,6 @@ extern "C"{
 #include "botNet_core.h"
 #include "communications.h"
 #include "tools.h"
-#include "ai.h"
 #include "net.h"
 #include "GeometryTools.h"
 #include "init_robots.h"
@@ -201,22 +200,22 @@ int main(int argc, char **argv) {
 
     // network initialization
     if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
-        cerr << "[ERROR] [main.cpp] bn_attach() error : " << -ret << endl;
+        logs << ERR << "bn_attach() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
         exit(EXIT_FAILURE);
     }
 
     if ((ret = bn_init()) < 0) {
-        cerr << "[ERROR] [main.cpp] bn_init() error : " << -ret << endl;
+        logs << ERR << "bn_init() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
         exit(EXIT_FAILURE);
     }
 
 
     if(roleSetup(true, simu_primary) < 0)
-        return -1;
+        exit(EXIT_FAILURE);
 
     if((ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 50)) < 0){
-        logs << ERR << "FAILED SYNC: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-        return -1;
+        logs << ERR << "FAILED SYNC: " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+        exit(EXIT_FAILURE);
     }
 
     sendPing();

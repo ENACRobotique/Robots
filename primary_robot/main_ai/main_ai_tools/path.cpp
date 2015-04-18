@@ -16,7 +16,7 @@
 #include "a_star.h"
 #include "time_tools.h"
 #include "tools.h"
-#include "ai_types.h"
+#include "ai_tools.h"
 #include "obj_tools.h"
 #include "GeometryTools.h"
 

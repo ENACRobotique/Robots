@@ -19,6 +19,7 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
     static bool first = true;
     static unsigned int state = 0;
     static unsigned int lastTime = 0;
+    static unsigned int startTime = 0;
     static Point2D<float> pos;
     static Vector2D<float> spd;
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
@@ -30,31 +31,33 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
                     pt.x = 300. - pt.x;
             }
 
-            lastTime = millis();
+            startTime = lastTime = millis();
 
             first = false;
         }
 
         unsigned int time = millis();
 
-        if(update) {
-            pos = trjS[state];
-            float theta, ctheta, stheta;
-            theta = atan2f((trjS[state + 1].y - trjS[state].y), (trjS[state + 1].x - trjS[state].x));
-            sincosf(theta, &stheta, &ctheta);
-            spd = Vector2D<float>(ctheta, stheta) * SPEED_SECONDARY;
+        if( time - startTime > START_DELAY){
+            if(update) {
+                pos = trjS[state];
+                float theta, ctheta, stheta;
+                theta = atan2f((trjS[state + 1].y - trjS[state].y), (trjS[state + 1].x - trjS[state].x));
+                sincosf(theta, &stheta, &ctheta);
+                spd = Vector2D<float>(ctheta, stheta) * SPEED_SECONDARY;
 
-            update = false;
+                update = false;
+            }
+
+            pos += spd * (int)(time - lastTime) / 1000.;
+
+            if (pos.distanceSqTo(trjS[state + 1]) < 1) {
+                state++;
+                update = true;
+            }
+
+            lastTime = millis();
         }
-
-        pos += spd * (int)(time - lastTime) / 1000.;
-
-        if (pos.distanceSqTo(trjS[state + 1]) < 1) {
-            state++;
-            update = true;
-        }
-
-        lastTime = millis();
     }
 
     return pos;

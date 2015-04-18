@@ -8,18 +8,26 @@
 #ifndef CAPABILITIES_CAPAI_H_
 #define CAPABILITIES_CAPAI_H_
 
+#include <vector>
+
 #include <Capability.h>
+#include "obj.h"
 
 
 class CapAI: public Capability {
-public:
-    CapAI(Robot* robot_init) :
+    public:
+        CapAI(Robot* robot_init) :
             Capability(robot_init) {
-    }
-    ~CapAI() {
-    }
+        }
+        ~CapAI() {
+        }
 
-    int loop();
+        int loop();
+
+    private:
+        void initObjective();
+
+        std::vector<Obj*> listObj;
 
 };
 

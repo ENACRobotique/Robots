@@ -33,7 +33,7 @@ void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hm
     robots.push_back(new Robot("", ELT_PRIMARY));
 
     robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color);
-    robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 1);
+    robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 0);
     robots.back()->caps[eCap::AI] = new CapAI(robots.back());
     if(primary_prop_holo)
         robots.back()->caps[eCap::PROP] = new CapPropHolonome(robots.back(), primary_addr_prop);
@@ -47,7 +47,7 @@ void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hm
     //Secondary
     robots.push_back(new Robot("", ELT_SECONDARY));
     robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color);
-    robots.back()->caps[eCap::POS] = new CapPosSimuSecondary(robots.back(), 2);
+    robots.back()->caps[eCap::POS] = new CapPosSimuSecondary(robots.back(), 1);
 }
 
 

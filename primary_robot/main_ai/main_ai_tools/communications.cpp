@@ -23,7 +23,7 @@ extern "C"{
 
 #include <a_star_tools.h>
 #include <tools.h>
-#include "ai_types.h"
+#include "ai_tools.h"
 
 
 /*

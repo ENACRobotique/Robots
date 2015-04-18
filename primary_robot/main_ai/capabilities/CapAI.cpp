@@ -10,15 +10,15 @@
 #include "CapPropulsion.h"
 #include "CapPosition.h"
 #include "CapTeam.h"
-#include "ai_types.h"
 #include "tools.h"
 #include "ai_tools.h"
 #include "obj_tools.h"
 #include "communications.h"
-#include "ai.h"
 extern "C"{
 #include "millis.h"
 }
+#include "clap.h"
+#include "spot.h"
 
 
 int CapAI::loop(){
@@ -62,7 +62,7 @@ int CapAI::loop(){
                 }
 
 
-                initObjective(capTeam->getColor());
+                initObjective();
 
                 Point2D<float> p(obs[0].c.x, obs[0].c.y);
                 sendPos(p, theta_robot); //Sending approximate initial position
@@ -102,7 +102,7 @@ int CapAI::loop(){
                 if ((millis() - last_time) > 1000){ //Calculation of the next objective
                       last_time = millis();
 
-                    if ((current_obj = next_obj(start_time)) != -1) {
+                    if ((current_obj = next_obj(start_time, listObj)) != -1) {
                         pt_select = listObj[current_obj]->getDestPoint();
                         logs << INFO << "Selected point is (" << pt_select.x << " ; " << pt_select.y << ")";
 
@@ -122,7 +122,7 @@ int CapAI::loop(){
                     mode_obj = true;
                 }
             }else{
-                if (metObj(current_obj) == 0){
+                if (metObj(current_obj, listObj) == 0){
                     pt_select.x = -1;
                     pt_select.y = -1;
                     mode_obj = false;
@@ -143,3 +143,25 @@ int CapAI::loop(){
 
     return 1;
 }
+
+void CapAI::initObjective(){
+    CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
+
+    if(capTeam->getColor() == YELLOW){
+        listObj.push_back(new Clap(0));
+        listObj.push_back(new Clap(2));
+        listObj.push_back(new Clap(4));
+    }
+    else if(capTeam->getColor() == GREEN){
+        listObj.push_back(new Clap(1));
+        listObj.push_back(new Clap(3));
+        listObj.push_back(new Clap(5));
+    }
+    else
+        logs << ERR << "Color ???";
+
+    for(unsigned int i = 0 ; i < 8 ; i++)
+        listObj.push_back(new Spot(i, capTeam->getColor()));
+}
+
+

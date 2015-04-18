@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include "types.h"
-#include "ai.h"
 #include <obj.h>
 #include <obj_tools.h>
 #include <tools.h>
@@ -85,7 +84,7 @@ void loadingPath(sPath_t /*_path*/, int /*num*/) {
 }
 
 
-int next_obj(const unsigned int start_time) {
+int next_obj(const unsigned int start_time, vector<Obj*>& listObj) {
     sNum_t tmp_val = 0.;
     sNum_t tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
@@ -135,7 +134,7 @@ int next_obj(const unsigned int start_time) {
 
 
 
-int metObj(int numObj){
+int metObj(int numObj, vector<Obj*>& listObj){
     static bool first = true;
 
     if(numObj < 0 || numObj > (int) listObj.size()){
