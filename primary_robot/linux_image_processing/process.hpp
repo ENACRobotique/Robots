@@ -42,7 +42,7 @@ void on_trackbar(int, void*);
 int frameProcess(Mat& rawFrame, Mat& framePattern, sPosOrien& posOrienRob);
 int frameStraight(Mat& frameIn, Mat& frameOut);
 int frameCrop2Circle(Mat& frame, Point2i& center, int radius);
-int frameThresh(const Mat frameIn, Mat frameOut, Scalar hsvMin, Scalar hsvMax, int sizeErode = 5, int sizeDilate = 8);
+int frameThresh(const Mat& frameIn, Mat& frameOut, Scalar hsvMin, Scalar hsvMax, int sizeErode = 5, int sizeDilate = 8);
 int initFramePattern(string& title, VideoCapture& srcFramePattern, Mat& matFramePattern);
 void drawTrapeze(Mat& frameSrc, sFieldCam2Draw& trapeze);
 void setFieldCam2Draw(sFieldCam2Draw& trapeze, Point2i c, Point2i vert1, Point2i vert2, Point2i vert3, Point2i vert4);

@@ -6,15 +6,16 @@
  */
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include "opencv2/highgui/highgui.hpp"
+#include <processes/ProcAbsPos.h>
+#include <processes/Process.h>
+#include <tools/Acq.h>
+#include <tools/Position2D.h>
+#include <tools/Uncertainty2D.h>
 #include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <math.h>
+#include <vector>
+
+int bn_init();
+int printf(const char *__format);
 
 // For communications
 //#include "../../network_config/messages.h"
@@ -39,9 +40,6 @@ using namespace std;
 //###############
 //#### TODO ####
 //##############
-/* To create build configuration for PC and BBB (BeagleBon Black)
- * Add bn communication
- */
 
 //####################
 //#### Information ##
@@ -53,95 +51,39 @@ using namespace std;
 //##################################
 int main(int argc, char* argv[]) {
     Perf p;
-	sPosOrien posOriRobot;
-	Mat framePattern;
-	Mat frameRaw;
-//	int ret;
-//	sMsg inMsg = {{0}}, outMsg = {{0}};s
+    sPosOrien posOriRobot;
+    Mat framePattern;
+    Mat frameRaw;
 
-	// botNet initialization
-	bn_init();
+    vector<Process*> processList;
+    processList.push_back(new ProcAbsPos(""));
 
-	// Init video sources
-	VideoCapture srcFramePattern;  // For the pattern of the table
-	VideoCapture cap;
-	string titleFrameRaw("frameRaw");
-	initCapture(titleFrameRaw, cap);
-	string titleFramePatt("framePattern");
-	initFramePattern(titleFramePatt, srcFramePattern, framePattern); //// Initialize the pattern frame
-
-#ifdef SETTINGS_HSV
-	// For calibration
-	Mat frameHSVPattern;
-	Mat frameHSVCalib;
-	VideoCapture srcHSVPattern;
-	VideoCapture srcHSVCalib;
-	// Initialize calibration
-	Mat frameGlobCalib;
-	initCalibHSV(srcHSVPattern, frameHSVPattern);
-	initCalibHSV(srcHSVCalib, frameHSVCalib);
-	string titleCalib("HSV_Calib");
-	initTrackbarCalib(frameHSVCalib, titleCalib);
-#endif
-
-	// Create  windows
-//	namedWindow("Anything", CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameGreen",CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameRed",CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameBlue",CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameYellow",CV_WINDOW_AUTOSIZE);
-
-	// Iinit the record of the video
-#ifdef SAVE
-	VideoWriter oVideoWriter;
-	if(initSave(cap, oVideoWriter) == -1) {
-		cout<<"Error: Failed to initialize the VideoWritter"<<endl;
-		return -1;
-	}
-#endif
+    bn_init();
 
 	while (1) {
 //		ret = bn_receive(&inMsg);
 //
 //		switch(inMsg.header.type){
 //            case E_POS_CAM:
-		p.beginFrame();
+        p.beginFrame();
 
+        for (Process* p : processList) {
+            vector<Acq*> acqList;
 
-		// Read a new frame from the video source
-		if (!cap.read(frameRaw)) {  //if not success, break loop
-			cout << "Cannot read the frame from source video file" << endl;
-			break;
-		}
+            for (Cam* c : p->getCamList()) {
+                // Read a new frame from the video source
+                if (!c->cap.read(frameRaw)) {  //if not success, break loop
+                    cout << "Cannot read the frame from source video file" << endl;
+                    break;
+                }
 
-		p.endOfStep("reading frame");
+                acqList.push_back(new Acq());
+            }
 
-		// Write the raw frame into the file
-#ifdef SAVE
-		save(oVideoWriter, frameRaw);
-#endif
+            p->process(acqList, Position2D<float>(), Uncertainty2D<float>());
+        }
 
-		// Image processing
-		if (frameProcess(frameRaw, framePattern, posOriRobot)) {
-			break;
-		}
-
-		p.endOfStep("image processing");
-
-		//// Image calibration
-#ifdef SETTINGS_HSV
-		// Apply a threshold
-		if(frameThresh(frameHSVCalib, frameHSVCalib, hsvCalib_min, hsvCalib_max, 5, 8) < 0) {
-			cout<<"process_frame(): Error during the threshold operation"<<endl;
-			return -1;
-		}
-		// Show calibration
-		displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
-
-		p.endOfStep("HSV calib");
-#endif
-
-		p.endFrame();
+        p.endFrame();
 //
 //                break;
 //            case E_DATA:
