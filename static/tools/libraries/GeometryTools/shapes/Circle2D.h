@@ -17,7 +17,7 @@ template<typename T>
 class Line2D;
 
 template<typename T>
-class Circle2D {
+class Circle2D: public Ellipse2D<T> {
     public:
         Circle2D() : c(0, 0), r(0){}
         Circle2D(Point2D<T> _c, T _r) : c(_c), r(_r){}
@@ -69,7 +69,7 @@ class Circle2D {
 
             return p1, p2;
         }
-        Point2D<T> projecte(Point2D<T>& p) const{
+        Point2D<T> project(Point2D<T>& p) const{
             Vector2D<T> v(c, p);
             Point2D<T> pt;
             T n = v.norm();
