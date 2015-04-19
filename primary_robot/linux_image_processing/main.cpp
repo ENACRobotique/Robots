@@ -37,18 +37,15 @@ using namespace std;
 #include "save.hpp"
 #include "sourceVid.hpp"
 
-//###############
-//#### TODO ####
-//##############
+//##### TODO ####
 
-//####################
-//#### Information ##
-//###################
+
+//##### Information ##
 // To param cam manually:
 // In terminal -> $ locate svv;  $ cd ->svv;  $ ./svv /dev/video1
-//##################################
-//############## Main ##############
-//##################################
+
+
+//##### Main #####
 int main(int argc, char* argv[]) {
     Perf p;
     sPosOrien posOriRobot;
