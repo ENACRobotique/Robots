@@ -29,8 +29,8 @@ Checksum algorithm :
  *
  * Remark : header must be without offset between his bytes
  */
-uint8_t checkSum(sMsg *msg){
-    int i;
+int checkSum(sMsg *msg){
+    unsigned int i;
     uint8_t sum=0;
     for ( i=0 ; i < sizeof(sGenericHeader)+msg->header.size ; i++ ){
         sum+=((uint8_t *)msg)[i];
@@ -49,7 +49,7 @@ uint8_t checkSum(sMsg *msg){
  * the "size" field must be correctly set before calling setSum;
  */
 void setSum(sMsg *msg){
-    int i;
+    unsigned int i;
     uint8_t sum=0;
     for ( i=0 ; i < sizeof(sGenericHeader)+msg->header.size ; i++ ){
         sum+=((uint8_t *)msg)[i];

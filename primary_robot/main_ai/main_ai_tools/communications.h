@@ -16,7 +16,7 @@ using namespace std;
 
 //Send message
 void sendPing();
-void sendRoleSetup();
+int roleSetup(bool simu_ai, bool simu_prop);
 void sendObsCfg();
 void sendObss();
 int sendPos(Point2D<float>& p, float theta);

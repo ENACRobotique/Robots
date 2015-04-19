@@ -15,13 +15,6 @@
 #include "log.h"
 
 
-#define INIT_POS_YELLOW_X 45
-#define INIT_POS_YELLOW_Y 100
-#define INIT_POS_GREEN_X  (300 - INIT_POS_YELLOW_X)
-#define INIT_POS_GREEN_Y  INIT_POS_YELLOW_Y
-#define INIT_ANGLE_YELLOW 0
-#define INIT_ANGLE_GREEN  M_PI
-
 #define INIT_POS_SLAVE_X 150
 #define INIT_POS_SLAVE_Y 100
 #define INIT_ANGLE_SLAVE -M_PI_2
@@ -35,13 +28,11 @@ typedef enum {
 } eAIState_t;
 
 typedef enum {
-    YELLOW, GREEN
+    YELLOW, GREEN, NONE
 } eColor_t;
 
 extern int verbose;
 extern int mode_switch;
-extern eColor_t color;
-extern eInOut_t starting_cord; //true = out and false = in
 extern Statuses statuses;
 extern Path path;
 extern Ihm ihm;

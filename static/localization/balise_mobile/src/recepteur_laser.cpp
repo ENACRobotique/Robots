@@ -12,6 +12,9 @@
 #include "network_cfg.h"
 #include "MemoryFree.h"
 #include "../../../communication/network_tools/bn_debug.h"
+extern "C" {
+#include "roles.h"
+}
 
 #ifdef SYNC_WIRELESS
 #include "shared/lib_synchro_beacon.h"

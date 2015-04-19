@@ -39,7 +39,7 @@
 #include <stdio.h>
 
 //local message to "transmit" via bn_receive()
-sMsg localMsg={{0}};
+sMsg localMsg;
 int localReceived=0; //indicates whether a message is available for local or not
 
 //sequence number counter;
@@ -175,8 +175,10 @@ int bn_genericSend(sMsg *msg){
  */
 int bn_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
-    sMsg msgIn={{0}}; //incoming message (may be our ack)
+    sMsg msgIn; //incoming message (may be our ack)
     int ret=0;
+
+    memset(&msgIn, 0, sizeof(msgIn));
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -223,9 +225,11 @@ int bn_sendAck(sMsg *msg){
  *
  */
 int bn_routine(){
-    sMsgIf temp={{{0}}};
+    sMsgIf temp;
     sMsgIf *pTmp=NULL;
     int count=0,ret=0; //count : indicator, used for debug purposes
+
+    memset(&temp, 0, sizeof(temp));
 
 #if (MYADDRX)!=0
     if ( (ret=Xbee_receive(&temp.msg)) > 0 ) {

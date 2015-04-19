@@ -36,6 +36,5 @@ int initSave(VideoCapture frameCap, VideoWriter& oVideoWriter){
  */
 int save(VideoWriter& oVideoWriter, Mat& frame){
 	oVideoWriter.write(frame);
-
 	return 0;
 }

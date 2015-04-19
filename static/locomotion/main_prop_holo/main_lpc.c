@@ -14,6 +14,7 @@
 #include "trajectory_manager.h"
 #include "shared/botNet_core.h"
 #include "bn_intp.h"
+#include "roles.h"
 
 /*
  * pins usage and mapping (board Rev3):
@@ -153,7 +154,7 @@ int main() {
                 outMsg.payload.pos.theta = (double) traj_mngr.ctlr.theta / dASHIFT;
             }
 
-            role_send(&outMsg);
+            role_send(&outMsg, ROLEMSG_PRIM_POS);
         }
 
         time_ms = millis();

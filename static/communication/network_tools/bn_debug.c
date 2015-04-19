@@ -36,7 +36,8 @@
  */
 int bn_printDbg(const char *str){
     int ret;
-    sMsg tmp = {{0}};
+    sMsg tmp;
+    memset(&tmp, 0, sizeof(tmp));
 
 //    tmp.header.destAddr=addr; role_send() => useless
     tmp.header.type=E_DEBUG;
@@ -44,9 +45,9 @@ int bn_printDbg(const char *str){
     strncpy((char *)tmp.payload.data , str , BN_MAX_PDU-sizeof(sGenericHeader)-1);
     tmp.payload.debug[tmp.header.size-1]=0; //strncpy does no ensure the null-termination, so we force it
 
-    ret = role_send(&tmp);
-    if(ret > sizeof(tmp.header)){
-        ret -= sizeof(tmp.header);
+    ret = role_send(&tmp, ROLE_DEBUG);
+    if(ret > (int)sizeof(tmp.header)){
+        ret -= (int)sizeof(tmp.header);
     }
     else{
         ret = -1;
@@ -77,22 +78,24 @@ int bn_printfDbg(const char *format, ...){
 
 /* bn_debugSignalling : sends the new debug address to dest. MUST be issued ONLY by the debugger.
  * Arguments :
- *  dest : address of the node whitch we want up update
+ *  dest : address of the node which we want up update
  * Return value : like bn_send.
  */
 int bn_debugSendAddr(bn_Address dest){
-    sMsg msg = {{0}};
+    sMsg msg;
+
+    memset(&msg, 0, sizeof(msg));
 
     msg.header.type = E_ROLE_SETUP;
     msg.header.destAddr = dest;
     msg.payload.roleSetup.nb_steps = 2;
-    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+    msg.header.size = 2 + 3*msg.payload.roleSetup.nb_steps;
     // step #0 (overrides any previous debug setup on the remote node)
-    msg.payload.roleSetup.steps[0].step = UPDATE_ACTIONS;
-    msg.payload.roleSetup.steps[0].type = E_DEBUG;
+    msg.payload.roleSetup.steps[0].step_type = UPDATE_ACTIONS;
+    msg.payload.roleSetup.steps[0].type = ROLEMSG_DEBUG;
     msg.payload.roleSetup.steps[0].actions.sendTo.first = ROLE_DEBUG;
     // step #1 (I will be the default debug node for this remote one)
-    msg.payload.roleSetup.steps[1].step = UPDATE_ADDRESS;
+    msg.payload.roleSetup.steps[1].step_type = UPDATE_ADDRESS;
     msg.payload.roleSetup.steps[1].role = ROLE_DEBUG;
     msg.payload.roleSetup.steps[1].address = MYADDR;
 

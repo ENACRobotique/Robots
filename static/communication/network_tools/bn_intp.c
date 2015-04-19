@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#include <string.h>
+
 #include "bn_intp.h"
 
 #include "../../tools/libraries/Timeout/timeout.h"
@@ -88,10 +90,12 @@ void bn_intp_msgHandle(sMsg *msg){
  *  <0 otherwise (see global_errors.h), or details in the code here.
  */
 int bn_intp_sync(bn_Address slave, int retries){
-    sMsg tempMsg={{0}}; // message on stack, initialized to 0s
+    sMsg tempMsg; // message on stack, initialized to 0s
     int i=0;
     int prevAcked=0,nbAcked=0,nbSuccess=0;
     int ret=0;
+
+    memset(&tempMsg, 0, sizeof(tempMsg));
 
     tempMsg.header.destAddr=slave;
     tempMsg.header.type=E_INTP;

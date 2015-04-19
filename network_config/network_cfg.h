@@ -16,8 +16,6 @@
 extern "C" {
 #endif
 
-#include "roles.h"
-
 #ifndef BIT
 #   define BIT(a) (1<<(a))
 #endif

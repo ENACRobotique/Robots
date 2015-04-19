@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include "types.h"
-#include "ai.h"
 #include <obj.h>
 #include <obj_tools.h>
 #include <tools.h>
@@ -20,6 +19,7 @@
 #ifndef HOLONOMIC
 #error "HOLONOMIC must be defined"
 #endif
+
 
 using namespace std;
 
@@ -63,7 +63,7 @@ void printEndTraj() {
  * And update the display on the screen.
  * The second argument is used for a non holonomic robot with the 3 circles anti half turn.
  */
-void loadingPath(sPath_t _path, int num) {
+void loadingPath(sPath_t /*_path*/, int /*num*/) {
     //path = _path; //FIXME
 
 #if !HOLONOMIC
@@ -84,7 +84,7 @@ void loadingPath(sPath_t _path, int num) {
 }
 
 
-int next_obj(void) {
+int next_obj(const unsigned int start_time, vector<Obj*>& listObj) {
     sNum_t tmp_val = 0.;
     sNum_t tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
@@ -100,16 +100,16 @@ int next_obj(void) {
 
 
         if (listObj[i]->update({pos_robot.x, pos_robot.y}) < 0) {
-
+#ifdef DEBUG_OBJ
             logs << DEBUG << "No find path to achieve the objective for objective n°" << i;
-
+#endif
             continue;
         }
 
-        tmp_val2 = listObj[i]->getYield();
-
+        tmp_val2 = listObj[i]->getYield(start_time);
+#ifdef DEBUG_OBJ
         logs << DEBUG << "objectif n°" << i << "avec ratio=" << tmp_val2;
-
+#endif
 
         if (tmp_val2 > tmp_val) {         //Update best objective
             tmp_val = tmp_val2;
@@ -124,7 +124,8 @@ int next_obj(void) {
     }
 
 
-    printListObj();
+    for(Obj* i : listObj)
+        i->print();
     logs << INFO << "The selected objective is :" << tmp_inx;
 
 
@@ -133,7 +134,7 @@ int next_obj(void) {
 
 
 
-int metObj(int numObj){
+int metObj(int numObj, vector<Obj*>& listObj){
     static bool first = true;
 
     if(numObj < 0 || numObj > (int) listObj.size()){

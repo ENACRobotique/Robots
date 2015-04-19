@@ -9,7 +9,7 @@
 #define HOLONOMIC 1 // 0 if the robot isn't an holonomic robot (for backward compatibility)
 
 //#define AS_DEBUG 1
-#define AS_STATS
+//#define AS_STATS
 // warning, activating AS_DEBUG adds a lot of time to the time statistics (time to print the debug information)
 
 
@@ -27,7 +27,7 @@
 #define LOW_THR ((sNum_t)0.001)
 
 #define R_SECU (5.)
-#define R_ROBOT (15.)
+#define R_ROBOT (18.)
 
 #if 1
 #   define X_MIN (R_ROBOT)

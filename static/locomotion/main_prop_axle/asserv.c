@@ -353,7 +353,7 @@ int send_pos(){
         msg.payload.pos.tid = msg.payload.pos.sid = -1;
     }
 
-    return role_send(&msg);
+    return role_send(&msg, ROLEMSG_PRIM_POS);
 }
 
 void get_pos(s2DPosAtt *p, s2DPAUncert *p_u, unsigned int *p_t){

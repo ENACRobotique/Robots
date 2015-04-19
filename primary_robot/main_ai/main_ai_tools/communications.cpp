@@ -23,7 +23,7 @@ extern "C"{
 
 #include <a_star_tools.h>
 #include <tools.h>
-#include "ai_types.h"
+#include "ai_tools.h"
 
 
 /*
@@ -97,37 +97,62 @@ void sendPing(){
 }
 
 
-void sendRoleSetup(){
+int roleSetup(bool simu_ai, bool simu_prop){
     int ret;
-    sMsg msg = {{0}};
+    sMsg msg;
 
-    msg.header.type = E_ROLE_SETUP;
-    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
-    msg.payload.roleSetup.nb_steps = 1;
-    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
-    // step #0
-    msg.payload.roleSetup.steps[0].step = UPDATE_ADDRESS;
-    msg.payload.roleSetup.steps[0].role = ROLE_AI;
-    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+    if(simu_prop){
+        role_set_addr(ROLE_PRIM_PROPULSION, ADDRD1_MAIN_PROP_SIMU);
 
-    printf("Sending RoleSetup message to propulsion... "); fflush(stdout);
-    ret = bn_sendAck(&msg);
-    if(ret < 0)
-        logs << ERR << "FAILED: "<< getErrorStr(-ret) << "(#" << -ret << ")";
+        msg.header.type = E_ROLE_SETUP;
+        msg.header.destAddr = role_get_addr(ROLE_MONITORING);
+        msg.payload.roleSetup.nb_steps = 1;
+        msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+        // step #0
+        msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+        msg.payload.roleSetup.steps[0].role = ROLE_PRIM_PROPULSION;
+        msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_PROP_SIMU;
 
-    msg.header.type = E_ROLE_SETUP;
-    msg.header.destAddr = role_get_addr(ROLE_MONITORING);
-    msg.payload.roleSetup.nb_steps = 1;
-    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
-    // step #0
-    msg.payload.roleSetup.steps[0].step = UPDATE_ADDRESS;
-    msg.payload.roleSetup.steps[0].role = ROLE_AI;
-    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+        ret = bn_sendAck(&msg);
+        if(ret < 0){
+            logs << ERR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return -1;
+        }
+    }
 
-    printf("Sending RoleSetup message to monitoring... "); fflush(stdout);
-    ret = bn_sendAck(&msg);
-    if(ret < 0)
-        logs << ERR << "FAILED: "<< getErrorStr(-ret) << "(#" << -ret << ")";
+    if(simu_ai){
+        msg.header.type = E_ROLE_SETUP;
+        msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
+        msg.payload.roleSetup.nb_steps = 1;
+        msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+        // step #0
+        msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+        msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+        msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+        ret = bn_sendAck(&msg);
+        if(ret < 0){
+            logs << ERR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return -1;
+        }
+
+        msg.header.type = E_ROLE_SETUP;
+        msg.header.destAddr = role_get_addr(ROLE_MONITORING);
+        msg.payload.roleSetup.nb_steps = 1;
+        msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+        // step #0
+        msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+        msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+        msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+        ret = bn_sendAck(&msg);
+        if(ret < 0){
+            logs << ERR << "FAILED ROLE SETUP 2: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 /*
@@ -231,7 +256,7 @@ int sendPos(Point2D<float> &p, float theta) {
 
     //XXX Created an intern message generic status for update the position, and if message not pos not receive --> position problem !!!
 
-    if ((ret = role_sendRetry(&msgOut, MAX_RETRIES)) <= 0) {
+    if ((ret = role_sendRetry(&msgOut, ROLEMSG_PRIM_POS, MAX_RETRIES)) <= 0) {
         logs << ERR << "bn_sendRetry(E_POS) error #" << -ret;
         return -2;
     }
@@ -250,7 +275,7 @@ int sendSpeed(float speed) {
     if (fabs(speed) > MAX_SPEED)
         return -1;
 
-    msgOut.header.destAddr = role_get_addr(ROLE_PROPULSION);
+    msgOut.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
     msgOut.header.type = E_SPEED_SETPOINT;
     msgOut.header.size = sizeof(msgOut.payload.speedSetPoint);
 
@@ -281,7 +306,6 @@ void checkInbox(int verbose){
 
     if ((ret = role_relay(&msgIn)) < 0 ) { // relay the message
         cerr << "[ERROR] [communication.cpp] role_relay() error #" << -ret << endl;
-        return;
     }
 
     // print message
