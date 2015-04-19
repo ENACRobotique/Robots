@@ -10,6 +10,7 @@
 
 #if defined(WIREDSYNC_BENCHMARK) && defined(ARCH_X86_LINUX)
 #include <stdio.h>
+#include <iostream>
 #endif
 
 #define SUM_SHIFT (0) // how much will the values be shifted before entering the sums
@@ -99,14 +100,13 @@ int wiredSync_finalCompute(int reset){
 #else
 #ifdef ARCH_328P_ARDUINO
 #else
-#ifdef BENCHMARK_GMP
-        printf("inv_delta_den : %f, offset_num : %f\n",inv_delta_den.get_d(),offset_num.get_d());
-        mpf_class delta = mpf_class(1)/mpf_class(inv_delta);
-        printf("det : %e, invdelta : %f, delta : %e, offset : %f\n",det.get_d(), inv_delta.get_d(), delta.get_d(), offset.get_d());
-#else
-        printf("inv_delta_den : %f, offset_num : %f\n",(float)inv_delta_den,(float)offset_num);
-        printf("det : %e, invdelta : %f, delta : %e, offset : %f\n",(float)det, (float)inv_delta, (float)1.0/inv_delta, (float)offset);
-#endif
+        wsType_t delta = 1/inv_delta;
+        std::cout << "sum_gt_lt , sum_lt , sum_lt_gt_lt , sum_ltsq , sum_ones , inv_delta_den , offset_num, det ,";
+        std::cout << "sum_ones*sum_lt_gt_lt , sum_ltsq * sum_ones , sum_lt*sum_lt , sum_lt*sum_gt_lt , sum_ltsq * sum_gt_lt , sum_lt * sum_gt_lt," ;
+        std::cout << "inv_delta,delta,offset" << std::endl;
+        std::cout << sum_gt_lt << "," << sum_lt << "," << sum_lt_gt_lt <<  "," << sum_ltsq << "," << sum_ones << "," << inv_delta_den << "," << offset_num<< "," << det << ",";
+        std::cout << sum_ones*sum_lt_gt_lt << "," << sum_ltsq * sum_ones << "," << sum_lt*sum_lt << ","<< sum_lt*sum_gt_lt << "," << sum_ltsq * sum_gt_lt << "," << sum_lt * sum_gt_lt << ",";
+        std::cout << inv_delta << "," << delta << "," << offset<< std::endl;
 #endif
 #endif
 
