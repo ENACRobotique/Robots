@@ -88,7 +88,7 @@ int wiredSync_finalCompute(int reset){
     det= sum_ltsq * sum_ones - sum_lt*sum_lt;
 
     if (det!=0){
-        inv_delta_den = sum_ltsq * sum_ones - sum_lt*sum_lt;
+        inv_delta_den = sum_ones*sum_lt_gt_lt - sum_lt*sum_gt_lt;
         inv_delta = det / inv_delta_den;
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_gt_lt;
         offset = offset_num / det;
@@ -98,8 +98,9 @@ int wiredSync_finalCompute(int reset){
 #else
 #ifdef ARCH_328P_ARDUINO
 #else
-        printf("inv_delta_den : %f, offset_num : %f\n",inv_delta_den,offset_num);
-        printf("det : %f, invdelta : %f, delta : %f, offset : %f\n",det, inv_delta, 1/inv_delta, offset);
+        printf("inv_delta_den : %f, offset_num : %f\n",inv_delta_den.get_d(),offset_num.get_d());
+        mpf_class delta = mpf_class(1)/mpf_class(inv_delta);
+        printf("det : %e, invdelta : %f, delta : %e, offset : %f\n",det.get_d(), inv_delta.get_d(), delta.get_d(), offset.get_d());
 #endif
 #endif
 

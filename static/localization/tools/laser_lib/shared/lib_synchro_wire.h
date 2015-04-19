@@ -21,16 +21,17 @@
 #include "arduino/lib_synchro_wire_arduino.h"
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define WIREDSYNC_INITIAL 0     // time to set when we receive the first sync signal.
 #define WIREDSYNC_LOWTIME 1000  // in ms
 #define WIREDSYNC_MAXLOOP 200   // maximum main loop duration in ms
 #define WIREDSYNC_DEBOUNCE (WIREDSYNC_LOWTIME-WIREDSYNC_MAXLOOP)
 
-typedef double wsType_t; // because it is shorter than wiredSyncType_t, and to allow easy change in order to benchmark different solutions
+#if defined(WIREDSYNC_BENCHMARK) && defined(ARCH_X86_LINUX)
+#include <gmpxx.h>
+#endif
+
+typedef mpz_class wsType_t; // because it is shorter than wiredSyncType_t, and to allow easy change in order to benchmark different solutions
 
 /* wiredSync_waitSignal : function that must be in the main loop, and waits for the wired synchronization signal.
  * This function is to be called on the device which has NOT the reference clock.
@@ -62,7 +63,7 @@ void wiredSync_intermediateCompute(wsType_t gTime, wsType_t lTime);
  *  SYNC_OUT_OF_SYNC while no synchronization has been successful
  *  SYNC_SYNCHRONIZED after the synchronization is achieved, and syncParams updated
  */
-int wiredSync_finalCompute();
+int wiredSync_finalCompute(int reset);
 
 
 /* wiredSync_sendSignal : function that sends the synchronization signal.
@@ -76,7 +77,4 @@ int wiredSync_finalCompute();
  */
 void wiredSync_sendSignal();
 
-#ifdef __cplusplus
-}
-#endif
 #endif /* LIB_SYNCHRO_WIRE_H_ */
