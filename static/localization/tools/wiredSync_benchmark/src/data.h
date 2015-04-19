@@ -11,11 +11,14 @@
 #include "shared/lib_synchro_wire.h"
 
 typedef struct {
-    int index;
+    uint16_t index;
     uint32_t date;
-    uint32_t unoffset_date;
 }wsMeasure_t;
 
+#ifdef ARCH_328P_ARDUINO
+extern wsMeasure_t measures[187];
+#else
 extern wsMeasure_t measures[378];
+#endif
 
 #endif /* SRC_DATA_H_ */

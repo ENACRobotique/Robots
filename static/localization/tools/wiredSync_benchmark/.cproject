@@ -126,8 +126,17 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.376165044" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug.145906660"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.2012416453.1978411063" name="main_linux.cpp" rcbsApplicability="disable" resourcePath="src/main_linux.cpp" toolsToInvoke="de.innot.avreclipse.tool.cppcompiler.app.debug.479892289.988174216">
+						<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.479892289.988174216" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug.479892289"/>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.772800104" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1202556760" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.882822274" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="lib/Millis|lib/laser_lib/shared/lib_int_laser.c|src/main.c|lib/laser_lib/lm4fxx/lib_laser_lm4fxx.c|lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/main_linux.cpp|lib/laser_lib/arduino/lib_laser_arduino.cpp|lib/Millis|lib/laser_lib/shared/lib_int_laser.c|src/main.c|lib/laser_lib/lm4fxx/lib_laser_lm4fxx.c|lib/network_config/roles.c|lib/network_config/network_cfg.c|lib/network_config/messages-elements.c|lib/network_config/messages.c|lib/laser_lib/shared/lib_synchro_laser_turret.cpp|lib/laser_lib/shared/lib_synchro_beacon.c|shared/lib_synchro_laser_turret.cpp|shared/lib_synchro_beacon.c|shared/lib_int_laser.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -199,7 +208,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.762124121" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.841125144" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
-								<option id="gnu.cpp.link.option.libs.1423179005" superClass="gnu.cpp.link.option.libs" valueType="libs">
+								<option id="gnu.cpp.link.option.libs.1423179005" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="gmp"/>
 									<listOptionValue builtIn="false" value="gmpxx"/>
 								</option>
@@ -264,14 +273,14 @@
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1266699842;de.innot.avreclipse.configuration.app.debug.1266699842.;de.innot.avreclipse.tool.compiler.winavr.app.debug.1300836832;de.innot.avreclipse.compiler.winavr.input.598808805">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1266699842;de.innot.avreclipse.configuration.app.debug.1266699842.;cdt.managedbuild.tool.gnu.c.compiler.base.1920133898;cdt.managedbuild.tool.gnu.c.compiler.input.1349577044">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.710589469;de.innot.avreclipse.configuration.app.release.710589469.;de.innot.avreclipse.tool.compiler.winavr.app.release.181146281;de.innot.avreclipse.compiler.winavr.input.1543626769">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1266699842;de.innot.avreclipse.configuration.app.debug.1266699842.;cdt.managedbuild.tool.gnu.cpp.compiler.base.1261285881;cdt.managedbuild.tool.gnu.cpp.compiler.input.2031346095">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.710589469;de.innot.avreclipse.configuration.app.release.710589469.;de.innot.avreclipse.tool.compiler.winavr.app.release.181146281;de.innot.avreclipse.compiler.winavr.input.1543626769">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1266699842;de.innot.avreclipse.configuration.app.debug.1266699842.;cdt.managedbuild.tool.gnu.c.compiler.base.1920133898;cdt.managedbuild.tool.gnu.c.compiler.input.1349577044">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>
