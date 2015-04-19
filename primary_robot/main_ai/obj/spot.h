@@ -19,7 +19,7 @@ using namespace std;
 
 class Spot : public Obj{
     public:
-        Spot(const unsigned int num, eColor_t color);
+        Spot(const unsigned int num, eColor_t color, vector<astar::sObs_t>& obs);
         virtual ~Spot();
 
         void initObj(){};

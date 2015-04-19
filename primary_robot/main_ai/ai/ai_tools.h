@@ -9,6 +9,8 @@
 #define AI_TOOLS_H_
 
 #include "GeometryTools.h"
+#include "a_star_tools.h"
+#include <vector>
 
 #define RESO_POS 2
 #define END_MATCH 90000 //in ms
@@ -18,9 +20,10 @@
 #define NB_MAX_PT_ZONE 10
 
 
-void printObsActive();
-int checkPointInObs(Point2D<float>& p);
+void printObsActive(std::vector<astar::sObs_t>& obs);
+int checkPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
+Point2D<float> projectPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
 void colissionDetection();
-void posPrimary();
+void posPrimary(std::vector<astar::sObs_t>& obs);
 
 #endif /* AI_TOOLS_H_ */

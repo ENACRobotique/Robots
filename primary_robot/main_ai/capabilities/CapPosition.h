@@ -15,17 +15,17 @@
 
 class CapPosition : public Capability{
     public:
-        CapPosition(Robot* rob_init, iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){}
+        CapPosition(Robot* rob_init, astar::iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){}
         virtual ~CapPosition(){}
 
         virtual Point2D<float> getLastPosXY() = 0;
 
-        iABObs_t getIobs(){
+        astar::iABObs_t getIobs(){
             return iobs;
         }
 
     private:
-        iABObs_t iobs; //obstacle associate to the robot
+        astar::iABObs_t iobs; //obstacle associate to the robot
 
 };
 

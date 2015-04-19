@@ -19,8 +19,8 @@
 
 class CapPosSimuSecondary : public CapPosition{
     public:
-        CapPosSimuSecondary(Robot* rob_init, iABObs_t iobs_init) : CapPosition(rob_init, iobs_init){
-            obs[iobs_init].active = 1;
+        CapPosSimuSecondary(Robot* rob_init, astar::iABObs_t iobs_init) : CapPosition(rob_init, iobs_init){
+            robot->env->obs[iobs_init].active = 1;
         }
         virtual ~CapPosSimuSecondary(){}
 

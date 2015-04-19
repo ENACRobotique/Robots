@@ -27,9 +27,6 @@ extern "C"{
 #include "bn_intp.h"
 }
 
-#ifndef HOLONOMIC
-#error "HOLONOMIC must be defined"
-#endif
 
 Path::Path() : _dist(0), _path_len(0){
 }
@@ -68,13 +65,13 @@ void Path::maintenace(){
         prevTime = millis();
     }
 
-#if !HOLONOMIC
+/*
     static unsigned int prevTime2 = 0;
     if(millis() - prevTime2 > 100){
         updateNoHaftTurn();
         prevTime2 = millis();
     }
-#endif
+*/
 }
 
 /*
@@ -82,7 +79,7 @@ void Path::maintenace(){
  * Every parameter that can be calculated automatically, the calculation is performed.
  * Try to send MAX_RETRIES if failed.
  */
-void Path::sendRobot() {
+void Path::sendRobot(bool holo) {
     static sPath_t path;
 
     if(!_path.empty() && !_path_orient.empty()){
@@ -96,9 +93,8 @@ void Path::sendRobot() {
 
     length();
 
-#if HOLONOMIC
-    convPathToPathOrient();
-#endif
+    if(holo)
+        convPathToPathOrient();
 
     if (!checkSamePath(path) || checkRobotBlock()){
         logs << INFO << "Preparation to send a path";
@@ -135,7 +131,7 @@ void Path::sendRobot() {
 /*
  * Stop the robot
  */
-void Path::stopRobot() {
+void Path::stopRobot(bool holo) {
     Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
     sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
 
@@ -143,7 +139,7 @@ void Path::stopRobot() {
 
     _path.push_back(traj);
 
-    sendRobot();
+    sendRobot(holo);
 }
 
 
@@ -151,9 +147,10 @@ void Path::stopRobot() {
  * The robot go to the destination point.
  * "f" to force the robot to go, even if the destination point is in obstacle or if there are obstacles in the trajectory.
  */
-void Path::go2Point(const Point2D<float> &dest, const bool f){
+void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs_t>& obs, bool holo){
     sPath_t path;
     Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
+    int N = obs.size();
 
     obs[0].c = {posRobot.x, posRobot.y};
     obs[N-1].c = {dest.x, dest.y};
@@ -168,15 +165,15 @@ void Path::go2Point(const Point2D<float> &dest, const bool f){
         sTrajEl_t traj = sTrajEl_t{posRobot, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
 
         _path.push_back(traj);
-        sendRobot();
+        sendRobot(holo);
     }
     else {
-        fill_tgts_lnk();
+        astar::fill_tgts_lnk(obs);
         a_star(A(0), A(N-1), &path);
         if (path.path) {
             logs << INFO << "New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
             addPath2(path);
-            sendRobot();
+            sendRobot(holo);
         }
         else {
             logs << INFO << "No path from 0a to " << N - 1;
@@ -185,9 +182,9 @@ void Path::go2Point(const Point2D<float> &dest, const bool f){
 }
 
 
-void Path::followPath(vector <sObs_t> &/*_obs*/, vector <iABObs_t> &l) { // todo tableau statique //for traj prog
+void Path::followPath(vector <astar::sObs_t>& , vector <astar::iABObs_t> &, bool ) { // todo tableau statique //for traj prog
     clear();
-
+/*
    //copier _obs dans obs
     //TODO if there are an adversaire
 
@@ -209,7 +206,8 @@ void Path::followPath(vector <sObs_t> &/*_obs*/, vector <iABObs_t> &l) { // todo
         _path.push_back(el);
     }
 
-    sendRobot();
+    sendRobot(holo);
+    */
 }
 
 /*
@@ -430,7 +428,7 @@ void Path::setPathLength() {
 /*
  * Return true(1) if the 2 obs are identical else false(0)
  */
-bool Path::checkSameObs(sObs_t& obs1, sObs_t& obs2){
+bool Path::checkSameObs(astar::sObs_t& obs1, astar::sObs_t& obs2){
     return ( obs1.r == obs2.r && obs1.c.x == obs2.c.x && obs1.c.y == obs2.c.y);
     }
 
@@ -524,12 +522,12 @@ int Path::checkRobotBlock() {
     return 0;
 }
 
-void Path::updateNoHaftTurn() {
-    int i;
+void Path::updateNoHaftTurn(vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated) {
+    int i, N = obs.size();
     sNum_t r;
     Point2D<float> pt = statuses.getLastPosXY(ELT_PRIMARY);
     float theta = statuses.getLastOrient(ELT_PRIMARY);
-    static sObs_t _obs[3];
+    static astar::sObs_t _obs[3];
 
     r = statuses.getLastSpeed(ELT_PRIMARY); //15=speed
     r /= 3;

@@ -31,8 +31,8 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
                     pt.x = 300. - pt.x;
             }
 
-            startTime = lastTime = millis();
-
+            startTime = millis();
+            lastTime = startTime + START_DELAY;
             first = false;
         }
 

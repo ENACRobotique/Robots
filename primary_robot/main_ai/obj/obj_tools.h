@@ -16,12 +16,12 @@
 
 void loadingPath(sPath_t _path, int num = -1);
 int checkCurrentPathLenght(sPath_t &path);
-void updateEndTraj(float theta, Point2D<float> *pt, float r);
-void updateNoHaftTurn(float theta, Point2D<float>& pt);
-void set_traj(sPath_t *p, iABObs_t l[], int nb);
+void updateEndTraj(float theta, Point2D<float> *pt, float r, vector<astar::sObs_t>& obs);
+void updateNoHaftTurn(float theta, Point2D<float>& pt, vector<astar::sObs_t>& obs);
+void set_traj(sPath_t *p, astar::iABObs_t l[], int nb);
 
-int next_obj(const unsigned int start_time, std::vector<Obj*>& listObj);
-int metObj(int numObj, vector<Obj*>& listObj);
+int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated, const int robot, const bool axle) ;
+int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated);
 
 
 #endif /* OBJ_OBJ_TOOLS_H_ */

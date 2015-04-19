@@ -8,6 +8,7 @@
 #ifndef CAPABILITIES_ROBOT_H_
 #define CAPABILITIES_ROBOT_H_
 
+#include <Environment.h>
 #include <map>
 #include <vector>
 
@@ -17,6 +18,7 @@
 typedef enum {
     POS,
     AI,
+    SLAVE,
     PROP,
     BEACON, //balise mobile
     IO,
@@ -27,9 +29,9 @@ typedef enum {
 
 class Capability;
 
-class Robot {
+class Robot{
     public:
-        Robot(std::string name_, eElement el_) : el(el_){
+        Robot(std::string name_, eElement el_, Environment* env_) : env(env_), el(el_){
             switch(el){
                 case(ELT_PRIMARY):
                     name = "Primary";
@@ -52,6 +54,7 @@ class Robot {
         ~Robot(){}
 
     public:
+        Environment* env;
         std::string name;
         eElement el;
         std::map<eCap, Capability*> caps;

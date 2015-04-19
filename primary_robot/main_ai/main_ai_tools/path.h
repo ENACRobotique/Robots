@@ -26,7 +26,7 @@ typedef struct{
     Point2D<float> p1;
     Point2D<float> p2;
 
-    sObs_t obs;
+    astar::sObs_t obs;
 
     float theta1;
     float theta2;
@@ -49,10 +49,10 @@ class Path {
         void maintenace();
 
         //Send methods
-        void sendRobot();
-        void stopRobot();
-        void go2Point(const Point2D<float> &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
-        void followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l);
+        void sendRobot(bool holo);
+        void stopRobot(bool holo);
+        void go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs_t>& obs, bool holo); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
+        void followPath(vector <astar::sObs_t>& obs, vector <astar::iABObs_t> &l, bool holo);
         void convPathToPathOrient();
         void computeOrientPathForHolonomic(float theta_end_obj);
         void computeTimePathForHolonomic();
@@ -71,11 +71,11 @@ class Path {
 
     private:
         void setPathLength();
-        bool checkSameObs(sObs_t& obs1, sObs_t& obs2);
+        bool checkSameObs(astar::sObs_t& obs1, astar::sObs_t& obs2);
         bool checkSamePath(sPath_t& path);
         bool checkSamePath2(deque<sTrajEl_t>& path);
         int checkRobotBlock();
-        void updateNoHaftTurn() ;
+        void updateNoHaftTurn(vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated);
 
         sNum_t _dist;               //Computed sends
         unsigned int _path_len;     //Computed sends

@@ -14,10 +14,9 @@
 /*
  * Print to the screen the list of active obstacle
  */
-void printObsActive() {
-    int i;
+void printObsActive(vector<astar::sObs_t>& obs) {
     logs << INFO << "List of obs[i].active :\n";
-    for (i = 0; i < N; i++)
+    for (unsigned int i = 0; i < obs.size(); i++)
         logs << "    obs[" << i << "].active=" << obs[i].active << "\n";
 }
 
@@ -25,8 +24,8 @@ void printObsActive() {
 /*
  * Returns the first obstacle number find if this point is inside else 0.
  */
-int checkPointInObs(Point2D<float>& p) {
-    for (int i = 1; i < N - 1; i++) {
+int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs) {
+    for (unsigned int i = 1; i < obs.size() - 1; i++) {
         if (obs[i].active == 0)
             continue;
         Point2D<float> c(obs[i].c.x, obs[i].c.y);
@@ -34,6 +33,27 @@ int checkPointInObs(Point2D<float>& p) {
             return i;
     }
     return 0;
+}
+
+/*
+ * Project the point if inside an obstacle
+ */
+Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
+    if (int n = checkPointInObs(p, obs) > 0) {
+        Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
+        Point2D<float> r;
+
+        r = c.projecte(p);
+        r.x += SIGN(r.x - c.c.x)*0.1;
+        r.y += SIGN(r.y - c.c.y)*0.1;
+
+        //TODO if the point is in several obstacle !
+        //TODO MAX of projection
+
+        return r;
+    }
+
+    return p;
 }
 
 /*
@@ -66,19 +86,19 @@ void colissionDetection(){
     }
 
     if (contact) {
-        path.stopRobot();
+        path.stopRobot(true);
     }
 }
 
 /*
  * FIXME Check the utility
  */
-void posPrimary() { //FIXME permet de deplacer les objects mobile en cas de contact
-    int i;
+void posPrimary(vector<astar::sObs_t>& obs) { //FIXME permet de deplacer les objects mobile en cas de contact
+    int i/*, N = obs.size()*/;
     Point2D<float> pt;
     Point2D<float> _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
 
-    if (((i = checkPointInObs(_current_pos)) != 0)) {
+    if (((i = checkPointInObs(_current_pos, obs)) != 0)) {
         if (obs[i].moved == 1) {
             pt = {obs[0].c.x, obs[0].c.y};
             Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);
@@ -88,7 +108,7 @@ void posPrimary() { //FIXME permet de deplacer les objects mobile en cas de cont
             obs[i].c.x += v.x;
             obs[i].c.y += v.y;
 
-            obs_updated[i]++;
+     //       obs_updated[i]++;
         }
         Point2D<float> p(_current_pos.x, _current_pos.y);
         Circle2D<float> c(obs[i].c.x, obs[i].c.y, obs[i].r);
@@ -97,20 +117,20 @@ void posPrimary() { //FIXME permet de deplacer les objects mobile en cas de cont
         if (sqrt(pow(_current_pos.x - obs[0].c.x, 2) + pow(_current_pos.y - obs[0].c.y, 2) < 2)) {
 
             obs[0].c = {_current_pos.x, _current_pos.y};
-            obs_updated[0]++;
+    //        obs_updated[0]++;
         }
         else {
             _current_pos = {obs[0].c.x, obs[0].c.y};
-            obs_updated[0]++;
+     //       obs_updated[0]++;
         }
     }
     //if non holmic
     float theta_robot = statuses.getLastOrient(ELT_ADV_PRIMARY);
     Point2D<float> p = {obs[0].c.x, obs[0].c.y};
-    updateNoHaftTurn(theta_robot * 180 / M_PI, pt);
-    obs_updated[N - 5]++;
-    obs_updated[N - 6]++;
-    obs_updated[N - 7]++;
+    updateNoHaftTurn(theta_robot * 180 / M_PI, pt, obs);
+//    obs_updated[N - 5]++;
+ //   obs_updated[N - 6]++;
+ //   obs_updated[N - 7]++;
     //end if
 }
 
