@@ -24,8 +24,9 @@ static wsType_t sum_lt=0;      // sum of local dates
 static wsType_t sum_ltsq=0;     // sum of (local dates)^2
 static wsType_t sum_gt_lt=0;   // sum of (global date - local date)
 static wsType_t sum_lt_gt_lt=0;// sum of (local date)*(global date - local date)
+
 #ifndef WIREDSYNC_BENCHMARK
-/* wiredSync_waitSignal : function that must be in the main loop, and wiats for the wired synchronization signal.
+/* wiredSync_waitSignal : function that must be in the main loop, and waits for the wired synchronization signal.
  * "SyncParam" is reset in EVERY TIME this signal is received.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
@@ -98,9 +99,14 @@ int wiredSync_finalCompute(int reset){
 #else
 #ifdef ARCH_328P_ARDUINO
 #else
+#ifdef BENCHMARK_GMP
         printf("inv_delta_den : %f, offset_num : %f\n",inv_delta_den.get_d(),offset_num.get_d());
         mpf_class delta = mpf_class(1)/mpf_class(inv_delta);
         printf("det : %e, invdelta : %f, delta : %e, offset : %f\n",det.get_d(), inv_delta.get_d(), delta.get_d(), offset.get_d());
+#else
+        printf("inv_delta_den : %f, offset_num : %f\n",(float)inv_delta_den,(float)offset_num);
+        printf("det : %e, invdelta : %f, delta : %e, offset : %f\n",(float)det, (float)inv_delta, (float)1.0/inv_delta, (float)offset);
+#endif
 #endif
 #endif
 
