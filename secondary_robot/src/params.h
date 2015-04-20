@@ -13,8 +13,8 @@
 
 /* endincludes *********************************************/
 
-//#define HEADING
-//#define ATTITUDE
+#define HEADING
+#define ATTITUDE
 
 /* Defines ************************************************/
 //pins

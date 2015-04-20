@@ -20,6 +20,8 @@
 #define TIME_RAG_RLSD 6000       //time to release carpet after stair climb begin(in ms)
 #define TIME_STOP 3000           //time for stop after stairs climbed (in ms)
 
+#define TIME_RAG_RLSD_NO_ATTITUDE 6000
+
 int attitudeCmdStartStairs;
 
 Servo servoCarpet;
@@ -39,20 +41,24 @@ sState *testStairs()
 	//réglage du temps de début de la montée
 	if (abs(attitudeCmdStairs-attitudeCmdStartStairs) > ANGLE_STAIRS_STARTED && timeStairsStarted == 0 ){
 		timeStairsStarted = millis();
+		Serial.println("Début montée");
 	}
 
 	if (timeStairsStarted != 0){	//si on a commencé a monter :
 		if (millis() - timeStairsStarted > TIME_RAG_RLSD) {	//après TIME_RAG_RLSD on relache les tapis.
 						servoCarpet.write(40);
+						Serial.println("Relachement tapis");
 				}
 		//quand on revient a l'angle de  départ +/- ANGLE_CMD_STOP on déclanche le timer pour l'arret
 		if (abs(attitudeCmdStairs-attitudeCmdStartStairs) < ANGLE_CMD_STOP && timeStopSoon==0){
 			timeStopSoon = millis();
+			Serial.println("Stop soon");
 		}
 	}
 
 	//arret TIME_STOP après
 	if(timeStopSoon!=0 && millis() - timeStopSoon > TIME_STOP){
+		Serial.println("STOP !!!");
 		if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
 		else return &sTrajEndStairsYellow;
 	}
@@ -60,12 +66,15 @@ sState *testStairs()
 #else
 	static unsigned long timestart = millis();
 
-	if(millis()-timestart > 10000){
+	if (millis() - timestart > TIME_RAG_RLSD_NO_ATTITUDE) {
+		servoCarpet.write(40);
+	}
+
+	if(millis()-timestart > 14000){
 		if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
 				else return &sTrajEndStairsYellow;
 	}
 	return 0;
-	}
 #endif
 }
 
@@ -74,6 +83,9 @@ void initStairs(sState *prev)
 	fanSetCon(FAN_SPEED);
 	attitudeCmdStartStairs = servoAttitude.read();
 	move(5,0);
+#ifndef ATTITUDE
+	servoAttitude.write(attitudeCmdStartStairs-100);
+#endif
 	#ifdef DEBUG
 		Serial.println("Starting stairs");
 	#endif

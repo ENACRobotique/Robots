@@ -17,11 +17,15 @@
 #include "../params.h"
 
 unsigned long timeStartPreStairs;
-
+#ifdef ATTITUDE
+#define TIME_PRESTAIRS 4000
+#else
+#define TIME_PRESTAIRS 2000
+#endif
 
 sState* testPrestairs()
     {
-        if (millis()-timeStartPreStairs > 4000){
+        if (millis()-timeStartPreStairs > TIME_PRESTAIRS){
         	return &sStairs;
         }
        return NULL;
