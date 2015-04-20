@@ -149,12 +149,11 @@ void Path::stopRobot(bool holo) {
  */
 void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs_t>& obs, bool holo){
     sPath_t path;
-    Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> posRobot(obs[0].c.x, obs[0].c.y);
     int N = obs.size();
 
-    obs[0].c = {posRobot.x, posRobot.y};
     obs[N-1].c = {dest.x, dest.y};
-    logs << DEBUG << "position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
+    logs << DEBUG << "go2Point() : position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
 
     Point2D<float> p1(obs[0].c.x, obs[0].c.y),  p2(obs[N-1].c.x, obs[N-1].c.y);
     if(p1.distanceSqTo(p2) < 2.*2.)
@@ -162,22 +161,26 @@ void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs
 
     if(f){
         clear();
-        sTrajEl_t traj = sTrajEl_t{posRobot, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
+        sTrajEl_t traj = sTrajEl_t{{obs[0].c.x, obs[0].c.y}, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
 
         _path.push_back(traj);
         sendRobot(holo);
     }
     else {
+        Point2D<float> p = projectPointInObs(posRobot, obs);
+        obs[0].c = {p.x, p.y};
+
         astar::fill_tgts_lnk(obs);
         a_star(A(0), A(N-1), &path);
         if (path.path) {
-            logs << INFO << "New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
+            logs << INFO << "go2Point() : New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
             addPath2(path);
             sendRobot(holo);
         }
         else {
-            logs << INFO << "No path from 0a to " << N - 1;
+            logs << INFO << "go2Point() : No path from 0a to " << N - 1;
         }
+        obs[0].c = {posRobot.x, posRobot.y};
     }
 }
 

@@ -5,11 +5,13 @@
  *      Author: Sebastien Malissard
  */
 
+#include <iomanip>
 
 #include "ai_tools.h"
 #include "obj_tools.h"
 #include "tools.h"
 
+//#define AI_TOOLS
 
 /*
  * Print to the screen the list of active obstacle
@@ -24,13 +26,17 @@ void printObsActive(vector<astar::sObs_t>& obs) {
 /*
  * Returns the first obstacle number find if this point is inside else 0.
  */
-int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs) {
+unsigned int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs) {
     for (unsigned int i = 1; i < obs.size() - 1; i++) {
         if (obs[i].active == 0)
             continue;
         Point2D<float> c(obs[i].c.x, obs[i].c.y);
-        if (c.distanceTo(p) < obs[i].r)
+        if (c.distanceTo(p) < obs[i].r){
+#ifdef AI_TOOLS
+            logs << DEBUG << fixed << setprecision(2) << "Point is inside obs n°" << i << " (" << obs[i].c.x << " ; " << obs[i].c.y << ")";
+#endif
             return i;
+        }
     }
     return 0;
 }
@@ -39,13 +45,20 @@ int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs) {
  * Project the point if inside an obstacle
  */
 Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
-    if (int n = checkPointInObs(p, obs) > 0) {
+    unsigned int n = checkPointInObs(p, obs);
+
+    if ( n > 0) {
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         Point2D<float> r;
 
         r = c.projecte(p);
         r.x += SIGN(r.x - c.c.x)*0.1;
         r.y += SIGN(r.y - c.c.y)*0.1;
+
+#ifdef AI_TOOLS
+            logs << DEBUG << fixed << setprecision(2) << "Old position : (" << p.x << " ; " << p.y << ")";
+            logs << DEBUG << fixed << setprecision(2) << "New position : (" << r.x << " ; " << r.y << ")";
+#endif
 
         //TODO if the point is in several obstacle !
         //TODO MAX of projection
