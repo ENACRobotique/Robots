@@ -1,5 +1,5 @@
 /*
- * Frame.h
+ * Acq.h
  *
  *  Created on: 17 avr. 2015
  *      Author: ludo6431
@@ -14,79 +14,36 @@
 #include <iostream>
 #include <map>
 #include <utility>
+#include "ProjAcq.h"
+#include "commonTypes.h"
+#include <Plane3D.h>
+#include <Vector2D.h>
 
 class Cam;
+class ProjAcq;
 
 template<typename T> class Point2D;
+template<typename T> class PosObj3D;
+template<typename T> class Vector2D;
 
-enum ColorType {
-    RGB,
-    HSV
-};
 
 class Acq {
 protected:
-    using matmap = std::map<ColorType, cv::Mat>;
+    using matmap = std::map<eColorType, cv::Mat>;
 
     matmap matMap;
     Cam* cam;
 
 public:
-    Acq(cv::Mat mat, ColorType ctype, Cam* cam):cam(cam) {
-        matMap.insert(std::pair<ColorType, cv::Mat>(ctype, mat));
+    Acq(cv::Mat mat, eColorType ctype, Cam* cam):cam(cam) {
+        matMap.insert(std::pair<eColorType, cv::Mat>(ctype, mat));
     }
     virtual ~Acq() {
     }
 
-    cv::Mat getMat(ColorType ctype = RGB) {
-        matmap::iterator resIt = matMap.find(ctype);
-        if (resIt == matMap.end()) {
-            cv::Mat ret;
-
-            int code = -1;
-
-            // find a possible conversion
-            for (resIt = matMap.begin(); code < 0 && resIt != matMap.end();
-                    resIt++) {
-                switch (ctype) {
-                case RGB:
-                    switch (resIt->first) {
-                    case HSV:
-                        code = cv::COLOR_HSV2RGB;
-                        break;
-                    default:
-                        break;
-                    }
-                    break;
-                case HSV:
-                    switch (resIt->first) {
-                    case RGB:
-                        code = cv::COLOR_RGB2HSV;
-                        break;
-                    default:
-                        break;
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
-
-            if (code >= 0) {
-                cv::cvtColor(resIt->second, ret, code);
-
-                matMap.insert(std::pair<ColorType, cv::Mat>(ctype, ret));
-            }
-            else {
-                std::cerr << "Can't convert to needed ctype!" << std::endl;
-            }
-
-            return ret;
-        }
-        else {
-            return resIt->second;
-        }
-    }
+    cv::Mat getMat(eColorType ctype = RGB);
+    Cam* getCam();
+    ProjAcq projectOnPlane(Plane3D<float> plan, Vector2D<int> size);
 };
 
 #endif /* TOOLS_ACQ_H_ */

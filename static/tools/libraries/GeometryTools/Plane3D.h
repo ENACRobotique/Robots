@@ -14,10 +14,8 @@ public:
     T a, b, c, d;
 
     Plane3D(T a, T b, T c, T d) :
-            a(a), b(b), c(c), d(d) {
-    }
-    virtual ~Plane3D() {
-    }
+            a(a), b(b), c(c), d(d) {}
+    virtual ~Plane3D() {}
 };
 
 #endif /* LIB_GEOMETRYTOOLS_PLANE3D_H_ */
