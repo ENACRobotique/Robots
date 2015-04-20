@@ -12,10 +12,10 @@ extern "C"{
 }
 #endif
 
-
+using namespace astar;
 
 void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {
-    int i, j;
+    int i, j, N = obs.size();
     iABObs_t tmp;
     sNum_t tmp_g_score, s_l;
     sSeg_t *seg;

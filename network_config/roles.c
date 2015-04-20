@@ -6,6 +6,9 @@
  */
 
 #include <string.h>
+#ifdef ARCH_X86_LINUX
+#   include <assert.h>
+#endif
 //#include <stdio.h> // printf()
 
 #include "../static/communication/botNet/shared/botNet_core.h"
@@ -13,66 +16,94 @@
 
 #include "roles.h"
 
-#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_AI && MYROLE!=ROLE_PROPULSION && MYROLE!=ROLE_DEBUG)
+#if !defined(MYROLE) || (MYROLE!=0 && MYROLE!=ROLE_DEBUG && MYROLE!=ROLE_MONITORING && MYROLE!=ROLE_PRIM_AI && MYROLE!=ROLE_PRIM_PROPULSION && MYROLE!=ROLE_SEC_AI && MYROLE!=ROLE_SEC_PROPULSION)
 #error "MYROLE must be defined and correct in node_cfg.h"
 #endif
 
-#if MYROLE != ROLE_MONITORING
-bn_Address addr_role_mon = ADDR_MONITORING_DFLT;
-#endif
-#if MYROLE != ROLE_AI
-bn_Address addr_role_ai = ADDR_AI_DFLT;
-#endif
-#if MYROLE != ROLE_PROPULSION
-bn_Address addr_role_prop = ADDR_PROP_DFLT;
-#endif
+bn_Address role_addresses[] = {
 #if MYROLE != ROLE_DEBUG
-bn_Address addr_role_dbg = ADDR_DEBUG_DFLT;
+    ADDR_DEBUG_DFLT,
 #endif
-
-sRoleActions role_actions[3] = {
-#if MYROLE == ROLE_AI
-        { // E_TRAJ && E_TRAJ_ORIENT_EL messages
-                .sendTo.first = ROLE_PROPULSION,
-                .sendTo.second = ROLE_MONITORING,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
-        },
-#else
-        { // E_TRAJ && E_TRAJ_ORIENT_EL messages
-                .sendTo.first = 0,
-                .sendTo.second = 0,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
-        },
+#if MYROLE
+#   if MYROLE != ROLE_MONITORING
+        ADDR_MONITORING_DFLT,
+#   endif
+#   if MYROLE != ROLE_PRIM_AI
+        ADDR_AI_DFLT,
+#   endif
+#   if MYROLE != ROLE_PRIM_PROPULSION
+        ADDR_PROP_DFLT,
+#   endif
 #endif
-
-#if MYROLE == ROLE_AI
-        { // E_POS messages
-                .sendTo.first = ROLE_PROPULSION,
-                .sendTo.second = ROLE_MONITORING,
-                .relayTo.n1 = ROLE_PROPULSION,
-                .relayTo.n2 = ROLE_MONITORING
-        },
-#else
-        { // E_POS messages
-                .sendTo.first = ROLE_AI,
-                .sendTo.second = 0,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
-        },
-#endif
-
-        { // E_DEBUG messages
-                .sendTo.first = ADDR_DEBUG_DFLT?ROLE_DEBUG:0,
-                .sendTo.second = 0,
-                .relayTo.n1 = 0,
-                .relayTo.n2 = 0
-        },
 };
-#define ACT_MSG_TRAJ (&role_actions[0])
-#define ACT_MSG_POS  (&role_actions[1])
-#define ACT_MSG_DBG  (&role_actions[2])
+#define NB_ROLE_ADDRESSES (sizeof(role_addresses)/sizeof(*role_addresses))
+
+sRoleActions role_actions[] = {
+        // ROLEMSG_DEBUG messages
+        {
+                .sendTo={
+                    .first = ADDR_DEBUG_DFLT?ROLE_DEBUG:0,
+                    .second = 0,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
+        },
+
+#if MYROLE
+        // ROLEMSG_PRIM_TRAJ messages
+#   if MYROLE == ROLE_PRIM_AI
+        {
+                .sendTo={
+                    .first = ROLE_PRIM_PROPULSION,
+                    .second = ROLE_MONITORING,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
+        },
+#   else
+        {
+                .sendTo={
+                    .first = 0,
+                    .second = 0,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
+        },
+#   endif
+
+        // ROLEMSG_PRIM_POS messages
+#   if MYROLE == ROLE_PRIM_AI
+        {
+                .sendTo={
+                    .first = ROLE_PRIM_PROPULSION,
+                    .second = ROLE_MONITORING,
+                },
+                .relayTo={
+                    .n1 = ROLE_PRIM_PROPULSION,
+                    .n2 = ROLE_MONITORING
+                }
+        },
+#   else
+        {
+                .sendTo={
+                    .first = ROLE_PRIM_AI,
+                    .second = 0,
+                },
+                .relayTo={
+                    .n1 = 0,
+                    .n2 = 0
+                }
+        },
+#   endif
+#endif
+};
+#define NB_ROLE_ACTIONS (sizeof(role_actions)/sizeof(*role_actions))
 
 void role_setup(sMsg *msg){
     int i;
@@ -82,28 +113,15 @@ void role_setup(sMsg *msg){
         return;
     }
 
-    for(i = 0; i < MIN(13, rs->nb_steps); i++){
+    for(i = 0; i < MIN(18, rs->nb_steps); i++){
         typeof(rs->steps[0]) *s = &rs->steps[i];
-        switch(s->step){
+        switch(s->step_type){
         case UPDATE_ADDRESS:
             role_set_addr(s->role, s->address);
-//            printf("auto update address %hhu %hx\n", s->role, s->address);
             break;
         case UPDATE_ACTIONS:
-//            printf("auto update actions %s (=%hhu)\n", eType2str(s->type), s->type);
-            switch(s->type){
-            case E_TRAJ:
-            case E_TRAJ_ORIENT_EL:
-                memcpy((void*)ACT_MSG_TRAJ, (void*)&s->actions, sizeof(*ACT_MSG_TRAJ));
-                break;
-            case E_POS:
-                memcpy((void*)ACT_MSG_POS, (void*)&s->actions, sizeof(*ACT_MSG_POS));
-                break;
-            case E_DEBUG:
-                memcpy((void*)ACT_MSG_DBG, (void*)&s->actions, sizeof(*ACT_MSG_DBG));
-                break;
-            default:
-                break;
+            if(s->type >= 0 && s->type < NB_ROLE_ACTIONS){
+                memcpy((void*)&role_actions[s->type], (void*)&s->actions, sizeof(*role_actions));
             }
             break;
         default:
@@ -113,280 +131,305 @@ void role_setup(sMsg *msg){
 }
 
 int role_set_addr(uint8_t role, bn_Address address){
-    switch(role){
-    case ROLE_MONITORING:
-#if MYROLE != ROLE_MONITORING
-        addr_role_mon = address;
-        break;
-#else
-        return -1;
+#ifdef ARCH_X86_LINUX
+    uint8_t inRole = role;
 #endif
-    case ROLE_AI:
-#if MYROLE != ROLE_AI
-        addr_role_ai = address;
-        break;
-#else
+
+    if(role == MYROLE){
         return -1;
-#endif
-    case ROLE_PROPULSION:
-#if MYROLE != ROLE_PROPULSION
-        addr_role_prop = address;
-        break;
-#else
-        return -1;
-#endif
-    case ROLE_DEBUG:
-#if MYROLE != ROLE_DEBUG
-        addr_role_dbg = address;
-        break;
-#else
-        return -1;
-#endif
-    default:
-        break;
     }
+
+    if(role > MYROLE){
+        role--;
+    }
+    role--; // roles are 1-based
+
+    if(role >= NB_ROLE_ADDRESSES){
+        return -1;
+    }
+
+#ifdef ARCH_X86_LINUX
+    assert(role_get_role(address) == inRole);
+#endif
+
+    role_addresses[role] = address;
+
     return 0;
 }
 
+// role_get_role(role_get_addr(r)) must be equal to r
+
 bn_Address role_get_addr(uint8_t role){
-    switch(role){
-    // monitoring
-    case ROLE_MONITORING:
-#if MYROLE != ROLE_MONITORING
-        return addr_role_mon;
-#else
-        return MYADDR;
+#ifdef ARCH_X86_LINUX
+    uint8_t inRole = role;
 #endif
-    // ai
-    case ROLE_AI:
-#if MYROLE != ROLE_AI
-        return addr_role_ai;
-#else
+
+    if(role == MYROLE){
         return MYADDR;
-#endif
-    // propulsion
-    case ROLE_PROPULSION:
-#if MYROLE != ROLE_PROPULSION
-        return addr_role_prop;
-#else
-        return MYADDR;
-#endif
-    // debug
-    case ROLE_DEBUG:
-#if MYROLE != ROLE_DEBUG
-        return addr_role_dbg;
-#else
-        return MYADDR;
-#endif
-    default:
+    }
+
+    if(role > MYROLE){
+        role--;
+    }
+    role--; // roles are 1-based
+
+    if(role >= NB_ROLE_ADDRESSES){
         return 0;
     }
+
+    bn_Address address = role_addresses[role];
+
+#ifdef ARCH_X86_LINUX
+    assert(role_get_role(address) == inRole);
+#endif
+
+    return address;
 }
 
-uint8_t role_get_role(bn_Address address){
+uint8_t role_get_role(bn_Address address){ // TODO update
     switch(address){
-    // monitoring
-    case ADDRD1_MONITORING:
-        return ROLE_MONITORING;
-    // ai
-    case ADDRD1_MAIN_AI_SIMU:
-    case ADDRD2_MAIN_AI:
-    case ADDRU2_MAIN_AI:
-        return ROLE_AI;
-    // propulsion
-    case ADDRD1_MAIN_PROP_SIMU:
-    case ADDRI_MAIN_PROP:
-    case ADDRU2_MAIN_PROP:
-        return ROLE_PROPULSION;
-    // debug
     case ADDRD1_DEBUG1:
     case ADDRD1_DEBUG2:
     case ADDRD1_DEBUG3:
     case ADDRX_DEBUG:
         return ROLE_DEBUG;
+    case ADDRD1_MONITORING:
+        return ROLE_MONITORING;
+    case ADDRD1_MAIN_AI_SIMU:
+    case ADDRD2_MAIN_AI:
+    case ADDRU2_MAIN_AI:
+        return ROLE_PRIM_AI;
+    case ADDRD1_MAIN_PROP_SIMU:
+    case ADDRI_MAIN_PROP:
+    case ADDRU2_MAIN_PROP:
+        return ROLE_PRIM_PROPULSION;
     default:
         return 0;
     }
 }
 
+int role_get_msgclass(E_TYPE msgType, uint8_t srcRole, uint8_t destRole, eRoleMsgClass* c){
+    int ret = 0;
+
+    switch(msgType){
+    case E_DEBUG:
+        switch(destRole){
+        case ROLE_DEBUG:
+            *c = ROLEMSG_DEBUG;
+            ret = 1;
+            break;
+        default:
+            break;
+        }
+        break;
+    case E_TRAJ:
+    case E_TRAJ_ORIENT_EL:
+        switch(destRole){
+        case ROLE_PRIM_AI:
+        case ROLE_PRIM_PROPULSION:
+            *c = ROLEMSG_PRIM_TRAJ;
+            ret = 1;
+            break;
+        case ROLE_SEC_AI:
+        case ROLE_SEC_PROPULSION:
+            *c = ROLEMSG_SEC_TRAJ;
+            ret = 1;
+            break;
+        case ROLE_MONITORING:
+            switch(srcRole){
+            case ROLE_PRIM_AI:
+            case ROLE_PRIM_PROPULSION:
+                *c = ROLEMSG_PRIM_TRAJ;
+                ret = 1;
+                break;
+            case ROLE_SEC_AI:
+            case ROLE_SEC_PROPULSION:
+                *c = ROLEMSG_SEC_TRAJ;
+                ret = 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    case E_POS:
+        switch(destRole){
+        case ROLE_PRIM_AI:
+        case ROLE_PRIM_PROPULSION:
+            *c = ROLEMSG_PRIM_POS;
+            ret = 1;
+            break;
+        case ROLE_SEC_AI:
+        case ROLE_SEC_PROPULSION:
+            *c = ROLEMSG_SEC_POS;
+            ret = 1;
+            break;
+        case ROLE_MONITORING:
+            switch(destRole){
+            case ROLE_PRIM_AI:
+            case ROLE_PRIM_PROPULSION:
+                *c = ROLEMSG_PRIM_POS;
+                ret = 1;
+                break;
+            case ROLE_SEC_AI:
+            case ROLE_SEC_PROPULSION:
+                *c = ROLEMSG_SEC_POS;
+                ret = 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return ret;
+}
+
 const char *role_string(uint8_t role){
     switch(role){
-    case ROLE_MONITORING:
-        return "monitoring";
-    case ROLE_AI:
-        return "ai";
-    case ROLE_PROPULSION:
-        return "propulsion";
     case ROLE_DEBUG:
         return "debug";
+    case ROLE_MONITORING:
+        return "monitoring";
+    case ROLE_PRIM_AI:
+        return "primary ai";
+    case ROLE_PRIM_PROPULSION:
+        return "primary propulsion";
+    case ROLE_SEC_AI:
+        return "secondary ai";
+    case ROLE_SEC_PROPULSION:
+        return "secondary propulsion";
     default:
         return "unknown";
     }
 }
 
-int role_send(sMsg *msg){
-    int ret = 0;
+int role_send(sMsg *msg, eRoleMsgClass mc){
+    int ret = 0, ret2 = 0;
 
-#define SEND_BLOCK(act) \
-    do{                                                                     \
-        if((act)->sendTo.first){                                            \
-            msg->header.destAddr = role_get_addr((act)->sendTo.first);      \
-            ret = bn_send(msg);                                             \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-        if((act)->sendTo.second){                                           \
-            msg->header.destAddr = role_get_addr((act)->sendTo.second);     \
-            ret = bn_send(msg);                                             \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-    }while(0)
+    if(mc >= NB_ROLE_ACTIONS){
+        return -1;
+    }
+    sRoleActions* act = &role_actions[mc];
 
-    switch(msg->header.type){
-    case E_TRAJ:
-    case E_TRAJ_ORIENT_EL:
-        SEND_BLOCK(ACT_MSG_TRAJ);
-        break;
-    case E_POS:
-        SEND_BLOCK(ACT_MSG_POS);
-        break;
-    case E_DEBUG:
-        SEND_BLOCK(ACT_MSG_DBG);
-        break;
-    default:
-        break;
+    if(act->sendTo.first){
+        msg->header.destAddr = role_get_addr(act->sendTo.first);
+        if((ret = bn_send(msg)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
+    }
+    if(act->sendTo.second){
+        msg->header.destAddr = role_get_addr(act->sendTo.second);
+        if((ret = bn_send(msg)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
     }
 
-#undef SEND_BLOCK
-
-    return ret;
+    return ret2;
 }
 
-int role_sendAck(sMsg *msg){
-    int ret = 0;
+int role_sendAck(sMsg *msg, eRoleMsgClass mc){
+    int ret = 0, ret2 = 0;
 
-#define SEND_BLOCK(act) \
-    do{                                                                     \
-        if((act)->sendTo.first){                                            \
-            msg->header.destAddr = role_get_addr((act)->sendTo.first);      \
-            ret = bn_sendAck(msg);                                          \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-        if((act)->sendTo.second){                                           \
-            msg->header.destAddr = role_get_addr((act)->sendTo.second);     \
-            ret = bn_sendAck(msg);                                          \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-    }while(0)
+    if(mc >= NB_ROLE_ACTIONS){
+        return -1;
+    }
+    sRoleActions* act = &role_actions[mc];
 
-    switch(msg->header.type){
-    case E_TRAJ:
-    case E_TRAJ_ORIENT_EL:
-        SEND_BLOCK(ACT_MSG_TRAJ);
-        break;
-    case E_POS:
-        SEND_BLOCK(ACT_MSG_POS);
-        break;
-    case E_DEBUG:
-        SEND_BLOCK(ACT_MSG_DBG);
-        break;
-    default:
-        break;
+    if(act->sendTo.first){
+        msg->header.destAddr = role_get_addr(act->sendTo.first);
+        if((ret = bn_sendAck(msg)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
+    }
+    if(act->sendTo.second){
+        msg->header.destAddr = role_get_addr(act->sendTo.second);
+        if((ret = bn_sendAck(msg)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
     }
 
-#undef SEND_BLOCK
-
-    return ret;
+    return ret2;
 }
 
-int role_sendRetry(sMsg *msg, int retries){
-    int ret = 0;
+int role_sendRetry(sMsg *msg, eRoleMsgClass mc, int retries){
+    int ret = 0, ret2 = 0;
 
-#define SEND_BLOCK(act) \
-    do{                                                                     \
-        if((act)->sendTo.first){                                            \
-            msg->header.destAddr = role_get_addr((act)->sendTo.first);      \
-            ret = bn_sendRetry(msg, retries);                                          \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-        if((act)->sendTo.second){                                           \
-            msg->header.destAddr = role_get_addr((act)->sendTo.second);     \
-            ret = bn_sendRetry(msg, retries);                                          \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-    }while(0)
+    if(mc >= NB_ROLE_ACTIONS){
+        return -1;
+    }
+    sRoleActions* act = &role_actions[mc];
 
-    switch(msg->header.type){
-    case E_TRAJ:
-    case E_TRAJ_ORIENT_EL:
-        SEND_BLOCK(ACT_MSG_TRAJ);
-        break;
-    case E_POS:
-        SEND_BLOCK(ACT_MSG_POS);
-        break;
-    case E_DEBUG:
-        SEND_BLOCK(ACT_MSG_DBG);
-        break;
-    default:
-        break;
+    if(act->sendTo.first){
+        msg->header.destAddr = role_get_addr(act->sendTo.first);
+        if((ret = bn_sendRetry(msg, retries)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
+    }
+    if(act->sendTo.second){
+        msg->header.destAddr = role_get_addr(act->sendTo.second);
+        if((ret = bn_sendRetry(msg, retries)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
     }
 
-#undef SEND_BLOCK
-
-    return ret;
+    return ret2;
 }
 
 #if MYROLE
 
 int role_relay(sMsg *msg){
-    bn_Address dest_save = msg->header.destAddr;
-    uint8_t msg_src_role = role_get_role(msg->header.srcAddr);
-    int ret = 0;
+    bn_Address dest_addr_save = msg->header.destAddr;
+    uint8_t src_role = role_get_role(msg->header.srcAddr);
+    uint8_t dest_role = role_get_role(msg->header.destAddr);
+    int ret = 0, ret2 = 0;
 
-    if(!msg_src_role || !role_get_role(msg->header.destAddr)){
+    if(!src_role || !dest_role){
         return 0;
     }
 
-#define RELAY_BLOCK(act) \
-    do{                                                                     \
-        if((act)->relayTo.n1 == msg_src_role){                              \
-            msg->header.destAddr = role_get_addr((act)->relayTo.n2);        \
-            ret = bn_send(msg);                                             \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-        if((act)->relayTo.n2 == msg_src_role){                              \
-            msg->header.destAddr = role_get_addr((act)->relayTo.n1);        \
-            ret = bn_send(msg);                                             \
-            if(ret < 0)                                                     \
-                break;                                                      \
-        }                                                                   \
-    }while(0)
-
-    switch(msg->header.type){
-    case E_TRAJ:
-    case E_TRAJ_ORIENT_EL:
-        RELAY_BLOCK(ACT_MSG_TRAJ);
-        break;
-    case E_POS:
-        RELAY_BLOCK(ACT_MSG_POS);
-        break;
-    case E_DEBUG:
-        RELAY_BLOCK(ACT_MSG_DBG);
-        break;
-    default:
-        break;
+    eRoleMsgClass mc;
+    if((ret = role_get_msgclass(msg->header.type, src_role, dest_role, &mc)) <= 0){
+        return ret;
     }
-    msg->header.destAddr = dest_save;
+    if(mc >= NB_ROLE_ACTIONS){
+        return -1;
+    }
+    sRoleActions* act = &role_actions[mc];
 
-#undef RELAY_BLOCK
+    if(act->relayTo.n1 == src_role){
+        msg->header.destAddr = role_get_addr(act->relayTo.n2);
+        if((ret = bn_send(msg)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
+    }
+    if(act->relayTo.n2 == src_role){
+        msg->header.destAddr = role_get_addr(act->relayTo.n1);
+        if((ret = bn_send(msg)) < 0){
+            return ret;
+        }
+        ret2 += ret > 0;
+    }
 
-    return ret;
+    msg->header.destAddr = dest_addr_save;
+
+    return ret2;
 }
 
 #endif

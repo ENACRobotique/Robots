@@ -11,6 +11,7 @@
 
 #include <types.h>
 #include "obj.h"
+#include "tools.h"
 
 #define START_STAND 4 //number of the first stand element in obs[]
 
@@ -18,7 +19,7 @@ using namespace std;
 
 class Spot : public Obj{
     public:
-        Spot(const unsigned int num);
+        Spot(const unsigned int num, eColor_t color, vector<astar::sObs_t>& obs);
         virtual ~Spot();
 
         void initObj(){};
@@ -27,6 +28,7 @@ class Spot : public Obj{
 
     private :
         unsigned int _num;
+        eColor_t _color;
 
 };
 

@@ -4,6 +4,7 @@
 #include <millis.h>
 #include <shared/botNet_core.h>
 #include <messages.h>
+#include <roles.h>
 
 #include "debug.h"
 #include "tools.h"
@@ -127,7 +128,7 @@ int main() {
                 outMsg.payload.pos.theta = (double)traj_mngr.ctlr.theta / dASHIFT;
             }
 
-            role_send(&outMsg);
+            role_send(&outMsg, ROLEMSG_PRIM_POS);
         }
     }
 }

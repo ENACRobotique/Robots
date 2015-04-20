@@ -20,9 +20,6 @@ extern "C"{
 #include "messages.h"
 #include "tools.h"
 
-#ifndef HOLONOMIC
-#error "HOLONOMIC must be defined"
-#endif
 
 #define TRAJ_ORIENT 0 //1 active else 0
 
@@ -43,11 +40,11 @@ void Net::maintenace(){
     static unsigned int prevTime = 0;
 
     if(millis() - prevTime > 20){
-#if TRAJ_ORIENT || HOLONOMIC
+
         sendPathOrientToNet();
-#else
-        sendPathToNet();
-#endif
+
+        //sendPathToNet();
+
         prevTime = millis();
     }
 
@@ -155,7 +152,7 @@ void Net::sendPathToNet(){
 
         _trajEl.pop();
 
-        if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0)
+        if ((ret = role_sendRetry(&outMsg, ROLEMSG_PRIM_TRAJ, MAX_RETRIES)) <= 0)
             logs << ERR << "role_sendRetry(E_TRAJ) failed #" << -ret;
         else
             logs << INFO <<"A new path was send : tid=" << _tid << " and sid=" << _sid;
@@ -217,7 +214,7 @@ void Net::sendPathOrientToNet(){
         outMsg.payload.trajOrientEl.tid = _tid;
         outMsg.payload.trajOrientEl.sid = _sid;
 
-        if ((ret = role_sendRetry(&outMsg, MAX_RETRIES)) <= 0)
+        if ((ret = role_sendRetry(&outMsg, ROLEMSG_PRIM_TRAJ, MAX_RETRIES)) <= 0)
             logs << ERR << "role_sendRetry(E_TRAJ_ORIENT_EL) failed " << getErrorStr(-ret) << " (#" << -ret << ")";
         else
             logs << INFO << "A new path orient has been sent: tid=" << _tid << " and sid=" << _sid;

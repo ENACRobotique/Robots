@@ -14,6 +14,7 @@
 #include "../network_tools/bn_debug.h"
 #include "global_errors.h"
 #include "node_cfg.h"
+#include "roles.h"
 
 //#define CTRLC_MENU
 

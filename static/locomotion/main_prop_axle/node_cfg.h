@@ -23,7 +23,7 @@
 #endif
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
-#define MYROLE ROLE_PROPULSION
+#define MYROLE ROLE_PRIM_PROPULSION
 // MYROLE must be equal to role_get_role(MYADDR)
 
 #define BN_INC_MSG_BUF_SIZE 4

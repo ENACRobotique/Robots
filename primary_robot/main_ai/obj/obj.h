@@ -8,13 +8,13 @@
 #ifndef OBJ_OBJ_H_
 #define OBJ_OBJ_H_
 
-#include <ai_types.h>
+#include <ai_tools.h>
 #include "types.h"
 #include <vector>
+#include "GeometryTools.h"
+#include "a_star.h"
 
-#ifndef HOLONOMIC
-#error "HOLONOMIC must be defined"
-#endif
+//#define DEBUG_OBJ
 
 using namespace std;
 
@@ -22,10 +22,8 @@ typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
 
 typedef struct {
     eTypeEntry_t type;      //type of access
-
-#if !HOLONOMIC
     float radius;           //size of the 3 approach circles
-#endif
+
 
     struct{
         Point2D<float> p;        //point
@@ -66,27 +64,68 @@ class Obj {
 
         void addAccess(sObjEntry_t &access);
 
-        sNum_t update(sPt_t posRobot);
+        float update(const bool axle,  std::vector<astar::sObs_t>& obs, const int robot);
 
         float getDist() const;
         sPath_t getPath() const;
         Point2D<float> getDestPoint() const;
         float getDestPointOrient() const;
         eStateObj_t getState() const;
-        sNum_t getYield();
-
-        void print() const;
+        float getYield(const unsigned int start_time);
+        vector<unsigned int> getNumObs(){
+            return _num_obs;
+        }
+        void print();
 
     protected:
+        string objAccess(eTypeEntry_t access){
+            switch(access){
+                case E_POINT:
+                    return "POINT";
+                case E_CIRCLE:
+                    return "CIRCLE";
+                case E_SEGMENT:
+                    return "SEGMENT";
+                default:
+                    return "Unknown type of access point";
+            }
+        }
+
+        string objType(){
+            switch(_type){
+                case E_CLAP:
+                    return "CLAP";
+                case E_SPOT:
+                    return "SPOT";
+                default:
+                    return "Undefined";
+            }
+        }
+
+        string objState(){
+            switch(_state){
+                case  ACTIVE:
+                    return "activated";
+                case WAIT_MES:
+                    return "waiting a message";
+                case NO_TIME:
+                    return "no time to go to the goal";
+                case FINISH:
+                    return "finished";
+                default:
+                    return "Unknown state !!!";
+            }
+        }
+
         eObj_t _type;                       //objective type
         int _point;                         //point number of the objective
         eStateObj_t _state;                 //if the objective is used or not
         Point2D<float> _access_select;               //the closest access select
         float _access_select_angle;         //angle of the access select
-        sNum_t _dist;                       //distance robot-objective (the closest access)
-        sNum_t _time;                       //time robot-objective (the closest access) TODO no compute for the moment
+        float _dist;                       //distance robot-objective (the closest access)
+        float _time;                       //time robot-objective (the closest access) TODO no compute for the moment
         sPath_t _path;                      //path robot-objective (the closest access)
-        sNum_t _done;                       //probability than the objective has already been completed by another robot
+        float _done;                       //probability than the objective has already been completed by another robot
         vector<unsigned int> _num_obs;      //obstacle number associate to the objective need to deactivate
         vector<sObjEntry_t> _access;        //list of access to reach the objective
 };

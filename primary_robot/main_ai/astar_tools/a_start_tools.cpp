@@ -10,25 +10,13 @@ extern "C"{
 
 #define CHECK_LIMITS
 
+using namespace astar;
 
-std::vector<sObs_t> obs;                                                    // array of physical obstacles (256B)
-int N = 0;                                                                  // number of physical obstacles
-std::vector<std::vector<sTgts_t>> tgts(N, std::vector<sTgts_t>(N));         // tangents between physical obstacles (17kiB)
-std::vector<std::vector<sASEl_t>> aselts(N*2, std::vector<sASEl_t>(N*2));   // A* elements
-std::vector<uint8_t> obs_updated(N);                                        // array not used by A*, available for the user
+std::vector<sObs_t> astar::obs;                             // array of physical obstacles (256B)
+int astar::N;                                               // number of physical obstacles
+std::vector<std::vector<sTgts_t>> astar::tgts;              // tangents between physical obstacles (17kiB)
+std::vector<std::vector<sASEl_t>> astar::aselts;            // A* elements
 
-void init_obs(const std::vector<sObs_t>& _obs){
-    obs = _obs;
-    N = obs.size();
-
-    std::vector<std::vector<sTgts_t>> _tgts(N, std::vector<sTgts_t>(N));
-    std::vector<std::vector<sASEl_t>> _aselts(N*2, std::vector<sASEl_t>(N*2));
-    std::vector<uint8_t> _obs_updated(N) ;
-
-    tgts = _tgts;
-    aselts = _aselts;
-    obs_updated =_obs_updated;
-}
 
 static uint8_t fill_tgts(iObs_t _o1, iObs_t _o2) { // private function, _o1 < _o2
     sVec_t o1o2, t, n;
@@ -182,7 +170,15 @@ uint8_t check_segment(iObs_t o1, sSeg_t *s, iObs_t o2) {
 }
 
 //#define FILL_DEBUG
-void fill_tgts_lnk() {
+void astar::fill_tgts_lnk(const std::vector<sObs_t>& obs_) {
+    obs = obs_;
+    N = obs.size();
+
+    std::vector<std::vector<sTgts_t>> _tgts(N, std::vector<sTgts_t>(N));
+    std::vector<std::vector<sASEl_t>> _aselts(N*2, std::vector<sASEl_t>(N*2));
+    tgts = _tgts;
+    aselts = _aselts;
+
     iObs_t i, j;
     uint8_t ok, nb;
 #ifdef AS_STATS
@@ -450,7 +446,7 @@ void northern_point_arc(const sPt_t *_p1, iObs_t o, int dir, const sPt_t *_p2, c
 }
 #endif
 
-uint8_t o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iObs_t o3) {
+uint8_t astar::o_check_arc(iObs_t o1, sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3, iObs_t o3) {
     iObs_t i;
     sVec_t v1, v3;
     sLin_t l1, l3;
@@ -552,7 +548,7 @@ printf("      because of CCW %i:", i);
     return 1; // good arc
 }
 
-sNum_t o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
+sNum_t astar::o_arc_len(sPt_t *p2_1, iObs_t o2, int dir, sPt_t *p2_3) {
     sVec_t v1, v3;
     sNum_t d, c;
 
@@ -601,3 +597,5 @@ printf(            "      v1^v3=%.3f ; v1.v3=%.3f\n", c, d);
 
     return d*obs[o2].r;
 }
+
+

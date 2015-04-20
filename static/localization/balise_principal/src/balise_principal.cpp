@@ -17,9 +17,11 @@
 #include "lib_domitille.h"
 #include "../../../communication/network_tools/bn_debug.h"
 #include "lib_sync_turret.h"
-#include "roles.h"
 #include "loc_tools_turret.h"
 #include "global_errors.h"
+extern "C" {
+#include "roles.h"
+}
 
 mainState state=S_SYNC_ELECTION;
 

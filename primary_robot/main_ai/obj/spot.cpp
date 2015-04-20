@@ -16,13 +16,13 @@
 
 
 
-Spot::Spot(unsigned int num) : Obj(E_SPOT), _num(num){
+Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E_SPOT), _num(num), _color(color){
 
     if(num > 8){
         logs << ERR << "Num too big";
     }
 
-    if(color == GREEN)
+    if(_color == GREEN)
         _num_obs.push_back(START_STAND + num + 8);
     else
         _num_obs.push_back(START_STAND + num);
@@ -42,8 +42,6 @@ Spot::~Spot() {
 
 int Spot::loopObj(){
     _state = FINISH;
-    obs[_num_obs.front()].active = 0;
-    obs_updated[_num_obs.front()]++;
     return 0;
 };
 

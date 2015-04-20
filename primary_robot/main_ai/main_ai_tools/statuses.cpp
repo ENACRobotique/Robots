@@ -9,7 +9,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include "ai_types.h"
+#include "ai_tools.h"
 #include "tools.h"
 #include "time_tools.h"
 
@@ -48,7 +48,7 @@ void Statuses::maintenace(){
 
 int Statuses::receivedNewStatus(sGenericStatus &status){
 
-    if(status.id < 0 || status.id > NUM_E_ELEMENT){
+    if(status.id >= NUM_E_ELEMENT){
         cerr << "[ERROR] [statuses.cpp] Unknown status id" << endl;
         return -1;
     }
@@ -130,19 +130,5 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
     if (srcUPR && srcUPG && dstUPG) {
         dstUPG->theta = srcUPR->theta + srcUPG->theta;
         // TODO compute full uncertainty
-    }
-}
-
-/*
- * Update the new position on monitoring
- */
-void Statuses::posUpdated(sGenericStatus &status) {
-    if (status.id != ELT_PRIMARY) { //Only for element fix in obs such as robots
-        obs[status.id].active = 1;
-        obs[status.id].moved = 1;
-        obs[status.id].c.x = status.pos.x;
-        obs[status.id].c.y = status.pos.y;
-
-        obs_updated[status.id]++;
     }
 }

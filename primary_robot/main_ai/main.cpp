@@ -15,91 +15,19 @@
 #include <getopt.h> //already exist extern "C"
 
 extern "C"{
-#include <unistd.h> //for uslepp
+#include <unistd.h> //for usleep
+#include "roles.h"
+#include "global_errors.h"
+#include "bn_intp.h"
 }
 
 #include "botNet_core.h"
 #include "communications.h"
 #include "tools.h"
-#include "ai.h"
 #include "net.h"
 #include "GeometryTools.h"
-
-std::vector<sObs_t> initObs= {
-   // robots
-   {{0., 0.},          0., 1, 1, 1},   //primary
-   {{0., 0.}, R_ROBOT+12., 1, 0, 1},   //secondary
-   {{0., 0.}, R_ROBOT+20., 1, 0, 1},   //primary adv
-   {{0., 0.}, R_ROBOT+15., 1, 0, 1},   //secondary adv
-
-   //Yellow spots //if moved change START_STAND
-   {{9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //4
-   {{85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
-   {{85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
-   {{87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
-   {{9.  , 15.}, 3. + R_ROBOT, 1, 1, 1},
-   {{9.  , 25.}, 3. + R_ROBOT, 1, 1, 1},
-   {{110., 23.}, 3. + R_ROBOT, 1, 1, 1},
-   {{130., 60.}, 3. + R_ROBOT, 1, 1, 1},
-
-   //Green spots
-   {{300 - 9.  ,180.}, 3. + R_ROBOT, 1, 1, 1}, //12
-   {{300 - 85. ,180.}, 3. + R_ROBOT, 1, 1, 1},
-   {{300 - 85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
-   {{300 - 87. ,64.5}, 3. + R_ROBOT, 1, 1, 1},
-   {{300 - 9.  , 15.}, 3. + R_ROBOT, 1, 1, 1},
-   {{300 - 9.  , 25.}, 3. + R_ROBOT, 1, 1, 1},
-   {{300 - 110., 23.}, 3. + R_ROBOT, 1, 1, 1},
-   {{300 - 130., 60.}, 3. + R_ROBOT, 1, 1, 1},
-
-   //Cup
-   {{25. , 25.}, 5. + R_ROBOT, 1, 1, 1}, //20
-   {{91. ,120.}, 5. + R_ROBOT, 1, 1, 1},
-   {{150., 35.}, 5. + R_ROBOT, 1, 1, 1},
-   {{300 - 25. , 25.}, 5. + R_ROBOT, 1, 1, 1},
-   {{300 - 91. ,120.}, 5. + R_ROBOT, 1, 1, 1},
-
-   //Popcorn machine
-   {{30. ,196.5}, 5. + R_ROBOT, 0, 1, 1}, //25
-   {{60. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
-   {{300 - 30. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
-   {{300 - 60. ,196.5}, 5. + R_ROBOT, 0, 1, 1},
-
-   //Stairs
-   {{102. ,147.}, 7. + R_ROBOT, 1, 1, 1}, //29
-   {{150.,200.}, 53. + R_ROBOT, 1, 1, 1},
-   {{300 - 102. ,147.}, 7. + R_ROBOT, 1, 1, 1},
-
-   //Platform
-   {{125.,  5.}, 7. + R_ROBOT, 1, 1, 1}, //32
-   {{300 - 125.,  5.}, 7. + R_ROBOT, 1, 1, 1},
-
-   //Starting zone
-   {{39., 79.}, 2. + R_ROBOT, 1, 1, 1}, //34
-   {{20., 79.}, 2. + R_ROBOT, 1, 1, 1},
-   {{39.,121.}, 2. + R_ROBOT, 1, 1, 1},
-   {{20.,121.}, 2. + R_ROBOT, 1, 1, 1},
-   {{300 - 39., 79.}, 2. + R_ROBOT, 1, 1, 1},
-   {{300 - 20., 79.}, 2. + R_ROBOT, 1, 1, 1},
-   {{300 - 39.,121.}, 2. + R_ROBOT, 1, 1, 1},
-   {{300 - 20.,121.}, 2. + R_ROBOT, 1, 1, 1},
-
-#if !HOLONOMIC
-   //Cercles du robot anti-demi-tour
-   {{0., 0. }, 0, 0, 0, 1}, //42
-   {{0., 0. }, 0, 0, 0, 1},
-   {{0., 0. }, 0, 0, 0, 1},
-
-   //Cercles d'approches
-   {{0., 0. }, 0, 0, 0, 1},//45
-   {{0., 0. }, 0, 0, 0, 1},
-   {{0., 0. }, 0, 0, 0, 1},
-#endif
-
-   // arrivée
-   {{0. , 0.}, 0, 0, 1, 1} //48
-};
-
+#include "init_robots.h"
+#include "environment.h"
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -113,7 +41,7 @@ void usage(char *cl) {
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
     printf("Options:\n");
-    printf("\t--mode,     -m        AI mode (slave | auto | prog | fire)\n");
+    printf("\t--mode,     -m        AI mode (slave | auto | prog)\n");
     printf("\t--log-file, -f        output log file of received messages (overwritten)\n");
     printf("\t--verbose,  -v        increases verbosity\n");
     printf("\t--quiet,    -q        not verbose\n");
@@ -123,6 +51,10 @@ void usage(char *cl) {
 int main(int argc, char **argv) {
     int ret;
     eAIState_t eAIState = E_AI_SLAVE;
+    bool simu_primary = true;
+    bool holo_primary = true;
+    eColor_t color_primary = GREEN;
+
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -132,9 +64,9 @@ int main(int argc, char **argv) {
 
     // arguments parsing
     while (1) {
-        static struct option long_options[] = { { "mode", required_argument, NULL, 'm' }, { "log-file", required_argument, NULL, 'f' }, { "verbose", no_argument, NULL, 'v' }, { "quiet", no_argument, NULL, 'q' }, { "help", no_argument, NULL, 'h' }, { NULL, 0, NULL, 0 } };
+        static struct option long_options[] = { { "mode", required_argument, NULL, 'm' }, { "log-file", required_argument, NULL, 'f' }, { "primary", required_argument, NULL, 'p' }, { "secondary", required_argument, NULL, 's' }, { "adv-primary", required_argument, NULL, 'a' }, { "adv-secondary", required_argument, NULL, 'b' }, { "verbose", no_argument, NULL, 'v' }, { "quiet", no_argument, NULL, 'q' }, { "help", no_argument, NULL, 'h' }, { NULL, 0, NULL, 0 } };
 
-        int c = getopt_long(argc, argv, "m:f:vqh?", long_options, NULL);
+        int c = getopt_long(argc, argv, "m:f:p:s:a:b:vqh?", long_options, NULL);
         if (c == -1)
             break;
         switch (c) {
@@ -151,6 +83,26 @@ int main(int argc, char **argv) {
                 break;
             case 'f':
                 logs.changeFile(optarg);
+                break;
+            case 'p':
+                if(strstr(optarg, "real"))
+                    simu_primary = false;
+                else if(strstr(optarg, "simu"))
+                    simu_primary = true;
+                if(strstr(optarg, "axle"))
+                    holo_primary = false;
+                else if(strstr(optarg, "holo"))
+                    holo_primary = true;
+                if(strstr(optarg, "green"))
+                    color_primary = GREEN;
+                else if(strstr(optarg, "yellow"))
+                    color_primary = YELLOW;
+                break;
+            case 's':
+                break;
+            case 'a':
+                break;
+            case 'b':
                 break;
             case 'v':
                 verbose++;
@@ -172,41 +124,29 @@ int main(int argc, char **argv) {
 
     // network initialization
     if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
-        cerr << "[ERROR] [main.cpp] bn_attach() error : " << -ret << endl;
+        logs << ERR << "bn_attach() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
         exit(EXIT_FAILURE);
     }
 
     if ((ret = bn_init()) < 0) {
-        cerr << "[ERROR] [main.cpp] bn_init() error : " << -ret << endl;
+        logs << ERR << "bn_init() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
         exit(EXIT_FAILURE);
     }
 
-    if(SIMU)
-        role_set_addr(ROLE_PROPULSION, ADDRD1_MAIN_PROP_SIMU);
-    sendRoleSetup();
-    sendPing();
 
-    // calls initialization functions
-    init_obs(initObs);
-    switch (eAIState) {
-        case E_AI_AUTO:
-        case E_AI_PROG:
-            ret = initAI();
-            if (ret < 0) {
-                cerr << "[ERROR] [main.cpp] obj_init() error #" << -ret << endl;
-            }
-            break;
-        case E_AI_SLAVE:
-            Point2D<float> pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
-            sendPos(pt, INIT_ANGLE_SLAVE);
-            break;
+    if(roleSetup(true, simu_primary) < 0)
+        exit(EXIT_FAILURE);
+
+    if((ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 50)) < 0){
+        logs << ERR << "FAILED SYNC: " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+        exit(EXIT_FAILURE);
     }
 
-    // send configuration of the playground and all obs to monitoring if activate
-    sendObsCfg();
-    for(int i = 0 ; i < N ; i++)
-        if(obs[i].active)
-            obs_updated[i] = 1;
+    sendPing();
+
+    Env2015::setup();
+
+    setupRobots(simu_primary, holo_primary, true /*hmi simu*/, color_primary, eAIState);
 
     ret = 1;
 
@@ -229,33 +169,14 @@ int main(int argc, char **argv) {
         checkInbox(verbose);
 
         // calls loop functions
-        Point2D<float> goal;
-        switch (eAIState) {
-            case E_AI_SLAVE:
-                if (lastGoal(goal, true)) {
-                    logs << INFO << "New goal available";
-                    path.go2Point(goal, false);
-                }
-                break;
-            case E_AI_AUTO:
-            case E_AI_PROG:
-                ret = stepAI();
-                break;
-            default:
-                break;
-        }
+        Env2015::loop();
+        if (!loopRobots())
+            break;
 
         // calls maintenance function
         statuses.maintenace();
         path.maintenace();
         net.maintenace();
-
-        // sending obstacles to monitoring
-        sendObss();
-
-        // end
-        if(ret == 0)
-            break;
 
         // menu
 #ifdef CTRLC_MENU

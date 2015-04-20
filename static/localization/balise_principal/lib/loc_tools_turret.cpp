@@ -103,7 +103,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     sMsg msg={{0}};
     msg.header.size=sizeof(sGenericStatus);
     msg.header.type=E_GENERIC_STATUS;
-    msg.header.destAddr=role_get_addr(ROLE_AI);
+    msg.header.destAddr=role_get_addr(ROLE_PRIM_AI);
 
     msg.payload.genericStatus.date=pLoad->date;        // todo : synchronize this with ia
     msg.payload.genericStatus.id=(origin==ADDRX_MOBILE_1?ELT_ADV_PRIMARY:ELT_ADV_SECONDARY);

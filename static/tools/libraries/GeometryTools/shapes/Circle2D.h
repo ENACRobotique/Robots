@@ -69,7 +69,7 @@ class Circle2D/*: public Ellipse2D<T>*/ {
 
             return p1, p2;
         }
-        Point2D<T> project(Point2D<T>& p) const{
+        Point2D<T> project(const Point2D<T>& p) const{
             Vector2D<T> v(c, p);
             Point2D<T> pt;
             T n = v.norm();

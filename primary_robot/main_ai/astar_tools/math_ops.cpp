@@ -278,7 +278,7 @@ ERROR interCircle2Line(const sLin_t *l, const sPt_t *c, sNum_t r, int *nb, sPt_t
     return 0;
 }
 
-ERROR testPtOnArc(const sPt_t *p1, const sPt_t *p2, const sPt_t *c, sNum_t r, sPt_t *p, int *ret) { //test if the point belongs on the part of circle FIXME test function
+ERROR testPtOnArc(const sPt_t *p1, const sPt_t *p2, const sPt_t *c, sNum_t /*r*/, sPt_t *p, int *ret) { //test if the point belongs on the part of circle FIXME test function
     sNum_t theta1, theta2, theta;
 
     RET_IF_NOT_(p1 && p2 && c && p && ret, ERR_BADPAR);
