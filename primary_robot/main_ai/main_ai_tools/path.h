@@ -49,11 +49,11 @@ class Path {
         void maintenace();
 
         //Send methods
-        void sendRobot(bool holo);
+        void sendRobot(bool holo, float thetaEnd);
         void stopRobot(bool holo);
         void go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs_t>& obs, bool holo); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
         void followPath(vector <astar::sObs_t>& obs, vector <astar::iABObs_t> &l, bool holo);
-        void convPathToPathOrient();
+        void convPathToPathOrient(float thetaEnd);
         void computeOrientPathForHolonomic(float theta_end_obj);
         void computeTimePathForHolonomic();
 

@@ -59,7 +59,7 @@ int CapAI::loop(){
                     }
                 sPath_t path_loc = listObj[current_obj]->getPath();
                 path.addPath2(path_loc);
-                path.sendRobot(capProp->getPropType()==HOLO?true:false);
+                path.sendRobot(capProp->getPropType()==HOLO?true:false, listObj[current_obj]->getDestPointOrient());
             }
         }
 

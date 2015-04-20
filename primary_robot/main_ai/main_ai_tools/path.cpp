@@ -79,7 +79,7 @@ void Path::maintenace(){
  * Every parameter that can be calculated automatically, the calculation is performed.
  * Try to send MAX_RETRIES if failed.
  */
-void Path::sendRobot(bool holo) {
+void Path::sendRobot(bool holo, float thetaEnd) {
     static sPath_t path;
 
     if(!_path.empty() && !_path_orient.empty()){
@@ -94,7 +94,7 @@ void Path::sendRobot(bool holo) {
     length();
 
     if(holo)
-        convPathToPathOrient();
+        convPathToPathOrient(thetaEnd);
 
     if (!checkSamePath(path) || checkRobotBlock()){
         logs << INFO << "Preparation to send a path";
@@ -133,13 +133,14 @@ void Path::sendRobot(bool holo) {
  */
 void Path::stopRobot(bool holo) {
     Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
+    float theta = statuses.getLastOrient(ELT_PRIMARY);
     sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
 
     clear();
 
     _path.push_back(traj);
 
-    sendRobot(holo);
+    sendRobot(holo, theta);
 }
 
 
@@ -164,7 +165,7 @@ void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs
         sTrajEl_t traj = sTrajEl_t{{obs[0].c.x, obs[0].c.y}, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
 
         _path.push_back(traj);
-        sendRobot(holo);
+        sendRobot(holo, atan2(dest.y - obs[0].c.y, dest.x - obs[0].c.x ));
     }
     else {
         Point2D<float> p = projectPointInObs(posRobot, obs);
@@ -175,7 +176,7 @@ void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs
         if (path.path) {
             logs << INFO << "go2Point() : New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
             addPath2(path);
-            sendRobot(holo);
+            sendRobot(holo, atan2(_path[_path.size()-1].p2.y - _path[_path.size()-1].p1.y, _path[_path.size()-1].p2.x - _path[_path.size()-1].p1.x));
         }
         else {
             logs << INFO << "go2Point() : No path from 0a to " << N - 1;
@@ -217,7 +218,7 @@ void Path::followPath(vector <astar::sObs_t>& , vector <astar::iABObs_t> &, bool
  * Converts a path in path orient.
  * This path orient can't directly used by a holonomic robot (theta set to 0 and time too)
  */
-void Path::convPathToPathOrient(){
+void Path::convPathToPathOrient(float thetaEnd){
     sTrajOrientEl_t trajOrient;
 
     while(!_path.empty()){
@@ -243,7 +244,7 @@ void Path::convPathToPathOrient(){
     }
 
     computeTimePathForHolonomic();
-    computeOrientPathForHolonomic(0); //FIXME
+    computeOrientPathForHolonomic(thetaEnd);
 }
 
 /*
@@ -273,59 +274,17 @@ float getPrincipalAngleValue(float a){
  * Computes a orient path for holonomic robot
  */
 void Path::computeOrientPathForHolonomic(float theta_end_obj){
-    //computes theta and rot_dir for all path
-    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        // in this case, the robot's orientation follows the linear speed vector
-
-        _path_orient[i].theta1 = atan2(_path_orient[i].p2.y - _path_orient[i].p1.y, _path_orient[i].p2.x - _path_orient[i].p1.x);
-        _path_orient[i].theta2 = _path_orient[i].theta1;
-        _path_orient[i].rot1_dir = true; // unused because theta1 == theta2
-
-        // r>0 CW  => dir=0
-        // r<0 CCW => dir=1
-        _path_orient[i].rot2_dir = _path_orient[i].obs.r < 0;
-    }
-
-    //adjusts for the first element
     float theta = statuses.getLastOrient(ELT_PRIMARY);
-//    float diff = fabs(_path_orient.front().theta1 - theta /* XXX you need to get the principal angle value here */)/MAX_SPEED_ROT - _path_orient.front().seg_len/MAX_SPEED;
-//    if(diff < 0){
-        _path_orient.front().theta1 = theta;
-        _path_orient.front().rot1_dir = getPrincipalAngleValue(_path_orient.front().theta2 - _path_orient.front().theta1) > 0; // select shortest rotation
-//    }
-//    else{ //insert rotation
-//        float theta_inter = diff*MAX_SPEED_ROT;
-//        sTrajOrientEl_t traj;
-//        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
-//        traj.p2 = traj.p1;
-//        traj.obs.c = traj.p1;
-//        traj.obs.r = 0;
-//        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
-//        traj.theta2 = theta_inter;
-//
-//        _path_orient.front().theta1 = theta_inter;
-//        _path_orient.push_front(traj);
-//    }
+    float deltaTheta = getPrincipalAngleValue(theta_end_obj - theta);
+    float Time = _path_orient[_path_orient.size()-1].t2 - _path_orient[0].t1;
 
-    //adjusts for the last element
-//    diff = fabs(_path_orient.back().theta1 - theta_end_obj)/MAX_SPEED_ROT - _path_orient.back().seg_len/MAX_SPEED;
-//    if(diff < 0){
-        _path_orient.back().theta2 = theta_end_obj;
-        _path_orient.back().rot1_dir = getPrincipalAngleValue(_path_orient.back().theta2 - _path_orient.back().theta1) > 0; // select shortest rotation
-//    }
-//    else{
-//        float theta_inter = diff*MAX_SPEED_ROT;
-//        sTrajOrientEl_t traj;
-//        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
-//        traj.p2 = traj.p1;
-//        traj.obs.c = traj.p1;
-//        traj.obs.r = 0;
-//        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
-//        traj.theta2 = theta_inter;
-//
-//        _path_orient.back().theta1 = theta_inter;
-//        _path_orient.push_back(traj);
-//    }
+    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
+        _path_orient[i].theta1 = getPrincipalAngleValue((_path_orient[i].t1 - _path_orient[0].t1)*deltaTheta/Time + theta);
+        _path_orient[i].theta2 = getPrincipalAngleValue((_path_orient[i].t2 - _path_orient[0].t1)*deltaTheta/Time + theta);
+
+        _path_orient[i].rot1_dir = deltaTheta > 0;
+        _path_orient[i].rot2_dir = deltaTheta > 0;
+    }
 }
 
 /*
