@@ -14,17 +14,20 @@
 #include <string>
 #include <vector>
 
+class ProjAcq;
+
 class ProcAbsPos: public Process {
 protected:
     std::vector<TestPoint> staticTP;
 
-    float getEnergy(Acq& acq, Pos); // WIP
+    std::vector<TestPoint> getPosDependentTP(const Pos& robPos);
+    float getEnergy(ProjAcq& pAcq, const Pos& robPos);
 
 public:
     ProcAbsPos(const std::string& staticTestPointFile);
     virtual ~ProcAbsPos();
 
-    virtual void process(const std::vector<Acq*>& acqList) override;
+    virtual void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;
 };
 
 #endif /* PROCESSES_PROCABSPOS_H_ */
