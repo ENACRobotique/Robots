@@ -2,7 +2,9 @@
 #ifndef LIB_GEOMETRYTOOLS_POINT3D_H_
 #define LIB_GEOMETRYTOOLS_POINT3D_H_
 
+
 template<typename T>
+
 class Point3D {
 public:
     T _x, _y, _z;
