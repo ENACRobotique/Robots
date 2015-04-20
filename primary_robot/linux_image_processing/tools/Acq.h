@@ -15,6 +15,7 @@
 #include <map>
 #include <utility>
 #include "ProjAcq.h"
+#include "commonTypes.h"
 #include <Plane3D.h>
 #include <Vector2D.h>
 
@@ -25,10 +26,6 @@ template<typename T> class Point2D;
 template<typename T> class PosObj3D;
 template<typename T> class Vector2D;
 
-typedef enum ColorType {
-    RGB,
-    HSV
-}eColorType;
 
 class Acq {
 protected:
@@ -44,7 +41,7 @@ public:
     virtual ~Acq() {
     }
 
-    cv::Mat getMat(ColorType ctype = RGB);
+    cv::Mat getMat(eColorType ctype = RGB);
     Cam* getCam();
     ProjAcq projectOnPlane(Plane3D<float> plan, Vector2D<int> size);
 };
