@@ -38,6 +38,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1416222392" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_X86_LINUX"/>
 									<listOptionValue builtIn="false" value="USE_BOTNET"/>
+									<listOptionValue builtIn="false" value="USE_OPENCV"/>
 									<listOptionValue builtIn="false" value="ARCH_LITTLE_ENDIAN"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.615657357" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>

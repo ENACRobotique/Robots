@@ -1,120 +1,137 @@
 #ifndef LIB_GEOMETRYTOOLS_VECTOR3D_H_
 #define LIB_GEOMETRYTOOLS_VECTOR3D_H_
 
+#include <Point3D.h>
+#include <Vector2D.h>
 #include <iostream>
-#include <cmath>
 
-template<typename T>
-class Point3D;
+#ifdef USE_OPENCV
+#include <opencv2/core/core.hpp>
+#endif
 
 template<typename T>
 class Vector3D {
-    public:
-        Vector3D() : _x(0), _y(0), _z(0){}
-        Vector3D(const Vector3D& v) : _x(v._x), _y(v._y), _z(v._z){}
-        Vector3D(const T val) : _x(val), _y(val), _z(val){}
-        Vector3D(const T _x, const T _y, const T _z) : _x(_x), _y(_y), _z(_z){}
-        Vector3D(const Point3D<T>& a, const Point3D<T>& b) : _x(b.x - a.x), _y(b.y - a.y), _z(b.z - a.z){}
-        Vector3D(const Vector2D<T> v, T z) : _x(v._x), _y(v._y), _z(z){}
-        ~Vector3D(){}
+protected:
+    T _x, _y, _z;
+    bool _norm;
 
-        T operator*(const Vector3D& v) const{ // Dot product
-            return _x*v._x + _y*v._y + _z*v._z;
-        }
-        Vector3D<T> operator^(const Vector3D& v) const{ // Cross product
-            return Vector3D((_y*v._z - _z*v._y), (-_x*v._z + _z*v._x), (_x*v._y - _y*v._x));
-        }
+public:
 
-        Vector3D operator+(const Vector3D& v) const{
-            return { _x + v._x, _y + v._y, _z + v._z };
-        }
-        Vector3D operator-(const Vector3D& v) const{
-            return { _x - v._x, _y - v._y, _z - v._z };
-        }
-        Vector3D operator*(const T& r) const{
-            return { _x*r, _y*r, _z*r };
-        }
-        Vector3D operator/(const T& r) const{
-            return { _x/r, _y/r, _z/r };
-        }
+    Vector3D() :
+            _x(0), _y(0), _z(0), _norm(true) {
+    }
+    Vector3D(const Vector3D& v) :
+            _x(v._x), _y(v._y), _z(v._z), _norm(false) {
+    }
+    Vector3D(const T _x, const T _y, const T _z) :
+            _x(_x), _y(_y), _z(_z), _norm(false) {
+    }
+    Vector3D(const Point3D<T>& a, const Point3D<T>& b) :
+            _x(b.x - a.x), _y(b.y - a.y), _z(b.z - a.z), _norm(false) {
+    }
+    Vector3D(const Vector2D<T> v, T z) :
+            _x(v._x), _y(v._y), _z(z), _norm(false) {
+    }
+#ifdef USE_OPENCV
+    Vector3D(const cv::Mat& m) :
+            _x(m.at<T>(0)), _y(m.at<T>(1)), _z(m.at<T>(2)), _norm(false) {
+    }
+#endif
+    ~Vector3D() {
+    }
 
-        Vector3D& operator+=(const Vector3D& v){
-            return *this = *this + v;
-        }
-        Vector3D& operator-=(const Vector3D& v){
-            return *this = *this - v;
-        }
-        Vector3D& operator*=(const T& r){
-            return *this = *this * r;
-        }
-        Vector3D& operator/=(const T& r){
-            return *this = *this / r;
-        }
-        Vector3D& operator=(const Vector3D& v){
-            _x = v._x;
-            _y = v._y;
-            _z = v._z;
-            return *this;
-        }
+    const T& x() const {
+        return _x;
+    }
+    const T& y() const {
+        return _y;
+    }
+    const T& z() const {
+        return _z;
+    }
 
-        bool operator==(const Vector3D& v) const{
-            return v._x == _x  &&  v._y == _y  && v._z == _z;
-        }
-        bool operator!=(const Vector3D& v) const{
-            return !(*this == v);
-        }
+    T operator*(const Vector3D& v) const { // Dot product
+        return _x * v._x + _y * v._y + _z * v._z;
+    }
+    Vector3D<T> operator^(const Vector3D& v) const { // Cross product
+        return Vector3D((_y * v._z - _z * v._y), (-_x * v._z + _z * v._x), (_x * v._y - _y * v._x));
+    }
 
-        T norm()const{
-            return (T) sqrt(_x*_x + _y*_y + _z*_z);
-        }
-        T normSq()const{
-            return _x*_x + _y*_y + _z-_z;
-        }
-        Vector3D<T> normalize(){
-            if((_x == (T)0)  && (_y == (T)0) && (_z == (T)0) ){
-                return this;
-            }
-            else{
-                T n = this->norm();
-                _x /= n;
-                _y /= n;
-                _z /= n;
-                return this;
-            }
-        }
-        void rotate(const T& theta){  // TODO
-        }
-        T angle(const Vector3D& v){
-            return acos(*this * v / sqrt(normSq() * v.normSq()));
-        }
+    Vector3D operator+(const Vector3D& v) const {
+        return {_x + v._x, _y + v._y, _z + v._z};
+    }
+    Vector3D operator-(const Vector3D& v) const {
+        return {_x - v._x, _y - v._y, _z - v._z};
+    }
+    Vector3D operator*(const T& r) const {
+        return {_x*r, _y*r, _z*r};
+    }
+    Vector3D operator/(const T& r) const {
+        return {_x/r, _y/r, _z/r};
+    }
 
-        T dist2Point(Point3D<T> pt){  // FIXME
-            Vector3D<T> vect(this - pt);
+    Vector3D& operator+=(const Vector3D& v) {
+        return *this = *this + v;
+    }
+    Vector3D& operator-=(const Vector3D& v) {
+        return *this = *this - v;
+    }
+    Vector3D& operator*=(const T& r) {
+        return *this = *this * r;
+    }
+    Vector3D& operator/=(const T& r) {
+        return *this = *this / r;
+    }
+    Vector3D& operator=(const Vector3D& v) {
+        _x = v._x;
+        _y = v._y;
+        _z = v._z;
+        return *this;
+    }
 
-            return (T) vect.norm;
-        }
+    bool operator==(const Vector3D& v) const {
+        return v._x == _x && v._y == _y && v._z == _z;
+    }
+    bool operator!=(const Vector3D& v) const {
+        return !(*this == v);
+    }
 
-        void setZero(){
-            _x = _y = _z = (T)0;
+    T norm() const {
+        return std::sqrt(_x * _x + _y * _y + _z * _z);
+    }
+    T normSq() const {
+        return _x * _x + _y * _y + _z - _z;
+    }
+    Vector3D<T>& normalize() {
+        if (!_norm && (_x || _y || _z)) {
+            T n = this->norm();
+            _x /= n;
+            _y /= n;
+            _z /= n;
         }
-        bool isPositive(){
-            if((_x >= (T)0)  &&  (_y >= (T)0)  &&  (_z >= (T)0) )
-                return true;
-            else
-                return false;
-        }
-        bool isEmpty(){
-            return ((_x == (T)0)  &&  (_y == (T)0)  &&  (_z == (T)0));
-        }
+        _norm = true;
+        return *this;
+    }
+//    void rotate(const T& theta) {  // TODO
+//    }
+    T angle(const Vector3D& v) {
+        return std::acos(*this * v / std::sqrt(normSq() * v.normSq()));
+    }
 
-        bool isZero(T eps){
-            if((fabsf(_x) <= eps)  &&  (fabsf(_y) <= eps)  &&  (fabsf(_z) <= eps))
-                return true;
-             else
-                 return false;
-        }
-
-        T _x;
-        T _y;
-        T _z;
+    bool isZero(T eps) {
+        return (std::abs(_x) <= eps) && (std::abs(_y) <= eps) && (std::abs(_z) <= eps);
+    }
 };
+
+template<typename T>
+Vector3D<T> operator*(const T& n, const Vector3D<T>& v) {
+    return v * n;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, Vector3D<T>& v) {
+    out << "(" << v.x << ";" << v.y << ";" << v.z << ")";
+    return out;
+}
+
+#endif /* LIB_GEOMETRYTOOLS_VECTOR3D_H_ */

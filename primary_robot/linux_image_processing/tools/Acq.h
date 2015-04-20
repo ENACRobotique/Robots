@@ -9,41 +9,34 @@
 #define TOOLS_ACQ_H_
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <Point2D.h>
-#include <iostream>
+#include <Plane3D.h>
+#include <tools/Image.h>
+#include <tools/ProjAcq.h>
 #include <map>
 #include <utility>
-#include "ProjAcq.h"
-#include "commonTypes.h"
-#include <Plane3D.h>
-#include <Vector2D.h>
 
 class Cam;
 class ProjAcq;
 
-template<typename T> class Point2D;
-template<typename T> class PosObj3D;
-template<typename T> class Vector2D;
-
-
-class Acq {
+class Acq: public Image {
 protected:
-    using matmap = std::map<eColorType, cv::Mat>;
-
-    matmap matMap;
-    Cam* cam;
+    Cam const* cam;
 
 public:
-    Acq(cv::Mat mat, eColorType ctype, Cam* cam):cam(cam) {
+    Acq(cv::Mat mat, eColorType ctype, Cam const* cam) :
+            cam(cam) {
         matMap.insert(std::pair<eColorType, cv::Mat>(ctype, mat));
     }
     virtual ~Acq() {
     }
 
-    cv::Mat getMat(eColorType ctype = RGB);
-    Cam* getCam();
-    ProjAcq projectOnPlane(Plane3D<float> plan, Vector2D<int> size);
+    Cam const* getCam() const {
+        return cam;
+    }
+
+    ProjAcq projectOnPlane(const Plane3D<float>& plan, cv::Size size) const {
+        return ProjAcq(size, this, plan);
+    }
 };
 
 #endif /* TOOLS_ACQ_H_ */

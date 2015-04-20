@@ -1,9 +1,18 @@
-#include "Acq.h"
+/*
+ * Image.cpp
+ *
+ *  Created on: 20 avr. 2015
+ *      Author: ludo6431
+ */
 
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <tools/Image.h>
+#include <iostream>
+#include <utility>
 
-
-cv::Mat Acq::getMat(eColorType ctype) {
-    matmap::iterator resIt = matMap.find(ctype);
+cv::Mat Image::getMat(eColorType ctype) {
+    map::iterator resIt = matMap.find(ctype);
     if (resIt == matMap.end()) {
         cv::Mat ret;
         int code = -1;
@@ -51,13 +60,6 @@ cv::Mat Acq::getMat(eColorType ctype) {
     }
 }
 
-
-Cam* Acq::getCam(){
-    return cam;
-}
-
-ProjAcq Acq::projectOnPlane(Plane3D<float> plane, Vector2D<int> size){
-    ProjAcq proAcq(size, plane);
-
-    return proAcq;
+cv::Size Image::getSize() {
+    return matMap.begin()->second.size();
 }

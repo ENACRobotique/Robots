@@ -8,94 +8,99 @@
 #ifndef LIB_GEOMETRYTOOLS_VECTOR2D_H_
 #define LIB_GEOMETRYTOOLS_VECTOR2D_H_
 
-#include <iostream>
+#include <Point2D.h>
 #include <cmath>
-
-template<typename T>
-class Point2D;
+#include <iostream>
 
 template<typename T>
 class Vector2D {
-    public:
-        Vector2D() : x(0), y(0){}
-        Vector2D(const Vector2D& v) : x(v.x), y(v.y){}
-        Vector2D(const T _x, const T _y) : x(_x), y(_y){}
-        Vector2D(const Point2D<T>& a, const Point2D<T>& b) : x(b.x - a.x), y(b.y - a.y){}
-        ~Vector2D(){}
+public:
+    T x, y;
 
-        T operator*(const Vector2D& v) const{ //dot product
-            return x * v.x + y * v.y;
-        }
-        T operator^(const Vector2D& v) const{ // cross product
-            return x * v.y - y * v.x;
-        }
+    Vector2D() :
+            x(0), y(0) {
+    }
+    Vector2D(const Vector2D& v) :
+            x(v.x), y(v.y) {
+    }
+    Vector2D(const T _x, const T _y) :
+            x(_x), y(_y) {
+    }
+    Vector2D(const Point2D<T>& a, const Point2D<T>& b) :
+            x(b.x - a.x), y(b.y - a.y) {
+    }
+    ~Vector2D() {
+    }
 
-        Vector2D operator+(const Vector2D& v) const{
-            return { x + v.x, y + v.y };
-        }
-        Vector2D operator-(const Vector2D& v) const{
-            return { x - v.x, y - v.y };
-        }
-        Vector2D operator*(const T& r) const{
-            return { x * r, y * r };
-        }
-        Vector2D operator/(const T& r) const{
-            return { x / r, y / r };
-        }
+    T operator*(const Vector2D& v) const { //dot product
+        return x * v.x + y * v.y;
+    }
+    T operator^(const Vector2D& v) const { // cross product
+        return x * v.y - y * v.x;
+    }
 
-        Vector2D& operator+=(const Vector2D& v){
-            return *this = *this + v;
-        }
-        Vector2D& operator-=(const Vector2D& v){
-            return *this = *this - v;
-        }
-        Vector2D& operator*=(const T& r){
-            return *this = *this * r;
-        }
-        Vector2D& operator/=(const T& r){
-            return *this = *this / r;
-        }
-        Vector2D& operator=(const Vector2D& v){
-            x = v.x;
-            y = v.y;
-            return *this;
-        }
+    Vector2D operator+(const Vector2D& v) const {
+        return {x + v.x, y + v.y};
+    }
+    Vector2D operator-(const Vector2D& v) const {
+        return {x - v.x, y - v.y};
+    }
+    Vector2D operator*(const T& r) const {
+        return {x * r, y * r};
+    }
+    Vector2D operator/(const T& r) const {
+        return {x / r, y / r};
+    }
 
-        bool operator==(const Vector2D& v) const{
-            return v.x == x && v.y == y;
-        }
-        bool operator!=(const Vector2D& v) const{
-            return !(*this == v);
-        }
+    Vector2D& operator+=(const Vector2D& v) {
+        return *this = *this + v;
+    }
+    Vector2D& operator-=(const Vector2D& v) {
+        return *this = *this - v;
+    }
+    Vector2D& operator*=(const T& r) {
+        return *this = *this * r;
+    }
+    Vector2D& operator/=(const T& r) {
+        return *this = *this / r;
+    }
+    Vector2D& operator=(const Vector2D& v) {
+        x = v.x;
+        y = v.y;
+        return *this;
+    }
 
-        T norm()const{
-            return hypot(x, y);
-        }
-        T normSq()const{
-            return x * x + y * y;
-        }
+    bool operator==(const Vector2D& v) const {
+        return v.x == x && v.y == y;
+    }
+    bool operator!=(const Vector2D& v) const {
+        return !(*this == v);
+    }
 
-        void rotate(const T& theta){
-            Vector2D vc = *this;
-            x = vc.x * cos(theta) - vc.y * sin(theta);
-            y = vc.x * sin(theta) + vc.y * cos(theta);
-        }
-        T angle(const Vector2D& v){
-            return acos(*this * v / sqrt(normSq() * v.normSq()));
-        }
+    T norm() const {
+        return std::hypot(x, y);
+    }
+    T normSq() const {
+        return x * x + y * y;
+    }
 
-
-        T x;
-        T y;
+    void rotate(const T& theta) {
+        Vector2D vc = *this;
+        x = vc.x * std::cos(theta) - vc.y * std::sin(theta);
+        y = vc.x * std::sin(theta) + vc.y * std::cos(theta);
+    }
+    T angle(const Vector2D& v) {
+        return std::acos(*this * v / std::sqrt(normSq() * v.normSq()));
+    }
 };
 
 template<typename T>
-Vector2D<T> operator*(const T& n, const Vector2D<T>& v){
+Vector2D<T> operator*(const T& n, const Vector2D<T>& v) {
     return v * n;
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, Vector2D<T>& v){
+std::ostream& operator<<(std::ostream& out, Vector2D<T>& v) {
     out << "(" << v.x << ";" << v.y << ")";
     return out;
 }

@@ -9,10 +9,7 @@
 #define LIB_GEOMETRYTOOLS_SHAPE2D_H_
 
 #include <Point2D.h>
-
-template<typename T> class Rect2D;
-
-template<typename T> class Point2D;
+#include <shapes/Rect2D.h>
 
 template<typename T>
 class Shape2D {

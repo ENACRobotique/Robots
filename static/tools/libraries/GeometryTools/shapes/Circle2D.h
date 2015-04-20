@@ -8,16 +8,16 @@
 #ifndef LIB_GEOMETRYTOOLS_CIRCLE2D_H_
 #define LIB_GEOMETRYTOOLS_CIRCLE2D_H_
 
-#include <iostream>
+#include <Line2D.h>
+#include <Point2D.h>
+//#include <shapes/Ellipse2D.h>
+#include <Vector2D.h>
 #include <cmath>
+#include <iostream>
+#include <utility>
 
 template<typename T>
-class Point2D;
-template<typename T>
-class Line2D;
-
-template<typename T>
-class Circle2D: public Ellipse2D<T> {
+class Circle2D/*: public Ellipse2D<T>*/ {
     public:
         Circle2D() : c(0, 0), r(0){}
         Circle2D(Point2D<T> _c, T _r) : c(_c), r(_r){}

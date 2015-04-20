@@ -88,7 +88,7 @@ float Obj::update(sPt_t posRobot) {
     if ((n = testInObs()) != 0) {
         Point2D<float> p(posRobot.x, posRobot.y);
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
-        p = c.projecte(p);
+        p = c.project(p);
         obs[0].c = {p.x, p.y};
         logs << INFO << "Robot in obstacle : " << n;
     }
@@ -166,7 +166,7 @@ float Obj::update(sPt_t posRobot) {
                     Circle2D<float> cir(i.cir.c.x, i.cir.c.y, i.cir.r);
                     if(cir.c.distanceTo(pt) == 0)
                         logs << ERR << "Can't project point";
-                    pt = cir.projecte(pt);
+                    pt = cir.project(pt);
                     _path.path[_path.path_len - 1].p2 = pt;
                 }
                 _access_select = _path.path[_path.path_len - 1].p2;

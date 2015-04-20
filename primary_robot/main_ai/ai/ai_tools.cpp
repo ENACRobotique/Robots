@@ -165,7 +165,7 @@ void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de 
         if (obs[i].moved == 1) {
             pt = {obs[0].c.x, obs[0].c.y};
             Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);
-            pt = cir.projecte(pt);
+            pt = cir.project(pt);
             Vector2D<float> v(pt, {obs[0].c.x, obs[0].c.y});
 
             obs[i].c.x += v.x;
@@ -175,7 +175,7 @@ void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de 
         }
         Point2D<float> p(_current_pos.x, _current_pos.y);
         Circle2D<float> c(obs[i].c.x, obs[i].c.y, obs[i].r);
-        p = c.projecte(p);
+        p = c.project(p);
         _current_pos = {p.x, p.y};
         if (sqrt(pow(_current_pos.x - obs[0].c.x, 2) + pow(_current_pos.y - obs[0].c.y, 2) < 2)) {
 

@@ -9,11 +9,11 @@
 #define LIB_GEOMETRYTOOLS_POLYGON2D_H_
 
 #include <Point2D.h>
-#include <shapes/Shape2D.h>
+//#include <shapes/Shape2D.h>
 #include <vector>
 
 template<typename T>
-class Polygon2D: public Shape2D<T> {
+class Polygon2D/*: public Shape2D<T>*/ {
 public:
     Polygon2D();
     virtual ~Polygon2D();
