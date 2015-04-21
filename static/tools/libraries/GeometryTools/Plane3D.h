@@ -29,9 +29,9 @@ public:
     }
     Plane3D(const Vector3D<T>& p, const Vector3D<T>& n) :
             norm(false) {
-        _a = n.x;
-        _b = n.y;
-        _c = n.z;
+        _a = n.x();
+        _b = n.y();
+        _c = n.z();
         _d = -(p * n);
     }
     virtual ~Plane3D() {

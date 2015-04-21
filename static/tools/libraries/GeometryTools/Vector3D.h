@@ -10,12 +10,26 @@
 #endif
 
 template<typename T>
+class Vector3D;
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const Vector3D<T>& v);
+
+template<typename T>
 class Vector3D {
 protected:
     T _x, _y, _z;
     bool _norm;
 
+    Vector3D(const T _x, const T _y, const T _z, const bool _norm) :
+            _x(_x), _y(_y), _z(_z), _norm(_norm) {
+    }
+
 public:
+    static const Vector3D zero;
+    static const Vector3D xAxis;
+    static const Vector3D yAxis;
+    static const Vector3D zAxis;
 
     Vector3D() :
             _x(0), _y(0), _z(0), _norm(true) {
@@ -54,20 +68,20 @@ public:
         return _x * v._x + _y * v._y + _z * v._z;
     }
     Vector3D<T> operator^(const Vector3D& v) const { // Cross product
-        return Vector3D((_y * v._z - _z * v._y), (-_x * v._z + _z * v._x), (_x * v._y - _y * v._x));
+        return Vector3D((_y * v._z - _z * v._y), (-_x * v._z + _z * v._x), (_x * v._y - _y * v._x), _norm && v._norm);
     }
 
     Vector3D operator+(const Vector3D& v) const {
-        return {_x + v._x, _y + v._y, _z + v._z};
+        return {_x + v._x, _y + v._y, _z + v._z, false};
     }
     Vector3D operator-(const Vector3D& v) const {
-        return {_x - v._x, _y - v._y, _z - v._z};
+        return {_x - v._x, _y - v._y, _z - v._z, false};
     }
     Vector3D operator*(const T& r) const {
-        return {_x*r, _y*r, _z*r};
+        return {_x*r, _y*r, _z*r, false};
     }
     Vector3D operator/(const T& r) const {
-        return {_x/r, _y/r, _z/r};
+        return {_x/r, _y/r, _z/r, false};
     }
 
     Vector3D& operator+=(const Vector3D& v) {
@@ -86,6 +100,7 @@ public:
         _x = v._x;
         _y = v._y;
         _z = v._z;
+        _norm = v._norm;
         return *this;
     }
 
@@ -97,14 +112,14 @@ public:
     }
 
     T norm() const {
-        return std::sqrt(_x * _x + _y * _y + _z * _z);
+        return _norm ? T(1) : std::sqrt(_x * _x + _y * _y + _z * _z);
     }
     T normSq() const {
-        return _x * _x + _y * _y + _z - _z;
+        return _norm ? T(1) : _x * _x + _y * _y + _z - _z;
     }
     Vector3D<T>& normalize() {
         if (!_norm && (_x || _y || _z)) {
-            T n = this->norm();
+            T n = norm();
             _x /= n;
             _y /= n;
             _z /= n;
@@ -121,6 +136,8 @@ public:
     bool isZero(T eps) {
         return (std::abs(_x) <= eps) && (std::abs(_y) <= eps) && (std::abs(_z) <= eps);
     }
+
+    friend std::ostream& operator<< <T>(std::ostream& out, const Vector3D& v);
 };
 
 template<typename T>
@@ -129,9 +146,18 @@ Vector3D<T> operator*(const T& n, const Vector3D<T>& v) {
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, Vector3D<T>& v) {
-    out << "(" << v.x << ";" << v.y << ";" << v.z << ")";
-    return out;
+std::ostream& operator<<(std::ostream& out, const Vector3D<T>& v) {
+    out << "(" << v._x << ";" << v._y << ";" << v._z << ")";
+	return out;
 }
+
+template<typename T>
+const Vector3D<T> Vector3D<T>::zero {0, 0, 0, true};
+template<typename T>
+const Vector3D<T> Vector3D<T>::xAxis {1, 0, 0, true};
+template<typename T>
+const Vector3D<T> Vector3D<T>::yAxis {0, 1, 0, true};
+template<typename T>
+const Vector3D<T> Vector3D<T>::zAxis {0, 0, 1, true};
 
 #endif /* LIB_GEOMETRYTOOLS_VECTOR3D_H_ */
