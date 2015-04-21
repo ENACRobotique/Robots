@@ -135,8 +135,12 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                     pt = cir.projecte(pt);
                     _path.path[_path.path_len - 1].p2 = pt;
                     _dist -= i.cir.r;
-
+                    Vector2D<float> v1(1,0), v2(cir.c, pt);
+                    _access_select_angle = v2.angle(v1) + M_PI; //M_PI because reference inverse
                 }
+            }
+            else if(i.type == E_POINT){
+                _access_select_angle = i.pt.angle + M_PI; //M_PI because reference inverse
             }
 
             _access_select = _path.path[_path.path_len - 1].p2;
