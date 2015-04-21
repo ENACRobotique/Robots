@@ -1,7 +1,6 @@
 #ifndef LIB_GEOMETRYTOOLS_VECTOR3D_H_
 #define LIB_GEOMETRYTOOLS_VECTOR3D_H_
 
-#include <Point3D.h>
 #include <Vector2D.h>
 #include <iostream>
 
@@ -39,9 +38,6 @@ public:
     }
     Vector3D(const T _x, const T _y, const T _z) :
             _x(_x), _y(_y), _z(_z), _norm(false) {
-    }
-    Vector3D(const Point3D<T>& a, const Point3D<T>& b) :
-            _x(b.x - a.x), _y(b.y - a.y), _z(b.z - a.z), _norm(false) {
     }
     Vector3D(const Vector2D<T> v, T z) :
             _x(v._x), _y(v._y), _z(z), _norm(false) {

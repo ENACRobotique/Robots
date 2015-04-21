@@ -21,14 +21,14 @@ class Plane3D {
 protected:
     // 3D plane (ax + by + cz + d = 0)
     T _a, _b, _c, _d;
-    bool norm;
+    bool _norm;
 
 public:
     Plane3D(T a, T b, T c, T d) :
-            _a(a), _b(b), _c(c), _d(d), norm(false) {
+            _a(a), _b(b), _c(c), _d(d), _norm(false) {
     }
     Plane3D(const Vector3D<T>& p, const Vector3D<T>& n) :
-            norm(false) {
+            _norm(false) {
         _a = n.x();
         _b = n.y();
         _c = n.z();
@@ -54,16 +54,21 @@ public:
         normalize();
         return _a * pt.x + _b * pt.y + _c * pt.z + _d;
     }
+    Point3D<T> project(const Point3D<T>& p) {
+        normalize();
 
+        Vector3D<T> v = p - Point3D<T>::origin;
+        Vector3D<T> n = getZ();
+        return Point3D<T>::origin + (v - (n * v + _d) * n);
+    }
     Plane3D& normalize() {
-        if (!norm) {
-            Vector3D<T> nv { _a, _b, _c };
-            T n = nv.norm();
+        if (!_norm) {
+            T n = getZ().norm();
             _a /= n;
             _b /= n;
             _c /= n;
             _d /= n;
-            norm = true;
+            _norm = true;
         }
         return *this;
     }
