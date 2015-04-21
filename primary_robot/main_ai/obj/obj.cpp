@@ -135,8 +135,8 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                     pt = cir.projecte(pt);
                     _path.path[_path.path_len - 1].p2 = pt;
                     _dist -= i.cir.r;
-                    Vector2D<float> v1(1,0), v2(cir.c, pt);
-                    _access_select_angle = v2.angle(v1) + M_PI; //M_PI because reference inverse
+                    Vector2D<float> v1(1,0), v2(cir.c, pt); //FIXME
+                    _access_select_angle = v1.angle(v2) + M_PI; //M_PI because reference inverse
                 }
             }
             else if(i.type == E_POINT){
@@ -187,6 +187,7 @@ float Obj::getYield(const unsigned int start_time){
 
     switch (_type) {
         case E_CLAP:
+        case E_CUP:
         case E_SPOT:
             ratio = 1/_dist * 100; //TODO
             break;
@@ -201,7 +202,7 @@ void Obj::print(){
     logs << DEBUG << fixed << setprecision(2) << "type : " << objType() << " : " << objState();
     if(_state == ACTIVE){
         if(_dist > 0)
-            logs << " : " << _dist << "cm to go" << _access_select << "(" << _access_select_angle << "°)";
+            logs << " : " << _dist << "cm to go" << _access_select << "(" << _access_select_angle*180/M_PI << "°)";
         else
             logs << " : no path found";
     }
