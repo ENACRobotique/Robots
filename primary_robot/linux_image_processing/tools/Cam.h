@@ -27,6 +27,7 @@ protected:
     cv::Mat matTransi_R2C = cv::Mat(4, 4, CV_32F);
     Transform3D<float> rob2cam;
     cv::Size2f aperAngle;
+    cv::Size size;
 
 public:
     /**
@@ -34,7 +35,7 @@ public:
      * size (in pixels)
      */
     Cam(float f, cv::Size size, const Transform3D<float>& rob2cam) :
-            rob2cam(rob2cam) {
+            rob2cam(rob2cam),size(size) {
         aperAngle = cv::Size2f(
                 2. * atan2f(size.width / 2, f),
                 2. * atan2f(size.height / 2, f));
@@ -46,7 +47,7 @@ public:
                 0, 0, 1);
 
         // Construct the transition matrix from camera to image
-        matK_C2I = matK_I2C.inv();
+        matK_I2C = matK_C2I.inv();
 
         // 3D transformation from robot reference frame to cam one
         matTransi_R2C = rob2cam.getMatrix();
@@ -69,13 +70,11 @@ public:
     }
     cv::Size2f getFocal() const {
         return {
-            this->matK_C2I.at<float>(0, 0),
-            this->matK_C2I.at<float>(1, 1)};
+            matK_C2I.at<float>(0, 0),
+            matK_C2I.at<float>(1, 1)};
     }
     cv::Size getSize() const {
-        return {
-            (this->matK_C2I.at<float>(0,2)*2) + 1,
-            (this->matK_C2I.at<float>(1,2)*2) + 1};
+        return size;
     }
     const Transform3D<float>& getRob2Cam() const {
         return rob2cam;

@@ -24,7 +24,7 @@ protected:
     float getEnergy(ProjAcq& pAcq, const Pos& robPos);
 
 public:
-    ProcAbsPos(const std::string& staticTestPointFile);
+    ProcAbsPos(Cam* c, const std::string& staticTestPointFile);
     virtual ~ProcAbsPos();
 
     virtual void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;

@@ -8,9 +8,11 @@
 #ifndef LIB_GEOMETRYTOOLS_VECTOR2D_H_
 #define LIB_GEOMETRYTOOLS_VECTOR2D_H_
 
-#include <Point2D.h>
 #include <cmath>
 #include <iostream>
+
+template<typename T>
+class Point2D;
 
 template<typename T>
 class Vector2D {

@@ -5,7 +5,7 @@
  *      Author: ludo6431
  */
 
-#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <tools/Image.h>
 #include <iostream>
@@ -45,7 +45,7 @@ cv::Mat Image::getMat(eColorType ctype) {
         }
 
         if (code >= 0) {
-            cv::cvtColor(resIt->second, ret, code);
+            cv::cvtColor(prev(resIt)->second, ret, code);
 
             matMap.insert(std::pair<eColorType, cv::Mat>(ctype, ret));
         }

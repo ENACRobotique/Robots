@@ -36,11 +36,11 @@ public:
     }
 
     void endOfStep(string s) {
-        insertNow("end of step: " + s);
+        insertNow("STEP  " + s);
     }
 
     void endFrame() {
-        insertNow("END");
+        insertNow("END  ");
 
         duration frameDur = std::chrono::duration_cast<duration>(frameTimes.crbegin()->first - frameTimes.cbegin()->first);
 

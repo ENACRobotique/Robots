@@ -45,13 +45,14 @@ public:
     Transform3D(const T x, const T y, const T z,
             const T rx, const T ry, const T rz) :
             mat(cv::Mat_<T>(4, 4)) {
+
+        // copy rotation part
         T crx = std::cos(rx);
         T srx = std::sin(rx);
         T cry = std::cos(ry);
         T sry = std::sin(ry);
         T crz = std::cos(rz);
         T srz = std::sin(rz);
-
         cv::Mat rotAB_X = (cv::Mat_<T>(3, 3) <<
                 1, 0, 0,
                 0, crx, srx,
@@ -67,11 +68,14 @@ public:
         cv::Mat rotAB = mat(cv::Rect(0, 0, 3, 3));
         rotAB = rotAB_Z * rotAB_Y * rotAB_X;
 
+        // copy translation part
         cv::Mat trslAB_A = (cv::Mat_<T>(3, 1) << x, y, z);
-        mat(cv::Rect(0, 3, 1, 3)) = -(rotAB * trslAB_A);
-        mat(cv::Rect(3, 0, 4, 1)) = (cv::Mat_<T>(1, 4) << 0, 0, 0, 1);
+        cv::Mat trslBA_B = -(rotAB * trslAB_A);
+        trslBA_B.copyTo(mat(cv::Rect(3, 0, 1, 3)));
 
-        std::cout << "Built Transform: " << mat << std::endl;
+        // copy last row
+        cv::Mat lastRow = (cv::Mat_<T>(1, 4) << T(0), T(0), T(0), T(1));
+        lastRow.copyTo(mat(cv::Rect(0, 3, 4, 1)));
     }
     virtual ~Transform3D() {
     }
@@ -83,13 +87,18 @@ public:
     Transform3D getReverse() const {
         Transform3D trsfBA;
 
-        cv::Mat rotBA = trsfBA.mat(cv::Rect(0, 0, 3, 3));
-        rotBA = mat(cv::Rect(0, 0, 3, 3)).t();
+        // copy transposed rotation part
+        cv::Mat rotBA = mat(cv::Rect(0, 0, 3, 3)).t();
+        rotBA.copyTo(trsfBA.mat(cv::Rect(0, 0, 3, 3)));
 
-        cv::Mat trslBA_B = mat(cv::Rect(0, 3, 1, 3));
-        trsfBA.mat(cv::Rect(0, 0, 3, 3)) = -(rotBA * trslBA_B);
+        // copy adapted translation part
+        cv::Mat trslBA_B = mat(cv::Rect(3, 0, 1, 3));
+        cv::Mat trslAB_A = -(rotBA * trslBA_B);
+        trslAB_A.copyTo(trsfBA.mat(cv::Rect(3, 0, 1, 3)));
 
-        std::cout << "Built Reversed Transform: " << trsfBA.mat << std::endl;
+        // copy last row
+        cv::Mat lastRow = (cv::Mat_<T>(1, 4) << T(0), T(0), T(0), T(1));
+        lastRow.copyTo(mat(cv::Rect(0, 3, 4, 1)));
 
         return trsfBA;
     }

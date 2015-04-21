@@ -34,7 +34,7 @@ public:
         return cam;
     }
 
-    ProjAcq projectOnPlane(const Plane3D<float>& plan, cv::Size size) const {
+    ProjAcq projectOnPlane(const Plane3D<float>& plan, cv::Size size) {
         return ProjAcq(size, this, plan);
     }
 };

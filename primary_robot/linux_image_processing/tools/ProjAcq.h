@@ -19,6 +19,9 @@ class Cam;
 
 class ProjAcq: public Image {
 protected:
+    using Pt3D = Point3D<float>;
+    using Pt2D = Point2D<float>;
+
     cv::Size _size; // nb cols, nb rows
     Acq* const _acq;
     Plane3D<float> _plane;
@@ -28,7 +31,7 @@ protected:
     cv::Mat _rot_cam2TOcam1;
 
 public:
-    ProjAcq(cv::Size size, Acq* const acq, Plane3D<float>& plane);
+    ProjAcq(cv::Size const& size, Acq* const acq, Plane3D<float> const& plane);
     virtual ~ProjAcq() {
     }
 
@@ -47,8 +50,8 @@ public:
     Vector2D<float> proj2cam(Vector2D<float> const& pt_pix);
     Vector3D<float> proj2plane(Vector2D<float> const& pt_pix);
     Vector2D<float> plane2proj(Vector3D<float> const& pt_cm);
-    Vector3D<float> cam2plane(Vector2D<float> const& pt_pix);
-    Vector2D<float> plane2cam(Vector3D<float> const& pt_cm);
+    Pt3D cam2plane(Pt2D const& pt_pix);
+    Pt2D plane2cam(Pt3D const& pt_cm);
 };
 
 #endif /* TOOLS_PROJACQ_H_ */

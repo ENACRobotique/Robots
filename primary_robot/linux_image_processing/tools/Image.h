@@ -23,7 +23,8 @@ protected:
     map matMap;
 
 public:
-    virtual ~Image();
+    virtual ~Image() {
+    }
 
     virtual cv::Mat getMat(eColorType ctype = RGB);
     virtual cv::Size getSize();

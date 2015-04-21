@@ -9,13 +9,11 @@
 #include <processes/ProcAbsPos.h>
 #include <processes/Process.h>
 #include <tools/Acq.h>
+#include <tools/Cam.h>
 #include <tools/Position2D.h>
 #include <tools/Uncertainty2D.h>
 #include <iostream>
 #include <vector>
-
-int bn_init();
-int printf(const char *__format);
 
 // For communications
 //#include "../../network_config/messages.h"
@@ -47,40 +45,66 @@ using namespace std;
 
 //##### Main #####
 int main(int argc, char* argv[]) {
-    Perf p;
-    sPosOrien posOriRobot;
-    Mat framePattern;
+    Perf perf;
     Mat frameRaw;
 
+    map<Cam*, VideoCapture*> camList;
+    camList.insert(std::pair<Cam*, VideoCapture*>(
+            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 107, 267, -45*M_PI, 0, 0)),
+//            new VideoCapture("MyVideo.avi")));
+            new VideoCapture(0)));
+
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPos(""));
+    processList.push_back(new ProcAbsPos(camList.begin()->first, ""));
 
     bn_init();
 
-	while (1) {
+    bool quit = false;
+	do {
 //		ret = bn_receive(&inMsg);
 //
 //		switch(inMsg.header.type){
 //            case E_POS_CAM:
-        p.beginFrame();
+        perf.beginFrame();
 
         for (Process* p : processList) {
             vector<Acq*> acqList;
 
             for (Cam* c : p->getCamList()) {
+                map<Cam*, VideoCapture*>::iterator it = camList.find(c);
+
                 // Read a new frame from the video source
-                if (!c->cap.read(frameRaw)) {  //if not success, break loop
+                if (!it->second->read(frameRaw)) {  //if not success, break loop
                     cout << "Cannot read the frame from source video file" << endl;
-                    break;
+                    continue;
                 }
 
-                acqList.push_back(new Acq());
+                imshow("rgb", frameRaw);
+
+                acqList.push_back(new Acq(frameRaw, RGB, c));
             }
 
-            p->process(acqList, Position2D<float>(), Uncertainty2D<float>());
+            perf.endOfStep("acquisitions");
+
+            p->process(acqList, Position2D<float>(0, 0, 0), Uncertainty2D<float>(0, 0, 0, 0));
+
+            for(Acq* a : acqList){
+                delete a;
+            }
+
+            perf.endOfStep("process");
         }
 
-        p.endFrame();
+        switch(waitKey(1000./10)){
+        case 0x110001B:
+        case 27:
+            quit = true;
+            break;
+        default:
+            break;
+        }
+
+        perf.endFrame();
 //
 //                break;
 //            case E_DATA:
@@ -91,7 +115,7 @@ int main(int argc, char* argv[]) {
 //                break;
 //		}  // End switch
 
-	}  // End while
+	}while(!quit);  // End while
 
 	printf("End loop\n");
 

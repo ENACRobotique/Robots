@@ -33,7 +33,7 @@ int initCapture(string& title, VideoCapture& srcCap, int valBegVid, bool offsetV
 	if(offsetVid)
 		srcCap.set(CV_CAP_PROP_POS_MSEC, valBegVid);
 
-	namedWindow(title.c_str(),CV_WINDOW_AUTOSIZE);
+	namedWindow(title,CV_WINDOW_AUTOSIZE);
 
 	return 0;
 }

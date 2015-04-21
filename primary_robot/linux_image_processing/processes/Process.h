@@ -28,9 +28,10 @@ public:
     using PosU = Uncertainty2D<float>;
     using Pt = Point2D<float>;
 
-    virtual ~Process();
+    virtual ~Process() {
+    }
 
-    std::vector<Cam*> getCamList(){
+    std::vector<Cam*> getCamList() {
         return camList;
     }
 

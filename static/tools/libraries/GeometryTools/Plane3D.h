@@ -12,7 +12,6 @@
 #include <Vector3D.h>
 
 #ifdef USE_OPENCV
-#include <opencv2/core/mat.hpp>
 #include <opencv2/core/core.hpp>
 #endif
 
@@ -126,10 +125,10 @@ public:
         Vector3D<T> y = getOneY().normalize();
         Vector3D<T> z = getZ();
 
-        return cv::Mat_<T>(3, 3) <<
-                x.x, y.x, z.x,
-                x.y, y.y, z.y,
-                x.z, y.z, z.z;
+        return (cv::Mat_<T>(3, 3) <<
+                x.x(), y.x(), z.x(),
+                x.y(), y.y(), z.y(),
+                x.z(), y.z(), z.z());
     }
 #endif
 };

@@ -8,11 +8,13 @@
 #ifndef LIB_GEOMETRYTOOLS_POINT2D_H_
 #define LIB_GEOMETRYTOOLS_POINT2D_H_
 
-#include <iostream>
+#include <Vector2D.h>
 #include <cmath>
+#include <iostream>
 
-template<typename T>
-class Vector2D;
+#ifdef USE_OPENCV
+#include <opencv2/core/core.hpp>
+#endif
 
 template<typename T>
 class Point2D {
@@ -28,6 +30,11 @@ public:
     Point2D(const T _x, const T _y) :
             x(_x), y(_y) {
     }
+#ifdef USE_OPENCV
+    Point2D(cv::Mat m) :
+            x(m.at<T>(0)), y(m.at<T>(1)) {
+    }
+#endif
     ~Point2D() {
     }
 
