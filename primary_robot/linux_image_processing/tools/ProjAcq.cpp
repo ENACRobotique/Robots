@@ -17,11 +17,13 @@ ProjAcq::ProjAcq(Size size, Acq* const acq, Plane3D<float>& plane) :
     Point3D<float> v(cam->getMatC2R()(Rect(0, 3, 1, 3)));
     _distPlaneCam = _plane.distanceTo(v);
 
-    Mat basisCam1 = cam->getMatC2R()(Rect(0, 0, 3, 3));
-    Mat basisCam2 = _plane.getOneBasis() * (Mat_<float>(3, 3) << 1, 0, 0, 0, -1, 0, 0, 0, -1);
+    Mat rot_cam1TOrob = cam->getMatC2R()(Rect(0, 0, 3, 3));
+    Mat rot_robTOcam2 = _plane.getOneBasis() * (Mat_<float>(3, 3) << 1, 0, 0, 0, -1, 0, 0, 0, -1);
 
-    _rot_cam1TOcam2 = basisCam2 * basisCam1;
+    _rot_cam1TOcam2 = rot_robTOcam2 * rot_cam1TOrob;
     _rot_cam2TOcam1 = _rot_cam1TOcam2.t();
+
+
 
 //    // Compute the size of the projected image
 //    if (this->plane.a == 0 && this->plane.b == 0) { // The plan is normal at z axis
@@ -63,6 +65,10 @@ Mat ProjAcq::getMat(eColorType ctype) {
     return Image::getMat(ctype);
 }
 
+Point3D<float> ProjAcq::cam2plane(Point2D<float> const& pt_pix) {
+
+}
+
 Vector3D<float> ProjAcq::cam2plane(Vector2D<float> const& pt_pix) {
     Mat px = (Mat_<float>(3, 1) << pt_pix.x, pt_pix.y, 1);
 
@@ -73,12 +79,23 @@ Vector3D<float> ProjAcq::cam2plane(Vector2D<float> const& pt_pix) {
 
     vec = _rot_cam2TOcam1 * vec;
 
-    Mat vec_rob = cam->getMatC2R() * (Mat_<float>(4,1) << vec.at<float>(0, 0), vec.at<float>(0, 0), vec.at<float>(1, 0), vec.at<float>(2, 0), 1);
+    Mat vec_rob = cam->getMatC2R() * (Mat_<float>(4,1) << vec.at<float>(0), vec.at<float>(1), vec.at<float>(2), 1);
 
     return Vector3D<float>(vec_rob(Rect(0, 0, 1, 3)));
 }
 
 Vector2D<float> ProjAcq::plane2cam(Vector3D<float> const& pt_cm) {
+    Cam const* cam = _acq->getCam();
+
+    Mat vec = _plane.project(Point3D<float>::origin + pt_cm).toCv();
+
+    vec = cam->getMatR2C() * (Mat_<float>(4, 1) << vec.at<float>(0), vec.at<float>(1), vec.at<float>(2), 1);
+
+    vec /= vec.at<float>(2);
+    vec = _rot_cam2TOcam1 * vec;
+
+
+
     // TODO
     return Vector2D<float>();
 }

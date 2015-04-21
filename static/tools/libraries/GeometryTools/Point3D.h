@@ -39,6 +39,12 @@ public:
         return {x - p.x, y - p.y, z - p.z};
     }
 
+#ifdef USE_OPENCV
+    cv::Mat toCv() {
+        return (cv::Mat_<T>(3, 1) << x, y, z);
+    }
+#endif
+
     friend std::ostream& operator<< <T>(std::ostream& out, const Point3D& v);
 };
 

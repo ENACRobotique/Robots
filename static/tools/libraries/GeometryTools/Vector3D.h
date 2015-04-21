@@ -133,7 +133,13 @@ public:
         return (std::abs(_x) <= eps) && (std::abs(_y) <= eps) && (std::abs(_z) <= eps);
     }
 
-    friend std::ostream& operator<< <T>(std::ostream& out, const Vector3D& v);
+#ifdef USE_OPENCV
+    cv::Mat toCv() {
+        return (cv::Mat_<T>(3, 1) << _x, _y, _z);
+    }
+#endif
+
+    friend std::ostream& operator<<<T>(std::ostream& out, const Vector3D& v);
 };
 
 template<typename T>
@@ -144,16 +150,16 @@ Vector3D<T> operator*(const T& n, const Vector3D<T>& v) {
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const Vector3D<T>& v) {
     out << "(" << v._x << ";" << v._y << ";" << v._z << ")";
-	return out;
+    return out;
 }
 
 template<typename T>
-const Vector3D<T> Vector3D<T>::zero {0, 0, 0, true};
+const Vector3D<T> Vector3D<T>::zero { 0, 0, 0, true };
 template<typename T>
-const Vector3D<T> Vector3D<T>::xAxis {1, 0, 0, true};
+const Vector3D<T> Vector3D<T>::xAxis { 1, 0, 0, true };
 template<typename T>
-const Vector3D<T> Vector3D<T>::yAxis {0, 1, 0, true};
+const Vector3D<T> Vector3D<T>::yAxis { 0, 1, 0, true };
 template<typename T>
-const Vector3D<T> Vector3D<T>::zAxis {0, 0, 1, true};
+const Vector3D<T> Vector3D<T>::zAxis { 0, 0, 1, true };
 
 #endif /* LIB_GEOMETRYTOOLS_VECTOR3D_H_ */
