@@ -80,8 +80,11 @@ class Vector2D {
             x = vc.x * cos(theta) - vc.y * sin(theta);
             y = vc.x * sin(theta) + vc.y * cos(theta);
         }
-        T angle(const Vector2D& v){
+        T angleUnsigned(const Vector2D& v){
             return acos(*this * v / sqrt(normSq() * v.normSq()));
+        }
+        T angle(const Vector2D& v){ //'*this' is the reference
+            return ((*this ^ v) > 0 ? 1 : -1) * angleUnsigned(v);
         }
 
 
