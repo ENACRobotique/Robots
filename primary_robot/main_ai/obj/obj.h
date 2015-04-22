@@ -43,7 +43,7 @@ typedef struct {
 } sObjEntry_t;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT
+    E_NULL, E_CLAP, E_SPOT, E_CUP
 } eObj_t;
 
 typedef enum {
@@ -97,6 +97,8 @@ class Obj {
                     return "CLAP";
                 case E_SPOT:
                     return "SPOT";
+                case E_CUP:
+                    return "CUP ";
                 default:
                     return "Undefined";
             }

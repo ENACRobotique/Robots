@@ -278,6 +278,8 @@ void Path::computeOrientPathForHolonomic(float theta_end_obj){
     float deltaTheta = getPrincipalAngleValue(theta_end_obj - theta);
     float Time = _path_orient[_path_orient.size()-1].t2 - _path_orient[0].t1;
 
+    logs << DEBUG << "Destination angle is :" << theta_end_obj*180/M_PI << "°";
+
     for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
         _path_orient[i].theta1 = getPrincipalAngleValue((_path_orient[i].t1 - _path_orient[0].t1)*deltaTheta/Time + theta);
         _path_orient[i].theta2 = getPrincipalAngleValue((_path_orient[i].t2 - _path_orient[0].t1)*deltaTheta/Time + theta);
@@ -306,7 +308,7 @@ void Path::printElTrajOrient(const unsigned int num) const{
                                << " ; p1 x" << _path_orient[num].p1.x << " p1 y" << _path_orient[num].p1.y
                                << " ; p2 x" << _path_orient[num].p2.x << " p2 y" << _path_orient[num].p2.y
                                << " ; obs x" << _path_orient[num].obs.c.x << " y" << _path_orient[num].obs.c.y << " r" << _path_orient[num].obs.r
-                               << " ; theta1=" << _path_orient[num].theta1 << " theta2=" << _path_orient[num].theta2
+                               << " ; theta1=" << _path_orient[num].theta1*180/M_PI<< "° theta2=" << _path_orient[num].theta2*180/M_PI << "°"
                                << " ; a_l" << _path_orient[num].arc_len << " s_l" << _path_orient[num].seg_len
                                << " : rot1_dir " << _path_orient[num].rot1_dir << " rot2_dir " << _path_orient[num].rot2_dir;
 }

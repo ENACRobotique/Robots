@@ -344,9 +344,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
             }
 
             // compute the next desired orientation (same calculation for seg and arc)
-            theta_sp = theta0 + (int64_t)dtheta * (int64_t)dur / elt_dur;
+            theta_sp = elt_dur ? theta0 + (int64_t)dtheta * (int64_t)dur / elt_dur : theta0;
 
-            oz_sp = dtheta / elt_dur;
+            oz_sp = elt_dur ? dtheta / elt_dur : 0;
 
             break;
         }

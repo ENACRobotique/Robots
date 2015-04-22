@@ -91,8 +91,11 @@ public:
         x = vc.x * std::cos(theta) - vc.y * std::sin(theta);
         y = vc.x * std::sin(theta) + vc.y * std::cos(theta);
     }
-    T angle(const Vector2D& v) {
-        return std::acos(*this * v / std::sqrt(normSq() * v.normSq()));
+    T angleUnsigned(const Vector2D& v){
+        return acos(*this * v / sqrt(normSq() * v.normSq()));
+    }
+    T angle(const Vector2D& v){ //'*this' is the reference
+        return ((*this ^ v) > 0 ? 1 : -1) * angleUnsigned(v);
     }
 };
 
