@@ -93,9 +93,11 @@ int loopRobots(){ //TODO end of game
     else{
         for(Robot* r : robots){
             if(CapPosition* capPos = dynamic_cast<CapPosition*> (r->caps[eCap::POS])){
-                Point2D<float> pos = capPos->getLastPosXY();
-                r->env->obs[capPos->getIobs()].c = {pos.x, pos.y};
-                r->env->obs_updated[capPos->getIobs()]++;
+                Point2D<float> pos = capPos->getLastPosXY(), prevPos(r->env->obs[capPos->getIobs()].c.x, r->env->obs[capPos->getIobs()].c.y);
+                if(prevPos != pos){
+                    r->env->obs[capPos->getIobs()].c = {pos.x, pos.y};
+                    r->env->obs_updated[capPos->getIobs()]++;
+                }
             }
 
             if(CapAI* capAI = dynamic_cast<CapAI*> (r->caps[eCap::AI])){
