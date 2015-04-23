@@ -128,15 +128,15 @@ imwrite(B, 'tp.png');
 
 %% write testpoints to file
 
-[row, col] = find(Q);
 H = rgb2hsv(i);
 H = H(:,:,1);
 
+[row, col] = find(Q);
 h = H(Q);
 
-histeq(h')
+M = [(col - 10 + 1)./factor, (size(i,1) - row + 1  - 10 + 1)./factor, h];
 
-dlmwrite('testpoints.csv', );
+dlmwrite('testpoints.csv', M);
 
 %%
 % %j = J(100:200, 100:200);
