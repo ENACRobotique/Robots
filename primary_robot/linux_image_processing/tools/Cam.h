@@ -9,15 +9,10 @@
 #define TOOLS_CAM_H_
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/operations.hpp>
 #include <opencv2/core/types_c.h>
+#include <Point2D.h>
 #include <Transform3D.h>
-#include <Vector2D.h>
 #include <cmath>
-
-template<typename T> class Transform3D;
-template<typename T> class Vector2D;
 
 class Cam {
 protected:
@@ -81,6 +76,19 @@ public:
     }
     const cv::Size2f& getAperAngle() const {
         return aperAngle;
+    }
+
+    Point2D<float> getTopLeft() const {
+        return Point2D<float>(0, 0);
+    }
+    Point2D<float> getTopRight() const {
+        return Point2D<float>(size.width - 1, 0);
+    }
+    Point2D<float> getBottomRight() const {
+        return Point2D<float>(size.width - 1, size.height - 1);
+    }
+    Point2D<float> getBottomLeft() const {
+        return Point2D<float>(0, size.height - 1);
     }
 };
 

@@ -9,6 +9,7 @@
 #define TOOLS_POSITION2D_H_
 
 #include <Point2D.h>
+#include <Transform2D.h>
 
 #ifdef USE_BOTNET
 #include <messages-position.h>
@@ -41,6 +42,10 @@ public:
             p(p.x, p.y), theta(p.theta) {
     }
 #endif
+
+    Transform2D<T> getTransform() const {
+        return Transform2D<T>(p.x, p.y, theta);
+    }
 };
 
 #endif /* TOOLS_POSITION2D_H_ */

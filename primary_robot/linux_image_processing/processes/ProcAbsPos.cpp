@@ -10,7 +10,9 @@
 #include <processes/ProcAbsPos.h>
 #include <Plane3D.h>
 #include <Point2D.h>
+#include <Transform2D.h>
 #include <tools/Image.h>
+#include <tools/Position2D.h>
 #include <tools/ProjAcq.h>
 #include <cassert>
 #include <fstream>
@@ -24,7 +26,7 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
 
     ifstream infile(staticTestPointFile);
     string line;
-    while(getline(infile, line)){
+    while (getline(infile, line)) {
         istringstream s(line);
         float x, y, hue;
         char del;
@@ -37,27 +39,39 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
     }
     infile.close();
 
-    cout << "Read " << staticTP.size() << " testpoints from file \#" << staticTestPointFile << "\"" << endl;
+    cout << "Read " << staticTP.size() << " testpoints from file \"" << staticTestPointFile << "\"" << endl;
 }
 
 ProcAbsPos::~ProcAbsPos()
 {
 }
 
-vector<TestPoint> ProcAbsPos::getPosDependentTP(const Pos& robPos){
+vector<TestPoint> ProcAbsPos::getPosDependentTP(const Pos& robPos) {
     // TODO
     return vector<TestPoint>();
 }
 
-//float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos){
-//    vector<TestPoint> posDependentTP = getPosDependentTP(robPos);
-//
-//    float E = 0;
-//
-//    Acq* acq = pAcq.getAcq();
-//    const Mat& im = acq->getMat(HSV);
-//    Transform2D tr_pg2rob = robPos.getTransform();
-//
+float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
+    vector<TestPoint> posDependentTP = getPosDependentTP(robPos);
+
+    float E = 0;
+
+    Acq* acq = pAcq.getAcq();
+    Cam const* cam = acq->getCam();
+    Mat im = acq->getMat(HSV);
+
+    Transform2D<float> tr_pg2rob = robPos.getTransform();
+
+    Point3D<float> camTL = pAcq.cam2plane(cam->getTopLeft());
+    Point3D<float> camTR = pAcq.cam2plane(cam->getTopRight());
+    Point3D<float> camBR = pAcq.cam2plane(cam->getBottomRight());
+    Point3D<float> camBL = pAcq.cam2plane(cam->getBottomLeft());
+
+    cout << "TL: " << camTL << endl;
+    cout << "TR: " << camTR << endl;
+    cout << "BR: " << camBR << endl;
+    cout << "BL: " << camBL << endl;
+
 //    for(const TestPoint& tp : staticTP){
 //        Pt tp_cmRob = tr_pg2rob.transformLinPos(tp.getPos());
 //        Pt tp_pxCam = pAcq->plane2Cam(tp_cmRob);
@@ -87,7 +101,7 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     imshow("hsv", im);
 
-    static Plane3D<float> pl({0, 0, 0}, {0, 0, 1}); // build a plane with a point and a normal
+    static Plane3D<float> pl( { 0, 0, 0 }, { 0, 0, 1 }); // build a plane with a point and a normal
     ProjAcq pAcq = acq->projectOnPlane(pl);
 
 //
