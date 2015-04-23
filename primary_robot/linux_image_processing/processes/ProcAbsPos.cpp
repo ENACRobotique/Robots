@@ -9,6 +9,7 @@
 #include <processes/ProcAbsPos.h>
 #include <Point2D.h>
 #include <tools/Image.h>
+#include <tools/ProjAcq.h>
 #include <cassert>
 
 using namespace std;
@@ -70,8 +71,9 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     imshow("hsv", im);
 
-//    Plane3D pl({0, 0, 0}, {0, 0, 1}); // build a plane with a point and a normal
-//    ProjAcq pAcq = acq->projectOnPlane(pl);
+    Plane3D<float> pl({0, 0, 0}, {0, 0, 1}); // build a plane with a point and a normal
+    ProjAcq pAcq = acq->projectOnPlane(pl);
+
 //
 //    float prevE = getEnergy(pAcq, currPos);
 //    Pos currPos = pos;

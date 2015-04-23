@@ -14,7 +14,7 @@ ProjAcq::ProjAcq(Size const& size, Acq* const acq, Plane3D<float> const& plane) 
         _size(size), _acq(acq), _plane(plane) {
     Cam const* cam = acq->getCam();
 
-    Point3D<float> v(cam->getMatC2R()(Rect(0, 3, 1, 3)));
+    Point3D<float> v(cam->getMatC2R()(Rect(3, 0, 1, 3)));
     _distPlaneCam = _plane.distanceTo(v);
 
     Mat rot_cam1TOrob = cam->getMatC2R()(Rect(0, 0, 3, 3));
@@ -72,7 +72,7 @@ Point3D<float> ProjAcq::cam2plane(Pt2D const& pt_pix) {
     vec *= (_distPlaneCam / vec.at<float>(2, 0)); // put the point on the plane
 
     vec = _rot_cam2TOcam1 * vec;
-    vec.push_back(1);
+    vec.push_back(1.f);
 
     Mat vec_rob = cam->getMatC2R() * vec;
 
@@ -84,7 +84,7 @@ Point2D<float> ProjAcq::plane2cam(Pt3D const& pt_cm) {
 
     Mat vec = _plane.project(pt_cm).toCv();
 
-    vec.push_back(float(1));
+    vec.push_back(1.f);
     vec = cam->getMatR2C() * vec;
     vec.pop_back(1);
 

@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
     map<Cam*, VideoCapture*> camList;
     camList.insert(std::pair<Cam*, VideoCapture*>(
-            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 107, 267, -45*M_PI, 0, 0)),
+            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 107, 267, 225.*M_PI/180., 0, 0)),
 //            new VideoCapture("MyVideo.avi")));
             new VideoCapture(0)));
 
@@ -76,6 +76,10 @@ int main(int argc, char* argv[]) {
                 // Read a new frame from the video source
                 if (!it->second->read(frameRaw)) {  //if not success, break loop
                     cout << "Cannot read the frame from source video file" << endl;
+                    continue;
+                }
+
+                if(frameRaw.size() != c->getSize()){
                     continue;
                 }
 

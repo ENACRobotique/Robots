@@ -42,8 +42,8 @@ public:
 
         // Construct transition matrix from image to camera
         matK_C2I = (cv::Mat_<float>(3, 3) <<
-                f, 0, (size.width - 1) / 2,
-                0, f, (size.height - 1) / 2,
+                f, 0, (size.width - 1.f) / 2.f,
+                0, f, (size.height - 1.f) / 2.f,
                 0, 0, 1);
 
         // Construct the transition matrix from camera to image
