@@ -20,7 +20,7 @@ J = double(edge(II, 'canny'));
 if ~exist('dist.mat', 'file')
     E = J;
     D = E;
-    SE = strel('diamond', 1);
+    SE = [0 1 0;1 1 1;0 1 0]%strel('diamond', 1);
     while min(min(E)) == 0
         E = imdilate(E, SE);
 
@@ -39,7 +39,7 @@ if ~exist('dist.mat', 'file')
     % pt = D(215, 147:180);
     % figure;plot(pt);
 else
-    load('dist')
+    load('dist.mat')
 end
 
 DD = D/max(max(D));
@@ -47,10 +47,10 @@ imwrite(DD, 'dist.png', 'bitdepth', 16);
 
 %% get propability from distance
 
-low_dens = 1/10; % (/cm)
-low_thr = 20; % (cm)
+low_dens = 1/10; % (/cm²)
+low_thr = 15; % (cm)
 
-high_dens = 1/1; % (/cm)
+high_dens = 1/1; % (/cm²)
 high_thr = 0;
 
 P = high_dens + (high_dens - low_dens) .* (D - high_thr) ./ (high_thr - low_thr);
@@ -58,15 +58,17 @@ P = high_dens + (high_dens - low_dens) .* (D - high_thr) ./ (high_thr - low_thr)
 P(D >= low_thr) = low_dens;
 P(D <= high_thr) = 0;
 
-P = min(P./factor, 1);
+P = min(P./(factor^2), 1);
 
-p = P(300:400, 400:500); % extract a star
-figure;
-subplot(1, 2, 1);surf(p);
-subplot(1, 2, 2);imagesc(p);axis equal;
+figure;imshow(P)
 
-pt = P(215, :);
-figure;plot(pt);
+%p = P(300:400, 400:500); % extract a star
+%figure;
+%subplot(1, 2, 1);surf(p);
+%subplot(1, 2, 2);imagesc(p);axis equal;
+
+%pt = P(215, :);
+%figure;plot(pt);
 
 imwrite(P, 'prob.png', 'bitdepth', 16);
 
@@ -75,7 +77,9 @@ imwrite(P, 'prob.png', 'bitdepth', 16);
 Q = false(size(P));
 Q(P > rand(size(P))) = true;
 
-figure;imshow(Q);
+sum(sum(Q))
+
+%figure;imshow(Q);
 
 imwrite(Q, 'tp_nb.png');
 
@@ -102,14 +106,14 @@ A = i.*a;
 % ig = A(:, :, 2); ig(b) = 1; A(:, :, 2) = ig;
 % ib = A(:, :, 3); ib(b) = 1; A(:, :, 3) = ib;
 
-figure;imshow(A);
+%figure;imshow(A);
 
 imwrite(A, 'tp_col.png');
 
 %% mask-out the result
 
-k = rgb2gray(imread('src_mask.png'));
-k = k < 128;
+k = imread('src_mask.png');
+k = ~k;
 
 c = zeros(size(k));
 c(:,:,1) = k;
