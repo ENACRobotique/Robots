@@ -63,26 +63,29 @@ Mat ProjAcq::getMat(eColorType ctype) {
     return Image::getMat(ctype);
 }
 
-Point3D<float> ProjAcq::cam2plane(Pt2D const& pt_pix) {
+Mat ProjAcq::cam2plane(Mat pt_px) {
     Cam const* cam = _acq->getCam();
 
-    Mat px = (Mat_<float>(3, 1) << pt_pix.x, pt_pix.y, 1);
-    Mat vec = _rot_cam1TOcam2 * cam->getMatI2C() * px;
+    if (pt_px.size[0] == 2) {
+        pt_px.push_back(1.f);
+    }
+    Mat vec = _rot_cam1TOcam2 * cam->getMatI2C() * pt_px;
 
     vec *= (_distPlaneCam / vec.at<float>(2, 0)); // put the point on the plane
 
     vec = _rot_cam2TOcam1 * vec;
     vec.push_back(1.f);
 
-    Mat vec_rob = cam->getMatC2R() * vec;
+    vec = cam->getMatC2R() * vec;
+    vec.pop_back(1);
 
-    return Pt3D(vec_rob);
+    return vec;
 }
 
-Point2D<float> ProjAcq::plane2cam(Pt3D const& pt_cm) {
+Mat ProjAcq::plane2cam(Mat pt_cm) {
     Cam const* cam = _acq->getCam();
 
-    Mat vec = _plane.project(pt_cm).toCv();
+    Mat vec = _plane.project(Pt3D(pt_cm)).toCv();
 
     vec.push_back(1.f);
     vec = cam->getMatR2C() * vec;
@@ -90,5 +93,8 @@ Point2D<float> ProjAcq::plane2cam(Pt3D const& pt_cm) {
 
     vec /= vec.at<float>(2);
 
-    return Pt2D(cam->getMatC2I() * vec);
+    vec = cam->getMatC2I() * vec;
+    vec.pop_back(1);
+
+    return vec;
 }

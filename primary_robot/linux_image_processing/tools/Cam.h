@@ -78,17 +78,17 @@ public:
         return aperAngle;
     }
 
-    Point2D<float> getTopLeft() const {
-        return Point2D<float>(0, 0);
+    cv::Mat getTopLeft() const {
+        return (cv::Mat_<float>(2, 1) << 0, 0);
     }
-    Point2D<float> getTopRight() const {
-        return Point2D<float>(size.width - 1, 0);
+    cv::Mat getTopRight() const {
+        return (cv::Mat_<float>(2, 1) << size.width - 1, 0);
     }
-    Point2D<float> getBottomRight() const {
-        return Point2D<float>(size.width - 1, size.height - 1);
+    cv::Mat getBottomRight() const {
+        return (cv::Mat_<float>(2, 1) << size.width - 1, size.height - 1);
     }
-    Point2D<float> getBottomLeft() const {
-        return Point2D<float>(0, size.height - 1);
+    cv::Mat getBottomLeft() const {
+        return (cv::Mat_<float>(2, 1) << 0, size.height - 1);
     }
 };
 

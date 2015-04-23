@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
             perf.endOfStep("acquisitions");
 
-            p->process(acqList, Position2D<float>(0, 0, 0), Uncertainty2D<float>(0, 0, 0, 0));
+            p->process(acqList, Position2D<float>(80, 50, -M_PI/4.), Uncertainty2D<float>(0, 0, 0, 0));
 
             for(Acq* a : acqList){
                 delete a;

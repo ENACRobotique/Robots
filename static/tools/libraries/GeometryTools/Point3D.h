@@ -40,7 +40,7 @@ public:
     }
 
 #ifdef USE_OPENCV
-    cv::Mat toCv() {
+    cv::Mat toCv() const {
         return (cv::Mat_<T>(3, 1) << x, y, z);
     }
 #endif

@@ -15,12 +15,13 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/operations.hpp>
 #include <cmath>
+#include <cassert>
 
 template<typename T>
 class Transform2D {
 private:
     Transform2D() :
-            mat(cv::Mat_<T>(3, 3)) {
+            mat(cv::Mat_<T>::eye(3, 3)) {
     }
 
 protected:
@@ -44,7 +45,7 @@ public:
      */
     Transform2D(const T x, const T y,
             const T rz) :
-            mat(cv::Mat_<T>(3, 3)) {
+            mat(cv::Mat_<T>::eye(3, 3)) {
 
         // copy rotation part
         T crz = std::cos(rz);
@@ -52,19 +53,30 @@ public:
         cv::Mat rotAB_Z = (cv::Mat_<T>(2, 2) <<
                 crz, srz,
                 -srz, crz);
-        cv::Mat rotAB = mat(cv::Rect(0, 0, 2, 2));
-        rotAB = rotAB_Z;
+        cv::Mat rotAB = rotAB_Z;
+        rotAB.copyTo(mat(cv::Rect(0, 0, 2, 2)));
 
         // copy translation part
         cv::Mat trslAB_A = (cv::Mat_<T>(2, 1) << x, y);
         cv::Mat trslBA_B = -(rotAB * trslAB_A);
         trslBA_B.copyTo(mat(cv::Rect(2, 0, 1, 2)));
-
-        // copy last row
-        cv::Mat lastRow = (cv::Mat_<T>(1, 3) << T(0), T(0), T(1));
-        lastRow.copyTo(mat(cv::Rect(0, 2, 3, 1)));
     }
     virtual ~Transform2D() {
+    }
+
+    cv::Mat transformLinPos(cv::Mat in) const {
+        if (in.size[0] == 2) {
+            in.push_back(1.f);
+        }
+        else if (in.size[0] == 3) {
+            in.at<float>(2) = 1;
+        }
+        else {
+            assert(0);
+        }
+        cv::Mat ret = mat * in;
+        ret.pop_back(1);
+        return ret;
     }
 
     const cv::Mat& getMatrix() const {
@@ -82,10 +94,6 @@ public:
         cv::Mat trslBA_B = mat(cv::Rect(2, 0, 1, 2));
         cv::Mat trslAB_A = -(rotBA * trslBA_B);
         trslAB_A.copyTo(trsfBA.mat(cv::Rect(2, 0, 1, 2)));
-
-        // copy last row
-        cv::Mat lastRow = (cv::Mat_<T>(1, 3) << T(0), T(0), T(1));
-        lastRow.copyTo(mat(cv::Rect(0, 2, 3, 1)));
 
         return trsfBA;
     }
