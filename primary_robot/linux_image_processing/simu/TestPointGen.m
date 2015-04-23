@@ -88,11 +88,11 @@ imwrite(Q, 'tp_nb.png');
 i = imread('src_colors.png');
 i = double(i)/255;
 
-j = rgb2gray(i);
-b = j < 0.1;
-ir = i(:, :, 1); ir(b) = 1; i(:, :, 1) = ir;
-ig = i(:, :, 2); ig(b) = 1; i(:, :, 2) = ig;
-ib = i(:, :, 3); ib(b) = 1; i(:, :, 3) = ib;
+% j = rgb2gray(i);
+% b = j < 0.1;
+% ir = i(:, :, 1); ir(b) = 1; i(:, :, 1) = ir;
+% ig = i(:, :, 2); ig(b) = 1; i(:, :, 2) = ig;
+% ib = i(:, :, 3); ib(b) = 1; i(:, :, 3) = ib;
 
 a = zeros(size(i));
 a(:,:,1) = Q;
@@ -112,8 +112,8 @@ imwrite(A, 'tp_col.png');
 
 %% mask-out the result
 
-k = imread('src_mask.png');
-k = ~k;
+k = rgb2gray(imread('src_mask.png'));
+k = k < 128;
 
 c = zeros(size(k));
 c(:,:,1) = k;
@@ -126,6 +126,17 @@ figure;imshow(B);
 
 imwrite(B, 'tp.png');
 
+%% write testpoints to file
+
+[row, col] = find(Q);
+H = rgb2hsv(i);
+H = H(:,:,1);
+
+h = H(Q);
+
+histeq(h')
+
+dlmwrite('testpoints.csv', );
 
 %%
 % %j = J(100:200, 100:200);

@@ -8,15 +8,16 @@
 #ifndef TOOLS_TESTPOINT_H_
 #define TOOLS_TESTPOINT_H_
 
-#include <Point2D.h>
+#include <opencv2/core/core.hpp>
+#include <cmath>
 
 class TestPoint {
-    Point2D<float> pos; // (in cm, in playground reference frame)
+    cv::Mat pos; // (in cm, in playground reference frame)
     float hue;
     float weight;
 
 public:
-    TestPoint(const Point2D<float>& pos, float hue, float weight) :
+    TestPoint(cv::Mat pos, float hue, float weight) :
             pos(pos), hue(hue), weight(weight) {
     }
     virtual ~TestPoint() {
@@ -35,7 +36,7 @@ public:
     /**
      * In centimeters, in playground reference frame
      */
-    const Point2D<float>& getPos() const
+    const cv::Mat getPos() const
     {
         return pos;
     }

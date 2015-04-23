@@ -9,15 +9,10 @@
 #define TOOLS_CAM_H_
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/operations.hpp>
 #include <opencv2/core/types_c.h>
+#include <Point2D.h>
 #include <Transform3D.h>
-#include <Vector2D.h>
 #include <cmath>
-
-template<typename T> class Transform3D;
-template<typename T> class Vector2D;
 
 class Cam {
 protected:
@@ -42,8 +37,8 @@ public:
 
         // Construct transition matrix from image to camera
         matK_C2I = (cv::Mat_<float>(3, 3) <<
-                f, 0, (size.width - 1) / 2,
-                0, f, (size.height - 1) / 2,
+                f, 0, (size.width - 1.f) / 2.f,
+                0, f, (size.height - 1.f) / 2.f,
                 0, 0, 1);
 
         // Construct the transition matrix from camera to image
@@ -81,6 +76,19 @@ public:
     }
     const cv::Size2f& getAperAngle() const {
         return aperAngle;
+    }
+
+    cv::Mat getTopLeft() const {
+        return (cv::Mat_<float>(2, 1) << 0, 0);
+    }
+    cv::Mat getTopRight() const {
+        return (cv::Mat_<float>(2, 1) << size.width - 1, 0);
+    }
+    cv::Mat getBottomRight() const {
+        return (cv::Mat_<float>(2, 1) << size.width - 1, size.height - 1);
+    }
+    cv::Mat getBottomLeft() const {
+        return (cv::Mat_<float>(2, 1) << 0, size.height - 1);
     }
 };
 

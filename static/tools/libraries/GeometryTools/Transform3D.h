@@ -15,12 +15,14 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/operations.hpp>
 #include <cmath>
+#include <cassert>
+#include <Transform2D.h>
 
 template<typename T>
 class Transform3D {
 private:
     Transform3D() :
-            mat(cv::Mat_<T>(4, 4)) {
+            mat(cv::Mat_<T>::eye(4, 4)) {
     }
 
 protected:
@@ -44,7 +46,7 @@ public:
      */
     Transform3D(const T x, const T y, const T z,
             const T rx, const T ry, const T rz) :
-            mat(cv::Mat_<T>(4, 4)) {
+            mat(cv::Mat_<T>::eye(4, 4)) {
 
         // copy rotation part
         T crx = std::cos(rx);
@@ -65,19 +67,44 @@ public:
                 crz, srz, 0,
                 -srz, crz, 0,
                 0, 0, 1);
-        cv::Mat rotAB = mat(cv::Rect(0, 0, 3, 3));
-        rotAB = rotAB_Z * rotAB_Y * rotAB_X;
+        cv::Mat rotAB = rotAB_Z * rotAB_Y * rotAB_X;
+        rotAB.copyTo(mat(cv::Rect(0, 0, 3, 3)));
 
         // copy translation part
         cv::Mat trslAB_A = (cv::Mat_<T>(3, 1) << x, y, z);
         cv::Mat trslBA_B = -(rotAB * trslAB_A);
         trslBA_B.copyTo(mat(cv::Rect(3, 0, 1, 3)));
-
-        // copy last row
-        cv::Mat lastRow = (cv::Mat_<T>(1, 4) << T(0), T(0), T(0), T(1));
-        lastRow.copyTo(mat(cv::Rect(0, 3, 4, 1)));
     }
+
+    Transform3D(Transform2D<T> const& tr) :
+            mat(cv::Mat_<T>::eye(4, 4)) {
+        cv::Mat m33 = tr.getMatrix();
+
+        // copy rotation part
+        cv::Mat rotAB = m33(cv::Rect(0, 0, 2, 2));
+        rotAB.copyTo(mat(cv::Rect(0, 0, 2, 2)));
+
+        // copy translation part
+        cv::Mat trslBA_B = m33(cv::Rect(2, 0, 1, 2));
+        trslBA_B.copyTo(mat(cv::Rect(3, 0, 1, 2)));
+    }
+
     virtual ~Transform3D() {
+    }
+
+    cv::Mat transformLinPos(cv::Mat in) const {
+        if (in.size[0] == 3) {
+            in.push_back(1.f);
+        }
+        else if (in.size[0] == 4) {
+            in.at<float>(3) = 1;
+        }
+        else {
+            assert(0);
+        }
+        cv::Mat ret = mat * in;
+        ret.pop_back(1);
+        return ret;
     }
 
     const cv::Mat& getMatrix() const {

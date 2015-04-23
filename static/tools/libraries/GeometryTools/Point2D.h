@@ -38,6 +38,12 @@ public:
     ~Point2D() {
     }
 
+#ifdef USE_OPENCV
+    cv::Mat toCv() const {
+        return (cv::Mat_<T>(2, 1) << x, y);
+    }
+#endif
+
     Point2D operator+(const Vector2D<T>& v) const {
         return {x + v.x, y + v.y};
     }
@@ -82,7 +88,7 @@ public:
 };
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, Point2D<T>& p) {
+std::ostream& operator<<(std::ostream& out, const Point2D<T>& p) {
     out << "(" << p.x << ";" << p.y << ")";
     return out;
 }

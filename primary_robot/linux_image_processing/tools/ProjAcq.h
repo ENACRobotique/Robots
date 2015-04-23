@@ -10,12 +10,13 @@
 
 #include <opencv2/core/core.hpp>
 #include <Plane3D.h>
+#include <Point2D.h>
+#include <Point3D.h>
 #include <tools/Image.h>
 #include <Vector2D.h>
 #include <Vector3D.h>
 
 class Acq;
-class Cam;
 
 class ProjAcq: public Image {
 protected:
@@ -50,8 +51,14 @@ public:
     Vector2D<float> proj2cam(Vector2D<float> const& pt_pix);
     Vector3D<float> proj2plane(Vector2D<float> const& pt_pix);
     Vector2D<float> plane2proj(Vector3D<float> const& pt_cm);
-    Pt3D cam2plane(Pt2D const& pt_pix);
-    Pt2D plane2cam(Pt3D const& pt_cm);
+    Pt3D cam2plane(Pt2D const& pt_pix) {
+        return Pt3D(cam2plane(pt_pix.toCv()));
+    }
+    cv::Mat cam2plane(cv::Mat pt_px);
+    Pt2D plane2cam(Pt3D const& pt_cm) {
+        return Pt2D(plane2cam(pt_cm.toCv()));
+    }
+    cv::Mat plane2cam(cv::Mat pt_cm);
 };
 
 #endif /* TOOLS_PROJACQ_H_ */

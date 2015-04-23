@@ -50,12 +50,12 @@ int main(int argc, char* argv[]) {
 
     map<Cam*, VideoCapture*> camList;
     camList.insert(std::pair<Cam*, VideoCapture*>(
-            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 107, 267, -45*M_PI, 0, 0)),
+            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 107, 267, 225.*M_PI/180., 0, 0)),
 //            new VideoCapture("MyVideo.avi")));
             new VideoCapture(0)));
 
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPos(camList.begin()->first, ""));
+    processList.push_back(new ProcAbsPos(camList.begin()->first, "simu/testpoints.csv"));
 
     bn_init();
 
@@ -79,6 +79,10 @@ int main(int argc, char* argv[]) {
                     continue;
                 }
 
+                if(frameRaw.size() != c->getSize()){
+                    continue;
+                }
+
                 imshow("rgb", frameRaw);
 
                 acqList.push_back(new Acq(frameRaw, RGB, c));
@@ -86,7 +90,7 @@ int main(int argc, char* argv[]) {
 
             perf.endOfStep("acquisitions");
 
-            p->process(acqList, Position2D<float>(0, 0, 0), Uncertainty2D<float>(0, 0, 0, 0));
+            p->process(acqList, Position2D<float>(80, 50, -M_PI/4.), Uncertainty2D<float>(0, 0, 0, 0));
 
             for(Acq* a : acqList){
                 delete a;

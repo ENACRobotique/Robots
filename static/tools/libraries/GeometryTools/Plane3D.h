@@ -26,12 +26,12 @@ public:
     Plane3D(T a, T b, T c, T d) :
             _a(a), _b(b), _c(c), _d(d), _norm(false) {
     }
-    Plane3D(const Vector3D<T>& p, const Vector3D<T>& n) :
+    Plane3D(const Point3D<T>& p, const Vector3D<T>& n) :
             _norm(false) {
         _a = n.x();
         _b = n.y();
         _c = n.z();
-        _d = -(p * n);
+        _d = -((p - Point3D<float>::origin) * n);
     }
     virtual ~Plane3D() {
     }
