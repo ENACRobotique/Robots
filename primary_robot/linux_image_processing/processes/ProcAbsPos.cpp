@@ -5,12 +5,15 @@
  *      Author: ludo6431
  */
 
+#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <processes/ProcAbsPos.h>
+#include <Plane3D.h>
 #include <Point2D.h>
 #include <tools/Image.h>
 #include <tools/ProjAcq.h>
 #include <cassert>
+#include <fstream>
 
 using namespace std;
 using namespace cv;
@@ -19,9 +22,22 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
         {
     camList.push_back(c);
 
-    // TODO read input file and fill staticTP vector
+    ifstream infile(staticTestPointFile);
+    string line;
+    while(getline(infile, line)){
+        istringstream s(line);
+        float x, y, hue;
+        char del;
 
-    staticTP.push_back(TestPoint(Pt(10, 10), 0., 1.));
+        s >> x >> del >> y >> del >> hue;
+
+        assert(del == ',');
+
+        staticTP.push_back(TestPoint(Pt(x, y), hue, 1.));
+    }
+    infile.close();
+
+    cout << "Read " << staticTP.size() << " testpoints from file \#" << staticTestPointFile << "\"" << endl;
 }
 
 ProcAbsPos::~ProcAbsPos()
@@ -71,7 +87,7 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     imshow("hsv", im);
 
-    Plane3D<float> pl({0, 0, 0}, {0, 0, 1}); // build a plane with a point and a normal
+    static Plane3D<float> pl({0, 0, 0}, {0, 0, 1}); // build a plane with a point and a normal
     ProjAcq pAcq = acq->projectOnPlane(pl);
 
 //

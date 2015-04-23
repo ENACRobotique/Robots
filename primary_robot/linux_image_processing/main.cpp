@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
             new VideoCapture(0)));
 
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPos(camList.begin()->first, ""));
+    processList.push_back(new ProcAbsPos(camList.begin()->first, "simu/testpoints.csv"));
 
     bn_init();
 
