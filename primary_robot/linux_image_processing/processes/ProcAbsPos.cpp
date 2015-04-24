@@ -40,6 +40,11 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
     infile.close();
 
     cout << "Read " << staticTP.size() << " testpoints from file \"" << staticTestPointFile << "\"" << endl;
+
+
+
+    // get default images
+    pg = imread("Images/Table2015.png");//"simu/src_colors.png");
 }
 
 ProcAbsPos::~ProcAbsPos()
@@ -59,6 +64,7 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     Acq* acq = pAcq.getAcq();
     Cam const* cam = acq->getCam();
     Mat im = acq->getMat(HSV);
+    Mat im2 = acq->getMat(RGB).clone();
 
     Transform2D<float> tr_pg2rob(robPos.getTransform());
     Transform2D<float> tr_rob2pg = tr_pg2rob.getReverse();
@@ -71,16 +77,30 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     camCorners[1] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getTopRight()));
     camCorners[2] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomRight()));
     camCorners[3] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomLeft()));
+
+    Point2i camCornersPoints[4];
+    float factor = 4; // (px/cm)
+
     Mat camEdges[4];
     for (int i = 0; i < 4; i++) {
+        camCornersPoints[i] = Point2i(camCorners[i].at<float>(0) * factor, (200. - camCorners[i].at<float>(1)) * factor);
+
         camEdges[i] = camCorners[(i + 1) % 4] - camCorners[i];
+    }
+
+    Mat pg_fov = pg.clone();
+    Scalar color_fov(0, 0, 0);
+    for (int i = 0; i < 4; i++) {
+        line(pg_fov, camCornersPoints[i], camCornersPoints[(i+1)%4], color_fov, 4);
     }
 
     int nb = 0;
     for (const TestPoint& tp : staticTP) {
+        cv::Mat tp_pos = tp.getPos();
+
         int i;
         for (i = 0; i < 4; i++) {
-            Mat vi = tp.getPos() - camCorners[i];
+            Mat vi = tp_pos - camCorners[i];
 
             double cross = vi.at<float>(0) * camEdges[i].at<float>(1) -
                     vi.at<float>(1) * camEdges[i].at<float>(0);
@@ -92,17 +112,33 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
             continue;
         }
 
+        pg_fov.at<Vec3b>(Point2i(round(tp_pos.at<float>(0) * factor), round((200. - tp_pos.at<float>(1)) * factor))) = Vec3b(255, 255, 255);
+
         nb++;
 
-//        Pt tp_cmRob = tr_pg2rob.transformLinPos(tp.getPos());
-//        Pt tp_pxCam = pAcq->plane2Cam(tp_cmRob);
-//
-//        const Scalar& px = im.at<Scalar>(tp_pxCam.x, tp_pxCam.y);
-//
-//        E += tp.getCost(px(0));
+        cv::Mat tp_cmRob = tr_pg2rob.transformLinPos(tp_pos);
+        cv::Mat tp_pxCam = pAcq.plane2cam(tp_cmRob);
+
+        int x = int(round(tp_pxCam.at<float>(0)));
+        int y = int(round(tp_pxCam.at<float>(1)));
+
+        assert(x >= 0 && x < cam->getSize().width);
+        assert(y >= 0 && y < cam->getSize().height);
+
+        im2.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+
+        float hue = float(im.at<Vec3b>(y, x)[0]) / 255.;
+
+        assert(hue >= 0. && hue <= 1.);
+
+        E += tp.getCost(hue);
     }
 
+    imshow("pg", pg_fov);
+    imshow("testpoints", im2);
+
     cout << "nb=" << nb << endl;
+    cout << "E =" << E << endl;
 
 //    for(const TestPoint& tp : posDependentTP){
 //        Pt tp_cmRob = tr_pg2rob.transformLinPos(tp.getPos());
@@ -126,12 +162,6 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     static Plane3D<float> pl( { 0, 0, 0 }, { 0, 0, 1 }); // build a plane with a point and a normal
     ProjAcq pAcq = acq->projectOnPlane(pl);
-
-//    Point3D<float> pt3d = pAcq.cam2plane(Point2D<float>(639., 479./2));
-//    cout << "pt3d=" << pt3d << endl;
-//
-//    Point2D<float> pt2d = pAcq.plane2cam(pt3d);
-//    cout << "pt2d=" << pt2d << endl;
 
     Pos currPos = pos;
     float prevE = getEnergy(pAcq, currPos);

@@ -23,6 +23,8 @@ protected:
     std::vector<TestPoint> getPosDependentTP(const Pos& robPos);
     float getEnergy(ProjAcq& pAcq, const Pos& robPos);
 
+    cv::Mat pg;
+
 public:
     ProcAbsPos(Cam* c, const std::string& staticTestPointFile);
     virtual ~ProcAbsPos();
