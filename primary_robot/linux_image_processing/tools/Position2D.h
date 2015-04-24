@@ -17,16 +17,16 @@
 
 template<typename T>
 class Position2D {
-public:
-    Point2D<T> p; // (cm x cm)
-    T theta; // (rad)
+    cv::Mat p; // (cm x cm)
+    T _theta; // (rad)
 
+public:
     /**
      * x, y in centimeters
      * theta in radians
      */
     Position2D(T x, T y, T theta) :
-            p(x, y), theta(theta) {
+            p((cv::Mat_<T>(2, 1) << x, y)), _theta(theta) {
     }
 
     /**
@@ -34,17 +34,37 @@ public:
      * theta in radians
      */
     Position2D(Point2D<T> p, T theta) :
-            p(p), theta(theta) {
+            p(p.toCv()), _theta(theta) {
+    }
+
+    Position2D(cv::Mat p, T theta) :
+        p(p), _theta(theta) {
     }
 
 #ifdef USE_BOTNET
     Position2D(const s2DPosAtt& p) :
-            p(p.x, p.y), theta(p.theta) {
+            p(p.x, p.y), _theta(p.theta) {
     }
 #endif
 
+    T x() const {
+        return p.at<T>(0);
+    }
+
+    T y() const {
+        return p.at<T>(1);
+    }
+
+    T theta() const {
+        return _theta;
+    }
+
+    cv::Mat getLinPos() const {
+        return p;
+    }
+
     Transform2D<T> getTransform() const {
-        return Transform2D<T>(p.x, p.y, theta);
+        return Transform2D<T>(p.at<T>(0), p.at<T>(1), _theta);
     }
 };
 

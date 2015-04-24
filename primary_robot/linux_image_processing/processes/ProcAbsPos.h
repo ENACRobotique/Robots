@@ -25,6 +25,14 @@ protected:
 
     cv::Mat pg;
 
+    // prepare random generator
+    std::random_device generator;
+
+    float getRand() {
+        static std::uniform_real_distribution<float> distribution(-1,1);
+        return distribution(generator);
+    }
+
 public:
     ProcAbsPos(Cam* c, const std::string& staticTestPointFile);
     virtual ~ProcAbsPos();

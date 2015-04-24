@@ -21,10 +21,10 @@ cv::Mat Image::getMat(eColorType ctype) {
         for (resIt = matMap.begin(); code < 0 && resIt != matMap.end();
                 resIt++) {
             switch (ctype) {
-            case RGB:
+            case BGR:
                 switch (resIt->first) {
                 case HSV:
-                    code = cv::COLOR_HSV2RGB;
+                    code = cv::COLOR_HSV2BGR;
                     break;
                 default:
                     break;
@@ -32,8 +32,8 @@ cv::Mat Image::getMat(eColorType ctype) {
                 break;
             case HSV:
                 switch (resIt->first) {
-                case RGB:
-                    code = cv::COLOR_RGB2HSV;
+                case BGR:
+                    code = cv::COLOR_BGR2HSV;
                     break;
                 default:
                     break;

@@ -52,7 +52,7 @@ ProjAcq::ProjAcq(Size const& size, Acq* const acq, Plane3D<float> const& plane) 
 
 Mat ProjAcq::getMat(eColorType ctype) {
     if (matMap.empty()) {
-        eColorType ctype = RGB; // always convert matrix using RGB for consistency
+        eColorType ctype = BGR; // always convert matrix using RGB for consistency
         Mat mat = Mat_<Scalar_<uint8_t>>(getSize());
 
         // TODO compute projected matrix here
@@ -65,6 +65,8 @@ Mat ProjAcq::getMat(eColorType ctype) {
 
 Mat ProjAcq::cam2plane(Mat pt_px) {
     Cam const* cam = _acq->getCam();
+
+    // TODO pre-compute affine transformation coefficients
 
     if (pt_px.size[0] == 2) {
         pt_px.push_back(1.f);
@@ -84,6 +86,8 @@ Mat ProjAcq::cam2plane(Mat pt_px) {
 
 Mat ProjAcq::plane2cam(Mat pt_cm) {
     Cam const* cam = _acq->getCam();
+
+    // TODO pre-compute affine transformation coefficients
 
     Mat vec = _plane.project(Pt3D(pt_cm)).toCv();
 

@@ -39,7 +39,7 @@ public:
     Acq* getAcq() const {
         return _acq;
     }
-    cv::Mat getMat(eColorType ctype = RGB) override;
+    cv::Mat getMat(eColorType ctype = BGR) override;
     cv::Size getSize() override {
         return _size;
     }
@@ -53,6 +53,12 @@ public:
     Vector2D<float> plane2proj(Vector3D<float> const& pt_cm);
     Pt3D cam2plane(Pt2D const& pt_pix) {
         return Pt3D(cam2plane(pt_pix.toCv()));
+    }
+    template<typename T>
+    cv::Point3_<float> cam2plane(cv::Point_<T> const& pt_pix) {
+        cv::Mat p = cam2plane((cv::Mat_<float>(2, 1) << pt_pix.x, pt_pix.y));
+
+        return cv::Point3_<float>(p.at<float>(0), p.at<float>(1), p.at<float>(2));
     }
     cv::Mat cam2plane(cv::Mat pt_px);
     Pt2D plane2cam(Pt3D const& pt_cm) {
