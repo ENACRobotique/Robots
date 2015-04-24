@@ -39,7 +39,7 @@ void initTrajGreenInit(sState *prev)
 	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 	        _backFromPause = 1;
 	    	}
-	    uint16_t limits[RAD_NB_PTS]={3,40};
+	    uint16_t limits[RAD_NB_PTS]={40,40};
 	   	    		radarSetLim(limits);
 	}
 
@@ -63,9 +63,9 @@ trajElem start_green[]={
 				//{15,-90,6000},
 				//{15,0,750},
 				//{0,0,0},
-				{30,0,5000},
-				{10,-90,3000},
-				{15,0,2000},
+				{30,0,4500},
+				{10,-90,5000},
+				{10,0,1000},
 				{0,0,0},
 #else
 				{30,0,4000},
@@ -116,7 +116,7 @@ void initTrajYellowInit(sState *prev)
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 		        _backFromPause = 1;
 		    	}
-		    uint16_t limits[RAD_NB_PTS]={40,3};
+		    uint16_t limits[RAD_NB_PTS]={40,40};
 		        radarSetLim(limits);
 	}
 
