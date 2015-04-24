@@ -59,6 +59,7 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     Acq* acq = pAcq.getAcq();
     Cam const* cam = acq->getCam();
     Mat im = acq->getMat(HSV);
+    Mat im2 = acq->getMat(RGB).clone();
 
     Transform2D<float> tr_pg2rob(robPos.getTransform());
     Transform2D<float> tr_rob2pg = tr_pg2rob.getReverse();
@@ -78,9 +79,11 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 
     int nb = 0;
     for (const TestPoint& tp : staticTP) {
+        cv::Mat tp_pos = tp.getPos();
+
         int i;
         for (i = 0; i < 4; i++) {
-            Mat vi = tp.getPos() - camCorners[i];
+            Mat vi = tp_pos - camCorners[i];
 
             double cross = vi.at<float>(0) * camEdges[i].at<float>(1) -
                     vi.at<float>(1) * camEdges[i].at<float>(0);
@@ -94,15 +97,26 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 
         nb++;
 
-//        Pt tp_cmRob = tr_pg2rob.transformLinPos(tp.getPos());
-//        Pt tp_pxCam = pAcq->plane2Cam(tp_cmRob);
-//
-//        const Scalar& px = im.at<Scalar>(tp_pxCam.x, tp_pxCam.y);
-//
-//        E += tp.getCost(px(0));
+        cv::Mat tp_cmRob = tr_pg2rob.transformLinPos(tp_pos);
+        cv::Mat tp_pxCam = pAcq.plane2cam(tp_cmRob);
+
+        int x = int(round(tp_pxCam.at<float>(0)));
+        int y = int(round(tp_pxCam.at<float>(1)));
+
+        assert(x >= 0 && x < cam->getSize().width);
+        assert(y >= 0 && y < cam->getSize().height);
+
+        im2.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+
+        const Vec3b& px = im.at<Vec3b>(y, x);
+
+        E += tp.getCost(float(px[0]) / 255.);
     }
 
+    imshow("testpoints", im2);
+
     cout << "nb=" << nb << endl;
+    cout << "E =" << E << endl;
 
 //    for(const TestPoint& tp : posDependentTP){
 //        Pt tp_cmRob = tr_pg2rob.transformLinPos(tp.getPos());
