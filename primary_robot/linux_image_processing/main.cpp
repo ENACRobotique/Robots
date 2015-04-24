@@ -48,15 +48,18 @@ int main(int argc, char* argv[]) {
     Perf perf;
     Mat frameRaw;
 
+    // init cameras
     map<Cam*, VideoCapture*> camList;
     camList.insert(std::pair<Cam*, VideoCapture*>(
             new Cam(521.3, Size(640, 480), Transform3D<float>(0, 107, 267, 225.*M_PI/180., 0, 0)),
 //            new VideoCapture("MyVideo.avi")));
             new VideoCapture(0)));
 
+    // init processes
     vector<Process*> processList;
     processList.push_back(new ProcAbsPos(camList.begin()->first, "simu/testpoints.csv"));
 
+    // init botnet
     bn_init();
 
     bool quit = false;

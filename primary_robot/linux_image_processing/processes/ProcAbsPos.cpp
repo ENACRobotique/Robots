@@ -40,6 +40,11 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
     infile.close();
 
     cout << "Read " << staticTP.size() << " testpoints from file \"" << staticTestPointFile << "\"" << endl;
+
+
+
+    // get default images
+    pg = imread("Images/Table2015.png");//"simu/src_colors.png");
 }
 
 ProcAbsPos::~ProcAbsPos()
@@ -72,9 +77,21 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     camCorners[1] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getTopRight()));
     camCorners[2] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomRight()));
     camCorners[3] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomLeft()));
+
+    Point2i camCornersPoints[4];
+    float factor = 4; // (px/cm)
+
     Mat camEdges[4];
     for (int i = 0; i < 4; i++) {
+        camCornersPoints[i] = Point2i(camCorners[i].at<float>(0) * factor, (200. - camCorners[i].at<float>(1)) * factor);
+
         camEdges[i] = camCorners[(i + 1) % 4] - camCorners[i];
+    }
+
+    Mat pg_fov = pg.clone();
+    Scalar color_fov(0, 0, 0);
+    for (int i = 0; i < 4; i++) {
+        line(pg_fov, camCornersPoints[i], camCornersPoints[(i+1)%4], color_fov, 4);
     }
 
     int nb = 0;
@@ -95,6 +112,8 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
             continue;
         }
 
+        pg_fov.at<Vec3b>(Point2i(round(tp_pos.at<float>(0) * factor), round((200. - tp_pos.at<float>(1)) * factor))) = Vec3b(255, 255, 255);
+
         nb++;
 
         cv::Mat tp_cmRob = tr_pg2rob.transformLinPos(tp_pos);
@@ -108,11 +127,14 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 
         im2.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
 
-        const Vec3b& px = im.at<Vec3b>(y, x);
+        float hue = float(im.at<Vec3b>(y, x)[0]) / 255.;
 
-        E += tp.getCost(float(px[0]) / 255.);
+        assert(hue >= 0. && hue <= 1.);
+
+        E += tp.getCost(hue);
     }
 
+    imshow("pg", pg_fov);
     imshow("testpoints", im2);
 
     cout << "nb=" << nb << endl;
@@ -140,12 +162,6 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     static Plane3D<float> pl( { 0, 0, 0 }, { 0, 0, 1 }); // build a plane with a point and a normal
     ProjAcq pAcq = acq->projectOnPlane(pl);
-
-//    Point3D<float> pt3d = pAcq.cam2plane(Point2D<float>(639., 479./2));
-//    cout << "pt3d=" << pt3d << endl;
-//
-//    Point2D<float> pt2d = pAcq.plane2cam(pt3d);
-//    cout << "pt2d=" << pt2d << endl;
 
     Pos currPos = pos;
     float prevE = getEnergy(pAcq, currPos);
