@@ -45,13 +45,13 @@ using namespace std;
 
 //##### Main #####
 int main(int argc, char* argv[]) {
-    Perf perf;
+    Perf& perf = Perf::getPerf();
     Mat frameRaw;
 
     // init cameras
     map<Cam*, VideoCapture*> camList;
     camList.insert(std::pair<Cam*, VideoCapture*>(
-            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 107, 267, 225.*M_PI/180., 0, 0)),
+            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 10.7, 26.7, 225.*M_PI/180., 0, 0)),
 //            new VideoCapture("MyVideo.avi")));
             new VideoCapture(0)));
 
@@ -88,12 +88,12 @@ int main(int argc, char* argv[]) {
 
                 imshow("rgb", frameRaw);
 
-                acqList.push_back(new Acq(frameRaw, RGB, c));
+                acqList.push_back(new Acq(frameRaw, BGR, c));
             }
 
             perf.endOfStep("acquisitions");
 
-            p->process(acqList, Position2D<float>(80, 50, -M_PI/4.), Uncertainty2D<float>(0, 0, 0, 0));
+            p->process(acqList, Position2D<float>(150, 23, 0), Uncertainty2D<float>(0, 0, 0, 0));
 
             for(Acq* a : acqList){
                 delete a;

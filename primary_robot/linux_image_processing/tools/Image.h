@@ -13,7 +13,7 @@
 #include <map>
 
 enum eColorType {
-    RGB,
+    BGR,
     HSV
 };
 
@@ -26,7 +26,7 @@ public:
     virtual ~Image() {
     }
 
-    virtual cv::Mat getMat(eColorType ctype = RGB);
+    virtual cv::Mat getMat(eColorType ctype = BGR);
     virtual cv::Size getSize();
 };
 

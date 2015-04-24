@@ -16,16 +16,21 @@ private:
 
     std::multimap<time_point, std::string> frameTimes;
 
-    string getPrefix() {
+    std::string getPrefix() {
         return "frame #" + std::to_string(currFrameNb) + ": ";
     }
 
-    void insertNow(string s) {
+    void insertNow(std::string s) {
         frameTimes.insert(std::pair<time_point, std::string>(time_point::clock::now(), getPrefix() + s));
     }
 
-public:
     Perf() {
+    }
+
+public:
+    static Perf& getPerf() {
+        static Perf p;
+        return p;
     }
 
     void beginFrame(int i = -1) {
@@ -35,7 +40,7 @@ public:
         insertNow("BEGIN");
     }
 
-    void endOfStep(string s) {
+    void endOfStep(std::string s) {
         insertNow("STEP  " + s);
     }
 
@@ -44,7 +49,7 @@ public:
 
         duration frameDur = std::chrono::duration_cast<duration>(frameTimes.crbegin()->first - frameTimes.cbegin()->first);
 
-        multimap<time_point, std::string>::iterator prevIt;
+        std::multimap<time_point, std::string>::iterator prevIt;
         for (auto it = frameTimes.begin(); it != frameTimes.end(); it++) {
             if (it != frameTimes.begin()) {
                 duration dur = std::chrono::duration_cast<duration>(it->first - prevIt->first);

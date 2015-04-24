@@ -80,10 +80,11 @@ public:
         return (p - *this).norm();
     }
 
-    void rotate(const T& a) {
+    Point2D& rotate(const T& a) {
         Point2D pc = *this;
         x = pc.x * cos(a) - pc.y * sin(a);
         y = pc.x * sin(a) + pc.y * cos(a);
+        return *this;
     }
 };
 

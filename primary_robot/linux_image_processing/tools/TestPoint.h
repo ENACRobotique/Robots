@@ -12,11 +12,11 @@
 #include <cmath>
 
 class TestPoint {
+public:
     cv::Mat pos; // (in cm, in playground reference frame)
     float hue;
     float weight;
 
-public:
     TestPoint(cv::Mat pos, float hue, float weight) :
             pos(pos), hue(hue), weight(weight) {
     }
@@ -25,7 +25,12 @@ public:
 
     float getCost(float mHue) const
             {
-        return weight * std::abs(hue - mHue);
+        float dHue = hue - mHue;
+
+        if(dHue > 0.5) dHue -= 1.f;
+        else if(dHue < -0.5) dHue += 1.f;
+
+        return weight * std::abs(dHue);
     }
 
     float getHue() const

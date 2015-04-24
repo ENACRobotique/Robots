@@ -64,6 +64,20 @@ public:
     virtual ~Transform2D() {
     }
 
+    template<typename T2>
+    cv::Point_<T2> transformLinPos(cv::Point_<T2> const& in) const {
+        cv::Mat p = transformLinPos((cv::Mat_<float>(2, 1) << in.x, in.y));
+
+        return cv::Point_<T>(p.at<float>(0), p.at<float>(1));
+    }
+
+    template<typename T2>
+    cv::Point_<T2> transformLinPos(cv::Point3_<T2> const& in) const {
+        cv::Mat p = transformLinPos((cv::Mat_<float>(2, 1) << in.x, in.y));
+
+        return cv::Point_<T>(p.at<float>(0), p.at<float>(1));
+    }
+
     cv::Mat transformLinPos(cv::Mat in) const {
         if (in.size[0] == 2) {
             in.push_back(1.f);
