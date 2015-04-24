@@ -45,7 +45,7 @@ using namespace std;
 
 //##### Main #####
 int main(int argc, char* argv[]) {
-    Perf perf;
+    Perf& perf = Perf::getPerf();
     Mat frameRaw;
 
     // init cameras
