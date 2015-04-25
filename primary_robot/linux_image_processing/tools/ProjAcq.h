@@ -47,10 +47,10 @@ public:
         return _plane;
     }
 
-    Vector2D<float> cam2proj(Vector2D<float> const& pt_pix);
-    Vector2D<float> proj2cam(Vector2D<float> const& pt_pix);
-    Vector3D<float> proj2plane(Vector2D<float> const& pt_pix);
-    Vector2D<float> plane2proj(Vector3D<float> const& pt_cm);
+    Pt2D cam2proj(Pt2D const& pt_pix);
+    Pt2D proj2cam(Pt2D const& pt_pix);
+    Pt3D proj2plane(Pt2D const& pt_pix);
+    Vector2D<float> plane2proj(Pt3D const& pt_cm);
     Pt3D cam2plane(Pt2D const& pt_pix) {
         return Pt3D(cam2plane(pt_pix.toCv()));
     }

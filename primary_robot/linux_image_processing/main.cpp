@@ -15,14 +15,6 @@
 #include <iostream>
 #include <vector>
 
-// For communications
-//#include "../../network_config/messages.h"
-//#include "../../network_config/messages-elements.h"
-//#include "node_cfg.h"
-//#include "../../static/communication/botNet/shared/botNet_core.h"
-//#include "../../static/communication/botNet/shared/message_header.h"
-//#include "../../network_config/roles.h"  // FIXME: ??? Is it relevant ???
-
 using namespace cv;
 using namespace std;
 

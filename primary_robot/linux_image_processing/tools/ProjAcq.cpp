@@ -14,6 +14,7 @@ ProjAcq::ProjAcq(Size const& size, Acq* const acq, Plane3D<float> const& plane) 
         _size(size), _acq(acq), _plane(plane) {
     Cam const* cam = acq->getCam();
 
+    // x,y z position of the camera in robot
     Point3D<float> v(cam->getMatC2R()(Rect(3, 0, 1, 3)));
     _distPlaneCam = _plane.distanceTo(v);
 
