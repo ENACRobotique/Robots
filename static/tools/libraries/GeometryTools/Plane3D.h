@@ -33,6 +33,16 @@ public:
         _c = n.z();
         _d = -((p - Point3D<float>::origin) * n);
     }
+    Plane3D(const Point3D<T>& p0, const Point3D<T>& p1, const Point3D<T>& p2):
+            _norm(false){
+        Vector3D<T> v1(p0, p1), v2(p0, p2), vn;
+        vn = v1^v2;
+         Plane3D<T> plane(p0, vn);
+         _a = plane._a;
+         _b = plane._b;
+         _c = plane._c;
+         _d = plane._d;
+    }
     virtual ~Plane3D() {
     }
 
@@ -48,7 +58,22 @@ public:
     const T& d() const {
         return _d;
     }
+    Point3D<T> ptclosest2orig(){
+        Point3D<T> pt;
+        T n = _a*_a + _b*_b + _c*_c;
 
+        pt.x = _a*_d/n;
+        pt.y = -b*_d/n;
+        pt.z = _c*_d/n;
+
+        return pt;
+    }
+    T closestdist2orig(){
+        T dist;
+        Point3D<T> pt = this->ptclosest2orig();
+
+        return dist = std::sqrt(pt.x*pt.x + pt.y*pt.y + pt.z*pt.z);
+    }
     T distanceTo(const Point3D<T>& pt) {
         normalize();
         return _a * pt.x + _b * pt.y + _c * pt.z + _d;
@@ -115,6 +140,25 @@ public:
      */
     Vector3D<T> getOneY() const {
         return getZ() ^ getOneX();
+    }
+    Point3D<T> interLine(const Vector3D<T> vectLine, const Point3D<T> ptLine){
+        Vector3D<T> n = this->getZ();
+        T b = n*vectLine;
+        if(b == (T) 0.0){ // Line & plan are // => 2 cases
+            if((_a*ptLine.x + _b*ptLine.y + _c*ptLine.z + _d) != (T)0.0){  // No intersection
+                return Point3D<T>::ptError;
+            }
+            else{
+                return ptLine;
+            }
+        }
+
+        T a = distanceTo(ptLine)/b;
+
+        return Point3D<T>(ptLine + a*vectLine);
+    }
+    void intersPlane(const Plane3D<T> pl1, const Plane3D<T> pl2, Vector3D<T> vInter,  Point3D<T> ptInter){
+       // TODO
     }
 
 #ifdef USE_OPENCV

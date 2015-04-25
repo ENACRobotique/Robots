@@ -45,6 +45,9 @@ public:
     Vector3D(const Vector2D<T> v, T z) :
             _x(v._x), _y(v._y), _z(z), _norm(false) {
     }
+    Vector3D(const Point3D<T> p1, const Point3D<T> p2) :
+            _x(p2._x-p1.x), _y(p2._y-p1.y), _z(p2._z-p1.z), _norm(false) {
+    }
 #ifdef USE_OPENCV
     Vector3D(const cv::Mat& m) :
             _x(m.at<T>(0)), _y(m.at<T>(1)), _z(m.at<T>(2)), _norm(false) {

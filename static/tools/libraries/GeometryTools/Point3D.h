@@ -18,6 +18,7 @@ template<typename T>
 class Point3D {
 public:
     static const Point3D origin;
+    static const Point3D ptError;
 
     T x, y, z;
 
@@ -56,5 +57,7 @@ std::ostream& operator<<(std::ostream& out, const Point3D<T>& p) {
 
 template<typename T>
 const Point3D<T> Point3D<T>::origin {0, 0, 0};
+template<typename T>
+const Point3D<T> Point3D<T>::ptError { 99999, 99999, 99999};
 
 #endif /* LIB_GEOMETRYTOOLS_POINT3D_H_ */
