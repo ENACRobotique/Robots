@@ -25,7 +25,7 @@ protected:
 public:
     Acq(cv::Mat mat, eColorType ctype, Cam const* cam) :
             cam(cam) {
-        matMap.insert(std::pair<eColorType, cv::Mat>(ctype, mat));
+        matMap.insert(std::make_pair(ctype, mat));
     }
     virtual ~Acq() {
     }

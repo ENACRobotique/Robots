@@ -47,7 +47,7 @@ cv::Mat Image::getMat(eColorType ctype) {
         if (code >= 0) {
             cv::cvtColor(prev(resIt)->second, ret, code);
 
-            matMap.insert(std::pair<eColorType, cv::Mat>(ctype, ret));
+            matMap.insert(std::make_pair(ctype, ret));
         }
         else {
             std::cerr << "Can't convert to needed ctype!" << std::endl;

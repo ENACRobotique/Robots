@@ -21,7 +21,7 @@ private:
     }
 
     void insertNow(std::string s) {
-        frameTimes.insert(std::pair<time_point, std::string>(time_point::clock::now(), getPrefix() + s));
+        frameTimes.insert(std::make_pair(time_point::clock::now(), getPrefix() + s));
     }
 
     Perf() {

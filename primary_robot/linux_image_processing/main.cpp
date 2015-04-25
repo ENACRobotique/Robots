@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
     // init cameras
     map<Cam*, VideoCapture*> camList;
-    camList.insert(std::pair<Cam*, VideoCapture*>(
+    camList.insert(make_pair(
             new Cam(521.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226.*M_PI/180., 0, 0)),
 //            new VideoCapture("MyVideo.avi")));
             new VideoCapture(0)));
