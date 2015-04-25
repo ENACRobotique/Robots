@@ -117,6 +117,20 @@ public:
         return getZ() ^ getOneX();
     }
 
+    Point3D<T> getOnePoint() {
+        normalize();
+
+        return Point3D<T>::origin - _d * getZ();
+    }
+
+    Point2D<T> getOneCoords(const Point3D<T>& p) {
+        normalize();
+
+        Vector3D<T> v = p - getOnePoint();
+
+        return {v * getOneX(), v * getOneY()};
+    }
+
 #ifdef USE_OPENCV
     cv::Mat getOneBasis() {
         normalize(); // ensures getZ returns a normalized vector

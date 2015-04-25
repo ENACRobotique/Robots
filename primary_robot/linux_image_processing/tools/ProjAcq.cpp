@@ -57,7 +57,7 @@ Mat ProjAcq::getMat(eColorType ctype) {
 
         // TODO compute projected matrix here
 
-        matMap.insert(pair<eColorType, Mat>(ctype, mat));
+        matMap.insert(make_pair(ctype, mat));
     }
 
     return Image::getMat(ctype);

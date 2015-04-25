@@ -157,7 +157,7 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 #ifdef SHOW_SIMULATED
     // simulate acquisition
     Mat im3 = acq->getMat(BGR).clone();
-    for(Mat_<Vec3b>::iterator it = im3.begin<Vec3b>() ; it != im3.end<Vec3b>(); it++) {
+    for(Mat_<Vec3b>::iterator it = im3.begin<Vec3b>(); it != im3.end<Vec3b>(); it++) {
         (*it) = pg.at<Vec3b>(getInPGIm(tr_rob2pg.transformLinPos(pAcq.cam2plane(it.pos()))));
     }
     imshow("im3", im3);
@@ -167,7 +167,7 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     Mat im3_hsv = im3.clone();
     cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
 #ifdef HSV_TO_HGRAY
-    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>() ; it != im3_hsv.end<Vec3b>(); it++) {
+    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
         (*it)[1] = (*it)[0];
         (*it)[2] = (*it)[0];
     }
@@ -264,7 +264,7 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
     Mat im = acq->getMat(HSV);
 
 #ifdef HSV_TO_HGRAY
-    for(Mat_<Vec3b>::iterator it = im.begin<Vec3b>() ; it != im.end<Vec3b>(); it++) {
+    for(Mat_<Vec3b>::iterator it = im.begin<Vec3b>(); it != im.end<Vec3b>(); it++) {
         (*it)[1] = (*it)[0];
         (*it)[2] = (*it)[0];
     }
@@ -283,30 +283,30 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     perf.endOfStep("begpos");
 
-    cout << "  begpos: " << currPos.x() << ", " << currPos.y() << ", " << currPos.theta() * 180. / M_PI << ", E=" << prevE  << endl;
+    cout << "  begpos: " << currPos.x() << ", " << currPos.y() << ", " << currPos.theta() * 180. / M_PI << ", E=" << prevE << endl;
 
 //    float T = ...;
 //    float alpha = 0.9...;
     int nb = 10;
-    do{
+    do {
         float dx = 5 * getRand();
         float dy = 5 * getRand();
-        float dt = 5 * M_PI/180. * getRand();
+        float dt = 5 * M_PI / 180. * getRand();
 
         Pos testPos(currPos.x() + dx, currPos.y() + dy, currPos.theta() + dt);
         E = getEnergy(pAcq, testPos);
 
-        if(E < prevE){
+        if (E < prevE) {
             currPos = testPos;
             prevE = E;
 
 //            cout << "  newpos: " << currPos.x() << ", " << currPos.y() << ", " << currPos.theta() * 180. / M_PI << ", E=" << E << endl;
         }
 
-        perf.endOfStep("it #" + to_string(11-nb));
+        perf.endOfStep("it #" + to_string(11 - nb));
 
 //        T *= alpha;
-    }while(--nb > 0);
+    } while (--nb > 0);
 
     cout << "  endpos: " << currPos.x() << ", " << currPos.y() << ", " << currPos.theta() * 180. / M_PI << ", E=" << prevE << endl;
 }
