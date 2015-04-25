@@ -157,8 +157,60 @@ public:
 
         return Point3D<T>(ptLine + a*vectLine);
     }
-    void intersPlane(const Plane3D<T> pl1, const Plane3D<T> pl2, Vector3D<T> vInter,  Point3D<T> ptInter){
-       // TODO
+
+    /*
+     * Description: Compute the intersection between the plan and another plane
+     * Input: pl1: A plane
+     * Output:
+     *  _If planes are parallel and not coincident:
+     *     _vInter = vectError (not normalized)
+     *     _ptInter = ptError
+     *     _return -1;
+     *  _If coincident:
+     *     _ptInter is the closest point from the origin
+     *     _vInter is any vector in the plane
+     *     _return 1;
+     *  _Otherwise:
+     *     _ptInter is any point on the line
+     *     _vInter is a normalized director of the line
+     *     _return 0;
+     */
+    int intersPlane(const Plane3D<T> pl1, Vector3D<T> vInter,  Point3D<T> ptInter){
+        // Equation of a line in 3D: pt = a*n + b*n1 + t*(n^n1)
+        // pt is a point which moves along the line following the parameter t
+        // a, b are coefficients; n, n1 are normals to plane *this, pl1
+
+        Vector3D<T> n = this->getZ();
+        Vector3D<T> n1 = pl1.getZ();
+        n1.normalize();
+        n.normalize();
+        T t = (T)0.0;  // Arbitrary choice
+
+        if(n^n1 == Vector3D<T>::zero){  // planes are parallel
+            Vector3D<T> pt = this->ptclosest2orig();
+            Vector3D<T> pt1 = pl1->ptclosest2orig();
+            if(pt == pt1){  // Plans are coincidents
+                ptInter = pt;
+                vInter = n.rotate(90, 0, 0, 1);
+                vInter.normalize();
+                return 1;
+            }
+            else{  // No intersection
+                ptInter Point3D<T>::ptError;
+                vInter Vector3D<T>::vectError;
+                return -1;
+            }
+        }
+        else{  // Planes are not parallel
+            T det = (n*n)*(n1*n1)-(n*n1)*(n*n1);  // det is > 0
+            T a = (_d*(n1*n1) - pl1._d*(n*n1))/det;
+            T b = (pl1._d*(n*n) - _d*(n*n1))/det;
+
+            ptInter = a*n + b*n1 + t*(n*n1);
+            vInter = ptInter - a*n + b*n1 + 1*(n*n1);
+            vInter.normalize();
+            return 0;
+        }
     }
 
 #ifdef USE_OPENCV

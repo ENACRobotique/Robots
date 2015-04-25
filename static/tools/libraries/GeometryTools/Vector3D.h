@@ -32,6 +32,7 @@ public:
     static const Vector3D xAxis;
     static const Vector3D yAxis;
     static const Vector3D zAxis;
+    static const Vector3D vectError;
 
     Vector3D() :
             _x(0), _y(0), _z(0), _norm(true) {
@@ -229,5 +230,7 @@ template<typename T>
 const Vector3D<T> Vector3D<T>::yAxis { 0, 1, 0, true };
 template<typename T>
 const Vector3D<T> Vector3D<T>::zAxis { 0, 0, 1, true };
+template<typename T>
+const Vector3D<T> Vector3D<T>::vectError { 9999, 9999, 9999, false };
 
 #endif /* LIB_GEOMETRYTOOLS_VECTOR3D_H_ */
