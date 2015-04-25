@@ -2,6 +2,7 @@
 #define LIB_GEOMETRYTOOLS_VECTOR3D_H_
 
 #include <Vector2D.h>
+#include <Point3D.h>
 #include <iostream>
 
 #ifdef USE_OPENCV
@@ -47,7 +48,7 @@ public:
             _x(v._x), _y(v._y), _z(z), _norm(false) {
     }
     Vector3D(const Point3D<T> p1, const Point3D<T> p2) :
-            _x(p2._x-p1.x), _y(p2._y-p1.y), _z(p2._z-p1.z), _norm(false) {
+            _x(p2.x - p1.x), _y(p2.y - p1.y), _z(p2.z - p1.z), _norm(false) {
     }
 #ifdef USE_OPENCV
     Vector3D(const cv::Mat& m) :
