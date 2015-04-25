@@ -120,6 +120,11 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     camCorners[2] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomRight()));
     camCorners[3] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomLeft()));
 
+    float xMin = MIN(MIN(camCorners[0].at<float>(0), camCorners[1].at<float>(0)), MIN(camCorners[2].at<float>(0), camCorners[3].at<float>(0)));
+    float yMin = MIN(MIN(camCorners[0].at<float>(1), camCorners[1].at<float>(1)), MIN(camCorners[2].at<float>(1), camCorners[3].at<float>(1)));
+    float xMax = MAX(MAX(camCorners[0].at<float>(0), camCorners[1].at<float>(0)), MAX(camCorners[2].at<float>(0), camCorners[3].at<float>(0)));
+    float yMax = MAX(MAX(camCorners[0].at<float>(1), camCorners[1].at<float>(1)), MAX(camCorners[2].at<float>(1), camCorners[3].at<float>(1)));
+
 #ifdef SHOW_PLAYGROUND
     Point2i camCornersPoints[4];
 #endif
@@ -175,6 +180,13 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     int nb = 0;
     for (TestPoint& tp : staticTP) {
         cv::Mat tp_pos = tp.getPos();
+
+        float tp_x = tp_pos.at<float>(0);
+        float tp_y = tp_pos.at<float>(1);
+
+        if (tp_x > xMax || tp_x < xMin || tp_y > yMax || tp_y < yMin) {
+            continue;
+        }
 
         // check if testpoint seen by camera
         int i;
