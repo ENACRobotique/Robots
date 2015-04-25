@@ -141,6 +141,23 @@ public:
     Vector3D<T> getOneY() const {
         return getZ() ^ getOneX();
     }
+    /**
+     * Compute a vector orthogonal to another vector in the plane
+     */
+    Vector3D<T> getOrthoVectToAnotherInPlane(Vector3D<T> vectIn) const {
+        Vector3D<T> z_n = getZ();
+        return z_n.normalize() ^ vectIn;
+    }
+    /**
+     * Compute a vector to another passing by a point
+     */
+    Point3D<T> getClosestPtBtwnLineAndPt(Point3D<T> ptLine0, Point3D<T> ptLine1, Point3D<T> ptAlone){
+        Vector3D<T> v01(ptLine1, ptLine0);
+        Vector3D<T> n = getOrthoVectToAnotherInPlane(v01);
+        return n + ptAlone;
+
+    }
+
     Point3D<T> interLine(const Vector3D<T> vectLine, const Point3D<T> ptLine){
         Vector3D<T> n = this->getZ();
         T b = n*vectLine;
@@ -225,6 +242,22 @@ public:
                 x.x(), y.x(), z.x(),
                 x.y(), y.y(), z.y(),
                 x.z(), y.z(), z.z());
+    }
+
+    cv::Mat interLine(const cv::Mat vectLine_cv, const cv::Mat ptLine_cv){
+        Vector3D<T> vectLine((T)vectLine_cv.at<float>(0),
+                             (T)vectLine_cv.at<float>(1),
+                             (T)vectLine_cv.at<float>(2));
+        Point3D<T> ptLine((T)ptLine_cv.at<float>(0),
+                          (T)ptLine_cv.at<float>(1),
+                          (T)ptLine_cv.at<float>(2));
+
+        Point3D<T> ptRes = this->interLine(vectLine, ptLine);
+        cv::Mat ptRes_cv;
+        for(int i=0; i<3; i++)
+            ptRes_cv.at<float>(i) = ptRes[i];
+
+        return ptRes_cv;
     }
 #endif
 };
