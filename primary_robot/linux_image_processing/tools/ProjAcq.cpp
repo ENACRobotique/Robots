@@ -14,8 +14,7 @@ ProjAcq::ProjAcq(Size const& size, Acq* const acq, Plane3D<float> const& plane) 
         _size(size), _acq(acq), _plane(plane) {
     Cam const* cam = acq->getCam();
 
-    // x,y z position of the camera in robot
-    Point3D<float> v(cam->getMatC2R()(Rect(3, 0, 1, 3)));
+    Point3D<float> v(cam->getMatC2R()(Rect(3, 0, 1, 3)));  // x,y z position of the camera in robot
     _distPlaneCam = _plane.distanceTo(v);
 
     Mat rot_cam1TOrob = cam->getMatC2R()(Rect(0, 0, 3, 3));
@@ -24,31 +23,64 @@ ProjAcq::ProjAcq(Size const& size, Acq* const acq, Plane3D<float> const& plane) 
     _rot_cam1TOcam2 = rot_robTOcam2 * rot_cam1TOrob;
     _rot_cam2TOcam1 = _rot_cam1TOcam2.t();
 
-//    // Compute the size of the projected image
-//    if (this->plane.a == 0 && this->plane.b == 0) { // The plan is normal at z axis
-//    // Find the restrictive parameter about the size of the projected plane
-//        float fSrc = cam->getFocal().height;
-//        float elevation = cam->getRob2Cam().rx;
-//        float aperAngle = cam->getAperAngle().height;
-//        float var1 = fSrc * cos(aperAngle + elevation) / (cos(aperAngle) * cam->getSize().width);
-//        float var2 = tan(elevation + aperAngle / 2) - tan(elevation + aperAngle / 2);
-//        float f2_1 = size.width * var1;
-//        float f2_2 = size.height / var2;
-//
-//        if (f2_1 < f2_2) {
-//            this->focal = f2_1;
-//            this->size.x = (int) round(f2_1 / var1) + 1;
-//            this->size.y = (int) round(f2_1 * var2) + 1;
-//        }
-//        else {
-//            this->focal = f2_2;
-//            this->size.x = (int) round(f2_2 / var1) + 1;
-//            this->size.y = (int) round(f2_2 * var2) + 1;
-//        }
-//    }
-//    else {
-//        std::cout << "Process of no horizontal plane not implemented yet" << std::endl;
-//    }
+    ////Compute the _size
+        // Project the 4 vertices of the camera on the plane
+            Point3D<float> ptTl_plane(_plane.interLine(cam->getOcPx_R(cam->getTopLeft()), cam->getTopLeft())); // // Top left Tl
+            Point3D<float> ptTr_plane(_plane.interLine(cam->getOcPx_R(cam->getTopRight()), cam->getTopRight())); // Top right Tr
+            Point3D<float> ptBl_plane(_plane.interLine(cam->getOcPx_R(cam->getBottomLeft()), cam->getBottomLeft())); // Bottom left Bl
+            Point3D<float> ptBr_plane(_plane.interLine(cam->getOcPx_R(cam->getBottomRight()), cam->getBottomRight())); // Bottom right Br
+            Point3D<float>  tabPtPlane[4] = {ptTl_plane, ptBl_plane, ptBr_plane, ptTr_plane};
+        // Find a basis in the plane witch minimize the useless area (black pixels)
+        // Current solution one of the side of the image is the longest side of the projected shape on the plane
+        // Not working with shape having angles > 90°
+            // Find the longest side
+            Vector3D<float> tabSide[4];
+            float side_lgest = 0.0;
+            int idx_side_lgest;
+            for(int i=0; i<4; i++){
+                tabSide[i] = Vector3D<float> (tabPtPlane[i], tabPtPlane[(i+1)%4]);
+                if(side_lgest < tabSide[i].norm()){
+                    side_lgest = tabSide[i].norm();
+                    idx_side_lgest = i;
+                }
+            }
+            // Compute the ratio of the circumscribe rectangle
+            float width, height;
+            float idx_vertexFar;
+            float lgestHeight = 0.0;
+            for(int i=0; i<(4-2); i++){
+                Point3D<float> pt_o = tabPtPlane[(idx_side_lgest)%4];
+                Point3D<float> pt_e = tabPtPlane[(idx_side_lgest+1)%4];
+                Vector3D<float> height(_plane.getClosestPtBtwnLineAndPt(pt_o, pt_e, tabPtPlane[i]),tabPtPlane[(idx_side_lgest + 2 + i)%4] );
+                if(lgestHeight < height.norm()){
+                    lgestHeight = height.norm();
+                    idx_vertexFar = i;
+                }
+            }
+            if(lgestHeight > side_lgest){
+                width = lgestHeight;
+                height = side_lgest;
+            }
+            else{
+                width = side_lgest;
+                height = lgestHeight;
+            }
+            float ratioIn = size.width/size.height;
+            float rationProj = width/height;
+            float ratioInProj_w = size.width/width;
+            float rationInProj_h = size.height/height;
+            float scale;
+            if(rationProj > ratioIn){
+                scale = size.width/width;
+            }
+            else{
+                scale = size.height/height;
+            }
+//            _size.width = width*scale;
+//            _size.height = height*scale;
+
+            // TODO Compute the rotation of the new rectangle
+
 }
 
 Mat ProjAcq::getMat(eColorType ctype) {
