@@ -22,10 +22,15 @@
 #endif
 
 
-#define WIREDSYNC_INITIAL 0     // time to set when we receive the first sync signal.
-#define WIREDSYNC_LOWTIME 1000  // in ms
-#define WIREDSYNC_MAXLOOP 200   // maximum main loop duration in ms
-#define WIREDSYNC_DEBOUNCE (WIREDSYNC_LOWTIME-WIREDSYNC_MAXLOOP)
+#define WIREDSYNC_INITIAL 0         // time to set when we receive the first sync signal.
+#define WIREDSYNC_LOWTIME 200000    // duration during which the signal is set (in µs)
+#define WIREDSYNC_PERIOD  1000000   // time duration between two signals (in µs)
+#define WIREDSYNC_DEBOUNCE 10000    // in µs
+#define WIREDSYNC_NBSAMPLES 20
+
+#if WIREDSYNC_PERIOD > 4294967295
+#error "Blocking loop. Sit back, think, and ask yourself why your are putting a duration between every sample larger than 52 minutes"
+#endif
 
 #if defined(WIREDSYNC_BENCHMARK) && defined(ARCH_X86_LINUX)
 #include <gmpxx.h>
@@ -40,8 +45,8 @@ typedef float wsType_t; // because it is shorter than wiredSyncType_t, and to al
  * Argument :
  *  None
  * Returned value :
- *  SYNC_OUT_OF_SYNC while no synchronizing signal has been received
- *  SYNC_SYNCHRONIZED after the synchronizing signal has been received
+ *  if >=0 : current sample index
+ *  if <= 0 : no significant signal received
  */
 int wiredSync_waitSignal();
 
@@ -68,7 +73,6 @@ int wiredSync_finalCompute(int reset);
 
 
 /* wiredSync_sendSignal : function that sends the synchronization signal.
- * "SyncParam" is reset in EVERY call to this function.
  * This function is to be called on the device which has the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :

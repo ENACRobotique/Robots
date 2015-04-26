@@ -26,32 +26,37 @@ static wsType_t sum_ltsq=0;     // sum of (local dates)^2
 static wsType_t sum_gt_lt=0;   // sum of (global date - local date)
 static wsType_t sum_lt_gt_lt=0;// sum of (local date)*(global date - local date)
 
-#ifndef WIREDSYNC_BENCHMARK
+#ifdef ARCH_328P_ARDUINO
 /* wiredSync_waitSignal : function that must be in the main loop, and waits for the wired synchronization signal.
- * "SyncParam" is reset in EVERY TIME this signal is received.
+ * This function is to be called on the device which has NOT the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
  *  None
  * Returned value :
- *  SYNC_OUT_OF_SYNC while no synchronizing signal has been received
- *  SYNC_SYNCHRONIZED after the synchronizing signal has been received
+ *  if >=0 : current sample index
+ *  if <= 0 : no significant signal received
  */
 int wiredSync_waitSignal(){
-    static int synchronized = 0;
-    syncStruc tmpStruc = getSyncParam();
-    // record current time
+    static int sampleIndex = -1;
+    static uint32_t prevReceived = 0;
     uint32_t begin = micros();
     // if signal is here
     while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
-    // if signal stayed here for more than debounce time, update initial time delay.
     uint32_t end = micros();
-    if ((end-begin)/1000 > WIREDSYNC_DEBOUNCE){
-        tmpStruc.initialDelay = end - WIREDSYNC_INITIAL;
-        setSyncParam(tmpStruc);
-        updateSync();
-        synchronized = 1;
+    // if signal stayed here for more than debounce time, record sample
+    if ((end-begin) > WIREDSYNC_DEBOUNCE){
+        if (prevReceived) {
+            sampleIndex += (end - prevReceived + WIREDSYNC_PERIOD/4)/WIREDSYNC_PERIOD; // keep track of the indexes (takes into account missed ones,with a signal up to WIREDSYNC_PERIOD/4 early)
+        }
+        else {
+            sampleIndex = 0;
+        }
+        prevReceived = end;
+
+        wiredSync_intermediateCompute(sampleIndex*WIREDSYNC_PERIOD,end);
+        return sampleIndex;
     }
-    return (synchronized?SYNC_SYNCHRONIZED:SYNC_OUT_OF_SYNC);
+    return -1;
 }
 #endif
 /* wiredSync_intermediateCompute :  records a new set of measures for the synchronization.
@@ -125,9 +130,8 @@ int wiredSync_finalCompute(int reset){
 
     return retVal;
 }
-#ifndef WIREDSYNC_BENCHMARK
+#ifdef ARCH_328P_ARDUINO
 /* wiredSync_sendSignal : function that sends the synchronization signal.
- * "SyncParam" is reset in EVERY call to this function.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
  *  None
@@ -135,14 +139,26 @@ int wiredSync_finalCompute(int reset){
  *  None
  */
 void wiredSync_sendSignal(){
-    syncStruc tmpStruc = getSyncParam();
-    wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
-    uint32_t begin = millis();
-    while(millis()-begin < WIREDSYNC_LOWTIME);
-    wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
-    uint32_t end=micros();
-    tmpStruc.initialDelay = end-WIREDSYNC_INITIAL;
-    setSyncParam(tmpStruc);
-    updateSync();
+    static uint32_t prevSignal=0;
+    static int nbSamples=WIREDSYNC_NBSAMPLES; // number of samples left
+
+    if (nbSamples && (micros() - prevSignal) > (WIREDSYNC_PERIOD - WIREDSYNC_LOWTIME)){
+        wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
+        if (!prevSignal) delay(2 * WIREDSYNC_LOWTIME / 1000);   // we must force the waiting for the first call. Given that everything in this mechanism works with active waiting, using a delay() is not that bad. Why delay and not delayMicrosecond ? Take a look at the prototype of delayMicrosecond... Also, wait 2 time the normal duration is to ensure that every receiver catches the first sample (critical). Why exactly 2 ? I don't know.
+        else while(micros()-prevSignal < WIREDSYNC_PERIOD);     // in the other cases, wait until exactly one period has elapsed since last signal
+        wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
+        uint32_t end=micros();
+        if (prevSignal) prevSignal += WIREDSYNC_PERIOD;
+        else prevSignal = end;
+
+        // set the "zero" right after the first signal
+        if (nbSamples == WIREDSYNC_NBSAMPLES) {
+            syncStruc tmpStruc = getSyncParam();
+            tmpStruc.initialDelay = end-WIREDSYNC_INITIAL;
+            setSyncParam(tmpStruc);
+            updateSync();
+        }
+        nbSamples --;
+    }
 }
 #endif
