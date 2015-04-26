@@ -78,8 +78,9 @@ int wiredSync_finalCompute(int reset);
  * Argument :
  *  None
  * Returned value :
- *  None
+ *  1 while there is still something to send
+ *  -1 if all the signals have been sent
  */
-void wiredSync_sendSignal();
+int wiredSync_sendSignal();
 
 #endif /* LIB_SYNCHRO_WIRE_H_ */

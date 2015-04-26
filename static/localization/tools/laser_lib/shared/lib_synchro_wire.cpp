@@ -100,7 +100,7 @@ int wiredSync_finalCompute(int reset){
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_gt_lt;
         offset = offset_num / det;
 #ifndef WIREDSYNC_BENCHMARK
-        syncStruc sStruc = {offset, abs(inv_delta),(inv_delta>0?1:-1)};
+        syncStruc sStruc = {static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)),(inv_delta>0?1:-1)};
         setSyncParam(sStruc);
 #else
 #ifdef ARCH_328P_ARDUINO
@@ -136,9 +136,10 @@ int wiredSync_finalCompute(int reset){
  * Argument :
  *  None
  * Returned value :
- *  None
+ *  1 while there is still something to send
+ *  -1 if all the signals have been sent
  */
-void wiredSync_sendSignal(){
+int wiredSync_sendSignal(){
     static uint32_t prevSignal=0;
     static int nbSamples=WIREDSYNC_NBSAMPLES; // number of samples left
 
@@ -160,5 +161,7 @@ void wiredSync_sendSignal(){
         }
         nbSamples --;
     }
+    if (nbSamples) return 1;
+    else return -1;
 }
 #endif
