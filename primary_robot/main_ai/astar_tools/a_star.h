@@ -8,7 +8,7 @@
 typedef struct {
     Point2D<float> p1;
     Point2D<float> p2;
-    sObs_t obs;
+    astar::sObs_t obs;
 
     sNum_t arc_len;
     sNum_t seg_len;
@@ -25,6 +25,6 @@ typedef struct {
 } sPath_t;
 
 
-void a_star(iABObs_t start, iABObs_t goal, sPath_t *path);
+void a_star(astar::iABObs_t start, astar::iABObs_t goal, sPath_t *path);
 
 #endif

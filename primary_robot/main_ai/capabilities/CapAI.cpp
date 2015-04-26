@@ -19,6 +19,7 @@ extern "C"{
 }
 #include "clap.h"
 #include "spot.h"
+#include "cup.h"
 
 
 int CapAI::loop(){
@@ -36,7 +37,7 @@ int CapAI::loop(){
 
     if (millis() - start_time > END_MATCH){
         logs << INFO << "SHUT_DOWN : time = " << (unsigned int) (millis() - start_time) / 1000;
-        path.stopRobot();
+        path.stopRobot(capProp->getPropType()==HOLO?true:false);
         return 0;
     }
 
@@ -47,7 +48,7 @@ int CapAI::loop(){
         if ((millis() - last_time) > 1000){ //Calculation of the next objective
               last_time = millis();
 
-            if ((current_obj = next_obj(start_time, listObj)) != -1) {
+            if ((current_obj = nextObj(start_time, listObj, robot->env->obs, robot->env->obs_updated ,(int) capPos->getIobs(), capProp->getPropType()==AXLE?true:false)) != -1) {
                 pt_select = listObj[current_obj]->getDestPoint();
                 logs << INFO << "Selected point is (" << pt_select.x << " ; " << pt_select.y << ")";
 
@@ -59,7 +60,7 @@ int CapAI::loop(){
                     }
                 sPath_t path_loc = listObj[current_obj]->getPath();
                 path.addPath2(path_loc);
-                path.sendRobot();
+                path.sendRobot(capProp->getPropType()==HOLO?true:false, listObj[current_obj]->getDestPointOrient());
             }
         }
 
@@ -67,7 +68,7 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        if (metObj(current_obj, listObj) == 0){
+        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated) == 0){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
@@ -90,11 +91,16 @@ void CapAI::initObjective(){
         listObj.push_back(new Clap(3));
         listObj.push_back(new Clap(5));
     }
-    else
+    else{
         logs << ERR << "Color ???";
+        exit(EXIT_FAILURE);
+    }
 
     for(unsigned int i = 0 ; i < 8 ; i++)
-        listObj.push_back(new Spot(i, capTeam->getColor()));
+        listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
+
+    for(unsigned int i = 0 ; i < 5 ; i++)
+        listObj.push_back(new Cup(i, robot->env->obs));
 }
 
 

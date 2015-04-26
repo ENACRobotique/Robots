@@ -158,7 +158,7 @@ int roleSetup(bool simu_ai, bool simu_prop){
 /*
  * Send the limit of the playground to monitoring
  */
-void sendObsCfg(){
+void sendObsCfg(const int n, const int rRobot, const int xMin, const int xMax, const int yMin, const int yMax){
     sMsg msgOut;
     int ret;
 
@@ -166,15 +166,15 @@ void sendObsCfg(){
     msgOut.header.type = E_OBS_CFG;
     msgOut.header.size = sizeof(msgOut.payload.obsCfg);
 
-    msgOut.payload.obsCfg.nb_obs = N;
-    msgOut.payload.obsCfg.r_robot = R_ROBOT;
-    msgOut.payload.obsCfg.x_min = X_MIN;
-    msgOut.payload.obsCfg.x_max = X_MAX;
-    msgOut.payload.obsCfg.y_min = Y_MIN;
-    msgOut.payload.obsCfg.y_max = Y_MAX;
+    msgOut.payload.obsCfg.nb_obs = n;
+    msgOut.payload.obsCfg.r_robot = rRobot;
+    msgOut.payload.obsCfg.x_min = xMin;
+    msgOut.payload.obsCfg.x_max = xMax;
+    msgOut.payload.obsCfg.y_min = yMin;
+    msgOut.payload.obsCfg.y_max = yMax;
 
     if ( (ret = bn_send(&msgOut)) < 0) {
-        cerr << "[ERROR] [communications.cpp] bn_send(E_OBS_CFG) error #%i" << -ret << endl;
+        logs << ERR << "bn_send(E_OBS_CFG) error #%i" << -ret;
         return;
     }
 
@@ -184,11 +184,11 @@ void sendObsCfg(){
 /*
  * Send obs where obs_updated was modified to monitoring
  */
-void sendObss(){
+void sendObss(vector<astar::sObs_t>& obs, vector<uint8_t>& obs_updated){
     sMsg msgOut;
     static unsigned int prevSendObss;
     static int send_obss_idx = 0;
-    int i, ret;
+    int i, ret, N = obs.size();
 
     if (millis() - prevSendObss > 150){
         prevSendObss = millis();
@@ -223,7 +223,7 @@ void sendObss(){
                 send_obss_idx = 0;
 
             if ((ret = bn_send(&msgOut)) < 0) {
-                cerr << "[ERROR] [communication.cpp] bn_send(E_OBSS) error #%i" << -ret << endl;
+                logs << ERR << "bn_send(E_OBSS) error #%i" << -ret;
                 return;
             }
 
@@ -345,7 +345,7 @@ void checkInbox(int verbose){
         case E_OBS_CFG:
             cout << "[OBS_CFS]" << endl;
 
-            sendObsCfg();
+            askObsCfg(false);
             break;
         case E_GENERIC_STATUS:
             if( verbose >= 2)
@@ -359,7 +359,7 @@ void checkInbox(int verbose){
             ihm.receivedNewIhm(msgIn.payload.ihmStatus);
             break;
         default:
-            cout << "[WARNING] message type not define or doesn't exist" << eType2str((E_TYPE)msgIn.header.type) << endl;
+            cout << "[WARNING] message type not define or doesn't exist : " << eType2str((E_TYPE)msgIn.header.type) << endl;
     }
 }
 
@@ -382,5 +382,20 @@ bool lastGoal(Point2D<float>& goal, bool get){
         new_goal = false;
         return true;
     }else
+        return false;
+}
+
+bool askObsCfg(bool get){
+    static bool ask = true; // True if monitoring want receive the congiguration of the playground
+
+    if(!get){
+        ask = true;
+        return true;
+    }
+    else if(ask){
+        ask = false;
+        return true;
+    }
+    else
         return false;
 }

@@ -43,7 +43,7 @@ typedef struct {
 } sObjEntry_t;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT
+    E_NULL, E_CLAP, E_SPOT, E_CUP
 } eObj_t;
 
 typedef enum {
@@ -64,7 +64,7 @@ class Obj {
 
         void addAccess(sObjEntry_t &access);
 
-        float update(sPt_t posRobot);
+        float update(const bool axle,  std::vector<astar::sObs_t>& obs, const int robot);
 
         float getDist() const;
         sPath_t getPath() const;
@@ -72,22 +72,39 @@ class Obj {
         float getDestPointOrient() const;
         eStateObj_t getState() const;
         float getYield(const unsigned int start_time);
-
+        vector<unsigned int> getNumObs(){
+            return _num_obs;
+        }
         void print();
 
     protected:
-        string obsType(){
+        string objAccess(eTypeEntry_t access){
+            switch(access){
+                case E_POINT:
+                    return "POINT";
+                case E_CIRCLE:
+                    return "CIRCLE";
+                case E_SEGMENT:
+                    return "SEGMENT";
+                default:
+                    return "Unknown type of access point";
+            }
+        }
+
+        string objType(){
             switch(_type){
                 case E_CLAP:
                     return "CLAP";
                 case E_SPOT:
                     return "SPOT";
+                case E_CUP:
+                    return "CUP ";
                 default:
                     return "Undefined";
             }
         }
 
-        string obsState(){
+        string objState(){
             switch(_state){
                 case  ACTIVE:
                     return "activated";

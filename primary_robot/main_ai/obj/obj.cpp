@@ -20,26 +20,7 @@ extern "C"{
 #include "millis.h"
 }
 
-#ifndef HOLONOMIC
-#error "HOLONOMIC must be defined"
-#endif
-
-int testInObs() { //retourne le numéro de l'obstable si la position est a l'interieur de celui ci
-    //FIXME si le robot dans plusieurs obstable
-    Point2D<float>p = statuses.getLastPosXY(ELT_PRIMARY);
-    int i;
-    float dist;
-    for (i = 1; i < N - 1; i++) {
-        if (obs[i].active == 0)
-            continue;
-        dist = p.distanceTo({obs[i].c.x, obs[i].c.y});
-        if (dist < obs[i].r) {
-            //printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
-            return i;
-        }
-    }
-    return 0;
-}
+//#define DEBUG_OBJ
 
 Obj::Obj() : _type(E_NULL), _point(-1), _state(ACTIVE), _access_select_angle(0), _dist(-1), _time(-1), _done(0){
 }
@@ -74,52 +55,35 @@ void Obj::addAccess(sObjEntry_t &access){
  * And update the others parameters
  * //TODO Considering the orientation of the robot
  */
-float Obj::update(sPt_t posRobot) {
-    int n;
-#if !HOLONOMIC
-    int g, m;
-#endif
+float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int robot) {
     sPath_t path_loc;
-    Point2D<float> posRobotp = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> posRobot(obs[robot].c.x, obs[robot].c.y);
+    int N = obs.size();
 
     _dist = -1;
-    obs[0].c = {posRobotp.x, posRobotp.y};
-
-    if ((n = testInObs()) != 0) {
-        Point2D<float> p(posRobot.x, posRobot.y);
-        Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
-        p = c.projecte(p);
-        obs[0].c = {p.x, p.y};
-#ifdef DEBUG_OBJ
-        logs << INFO << "Robot in obstacle : " << n;
-#endif
-    }
+    Point2D<float> p = projectPointInObs(posRobot, obs);
+    obs[robot].c = {p.x, p.y};
 
     for (sObjEntry_t i : _access) {
-        obs[0].c = {posRobotp.x, posRobotp.y};
+#ifdef DEBUG_OBJ
+        logs << DEBUG << "Access type : " << objAccess(i.type);
+#endif
         switch(i.type){
             case E_POINT :
-#ifdef DEBUG_OBJ
-                logs << DEBUG << "Access type POINT";
-#endif
-                obs[N - 1].c = {i.pt.p.x, i.pt.p.y};
-#if !HOLONOMIC
-                updateEndTraj(i.pt.angle, &i.pt.p, i.radius);
-#endif
-            break;
+                obs[obs.size() - 1].c = {i.pt.p.x, i.pt.p.y};
+                if(axle)
+                    updateEndTraj(i.pt.angle, &i.pt.p, i.radius, obs);
+                    p = {obs[robot].c.x,obs[robot].c.y};
+                    p = projectPointInObs(p, obs);
+                    obs[robot].c = {p.x, p.y};
+                break;
             case E_CIRCLE:
-#ifdef DEBUG_OBJ
-                logs << DEBUG << "Access type CIRCLE";
-#endif
-                obs[N - 1].c = {i.cir.c.x, i.cir.c.y};
-#if !HOLONOMIC
-                obs[N - 2].active = 0;
-                obs[N - 3].active = 0;
-                obs[N - 4].active = 0;
-                obs[N - 5].active = 0;
-                obs[N - 6].active = 0;
-                obs[N - 7].active = 0;
-#endif
+                obs[obs.size() - 1].c = {i.cir.c.x, i.cir.c.y};
+                if(axle){
+                    obs[N - 2].active = 0;
+                    obs[N - 3].active = 0;
+                    obs[N - 4].active = 0;
+                }
                 break;
             case E_SEGMENT:
                 //TODO
@@ -128,35 +92,24 @@ float Obj::update(sPt_t posRobot) {
                 logs << ERR << "Unknown type of access to objective";
         }
 
-#if !HOLONOMIC
-        if ((g = testInObs(&obs[0].c)) != 0) { //Projection if the robot is inside a "circle of end trajectory"
-            projectPoint(posRobot.x, posRobot.y, obs[g].r, obs[g].c.x, obs[g].c.y, &obs[0].c);
-            if ((m = testInObs(&obs[0].c)) != 0) { //Cas la projection se retrouve dans un obstacle après la premier projection
-                logs << ERR << "Fix this projection inside an obstacle n°" << m; //FIXME or no : investigate
-                continue;
-            }
-        }
-#endif
 #ifdef DEBUG_OBJ
-        logs << DEBUG << "Current position is : " << obs[0].c.x << " : " << obs[0].c.y;
-        logs << DEBUG << "Current access point chose is : " << obs[N - 1].c.x << " : " << obs[N - 1].c.y;
-        if(!_num_obs.empty())
-            logs << DEBUG << "Current obstacle position is : " << obs[_num_obs.front()].c.x << " : " << obs[_num_obs.front()].c.y;
+        logs << DEBUG << "Current position is : (" << obs[0].c.x << " ; " << obs[0].c.y << ")";
+        logs << DEBUG << "Current access point chose is : (" << obs[N - 1].c.x << " ; " << obs[N - 1].c.y << ")";
 #endif
 
-        //deactivate obs
-        for(unsigned int j : _num_obs){
+
+        for(unsigned int j : _num_obs){ // Disable necessary obstacle to achieve the objective
             obs[j].active = 0;
 #ifdef DEBUG_OBJ
-            logs << DEBUG << "Deactivation of obstacle number :" << j;
+            logs << DEBUG << "Disable obstacle number : " << j;
 #endif
         }
 
-        fill_tgts_lnk();
-        a_star(A(0), A(N-1), &path_loc);
+        astar::fill_tgts_lnk(obs);
+        a_star(A(robot), A(N-1), &path_loc);
 
-        //reactivate obs
-        for(unsigned int j : _num_obs){
+
+        for(unsigned int j : _num_obs){ // Reactivation obstacle
             obs[j].active = 1;
 #ifdef DEBUG_OBJ
             logs << DEBUG << "Reactivation of obstacle number :" << j;
@@ -164,34 +117,37 @@ float Obj::update(sPt_t posRobot) {
         }
 
         if (path_loc.dist == 0){
-#if DEBUG_OBJ
+#ifdef DEBUG_OBJ
             logs << INFO << "A* return null distance";
 #endif
         }
-        else if (_dist > path_loc.dist || _dist == -1) {
+        else if (_dist > path_loc.dist || _dist == -1) { // The new path is better to access the objective
             _dist = path_loc.dist;
             _path = path_loc;
-            _access_select = {obs[N - 1].c.x, obs[N - 1].c.y};
 
-            if( i.type == E_CIRCLE){
-                if(_path.path[_path.path_len - 1].p1.distanceSqTo(_path.path[_path.path_len - 1].p2) < i.cir.r){
-#if DEBUG_OBJ
-                    logs << ERR << "Very strange path"; //FIXME deux obstable sont très provhe
-#endif
-                }
+            if(i.type == E_CIRCLE){
+                if(_path.path[_path.path_len - 1].p1.distanceTo(_path.path[_path.path_len - 1].p2) < i.cir.r)
+                    continue;
                 else{
                     Point2D<float> pt = _path.path[_path.path_len - 1].p1;
                     Circle2D<float> cir(i.cir.c.x, i.cir.c.y, i.cir.r);
-                    if(cir.c.distanceTo(pt) == 0)
-                        logs << ERR << "Can't project point";
+
                     pt = cir.projecte(pt);
                     _path.path[_path.path_len - 1].p2 = pt;
+                    _dist -= i.cir.r;
+                    Vector2D<float> v1(1,0), v2(cir.c, pt); //FIXME
+                    _access_select_angle = v1.angle(v2) + M_PI; //M_PI because reference inverse
                 }
-                _access_select = _path.path[_path.path_len - 1].p2;
-                //_dist -= (i.cir.r + R_ROBOT);
             }
-        }//else not better, conserve the previous
+            else if(i.type == E_POINT){
+                _access_select_angle = i.pt.angle + M_PI; //M_PI because reference inverse
+            }
+
+            _access_select = _path.path[_path.path_len - 1].p2;
+        }
     }
+
+    obs[robot].c = {posRobot.x, posRobot.y}; // Restore the original position
 
     return _dist;
 }
@@ -231,6 +187,7 @@ float Obj::getYield(const unsigned int start_time){
 
     switch (_type) {
         case E_CLAP:
+        case E_CUP:
         case E_SPOT:
             ratio = 1/_dist * 100; //TODO
             break;
@@ -242,10 +199,10 @@ float Obj::getYield(const unsigned int start_time){
 
 
 void Obj::print(){
-    logs << DEBUG << fixed << setprecision(2) << "type : " << obsType() << " : " << obsState();
+    logs << DEBUG << fixed << setprecision(2) << "type : " << objType() << " : " << objState();
     if(_state == ACTIVE){
         if(_dist > 0)
-            logs << " : " << _dist << "cm to go" << _access_select << "(" << _access_select_angle << "°)";
+            logs << " : " << _dist << "cm to go" << _access_select << "(" << _access_select_angle*180/M_PI << "°)";
         else
             logs << " : no path found";
     }

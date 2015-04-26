@@ -132,17 +132,3 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
         // TODO compute full uncertainty
     }
 }
-
-/*
- * Update the new position on monitoring
- */
-void Statuses::posUpdated(sGenericStatus &status) {
-    if (status.id != ELT_PRIMARY) { //Only for element fix in obs such as robots
-        obs[status.id].active = 1;
-        obs[status.id].moved = 1;
-        obs[status.id].c.x = status.pos.x;
-        obs[status.id].c.y = status.pos.y;
-
-        obs_updated[status.id]++;
-    }
-}

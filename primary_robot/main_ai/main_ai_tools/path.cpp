@@ -27,9 +27,6 @@ extern "C"{
 #include "bn_intp.h"
 }
 
-#ifndef HOLONOMIC
-#error "HOLONOMIC must be defined"
-#endif
 
 Path::Path() : _dist(0), _path_len(0){
 }
@@ -68,13 +65,13 @@ void Path::maintenace(){
         prevTime = millis();
     }
 
-#if !HOLONOMIC
+/*
     static unsigned int prevTime2 = 0;
     if(millis() - prevTime2 > 100){
         updateNoHaftTurn();
         prevTime2 = millis();
     }
-#endif
+*/
 }
 
 /*
@@ -82,7 +79,7 @@ void Path::maintenace(){
  * Every parameter that can be calculated automatically, the calculation is performed.
  * Try to send MAX_RETRIES if failed.
  */
-void Path::sendRobot() {
+void Path::sendRobot(bool holo, float thetaEnd) {
     static sPath_t path;
 
     if(!_path.empty() && !_path_orient.empty()){
@@ -96,9 +93,8 @@ void Path::sendRobot() {
 
     length();
 
-#if HOLONOMIC
-    convPathToPathOrient();
-#endif
+    if(holo)
+        convPathToPathOrient(thetaEnd);
 
     if (!checkSamePath(path) || checkRobotBlock()){
         logs << INFO << "Preparation to send a path";
@@ -135,15 +131,16 @@ void Path::sendRobot() {
 /*
  * Stop the robot
  */
-void Path::stopRobot() {
+void Path::stopRobot(bool holo) {
     Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
+    float theta = statuses.getLastOrient(ELT_PRIMARY);
     sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
 
     clear();
 
     _path.push_back(traj);
 
-    sendRobot();
+    sendRobot(holo, theta);
 }
 
 
@@ -151,13 +148,13 @@ void Path::stopRobot() {
  * The robot go to the destination point.
  * "f" to force the robot to go, even if the destination point is in obstacle or if there are obstacles in the trajectory.
  */
-void Path::go2Point(const Point2D<float> &dest, const bool f){
+void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs_t>& obs, bool holo){
     sPath_t path;
-    Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
+    Point2D<float> posRobot(obs[0].c.x, obs[0].c.y);
+    int N = obs.size();
 
-    obs[0].c = {posRobot.x, posRobot.y};
     obs[N-1].c = {dest.x, dest.y};
-    logs << DEBUG << "position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
+    logs << DEBUG << "go2Point() : position : " << obs[0].c.x << ", " << obs[0].c.y << " ; destination : " << obs[N-1].c.x << ", " << obs[N-1].c.y;
 
     Point2D<float> p1(obs[0].c.x, obs[0].c.y),  p2(obs[N-1].c.x, obs[N-1].c.y);
     if(p1.distanceSqTo(p2) < 2.*2.)
@@ -165,29 +162,33 @@ void Path::go2Point(const Point2D<float> &dest, const bool f){
 
     if(f){
         clear();
-        sTrajEl_t traj = sTrajEl_t{posRobot, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
+        sTrajEl_t traj = sTrajEl_t{{obs[0].c.x, obs[0].c.y}, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
 
         _path.push_back(traj);
-        sendRobot();
+        sendRobot(holo, atan2(dest.y - obs[0].c.y, dest.x - obs[0].c.x ));
     }
     else {
-        fill_tgts_lnk();
+        Point2D<float> p = projectPointInObs(posRobot, obs);
+        obs[0].c = {p.x, p.y};
+
+        astar::fill_tgts_lnk(obs);
         a_star(A(0), A(N-1), &path);
         if (path.path) {
-            logs << INFO << "New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
+            logs << INFO << "go2Point() : New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
             addPath2(path);
-            sendRobot();
+            sendRobot(holo, atan2(_path[_path.size()-1].p2.y - _path[_path.size()-1].p1.y, _path[_path.size()-1].p2.x - _path[_path.size()-1].p1.x));
         }
         else {
-            logs << INFO << "No path from 0a to " << N - 1;
+            logs << INFO << "go2Point() : No path from 0a to " << N - 1;
         }
+        obs[0].c = {posRobot.x, posRobot.y};
     }
 }
 
 
-void Path::followPath(vector <sObs_t> &/*_obs*/, vector <iABObs_t> &l) { // todo tableau statique //for traj prog
+void Path::followPath(vector <astar::sObs_t>& , vector <astar::iABObs_t> &, bool ) { // todo tableau statique //for traj prog
     clear();
-
+/*
    //copier _obs dans obs
     //TODO if there are an adversaire
 
@@ -209,14 +210,15 @@ void Path::followPath(vector <sObs_t> &/*_obs*/, vector <iABObs_t> &l) { // todo
         _path.push_back(el);
     }
 
-    sendRobot();
+    sendRobot(holo);
+    */
 }
 
 /*
  * Converts a path in path orient.
  * This path orient can't directly used by a holonomic robot (theta set to 0 and time too)
  */
-void Path::convPathToPathOrient(){
+void Path::convPathToPathOrient(float thetaEnd){
     sTrajOrientEl_t trajOrient;
 
     while(!_path.empty()){
@@ -242,7 +244,7 @@ void Path::convPathToPathOrient(){
     }
 
     computeTimePathForHolonomic();
-    computeOrientPathForHolonomic(0); //FIXME
+    computeOrientPathForHolonomic(thetaEnd);
 }
 
 /*
@@ -272,59 +274,19 @@ float getPrincipalAngleValue(float a){
  * Computes a orient path for holonomic robot
  */
 void Path::computeOrientPathForHolonomic(float theta_end_obj){
-    //computes theta and rot_dir for all path
-    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        // in this case, the robot's orientation follows the linear speed vector
-
-        _path_orient[i].theta1 = atan2(_path_orient[i].p2.y - _path_orient[i].p1.y, _path_orient[i].p2.x - _path_orient[i].p1.x);
-        _path_orient[i].theta2 = _path_orient[i].theta1;
-        _path_orient[i].rot1_dir = true; // unused because theta1 == theta2
-
-        // r>0 CW  => dir=0
-        // r<0 CCW => dir=1
-        _path_orient[i].rot2_dir = _path_orient[i].obs.r < 0;
-    }
-
-    //adjusts for the first element
     float theta = statuses.getLastOrient(ELT_PRIMARY);
-//    float diff = fabs(_path_orient.front().theta1 - theta /* XXX you need to get the principal angle value here */)/MAX_SPEED_ROT - _path_orient.front().seg_len/MAX_SPEED;
-//    if(diff < 0){
-        _path_orient.front().theta1 = theta;
-        _path_orient.front().rot1_dir = getPrincipalAngleValue(_path_orient.front().theta2 - _path_orient.front().theta1) > 0; // select shortest rotation
-//    }
-//    else{ //insert rotation
-//        float theta_inter = diff*MAX_SPEED_ROT;
-//        sTrajOrientEl_t traj;
-//        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
-//        traj.p2 = traj.p1;
-//        traj.obs.c = traj.p1;
-//        traj.obs.r = 0;
-//        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
-//        traj.theta2 = theta_inter;
-//
-//        _path_orient.front().theta1 = theta_inter;
-//        _path_orient.push_front(traj);
-//    }
+    float deltaTheta = getPrincipalAngleValue(theta_end_obj - theta);
+    float Time = _path_orient[_path_orient.size()-1].t2 - _path_orient[0].t1;
 
-    //adjusts for the last element
-//    diff = fabs(_path_orient.back().theta1 - theta_end_obj)/MAX_SPEED_ROT - _path_orient.back().seg_len/MAX_SPEED;
-//    if(diff < 0){
-        _path_orient.back().theta2 = theta_end_obj;
-        _path_orient.back().rot1_dir = getPrincipalAngleValue(_path_orient.back().theta2 - _path_orient.back().theta1) > 0; // select shortest rotation
-//    }
-//    else{
-//        float theta_inter = diff*MAX_SPEED_ROT;
-//        sTrajOrientEl_t traj;
-//        traj.p1 = statuses.getLastPosXY(ELT_PRIMARY);
-//        traj.p2 = traj.p1;
-//        traj.obs.c = traj.p1;
-//        traj.obs.r = 0;
-//        traj.theta1 = statuses.getLastOrient(ELT_PRIMARY);
-//        traj.theta2 = theta_inter;
-//
-//        _path_orient.back().theta1 = theta_inter;
-//        _path_orient.push_back(traj);
-//    }
+    logs << DEBUG << "Destination angle is :" << theta_end_obj*180/M_PI << "°";
+
+    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
+        _path_orient[i].theta1 = getPrincipalAngleValue((_path_orient[i].t1 - _path_orient[0].t1)*deltaTheta/Time + theta);
+        _path_orient[i].theta2 = getPrincipalAngleValue((_path_orient[i].t2 - _path_orient[0].t1)*deltaTheta/Time + theta);
+
+        _path_orient[i].rot1_dir = deltaTheta > 0;
+        _path_orient[i].rot2_dir = deltaTheta > 0;
+    }
 }
 
 /*
@@ -346,7 +308,7 @@ void Path::printElTrajOrient(const unsigned int num) const{
                                << " ; p1 x" << _path_orient[num].p1.x << " p1 y" << _path_orient[num].p1.y
                                << " ; p2 x" << _path_orient[num].p2.x << " p2 y" << _path_orient[num].p2.y
                                << " ; obs x" << _path_orient[num].obs.c.x << " y" << _path_orient[num].obs.c.y << " r" << _path_orient[num].obs.r
-                               << " ; theta1=" << _path_orient[num].theta1 << " theta2=" << _path_orient[num].theta2
+                               << " ; theta1=" << _path_orient[num].theta1*180/M_PI<< "° theta2=" << _path_orient[num].theta2*180/M_PI << "°"
                                << " ; a_l" << _path_orient[num].arc_len << " s_l" << _path_orient[num].seg_len
                                << " : rot1_dir " << _path_orient[num].rot1_dir << " rot2_dir " << _path_orient[num].rot2_dir;
 }
@@ -430,7 +392,7 @@ void Path::setPathLength() {
 /*
  * Return true(1) if the 2 obs are identical else false(0)
  */
-bool Path::checkSameObs(sObs_t& obs1, sObs_t& obs2){
+bool Path::checkSameObs(astar::sObs_t& obs1, astar::sObs_t& obs2){
     return ( obs1.r == obs2.r && obs1.c.x == obs2.c.x && obs1.c.y == obs2.c.y);
     }
 
@@ -524,12 +486,12 @@ int Path::checkRobotBlock() {
     return 0;
 }
 
-void Path::updateNoHaftTurn() {
-    int i;
+void Path::updateNoHaftTurn(vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated) {
+    int i, N = obs.size();
     sNum_t r;
     Point2D<float> pt = statuses.getLastPosXY(ELT_PRIMARY);
     float theta = statuses.getLastOrient(ELT_PRIMARY);
-    static sObs_t _obs[3];
+    static astar::sObs_t _obs[3];
 
     r = statuses.getLastSpeed(ELT_PRIMARY); //15=speed
     r /= 3;
