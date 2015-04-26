@@ -35,9 +35,18 @@ uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the lase
 uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
 char chosenOne=0;                           // interruption chosen for synchronization
 
+#ifdef SYNC_WIRED
+int lastSyncSampleIndex = -1;
+uint32_t firstSyncSample = 0;
+#endif
 
 char debug_led=1;
+#ifdef SYNC_WIRELESS
 mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;                           // State machine state
+#endif
+#ifdef SYNC_WIRED
+mainState state=S_SYNC_MEASURES, prevState=S_BEGIN;                           // State machine state
+#endif
 
 inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
@@ -66,7 +75,9 @@ void loop() {
     plStruct laserStruct={0}; //structure containing info about the last laser detection (deleted if not processed within one loop)
     int rxB=0; // size (bytes) of message available to read
     unsigned long time = millis(),timeMicros=micros();
-
+#ifdef SYNC_WIRED
+    int tempIndex;
+#endif
 
     updateSync();
     //blink
@@ -81,9 +92,7 @@ void loop() {
 //MUST ALWAYS BE DONE (any state)
 
     updateSync();
-#ifdef SYNC_WIRED
-    wiredSync_waitSignal()==SYNC_SYNCHRONIZED;
-#endif
+
 
     // routine and receive
     rxB=bn_receive(&inMsg);
@@ -138,7 +147,7 @@ void loop() {
     }
 
 
-// In any state, if we receive a "begin election" message, be begin election.
+// In any state, if we receive a "begin election" message, we begin election.
     if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
         state=S_SYNC_ELECTION;
 #ifdef VERBOSE_SYNC
@@ -149,6 +158,22 @@ void loop() {
 
 //STATE MACHINE
     switch (state){
+#ifdef SYNC_WIRED
+        case S_SYNC_MEASURES :
+            if ((tempIndex=wiredSync_waitSignal())!=lastSyncSampleIndex){
+                if (tempIndex != -1){
+                    lastSyncSampleIndex = tempIndex;
+                }
+                if (tempIndex == 0){
+                    firstSyncSample = micros();
+                }
+            }
+            if (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD){
+                wiredSync_finalCompute(1);
+            }
+            state=S_GAME;
+            break;
+#endif
 #ifdef SYNC_WIRELESS
         case S_SYNC_ELECTION :
             if (prevState!=state) {

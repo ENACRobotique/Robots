@@ -16,7 +16,6 @@
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "lib_domitille.h"
 #include "../../../communication/network_tools/bn_debug.h"
-#include "lib_sync_turret.h"
 #include "loc_tools_turret.h"
 #include "global_errors.h"
 extern "C" {
@@ -40,7 +39,7 @@ mainState state=S_SYNC_ELECTION;
 #endif
 
 #ifdef SYNC_WIRED
-mainState state=S_GAME;
+mainState state=S_SYNC_MEASURE;
 #endif
 
 
@@ -145,6 +144,11 @@ void loop(){
 
     ///////state machine
     switch (state){
+#ifdef SYNC_WIRED
+    case S_SYNC_MEASURE :
+        if (wiredSync_sendSignal() == -1) state = S_GAME;
+        break;
+#endif
 #ifdef SYNC_WIRELESS
     case S_SYNC_ELECTION :
         if (!sw){
