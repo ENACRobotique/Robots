@@ -14,7 +14,7 @@
 //#define NM_DEBUG
 
 template<typename T, typename V, int sz>
-V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, int nb_max) {
+V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&, int)> f, T z_end, int nb_max) {
     V xb, xr, xe, xc;
     int i_max, i_MAX, i_MIN;
     int indexes[sz + 1];
@@ -22,7 +22,7 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, in
             sigma = 0.5;
 
     for (int i = 0; i < sz + 1; i++) {
-        z[i] = f(x[i]);
+        z[i] = f(x[i], 0);
         indexes[i] = i;
 
 #ifdef NM_DEBUG
@@ -37,9 +37,9 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, in
         }
     }
 
-    for (int i = 0; i < nb_max; i++) {
+    for (int iter = 1; iter <= nb_max; iter++) {
 #ifdef NM_DEBUG
-        std::cout << "## loop " << i << std::endl;
+        std::cout << "## loop " << iter << std::endl;
 #endif
 
 // tri (insertion sort)
@@ -72,7 +72,7 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, in
 
 // calcul point réflechi
         xr = xb + alpha * (xb - x[i_MAX]);
-        z_xr = f(xr);
+        z_xr = f(xr, iter);
 #ifdef NM_DEBUG
         std::cout << "   f(xr = " << xr << ") = " << z_xr << std::endl;
 #endif
@@ -96,7 +96,7 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, in
 // expansion
         if (z_xr < z[i_MIN]) {
             xe = xb + gamma * (xb - x[i_MAX]);
-            z_xe = f(xe);
+            z_xe = f(xe, iter);
 #ifdef NM_DEBUG
             std::cout << "   f(xe = " << xe << ") = " << z_xe << std::endl;
 #endif
@@ -126,7 +126,7 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, in
 
 // contraction
         xc = xb + rho * (xb - x[i_MAX]);
-        z_xc = f(xc);
+        z_xc = f(xc, iter);
 #ifdef NM_DEBUG
         std::cout << "   f(xc = " << xc << ") = " << z_xc << std::endl;
 #endif
@@ -152,7 +152,7 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, in
                 continue;
 
             x[j] = x[i_MIN] + sigma * (x[j] - x[i_MIN]);
-            z[j] = f(x[j]);
+            z[j] = f(x[j], iter);
 #ifdef NM_DEBUG
             std::cout << "=> f(x[" << j << "] = " << x[j] << ") = " << z[j] << std::endl;
 #endif
@@ -171,10 +171,13 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&)> f, T z_end, in
 #endif
 
     i_MIN = 0;
+    z[0] = f(x[0], -1);
 #ifdef NM_DEBUG
     std::cout << " z[" << i_MIN << "] = " << z[i_MIN] << std::endl;
 #endif
     for (int i = 1; i < sz + 1; i++) {
+        z[i] = f(x[i], -1);
+
 #ifdef NM_DEBUG
         std::cout << " z[" << i << "] = " << z[i] << std::endl;
 #endif

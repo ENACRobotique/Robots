@@ -48,9 +48,9 @@ imwrite(DD, 'dist.png', 'bitdepth', 16);
 %% get propability from distance
 
 low_dens = 1/15; % (/cm²)
-low_thr = 12; % (cm)
+low_thr = 15; % (cm)
 
-high_dens = 1/1; % (/cm²)
+high_dens = 1.2/1; % (/cm²)
 high_thr = 0;
 
 P = high_dens + (high_dens - low_dens) .* (D - high_thr) ./ (high_thr - low_thr);
@@ -139,7 +139,7 @@ s = S(Q);
 v = V(Q);
 p = P(Q);
 
-M = [(col - 10 + 1)./factor, (size(i,1) - row + 1  - 10 + 1)./factor, h, s, v, p];
+M = [(col - 30 + 1)./factor, (size(i,1) - row + 1  - 30 + 1)./factor, h, s, v, p];
 
 dlmwrite('testpoints.csv', M);
 
