@@ -45,11 +45,11 @@ int bn_printDbg(const char *str){
     strncpy((char *)tmp.payload.data , str , BN_MAX_PDU-sizeof(sGenericHeader)-1);
     tmp.payload.debug[tmp.header.size-1]=0; //strncpy does no ensure the null-termination, so we force it
 
-    ret = role_send(&tmp, ROLE_DEBUG);
+    ret = role_send(&tmp, ROLEMSG_DEBUG);
     if(ret > (int)sizeof(tmp.header)){
         ret -= (int)sizeof(tmp.header);
     }
-    else{
+    else if(ret >= 0){
         ret = -1;
     }
     return ret;
