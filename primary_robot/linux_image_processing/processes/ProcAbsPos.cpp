@@ -66,7 +66,7 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
         assert(val >= 0 && val <= 1);
         assert(prob >= 0 && prob <= 1);
 
-        staticTP.push_back(TestPoint((Mat_<float>(2, 1) << x, y), hue, sat, val, 2. * prob));
+        staticTP.push_back(TestPoint((Mat_<float>(2, 1) << x, y), hue, sat, val, 10. * prob));
     }
     infile.close();
 
@@ -330,32 +330,36 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     cout << "  begpos: " << pos.x() << ", " << pos.y() << ", " << pos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, pos) << endl;
 
-    float dx = 10;
-    float dy = 10;
+    float du = 10;
+    float dv = 10;
     float cm2rad = 0.01;
+
+    float ct = cos(pos.theta());
+    float st = sin(pos.theta());
 
     array<Vector3D<float>, 4> simplex {
             Vector3D<float>(
-                    pos.getLinPos().at<float>(0) - dx,
-                    pos.getLinPos().at<float>(1),
-                    pos.theta() - dx * cm2rad),
+                    pos.getLinPos().at<float>(0) - ct*du,
+                    pos.getLinPos().at<float>(1) - st*du,
+                    pos.theta() - du * cm2rad),
             Vector3D<float>(
-                    pos.getLinPos().at<float>(0),
-                    pos.getLinPos().at<float>(1) + dy,
+                    pos.getLinPos().at<float>(0) - st*dv,
+                    pos.getLinPos().at<float>(1) + ct*dv,
                     pos.theta()),
             Vector3D<float>(
-                    pos.getLinPos().at<float>(0) + dx,
-                    pos.getLinPos().at<float>(1),
-                    pos.theta() + dx * cm2rad),
+                    pos.getLinPos().at<float>(0) + ct*du,
+                    pos.getLinPos().at<float>(1) + st*du,
+                    pos.theta() + du * cm2rad),
             Vector3D<float>(
-                    pos.getLinPos().at<float>(0),
-                    pos.getLinPos().at<float>(1) - dy,
+                    pos.getLinPos().at<float>(0) + st*dv,
+                    pos.getLinPos().at<float>(1) - ct*dv,
                     pos.theta()),
     };
 
-//    for(Vector3D<float> const& v : simplex) {
-//        cout << "in  v: " << v << endl;
-//    }
+    cout << "input simplex:" << endl;
+    for(Vector3D<float> const& v : simplex) {
+        cout << v.x() << " " << v.y() << " " << v.z() << endl;
+    }
 
     function<float(Vector3D<float> const&)> bf = std::bind(f, ref(*this), ref(pAcq), placeholders::_1);
 
@@ -364,8 +368,9 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
     Vector3D<float> res = neldermead<float, Vector3D<float>, 3>(simplex, bf, 0, 30);
     Pos endPos(res.x(), res.y(), res.z());
 
+    cout << "output simplex:" << endl;
     for(Vector3D<float> const& v : simplex) {
-        cout << "out v: " << v << endl;
+        cout << v.x() << " " << v.y() << " " << v.z() << endl;
     }
 
     cout << "  endpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, endPos) << endl;

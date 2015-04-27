@@ -17,5 +17,9 @@ hold on;
 plot(v(:,1), v(:,2), 'r*');
 l = 0.01;
 plot([v(:,1) v(:,1)+l*ct(:)]', [v(:,2) v(:,2)+l*st(:)]')
+for i = 1:4
+    text(v(i,1), v(i,2)+l/3, ['v', num2str(i)])
+    text(v(i,1), v(i,2)-l/3, [num2str(v(i,3)*180/pi)])
+end
 
 axis equal
