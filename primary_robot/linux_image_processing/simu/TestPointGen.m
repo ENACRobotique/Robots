@@ -47,8 +47,8 @@ imwrite(DD, 'dist.png', 'bitdepth', 16);
 
 %% get propability from distance
 
-low_dens = 1/10; % (/cm²)
-low_thr = 15; % (cm)
+low_dens = 1/15; % (/cm²)
+low_thr = 12; % (cm)
 
 high_dens = 1/1; % (/cm²)
 high_thr = 0;
@@ -128,13 +128,18 @@ imwrite(B, 'tp.png');
 
 %% write testpoints to file
 
-H = rgb2hsv(i);
-H = H(:,:,1);
+HSV = rgb2hsv(i);
+H = HSV(:,:,1);
+S = HSV(:,:,2);
+V = HSV(:,:,3);
 
 [row, col] = find(Q);
 h = H(Q);
+s = S(Q);
+v = V(Q);
+p = P(Q);
 
-M = [(col - 10 + 1)./factor, (size(i,1) - row + 1  - 10 + 1)./factor, h];
+M = [(col - 10 + 1)./factor, (size(i,1) - row + 1  - 10 + 1)./factor, h, s, v, p];
 
 dlmwrite('testpoints.csv', M);
 

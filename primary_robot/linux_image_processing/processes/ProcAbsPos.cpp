@@ -23,6 +23,7 @@
 #include <iostream>
 #include <random>
 #include "performance.hpp"
+#include <tools/neldermead.h>
 
 using namespace std;
 using namespace cv;
@@ -30,8 +31,11 @@ using namespace cv;
 //#define SHOW_TESTPOINTS
 //#define SHOW_SIMULATED
 //#define HSV_TO_HGRAY
+//#define HSV_TO_VGRAY
 //#define SHOW_PLAYGROUND
 //#define SHOW_HSV
+
+//#define WRITE_IMAGES
 
 /**
  * H
@@ -51,15 +55,18 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
     string line;
     while (getline(infile, line)) {
         istringstream s(line);
-        float x, y, hue;
+        float x, y, hue, sat, val, prob;
         char del;
 
-        s >> x >> del >> y >> del >> hue;
+        s >> x >> del >> y >> del >> hue >> del >> sat >> del >> val >> del >> prob;
 
         assert(del == ',');
         assert(hue >= 0 && hue <= 1);
+        assert(sat >= 0 && sat <= 1);
+        assert(val >= 0 && val <= 1);
+        assert(prob >= 0 && prob <= 1);
 
-        staticTP.push_back(TestPoint((Mat_<float>(2, 1) << x, y), hue, 1.));
+        staticTP.push_back(TestPoint((Mat_<float>(2, 1) << x, y), hue, sat, val, 2. * prob));
     }
     infile.close();
 
@@ -96,6 +103,23 @@ Point2i getInPGIm(Point3_<T> p) {
     float factor = 4; // (px/cm)
 
     return {int(round(p.x * factor)) + 9, int(round((200 - p.y) * factor)) + 9};
+}
+
+Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
+    Transform2D<float> tr_rob2pg = robPos.getTransform().getReverse();
+
+    return getSimulatedAt(pAcq, tr_rob2pg);
+}
+
+Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const {
+    // simulate acquisition
+    Mat im3 = pAcq.getAcq()->getMat(BGR).clone();
+    for (Mat_<Vec3b>::iterator it = im3.begin<Vec3b>(); it != im3.end<Vec3b>();
+            it++) {
+        (*it) = pg.at<Vec3b>(getInPGIm(tr_rob2pg.transformLinPos(pAcq.cam2plane(it.pos()))));
+    }
+
+    return im3;
 }
 
 float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
@@ -154,27 +178,32 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     line(pg_fov, rP, rP_y, Scalar(0, 255, 0), 4);
 #endif
 
-#ifdef SHOW_SIMULATED
-    // simulate acquisition
-    Mat im3 = acq->getMat(BGR).clone();
-    for(Mat_<Vec3b>::iterator it = im3.begin<Vec3b>(); it != im3.end<Vec3b>(); it++) {
-        (*it) = pg.at<Vec3b>(getInPGIm(tr_rob2pg.transformLinPos(pAcq.cam2plane(it.pos()))));
-    }
-    imshow("im3", im3);
-
-#ifdef SHOW_HSV
-    // show simulated acquisition in hsv
-    Mat im3_hsv = im3.clone();
-    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
-#ifdef HSV_TO_HGRAY
-    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
-        (*it)[1] = (*it)[0];
-        (*it)[2] = (*it)[0];
-    }
-#endif
-    imshow("im3_hsv", im3_hsv);
-#endif
-#endif
+//#ifdef SHOW_SIMULATED
+//    // simulate acquisition
+//    Mat im3 = getSimulatedAt(pAcq, tr_rob2pg);
+//    imshow("im3", im3);
+//
+//#ifdef SHOW_HSV
+//    // show simulated acquisition in hsv
+//    Mat im3_hsv = im3.clone();
+//    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+//#ifdef HSV_TO_HGRAY
+//    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+//        (*it)[1] = (*it)[0];
+//        (*it)[2] = (*it)[0];
+//    }
+//#elif defined(HSV_TO_VGRAY)
+//    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+//        (*it)[0] = (*it)[2];
+//        (*it)[1] = (*it)[2];
+//    }
+//#endif
+//#ifdef WRITE_IMAGES
+//    imwrite("im3_hsv.png", im3_hsv);
+//#endif
+//    imshow("im3_hsv", im3_hsv);
+//#endif
+//#endif
 
     // get Energy...
     int nb = 0;
@@ -227,12 +256,14 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 
         // get hue of selected pixel
         float hue = float(im.at<Vec3b>(y, x)[0]) / 255.;
+        float sat = float(im.at<Vec3b>(y, x)[1]) / 255.;
+        float val = float(im.at<Vec3b>(y, x)[2]) / 255.;
 
 //        assert(hue >= 0. && hue <= 1.);
 //        assert(255*hue == im.at<Vec3b>(y, x)[0]);
 
         // get cost of testpoint given this hue
-        E += tp.getCost(hue);
+        E += tp.getCost(hue, sat, val);
     }
 
 //    for(const TestPoint& tp : posDependentTP){
@@ -256,21 +287,40 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     return E;
 }
 
+float ProcAbsPos::f(ProcAbsPos& p, ProjAcq& pAcq, const Vector3D<float>& pt) {
+    return p.getEnergy(pAcq, Pos(pt.x(), pt.y(), pt.z()));
+}
+
 void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) {
     assert(acqList.size() == 1);
 
     Acq* acq = acqList.front();
+
+#ifdef WRITE_IMAGES
+    imwrite("rgb.png", acq->getMat(BGR));
+#endif
+
 #ifdef SHOW_HSV
-    Mat im = acq->getMat(HSV);
+    Mat im_hsv = acq->getMat(HSV);
 
 #ifdef HSV_TO_HGRAY
-    for(Mat_<Vec3b>::iterator it = im.begin<Vec3b>(); it != im.end<Vec3b>(); it++) {
+    for(Mat_<Vec3b>::iterator it = im_hsv.begin<Vec3b>(); it != im_hsv.end<Vec3b>(); it++) {
         (*it)[1] = (*it)[0];
         (*it)[2] = (*it)[0];
     }
+#elif defined(HSV_TO_VGRAY)
+    for (Mat_<Vec3b>::iterator it = im_hsv.begin<Vec3b>();
+            it != im_hsv.end<Vec3b>(); it++) {
+        (*it)[0] = (*it)[2];
+        (*it)[1] = (*it)[2];
+    }
 #endif
 
-    imshow("hsv", im);
+#ifdef WRITE_IMAGES
+    imwrite("hsv.png", im_hsv);
+#endif
+
+    imshow("hsv", im_hsv);
 #endif
 
     Perf& perf = Perf::getPerf();
@@ -278,35 +328,84 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
     static Plane3D<float> pl( { 0, 0, 0 }, { 0, 0, 1 }); // build a plane with a point and a normal
     ProjAcq pAcq = acq->projectOnPlane(pl);
 
-    Pos currPos = pos;
-    float E = 0, prevE = getEnergy(pAcq, currPos);
+    cout << "  begpos: " << pos.x() << ", " << pos.y() << ", " << pos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, pos) << endl;
 
-    perf.endOfStep("begpos");
+    float dx = 10;
+    float dy = 10;
+    float cm2rad = 0.01;
 
-    cout << "  begpos: " << currPos.x() << ", " << currPos.y() << ", " << currPos.theta() * 180. / M_PI << ", E=" << prevE << endl;
+    array<Vector3D<float>, 4> simplex {
+            Vector3D<float>(
+                    pos.getLinPos().at<float>(0) - dx,
+                    pos.getLinPos().at<float>(1),
+                    pos.theta() - dx * cm2rad),
+            Vector3D<float>(
+                    pos.getLinPos().at<float>(0),
+                    pos.getLinPos().at<float>(1) + dy,
+                    pos.theta()),
+            Vector3D<float>(
+                    pos.getLinPos().at<float>(0) + dx,
+                    pos.getLinPos().at<float>(1),
+                    pos.theta() + dx * cm2rad),
+            Vector3D<float>(
+                    pos.getLinPos().at<float>(0),
+                    pos.getLinPos().at<float>(1) - dy,
+                    pos.theta()),
+    };
 
-//    float T = ...;
-//    float alpha = 0.9...;
-    int nb = 10;
-    do {
-        float dx = 5 * getRand();
-        float dy = 5 * getRand();
-        float dt = 5 * M_PI / 180. * getRand();
+//    for(Vector3D<float> const& v : simplex) {
+//        cout << "in  v: " << v << endl;
+//    }
 
-        Pos testPos(currPos.x() + dx, currPos.y() + dy, currPos.theta() + dt);
-        E = getEnergy(pAcq, testPos);
+    function<float(Vector3D<float> const&)> bf = std::bind(f, ref(*this), ref(pAcq), placeholders::_1);
 
-        if (E < prevE) {
-            currPos = testPos;
-            prevE = E;
+    perf.endOfStep("ProcAbsPos::setting up optim");
 
-//            cout << "  newpos: " << currPos.x() << ", " << currPos.y() << ", " << currPos.theta() * 180. / M_PI << ", E=" << E << endl;
-        }
+    Vector3D<float> res = neldermead<float, Vector3D<float>, 3>(simplex, bf, 0, 30);
+    Pos endPos(res.x(), res.y(), res.z());
 
-        perf.endOfStep("it #" + to_string(11 - nb));
+    for(Vector3D<float> const& v : simplex) {
+        cout << "out v: " << v << endl;
+    }
 
-//        T *= alpha;
-    } while (--nb > 0);
+    cout << "  endpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, endPos) << endl;
 
-    cout << "  endpos: " << currPos.x() << ", " << currPos.y() << ", " << currPos.theta() * 180. / M_PI << ", E=" << prevE << endl;
+    perf.endOfStep("optim (neldermead)");
+
+#ifdef SHOW_SIMULATED
+    // simulate acquisition
+    Mat im3 = getSimulatedAt(pAcq, endPos);
+#ifdef WRITE_IMAGES
+    imwrite("im3.png", im3);
+#endif
+    imshow("im3", im3);
+
+#ifdef SHOW_HSV
+    // show simulated acquisition in hsv
+    Mat im3_hsv = im3.clone();
+    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+#ifdef HSV_TO_HGRAY
+    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[1] = (*it)[0];
+        (*it)[2] = (*it)[0];
+    }
+#elif defined(HSV_TO_VGRAY)
+    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[0] = (*it)[2];
+        (*it)[1] = (*it)[2];
+    }
+#endif
+#ifdef WRITE_IMAGES
+    imwrite("im3_hsv.png", im3_hsv);
+#endif
+    imshow("im3_hsv", im3_hsv);
+
+    Mat diff_hsv = im_hsv - im3_hsv;
+#ifdef WRITE_IMAGES
+    imwrite("diff_hsv.png", diff_hsv);
+#endif
+    imshow("diff_hsv", diff_hsv);
+#endif
+#endif
+
 }

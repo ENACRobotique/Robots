@@ -14,23 +14,30 @@
 class TestPoint {
 public:
     cv::Mat pos; // (in cm, in playground reference frame)
-    float hue;
+    float hue, sat, val;
     float weight;
 
-    TestPoint(cv::Mat pos, float hue, float weight) :
-            pos(pos), hue(hue), weight(weight) {
+    TestPoint(cv::Mat pos, float hue, float sat, float val, float weight) :
+            pos(pos), hue(hue), sat(sat), val(val), weight(weight) {
     }
     virtual ~TestPoint() {
     }
 
-    float getCost(float mHue) const
+    float getCost(float mHue, float mSat, float mVal) const
             {
+        float dVal = val - mVal;
+        if (dVal > 0.5)
+            dVal -= 1.f;
+        else if (dVal < -0.5)
+            dVal += 1.f;
+
         float dHue = hue - mHue;
+        if (dHue > 0.5)
+            dHue -= 1.f;
+        else if (dHue < -0.5)
+            dHue += 1.f;
 
-        if(dHue > 0.5) dHue -= 1.f;
-        else if(dHue < -0.5) dHue += 1.f;
-
-        return weight * std::abs(dHue);
+        return weight * (val * std::abs(dHue) + (1.f - val) * std::abs(dVal));
     }
 
     float getHue() const

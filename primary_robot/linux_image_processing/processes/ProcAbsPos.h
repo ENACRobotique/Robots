@@ -22,8 +22,12 @@ protected:
 
     std::vector<TestPoint> getPosDependentTP(const Pos& robPos);
     float getEnergy(ProjAcq& pAcq, const Pos& robPos);
+    cv::Mat getSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const;
+    cv::Mat getSimulatedAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const;
 
     cv::Mat pg;
+
+    static float f(ProcAbsPos& p, ProjAcq& pAcq, const Vector3D<float>& pt);
 
     // prepare random generator
     std::random_device generator;
