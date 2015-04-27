@@ -37,12 +37,5 @@ typedef enum{
 #error "only one sync method possible"
 #endif
 
-#if MYADDRX==ADDRX_MOBILE_1             // the beacon with a "1" written in red on the PCB
-    #define HARDUPDATEPERIOD  129870    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
-    #define HARDUPDATESIGN    -1        // sgn(delta)
-#elif MYADDRX==ADDRX_MOBILE_2           // the beacon with a "2" written in red on the PCB
-    #define HARDUPDATEPERIOD  117855    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
-    #define HARDUPDATESIGN    -1        // sgn(delta)
-#endif
 
 #endif /* PARAMS_H_ */

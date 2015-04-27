@@ -78,7 +78,6 @@ void setup(){
     pinMode(PIN_DBG_LED,OUTPUT);
 #ifdef SYNC_WIRED
     wiredSync_senderInit(PIN_SYNC);
-    wiredSync_sendSignal();
 #endif
 }
 

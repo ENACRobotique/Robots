@@ -7,7 +7,10 @@
 
 #include "timeout.h"
 #include "lib_synchro_wire.h"
-
+#if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
+#include "bn_debug.h"
+#include "params.h"
+#endif
 #if defined(WIREDSYNC_BENCHMARK) && defined(ARCH_X86_LINUX)
 #include <stdio.h>
 #include <iostream>
@@ -54,6 +57,16 @@ int wiredSync_waitSignal(){
         prevReceived = end;
 
         wiredSync_intermediateCompute(sampleIndex*WIREDSYNC_PERIOD,end);
+#if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
+#if MYADDRX == ADDRX_MOBILE_1
+        delay(20);
+        bn_printfDbg(", mob1, %d, %lu, %lu",sampleIndex, end, sampleIndex*WIREDSYNC_PERIOD);
+#endif
+#if MYADDRX == ADDRX_MOBILE_2
+        delay(40);
+        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, end, sampleIndex*WIREDSYNC_PERIOD);
+#endif
+#endif
         return sampleIndex;
     }
     return -1;
@@ -102,6 +115,16 @@ int wiredSync_finalCompute(int reset){
 #ifndef WIREDSYNC_BENCHMARK
         syncStruc sStruc = {static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)),(inv_delta>0?1:-1)};
         setSyncParam(sStruc);
+#ifdef DEBUG_SYNC_WIRE
+#if MYADDRX == ADDRX_MOBILE_1
+        delay(20);
+        bn_printfDbg(", mob1 end, %d, %lu, %lu",(int)sum_ones, (uint32_t)offset, (uint32_t)inv_delta);
+#endif
+#if MYADDRX == ADDRX_MOBILE_2
+        delay(40);
+        bn_printfDbg(", mob2 end, %d, %lu, %lu\n",(int)sum_ones, (uint32_t)offset, (uint32_t)inv_delta);
+#endif
+#endif
 #else
 #ifdef ARCH_328P_ARDUINO
 #else
@@ -160,6 +183,9 @@ int wiredSync_sendSignal(){
             updateSync();
         }
         nbSamples --;
+#if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
+        bn_printfDbg("tur, %d, %lu", WIREDSYNC_NBSAMPLES - nbSamples, end);
+#endif
     }
     if (nbSamples) return 1;
     else return -1;
