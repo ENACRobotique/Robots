@@ -49,7 +49,7 @@ int bn_printDbg(const char *str){
     if(ret > (int)sizeof(tmp.header)){
         ret -= (int)sizeof(tmp.header);
     }
-    else{
+    else if(ret >= 0){
         ret = -1;
     }
     return ret;
