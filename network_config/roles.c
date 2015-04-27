@@ -168,9 +168,11 @@ bn_Address role_get_addr(uint8_t role){
         return MYADDR;
     }
 
+#if MYROLE
     if(role > MYROLE){
         role--;
     }
+#endif
     role--; // roles are 1-based
 
     if(role >= NB_ROLE_ADDRESSES){
