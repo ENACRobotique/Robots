@@ -16,6 +16,7 @@
 template<typename T, typename V, int sz>
 V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&, int)> f, T z_end, int nb_max) {
     V xb, xr, xe, xc;
+    const V x0;
     int i_max, i_MAX, i_MIN;
     int indexes[sz + 1];
     T z[sz + 1], z_xr, z_xe, z_xc, alpha = 1., gamma = 2., rho = -0.5,
@@ -60,12 +61,13 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&, int)> f, T z_en
 #endif
 
 // barycentre
-        xb = V();
+        decltype(xb - xb) v;
         for (int j = 0; j < sz + 1; j++) {
             if (j != i_MAX) {
-                xb += x[j] * T(1) / sz;
+                v += x[j] - x0;
             }
         }
+        xb = x0 + v * T(1) / sz;
 #ifdef NM_DEBUG
         std::cout << "   xb = (" << xb << ")" << std::endl;
 #endif

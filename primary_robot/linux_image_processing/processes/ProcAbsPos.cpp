@@ -293,7 +293,7 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     return E;
 }
 
-float ProcAbsPos::f(ProcAbsPos& p, ProjAcq& pAcq, Vector3D<float> const& pt, int iter) {
+float ProcAbsPos::f(ProcAbsPos& p, ProjAcq& pAcq, Point3D<float> const& pt, int iter) {
     float enr = p.getEnergy(pAcq, Pos(pt.x(), pt.y(), pt.z()));
     float rnd = iter >= 0 ? enr * 1.f * p.getRand() / log(3.f + iter) : 0.f;
     float ret = enr + rnd;
@@ -353,29 +353,29 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
         float ct = cos(t);
         float st = sin(t);
 
-        array<Vector3D<float>, 4> simplex {
-                Vector3D<float>(
+        array<Point3D<float>, 4> simplex {
+                Point3D<float>(
                         pos.getLinPos().at<float>(0) - ct * du +
                                 dr * getRand(),
                         pos.getLinPos().at<float>(1) - st * du +
                                 dr * getRand(),
                         pos.theta() - du * cm2rad +
                                 dr * cm2rad * getRand()),
-                Vector3D<float>(
+                Point3D<float>(
                         pos.getLinPos().at<float>(0) - st * dv +
                                 dr * getRand(),
                         pos.getLinPos().at<float>(1) + ct * dv +
                                 dr * getRand(),
                         pos.theta() +
                                 dr * cm2rad * getRand()),
-                Vector3D<float>(
+                Point3D<float>(
                         pos.getLinPos().at<float>(0) + ct * du +
                                 dr * getRand(),
                         pos.getLinPos().at<float>(1) + st * du +
                                 dr * getRand(),
                         pos.theta() + du * cm2rad +
                                 dr * cm2rad * getRand()),
-                Vector3D<float>(
+                Point3D<float>(
                         pos.getLinPos().at<float>(0) + st * dv +
                                 dr * getRand(),
                         pos.getLinPos().at<float>(1) - ct * dv +
@@ -385,19 +385,19 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
         };
 
         cout << "input simplex:" << endl;
-        for (Vector3D<float> const& v : simplex) {
+        for (Point3D<float> const& v : simplex) {
             cout << v.x() << " " << v.y() << " " << v.z() << endl;
         }
 
-        function<float(Vector3D<float> const&, int)> bf = std::bind(f, ref(*this), ref(pAcq), placeholders::_1, placeholders::_2);
+        function<float(Point3D<float> const&, int)> bf = std::bind(f, ref(*this), ref(pAcq), placeholders::_1, placeholders::_2);
 
         perf.endOfStep("ProcAbsPos::setting up optim");
 
-        Vector3D<float> res = neldermead<float, Vector3D<float>, 3>(simplex, bf, 0, 20);
+        Point3D<float> res = neldermead<float, Point3D<float>, 3>(simplex, bf, 0, 20);
         Pos endPos(res.x(), res.y(), res.z());
 
         cout << "output simplex:" << endl;
-        for (Vector3D<float> const& v : simplex) {
+        for (Point3D<float> const& v : simplex) {
             cout << v.x() << " " << v.y() << " " << v.z() << endl;
         }
 

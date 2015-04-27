@@ -51,7 +51,7 @@ public:
 
     T distanceTo(const Point3D<T>& pt) {
         normalize();
-        return _a * pt.x + _b * pt.y + _c * pt.z + _d;
+        return _a * pt.x() + _b * pt.y() + _c * pt.z() + _d;
     }
     Point3D<T> project(const Point3D<T>& p) {
         normalize();

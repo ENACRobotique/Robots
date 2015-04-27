@@ -27,7 +27,7 @@ protected:
 
     cv::Mat pg;
 
-    static float f(ProcAbsPos& p, ProjAcq& pAcq, Vector3D<float> const& pt, int iter);
+    static float f(ProcAbsPos& p, ProjAcq& pAcq, Point3D<float> const& pt, int iter);
 
     // prepare random generator
     std::random_device generator;
