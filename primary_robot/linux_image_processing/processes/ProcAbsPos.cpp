@@ -5,25 +5,22 @@
  *      Author: ludo6431
  */
 
-#include <opencv2/core/core.hpp>
+#include <opencv2/core/types_c.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <performance.hpp>
 #include <processes/ProcAbsPos.h>
 #include <Plane3D.h>
-#include <Point2D.h>
 #include <tools/Cam.h>
 #include <tools/Image.h>
-#include <tools/Position2D.h>
+#include <tools/neldermead.h>
 #include <tools/ProjAcq.h>
-#include <Transform2D.h>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <random>
-#include "performance.hpp"
-#include <tools/neldermead.h>
 
 using namespace std;
 using namespace cv;
@@ -293,12 +290,12 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     return E;
 }
 
-float ProcAbsPos::f(ProcAbsPos& p, ProjAcq& pAcq, Point3D<float> const& pt, int iter) {
-    float enr = p.getEnergy(pAcq, Pos(pt.x(), pt.y(), pt.z()));
+float ProcAbsPos::f(ProcAbsPos& p, ProjAcq& pAcq, AbsPos2D<float> const& pt, int iter) {
+    float enr = p.getEnergy(pAcq, pt);
     float rnd = iter >= 0 ? enr * 1.f * p.getRand() / log(3.f + iter) : 0.f;
     float ret = enr + rnd;
 
-    cout << "f(pt = " << pt << ", iter = " << iter << ") = " << enr << " + " << rnd / enr * 100.f << " %" << endl;
+// cout << "f(pt = " << pt << ", iter = " << iter << ") = " << enr << " + " << rnd / enr * 100.f << " %" << endl;
 
     return ret;
 }
@@ -353,57 +350,56 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
         float ct = cos(t);
         float st = sin(t);
 
-        array<Point3D<float>, 4> simplex {
-                Point3D<float>(
-                        pos.getLinPos().at<float>(0) - ct * du +
+        array<AbsPos2D<float>, 4> simplex {
+                AbsPos2D<float>(
+                        pos.x() - ct * du +
                                 dr * getRand(),
-                        pos.getLinPos().at<float>(1) - st * du +
+                        pos.y() - st * du +
                                 dr * getRand(),
                         pos.theta() - du * cm2rad +
                                 dr * cm2rad * getRand()),
-                Point3D<float>(
-                        pos.getLinPos().at<float>(0) - st * dv +
+                AbsPos2D<float>(
+                        pos.x() - st * dv +
                                 dr * getRand(),
-                        pos.getLinPos().at<float>(1) + ct * dv +
+                        pos.y() + ct * dv +
                                 dr * getRand(),
                         pos.theta() +
                                 dr * cm2rad * getRand()),
-                Point3D<float>(
-                        pos.getLinPos().at<float>(0) + ct * du +
+                AbsPos2D<float>(
+                        pos.x() + ct * du +
                                 dr * getRand(),
-                        pos.getLinPos().at<float>(1) + st * du +
+                        pos.y() + st * du +
                                 dr * getRand(),
                         pos.theta() + du * cm2rad +
                                 dr * cm2rad * getRand()),
-                Point3D<float>(
-                        pos.getLinPos().at<float>(0) + st * dv +
+                AbsPos2D<float>(
+                        pos.x() + st * dv +
                                 dr * getRand(),
-                        pos.getLinPos().at<float>(1) - ct * dv +
+                        pos.y() - ct * dv +
                                 dr * getRand(),
                         pos.theta() - du * cm2rad +
                                 dr * cm2rad * getRand()),
         };
 
         cout << "input simplex:" << endl;
-        for (Point3D<float> const& v : simplex) {
-            cout << v.x() << " " << v.y() << " " << v.z() << endl;
+        for (AbsPos2D<float> const& v : simplex) {
+            cout << v.x() << " " << v.y() << " " << v.theta() << endl;
         }
 
-        function<float(Point3D<float> const&, int)> bf = std::bind(f, ref(*this), ref(pAcq), placeholders::_1, placeholders::_2);
+        function<float(AbsPos2D<float> const&, int)> bf = std::bind(f, ref(*this), ref(pAcq), placeholders::_1, placeholders::_2);
 
         perf.endOfStep("ProcAbsPos::setting up optim");
 
-        Point3D<float> res = neldermead<float, Point3D<float>, 3>(simplex, bf, 0, 20);
-        Pos endPos(res.x(), res.y(), res.z());
+        AbsPos2D<float> endPos = neldermead<float, AbsPos2D<float>, 3>(simplex, bf, 0, 20);
 
         cout << "output simplex:" << endl;
-        for (Point3D<float> const& v : simplex) {
-            cout << v.x() << " " << v.y() << " " << v.z() << endl;
+        for (AbsPos2D<float> const& v : simplex) {
+            cout << v.x() << " " << v.y() << " " << v.theta() << endl;
         }
 
         cout << "  endpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, endPos) << endl;
 
-        perf.endOfStep("optim (neldermead #" + to_string(i) + ")");
+        perf.endOfStep("ProcAbsPos::optim (neldermead #" + to_string(i) + ")");
 
 #ifdef SHOW_SIMULATED
         // simulate acquisition

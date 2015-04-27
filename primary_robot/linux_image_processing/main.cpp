@@ -8,9 +8,9 @@
 #include <opencv2/core/core.hpp>
 #include <processes/ProcAbsPos.h>
 #include <processes/Process.h>
+#include <tools/AbsPos2D.h>
 #include <tools/Acq.h>
 #include <tools/Cam.h>
-#include <tools/Position2D.h>
 #include <tools/Uncertainty2D.h>
 #include <iostream>
 #include <vector>
@@ -51,9 +51,12 @@ int main(int argc, char* argv[]) {
     // init cameras
     map<Cam*, VideoCapture*> camList;
     camList.insert(make_pair(
-            new Cam(521.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226.*M_PI/180., 0, 0)),
+            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226.*M_PI/180., 0, 0)),
 //            new VideoCapture("MyVideo.avi")));
-            new VideoCapture(0)));
+//            new VideoCapture(0)));
+            new VideoCapture("Images/captures/guvcview_image-25.jpg")));
+//            new VideoCapture("Images/captures/1-955-743.jpg")));
+//            new VideoCapture("Images/captures/z1.png")));
 
     // init processes
     vector<Process*> processList;
@@ -93,7 +96,9 @@ int main(int argc, char* argv[]) {
 
             perf.endOfStep("acquisitions");
 
-            p->process(acqList, Position2D<float>(150, 23, 0), Uncertainty2D<float>(0, 0, 0, 0));
+            p->process(acqList, AbsPos2D<float>(40, 55, 140. * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
+//            p->process(acqList, Position2D<float>(150, 23, 0 * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
+//            p->process(acqList, Position2D<float>(90, 75, 65 * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
 
             for(Acq* a : acqList){
                 delete a;

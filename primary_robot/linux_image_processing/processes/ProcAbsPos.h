@@ -8,9 +8,13 @@
 #ifndef PROCESSES_PROCABSPOS_H_
 #define PROCESSES_PROCABSPOS_H_
 
+#include <opencv2/core/core.hpp>
 #include <processes/Process.h>
+#include <tools/AbsPos2D.h>
 #include <tools/Acq.h>
 #include <tools/TestPoint.h>
+#include <Transform2D.h>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -27,7 +31,7 @@ protected:
 
     cv::Mat pg;
 
-    static float f(ProcAbsPos& p, ProjAcq& pAcq, Point3D<float> const& pt, int iter);
+    static float f(ProcAbsPos& p, ProjAcq& pAcq, AbsPos2D<float> const& pt, int iter);
 
     // prepare random generator
     std::random_device generator;

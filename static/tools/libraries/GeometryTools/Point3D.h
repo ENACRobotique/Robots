@@ -21,7 +21,8 @@ class Point3D {
 public:
     static const Point3D origin;
 
-    Point3D() {
+    Point3D() :
+            _x(0), _y(0), _z(0) {
     }
     Point3D(T x, T y, T z) :
             _x(x), _y(y), _z(z) {
@@ -67,7 +68,7 @@ public:
     }
 #endif
 
-    friend std::ostream& operator<< <T>(std::ostream& out, const Point3D& v);
+    friend std::ostream& operator<<<T>(std::ostream& out, const Point3D& v);
 };
 
 template<typename T>
