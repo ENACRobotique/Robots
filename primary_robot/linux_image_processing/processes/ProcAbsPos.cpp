@@ -14,6 +14,7 @@
 #include <tools/Cam.h>
 #include <tools/Image.h>
 #include <tools/neldermead.h>
+#include <tools/simulated_annealing.h>
 #include <tools/ProjAcq.h>
 #include <array>
 #include <cassert>
@@ -25,24 +26,15 @@
 using namespace std;
 using namespace cv;
 
-//#define SHOW_TESTPOINTS
-#define SHOW_SIMULATED
-#define HSV_TO_HGRAY
+#define COMP_TESTPOINTS
+#define COMP_SIMULATED
+//#define COMP_PLAYGROUND
+//#define COMP_HSV
+//#define HSV_TO_HGRAY
 //#define HSV_TO_VGRAY
-//#define SHOW_PLAYGROUND
-#define SHOW_HSV
 
 #define WRITE_IMAGES
-
-/**
- * H
- * 0°-360° rouge
- * 60° jaune
- * 120° vert
- * 180° cyan
- * 240° bleu
- * 300° magenta
- */
+//#define SHOW_IMAGES
 
 ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
         {
@@ -52,18 +44,20 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
     string line;
     while (getline(infile, line)) {
         istringstream s(line);
-        float x, y, hue, sat, val, prob;
+        float x, y /* (cm) */, hue = -1, sat = -1, val = -1,
+                dist = -1 /* (cm) */, dens = -1 /* (cm^-2) */;
         char del;
 
-        s >> x >> del >> y >> del >> hue >> del >> sat >> del >> val >> del >> prob;
+        s >> x >> del >> y >> del >> hue >> del >> sat >> del >> val >> del >> dist >> del >> dens;
 
         assert(del == ',');
         assert(hue >= 0 && hue <= 1);
         assert(sat >= 0 && sat <= 1);
         assert(val >= 0 && val <= 1);
-        assert(prob >= 0 && prob <= 1);
+        assert(dist >= 0 && dist <= 100);
+        assert(dens > 0 && dens <= 10);
 
-        staticTP.push_back(TestPoint((Mat_<float>(2, 1) << x, y), hue, sat, val, 10. * prob));
+        staticTP.push_back(TestPoint(x, y, hue, sat, val, 1.f / dens));
     }
     infile.close();
 
@@ -125,6 +119,75 @@ Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2p
     return im3;
 }
 
+void ProcAbsPos::addTestPointsAtTo(Mat& im, ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const {
+    Transform2D<float> tr_pg2rob = tr_rob2pg.getReverse();
+    Cam const* cam = pAcq.getAcq()->getCam();
+
+    // get corners and edges of cam fov projected on playground
+    Mat camCorners[4];
+    camCorners[0] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getTopLeft()));
+    camCorners[1] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getTopRight()));
+    camCorners[2] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomRight()));
+    camCorners[3] = tr_rob2pg.transformLinPos(pAcq.cam2plane(cam->getBottomLeft()));
+
+    float xMin = MIN(MIN(camCorners[0].at<float>(0), camCorners[1].at<float>(0)), MIN(camCorners[2].at<float>(0), camCorners[3].at<float>(0)));
+    float yMin = MIN(MIN(camCorners[0].at<float>(1), camCorners[1].at<float>(1)), MIN(camCorners[2].at<float>(1), camCorners[3].at<float>(1)));
+    float xMax = MAX(MAX(camCorners[0].at<float>(0), camCorners[1].at<float>(0)), MAX(camCorners[2].at<float>(0), camCorners[3].at<float>(0)));
+    float yMax = MAX(MAX(camCorners[0].at<float>(1), camCorners[1].at<float>(1)), MAX(camCorners[2].at<float>(1), camCorners[3].at<float>(1)));
+
+    Mat camEdges[4];
+    for (int i = 0; i < 4; i++) {
+        camEdges[i] = camCorners[(i + 1) % 4] - camCorners[i];
+    }
+
+    for (TestPoint const& tp : staticTP) {
+        cv::Mat tp_pos = tp.getPos();
+
+        float tp_x = tp_pos.at<float>(0);
+        float tp_y = tp_pos.at<float>(1);
+
+        if (tp_x > xMax || tp_x < xMin || tp_y > yMax || tp_y < yMin) {
+            continue;
+        }
+
+        // check if testpoint seen by camera
+        int i;
+        for (i = 0; i < 4; i++) {
+            Mat vi = tp_pos - camCorners[i];
+
+            double cross = vi.at<float>(0) * camEdges[i].at<float>(1) -
+                    vi.at<float>(1) * camEdges[i].at<float>(0);
+            if (cross < 0) {
+                break;
+            }
+        }
+        if (i < 4) {
+            continue;
+        }
+
+        // get position of testpoint in original camera image
+        cv::Mat tp_cmRob = tr_pg2rob.transformLinPos(tp_pos);
+        cv::Mat tp_pxCam = pAcq.plane2cam(tp_cmRob);
+
+        int x = int(round(tp_pxCam.at<float>(0)));
+        int y = int(round(tp_pxCam.at<float>(1)));
+
+        assert(x >= 0 && x < cam->getSize().width);
+        assert(y >= 0 && y < cam->getSize().height);
+
+        // draw testpoint position in camera frame
+        im.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+    }
+}
+
+Mat ProcAbsPos::getTestPointsAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const {
+    Mat im3 = getSimulatedAt(pAcq, tr_rob2pg);
+
+    addTestPointsAtTo(im3, pAcq, tr_rob2pg);
+
+    return im3;
+}
+
 float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     vector<TestPoint> posDependentTP = getPosDependentTP(robPos);
 
@@ -133,9 +196,6 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     Acq* acq = pAcq.getAcq();
     Cam const* cam = acq->getCam();
     Mat im = acq->getMat(HSV);
-#ifdef SHOW_TESTPOINTS
-    Mat im2 = acq->getMat(BGR).clone();
-#endif
 
     Transform2D<float> tr_pg2rob(robPos.getTransform());
     Transform2D<float> tr_rob2pg = tr_pg2rob.getReverse();
@@ -152,19 +212,19 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     float xMax = MAX(MAX(camCorners[0].at<float>(0), camCorners[1].at<float>(0)), MAX(camCorners[2].at<float>(0), camCorners[3].at<float>(0)));
     float yMax = MAX(MAX(camCorners[0].at<float>(1), camCorners[1].at<float>(1)), MAX(camCorners[2].at<float>(1), camCorners[3].at<float>(1)));
 
-#ifdef SHOW_PLAYGROUND
+#ifdef COMP_PLAYGROUND
     Point2i camCornersPoints[4];
-#endif
+#endif /* COMP_PLAYGROUND */
 
     Mat camEdges[4];
     for (int i = 0; i < 4; i++) {
-#ifdef SHOW_PLAYGROUND
+#ifdef COMP_PLAYGROUND
         camCornersPoints[i] = getInPGIm(camCorners[i]);
-#endif
+#endif /* COMP_PLAYGROUND */
         camEdges[i] = camCorners[(i + 1) % 4] - camCorners[i];
     }
 
-#ifdef SHOW_PLAYGROUND
+#ifdef COMP_PLAYGROUND
     Mat pg_fov = pg.clone();
 
     // draw projected FOV
@@ -179,34 +239,7 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
     line(pg_fov, rP, rP_x, Scalar(0, 0, 255), 4);
     Point2i rP_y = getInPGIm(robPos.getLinPos() + Point2D<float>(0, 3).rotate(robPos.theta()).toCv());
     line(pg_fov, rP, rP_y, Scalar(0, 255, 0), 4);
-#endif
-
-//#ifdef SHOW_SIMULATED
-//    // simulate acquisition
-//    Mat im3 = getSimulatedAt(pAcq, tr_rob2pg);
-//    imshow("im3", im3);
-//
-//#ifdef SHOW_HSV
-//    // show simulated acquisition in hsv
-//    Mat im3_hsv = im3.clone();
-//    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
-//#ifdef HSV_TO_HGRAY
-//    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
-//        (*it)[1] = (*it)[0];
-//        (*it)[2] = (*it)[0];
-//    }
-//#elif defined(HSV_TO_VGRAY)
-//    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
-//        (*it)[0] = (*it)[2];
-//        (*it)[1] = (*it)[2];
-//    }
-//#endif
-//#ifdef WRITE_IMAGES
-//    imwrite("im3_hsv.png", im3_hsv);
-//#endif
-//    imshow("im3_hsv", im3_hsv);
-//#endif
-//#endif
+#endif /* COMP_PLAYGROUND */
 
     // get Energy...
     int nb = 0;
@@ -237,10 +270,10 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 
         nb++;
 
-#ifdef SHOW_PLAYGROUND
+#ifdef COMP_PLAYGROUND
         // testpoint is in cam field of view, draw it in playground
         pg_fov.at<Vec3b>(getInPGIm(tp_pos)) = Vec3b(255, 255, 255);
-#endif
+#endif /* COMP_PLAYGROUND */
 
         // get position of testpoint in original camera image
         cv::Mat tp_cmRob = tr_pg2rob.transformLinPos(tp_pos);
@@ -251,11 +284,6 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 
         assert(x >= 0 && x < cam->getSize().width);
         assert(y >= 0 && y < cam->getSize().height);
-
-#ifdef SHOW_TESTPOINTS
-        // draw testpoint position in camera frame
-        im2.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
-#endif
 
         // get hue of selected pixel
         float hue = float(im.at<Vec3b>(y, x)[0]) / 255.;
@@ -280,36 +308,32 @@ float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
 
     E /= nb;
 
-#ifdef SHOW_PLAYGROUND
+#ifdef COMP_PLAYGROUND
+#ifdef SHOW_IMAGES
     imshow("pg", pg_fov);
-#endif
-#ifdef SHOW_TESTPOINTS
-    imshow("testpoints", im2);
-#endif
+#endif /* SHOW_IMAGES */
+#ifdef WRITE_IMAGES
+    imwrite("pg.png", pg_fov);
+#endif /* WRITE_IMAGES */
+#endif /* COMP_PLAYGROUND */
 
     return E;
 }
 
-float ProcAbsPos::f(ProcAbsPos& p, ProjAcq& pAcq, AbsPos2D<float> const& pt, int iter) {
-    float enr = p.getEnergy(pAcq, pt);
-    float rnd = iter >= 0 ? enr * 1.f * p.getRand() / log(3.f + iter) : 0.f;
-    float ret = enr + rnd;
-
-// cout << "f(pt = " << pt << ", iter = " << iter << ") = " << enr << " + " << rnd / enr * 100.f << " %" << endl;
-
-    return ret;
-}
+template<typename T>
+inline T clamp(T v, T m, T M) { return max(m, min(v, M)); }
 
 void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) {
     assert(acqList.size() == 1);
 
     Acq* acq = acqList.front();
 
+    Mat rgb = acq->getMat(BGR);
 #ifdef WRITE_IMAGES
-    imwrite("rgb.png", acq->getMat(BGR));
+    imwrite("rgb.png", rgb);
 #endif
 
-#ifdef SHOW_HSV
+#ifdef COMP_HSV
     Mat im_hsv = acq->getMat(HSV);
 
 #ifdef HSV_TO_HGRAY
@@ -328,10 +352,11 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
 #ifdef WRITE_IMAGES
     imwrite("hsv.png", im_hsv);
-#endif
-
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
     imshow("hsv", im_hsv);
-#endif
+#endif /* SHOW_IMAGES */
+#endif /* COMP_HSV */
 
     Perf& perf = Perf::getPerf();
 
@@ -340,45 +365,153 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
     cout << "  begpos: " << pos.x() << ", " << pos.y() << ", " << pos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, pos) << endl;
 
+#if 1
+    ofstream fout_trials("out_trials.csv");
+    fout_trials << "x,y,theta,E" << endl;
+
+    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 30.f, 0.96f, 200,
+            [this, &pAcq, &fout_trials](AbsPos2D<float> const& pt) { // get energy
+                float ret = this->getEnergy(pAcq, pt);
+
+                fout_trials << pt.x() << "," << pt.y() << "," << pt.theta() << "," << ret << endl;
+
+                return ret;
+            },
+            [this](AbsPos2D<float> const& curr) { // get neighbor
+                constexpr float dr = 3.f;
+                constexpr float cm2rad = 1.f/40.f;
+
+                float nx = clamp(curr.x() + dr * this->getRand(), 20.f, 280.f);
+                float ny = clamp(curr.y() + dr * this->getRand(), 20.f, 180.f);
+                float nt = curr.theta() + dr * cm2rad * this->getRand();
+
+                return AbsPos2D<float>(nx, ny, nt);
+            });
+
+    fout_trials.close();
+
+    cout << "  endpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, endPos) << endl;
+
+    perf.endOfStep("ProcAbsPos::optim (simulated annealing)");
+
+#ifdef COMP_SIMULATED
+    // simulate acquisition
+    Mat im3 = getSimulatedAt(pAcq, endPos);
+    string bn("im3-sa");
+#ifdef WRITE_IMAGES
+    imwrite(bn + ".png", im3);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, im3);
+#endif /* SHOW_IMAGES */
+
+#ifdef COMP_HSV
+    // show simulated acquisition in hsv
+    Mat im3_hsv = im3.clone();
+    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+#ifdef HSV_TO_HGRAY
+    for (Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>();
+            it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[1] = (*it)[0];
+        (*it)[2] = (*it)[0];
+    }
+#elif defined(HSV_TO_VGRAY)
+    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[0] = (*it)[2];
+        (*it)[1] = (*it)[2];
+    }
+#endif
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_hsv.png", im3_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_hsv", im3_hsv);
+#endif /* SHOW_IMAGES */
+
+    Mat diff_hsv = im_hsv - im3_hsv;
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_diff_hsv.png", diff_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_diff_hsv", diff_hsv);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_HSV */
+
+#ifdef COMP_TESTPOINTS
+    Mat im3_tp = getTestPointsAt(pAcq, endPos.getTransform().getReverse());
+    bn = "im3_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(bn + ".png", im3_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, im3_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+
+#endif /* COMP_SIMULATED */
+
+#ifdef COMP_TESTPOINTS
+    Mat rgb_tp = rgb.clone();
+    addTestPointsAtTo(rgb_tp, pAcq, endPos.getTransform().getReverse());
+    bn = "im_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(bn + ".png", rgb_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, rgb_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+
+#else
     float du = 10;
     float dv = 10;
-    float dr = 5;
-    float cm2rad = 1.f / 50.f;
+    float dr = 0;
+    float cm2rad = 1.f / 40.f;
 
-    for (int i = 0; i < 3; i++) {
+    Transform2D<float> tr_pg2rob = pos.getTransform();
+    Transform2D<float> tr_rob2pg = tr_rob2pg.getReverse();
+    Vector2D<float> camDir(pAcq.cam2plane(acq->getCam()->getCenter()));
+
+    cout << "camDir: " << camDir << endl;
+
+    for (int i = 0; i < 1; i++) {
         float t = pos.theta() + dr * cm2rad * getRand();
         float ct = cos(t);
         float st = sin(t);
 
         array<AbsPos2D<float>, 4> simplex {
-                AbsPos2D<float>(
-                        pos.x() - ct * du +
-                                dr * getRand(),
-                        pos.y() - st * du +
-                                dr * getRand(),
-                        pos.theta() - du * cm2rad +
-                                dr * cm2rad * getRand()),
-                AbsPos2D<float>(
-                        pos.x() - st * dv +
-                                dr * getRand(),
-                        pos.y() + ct * dv +
-                                dr * getRand(),
-                        pos.theta() +
-                                dr * cm2rad * getRand()),
-                AbsPos2D<float>(
-                        pos.x() + ct * du +
-                                dr * getRand(),
-                        pos.y() + st * du +
-                                dr * getRand(),
-                        pos.theta() + du * cm2rad +
-                                dr * cm2rad * getRand()),
-                AbsPos2D<float>(
-                        pos.x() + st * dv +
-                                dr * getRand(),
-                        pos.y() - ct * dv +
-                                dr * getRand(),
-                        pos.theta() - du * cm2rad +
-                                dr * cm2rad * getRand()),
+            AbsPos2D<float>(
+                    pos.x() - ct * du +
+                    dr * getRand(),
+                    pos.y() - st * du +
+                    dr * getRand(),
+                    pos.theta() - du * cm2rad +
+                    dr * cm2rad * getRand(),
+                    camDir),
+            AbsPos2D<float>(
+                    pos.x() - st * dv +
+                    dr * getRand(),
+                    pos.y() + ct * dv +
+                    dr * getRand(),
+                    pos.theta() +
+                    dr * cm2rad * getRand(),
+                    camDir),
+            AbsPos2D<float>(
+                    pos.x() + ct * du +
+                    dr * getRand(),
+                    pos.y() + st * du +
+                    dr * getRand(),
+                    pos.theta() + du * cm2rad +
+                    dr * cm2rad * getRand(),
+                    camDir),
+            AbsPos2D<float>(
+                    pos.x() + st * dv +
+                    dr * getRand(),
+                    pos.y() - ct * dv +
+                    dr * getRand(),
+                    pos.theta() - du * cm2rad +
+                    dr * cm2rad * getRand(),
+                    camDir),
         };
 
         cout << "input simplex:" << endl;
@@ -390,7 +523,7 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
         perf.endOfStep("ProcAbsPos::setting up optim");
 
-        AbsPos2D<float> endPos = neldermead<float, AbsPos2D<float>, 3>(simplex, bf, 0, 20);
+        AbsPos2D<float> endPos = neldermead<float, AbsPos2D<float>, 3>(simplex, bf, 0, 30);
 
         cout << "output simplex:" << endl;
         for (AbsPos2D<float> const& v : simplex) {
@@ -439,5 +572,6 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 #endif
 #endif
     }
+#endif
 
 }

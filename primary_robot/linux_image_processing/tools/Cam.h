@@ -30,7 +30,7 @@ public:
      * size (in pixels)
      */
     Cam(float f, cv::Size size, const Transform3D<float>& rob2cam) :
-            rob2cam(rob2cam),size(size) {
+            rob2cam(rob2cam), size(size) {
         aperAngle = cv::Size2f(
                 2. * atan2f(size.width / 2, f),
                 2. * atan2f(size.height / 2, f));
@@ -89,6 +89,9 @@ public:
     }
     cv::Mat getBottomLeft() const {
         return (cv::Mat_<float>(2, 1) << 0, size.height - 1);
+    }
+    cv::Mat getCenter() const {
+        return (cv::Mat_<float>(2, 1) << (size.width - 1.f) / 2.f, (size.height - 1.f) / 2.f);
     }
 };
 

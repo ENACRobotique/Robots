@@ -27,6 +27,10 @@ private:
     Perf() {
     }
 
+    Perf(Perf const&) = delete;
+    Perf(Perf &) = delete;
+    Perf& operator=(Perf const&) = delete;
+
 public:
     static Perf& getPerf() {
         static Perf p;

@@ -28,10 +28,10 @@ protected:
     float getEnergy(ProjAcq& pAcq, const Pos& robPos);
     cv::Mat getSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const;
     cv::Mat getSimulatedAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const;
+    void addTestPointsAtTo(cv::Mat& im, ProjAcq& pAcq, const Transform2D<float>& tr_pg2rob) const;
+    cv::Mat getTestPointsAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const;
 
     cv::Mat pg;
-
-    static float f(ProcAbsPos& p, ProjAcq& pAcq, AbsPos2D<float> const& pt, int iter);
 
     // prepare random generator
     std::random_device generator;

@@ -8,8 +8,13 @@
 #ifndef LIB_GEOMETRYTOOLS_VECTOR2D_H_
 #define LIB_GEOMETRYTOOLS_VECTOR2D_H_
 
+#include <Point2D.h>
 #include <cmath>
 #include <iostream>
+
+#ifdef USE_OPENCV
+#include <opencv2/core/core.hpp>
+#endif
 
 template<typename T>
 class Point2D;
@@ -31,8 +36,19 @@ public:
     Vector2D(const Point2D<T>& a, const Point2D<T>& b) :
             x(b.x - a.x), y(b.y - a.y) {
     }
+#ifdef USE_OPENCV
+    Vector2D(cv::Mat v) :
+            x(v.at<T>(0)), y(v.at<T>(1)) {
+    }
+#endif
     ~Vector2D() {
     }
+
+#ifdef USE_OPENCV
+    cv::Mat toCv() const {
+        return (cv::Mat_<T>(3, 1) << x, y);
+    }
+#endif
 
     T operator*(const Vector2D& v) const { //dot product
         return x * v.x + y * v.y;
@@ -105,7 +121,7 @@ Vector2D<T> operator*(const T& n, const Vector2D<T>& v) {
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, Vector2D<T>& v) {
+std::ostream& operator<<(std::ostream& out, const Vector2D<T>& v) {
     out << "(" << v.x << ";" << v.y << ")";
     return out;
 }

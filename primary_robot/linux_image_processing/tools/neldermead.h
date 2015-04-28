@@ -61,13 +61,12 @@ V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&, int)> f, T z_en
 #endif
 
 // barycentre
-        decltype(xb - xb) v;
+        xb = V();
         for (int j = 0; j < sz + 1; j++) {
             if (j != i_MAX) {
-                v += x[j] - x0;
+                xb += x[j] * (T(1) / sz);
             }
         }
-        xb = x0 + v * T(1) / sz;
 #ifdef NM_DEBUG
         std::cout << "   xb = (" << xb << ")" << std::endl;
 #endif

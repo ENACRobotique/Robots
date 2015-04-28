@@ -78,6 +78,11 @@ public:
         return cv::Point_<T>(p.at<float>(0), p.at<float>(1));
     }
 
+    cv::Mat transformDir(cv::Mat in) const {
+        cv::Mat R = mat(cv::Rect(0, 0, 2, 2));
+        return R * in(cv::Rect(0, 0, 1, 2));
+    }
+
     cv::Mat transformLinPos(cv::Mat in) const {
         if (in.size[0] == 2) {
             in.push_back(1.f);

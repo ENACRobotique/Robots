@@ -20,6 +20,7 @@ template<typename T>
 class RelPos2D {
     Vector2D<T> _v; // (cm x cm)
     T _theta; // (rad)
+    Vector2D<T> _camDir;
 
 public:
     RelPos2D() :
@@ -35,11 +36,27 @@ public:
     }
 
     /**
+     * x, y in centimeters
+     * theta in radians
+     */
+    RelPos2D(T x, T y, T theta, Vector2D<T> const& camDir) :
+            _v(x, y), _theta(theta), _camDir(camDir) {
+    }
+
+    /**
      * v.x, v.y in centimeters
      * theta in radians
      */
     RelPos2D(Vector2D<T> v, T theta) :
             _v(v), _theta(theta) {
+    }
+
+    /**
+     * v.x, v.y in centimeters
+     * theta in radians
+     */
+    RelPos2D(Vector2D<T> v, T theta, Vector2D<T> const& camDir) :
+            _v(v), _theta(theta), _camDir(camDir) {
     }
 
     RelPos2D(cv::Mat v, T theta) :
@@ -52,21 +69,27 @@ public:
     T const& y() const {
         return _v.y;
     }
+    Vector2D<T> const& v() const {
+        return _v;
+    }
     T const& theta() const {
         return _theta;
     }
+    Vector2D<T> const& camDir() const {
+        return _camDir;
+    }
 
     RelPos2D operator+(const RelPos2D& v) const {
-        return {_v + v._v, _theta + v._theta};
+        return {_v + v._v, _theta + v._theta, v._camDir};
     }
     RelPos2D operator-(const RelPos2D& v) const {
-        return {_v - v._v, _theta - v._theta};
+        return {_v - v._v, _theta - v._theta, v._camDir};
     }
     RelPos2D operator*(const T& r) const {
-        return {_v*r, _theta*r};
+        return {_v*r, _theta*r, _camDir};
     }
     RelPos2D operator/(const T& r) const {
-        return {_v/r, _theta/r};
+        return {_v/r, _theta/r, _camDir};
     }
 
     RelPos2D& operator+=(const RelPos2D& v) {
@@ -80,6 +103,12 @@ public:
     }
     RelPos2D& operator/=(const T& r) {
         return *this = *this / r;
+    }
+    RelPos2D& operator=(const RelPos2D& v) {
+        _v = v._v;
+        _theta = v._theta;
+        _camDir = v._camDir;
+        return *this;
     }
 
     Transform2D<T> getTransform() const {

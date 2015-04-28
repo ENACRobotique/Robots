@@ -11,14 +11,33 @@
 #include <opencv2/core/core.hpp>
 #include <cmath>
 
+/**
+ * H (converted t0 0-1 range)
+ * 0°-360° rouge
+ * 60° jaune
+ * 120° vert
+ * 180° cyan
+ * 240° bleu
+ * 300° magenta
+ *
+ * S
+ * 0 blanc
+ * 1 couleur
+ *
+ * V
+ * 0 noir
+ * 1 couleur
+ *
+ */
+
 class TestPoint {
 public:
     cv::Mat pos; // (in cm, in playground reference frame)
     float hue, sat, val;
     float weight;
 
-    TestPoint(cv::Mat pos, float hue, float sat, float val, float weight) :
-            pos(pos), hue(hue), sat(sat), val(val), weight(weight) {
+    TestPoint(float x, float y, float hue, float sat, float val, float weight) :
+            pos((cv::Mat_<float>(2, 1) << x, y)), hue(hue), sat(sat), val(val), weight(weight) {
     }
     virtual ~TestPoint() {
     }

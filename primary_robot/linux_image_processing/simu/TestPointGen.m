@@ -137,9 +137,10 @@ V = HSV(:,:,3);
 h = H(Q);
 s = S(Q);
 v = V(Q);
-p = P(Q);
+dist = D(Q);
+dens = P(Q) .* factor^2;
 
-M = [(col - 30 + 1)./factor, (size(i,1) - row + 1  - 30 + 1)./factor, h, s, v, p];
+M = [(col - 30 + 1)./factor, (size(i,1) - row + 1  - 30 + 1)./factor, h, s, v, dist, dens];
 
 dlmwrite('testpoints.csv', M);
 

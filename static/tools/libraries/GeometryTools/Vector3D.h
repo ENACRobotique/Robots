@@ -34,7 +34,7 @@ public:
             _x(0), _y(0), _z(0), _norm(true) {
     }
     Vector3D(const Vector3D& v) :
-            _x(v._x), _y(v._y), _z(v._z), _norm(false) {
+            _x(v._x), _y(v._y), _z(v._z), _norm(v._norm) {
     }
     Vector3D(const T _x, const T _y, const T _z) :
             _x(_x), _y(_y), _z(_z), _norm(false) {
@@ -134,7 +134,7 @@ public:
     }
 
 #ifdef USE_OPENCV
-    cv::Mat toCv() {
+    cv::Mat toCv() const {
         return (cv::Mat_<T>(3, 1) << _x, _y, _z);
     }
 #endif

@@ -13,7 +13,7 @@
 #include "Line2D.h"
 #include "Segment2D.h"
 #include "shapes/Circle2D.h"
-#include "shapes/Polygon2D.h"
+//#include "shapes/Polygon2D.h"
 
 #define SIGN(x) ((x > 0) - (x < 0))
 

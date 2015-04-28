@@ -29,6 +29,7 @@ template<typename T>
 class AbsPos2D {
     Point2D<T> _p; // (cm x cm)
     T _theta; // (rad)
+    Vector2D<T> _camDir;
 
 public:
     AbsPos2D() :
@@ -41,6 +42,22 @@ public:
      */
     AbsPos2D(T x, T y, T theta) :
             _p(x, y), _theta(theta) {
+    }
+
+    /**
+     * x, y in centimeters
+     * theta in radians
+     */
+    AbsPos2D(T x, T y, T theta, Vector2D<T> const& camDir) :
+            _p(x, y), _theta(theta), _camDir(camDir) {
+    }
+
+    /**
+     * p.x, p.y in centimeters
+     * theta in radians
+     */
+    AbsPos2D(Point2D<T> p, T theta, Vector2D<T> const& camDir) :
+            _p(p), _theta(theta), _camDir(camDir) {
     }
 
     /**
@@ -73,11 +90,41 @@ public:
         return _theta;
     }
 
+
+    AbsPos2D operator*(const T& r) const {
+        return {Point2D<T>(_p.x*r, _p.y*r), _theta*r, _camDir};
+    }
+    AbsPos2D operator+(const AbsPos2D& v) const {
+        return {Point2D<T>(_p.x + v._p.x, _p.y + v._p.y), _theta + v._theta, v._camDir};
+    }
+
+    AbsPos2D& operator+=(const AbsPos2D& v) {
+        return *this = *this + v;
+    }
+
+
+
+
     AbsPos2D operator+(const RelPos2D<T>& v) const {
-        return {_p.x + v.x(), _p.y + v.y(), _theta + v.theta()};
+        Vector2D<T> const* camDir = &_camDir;
+        T nSq = camDir->normSq();
+        if(!nSq) {
+            camDir = &v.camDir();
+            nSq = camDir->normSq();
+            std::cout << "using camDir " << *camDir << " from vector..." << std::endl;
+        }
+
+        T dtheta = 0;
+        if(nSq) {
+            Vector2D<T> vv_rob(getTransform().transformDir(v.v().toCv())); // from pg2rob
+
+            dtheta = (vv_rob ^ *camDir) / nSq;
+        }
+
+        return {_p.x + v.x(), _p.y + v.y(), _theta + v.theta() + dtheta, _camDir};
     }
     RelPos2D<T> operator-(const AbsPos2D& p) const {
-        return {_p.x - p._p.x, _p.y - p._p.y, _theta - p._theta};
+        return {_p.x - p._p.x, _p.y - p._p.y, _theta - p._theta, _camDir};
     }
 
     Transform2D<T> getTransform() const {
