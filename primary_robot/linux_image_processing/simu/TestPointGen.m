@@ -47,10 +47,10 @@ imwrite(DD, 'dist.png', 'bitdepth', 16);
 
 %% get propability from distance
 
-low_dens = 1/15; % (/cm²)
+low_dens = 1/25; % (/cm²)
 low_thr = 15; % (cm)
 
-high_dens = 1.2/1; % (/cm²)
+high_dens = 0.7/1; % (/cm²)
 high_thr = 0;
 
 P = high_dens + (high_dens - low_dens) .* (D - high_thr) ./ (high_thr - low_thr);

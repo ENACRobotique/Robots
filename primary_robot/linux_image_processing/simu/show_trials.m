@@ -12,6 +12,13 @@ y = v(:,2);
 theta = v(:,3);
 e = v(:,4);
 
+[Y, I] = min(e);
+best_I = I
+best_X = v(I,1)
+best_Y = v(I,2)
+best_Theta = v(I,3)*180/pi
+best_E = v(I,4)
+
 ct = cos(theta);
 st = sin(theta);
 

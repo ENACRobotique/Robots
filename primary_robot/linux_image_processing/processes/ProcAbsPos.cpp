@@ -11,16 +11,16 @@
 #include <performance.hpp>
 #include <processes/ProcAbsPos.h>
 #include <Plane3D.h>
+#include <Point2D.h>
 #include <tools/Cam.h>
 #include <tools/Image.h>
-#include <tools/neldermead.h>
-#include <tools/simulated_annealing.h>
 #include <tools/ProjAcq.h>
-#include <array>
+#include <tools/simulated_annealing.h>
+#include <tools/Uncertainty2D.h>
+#include <Vector2D.h>
 #include <cassert>
 #include <cmath>
 #include <fstream>
-#include <functional>
 #include <iostream>
 
 using namespace std;
@@ -57,7 +57,7 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
         assert(dist >= 0 && dist <= 100);
         assert(dens > 0 && dens <= 10);
 
-        staticTP.push_back(TestPoint(x, y, hue, sat, val, 1.f / dens));
+        staticTP.push_back(TestPoint(x, y, hue, sat, val, 1.f));
     }
     infile.close();
 
@@ -91,9 +91,15 @@ Point2i getInPGIm(Point_<T> p) {
 
 template<typename T>
 Point2i getInPGIm(Point3_<T> p) {
-    float factor = 4; // (px/cm)
+    constexpr float factor = 4; // (px/cm)
 
     return {int(round(p.x * factor)) + 29, int(round((200 - p.y) * factor)) + 29};
+}
+
+Point2f getFromPgIm(Point2i p) {
+    constexpr float factor = 4; // (px/cm)
+
+    return {(p.x - 29.f)/factor, 200.f - (p.y - 29.f)/factor};
 }
 
 Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
@@ -186,6 +192,29 @@ Mat ProcAbsPos::getTestPointsAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2
     addTestPointsAtTo(im3, pAcq, tr_rob2pg);
 
     return im3;
+}
+
+Mat ProcAbsPos::getPgWithSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
+    Mat pg_fov = pg.clone();
+    Mat im = pAcq.getAcq()->getMat(BGR);
+
+    Transform2D<float> tr_pg2rob = robPos.getTransform();
+
+    for (Mat_<Vec3b>::iterator it = pg_fov.begin<Vec3b>();
+            it != pg_fov.end<Vec3b>(); it++) {
+        Point2f p_rob = tr_pg2rob.transformLinPos(getFromPgIm(it.pos()));
+        Mat p_cam = pAcq.plane2cam((Mat_<float>(3, 1) << p_rob.x, p_rob.y));
+
+        Point2i c(int(round(p_cam.at<float>(0))), int(round(p_cam.at<float>(1))));
+
+        if(c.x < 0 || c.y < 0 || c.x >= pAcq.getAcq()->getCam()->getSize().width || c.y >= pAcq.getAcq()->getCam()->getSize().height){
+            continue;
+        }
+
+        (*it) = im.at<Vec3b>(c);
+    }
+
+    return pg_fov;
 }
 
 float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
@@ -454,7 +483,22 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
     ofstream fout_trials("out_trials.csv");
     fout_trials << "x,y,theta,E" << endl;
 
-    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 30.f, 0.96f, 150, 12,
+//    for(float x = pos.x() - sqrt(posU.a_var); x < pos.x() + sqrt(posU.a_var); x += 1.f) {
+//        for(float y = pos.y() - sqrt(posU.b_var); y < pos.y() + sqrt(posU.b_var); y += 1.f) {
+//            for(float t = pos.theta() - posU.theta; t < pos.theta() + posU.theta; t += 1.f * M_PI / 180.f) {
+//                float ret = getEnergy(pAcq, AbsPos2D<float>(x, y, t));
+//
+//                fout_trials << x << "," << y << "," << t << "," << ret << endl;
+//            }
+//        }
+//
+//    }
+//    fout_trials.close();
+//    return;
+
+
+    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 20.f, 1.f, 400, 400,
+//    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 20.f, 0.9626f, 150, 12,
             [this, &pAcq, &fout_trials](AbsPos2D<float> const& pt) { // get energy
                 float ret = this->getEnergy(pAcq, pt);
 
@@ -462,17 +506,29 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
                 return ret;
             },
-            [this, &camDir_rob, &cm2rad](AbsPos2D<float> const& curr) { // get neighbor (4 terms: deltaX, deltaY, deltaTheta@Robot, deltaTheta@Image)
-                constexpr float dr = 3.f;
+            [this, &camDir_rob, &cm2rad, &pos, &posU](AbsPos2D<float> const& curr, int rem_c) { // get neighbor (4 terms: deltaX, deltaY, deltaTheta@Robot, deltaTheta@Image)
+//                float per = 1.f - rem_c/400.f;
+
+                constexpr float dt = 3.f; // (cm)
+                float prop = 0;//0.25f + per/3.f; // (%)
+                float dr = dt * (1.f - prop); // (cm)
+                float di = dt * prop; // (cm)
 
                 // compute dx/dy of robot for a corresponding rotation of image
-                float dti = dr * cm2rad * this->getRand() / 2.f;
-                Vector2D<float> d_rob(std::move(camDir_rob - camDir_rob.rotated(dti)));
-                Vector2D<float> d_pg(std::move(d_rob.rotated(curr.theta())));
+                float dti = di * cm2rad * this->getRand();
+                Vector2D<float> d_rob(camDir_rob - camDir_rob.rotated(dti));
+                Vector2D<float> d_pg(d_rob.rotated(curr.theta()));
 
-                float nx = clamp(curr.x() + dr * this->getRand() + d_pg.x, 20.f, 280.f);
-                float ny = clamp(curr.y() + dr * this->getRand() + d_pg.y, 20.f, 180.f);
+                float nx = clamp(curr.x() + dr * this->getRand() + d_pg.x, pos.x() - sqrt(posU.a_var), pos.x() + sqrt(posU.a_var));
+                float ny = clamp(curr.y() + dr * this->getRand() + d_pg.y, pos.y() - sqrt(posU.b_var), pos.y() + sqrt(posU.b_var));
                 float nt = curr.theta() + dr * cm2rad * this->getRand() + dti;
+
+                while(nt - pos.theta() > M_PI)
+                    nt -= 2.f*M_PI;
+                while(nt - pos.theta() < -M_PI)
+                    nt += 2.f*M_PI;
+
+                nt = clamp(nt, pos.theta() - posU.theta, pos.theta() + posU.theta);
 
                 return AbsPos2D<float>(nx, ny, nt);
             });
@@ -550,6 +606,10 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
     imshow(bn, rgb_tp);
 #endif /* SHOW_IMAGES */
 #endif /* COMP_TESTPOINTS */
+
+    Mat pg_proj = getPgWithSimulatedAt(pAcq, endPos);
+    imwrite("pg_simu.png", pg_proj);
+
 
 #else
     float du = 10;
