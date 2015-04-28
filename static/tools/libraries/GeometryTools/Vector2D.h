@@ -107,6 +107,10 @@ public:
         x = vc.x * std::cos(theta) - vc.y * std::sin(theta);
         y = vc.x * std::sin(theta) + vc.y * std::cos(theta);
     }
+    Vector2D rotated(const T& theta) const {
+        T ct = std::cos(theta), st = std::sin(theta);
+        return {x * ct - y * st, x * st + y * ct};
+    }
     T angleUnsigned(const Vector2D& v){
         return acos(*this * v / sqrt(normSq() * v.normSq()));
     }

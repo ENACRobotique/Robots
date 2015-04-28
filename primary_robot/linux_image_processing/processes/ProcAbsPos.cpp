@@ -366,10 +366,95 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
     cout << "  begpos: " << pos.x() << ", " << pos.y() << ", " << pos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, pos) << endl;
 
 #if 1
+
+
+
+
+
+
+#ifdef COMP_SIMULATED
+    // simulate acquisition
+    Mat _im3 = getSimulatedAt(pAcq, pos);
+    string _bn("_im3-sa");
+#ifdef WRITE_IMAGES
+    imwrite(_bn + ".png", _im3);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, im3);
+#endif /* SHOW_IMAGES */
+
+#ifdef COMP_HSV
+    // show simulated acquisition in hsv
+    Mat im3_hsv = im3.clone();
+    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+#ifdef HSV_TO_HGRAY
+    for (Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>();
+            it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[1] = (*it)[0];
+        (*it)[2] = (*it)[0];
+    }
+#elif defined(HSV_TO_VGRAY)
+    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[0] = (*it)[2];
+        (*it)[1] = (*it)[2];
+    }
+#endif
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_hsv.png", im3_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_hsv", im3_hsv);
+#endif /* SHOW_IMAGES */
+
+    Mat diff_hsv = im_hsv - im3_hsv;
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_diff_hsv.png", diff_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_diff_hsv", diff_hsv);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_HSV */
+
+#ifdef COMP_TESTPOINTS
+    Mat _im3_tp = getTestPointsAt(pAcq, pos.getTransform().getReverse());
+    _bn = "_im3_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(_bn + ".png", _im3_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, im3_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+
+#endif /* COMP_SIMULATED */
+
+#ifdef COMP_TESTPOINTS
+    Mat _rgb_tp = rgb.clone();
+    addTestPointsAtTo(_rgb_tp, pAcq, pos.getTransform().getReverse());
+    _bn = "_im_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(_bn + ".png", _rgb_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, rgb_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+
+
+
+
+
+
+
+
+
+    const Vector2D<float> camDir_rob(pAcq.cam2plane(acq->getCam()->getCenter()));
+    const float cm2rad = 1.f/camDir_rob.norm();
+
     ofstream fout_trials("out_trials.csv");
     fout_trials << "x,y,theta,E" << endl;
 
-    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 30.f, 0.96f, 200, 15,
+    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 30.f, 0.96f, 150, 12,
             [this, &pAcq, &fout_trials](AbsPos2D<float> const& pt) { // get energy
                 float ret = this->getEnergy(pAcq, pt);
 
@@ -377,13 +462,17 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
 
                 return ret;
             },
-            [this](AbsPos2D<float> const& curr) { // get neighbor
+            [this, &camDir_rob, &cm2rad](AbsPos2D<float> const& curr) { // get neighbor (4 terms: deltaX, deltaY, deltaTheta@Robot, deltaTheta@Image)
                 constexpr float dr = 3.f;
-                constexpr float cm2rad = 1.f/40.f;
 
-                float nx = clamp(curr.x() + dr * this->getRand(), 20.f, 280.f);
-                float ny = clamp(curr.y() + dr * this->getRand(), 20.f, 180.f);
-                float nt = curr.theta() + dr * cm2rad * this->getRand();
+                // compute dx/dy of robot for a corresponding rotation of image
+                float dti = dr * cm2rad * this->getRand() / 2.f;
+                Vector2D<float> d_rob(std::move(camDir_rob - camDir_rob.rotated(dti)));
+                Vector2D<float> d_pg(std::move(d_rob.rotated(curr.theta())));
+
+                float nx = clamp(curr.x() + dr * this->getRand() + d_pg.x, 20.f, 280.f);
+                float ny = clamp(curr.y() + dr * this->getRand() + d_pg.y, 20.f, 180.f);
+                float nt = curr.theta() + dr * cm2rad * this->getRand() + dti;
 
                 return AbsPos2D<float>(nx, ny, nt);
             });
