@@ -369,7 +369,7 @@ void ProcAbsPos::process(const std::vector<Acq*>& acqList, const Pos& pos, const
     ofstream fout_trials("out_trials.csv");
     fout_trials << "x,y,theta,E" << endl;
 
-    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 30.f, 0.96f, 200,
+    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 30.f, 0.96f, 200, 15,
             [this, &pAcq, &fout_trials](AbsPos2D<float> const& pt) { // get energy
                 float ret = this->getEnergy(pAcq, pt);
 
