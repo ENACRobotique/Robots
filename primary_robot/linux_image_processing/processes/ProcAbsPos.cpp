@@ -68,6 +68,225 @@ Point2i getInPGIm(Mat p) {
     return {int(round(p.at<float>(0) * factor)) + 29, int(round((200 - p.at<float>(1)) * factor)) + 29};
 }
 
+void ProcAbsPos::handleStart(ProjAcq& pAcq, AbsPos2D<float> const& pos) const {
+    Acq* acq = pAcq.getAcq();
+
+    Mat rgb = acq->getMat(BGR);
+
+#ifdef WRITE_IMAGES
+    imwrite("rgb.png", rgb);
+#endif
+
+#ifdef COMP_HSV
+    Mat im_hsv = acq->getMat(HSV);
+
+#ifdef HSV_TO_HGRAY
+    for (Mat_<Vec3b>::iterator it = im_hsv.begin<Vec3b>();
+            it != im_hsv.end<Vec3b>(); it++) {
+        (*it)[1] = (*it)[0];
+        (*it)[2] = (*it)[0];
+    }
+#elif defined(HSV_TO_VGRAY)
+    for (Mat_<Vec3b>::iterator it = im_hsv.begin<Vec3b>();
+            it != im_hsv.end<Vec3b>(); it++) {
+        (*it)[0] = (*it)[2];
+        (*it)[1] = (*it)[2];
+    }
+#endif
+
+#ifdef WRITE_IMAGES
+    imwrite("hsv.png", im_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow("hsv", im_hsv);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_HSV */
+
+#ifdef COMP_SIMULATED
+    // simulate acquisition
+    Mat _im3 = getSimulatedAt(pAcq, pos);
+    string _bn("_im3-sa");
+#ifdef WRITE_IMAGES
+    imwrite(_bn + ".png", _im3);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, _im3);
+#endif /* SHOW_IMAGES */
+
+#ifdef COMP_HSV
+    // show simulated acquisition in hsv
+    Mat im3_hsv = im3.clone();
+    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+#ifdef HSV_TO_HGRAY
+    for (Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>();
+            it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[1] = (*it)[0];
+        (*it)[2] = (*it)[0];
+    }
+#elif defined(HSV_TO_VGRAY)
+    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[0] = (*it)[2];
+        (*it)[1] = (*it)[2];
+    }
+#endif
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_hsv.png", im3_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_hsv", im3_hsv);
+#endif /* SHOW_IMAGES */
+
+    Mat diff_hsv = im_hsv - im3_hsv;
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_diff_hsv.png", diff_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_diff_hsv", diff_hsv);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_HSV */
+
+#ifdef COMP_TESTPOINTS
+    Mat _im3_tp = getTestPointsAt(pAcq, pos.getTransform().getReverse());
+    _bn = "_im3_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(_bn + ".png", _im3_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, im3_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+
+#endif /* COMP_SIMULATED */
+
+#ifdef COMP_TESTPOINTS
+    Mat _rgb_tp = rgb.clone();
+    addTestPointsAtTo(_rgb_tp, pAcq, pos.getTransform().getReverse());
+    _bn = "_im_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(_bn + ".png", _rgb_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, rgb_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+}
+
+void ProcAbsPos::handleStep(ProjAcq& pAcq, AbsPos2D<float> const& endPos, int i) const {
+#ifdef COMP_SIMULATED
+        // simulate acquisition
+        Mat im3 = getSimulatedAt(pAcq, endPos);
+        string bn("im3-" + to_string(i));
+#ifdef WRITE_IMAGES
+        imwrite(bn + ".png", im3);
+#endif
+        imshow(bn, im3);
+
+#ifdef SHOW_HSV
+        // show simulated acquisition in hsv
+        Mat im3_hsv = im3.clone();
+        cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+#ifdef HSV_TO_HGRAY
+        for (Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>();
+                it != im3_hsv.end<Vec3b>(); it++) {
+            (*it)[1] = (*it)[0];
+            (*it)[2] = (*it)[0];
+        }
+#elif defined(HSV_TO_VGRAY)
+        for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+            (*it)[0] = (*it)[2];
+            (*it)[1] = (*it)[2];
+        }
+#endif
+#ifdef WRITE_IMAGES
+        imwrite(bn + "_hsv.png", im3_hsv);
+#endif
+        imshow(bn + "_hsv", im3_hsv);
+
+        Mat diff_hsv = im_hsv - im3_hsv;
+#ifdef WRITE_IMAGES
+        imwrite(bn + "_diff_hsv.png", diff_hsv);
+#endif
+        imshow(bn + "_diff_hsv", diff_hsv);
+#endif
+#endif
+
+        Mat pg_proj = getPgWithSimulatedAt(pAcq, endPos);
+        imwrite("pg_simu-" + to_string(i) + ".png", pg_proj);
+}
+
+void ProcAbsPos::handleEnd(ProjAcq& pAcq, AbsPos2D<float> const& endPos) const {
+#ifdef COMP_SIMULATED
+    // simulate acquisition
+    Mat im3 = getSimulatedAt(pAcq, endPos);
+    string bn("im3-sa");
+#ifdef WRITE_IMAGES
+    imwrite(bn + ".png", im3);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, im3);
+#endif /* SHOW_IMAGES */
+
+#ifdef COMP_HSV
+    // show simulated acquisition in hsv
+    Mat im3_hsv = im3.clone();
+    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+#ifdef HSV_TO_HGRAY
+    for (Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>();
+            it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[1] = (*it)[0];
+        (*it)[2] = (*it)[0];
+    }
+#elif defined(HSV_TO_VGRAY)
+    for(Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>(); it != im3_hsv.end<Vec3b>(); it++) {
+        (*it)[0] = (*it)[2];
+        (*it)[1] = (*it)[2];
+    }
+#endif
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_hsv.png", im3_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_hsv", im3_hsv);
+#endif /* SHOW_IMAGES */
+
+    Mat diff_hsv = im_hsv - im3_hsv;
+#ifdef WRITE_IMAGES
+    imwrite(bn + "_diff_hsv.png", diff_hsv);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn + "_diff_hsv", diff_hsv);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_HSV */
+
+#ifdef COMP_TESTPOINTS
+    Mat im3_tp = getTestPointsAt(pAcq, endPos.getTransform().getReverse());
+    bn = "im3_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(bn + ".png", im3_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, im3_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+
+#endif /* COMP_SIMULATED */
+
+#ifdef COMP_TESTPOINTS
+    Mat rgb_tp = pAcq.getAcq()->getMat(BGR).clone();
+    addTestPointsAtTo(rgb_tp, pAcq, endPos.getTransform().getReverse());
+    bn = "im_tp-sa";
+#ifdef WRITE_IMAGES
+    imwrite(bn + ".png", rgb_tp);
+#endif /* WRITE_IMAGES */
+#ifdef SHOW_IMAGES
+    imshow(bn, rgb_tp);
+#endif /* SHOW_IMAGES */
+#endif /* COMP_TESTPOINTS */
+
+    Mat pg_proj = getPgWithSimulatedAt(pAcq, endPos);
+    imwrite("pg_simu.png", pg_proj);
+}
+
 Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
     Transform2D<float> tr_rob2pg = robPos.getTransform().getReverse();
 

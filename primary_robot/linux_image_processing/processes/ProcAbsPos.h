@@ -20,6 +20,16 @@
 
 class ProjAcq;
 
+#define COMP_TESTPOINTS
+#define COMP_SIMULATED
+//#define COMP_PLAYGROUND
+//#define COMP_HSV
+//#define HSV_TO_HGRAY
+//#define HSV_TO_VGRAY
+
+#define WRITE_IMAGES
+//#define SHOW_IMAGES
+
 class ProcAbsPos: public Process {
 protected:
     std::vector<TestPoint> staticTP;
@@ -31,6 +41,10 @@ protected:
     void addTestPointsAtTo(cv::Mat& im, ProjAcq& pAcq, const Transform2D<float>& tr_pg2rob) const;
     cv::Mat getTestPointsAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const;
     cv::Mat getPgWithSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const;
+
+    void handleStart(ProjAcq& pAcq, AbsPos2D<float> const& pos) const;
+    void handleStep(ProjAcq& pAcq, AbsPos2D<float> const& endPos, int i) const;
+    void handleEnd(ProjAcq& pAcq, AbsPos2D<float> const& endPos) const;
 
     cv::Mat pg;
 
