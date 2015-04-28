@@ -6,6 +6,7 @@
  */
 
 #include <opencv2/core/core.hpp>
+#include <processes/ProcAbsPosSA.h>
 #include <processes/ProcAbsPos.h>
 #include <processes/Process.h>
 #include <tools/AbsPos2D.h>
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]) {
 
 // init processes
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPos(camList.begin()->first, "simu/testpoints.csv"));
+    processList.push_back(new ProcAbsPosSA(camList.begin()->first, "simu/testpoints.csv"));
 
     // init botnet
     bn_init();

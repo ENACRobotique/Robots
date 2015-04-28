@@ -42,11 +42,32 @@ protected:
         return distribution(generator);
     }
 
+
+    template<typename T>
+    inline T clamp(T v, T m, T M) const { return std::max(m, std::min(v, M)); }
+
+    template<typename T>
+    cv::Point2i getInPGIm(cv::Point_<T> p) const {
+        float factor = 4; // (px/cm)
+
+        return {int(round(p.x * factor)) + 29, int(round((200 - p.y) * factor)) + 29};
+    }
+
+    template<typename T>
+    cv::Point2i getInPGIm(cv::Point3_<T> p) const {
+        constexpr float factor = 4; // (px/cm)
+
+        return {int(round(p.x * factor)) + 29, int(round((200 - p.y) * factor)) + 29};
+    }
+
+    cv::Point2f getFromPgIm(cv::Point2i p) const {
+        constexpr float factor = 4; // (px/cm)
+
+        return {(p.x - 29.f)/factor, 200.f - (p.y - 29.f)/factor};
+    }
+
 public:
     ProcAbsPos(Cam* c, const std::string& staticTestPointFile);
-    virtual ~ProcAbsPos();
-
-    virtual void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;
 };
 
 #endif /* PROCESSES_PROCABSPOS_H_ */
