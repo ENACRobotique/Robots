@@ -121,6 +121,7 @@ c(:,:,2) = k;
 c(:,:,3) = k;
 
 B = A.*c;
+R = Q & k;
 
 figure;imshow(B);
 
@@ -133,12 +134,12 @@ H = HSV(:,:,1);
 S = HSV(:,:,2);
 V = HSV(:,:,3);
 
-[row, col] = find(Q);
-h = H(Q);
-s = S(Q);
-v = V(Q);
-dist = D(Q);
-dens = P(Q) .* factor^2;
+[row, col] = find(R);
+h = H(R);
+s = S(R);
+v = V(R);
+dist = D(R);
+dens = P(R) .* factor^2;
 
 M = [(col - 30 + 1)./factor, (size(i,1) - row + 1  - 30 + 1)./factor, h, s, v, dist, dens];
 

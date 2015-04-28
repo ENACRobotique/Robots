@@ -13,10 +13,17 @@
 #include <utility>
 #include <algorithm>
 
+#define SA_DEBUG 2
+
+#if SA_DEBUG > 0
+#   include <iostream>
+#endif
+
 // To find a status with lower energy according to the given condition
 template<typename status, typename count, typename energy>
 status simulated_annealing(status i_old, energy T, energy alpha, count c, count max_without_amelioration,
-        std::function<energy(status const&)> const& ef, std::function<status(status const&)> const& nf) {
+        std::function<energy(status const&)> const& ef, std::function<
+                status(status const&)> const& nf) {
 
     energy e_old = ef(i_old);
 
@@ -36,13 +43,21 @@ status simulated_annealing(status i_old, energy T, energy alpha, count c, count 
             i_best = i_new;
             e_best = e_new;
             steps_without_amelioration = 0;
+
+#if SA_DEBUG > 0
+            std::cout << "new best: " << i_new << std::endl;
+#endif
         }
         else {
             steps_without_amelioration++;
 
-            if(steps_without_amelioration > max_without_amelioration) {
+            if (steps_without_amelioration > max_without_amelioration) {
                 i_old = i_best;
                 e_old = e_best;
+
+#if SA_DEBUG > 1
+                std::cout << "ret2best: " << i_new << std::endl;
+#endif
                 continue;
             }
         }
@@ -50,6 +65,10 @@ status simulated_annealing(status i_old, energy T, energy alpha, count c, count 
         if (e_new < e_old || std::exp((e_old - e_new) / T) > rf(g)) {
             i_old = std::move(i_new);
             e_old = std::move(e_new);
+
+#if SA_DEBUG > 2
+            std::cout << "new curr: " << i_old << std::endl;
+#endif
         }
 
         T *= alpha;
