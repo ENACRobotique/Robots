@@ -25,12 +25,9 @@ st = sin(theta);
 %%
 figure;
 hold on;
-plot(x, y, 'r-*');
-l = 1;
-% plot([x x+l*ct(:)]', [y y+l*st(:)]')
+plot3(x, y, theta, 'r-*');
 for i = iter
-    text(v(i,1), v(i,2)+l/3, ['v', num2str(i)])
-%     text(v(i,1), v(i,2)-l/3, [num2str(v(i,3)*180/pi)])
+    text(v(i,1), v(i,2), v(i,3), ['v', num2str(i)])
 end
 
 %%
