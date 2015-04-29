@@ -6,7 +6,7 @@
  */
 
 #include <opencv2/core/core.hpp>
-#include <processes/ProcAbsPosSA.h>
+#include <processes/ProcAbsPosNTree.h>
 #include <processes/ProcAbsPos.h>
 #include <processes/Process.h>
 #include <tools/AbsPos2D.h>
@@ -53,13 +53,13 @@ int main(int argc, char* argv[]) {
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(0)));
-//            new VideoCapture("Images/captures/guvcview_image-25.jpg")));
+//            new VideoCapture("Images/captures/guvcview_image-25.jpg"))); // coin avec 2 pieds
             new VideoCapture("Images/captures/1-955-743.jpg")));
-//            new VideoCapture("Images/captures/z1.png")));
+//            new VideoCapture("Images/captures/z1.png"))); // "obomovie"
 
 // init processes
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPosSA(camList.begin()->first, "simu/testpoints.csv"));
+    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "simu/testpoints.csv"));
 
     // init botnet
     bn_init();
@@ -99,9 +99,9 @@ int main(int argc, char* argv[]) {
 
             perf.endOfStep("acquisitions");
 
-//            p->process(acqList, AbsPos2D<float>(40, 60, 140. * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
-            p->process(acqList, AbsPos2D<float>(95, 70, 63 * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
-//            p->process(acqList, AbsPos2D<float>(150, 23, 0 * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
+//            p->process(acqList, AbsPos2D<float>(50, 70, 130. * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 39.58, 59.58, 134.99, 0.1396
+            p->process(acqList, AbsPos2D<float>(100, 50, 60 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f));
+//            p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
 
             for (Acq* a : acqList) {
                 delete a;

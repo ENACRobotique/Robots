@@ -106,22 +106,25 @@ public:
 
 
     AbsPos2D operator+(const RelPos2D<T>& v) const {
-        Vector2D<T> const* camDir = &_camDir;
-        T nSq = camDir->normSq();
-        if(!nSq) {
-            camDir = &v.camDir();
-            nSq = camDir->normSq();
-            std::cout << "using camDir " << *camDir << " from vector..." << std::endl;
-        }
+//        Vector2D<T> const* camDir = &_camDir;
+//        T nSq = camDir->normSq();
+//        if(!nSq) {
+//            camDir = &v.camDir();
+//            nSq = camDir->normSq();
+//            std::cout << "using camDir " << *camDir << " from vector..." << std::endl;
+//        }
+//
+//        T dtheta = 0;
+//        if(nSq) {
+//            Vector2D<T> vv_rob(getTransform().transformDir(v.v().toCv())); // from pg2rob
+//
+//            dtheta = (vv_rob ^ *camDir) / nSq;
+//        }
 
-        T dtheta = 0;
-        if(nSq) {
-            Vector2D<T> vv_rob(getTransform().transformDir(v.v().toCv())); // from pg2rob
-
-            dtheta = (vv_rob ^ *camDir) / nSq;
-        }
-
-        return {_p.x + v.x(), _p.y + v.y(), _theta + v.theta() + dtheta, _camDir};
+        return {_p.x + v.x(), _p.y + v.y(), _theta + v.theta() /*+ dtheta*/, _camDir};
+    }
+    AbsPos2D operator-(const RelPos2D<T>& v) const {
+        return {_p.x - v.x(), _p.y - v.y(), _theta - v.theta(), _camDir};
     }
     RelPos2D<T> operator-(const AbsPos2D& p) const {
         return {_p.x - p._p.x, _p.y - p._p.y, _theta - p._theta, _camDir};
