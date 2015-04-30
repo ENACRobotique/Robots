@@ -33,6 +33,8 @@ status n_tree(status const& x, energy z_end, unsigned nb_max, unsigned nb_store,
         while (best.size() > nb_store) {
             best.erase(std::prev(best.end()));
         }
+
+        energy best_max = best.rbegin()->first;
         std::multimap<energy, status> nbest;
 
         for (std::pair<const energy, status> const& el : best) {
@@ -45,9 +47,9 @@ status n_tree(status const& x, energy z_end, unsigned nb_max, unsigned nb_store,
                     return st;
                 }
 
-                if (nbest.upper_bound(e) != nbest.end() || nbest.size() < nb_store) {
+                if (e < best_max || iter == 0) {
 #if NT_DEBUG > 1
-    std::cout << "inserting, e: " << e << ", pt: " << st << std::endl;
+                    std::cout << "inserting, e: " << e << ", pt: " << st << std::endl;
 #endif
 
                     nbest.insert( { e, st });
@@ -55,7 +57,7 @@ status n_tree(status const& x, energy z_end, unsigned nb_max, unsigned nb_store,
             }
         }
 
-        best = nbest;
+        best.insert(nbest.begin(), nbest.end());
     }
 
 #if NT_DEBUG > 0

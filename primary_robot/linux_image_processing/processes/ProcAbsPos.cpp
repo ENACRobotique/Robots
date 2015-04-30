@@ -47,7 +47,7 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
         assert(dist >= 0 && dist <= 100);
         assert(dens > 0 && dens <= 10);
 
-        staticTP.push_back(TestPoint(x, y, hue, sat, val, 1.f));
+        staticTP.push_back(TestPoint(x, y, hue, sat, val, dens));
     }
     infile.close();
 

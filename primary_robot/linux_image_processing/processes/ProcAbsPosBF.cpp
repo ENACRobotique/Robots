@@ -10,7 +10,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <performance.hpp>
 #include <processes/ProcAbsPos.h>
-#include <processes/ProcAbsPosFull.h>
+#include <processes/ProcAbsPosBF.h>
 #include <Plane3D.h>
 #include <tools/AbsPos2D.h>
 #include <tools/Acq.h>
@@ -30,7 +30,7 @@
 using namespace std;
 using namespace cv;
 
-void ProcAbsPosFull::process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) {
+void ProcAbsPosBF::process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) {
     assert(acqList.size() == 1);
 
     Acq* acq = acqList.front();
@@ -54,7 +54,11 @@ void ProcAbsPosFull::process(const std::vector<Acq*>& acqList, const Pos& pos, c
     float min_e = FLT_MAX;
     AbsPos2D<float> endPos(pos);
 
+    perf.endOfStep("ProcAbsPosBF::prepare optim");
+
     for(float x = pos.x() - sqrt(posU.a_var); x < pos.x() + sqrt(posU.a_var); x += 1.f) {
+        cout << (x - (pos.x() - sqrt(posU.a_var)))/(2.f * sqrt(posU.a_var)) * 100.f << " %" << endl;
+
         for(float y = pos.y() - sqrt(posU.b_var); y < pos.y() + sqrt(posU.b_var); y += 1.f) {
             for(float t = pos.theta() - posU.theta; t < pos.theta() + posU.theta; t += 1.f * M_PI / 180.f) {
                 AbsPos2D<float> currPos(x, y, t);
@@ -63,19 +67,20 @@ void ProcAbsPosFull::process(const std::vector<Acq*>& acqList, const Pos& pos, c
                 if(ret < min_e){
                     min_e = ret;
                     endPos = std::move(currPos);
+
+                    cout << "  newpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << ret << endl;
                 }
 
                 fout_trials << x << "," << y << "," << t << "," << ret << endl;
             }
         }
-
     }
+
+    perf.endOfStep("ProcAbsPosBF::optim");
+
     fout_trials.close();
-    return;
 
     cout << "  endpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, endPos) << endl;
-
-    perf.endOfStep("ProcAbsPos::optim (simulated annealing)");
 
     handleEnd(pAcq, endPos);
 }

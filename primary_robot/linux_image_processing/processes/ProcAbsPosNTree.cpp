@@ -1,5 +1,5 @@
 /*
- * ProcAbsPosSA.cpp
+ * ProcAbsPosNTree.cpp
  *
  *  Created on: 29 avr. 2015
  *      Author: ludo6431
@@ -52,7 +52,7 @@ void ProcAbsPosNTree::process(const std::vector<Acq*>& acqList, const Pos& pos, 
 
     perf.endOfStep("ProcAbsPosNTree::prepare optim");
 
-    AbsPos2D<float> endPos = n_tree<float, AbsPos2D<float>, 3>(pos, 0.f, 7, 4,
+    AbsPos2D<float> endPos = n_tree<float, AbsPos2D<float>, 3>(pos, 0.f, 6, 4,
             [this, &pAcq, &fout_trials](AbsPos2D<float> const& pt) {
                 float ret = this->getEnergy(pAcq, pt);
 

@@ -54,8 +54,8 @@ int main(int argc, char* argv[]) {
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(0)));
 //            new VideoCapture("Images/captures/guvcview_image-25.jpg"))); // coin avec 2 pieds
-            new VideoCapture("Images/captures/1-955-743.jpg")));
-//            new VideoCapture("Images/captures/z1.png"))); // "obomovie"
+//            new VideoCapture("Images/captures/1-955-743.jpg"))); // zone de départ jaune
+            new VideoCapture("Images/captures/z1.png"))); // "obomovie"
 
 // init processes
     vector<Process*> processList;
@@ -99,9 +99,9 @@ int main(int argc, char* argv[]) {
 
             perf.endOfStep("acquisitions");
 
-//            p->process(acqList, AbsPos2D<float>(50, 70, 130. * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 39.58, 59.58, 134.99, 0.1396
-            p->process(acqList, AbsPos2D<float>(100, 50, 60 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f));
-//            p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(0, 0, 0, 0));
+//            p->process(acqList, AbsPos2D<float>(45, 65, 130. * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 39.58, 59.58, 134.99
+//            p->process(acqList, AbsPos2D<float>(100, 62, 60 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 93.58, 73.58, 64
+            p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
 
             for (Acq* a : acqList) {
                 delete a;

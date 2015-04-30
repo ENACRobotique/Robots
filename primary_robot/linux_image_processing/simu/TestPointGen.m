@@ -47,10 +47,10 @@ imwrite(DD, 'dist.png', 'bitdepth', 16);
 
 %% get propability from distance
 
-low_dens = 1/25; % (/cm²)
-low_thr = 15; % (cm)
+low_dens = 1/22; % (/cm²)
+low_thr = 9; % (cm)
 
-high_dens = 0.7/1; % (/cm²)
+high_dens = 1.1/1; % (/cm²)
 high_thr = 0;
 
 P = high_dens + (high_dens - low_dens) .* (D - high_thr) ./ (high_thr - low_thr);
@@ -76,8 +76,6 @@ imwrite(P, 'prob.png', 'bitdepth', 16);
 
 Q = false(size(P));
 Q(P > rand(size(P))) = true;
-
-sum(sum(Q))
 
 %figure;imshow(Q);
 
@@ -122,6 +120,8 @@ c(:,:,3) = k;
 
 B = A.*c;
 R = Q & k;
+
+sum(sum(R))
 
 figure;imshow(B);
 

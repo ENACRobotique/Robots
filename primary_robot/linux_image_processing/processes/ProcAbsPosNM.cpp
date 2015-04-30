@@ -60,7 +60,7 @@ void ProcAbsPosNM::process(const std::vector<Acq*>& acqList, const Pos& pos, con
         float ct = cos(t);
         float st = sin(t);
 
-        array<AbsPos2D<float>, 4> simplex {
+        array<AbsPos2D<float>, 4> simplex { // TODO do not set initial plane on the same 3D plane...
             AbsPos2D<float>(
                     pos.x() - ct * du +
                     dr * getRand(),
