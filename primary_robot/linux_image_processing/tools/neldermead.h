@@ -14,7 +14,7 @@
 //#define NM_DEBUG
 
 template<typename T, typename V, int sz>
-V neldermead(std::array<V, sz + 1>& x, std::function<T(V const&, int)> f, T z_end, int nb_max) {
+V neldermead(std::array<V, sz + 1>& x, T z_end, int nb_max, std::function<T(V const&, int)> f) {
     V xb, xr, xe, xc;
     const V x0;
     int i_max, i_MAX, i_MIN;

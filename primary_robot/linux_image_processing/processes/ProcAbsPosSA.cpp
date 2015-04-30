@@ -52,8 +52,7 @@ void ProcAbsPosSA::process(const std::vector<Acq*>& acqList, const Pos& pos, con
     ofstream fout_trials("out_trials.csv");
     fout_trials << "x,y,theta,E" << endl;
 
-    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 20.f, 1.f, 400, 400,
-//    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 20.f, 0.9626f, 150, 12,
+    AbsPos2D<float> endPos = simulated_annealing<AbsPos2D<float>, int, float>(pos, 20.f, 0.95f, 150, 12,
             [this, &pAcq, &fout_trials](AbsPos2D<float> const& pt) { // get energy
                 float ret = this->getEnergy(pAcq, pt);
 
@@ -74,16 +73,16 @@ void ProcAbsPosSA::process(const std::vector<Acq*>& acqList, const Pos& pos, con
                 Vector2D<float> d_rob(camDir_rob - camDir_rob.rotated(dti));
                 Vector2D<float> d_pg(d_rob.rotated(curr.theta()));
 
-                float nx = clamp(curr.x() + dr * this->getRand() + d_pg.x, pos.x() - sqrt(posU.a_var), pos.x() + sqrt(posU.a_var));
-                float ny = clamp(curr.y() + dr * this->getRand() + d_pg.y, pos.y() - sqrt(posU.b_var), pos.y() + sqrt(posU.b_var));
+                float nx = clamp(curr.x() + dr * this->getRand() + d_pg.x, 20.f, 280.f);
+                float ny = clamp(curr.y() + dr * this->getRand() + d_pg.y, 20.f, 180.f);
                 float nt = curr.theta() + dr * cm2rad * this->getRand() + dti;
 
-                while(nt - pos.theta() > M_PI)
-                    nt -= 2.f*M_PI;
-                while(nt - pos.theta() < -M_PI)
-                    nt += 2.f*M_PI;
-
-                nt = clamp(nt, pos.theta() - posU.theta, pos.theta() + posU.theta);
+//                while(nt - pos.theta() > M_PI)
+//                    nt -= 2.f*M_PI;
+//                while(nt - pos.theta() < -M_PI)
+//                    nt += 2.f*M_PI;
+//
+//                nt = clamp(nt, pos.theta() - posU.theta, pos.theta() + posU.theta);
 
                 return AbsPos2D<float>(nx, ny, nt);
             });

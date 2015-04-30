@@ -43,56 +43,34 @@ void ProcAbsPosNM::process(const std::vector<Acq*>& acqList, const Pos& pos, con
 
     cout << "  begpos: " << pos.x() << ", " << pos.y() << ", " << pos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, pos) << endl;
 
-
     float du = 10;
     float dv = 10;
-    float dr = 0;
     float cm2rad = 1.f / 40.f;
 
     Transform2D<float> tr_pg2rob = pos.getTransform();
     Transform2D<float> tr_rob2pg = tr_rob2pg.getReverse();
-    Vector2D<float> camDir(pAcq.cam2plane(acq->getCam()->getCenter()));
-
-    cout << "camDir: " << camDir << endl;
 
     for (int i = 0; i < 1; i++) {
-        float t = pos.theta() + dr * cm2rad * getRand();
-        float ct = cos(t);
-        float st = sin(t);
+        float ct = cos(pos.theta());
+        float st = sin(pos.theta());
 
-        array<AbsPos2D<float>, 4> simplex { // TODO do not set initial plane on the same 3D plane...
+        array<AbsPos2D<float>, 4> simplex {
             AbsPos2D<float>(
-                    pos.x() - ct * du +
-                    dr * getRand(),
-                    pos.y() - st * du +
-                    dr * getRand(),
-                    pos.theta() - du * cm2rad +
-                    dr * cm2rad * getRand(),
-                    camDir),
+                    pos.x() - ct * du,
+                    pos.y() - st * du,
+                    pos.theta() + du * cm2rad),
             AbsPos2D<float>(
-                    pos.x() - st * dv +
-                    dr * getRand(),
-                    pos.y() + ct * dv +
-                    dr * getRand(),
-                    pos.theta() +
-                    dr * cm2rad * getRand(),
-                    camDir),
+                    pos.x() - st * dv,
+                    pos.y() + ct * dv,
+                    pos.theta()),
             AbsPos2D<float>(
-                    pos.x() + ct * du +
-                    dr * getRand(),
-                    pos.y() + st * du +
-                    dr * getRand(),
-                    pos.theta() + du * cm2rad +
-                    dr * cm2rad * getRand(),
-                    camDir),
+                    pos.x() + ct * du,
+                    pos.y() + st * du,
+                    pos.theta() + du * cm2rad),
             AbsPos2D<float>(
-                    pos.x() + st * dv +
-                    dr * getRand(),
-                    pos.y() - ct * dv +
-                    dr * getRand(),
-                    pos.theta() - du * cm2rad +
-                    dr * cm2rad * getRand(),
-                    camDir),
+                    pos.x() + st * dv,
+                    pos.y() - ct * dv,
+                    pos.theta()),
         };
 
         cout << "input simplex:" << endl;
@@ -100,18 +78,16 @@ void ProcAbsPosNM::process(const std::vector<Acq*>& acqList, const Pos& pos, con
             cout << v.x() << " " << v.y() << " " << v.theta() << endl;
         }
 
-        perf.endOfStep("ProcAbsPos::setting up optim");
+        perf.endOfStep("ProcAbsPosNM::prepare optim");
 
-        AbsPos2D<float> endPos = neldermead<float, AbsPos2D<float>, 3>(simplex, [this, &pAcq](AbsPos2D<float> const& pt, int iter){
-            float enr = this->getEnergy(pAcq, pt);
-            float rnd = iter >= 0 ? enr * 1.f * this->getRand() / log(3.f + iter) : 0.f;
-            float ret = enr + rnd;
+        AbsPos2D<float> endPos = neldermead<float, AbsPos2D<float>, 3>(simplex, 0, 30,
+                [this, &pAcq](AbsPos2D<float> const& pt, int iter) {
+                    float enr = this->getEnergy(pAcq, pt);
 
-        // cout << "f(pt = " << pt << ", iter = " << iter << ") = " << enr << " + " << rnd / enr * 100.f << " %" << endl;
+                    // cout << "f(pt = " << pt << ", iter = " << iter << ") = " << enr << " + " << rnd / enr * 100.f << " %" << endl;
 
-            return ret;
-        }, 0, 30);
-
+                    return enr;
+                });
 
         cout << "output simplex:" << endl;
         for (AbsPos2D<float> const& v : simplex) {
@@ -120,8 +96,7 @@ void ProcAbsPosNM::process(const std::vector<Acq*>& acqList, const Pos& pos, con
 
         cout << "  endpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, endPos) << endl;
 
-        perf.endOfStep("ProcAbsPos::optim (neldermead #" + to_string(i) + ")");
-
+        perf.endOfStep("ProcAbsPosNM::optim #" + to_string(i));
 
         handleStep(pAcq, endPos, i);
     }
