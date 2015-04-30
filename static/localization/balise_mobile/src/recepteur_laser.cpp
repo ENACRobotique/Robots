@@ -220,9 +220,14 @@ void loop() {
         	break;
 #endif
         case S_GAME :
-#ifdef DEBUG_SYNC_WIRE
-            wiredSync_waitSignal();
-#endif
+
+            if ((tempIndex=wiredSync_waitSignal())!=lastSyncSampleIndex){
+                if (tempIndex != -1){
+                    lastSyncSampleIndex = tempIndex;
+                    firstSyncSample = micros();
+                    state = S_SYNC_MEASURES;
+                }
+            }
             if (prevState!=state) {
                 prevState=state;
             }
