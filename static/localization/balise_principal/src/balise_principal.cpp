@@ -55,6 +55,9 @@ void setup(){
 
     setupFreeTest();
 
+#ifdef SYNC_WIRED
+    wiredSync_senderInit(PIN_SYNC);
+#endif
     // initializes the local state of the beacons to "off"
     for (int i=0;i<D_AMOUNT;i++) {
         devicesInfo[i].state=DS_OFF;
@@ -76,9 +79,6 @@ void setup(){
 #endif
 
     pinMode(PIN_DBG_LED,OUTPUT);
-#ifdef SYNC_WIRED
-    wiredSync_senderInit(PIN_SYNC);
-#endif
 }
 
 

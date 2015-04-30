@@ -12,6 +12,7 @@ int syncPin;
 
 /* wiredSync_{sender,receiver}Init : init function for sender/receiver of the synchronization signal.
  * There MUST be exactly ONE sender, and possibly multiple receiver.
+ * /!\ MUST be as early as possible in the global inits.
  */
 void wiredSync_senderInit(int pin){
     syncPin = pin;

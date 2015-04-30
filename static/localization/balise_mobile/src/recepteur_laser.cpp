@@ -168,10 +168,10 @@ void loop() {
                     firstSyncSample = micros();
                 }
             }
-            if (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD){
+            if (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD || tempIndex >= WIREDSYNC_NBSAMPLES){
                 wiredSync_finalCompute(1);
+                state=S_GAME;
             }
-            state=S_GAME;
             break;
 #endif
 #ifdef SYNC_WIRELESS
@@ -220,6 +220,9 @@ void loop() {
         	break;
 #endif
         case S_GAME :
+#ifdef DEBUG_SYNC_WIRE
+            wiredSync_waitSignal();
+#endif
             if (prevState!=state) {
                 prevState=state;
             }

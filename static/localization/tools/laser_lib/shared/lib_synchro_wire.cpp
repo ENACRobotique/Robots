@@ -47,7 +47,10 @@ int wiredSync_waitSignal(){
     while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
     uint32_t end = micros();
     // if signal stayed here for more than debounce time, record sample
-    if ((end-begin) > WIREDSYNC_DEBOUNCE){
+    if ((end-begin) > WIREDSYNC_DEBOUNCE && (end-begin) < WIREDSYNC_LOWTIME*3){
+#if WIREDSYNC_DEBOUNCE > (WIREDSYNC_LOWTIME*3)
+#error "will not work. Debounce too slow, or lowtime too fast"
+#endif
         if (prevReceived) {
             sampleIndex += (end - prevReceived + WIREDSYNC_PERIOD/4)/WIREDSYNC_PERIOD; // keep track of the indexes (takes into account missed ones,with a signal up to WIREDSYNC_PERIOD/4 early)
         }
@@ -64,7 +67,7 @@ int wiredSync_waitSignal(){
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, end, sampleIndex*WIREDSYNC_PERIOD);
+        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, end , sampleIndex*WIREDSYNC_PERIOD);
 #endif
 #endif
         return sampleIndex;
@@ -110,7 +113,7 @@ int wiredSync_finalCompute(int reset){
     if (det!=0){
         inv_delta_den = sum_ones*sum_lt_gt_lt - sum_lt*sum_gt_lt;
         inv_delta = det / inv_delta_den;
-        offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_gt_lt;
+        offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_lt_gt_lt;
         offset = offset_num / det;
 #ifndef WIREDSYNC_BENCHMARK
         syncStruc sStruc = {static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)),(inv_delta>0?1:-1)};
@@ -118,11 +121,11 @@ int wiredSync_finalCompute(int reset){
 #ifdef DEBUG_SYNC_WIRE
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
-        bn_printfDbg(", mob1 end, %d, %lu, %lu",(int)sum_ones, (uint32_t)offset, (uint32_t)inv_delta);
+        bn_printfDbg(", mob1 end, %d, %ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2 end, %d, %lu, %lu\n",(int)sum_ones, (uint32_t)offset, (uint32_t)inv_delta);
+        bn_printfDbg(", mob2 end, %d, %ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #endif
 #else
@@ -182,10 +185,10 @@ int wiredSync_sendSignal(){
             setSyncParam(tmpStruc);
             updateSync();
         }
-        nbSamples --;
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
         bn_printfDbg("tur, %d, %lu", WIREDSYNC_NBSAMPLES - nbSamples, end);
 #endif
+        nbSamples --;
     }
     if (nbSamples) return 1;
     else return -1;

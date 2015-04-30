@@ -21,10 +21,10 @@
 #include "arduino/lib_synchro_wire_arduino.h"
 #endif
 
-#define DEBUG_SYNC_WIRE
+//#define DEBUG_SYNC_WIRE
 
 #define WIREDSYNC_INITIAL 0         // time to set when we receive the first sync signal.
-#define WIREDSYNC_LOWTIME 200000    // duration during which the signal is set (in µs)
+#define WIREDSYNC_LOWTIME 100000    // duration during which the signal is set (in µs)
 #define WIREDSYNC_PERIOD  1000000   // time duration between two signals (in µs)
 #define WIREDSYNC_DEBOUNCE 10000    // in µs
 #define WIREDSYNC_NBSAMPLES 20
