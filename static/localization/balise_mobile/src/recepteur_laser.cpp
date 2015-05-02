@@ -224,10 +224,12 @@ void loop() {
 
             if ((tempIndex=wiredSync_waitSignal(1))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
+#ifdef DEBUG_SYNC_WIRE
                     lastSyncSampleIndex = tempIndex;
                     initIndex = tempIndex;
                     firstSyncSample = micros();
-                    state = S_SYNC_MEASURES;
+                    newState = S_SYNC_MEASURES;
+#endif
                 }
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
