@@ -42,10 +42,10 @@ uint32_t firstSyncSample = 0;
 
 char debug_led=1;
 #ifdef SYNC_WIRELESS
-mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;                           // State machine state
+mainState state=S_SYNC_ELECTION, prevState=S_BEGIN,newState=S_SYNC_ELECTION;                           // State machine state
 #endif
 #ifdef SYNC_WIRED
-mainState state=S_SYNC_MEASURES, prevState=S_BEGIN;                           // State machine state
+mainState state=S_SYNC_MEASURES, prevState=S_BEGIN,newState=S_SYNC_MEASURES;                           // State machine state
 #endif
 
 inline void periodHandle(sMsg *msg){
@@ -171,7 +171,7 @@ void loop() {
             }
             if (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
                 wiredSync_finalCompute(1);
-                state=S_GAME;
+                newState=S_GAME;
             }
             break;
 #endif
@@ -181,7 +181,6 @@ void loop() {
                 // reset counters
                 intLas0=0;
                 intLas1=0;
-                prevState=state;
             }
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
             if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
@@ -189,7 +188,7 @@ void loop() {
 #ifdef VERBOSE_SYNC
                 bn_printDbg("end election\n");
 #endif
-                state=S_SYNC_MEASURES;
+                newState=S_SYNC_MEASURES;
             }
             else {
                 break;
@@ -212,7 +211,7 @@ void loop() {
 #ifdef VERBOSE_SYNC
                     bn_printfDbg("syncComputation : %lu\n",micros2s(micros()));
 #endif
-                    state=S_GAME;
+                    newState=S_GAME;
                 }
                 else {
                     syncComputationMsg(&inMsg.payload.sync);
@@ -229,9 +228,6 @@ void loop() {
                     firstSyncSample = micros();
                     state = S_SYNC_MEASURES;
                 }
-            }
-            if (prevState!=state) {
-                prevState=state;
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
         	    if (millis()-time_data_send>=SENDING_PERIOD){
@@ -254,5 +250,7 @@ void loop() {
           break;
         default : break;
     }
+    prevState = state;
+    state = newState;
 }
 
