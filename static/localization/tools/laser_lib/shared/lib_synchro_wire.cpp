@@ -23,6 +23,7 @@
 #endif
 
 // static variables to store values between different calls
+static uint32_t firstSampleTime=0; // we store the time of the first sample, in order to keep computed value in the resolution range of wsType_t
 static wsType_t sum_ones=0;    // sum of one
 static wsType_t sum_lt=0;      // sum of local dates
 static wsType_t sum_ltsq=0;     // sum of (local dates)^2
@@ -60,10 +61,11 @@ int wiredSync_waitSignal(int reset){
         }
         else {
             sampleIndex = 0;
+            firstSampleTime = end;
         }
         prevReceived = end;
 
-        wiredSync_intermediateCompute(sampleIndex*WIREDSYNC_PERIOD,end);
+        wiredSync_intermediateCompute(sampleIndex*WIREDSYNC_PERIOD,end-firstSampleTime);
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
@@ -119,10 +121,15 @@ int wiredSync_finalCompute(int reset){
         inv_delta = det / inv_delta_den;
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_lt_gt_lt;
         offset = offset_num / det;
+
+
 #ifndef WIREDSYNC_BENCHMARK
-        syncStruc sStruc = {static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)),(inv_delta>0?1:-1)};
+        syncStruc sStruc = {static_cast<int32_t>(offset)+static_cast<int32_t>(firstSampleTime), static_cast<uint32_t>(abs(inv_delta)),(inv_delta>0?1:-1)};
         setSyncParam(sStruc);
 #ifdef DEBUG_SYNC_WIRE
+        if (abs(offset)>WIREDSYNC_ACCEPTABLE_OFFSET){
+            bn_printfDbg("sync error : offset = %lu\n",static_cast<int32_t>(offset));
+        }
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
         bn_printfDbg(", mob1 end, %d, %ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)));
