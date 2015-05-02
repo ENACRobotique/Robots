@@ -224,7 +224,7 @@ void loop() {
 
             if ((tempIndex=wiredSync_waitSignal(1))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
-#ifdef DEBUG_SYNC_WIRE
+#ifndef DEBUG_SYNC_WIRE
                     lastSyncSampleIndex = tempIndex;
                     initIndex = tempIndex;
                     firstSyncSample = micros();
