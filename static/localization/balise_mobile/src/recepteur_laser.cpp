@@ -169,7 +169,8 @@ void loop() {
                     firstSyncSample = micros();
                 }
             }
-            if (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
+            if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD))
+                    || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
                 wiredSync_finalCompute(1);
                 newState=S_GAME;
             }
