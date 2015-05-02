@@ -35,7 +35,7 @@ syncStruc getSyncParam(){
  *  Synchronized date (expressed in microsecond)
  */
 uint32_t micros2s(uint32_t local){
-    return local-_offset;
+    return local+_offset;
 }
 
 /* s2micros : synchronized to local time (microsecond).
@@ -45,7 +45,7 @@ uint32_t micros2s(uint32_t local){
  *  local date (expressed in microsecond)
  */
 uint32_t s2micros(uint32_t syncronized){
-    return syncronized+_offset;
+    return syncronized-_offset;
 }
 
 /* millis2s : local to synchronized time (millisecond).
@@ -55,7 +55,7 @@ uint32_t s2micros(uint32_t syncronized){
  *  Synchronized date (expressed in millisecond)
  */
 uint32_t millis2s(uint32_t local){
-    return local-(_offset/1000);
+    return local+(_offset/1000);
 }
 
 
@@ -66,7 +66,7 @@ uint32_t millis2s(uint32_t local){
  *  local date (expressed in millisecond)
  */
 uint32_t s2millis(uint32_t syncronized){
-    return syncronized+(_offset/1000);
+    return syncronized-(_offset/1000);
 }
 /* updateSync : Updates the correction done by millis2s and micros2s. Must be called regularly
  */

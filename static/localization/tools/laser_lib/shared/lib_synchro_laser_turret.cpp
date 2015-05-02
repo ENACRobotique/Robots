@@ -12,6 +12,8 @@
 #include "lib_domitille.h"
 #include "params.h"
 
+#error "re-check synchronization equations. updateSync sign was changed. (was local - _offset, is now local+_offset)"
+
 int sync_beginElection(bn_Address addr){
     sMsg outMsg;
     int ret=0;

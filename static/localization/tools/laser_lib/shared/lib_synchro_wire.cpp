@@ -69,11 +69,11 @@ int wiredSync_waitSignal(int reset){
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
-        bn_printfDbg(", mob1, %d, %lu, %lu",sampleIndex, end, sampleIndex*WIREDSYNC_PERIOD);
+        bn_printfDbg(", mob1, %d, %lu, %lu",sampleIndex, micros2s(end) , sampleIndex*WIREDSYNC_PERIOD);
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, end , sampleIndex*WIREDSYNC_PERIOD);
+        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, micros2s(end) , sampleIndex*WIREDSYNC_PERIOD);
 #endif
 #endif
         return sampleIndex;
@@ -121,22 +121,25 @@ int wiredSync_finalCompute(int reset){
         inv_delta = det / inv_delta_den;
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_lt_gt_lt;
         offset = offset_num / det;
-
+        int increment = (inv_delta>0?1:-1);
 
 #ifndef WIREDSYNC_BENCHMARK
-        syncStruc sStruc = {static_cast<int32_t>(offset)+static_cast<int32_t>(firstSampleTime), static_cast<uint32_t>(abs(inv_delta)),(inv_delta>0?1:-1)};
+        syncStruc sStruc = {static_cast<int32_t>(offset)-static_cast<int32_t>(firstSampleTime*(1+(1/inv_delta))) + static_cast<int32_t>((micros()-firstSampleTime)/inv_delta),
+                            static_cast<uint32_t>(abs(inv_delta)),
+                            increment};
         setSyncParam(sStruc);
+        updateSync();
 #ifdef DEBUG_SYNC_WIRE
         if (abs(offset)>WIREDSYNC_ACCEPTABLE_OFFSET){
             bn_printfDbg("sync error : offset = %lu\n",static_cast<int32_t>(offset));
         }
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
-        bn_printfDbg(", mob1 end, %d, %ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)));
+        bn_printfDbg(", mob1 end, %d, %ld,%ld, %lu",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2 end, %d, %ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)));
+        bn_printfDbg(", mob2 end, %d, %ld,%ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #endif
 #else
@@ -195,8 +198,7 @@ int wiredSync_sendSignal(int reset){
 
         // set the "zero" right after the first signal
         if (nbSamples == WIREDSYNC_NBSAMPLES) {
-            syncStruc tmpStruc = getSyncParam();
-            tmpStruc.initialDelay = end-WIREDSYNC_INITIAL;
+            syncStruc tmpStruc = {static_cast<int32_t>(end-WIREDSYNC_INITIAL),0,0};
             setSyncParam(tmpStruc);
             updateSync();
         }

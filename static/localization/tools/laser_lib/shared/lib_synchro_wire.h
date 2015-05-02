@@ -28,6 +28,7 @@
 #define WIREDSYNC_PERIOD  1000000   // time duration between two signals (in µs)
 #define WIREDSYNC_DEBOUNCE 10000    // in µs
 #define WIREDSYNC_NBSAMPLES 20
+#define WIREDSYNC_ACCEPTABLE_OFFSET 280 // acceptable offset (in µs). 139 µs = 1° @ 20Hz
 
 #if WIREDSYNC_PERIOD > 4294967295
 #error "Blocking loop. Sit back, think, and ask yourself why your are putting a duration between every sample larger than 52 minutes"
