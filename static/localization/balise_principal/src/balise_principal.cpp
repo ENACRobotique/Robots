@@ -145,7 +145,7 @@ void loop(){
     switch (state){
 #ifdef SYNC_WIRED
     case S_SYNC_MEASURE :
-        if (wiredSync_sendSignal() == -1) state = S_GAME;
+        if (wiredSync_sendSignal(0) == -1) state = S_GAME;
         break;
 #endif
 #ifdef SYNC_WIRELESS

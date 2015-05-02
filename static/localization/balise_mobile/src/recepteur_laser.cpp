@@ -36,7 +36,7 @@ uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thi
 char chosenOne=0;                           // interruption chosen for synchronization
 
 #ifdef SYNC_WIRED
-int lastSyncSampleIndex = -1;
+int lastSyncSampleIndex = -1,initIndex=-1;
 uint32_t firstSyncSample = 0;
 #endif
 
@@ -76,7 +76,7 @@ void loop() {
     int rxB=0; // size (bytes) of message available to read
     unsigned long time = millis(),timeMicros=micros();
 #ifdef SYNC_WIRED
-    int tempIndex;
+    int tempIndex=-1;
 #endif
 
     updateSync();
@@ -160,15 +160,16 @@ void loop() {
     switch (state){
 #ifdef SYNC_WIRED
         case S_SYNC_MEASURES :
-            if ((tempIndex=wiredSync_waitSignal())!=lastSyncSampleIndex){
+            if ((tempIndex=wiredSync_waitSignal(0))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
                     lastSyncSampleIndex = tempIndex;
+                    initIndex = tempIndex;
                 }
                 if (tempIndex == 0){
                     firstSyncSample = micros();
                 }
             }
-            if (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD || tempIndex >= WIREDSYNC_NBSAMPLES){
+            if (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
                 wiredSync_finalCompute(1);
                 state=S_GAME;
             }
@@ -221,9 +222,10 @@ void loop() {
 #endif
         case S_GAME :
 
-            if ((tempIndex=wiredSync_waitSignal())!=lastSyncSampleIndex){
+            if ((tempIndex=wiredSync_waitSignal(1))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
                     lastSyncSampleIndex = tempIndex;
+                    initIndex = tempIndex;
                     firstSyncSample = micros();
                     state = S_SYNC_MEASURES;
                 }

@@ -36,6 +36,9 @@ typedef enum{
 #if defined(SYNC_WIRED) && defined(SYNC_WIRELESS)
 #error "only one sync method possible"
 #endif
+#if !defined(SYNC_WIRED) && !defined(SYNC_WIRELESS)
+#error "no sync method specified. required."
+#endif
 
 
 #endif /* PARAMS_H_ */

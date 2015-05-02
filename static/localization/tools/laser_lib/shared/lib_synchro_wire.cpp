@@ -34,14 +34,18 @@ static wsType_t sum_lt_gt_lt=0;// sum of (local date)*(global date - local date)
  * This function is to be called on the device which has NOT the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
- *  None
+ *  reset : if != 0, resets the index count (starts new synchronization)
  * Returned value :
  *  if >=0 : current sample index
  *  if <= 0 : no significant signal received
  */
-int wiredSync_waitSignal(){
+int wiredSync_waitSignal(int reset){
     static int sampleIndex = -1;
     static uint32_t prevReceived = 0;
+    if (reset){
+        sampleIndex = -1;
+        prevReceived = 0;
+    }
     uint32_t begin = micros();
     // if signal is here
     while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
@@ -158,17 +162,21 @@ int wiredSync_finalCompute(int reset){
 }
 #ifdef ARCH_328P_ARDUINO
 /* wiredSync_sendSignal : function that sends the synchronization signal.
+ * This function is to be called on the device which has the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
- *  None
+ *  reset : if != 0, resets the index count (starts new synchronization)
  * Returned value :
  *  1 while there is still something to send
  *  -1 if all the signals have been sent
  */
-int wiredSync_sendSignal(){
+int wiredSync_sendSignal(int reset){
     static uint32_t prevSignal=0;
     static int nbSamples=WIREDSYNC_NBSAMPLES; // number of samples left
-
+    if (reset){
+        prevSignal = 0;
+        nbSamples = WIREDSYNC_NBSAMPLES;
+    }
     if (nbSamples && (micros() - prevSignal) > (WIREDSYNC_PERIOD - WIREDSYNC_LOWTIME)){
         wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
         if (!prevSignal) delay(2 * WIREDSYNC_LOWTIME / 1000);   // we must force the waiting for the first call. Given that everything in this mechanism works with active waiting, using a delay() is not that bad. Why delay and not delayMicrosecond ? Take a look at the prototype of delayMicrosecond... Also, wait 2 time the normal duration is to ensure that every receiver catches the first sample (critical). Why exactly 2 ? I don't know.
