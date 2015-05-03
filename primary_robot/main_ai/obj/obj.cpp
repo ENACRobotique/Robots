@@ -59,6 +59,8 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
     sPath_t path_loc;
     Point2D<float> posRobot(obs[robot].c.x, obs[robot].c.y);
     int N = obs.size();
+    std::vector<int> list;
+    int result;
 
     _dist = -1;
     Point2D<float> p = projectPointInObs(posRobot, obs);
@@ -105,9 +107,24 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
 #endif
         }
 
+        if(i.type == E_CIRCLE){
+            Point2D<float> dest(obs[obs.size() - 1].c.x, obs[obs.size() - 1].c.y);
+
+            while((result = checkPointInObs(dest, obs)) != 0){
+                logs << DEBUG << "Disable obstacle number : " << result;
+                list.push_back(result);
+                obs[result].active = 0;
+            }
+        }
+
         astar::fill_tgts_lnk(obs);
         a_star(A(robot), A(N-1), &path_loc);
 
+        if(i.type == E_CIRCLE){
+            for(int i : list){
+                obs[i].active = 1;
+            }
+        }
 
         for(unsigned int j : _num_obs){ // Reactivation obstacle
             obs[j].active = 1;
@@ -122,25 +139,29 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
 #endif
         }
         else if (_dist > path_loc.dist || _dist == -1) { // The new path is better to access the objective
-            _dist = path_loc.dist;
             _path = path_loc;
 
             if(i.type == E_CIRCLE){
-                if(_path.path[_path.path_len - 1].p1.distanceTo(_path.path[_path.path_len - 1].p2) < i.cir.r)
+                if(_path.path[_path.path_len - 1].p1.distanceTo(_path.path[_path.path_len - 1].p2) < i.cir.r){
                     continue;
+                }
                 else{
                     Point2D<float> pt = _path.path[_path.path_len - 1].p1;
                     Circle2D<float> cir(i.cir.c.x, i.cir.c.y, i.cir.r);
 
-                    pt = cir.projecte(pt);
+                    pt = cir.projecteSup(pt, 0.1);
+                    if(checkPointInObs(pt, obs)){
+                        continue;
+                    }
                     _path.path[_path.path_len - 1].p2 = pt;
-                    _dist -= i.cir.r;
-                    Vector2D<float> v1(1,0), v2(cir.c, pt); //FIXME
+                    _dist = path_loc.dist - i.cir.r;
+                    Vector2D<float> v1(1,0), v2(cir.c, pt);
                     _access_select_angle = v1.angle(v2) + M_PI; //M_PI because reference inverse
                 }
             }
             else if(i.type == E_POINT){
                 _access_select_angle = i.pt.angle + M_PI; //M_PI because reference inverse
+                _dist = path_loc.dist;
             }
 
             _access_select = _path.path[_path.path_len - 1].p2;
