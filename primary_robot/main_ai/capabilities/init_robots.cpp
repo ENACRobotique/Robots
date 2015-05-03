@@ -25,6 +25,7 @@
 #include "CapSlave.h"
 #include "CapAI.h"
 #include "CapIO.h"
+#include "CapActuator.h"
 #include "environment.h"
 
 
@@ -40,6 +41,7 @@ void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hm
     robots.push_back(new Robot("", ELT_PRIMARY, &env));
 
     robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 0);
+    robots.back()->caps[eCap::ACTUATOR] = new CapActuator(robots.back());
     if(eState == E_AI_SLAVE)
         robots.back()->caps[eCap::SLAVE] = new CapSlave(robots.back());
     else{ //PRIM_MODE_AI
@@ -68,6 +70,9 @@ void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hm
     for(Robot* r : robots){
         if(CapSlave* capSlave = dynamic_cast<CapSlave*> (r->caps[eCap::SLAVE])){
             capSlave->setup();
+        }
+        if(CapActuator* capActuator = dynamic_cast<CapActuator*> (r->caps[eCap::ACTUATOR])){
+            capActuator->setup();
         }
     }
 

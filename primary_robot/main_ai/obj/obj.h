@@ -13,10 +13,27 @@
 #include <vector>
 #include "GeometryTools.h"
 #include "a_star.h"
+#include "obj.h"
 
 //#define DEBUG_OBJ
 
 using namespace std;
+
+typedef enum{
+    SPOT,
+    CLAP,
+    POP_CORN
+}objective;
+
+typedef enum {
+    E_NULL, E_CLAP, E_SPOT, E_CUP
+} eObj_t;
+
+typedef struct {
+        eObj_t type;
+        std::vector<bool> active;
+        std::vector<float> angle;
+} Actuator;
 
 typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
 
@@ -43,10 +60,6 @@ typedef struct {
 } sObjEntry_t;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT, E_CUP
-} eObj_t;
-
-typedef enum {
     ACTIVE, WAIT_MES, NO_TIME, FINISH
 } eStateObj_t;
 
@@ -57,7 +70,7 @@ class Obj {
         Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint);
         virtual ~Obj();
 
-        virtual void initObj(){};
+        virtual void initObj(Point2D<float> , vector<astar::sObs_t>& ){};
         virtual int loopObj(){return -1;};
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return _dist;};
@@ -65,6 +78,8 @@ class Obj {
         void addAccess(sObjEntry_t &access);
 
         float update(const bool axle,  std::vector<astar::sObs_t>& obs, const int robot);
+        int updateDestPointOrient(const vector<Actuator>& act);
+
 
         float getDist() const;
         sPath_t getPath() const;

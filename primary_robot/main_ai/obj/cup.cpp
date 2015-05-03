@@ -14,10 +14,14 @@
 #include "types.h"
 #include "tools.h"
 
+extern "C"{
+#include "millis.h"
+}
 
 
 
-Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP), _num(num){
+
+Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP), _num(num), _time(0){
 
     if(num > 4)
         logs << ERR << "Num too big";
@@ -37,8 +41,24 @@ Cup::~Cup() {
     // TODO Auto-generated destructor stub
 }
 
+void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs){
+    Circle2D<float> cir(obs[_num_obs[0]].c.x, obs[_num_obs[0]].c.y, 10);
+    Point2D<float> dest;
+
+    dest = cir.projecte(pos);
+
+    path.go2Point(dest,true, obs, true); //FIXME angle actionneur
+
+    _time = millis();
+}
+
 int Cup::loopObj(){
-    _state = FINISH;
-    return 0;
+
+    if(millis() - _time > 2000){
+        _state = FINISH;
+        return 0;
+    }
+
+    return 1;
 };
 

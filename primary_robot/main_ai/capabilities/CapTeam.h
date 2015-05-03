@@ -9,14 +9,8 @@
 #define CAPABILITIES_CAPTEAM_H_
 
 #include <Capability.h>
-
+#include "obj.h"
 #include <vector>
-
-typedef enum{
-    SPOT,
-    CLAP,
-    POP_CORN
-}objective;
 
 class CapTeam : public Capability {
     public:
