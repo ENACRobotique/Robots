@@ -169,7 +169,7 @@ void loop() {
                     firstSyncSample = micros();
                 }
             }
-            if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD))
+            if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES) * WIREDSYNC_PERIOD))
                     || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
                 wiredSync_finalCompute(1);
                 newState=S_GAME;
@@ -224,7 +224,7 @@ void loop() {
 
             if ((tempIndex=wiredSync_waitSignal(1))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
-#ifndef DEBUG_SYNC_WIRE
+#ifndef DEBUG_SYNC_WIRE_EVAL
                     lastSyncSampleIndex = tempIndex;
                     initIndex = tempIndex;
                     firstSyncSample = micros();

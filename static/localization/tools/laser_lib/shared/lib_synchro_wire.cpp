@@ -62,7 +62,7 @@ int wiredSync_waitSignal(int reset){
 #error "will not work. Debounce too slow, or lowtime too fast"
 #endif
         if (prevReceived) {
-            sampleIndex += (end - prevReceived + WIREDSYNC_PERIOD/4)/WIREDSYNC_PERIOD; // keep track of the indexes (takes into account missed ones,with a signal up to WIREDSYNC_PERIOD/4 early)
+            sampleIndex += (end - prevReceived + WIREDSYNC_PERIOD/3)/WIREDSYNC_PERIOD; // keep track of the indexes (takes into account missed ones,with a signal up to WIREDSYNC_PERIOD/4 early)
         }
         else {
             sampleIndex = 0;
@@ -135,8 +135,11 @@ int wiredSync_finalCompute(int reset){
         setSyncParam(sStruc);
         sMsg tmpMsg;
         updateSync();
-        if (abs(offset)>WIREDSYNC_ACCEPTABLE_OFFSET){
+        if ( static_cast<int32_t>(offset)>(int32_t)WIREDSYNC_ACCEPTABLE_OFFSET || static_cast<int32_t>(offset)<(int32_t)-WIREDSYNC_ACCEPTABLE_OFFSET){
             tmpMsg.payload.syncWired.flag = SYNC_UNSYNC;
+#ifdef DEBUG_SYNC_WIRE
+            bn_printfDbg("sync error : offset = %ld\n",static_cast<int32_t>(offset));
+#endif
         }
         else tmpMsg.payload.syncWired.flag = SYNC_OK;
         tmpMsg.header.destAddr = ADDRX_MAIN_TURRET;
@@ -145,17 +148,15 @@ int wiredSync_finalCompute(int reset){
         bn_send(&tmpMsg);
 
 #ifdef DEBUG_SYNC_WIRE
-            bn_printfDbg("sync error : offset = %lu\n",static_cast<int32_t>(offset));
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
         bn_printfDbg(", mob1 end, %d, %ld,%ld, %lu",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2 end, %d, %ld,%ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
+        bn_printfDbg(", mob2 end, %d, %ld,%lu, %lu\n",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #endif
-        }
 #endif
 #ifdef DEBUG_SYNC_WIRE
 #ifdef ARCH_328P_ARDUINO
