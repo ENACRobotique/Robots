@@ -163,9 +163,9 @@ void loop() {
             if ((tempIndex=wiredSync_waitSignal(0))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
                     lastSyncSampleIndex = tempIndex;
-                    initIndex = tempIndex;
                 }
                 if (tempIndex == 0){
+                    initIndex = tempIndex;
                     firstSyncSample = micros();
                 }
             }

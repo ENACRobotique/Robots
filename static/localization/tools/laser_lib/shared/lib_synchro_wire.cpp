@@ -133,14 +133,16 @@ int wiredSync_finalCompute(int reset){
                             static_cast<uint32_t>(abs(inv_delta)),
                             increment};
         setSyncParam(sStruc);
+        sMsg tmpMsg;
         updateSync();
         if (abs(offset)>WIREDSYNC_ACCEPTABLE_OFFSET){
-            sMsg tmpMsg;
-            tmpMsg.header.destAddr = ADDRX_MAIN_TURRET;
-            tmpMsg.header.type = E_SYNC_STATUS;
-            tmpMsg.header.size = sizeof(sSyncPayload_wired);
-            tmpMsg.payload.syncWired.flag = SYNC_OK;
-            bn_send(&tmpMsg);
+            tmpMsg.payload.syncWired.flag = SYNC_UNSYNC;
+        }
+        else tmpMsg.payload.syncWired.flag = SYNC_OK;
+        tmpMsg.header.destAddr = ADDRX_MAIN_TURRET;
+        tmpMsg.header.type = E_SYNC_STATUS;
+        tmpMsg.header.size = sizeof(sSyncPayload_wired);
+        bn_send(&tmpMsg);
 
 #ifdef DEBUG_SYNC_WIRE
             bn_printfDbg("sync error : offset = %lu\n",static_cast<int32_t>(offset));

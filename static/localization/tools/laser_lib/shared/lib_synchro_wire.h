@@ -38,7 +38,7 @@
 #include <gmpxx.h>
 #endif
 
-#define BENCHMARK_GMP
+//#define BENCHMARK_GMP
 typedef float wsType_t; // because it is shorter than wiredSyncType_t, and to allow easy change in order to benchmark different solutions
 
 /* wiredSync_waitSignal : function that must be in the main loop, and waits for the wired synchronization signal.
