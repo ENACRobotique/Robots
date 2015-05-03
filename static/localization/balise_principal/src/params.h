@@ -11,6 +11,7 @@
 #include "messages.h"
 
 typedef enum{
+    S_CHECKREMOTE,
     S_CHANNEL,
     S_SYNC_ELECTION,
     S_SYNC_MEASURE,
@@ -64,9 +65,6 @@ typedef struct{
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
-
-#define HARDUPDATEPERIOD  0    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
-#define HARDUPDATESIGN    0
 
 #define SYNC_WIRED
 //#define SYNC_WIRELESS

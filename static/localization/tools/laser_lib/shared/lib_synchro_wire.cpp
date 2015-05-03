@@ -7,6 +7,11 @@
 
 #include "timeout.h"
 #include "lib_synchro_wire.h"
+#include "network_cfg.h"
+#include "messages.h"
+#ifndef WIREDSYNC_BENCHMARK
+#include "botNet_core.h"
+#endif
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
 #include "bn_debug.h"
 #include "params.h"
@@ -129,10 +134,16 @@ int wiredSync_finalCompute(int reset){
                             increment};
         setSyncParam(sStruc);
         updateSync();
-#ifdef DEBUG_SYNC_WIRE
         if (abs(offset)>WIREDSYNC_ACCEPTABLE_OFFSET){
+            sMsg tmpMsg;
+            tmpMsg.header.destAddr = ADDRX_MAIN_TURRET;
+            tmpMsg.header.type = E_SYNC_STATUS;
+            tmpMsg.header.size = sizeof(sSyncPayload_wired);
+            tmpMsg.payload.syncWired.flag = SYNC_OK;
+            bn_send(&tmpMsg);
+
+#ifdef DEBUG_SYNC_WIRE
             bn_printfDbg("sync error : offset = %lu\n",static_cast<int32_t>(offset));
-        }
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
         bn_printfDbg(", mob1 end, %d, %ld,%ld, %lu",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
@@ -142,7 +153,9 @@ int wiredSync_finalCompute(int reset){
         bn_printfDbg(", mob2 end, %d, %ld,%ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #endif
-#else
+        }
+#endif
+#ifdef DEBUG_SYNC_WIRE
 #ifdef ARCH_328P_ARDUINO
 #else
         wsType_t delta = 1/inv_delta;
