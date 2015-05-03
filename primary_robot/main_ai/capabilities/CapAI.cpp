@@ -101,6 +101,20 @@ void CapAI::initObjective(){
 
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));
+
+    if(capTeam->getColor() == YELLOW){
+        for(unsigned int i = 12 ; i < 20 ; i++){
+            robot->env->obs[i].active = 0;
+            robot->env->obs_updated[i]++;
+        }
+    }
+    else if(capTeam->getColor() == GREEN){
+        for(unsigned int i = 4 ; i < 12 ; i++){
+            robot->env->obs[i].active = 0;
+            robot->env->obs_updated[i]++;
+        }
+    }
+
 }
 
 
