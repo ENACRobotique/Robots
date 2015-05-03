@@ -60,7 +60,11 @@ void domi_init(int pinInt, int pinSpeed){
 #endif
 
     pinMode(_pinSpeed,OUTPUT);
+#ifdef SYNC_WIRED
+    digitalWrite(_pinSpeed,SPEED_20HZ);
+#elif defined(SYNC_WIRELESS)
     digitalWrite(_pinSpeed,SPEED_HIGH);
+#endif
 }
 
 //remove the ISR

@@ -28,6 +28,7 @@
 #define WIREDSYNC_PERIOD  1000000   // time duration between two signals (in µs)
 #define WIREDSYNC_DEBOUNCE 10000    // in µs
 #define WIREDSYNC_NBSAMPLES 20
+#define WIREDSYNC_ACCEPTABLE_OFFSET 280 // acceptable offset (in µs). 139 µs = 1° @ 20Hz
 
 #if WIREDSYNC_PERIOD > 4294967295
 #error "Blocking loop. Sit back, think, and ask yourself why your are putting a duration between every sample larger than 52 minutes"
@@ -44,12 +45,12 @@ typedef float wsType_t; // because it is shorter than wiredSyncType_t, and to al
  * This function is to be called on the device which has NOT the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
- *  None
+ *  reset : if != 0, resets the index count (starts new synchronization)
  * Returned value :
  *  if >=0 : current sample index
  *  if <= 0 : no significant signal received
  */
-int wiredSync_waitSignal();
+int wiredSync_waitSignal(int reset);
 
 /* wiredSync_intermediateCompute :  records a new set of measures for the synchronization.
  * The actual computation is done in wiredSync_finalCompute.
@@ -77,11 +78,11 @@ int wiredSync_finalCompute(int reset);
  * This function is to be called on the device which has the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
- *  None
+ *  reset : if != 0, resets the index count (starts new synchronization)
  * Returned value :
  *  1 while there is still something to send
  *  -1 if all the signals have been sent
  */
-int wiredSync_sendSignal();
+int wiredSync_sendSignal(int reset);
 
 #endif /* LIB_SYNCHRO_WIRE_H_ */

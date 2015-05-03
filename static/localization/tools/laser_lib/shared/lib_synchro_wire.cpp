@@ -23,6 +23,7 @@
 #endif
 
 // static variables to store values between different calls
+static uint32_t firstSampleTime=0; // we store the time of the first sample, in order to keep computed value in the resolution range of wsType_t
 static wsType_t sum_ones=0;    // sum of one
 static wsType_t sum_lt=0;      // sum of local dates
 static wsType_t sum_ltsq=0;     // sum of (local dates)^2
@@ -34,14 +35,18 @@ static wsType_t sum_lt_gt_lt=0;// sum of (local date)*(global date - local date)
  * This function is to be called on the device which has NOT the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
- *  None
+ *  reset : if != 0, resets the index count (starts new synchronization)
  * Returned value :
  *  if >=0 : current sample index
  *  if <= 0 : no significant signal received
  */
-int wiredSync_waitSignal(){
+int wiredSync_waitSignal(int reset){
     static int sampleIndex = -1;
     static uint32_t prevReceived = 0;
+    if (reset){
+        sampleIndex = -1;
+        prevReceived = 0;
+    }
     uint32_t begin = micros();
     // if signal is here
     while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
@@ -56,18 +61,19 @@ int wiredSync_waitSignal(){
         }
         else {
             sampleIndex = 0;
+            firstSampleTime = end;
         }
         prevReceived = end;
 
-        wiredSync_intermediateCompute(sampleIndex*WIREDSYNC_PERIOD,end);
+        wiredSync_intermediateCompute(sampleIndex*WIREDSYNC_PERIOD,end-firstSampleTime);
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
-        bn_printfDbg(", mob1, %d, %lu, %lu",sampleIndex, end, sampleIndex*WIREDSYNC_PERIOD);
+        bn_printfDbg(", mob1, %d, %lu, %lu",sampleIndex, micros2s(end) , sampleIndex*WIREDSYNC_PERIOD);
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, end , sampleIndex*WIREDSYNC_PERIOD);
+        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, micros2s(end) , sampleIndex*WIREDSYNC_PERIOD);
 #endif
 #endif
         return sampleIndex;
@@ -115,17 +121,25 @@ int wiredSync_finalCompute(int reset){
         inv_delta = det / inv_delta_den;
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_lt_gt_lt;
         offset = offset_num / det;
+        int increment = (inv_delta>0?1:-1);
+
 #ifndef WIREDSYNC_BENCHMARK
-        syncStruc sStruc = {static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)),(inv_delta>0?1:-1)};
+        syncStruc sStruc = {static_cast<int32_t>(offset)-static_cast<int32_t>(firstSampleTime*(1+(1/inv_delta))) + static_cast<int32_t>((micros()-firstSampleTime)/inv_delta),
+                            static_cast<uint32_t>(abs(inv_delta)),
+                            increment};
         setSyncParam(sStruc);
+        updateSync();
 #ifdef DEBUG_SYNC_WIRE
+        if (abs(offset)>WIREDSYNC_ACCEPTABLE_OFFSET){
+            bn_printfDbg("sync error : offset = %lu\n",static_cast<int32_t>(offset));
+        }
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
-        bn_printfDbg(", mob1 end, %d, %ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)));
+        bn_printfDbg(", mob1 end, %d, %ld,%ld, %lu",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2 end, %d, %ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset), static_cast<uint32_t>(abs(inv_delta)));
+        bn_printfDbg(", mob2 end, %d, %ld,%ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #endif
 #else
@@ -158,17 +172,21 @@ int wiredSync_finalCompute(int reset){
 }
 #ifdef ARCH_328P_ARDUINO
 /* wiredSync_sendSignal : function that sends the synchronization signal.
+ * This function is to be called on the device which has the reference clock.
  * WILL BLOCK DURING SYNCHRONIZATION, blocking delay is at most WIREDSYNC_LOWTIME
  * Argument :
- *  None
+ *  reset : if != 0, resets the index count (starts new synchronization)
  * Returned value :
  *  1 while there is still something to send
  *  -1 if all the signals have been sent
  */
-int wiredSync_sendSignal(){
+int wiredSync_sendSignal(int reset){
     static uint32_t prevSignal=0;
     static int nbSamples=WIREDSYNC_NBSAMPLES; // number of samples left
-
+    if (reset){
+        prevSignal = 0;
+        nbSamples = WIREDSYNC_NBSAMPLES;
+    }
     if (nbSamples && (micros() - prevSignal) > (WIREDSYNC_PERIOD - WIREDSYNC_LOWTIME)){
         wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
         if (!prevSignal) delay(2 * WIREDSYNC_LOWTIME / 1000);   // we must force the waiting for the first call. Given that everything in this mechanism works with active waiting, using a delay() is not that bad. Why delay and not delayMicrosecond ? Take a look at the prototype of delayMicrosecond... Also, wait 2 time the normal duration is to ensure that every receiver catches the first sample (critical). Why exactly 2 ? I don't know.
@@ -180,8 +198,7 @@ int wiredSync_sendSignal(){
 
         // set the "zero" right after the first signal
         if (nbSamples == WIREDSYNC_NBSAMPLES) {
-            syncStruc tmpStruc = getSyncParam();
-            tmpStruc.initialDelay = end-WIREDSYNC_INITIAL;
+            syncStruc tmpStruc = {static_cast<int32_t>(end-WIREDSYNC_INITIAL),0,0};
             setSyncParam(tmpStruc);
             updateSync();
         }

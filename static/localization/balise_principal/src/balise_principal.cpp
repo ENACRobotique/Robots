@@ -120,6 +120,15 @@ void loop(){
     if((time - time_prev_led)>=1000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
+#ifdef DEBUG_SYNC_WIRE
+        if (millis() > 35000){
+            wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
+            delay(WIREDSYNC_LOWTIME/1000);
+            wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
+            uint32_t end = micros();
+            bn_printfDbg("tur, %lu,",micros2s(end));
+        }
+#endif
 #ifdef DEBUG
     bn_printfDbg("%lu period %lu",micros(),domi_meanPeriod());
 //        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
@@ -145,7 +154,7 @@ void loop(){
     switch (state){
 #ifdef SYNC_WIRED
     case S_SYNC_MEASURE :
-        if (wiredSync_sendSignal() == -1) state = S_GAME;
+        if (wiredSync_sendSignal(0) == -1) state = S_GAME;
         break;
 #endif
 #ifdef SYNC_WIRELESS
