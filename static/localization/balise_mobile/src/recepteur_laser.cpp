@@ -148,7 +148,7 @@ void loop() {
 
 
 // In any state, if we receive a "begin election" message, we begin election.
-    if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
+    if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.syncWireless.flag==SYNCF_BEGIN_ELECTION){
         state=S_SYNC_ELECTION;
 #ifdef VERBOSE_SYNC
         printf("begin election");
@@ -184,7 +184,7 @@ void loop() {
                 intLas1=0;
             }
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
-            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
+            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.syncWireless.flag==SYNCF_MEASURES){
                 chosenOne=(intLas0<intLas1?1:0);
 #ifdef VERBOSE_SYNC
                 bn_printDbg("end election\n");
@@ -206,8 +206,8 @@ void loop() {
             // handling data broadcasted by turret
             if (rxB && inMsg.header.type==E_SYNC_DATA){
                     rxB=0;
-                if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
-                    syncComputationFinal(&inMsg.payload.sync);
+                if (inMsg.payload.syncWireless.flag==SYNCF_END_MEASURES){
+                    syncComputationFinal(&inMsg.payload.syncWireless);
                     updateSync();
 #ifdef VERBOSE_SYNC
                     bn_printfDbg("syncComputation : %lu\n",micros2s(micros()));
@@ -215,7 +215,7 @@ void loop() {
                     newState=S_GAME;
                 }
                 else {
-                    syncComputationMsg(&inMsg.payload.sync);
+                    syncComputationMsg(&inMsg.payload.syncWireless);
                 }
             }
         	break;

@@ -36,7 +36,8 @@ typedef enum{
     E_INTP,                 // @payload.intp: bn_intp synchronization message
 
 /************************ user types start ************************/
-    E_SYNC_DATA,            // @payload.sync: sync data (send from the turret to the receiver)
+    E_SYNC_DATA,            // @payload.syncWireless: sync data (send from the turret to the receiver)
+    E_SYNC_STATUS,          // @payload.syncWired: sync status
     E_PERIOD,               // @payload.period period measurement
     E_MEASURE,              // @payload.mobileReport laser delta-time measurement
     E_TRAJ,                 // @payload.traj: a trajectory step
@@ -52,7 +53,7 @@ typedef enum{
     E_GENERIC_STATUS,       // @payload.genericStatus: generic status of an element
     E_POS_STATS,            // @payload.posStats: position statistics (packed)
     E_TRAJ_ORIENT_EL,       // @payload.trajOrientEl: complex trajectory element (position + orientation wrt time)
-    E_POS_CAM,               // @payload.posCam: For position computed from CAM
+    E_POS_CAM,              // @payload.posCam: For position computed from CAM
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -124,10 +125,11 @@ typedef union{
     sTrajOrientElRaw_t trajOrientEl;    // E_TRAJ_ORIENT_EL
 
 // LOCALIZATION (cf messages-localization.h)
-    sMobileReportPayload mobileReport;  // E_
-    sSyncPayload sync;                  // E_
+    sMobileReportPayload mobileReport;  // E_MEASURE
+    sSyncPayload_wireless syncWireless; // E_SYNC_DATA
+    sSyncPayload_wired syncWired;       // E_SYNC_STATUS
     uint8_t channel;                    // E_
-    uint32_t period;                    // E_
+    uint32_t period;                    // E_E_PERIOD
 
 // INTERACTIONS (cf messages-interactions.h)
     sServos servos;                     // E_SERVOS

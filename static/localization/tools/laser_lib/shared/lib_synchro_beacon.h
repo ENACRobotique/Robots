@@ -31,7 +31,7 @@ int hbit(uint64_t val);
  * Usage : feed syncComputationMsg with data broadcasted by the turret until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
  *         /!\ feed also syncComputationLaser with laser data
  */
-void syncComputationMsg(sSyncPayload *pload);
+void syncComputationMsg(sSyncPayload_wireless *pload);
 
 
 /* SyncComputationLaser : Computes the synchronization parameters.
@@ -48,7 +48,7 @@ void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t perio
 /* SyncComputationFinal : Computes the sync parameters (least square).
  * Usage : feed syncComputationLaser with data received under the flag SYNCF_END_MEASURES.
  */
-void syncComputationFinal(sSyncPayload *pload);
+void syncComputationFinal(sSyncPayload_wireless *pload);
 
 #ifdef __cplusplus
     }
