@@ -19,7 +19,7 @@ class Clap : public Obj{
         Clap(const unsigned int num);
         virtual ~Clap();
 
-        void initObj(){};
+        void initObj(Point2D<float> , vector<astar::sObs_t>& ){};
         int loopObj();
         eObj_t type() const {return E_CLAP;};
         //float gain(){return 1;};

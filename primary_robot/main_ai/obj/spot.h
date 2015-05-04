@@ -22,7 +22,7 @@ class Spot : public Obj{
         Spot(const unsigned int num, eColor_t color, vector<astar::sObs_t>& obs);
         virtual ~Spot();
 
-        void initObj(){};
+        void initObj(Point2D<float> , vector<astar::sObs_t>& ){};
         int loopObj();
         eObj_t type() const {return E_SPOT;};
 

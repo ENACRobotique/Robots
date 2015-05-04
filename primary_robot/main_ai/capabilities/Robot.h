@@ -24,7 +24,8 @@ typedef enum {
     IO,
     VIDEO,
     TEAM,
-    PREP
+    PREP,
+    ACTUATOR
 }eCap;
 
 class Capability;

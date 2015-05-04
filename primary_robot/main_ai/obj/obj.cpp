@@ -173,6 +173,36 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
     return _dist;
 }
 
+int Obj::updateDestPointOrient(const vector<Actuator>& act){
+    unsigned int i;
+
+    if(act.empty())
+        return -1;
+
+    for(i = 0 ; i < act.size() ; i++){
+        if( act[i].type == _type)
+            break;
+    }
+
+    if(i == act.size()){
+        logs << ERR << "Any actuator define for this objective";
+        return -1;
+    }
+
+    if(act[i].active.size() != act[i].angle.size()){
+        logs << ERR << "Different size : active=" << act[i].active.size() << "and angle=" << act[i].angle.size();
+    }
+
+    if(act[i].active.empty())
+        logs << INFO << "Any actuator available";
+
+    if(act[i].active[0]) //TODO For the moment choose the first find
+        _access_select_angle += act[i].angle[0];
+
+
+    return 0;
+}
+
 float Obj::getDist() const{
     return _dist;
 }

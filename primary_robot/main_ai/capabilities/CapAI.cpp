@@ -9,6 +9,7 @@
 #include "CapIO.h"
 #include "CapPropulsion.h"
 #include "CapPosition.h"
+#include "CapActuator.h"
 #include "CapTeam.h"
 #include "tools.h"
 #include "ai_tools.h"
@@ -32,6 +33,7 @@ int CapAI::loop(){
     CapPropulsion* capProp = dynamic_cast<CapPropulsion*> (robot->caps[eCap::PROP]);
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
+    CapActuator* capActuator = dynamic_cast<CapActuator*> (robot->caps[eCap::ACTUATOR]);
 
     start_time = capTeam->getStartGame();
 
@@ -46,9 +48,9 @@ int CapAI::loop(){
             logs << INFO << "Objective list is empty";
 
         if ((millis() - last_time) > 1000){ //Calculation of the next objective
-              last_time = millis();
+            last_time = millis();
 
-            if ((current_obj = nextObj(start_time, listObj, robot->env->obs, robot->env->obs_updated ,(int) capPos->getIobs(), capProp->getPropType()==AXLE?true:false)) != -1) {
+            if ((current_obj = nextObj(start_time, listObj, robot->env->obs, robot->env->obs_updated ,(int) capPos->getIobs(), capProp->getPropType()==AXLE?true:false, capActuator->_act)) != -1) {
                 pt_select = listObj[current_obj]->getDestPoint();
                 logs << INFO << "Selected point is (" << pt_select.x << " ; " << pt_select.y << ")";
 
