@@ -53,6 +53,8 @@ typedef enum{
     E_POS_STATS,            // @payload.posStats: position statistics (packed)
     E_TRAJ_ORIENT_EL,       // @payload.trajOrientEl: complex trajectory element (position + orientation wrt time)
     E_POS_CAM,               // @payload.posCam: For position computed from CAM
+    E_SYNC_QUERY,           // @payload.syncQuery: for time synchronization
+    E_SYNC_RESPONSE,        // @payload.syncResponse: for time synchronization
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -137,6 +139,8 @@ typedef union{
     sObsConfig obsCfg;                  // E_OBS_CFG
     sObss obss;                         // E_OBSS
     sGenericStatus genericStatus;       // E_GENERIC_STATUS
+    sSyncQuery syncQuery;               // E_SYNC_QUERY
+    sSyncResponse syncResponse;         // E_SYNC_RESPONSE
 
 // IMAGE PROCESSING (cf messages-image-processing.h)
     sPosCam posCam;                     // E_POS_CAM
