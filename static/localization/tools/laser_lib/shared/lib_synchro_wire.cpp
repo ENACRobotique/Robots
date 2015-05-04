@@ -135,10 +135,12 @@ int wiredSync_finalCompute(int reset){
         setSyncParam(sStruc);
         sMsg tmpMsg;
         updateSync();
-        if ( static_cast<int32_t>(offset)>(int32_t)WIREDSYNC_ACCEPTABLE_OFFSET || static_cast<int32_t>(offset)<(int32_t)-WIREDSYNC_ACCEPTABLE_OFFSET){
+        if ( static_cast<int32_t>(offset)>(int32_t)WIREDSYNC_ACCEPTABLE_OFFSET
+                || static_cast<int32_t>(offset)<(int32_t)-WIREDSYNC_ACCEPTABLE_OFFSET
+                || sum_ones < (WIREDSYNC_NBSAMPLES*3)/4){
             tmpMsg.payload.syncWired.flag = SYNC_UNSYNC;
 #ifdef DEBUG_SYNC_WIRE
-            bn_printfDbg("sync error : offset = %ld\n",static_cast<int32_t>(offset));
+            bn_printfDbg("sync error : offset = %ld, %d samples\n",static_cast<int32_t>(offset),static_cast<int>(sum_ones));
 #endif
         }
         else tmpMsg.payload.syncWired.flag = SYNC_OK;
