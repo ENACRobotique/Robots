@@ -22,14 +22,14 @@ extern "C"{
 
 //#define DEBUG_OBJ
 
-Obj::Obj() : _type(E_NULL), _point(-1), _state(ACTIVE), _access_select_angle(0), _dist(-1), _time(-1), _done(0){
+Obj::Obj() : _type(E_NULL), _point(-1), _state(ACTIVE), _access_select_angle(0), _access_point_select(-1),_dist(-1), _time(-1), _done(0){
 }
 
-Obj::Obj(eObj_t type) : _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _dist(-1), _time(-1), _done(0){
+Obj::Obj(eObj_t type) : _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _access_point_select(-1), _dist(-1), _time(-1), _done(0){
 }
 
 Obj::Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint) :
-        _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _dist(-1), _time(-1), _done(0){
+        _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _access_point_select(-1), _dist(-1), _time(-1), _done(0){
 
     for(unsigned int i : numObs){
         _num_obs.push_back(i);
@@ -66,21 +66,21 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
     Point2D<float> p = projectPointInObs(posRobot, obs);
     obs[robot].c = {p.x, p.y};
 
-    for (sObjEntry_t i : _access) {
+    for (unsigned int i = 0 ; i < _access.size(); i++) {
 #ifdef DEBUG_OBJ
-        logs << DEBUG << "Access type : " << objAccess(i.type);
+        logs << DEBUG << "Access type : " << objAccess(_access[i].type);
 #endif
-        switch(i.type){
+        switch(_access[i].type){
             case E_POINT :
-                obs[obs.size() - 1].c = {i.pt.p.x, i.pt.p.y};
+                obs[obs.size() - 1].c = {_access[i].pt.p.x, _access[i].pt.p.y};
                 if(axle)
-                    updateEndTraj(i.pt.angle, &i.pt.p, i.radius, obs);
+                    updateEndTraj(_access[i].pt.angle, &_access[i].pt.p, _access[i].radius, obs);
                     p = {obs[robot].c.x,obs[robot].c.y};
                     p = projectPointInObs(p, obs);
                     obs[robot].c = {p.x, p.y};
                 break;
             case E_CIRCLE:
-                obs[obs.size() - 1].c = {i.cir.c.x, i.cir.c.y};
+                obs[obs.size() - 1].c = {_access[i].cir.c.x, _access[i].cir.c.y};
                 if(axle){
                     obs[N - 2].active = 0;
                     obs[N - 3].active = 0;
@@ -107,7 +107,7 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
 #endif
         }
 
-        if(i.type == E_CIRCLE){
+        if(_access[i].type == E_CIRCLE){
             Point2D<float> dest(obs[obs.size() - 1].c.x, obs[obs.size() - 1].c.y);
 
             while((result = checkPointInObs(dest, obs)) != 0){
@@ -120,7 +120,7 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
         astar::fill_tgts_lnk(obs);
         a_star(A(robot), A(N-1), &path_loc);
 
-        if(i.type == E_CIRCLE){
+        if(_access[i].type == E_CIRCLE){
             for(int i : list){
                 obs[i].active = 1;
             }
@@ -141,29 +141,30 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
         else if (_dist > path_loc.dist || _dist == -1) { // The new path is better to access the objective
             _path = path_loc;
 
-            if(i.type == E_CIRCLE){
-                if(_path.path[_path.path_len - 1].p1.distanceTo(_path.path[_path.path_len - 1].p2) < i.cir.r){
+            if(_access[i].type == E_CIRCLE){
+                if(_path.path[_path.path_len - 1].p1.distanceTo(_path.path[_path.path_len - 1].p2) < _access[i].cir.r){
                     continue;
                 }
                 else{
                     Point2D<float> pt = _path.path[_path.path_len - 1].p1;
-                    Circle2D<float> cir(i.cir.c.x, i.cir.c.y, i.cir.r);
+                    Circle2D<float> cir(_access[i].cir.c.x, _access[i].cir.c.y, _access[i].cir.r);
 
                     pt = cir.projecteSup(pt, 0.1);
                     if(checkPointInObs(pt, obs)){
                         continue;
                     }
                     _path.path[_path.path_len - 1].p2 = pt;
-                    _dist = path_loc.dist - i.cir.r;
+                    _dist = path_loc.dist - _access[i].cir.r;
                     Vector2D<float> v1(1,0), v2(cir.c, pt);
                     _access_select_angle = v1.angle(v2) + M_PI; //M_PI because reference inverse
                 }
             }
-            else if(i.type == E_POINT){
-                _access_select_angle = i.pt.angle + M_PI; //M_PI because reference inverse
+            else if(_access[i].type == E_POINT){
+                _access_select_angle = _access[i].pt.angle + M_PI; //M_PI because reference inverse
                 _dist = path_loc.dist;
             }
 
+            _access_point_select = i;
             _access_select = _path.path[_path.path_len - 1].p2;
         }
     }
@@ -179,9 +180,12 @@ int Obj::updateDestPointOrient(const vector<Actuator>& act){
     if(act.empty())
         return -1;
 
-    for(i = 0 ; i < act.size() ; i++){
-        if( act[i].type == _type)
+    for(i = 0 ; i < act.size() ; i++){ //TODO optimize for the moment the first find is used
+        if( act[i].type == _type){
+            if(act[i].full)
+                continue;
             break;
+        }
     }
 
     if(i == act.size()){
@@ -189,16 +193,7 @@ int Obj::updateDestPointOrient(const vector<Actuator>& act){
         return -1;
     }
 
-    if(act[i].active.size() != act[i].angle.size()){
-        logs << ERR << "Different size : active=" << act[i].active.size() << "and angle=" << act[i].angle.size();
-    }
-
-    if(act[i].active.empty())
-        logs << INFO << "Any actuator available";
-
-    if(act[i].active[0]) //TODO For the moment choose the first find
-        _access_select_angle += act[i].angle[0];
-
+     _access_select_angle += act[i].angle;
 
     return 0;
 }
@@ -240,10 +235,9 @@ float Obj::getYield(const unsigned int start_time){
         case E_CLAP:
         case E_CUP:
         case E_SPOT:
+        default:
             ratio = 1/_dist * 100; //TODO
             break;
-        default:
-            return (-1);
     }
     return ratio * (1. - _done);
 }

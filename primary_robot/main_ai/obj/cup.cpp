@@ -13,6 +13,7 @@
 
 #include "types.h"
 #include "tools.h"
+#include "dropCup.h"
 
 extern "C"{
 #include "millis.h"
@@ -41,7 +42,7 @@ Cup::~Cup() {
     // TODO Auto-generated destructor stub
 }
 
-void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs){
+void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&){
     Circle2D<float> cir(obs[_num_obs[0]].c.x, obs[_num_obs[0]].c.y, 10);
     Point2D<float> dest;
 
@@ -52,9 +53,15 @@ void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs){
     _time = millis();
 }
 
-int Cup::loopObj(){
+int Cup::loopObj(vector<Obj*>& listObj){
 
     if(millis() - _time > 2000){
+        for(Obj* i : listObj){
+            if(i->type() == E_DROP_CUP && i->state() == WAIT_MES){
+                i->state() = ACTIVE;
+                break;
+            }
+        }
         _state = FINISH;
         return 0;
     }

@@ -22,9 +22,9 @@ class Cup : public Obj{
         Cup(const unsigned int num, vector<astar::sObs_t>& obs);
         virtual ~Cup();
 
-        void initObj(Point2D<float> pos, vector<astar::sObs_t>& obs);
-        int loopObj();
-        eObj_t type() const {return E_CUP;};
+        void initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&) override;
+        int loopObj(vector<Obj*>& listObj) override;
+        eObj_t type() const override {return E_CUP;};
 
     private :
         unsigned int _num;

@@ -26,13 +26,23 @@ typedef enum{
 }objective;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT, E_CUP
+    E_NULL, E_CLAP, E_SPOT, E_CUP, E_DROP_CUP
 } eObj_t;
 
 typedef struct {
         eObj_t type;
-        std::vector<bool> active;
-        std::vector<float> angle;
+        bool full;      //true if full
+        float angle;
+
+        struct{
+            unsigned int number;
+            bool ball;
+        }elevator;
+
+        struct{
+            bool distributor; //true if the cup was fill by a distributor
+        }cupActuator;
+
 } Actuator;
 
 typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
@@ -70,8 +80,8 @@ class Obj {
         Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint);
         virtual ~Obj();
 
-        virtual void initObj(Point2D<float> , vector<astar::sObs_t>& ){};
-        virtual int loopObj(){return -1;};
+        virtual void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) = 0;
+        virtual int loopObj(vector<Obj*>&) = 0;
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return _dist;};
 
@@ -139,12 +149,16 @@ class Obj {
         eStateObj_t _state;                 //if the objective is used or not
         Point2D<float> _access_select;               //the closest access select
         float _access_select_angle;         //angle of the access select
+        int _access_point_select;
         float _dist;                       //distance robot-objective (the closest access)
         float _time;                       //time robot-objective (the closest access) TODO no compute for the moment
         sPath_t _path;                      //path robot-objective (the closest access)
         float _done;                       //probability than the objective has already been completed by another robot
         vector<unsigned int> _num_obs;      //obstacle number associate to the objective need to deactivate
+    public:
         vector<sObjEntry_t> _access;        //list of access to reach the objective
+        vector<sObjEntry_t>& access() { return _access; }        //list of access to reach the objective
+        eStateObj_t& state() { return _state; }
 };
 
 #endif /* OBJ_OBJ_H_ */

@@ -149,11 +149,11 @@ int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, s
     }
 
     if(first){
-        listObj[numObj]->initObj({obs[0].c.x, obs[0].c.y}, obs);
+        listObj[numObj]->initObj({obs[0].c.x, obs[0].c.y}, obs, listObj);
         first = false;
         logs << INFO << "Starting objective number : " << numObj;
     }else{
-        if(listObj[numObj]->loopObj() == 0){ //0 finished
+        if(listObj[numObj]->loopObj(listObj) == 0){ //0 finished
             first = true;
             logs << INFO << "Ending objective number : " << numObj;
             vector <unsigned int> num = listObj[numObj]->getNumObs();

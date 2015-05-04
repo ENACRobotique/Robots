@@ -21,6 +21,7 @@ extern "C"{
 #include "clap.h"
 #include "spot.h"
 #include "cup.h"
+#include "dropCup.h"
 
 
 int CapAI::loop(){
@@ -104,6 +105,9 @@ void CapAI::initObjective(){
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));
 
+    for(unsigned int i = 0 ; i < 3 ; i++)
+        listObj.push_back(new DropCup(capTeam->getColor()));
+
     if(capTeam->getColor() == YELLOW){
         for(unsigned int i = 12 ; i < 20 ; i++){
             robot->env->obs[i].active = 0;
@@ -116,6 +120,7 @@ void CapAI::initObjective(){
             robot->env->obs_updated[i]++;
         }
     }
+
 
 }
 

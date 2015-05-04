@@ -19,9 +19,9 @@ class Clap : public Obj{
         Clap(const unsigned int num);
         virtual ~Clap();
 
-        void initObj(Point2D<float> , vector<astar::sObs_t>& ){};
-        int loopObj();
-        eObj_t type() const {return E_CLAP;};
+        void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) override {};
+        int loopObj(vector<Obj*>&) override;
+        eObj_t type() const override {return E_CLAP;};
         //float gain(){return 1;};
 
     private :

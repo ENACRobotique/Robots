@@ -24,22 +24,23 @@ class CapActuator : public Capability{
 
         void setup(){
             Actuator spot, cup;
+            float spotAngle[2] = {M_PI/6, 5*M_PI/6};
+            float cupAngle[3] = {0, M_PI/3, 2*M_PI/3};
 
-            _act.push_back(spot);
-            _act.back().type = E_SPOT;
+
             for(unsigned int i = 0 ; i < 2 ; i++){
-                _act.back().active.push_back(1);
-                _act.back().angle.push_back(M_PI/3);
+                _act.push_back(spot);
+                _act.back().type = E_SPOT;
+                _act.back().full = false;
+                _act.back().angle = spotAngle[i];
             }
 
-            _act.push_back(cup);
-            _act.back().type = E_CUP;
-            for(unsigned int i = 0 ; i < 3 ; i++){
-                _act.back().active.push_back(new bool(1));
-                _act.back().angle.push_back(i*2*M_PI/3);
+            for(unsigned int i = 2 ; i < 5 ; i++){
+                _act.push_back(cup);
+                _act.back().type = E_CUP;
+                _act.back().full = false;
+                _act.back().angle = cupAngle[i-2];
             }
-
-            logs << DEBUG << "size=" << _act[0].active.size();
         }
 
         std::vector<Actuator> _act;
