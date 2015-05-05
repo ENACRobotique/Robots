@@ -35,12 +35,12 @@
 		<link>
 			<name>arduinolib/Servo</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/static/core/arduino/libraries/Servo</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/static/core/arduino/libraries/Servo</locationURI>
 		</link>
 		<link>
 			<name>arduinolib/Wire</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/static/core/arduino/libraries/Wire</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/static/core/arduino/libraries/Wire</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
