@@ -14,7 +14,6 @@
 #include "tools.h"
 #include "GeometryTools.h"
 
-#define START_CUP   20 //number of the first stand element in obs[]
 
 using namespace std;
 

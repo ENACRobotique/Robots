@@ -13,6 +13,7 @@
 #include "CapTeam.h"
 #include "tools.h"
 #include "ai_tools.h"
+#include "a_star_tools.h"
 #include "obj_tools.h"
 #include "communications.h"
 extern "C"{
@@ -22,6 +23,7 @@ extern "C"{
 #include "spot.h"
 #include "cup.h"
 #include "dropCup.h"
+#include "environment.h"
 
 
 int CapAI::loop(){
@@ -121,6 +123,15 @@ void CapAI::initObjective(){
         }
     }
 
+    if(capTeam->getColor() == GREEN)
+        robot->env->obs[BLOCK_START_ZONE].c = {45, 100};
+    else
+        robot->env->obs[BLOCK_START_ZONE].c = {300-45, 100};
+
+    robot->env->obs[BLOCK_START_ZONE].active = 1;
+    robot->env->obs[BLOCK_START_ZONE].r = 20. + R_ROBOT;
+
+    robot->env->obs_updated[BLOCK_START_ZONE]++;
 
 }
 
