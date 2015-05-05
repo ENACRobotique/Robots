@@ -144,6 +144,16 @@ void Path::stopRobot(bool holo) {
 }
 
 
+void Path::go2PointOrient(const Point2D<float> &dest, vector<astar::sObs_t>& obs, float angle){
+    Point2D<float> posRobot(obs[0].c.x, obs[0].c.y);
+
+    clear();
+    sTrajEl_t traj = sTrajEl_t{{obs[0].c.x, obs[0].c.y}, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
+
+    _path.push_back(traj);
+    sendRobot(true, angle);
+}
+
 /*
  * The robot go to the destination point.
  * "f" to force the robot to go, even if the destination point is in obstacle or if there are obstacles in the trajectory.
