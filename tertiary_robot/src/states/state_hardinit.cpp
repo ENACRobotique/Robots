@@ -1,18 +1,16 @@
 #include "state_hardinit.h"
 
 #include "state_types.h"
-#include "../params.h"
+#include "params.h"
 #include "Arduino.h"
 #include "Wire.h"
 
-#include "state_funny.h"
-#include "state_wall.h"
 #include "state_tirette.h"
 
 
-#include "../libs/lib_move.h"
-#include "../libs/lib_motor.h"
-#include "../libs/lib_radar.h"
+#include "lib_move.h"
+#include "lib_motor.h"
+#include "lib_radar.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
@@ -24,9 +22,15 @@ void initHard(sState *prev){
     Serial.println("debut init matérielles");
 #endif
     //movements
-    moveInitHard(PIN_DIR_SERVO, ANGLE_ZERO, DIR_SERVO_START);
-    motorInitHard(PIN_MOTOR_DIR,PIN_MOTOR_PWM);
-    odoInitHard(PIN_ODO_INT,PIN_ODO_SEN);
+    //movements
+    int pin_motors_dir[NB_MOTORS];
+    int pin_motors_pwm[NB_MOTORS];
+    pin_motors_dir[0]=PIN_MOTOR1_DIR;
+    pin_motors_pwm[0]=PIN_MOTOR1_PWM;
+    motorInitHard(pin_motors_dir,pin_motors_pwm);
+    int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT};
+    int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN};
+    odoInitHard(pin_odo_int,pin_odo_sen);
 
     //radar
     Wire.begin();

@@ -11,8 +11,8 @@
 #include "state_traj.h"
 #include "lib_radar.h"
 #include "lib_line.h"
-#include "../params.h"
-#include "../tools.h"
+#include "params.h"
+#include "tools.h"
 
 #include "lib_move.h"
 #include "sharp_2d120x.h"

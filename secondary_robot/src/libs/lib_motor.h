@@ -10,7 +10,7 @@
 
 #include "Arduino.h"
 #include "lib_odo.h"
-#include "../params.h"
+#include "params.h"
 
 //#define DEBUG_MOTOR
 

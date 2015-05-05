@@ -17,11 +17,14 @@
 /* Defines ************************************************/
 //pins
 //digital I/O
+#define TRIKE
+#define NB_MOTORS 1
+#error "check pin attribution"
 #define PIN_DIR_SERVO 5
-#define PIN_MOTOR_PWM 6
-#define PIN_MOTOR_DIR 7
-#define PIN_ODO_INT 2//odometer, interruption pin
-#define PIN_ODO_SEN 9
+#define PIN_MOTOR1_PWM 6
+#define PIN_MOTOR1_DIR 7
+#define PIN_ODO1_INT 2//odometer, interruption pin
+#define PIN_ODO1_SEN 9
 #define PIN_TIRETTE 10
 #define PIN_LED 13
 #define PIN_LAUNCHER_1 8

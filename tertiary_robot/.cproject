@@ -80,7 +80,7 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.def.678147422" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ARCH_328P_ARDUINO"/>
 								</option>
-								<option id="de.innot.avreclipse.cppcompiler.option.otherflags.439271432" name="Other flags" superClass="de.innot.avreclipse.cppcompiler.option.otherflags" value="" valueType="string"/>
+								<option id="de.innot.avreclipse.cppcompiler.option.otherflags.439271432" name="Other flags" superClass="de.innot.avreclipse.cppcompiler.option.otherflags" value="-std=c++11" valueType="string"/>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.1201596420" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.1072426987" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug"/>

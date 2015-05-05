@@ -9,7 +9,6 @@
 #define LIB_HEADING_H_
 
 #include "Arduino.h"
-#include "../params.h"
 #include "Servo.h"
 #include "Wire.h"
 #include "MPU_6050.h"

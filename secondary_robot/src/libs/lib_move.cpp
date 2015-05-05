@@ -42,8 +42,8 @@ void move(int speed,int omega){
     motSetCon(speeds);
 #else
 #ifdef TRIKE
-    motSetCon({speed});
-    _dirServo.write(CLAMP(MIN_ANGLE , angle+_servo_zero, MAX_ANGLE));
+    motSetCon(&speed);
+    _dirServo.write(CLAMP(MIN_ANGLE , omega+_servo_zero, MAX_ANGLE));
 #endif
 #endif
 }

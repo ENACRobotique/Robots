@@ -15,15 +15,13 @@
 #include "lib_line.h"
 #include "lib_wall.h"
 #include "lib_trajectory.h"
-#include "../tools.h"
-#include "../params.h"
+#include "tools.h"
+#include "params.h"
 #include "state_traj.h"
 #include "state_pause.h"
 #include "state_wall.h"
-#include "state_funny.h"
 #include "state_wait.h"
-#include "state_fresco.h"
-#include "state_lineMonit.h"
+#include "state_dead.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
 
@@ -194,7 +192,7 @@ sState *testTrajYellowFinal()
 
 			if(periodicProgTraj(Final_yellow,&st_saveTime,&i,&prev_millis))
 			 	{
-				return &sFunny;
+				return &sDead;
 			 	}
 
 
@@ -266,7 +264,7 @@ sState *testTrajRedFinal()
 
 	    if(periodicProgTraj(Final_red,&st_saveTime,&i,&prev_millis))
 		{
-	    	return &sFunny;
+	    	return &sDead;
 		}
 
 

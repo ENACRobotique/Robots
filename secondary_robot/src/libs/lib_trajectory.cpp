@@ -7,8 +7,7 @@
 #include "lib_wall.h"
 #include "lib_attitude.h"
 #include "lib_heading.h"
-#include "../tools.h"
-#include "../params.h"
+#include "tools.h"
 #include "state_pause.h"
 #include "lib_trajectory.h"
 
