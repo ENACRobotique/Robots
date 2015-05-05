@@ -14,52 +14,78 @@
 
 using namespace std;
 
+typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
+
+typedef struct {
+    eTypeEntry_t type;      //type of access
+
+#if NON_HOLONOMIC
+    float radius;           //size of the 3 approach circles
+#endif
+
+    union{
+        struct{
+            sPt_t p;        //point
+            float angle;    //approach angle between 0 and 2 M_PI
+        }pt;
+
+        struct{
+            sPt_t c;        //enter of the circle
+            float r;        //radius of the circle
+        }cir;
+
+        struct{
+            sSeg_t s;       //segment
+            bool dir;       //true if (p1;p2)^(p1;probot) > 0
+        }seg;
+    };
+} sObjEntry_t;
+
+typedef enum {
+    E_NULL, E_CLAP, E_SPOT
+} eObj_t;
+
+typedef enum {
+    ACTIVE, WAIT_MES, NO_TIME, FINISH
+} eStateObj_t;
+
 class Obj {
     public:
         Obj();
         Obj(eObj_t type);
-        Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjPt_t> &entryPoint);
+        Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint);
         virtual ~Obj();
 
         virtual void initObj(){};
         virtual int loopObj(){return -1;};
         virtual eObj_t type() const {return E_NULL;} ;
-        virtual float gain(){return 0;};
+        virtual float gain(){return _dist;};
 
-        void setEP(sObjPt_t &pt);
+        void addAccess(sObjEntry_t &access);
 
-
-        //TODO fonction update dist and path and time
         sNum_t update(sPt_t posRobot);
-        void updateTime() {_time = _dist / SPEED;};
-        sPath_t path() {
-            return _path;
-        }
-        ;
-        sObjPt_t entryPoint(int num) {return _entryPoint[num];};
-        int EP() {return _EP;};
-        sPt_t destPoint();
 
-        bool active() {
-            return _active;
-        }
-        ;
-        sNum_t value();
+        float getDist() const;
+        sPath_t getPath() const;
+        sPt_t getDestPoint() const;
+        float getDestPointOrient() const;
+        eStateObj_t getState() const;
+        sNum_t getYield();
+
+        void print() const;
 
     protected:
         eObj_t _type;                       //objective type
-        eStateObj_t _state;                 //if the objective is used or not //TODO group with probability
-        vector<unsigned int> _numObs;       //obstacle number associate to the objective
-        sNum_t _dist;                       //distance robot-objective (the closest EntryPoint)
-        sNum_t _time;                       //time robot-objective (the closest EntryPoint)
-        sPath_t _path;                      //path robot-objective (the closest EntryPoint)
-        int _point;                         //point number that the objective can save
-        int _EP;                            //the closest EntryPoint select
-        bool _active;                       //FALSE=objective finished TRUE=objective unfinished
+        int _point;                         //point number of the objective
+        eStateObj_t _state;                 //if the objective is used or not
+        sPt_t _access_select;               //the closest access select
+        float _access_select_angle;         //angle of the access select
+        sNum_t _dist;                       //distance robot-objective (the closest access)
+        sNum_t _time;                       //time robot-objective (the closest access) TODO no compute for the moment
+        sPath_t _path;                      //path robot-objective (the closest access)
         sNum_t _done;                       //probability than the objective has already been completed by another robot
-        vector<sObjPt_t> _entryPoint;       //list of access point to reach the objective
+        vector<unsigned int> _num_obs;      //obstacle number associate to the objective need to deactivate
+        vector<sObjEntry_t> _access;        //list of access to reach the objective
 };
-
-extern void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
 
 #endif /* OBJ_OBJ_H_ */

@@ -36,16 +36,13 @@ typedef enum{
     E_INTP,                 // @payload.intp: bn_intp synchronization message
 
 /************************ user types start ************************/
-    E_SWITCH_CHANNEL,       //  switch channel message
-    E_SYNC_DATA,            //  sync data (send from the turret to the receiver)
-    E_SYNC_OK,              //  synchronized
-    E_PERIOD,               //  period measurement
-    E_MEASURE,              //  laser delta-time measurement
+    E_SYNC_DATA,            // @payload.sync: sync data (send from the turret to the receiver)
+    E_PERIOD,               // @payload.period period measurement
+    E_MEASURE,              // @payload.mobileReport laser delta-time measurement
     E_TRAJ,                 // @payload.traj: a trajectory step
     E_POS,                  // @payload.pos: position (w/ uncertainty) of an element (deprecated use E_GENERIC_STATUS)
-    E_SERIAL_DUMP,          //  serial dump (for debug)
     E_ASSERV_STATS,         // @payload.asservStats: control loop statistics
-    E_GOAL,                 //  asks the robot to go to this goal (x,y)
+    E_GOAL,                 // @payload.pos asks the robot to go to this goal (x,y)
     E_OBS_CFG,              // @payload.obsCfg: obstacle array configuration
     E_OBSS,                 // @payload.obss: obstacles update (position & status update)
     E_POS_QUERY,            // @payload.posQuery: position query

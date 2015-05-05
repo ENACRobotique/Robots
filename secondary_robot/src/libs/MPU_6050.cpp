@@ -5,7 +5,7 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-# define DEBUG_INERTIAL
+#define DEBUG_INERTIAL
 
   unsigned long last_read_time;
   float         last_x_angle;  // These are the filtered angles
@@ -63,7 +63,7 @@ int read_gyro_accel_vals(uint8_t* accel_t_gyro_ptr) {
 
 
 void calibrate_sensors() {
-  int num_readings = 1;
+  int num_readings = 10;
   float                 x_accel = 0;
   float                 y_accel = 0;
   float                 z_accel = 0;
@@ -87,7 +87,7 @@ void calibrate_sensors() {
     x_gyro += accel_t_gyro.value.x_gyro;
     y_gyro += accel_t_gyro.value.y_gyro;
     z_gyro += accel_t_gyro.value.z_gyro;
-//    delay(100);
+    delay(100);
   }
   x_accel /= num_readings;
   y_accel /= num_readings;
@@ -110,7 +110,8 @@ void calibrate_sensors() {
 
 int MPU6050_read(int start, uint8_t *buffer, int size)
 {
-  int i, n, error;
+  int i, n;
+  //int error;
 
   Wire.beginTransmission(MPU6050_I2C_ADDRESS);
   n = Wire.write(start);
@@ -206,6 +207,7 @@ void initInertial()
 
   // Clear the 'sleep' bit to start the sensor.
   MPU6050_write_reg (MPU6050_PWR_MGMT_1, 0);
+  delay(50);
 
   //Initialize the angles
   calibrate_sensors();
@@ -221,12 +223,12 @@ void initInertial()
 
 int readInertial(int value)
 {
-  int error;
-  double dT;
+  //int error;
+//  double dT;
   accel_t_gyro_union accel_t_gyro;
 
   // Read the raw values.
-  error = read_gyro_accel_vals((uint8_t*) &accel_t_gyro);
+  int error = read_gyro_accel_vals((uint8_t*) &accel_t_gyro);
 
   // Get the time of reading for rotation computations
   unsigned long t_now = millis();
@@ -269,8 +271,8 @@ int readInertial(int value)
   float alpha = 0.96;
   float angle_x = alpha*gyro_angle_x + (1.0 - alpha)*accel_angle_x;
   float angle_y = alpha*gyro_angle_y + (1.0 - alpha)*accel_angle_y;
-  float angle_z = alpha*gyro_angle_z + (1.0 - alpha)*accel_angle_z;  //Accelerometer doesn't give z-angle
-
+  //float angle_z = alpha*gyro_angle_z + (1.0 - alpha)*accel_angle_z;  //Accelerometer doesn't give z-angle
+  float angle_z = gyro_angle_z;
   // Update the saved data with the latest values
   set_last_read_angle_data(t_now, angle_x, angle_y, angle_z, unfiltered_gyro_angle_x, unfiltered_gyro_angle_y, unfiltered_gyro_angle_z);
   switch(value){

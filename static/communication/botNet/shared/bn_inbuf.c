@@ -8,7 +8,7 @@
 #include <string.h>
 #include "message_header.h"
 
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 #include "bn_inbuf.h"
 

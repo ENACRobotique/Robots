@@ -18,21 +18,18 @@
 #include <speed_controller.h>
 #include <stdint.h>
 
-#if NB_ENCODERS != 3 || NB_MOTORS != 3
-#error "You can't change NB_ENCODERS or NB_MOTORS without changing trajectory_controller as well!"
+#if NB_ENCODERS != NB_MOTORS
+#error "trajectory_controller's implementation assumes NB_ENCODERS==NB_MOTORS"
 #endif
 
-// do not use those defines from motors.h and encoders.h, use NB_PODS
-#undef NB_ENCODERS
-#undef NB_MOTORS
-
 /**
- * Number of pods (must be equal to NB_MOTORS and NB_ENCODERS)
+ * Number of pods
  */
-#define NB_PODS (3)
+#define NB_PODS (NB_MOTORS)
 
 /**
- * Number of internal speed outputs, must be 3 for a planar motion case (Vx, Vy, Omega)
+ * Number of internal speed outputs, must be 3 for a planar motion case (Vx, Vy, Omegaz)
+ * current implementation assumes a value of 3, others will produce inconsistent results or buffer overflow
  */
 #define NB_SPDS (3)
 
@@ -41,7 +38,8 @@ typedef struct {
     MT_MAT M_spds_rob2pods;
 
     // Last known status
-    int x, y, theta;
+    int x, y; // (in I << SHIFT)
+    int theta; // (in R << (RAD_SHIFT + SHIFT))
 
     // PID
     PID_t pid_traj;
@@ -56,8 +54,10 @@ typedef struct {
     int next_spd_cmds[NB_PODS];
 } trajectory_controller_t;
 
-void trajctlr_init(trajectory_controller_t* ctl, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
-void trajctlr_update(trajectory_controller_t* ctl /* ,trajectory_sp(t), orientation_sp(t) */);
-void trajctlr_reset(trajectory_controller_t* ctl);
+void trajctlr_init(trajectory_controller_t* tc, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
+void trajctlr_begin_update(trajectory_controller_t* tc);
+void trajctlr_end_update(trajectory_controller_t* tc, int x_sp, int y_sp, int theta_sp);
+void trajctlr_set_pos(trajectory_controller_t* tc, int x, int y, int theta);
+void trajctlr_reset(trajectory_controller_t* tc);
 
 #endif /* TRAJECTORY_CONTROLLER_H_ */

@@ -22,7 +22,7 @@
 #include "../../../../botNet/shared/botNet_core.h"
 #include "../../../../network_tools/bn_utils.h"
 #include "../../../../network_tools/bn_debug.h"
-#include "../../../../../global_errors.h"
+#include "global_errors.h"
 #include "../testNet_functions/bn_testFunc.h"
 #include "node_cfg.h"
 
@@ -214,7 +214,7 @@ int main(){
     }
 
     printf("bye\n");
-    bn_deattach(E_DEBUG_SIGNALLING);
+    bn_detach(E_DEBUG_SIGNALLING);
 
     return 0;
 }

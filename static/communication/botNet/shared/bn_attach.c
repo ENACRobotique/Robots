@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 #include "bn_attach.h"
 

@@ -12,7 +12,7 @@
 #include "../params.h"
 #include "Servo.h"
 #include "Wire.h"
-#define DEBUG_ATTITUDE
+//#define DEBUG_ATTITUDE
 
 #define X_ANGLE 1
 #define Y_ANGLE 2
@@ -32,7 +32,15 @@ void attitudeAsser();
 void attitudeAsserTemp();
 
 extern int _attitudeCon;
+extern int _attitudeCmd;
+
+inline int attitudeGetCmd(){
+    return _attitudeCmd;
+}
 inline void attitudeSetCon(int attitude){
 	_attitudeCon=attitude;
+}
+inline int attitudeGetCon(int attitude){
+    return _attitudeCon;
 }
 #endif /* LIB_ATTITUDE_H_ */

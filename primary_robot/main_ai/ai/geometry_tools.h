@@ -8,7 +8,7 @@
 #ifndef OBJ_GEOMETRY_TOOLS_H_
 #define OBJ_GEOMETRY_TOOLS_H_
 
-#include <astar_tools.h>
+#include <a_star_tools.h>
 #include <main_ai_tools/path.h>
 
 
@@ -22,8 +22,7 @@ void Rot90Traj(sTrajEl_t *traj);
 
 void projectPoint(sNum_t xp, sNum_t yp, sNum_t rc, sNum_t xc, sNum_t yc, sPt_t *point);
 
-void rotPt(sPt_t *p1, sNum_t theta, sPt_t *p2);
 void tranOrg(sPt_t *pRef, sPt_t *p1, sPt_t *p2);
-void chgRef(sPt_t *pRef, sNum_t theta, sPt_t *p1, sPt_t *p2);
+
 
 #endif /* OBJ_GEOMETRY_TOOLS_H_ */

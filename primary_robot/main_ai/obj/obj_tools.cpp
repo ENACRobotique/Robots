@@ -37,7 +37,7 @@ void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r) {
 
 void updateNoHaftTurn(sNum_t theta, sPt_t *pt) {
     int i;
-    sNum_t r;
+    sNum_t r, speed = statuses.getLastSpeed(ELT_PRIMARY);
     r = speed / 3;
     if (r > 15)
         r = 15;
@@ -70,8 +70,10 @@ void loadingPath(sPath_t _path, int num) {
 
 #ifdef NON_HOLONOMIC
     if (num >= 0) {
-        sObjPt_t _ep = listObj[num]->entryPoint(listObj[num]->EP());
-        updateEndTraj(_ep.angleEP, &_ep.c, _ep.radiusEP);
+        sPt_t _ep = listObj[num]->getDestPoint();
+        float  angle = listObj[num]->getDestPointOrient();
+
+        updateEndTraj(angle, &_ep, 5);
         printEndTraj();
     }
     else
@@ -126,9 +128,9 @@ int checkCurrentPathLenght(sPath_t &path) {
     static sPath_t prev_path;
     int ret = -1;
 
-#ifdef DEBUG
-    cout << "checkCurrentPAthLenght : lenght_1 = " << path.path_len << " and lenght_2 = " << prev_path.path_len << endl;
-#endif
+
+    logs << DEBUG <<"checkCurrentPAthLenght : lenght_1 = " << path.path_len << " and lenght_2 = " << prev_path.path_len;
+
 
     ret = same_traj(&path, &prev_path);
     prev_path = path;
@@ -142,29 +144,26 @@ int next_obj(void) {
     int tmp_inx = -1; //index of the objective will be selected
     sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
 
-    cout << "[INFO] [obj_tools.cpp] Start next_obj()" << endl;
+    logs << INFO << "Start next_obj()";
 
     obs[N-1].active = 1;
 
     for (unsigned int i = 0; i < listObj.size(); i++) {
-        if (listObj[i]->active() == false)
+        if (listObj[i]->getState() != ACTIVE)
             continue; //test if  objective is still active
 
-#if DEBUG //TODO if verbose == 2
-        //printObsActive();
-#endif
 
         if (listObj[i]->update(pos_robot) < 0) {
-#if DEBUG
-            printf("[INFO] [obj_tools.cpp] No find path to achieve the objective for objective n°%d\n\n", i);
-#endif
+
+            logs << DEBUG << "No find path to achieve the objective for objective n°" << i;
+
             continue;
         }
 
-        tmp_val2 = listObj[i]->value();
-#if DEBUG
-        printf("objectif n°%hhi avec ratio=%f \n\n", i, tmp_val2);
-#endif
+        tmp_val2 = listObj[i]->getYield();
+
+        logs << DEBUG << "objectif n°" << i << "avec ratio=" << tmp_val2;
+
 
         if (tmp_val2 > tmp_val) {         //Update best objective
             tmp_val = tmp_val2;
@@ -174,18 +173,18 @@ int next_obj(void) {
 
     if (tmp_inx >= 0) { //Update end of trajectory
 #ifdef NON_HOLONOMIC
-        loadingPath(listObj[tmp_inx]->path(), tmp_inx);
+        loadingPath(listObj[tmp_inx]->getPath(), tmp_inx);
 #else
         loadingPath(listObj[tmp_inx]->path());
 #endif
-        obs[N - 1].c = listObj[tmp_inx]->destPoint();
+        obs[N - 1].c = listObj[tmp_inx]->getDestPoint();
         obs_updated[N - 1]++;
     }
 
-#if DEBUG
+
     printListObj();
-    printf("Objectif sélectionné : %i\n\n", tmp_inx);
-#endif
+    logs << INFO << "Objectif sélectionné :" << tmp_inx;
+
 
     return (tmp_inx);
 }

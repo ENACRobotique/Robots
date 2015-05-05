@@ -27,7 +27,7 @@ typedef struct __attribute__((packed)){
             s2DPosAtt pos;
             s2DPAUncert pos_u;
 
-            float speed; // (cm/s)
+            s2DSpeed spd;
 
             uint16_t tid; // trajectory identifier
             uint8_t sid; // step identifier

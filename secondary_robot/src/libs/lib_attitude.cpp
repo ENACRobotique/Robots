@@ -10,34 +10,37 @@ this library contains the different functions useful for the motor and its contr
 #define ATTITUDE_ASSER_PERIOD 20 // milliseconds
 #define ANGLE_TO_ASSERV X_ANGLE
 #define MAX_ANGLE 15
-#define MIN_ANGLE 160
+#define MIN_ANGLE 176
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
 
 //globals
-int _attitudeCon = -5;
+int _attitudeCon = -12;
+int _attitudeCmd=0;
 int _pinServo;
 Servo servoAttitude;
 
 //initializes the PINs for motor speed and direction
-//REQUIRES : odoinitHard()
+//REQUIRES : initInertial()
 void servoInitHard(int pinservo){
 	_pinServo=pinservo;
 	servoAttitude.attach(_pinServo);
 	servoAttitude.write(MIN_ANGLE);
 }
 
-#define KP  4// >>2
+#define KP  2// >>2
 #define KI  2// >>8
+#define KD  0
 
 void attitudeAsser(){
 
     unsigned long int time=millis();
-    static int intEps=0;
+    static int intEps=256;
+    static int prevEps = 0;
     static unsigned long time_prev_asser=millis();
-    static int _attitudeCmd=0;
 	int eps;
+	int derEps;
 
 
 	// asservissement attitude
@@ -45,8 +48,12 @@ void attitudeAsser(){
 		if ( (time-time_prev_asser) < ATTITUDE_ASSER_PERIOD+ATTITUDE_ASSER_PERIOD/2 ){
 			time_prev_asser = time_prev_asser + ATTITUDE_ASSER_PERIOD;
 			//compute error (epsilon)
-			int read=-readInertial(ANGLE_TO_ASSERV);
+			int read=readInertial(ANGLE_TO_ASSERV);
 			eps = _attitudeCon - read;
+
+			//compute error derivate
+			derEps = CLAMP( -(64<<2) ,eps - prevEps, (64<<2));
+			prevEps = eps;
 
 			//compute error integral
 			intEps= CLAMP( -(64<<2) ,intEps+eps, (64<<2));
@@ -55,7 +62,7 @@ void attitudeAsser(){
 //				_attitudeCmd=0;
 //			}
 //			else{
-				_attitudeCmd = ((KP*eps)>>2) + ((KI*intEps)>>3);
+				_attitudeCmd = ((KP*eps)>>2) + ((KI*intEps)>>3) + ((KD*derEps)>>2);
 //			}
 
 #ifdef DEBUG_ATTITUDE
@@ -65,11 +72,11 @@ Serial.print(_attitudeCon);
 Serial.print("\t");
 Serial.print(read);
 Serial.print("\t");
-Serial.print(_attitudeCmd);
+Serial.print(90+_attitudeCmd);
 //Serial.print("\t");
 //Serial.print(CLAMP(15,abs(_attitudeCmd),175));
-//Serial.print("\t");
-//Serial.print(eps);
+Serial.print("\t");
+Serial.print(eps);
 Serial.print("\t");
 Serial.print(intEps);
 //Serial.print("\t");

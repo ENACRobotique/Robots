@@ -7,6 +7,7 @@
 #include "Arduino.h"
 #include "Servo.h"
 #include "lib_move.h"
+#include "lib_heading.h"
 
 #if defined(TANK) && defined(TRIKE)
 #error "TANK and TRIKE defined. Only one possible."
@@ -16,7 +17,6 @@
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
-
 
 #ifdef TRIKE
 Servo _dirServo;

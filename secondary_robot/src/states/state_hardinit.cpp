@@ -22,7 +22,7 @@
 
 sState* reTirette(){
 	return &sTirette;
-//	return &sAlacon;
+	//return &sAlacon;
 }
 void initHard(sState *prev){
 
@@ -43,8 +43,9 @@ void initHard(sState *prev){
 
     //radar
     Wire.begin();
-    initInertial();
     servoInitHard(PIN_SERVO_ATTITUDE);
+    delay(1000); // waiting for servo to reach its initial position an to stand still
+    initInertial();
     //line following/detector
     //Wire.begin(); already done
     //fan

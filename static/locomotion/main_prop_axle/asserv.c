@@ -21,7 +21,7 @@
 
 #include "../botNet/shared/botNet_core.h"
 #include "../network_tools/bn_debug.h"
-#include "../../../global_errors.h"
+#include "global_errors.h"
 #ifdef ARCH_X86_LINUX
 #include "millis.h"
 #endif
@@ -294,7 +294,7 @@ int new_traj_orient_el(sTrajOrientElRaw_t *toe){
 
         te.c_x = CONV2TRAJ(toe->elts[i].c_x, 6);
         te.c_y = CONV2TRAJ(toe->elts[i].c_y, 6);
-        te.c_r = CONV2TRAJ(toe->elts[i].c_r, 6);
+        te.c_r = CONV2TRAJ(toe->elts[i].c_r, 5);
 
         te.seg_len = CONV2TRAJ(toe->elts[i].seg_len, 5);
         te.arc_len = CONV2TRAJ(toe->elts[i].arc_len, 5);
@@ -307,7 +307,7 @@ int new_traj_orient_el(sTrajOrientElRaw_t *toe){
             return ret;
         }
 
-        if(te.arc_len == 0) //end of trajectory
+        if(toe->elts[i].is_last_element) //end of trajectory
             break;
     }
     return 0;

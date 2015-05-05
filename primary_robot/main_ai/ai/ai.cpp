@@ -2,15 +2,12 @@
  * ai.cpp
  *
  *  Created on: 30 janv. 2015
- *      Author: seb
+ *      Author: Sebastien Malissard
  */
 
-
-
+#include <a_star_tools.h>
 #include <ai.h>
 #include <ai_tools.h>
-#include <astar_tools.h>
-#include <iostream>
 
 extern "C"{
 #include <string.h>
@@ -20,87 +17,84 @@ extern "C"{
 
 #include "math_ops.h"
 #include <obj_tools.h>
-#include <main_ai_tools/statuses.h>
 #include <clap.h>
+#include <spot.h>
 #include <obj.h>
-
-#include <main_ai_tools/path.h>
 #include <tools.h>
 #include "communications.h"
 
 using namespace std;
 
 std::vector<Obj*> listObj;
-estate_t state = COLOR_SELECTION;
-sWaitPos waiting_pos;
-unsigned int last_time2 = -1;
-
-
 
 void colissionDetection(){
-    sGenericStatus &stPr = statuses.getLastStatus(ELT_PRIMARY);
-    sPt_t ptPr;
-    sGenericStatus &stAPr = statuses.getLastStatus(ELT_ADV_PRIMARY);
-    sPt_t ptAPr;
-    sGenericStatus &stASc = statuses.getLastStatus(ELT_ADV_SECONDARY);
-    sPt_t ptASc;
+    sPt_t ptPr = statuses.getLastPosXY(ELT_PRIMARY);
+    float anglePr = statuses.getLastOrient(ELT_PRIMARY);
+    sPt_t ptAPr = statuses.getLastPosXY(ELT_ADV_PRIMARY);
+    sPt_t ptASc = statuses.getLastPosXY(ELT_ADV_SECONDARY);
     sNum_t d, dot;
     sVec_t v1, v2;
     int contact = 0;
 
-   // if (stPr) {
-        ptPr.x = stPr.prop_status.pos.x;
-        ptPr.y = stPr.prop_status.pos.y;
+    distPt2Pt(&ptPr, &ptAPr, &d);
+    v1.x = cos(anglePr);
+    v1.y = sin(anglePr);
+    convPts2Vec(&ptPr, &ptAPr, &v2);
+    dotVecs(&v1, &v2, &dot);
 
-    //    if (stAPr) {
-            ptAPr.x = stAPr.prop_status.pos.x;
-            ptAPr.y = stAPr.prop_status.pos.y;
+    if (d < 50 && dot > 0.6 * d) {
+        logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!"; // TODO
+        contact = 1;
+    }
 
-            distPt2Pt(&ptPr, &ptAPr, &d);
-            v1.x = cos(stPr.prop_status.pos.theta);
-            v1.y = sin(stPr.prop_status.pos.theta);
-            convPts2Vec(&ptPr, &ptAPr, &v2);
-            dotVecs(&v1, &v2, &dot);
+    distPt2Pt(&ptPr, &ptASc, &d);
+    v1.x = cos(anglePr);
+    v1.y = sin(anglePr);
+    convPts2Vec(&ptPr, &ptASc, &v2);
+    dotVecs(&v1, &v2, &dot);
 
-            if (d < 50 && dot > 0.6 * d) {
-                printf("CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
-                contact = 1;
-            }
- //       }
+    if (d < 40 && dot > 0.6 * d) {
+        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!"; // TODO
+        contact = 1;
+    }
 
-   //     if (stASc) {
-            ptASc.x = stASc.prop_status.pos.x;
-            ptASc.y = stASc.prop_status.pos.y;
+    if (contact) {
+        path.stopRobot();
+    }
 
-            distPt2Pt(&ptPr, &ptASc, &d);
-            v1.x = cos(stPr.prop_status.pos.theta);
-            v1.y = sin(stPr.prop_status.pos.theta);
-            convPts2Vec(&ptPr, &ptASc, &v2);
-            dotVecs(&v1, &v2, &dot);
+}
 
-            if (d < 40 && dot > 0.6 * d) {
-                printf("CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"); // TODO
-                contact = 1;
-            }
-   //     }
+void initObjective(){
+    if(color == YELLOW){
+        listObj.push_back(new Clap(0));
+        listObj.push_back(new Clap(2));
+        listObj.push_back(new Clap(4));
+    }
+    else if(color == GREEN){
+        listObj.push_back(new Clap(1));
+        listObj.push_back(new Clap(3));
+        listObj.push_back(new Clap(5));
+    }
+    else
+        logs << ERR << "Color ???";
 
-        if (contact) {
-            path.stopRobot();
-        }
-   // }
+    for(unsigned int i = 0 ; i < 8 ; i++)
+        listObj.push_back(new Spot(i));
 }
 
 
-void obj_step(eAIState_t AIState) {
-    //int obj = -1;
+int stepAI() {
+    static estate_t state = COLOR_SELECTION;
     static bool mode_obj = false;
     static int current_obj = -1;
-    sPath_t path_loc;
+    static sPt_t pt_select;
+    static unsigned int last_time = 0;
 
     switch (state) {
         case COLOR_SELECTION: //Choose the color and take off the starting cord
             startColor();
             if (test_tirette()) {
+                float theta_robot;
 
                 if (color == YELLOW) {
                     obs[0].c.x = INIT_POS_YELLOW_X;
@@ -116,30 +110,15 @@ void obj_step(eAIState_t AIState) {
                     cerr << "[ERROR] [ai.cpp] Error selection color" << endl;
                 }
 
-#ifndef ABS_POS
-                sendPos(obs[0].c, theta_robot); //Sending initial position
+                initObjective();
+
+                sendPos(obs[0].c, theta_robot); //Sending approximate initial position
+
+                //TODO procedure de mise en place
+
                 state = WAIT_STARTING_CORD;
-#else
-                waiting_pos.next = WAIT_STARTING_CORD;
-                waiting_pos.pos = obs[0].c;
-                waiting_pos.theta = theta_robot;
-                state = WAITING_POS;
-#endif
             }
-            break;
-
-#ifdef ABS_POS
-        case WAITING_POS: { //Check if the position of the robot is correct (necessary if we use programmed path for the initialization of the position).
-            sNum_t dist;
-
-            distPt2Pt(&waiting_pos.pos, &obs[0].c, &dist);
-
-            if (dist <= 1. /* XXX test theta aswell */) {
-                state = waiting_pos.next;
-            }
-            break;
-        }
-#endif
+            break; //FIXME WAIT_POS delete because the ia doesn't known if abs pos is active or not, prop give the pos (or status)
 
         case WAIT_STARTING_CORD: //Wait to take in the starting cord
 #if SIMU
@@ -171,41 +150,36 @@ void obj_step(eAIState_t AIState) {
 
             if (!mode_obj) {
                 //Test if all objective have finished
-                if(listObj.empty()){
-                    cout << "[INFO] [ai.cpp] Objective list is empty" << endl;
-                    state = SHUT_DOWN; //FIXME waitting other objective
-                    break;
-                }
+                if(listObj.empty())
+                    logs << INFO << "Objective list is empty";
 
                 //Calculation of the next objective
                 if ((millis() - last_time) > 1000) {
-                    cout << "[INFO] [ai.cpp] obs[0] suivi par next_obj(): x=" << obs[0].c.x << " & y=" << obs[0].c.y << endl;
                     last_time = millis();
 
                     if ((current_obj = next_obj()) != -1) {
-                        //if (checkCurrentPathLenght(path) == 0 || checkRobotBlock() == 1) { //TODO in path class
+                        pt_select = listObj[current_obj]->getDestPoint();
+                        logs << INFO << "Selected point is (" << pt_select.x << " ; " << pt_select.y << ")";
 #ifdef NON_HOLONOMIC
                   /*      int k = listObj[current_obj]->_EP;
                         sObjPt_t ep = listObj[current_obj]->entryPoint(k);
                         updateEndTraj(ep.angleEP,  &ep.c, ep.radiusEP);
                         printEndTraj();*/
+#else
+                        path.convPathForHolonomic();
 #endif
-                        pt_select = listObj[current_obj]->destPoint();
-
-
-                        path_loc = listObj[current_obj]->path();
+                        sPath_t path_loc = listObj[current_obj]->getPath();
                         path.addPath2(path_loc);
                         path.sendRobot();
                     }
                 }
 
-                //Test is the robot is on the entry point selected
+                //Test if the robot is on the entry point selected
                 sPt_t pos_robot = statuses.getLastPosXY(ELT_PRIMARY);
                 if ( (fabs(pt_select.x - pos_robot.x) < RESO_POS && fabs(pt_select.y - pos_robot.y) < RESO_POS) && (current_obj != -1) ){
                     mode_obj = true;
                 }
             } else{
-                cout << mode_obj<< endl;
                 if (metObj(current_obj) == 0){
                     pt_select.x = -1;
                     pt_select.y = -1;
@@ -213,41 +187,32 @@ void obj_step(eAIState_t AIState) {
                 }
             }
 
-            //Update position
+            // Robots simulation
             if ((millis() - _start_time) > 2000) {
-                // simuSecondary();
-            }
-
-            obs_updated[4]++;
-            posPrimary();
-            //checkRobot2Obj();
-            //checkRobotBlock();
-
-            if ((millis() - last_time2) > 1000) {
-                last_time2 = millis();
-           //     printf("Select : x=%f et y=%f avec fabsx=%f et fabsy=%f\n", pt_select.x, pt_select.y, fabs(pt_select.x - _current_pos.x), fabs(pt_select.y - _current_pos.y));
+                 simuSecondary();
             }
 
             break;
+
         case SHUT_DOWN:
-            cout << "[INFO] SHUT_DOWN : time = %d\n" << (int) (millis() - _start_time) / 1000 << endl;
-            exit(1);
-            //TODO arrêt total
-            return;
+            logs << INFO << "SHUT_DOWN : time = " << (unsigned int) (millis() - _start_time) / 1000;
+
+            path.stopRobot();
+
+            return 0;
             break;
+
         default:
-            cerr << "[ERROR] [ai.cpp] Unknown state=" << state << endl;
+            logs << ERR << "Unknown state=" << state;
             break;
     }
+
+    return 1;
 }
 
-int obj_init(eAIState_t AIState) {
-    Path path;
+int initAI() {
 
-    //path.go2Point(obs[0].c, {100, 100}, true);
-
-    listObj.push_back(new Clap(1));
-    listObj.push_back(new Clap(2));
+    //Objectives are initialized in the loop step, because here we don't known the color selected.
 
     return 0;
 }

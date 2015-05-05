@@ -9,7 +9,7 @@
 
 #include "../../tools/libraries/Timeout/timeout.h"
 
-#include "../../global_errors.h"
+#include "global_errors.h"
 
 #ifdef ARCH_328P_ARDUINO
 #include "Arduino.h"

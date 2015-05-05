@@ -22,7 +22,7 @@ class Clap : public Obj{
         void initObj(){};
         int loopObj();
         eObj_t type() const {return E_CLAP;};
-        float gain(){return 1;};
+        //float gain(){return 1;};
 
     private :
         unsigned int _num;

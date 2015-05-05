@@ -17,6 +17,7 @@
 #include "lib_wall.h"
 #include "lib_line.h"
 #include "lib_attitude.h"
+#include "lib_heading.h"
 
 
 
@@ -63,6 +64,7 @@ void loop(){
     if (current->flag & BIT(E_MOTOR) ) motAsser();
     if (current->flag & BIT(E_LINE) )  asserLine();
     if (current->flag & BIT(E_ATTITUDE) )  attitudeAsser();
+    if (current->flag & BIT(E_HEADING) )  headingAsser();
 
     sState *next;
     if (current->testFunction){

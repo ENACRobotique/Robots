@@ -17,7 +17,7 @@
 #include <arpa/inet.h> // inet_pton()
 #include <errno.h> // errno
 
-#include "../../../global_errors.h"
+#include "global_errors.h"
 
 int udpsockfd = -1; // file descriptor
 

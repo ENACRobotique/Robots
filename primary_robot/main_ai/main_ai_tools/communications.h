@@ -22,7 +22,7 @@ int sendPos(sPt_t &p, sNum_t theta);
 int sendSpeed(sNum_t speed);
 
 //Receive message
-void checkInbox(int verbose, ofstream &file);
+void checkInbox(int verbose);
 bool lastGoal(sPt_t &goal, bool get);
 
 #endif /* COMMUNICATIONS_TOOLS_H_ */

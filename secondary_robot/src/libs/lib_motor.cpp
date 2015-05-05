@@ -46,7 +46,7 @@ void motAsser(){
 		int eps;
 		// asservissement vitesse
 		if((time-time_prev_asser[i])>=MOT_ASSER_PERIOD) {
-			if ( (time-time_prev_asser[i]) < MOT_ASSER_PERIOD+MOT_ASSER_PERIOD/2 ){
+			if ( (time-time_prev_asser[i]) < MOT_ASSER_PERIOD+(MOT_ASSER_PERIOD>>1) ){
 				time_prev_asser[i] = time_prev_asser[i] + MOT_ASSER_PERIOD;
 				//compute error (epsilon)
 				int read=odoRead(i);
@@ -83,8 +83,8 @@ void motAsser(){
 				analogWrite(_motPinPWM[i],CLAMP(0,abs(_motCmd[i]),254));
 			}
 			else {//to avoid problems due to long loop
-				  time_prev_asser[0]=millis();
-				  intEps[0]=0;//<=>resets the integral term
+				  time_prev_asser[i]=millis();
+				  intEps[i]=0;//<=>resets the integral term
 				  analogWrite(_motPinPWM[i], CLAMP(0,abs(_motCmd[i]),254));
 				  odoRead(i);
 				}
