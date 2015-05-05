@@ -73,7 +73,7 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated) == 0){
+        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated, capActuator->_act ) == 0){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
@@ -108,7 +108,7 @@ void CapAI::initObjective(){
         listObj.push_back(new Cup(i, robot->env->obs));
 
     for(unsigned int i = 0 ; i < 3 ; i++)
-        listObj.push_back(new DropCup(capTeam->getColor()));
+        listObj.push_back(new DropCup(i, capTeam->getColor()));
 
     if(capTeam->getColor() == YELLOW){
         for(unsigned int i = 12 ; i < 20 ; i++){

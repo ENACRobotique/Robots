@@ -19,44 +19,46 @@ using namespace std;
 
 class DropCup : public Obj{
     public:
-        DropCup(eColor_t color) : Obj(E_DROP_CUP), EP_selected(-1){
+        DropCup(int num, eColor_t color) : Obj(E_DROP_CUP, ActuatorType::CUP, false), EP_selected(-1){
             vector<Point2D<float>> listEP{{50, 100}, {280, 50}, {280, 150}}; //Yellow
             sObjEntry_t objEP;
 
             _state = WAIT_MES;
 
-            for(unsigned int i = 0 ; i < 3 ; i++){
-                objEP.type = E_CIRCLE;
-                if(color == YELLOW)
-                    objEP.cir.c = {listEP[i].x, listEP[i].y};
-                else
-                    objEP.cir.c = {300 - listEP[i].x, listEP[i].y};
-                objEP.cir.r = 10.;
-                _access.push_back(objEP);
-            }
+            objEP.type = E_CIRCLE;
+            if(color == YELLOW)
+                objEP.cir.c = {listEP[num].x, listEP[num].y};
+            else
+                objEP.cir.c = {300 - listEP[num].x, listEP[num].y};
+            objEP.cir.r = 10.;
+            _access.push_back(objEP);
+
 
         }
         virtual ~DropCup(){}
 
-        void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>& listObj) override {
-            //Drop the cup and back
-            for(Obj* j : listObj){
-                if(j->type() == E_DROP_CUP){
-                    j->_access[_access_point_select].cir.c = {0,0};
-                    /*
-                    for(vector<>::iterator it = j->access().begin(); it != j->access().end(); ){
-                        if(it-> == _access_select){
-                            it = j->access().erase(it);
-                        }
-                        else {
-                            it++;
-                        }
-                    }
-                    */
+        void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) override {
+
+        }
+        int loopObj(vector<Obj*>& listObj, std::vector<Actuator>& actuator) override{
+
+            for(Actuator& i : actuator){
+                if(i.type == ActuatorType::CUP && i.id == _actuator_select){
+                    i.full = false;
+                    i.cupActuator.distributor = false;
                 }
             }
-        }
-        int loopObj(vector<Obj*>&) override{
+
+            unsigned int i;
+            for(i = 0 ; i < actuator.size() ; i++)
+                if(actuator[i].type == ActuatorType::CUP && actuator[i].full)
+                    break;
+
+            if(i == actuator.size())
+                for(Obj* i : listObj)
+                    if((i->type() == E_DROP_CUP) && (i->state() == ACTIVE))
+                        i->state() = WAIT_MES;
+
             _state = FINISH;
             return 0;
         }

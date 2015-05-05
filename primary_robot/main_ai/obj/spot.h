@@ -23,7 +23,7 @@ class Spot : public Obj{
         virtual ~Spot();
 
         void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>& ) override {};
-        int loopObj(vector<Obj*>&) override;
+        int loopObj(vector<Obj*>&, std::vector<Actuator>&) override;
         eObj_t type() const override {return E_SPOT;};
 
     private :
