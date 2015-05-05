@@ -11,10 +11,10 @@
 #include "messages.h"
 #ifndef WIREDSYNC_BENCHMARK
 #include "botNet_core.h"
+#include "params.h"
 #endif
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
 #include "bn_debug.h"
-#include "params.h"
 #endif
 #if defined(WIREDSYNC_BENCHMARK) && defined(ARCH_X86_LINUX)
 #include <stdio.h>
@@ -216,7 +216,7 @@ int wiredSync_sendSignal(int reset){
 
         // set the "zero" right after the first signal
         if (nbSamples == WIREDSYNC_NBSAMPLES) {
-            syncStruc tmpStruc = {static_cast<int32_t>(end-WIREDSYNC_INITIAL),0,0};
+            syncStruc tmpStruc = {static_cast<int32_t>(WIREDSYNC_INITIAL-end),0,0};
             setSyncParam(tmpStruc);
             updateSync();
         }
