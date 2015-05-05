@@ -13,10 +13,8 @@
 #include "state_types.h"
 #include "lib_trajectory.h"
 
-#define MUR_R
-//#define Int_R
-#define MUR_Y
-//#define INT_Y
+//pointeur de fonction
+typedef int(*periodicTraj)(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
 int progTraj(trajElem tab[]);
 

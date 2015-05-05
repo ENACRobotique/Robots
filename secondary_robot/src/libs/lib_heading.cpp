@@ -57,13 +57,13 @@ void headingAsser(){
 			intEps= CLAMP( -(64<<2) ,intEps+eps, (64<<2));
 			//compute command
 			_OmegaCmd = ((KP*eps)>>2) + ((KI*intEps)>>3) + (KD*derEps);
-
+#ifdef DEBUG_HEADING
 Serial.print(_headingCon);
 Serial.print("\t");
 Serial.print(read);
 Serial.print("\t");
-Serial.print(_OmegaCmd);
-
+Serial.println(_OmegaCmd);
+#endif
 			move(_speedCon, _OmegaCmd);
 		}
 		else {//to avoid problems due to long loop
