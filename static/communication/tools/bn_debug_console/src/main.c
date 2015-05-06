@@ -290,7 +290,12 @@ int main(int argc, char **argv){
                     else{
                         printf("OK!\n");
                     }
-
+		case 'v':
+                    verbose++;
+                    break;
+                case 'V':
+                    verbose--;
+                    verbose=(verbose<0?0:verbose);
                     break;
                 }
                 case 'h':{

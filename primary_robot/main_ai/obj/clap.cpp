@@ -15,7 +15,7 @@
 
 Point2D<float> obsClap[6]={{32., R_ROBOT}, {62., R_ROBOT}, {92., R_ROBOT}, {208. , R_ROBOT}, {238., R_ROBOT}, {268., R_ROBOT}} ;
 
-Clap::Clap(unsigned int num) : Obj(E_CLAP), _num(num){
+Clap::Clap(unsigned int num) : Obj(E_CLAP, ActuatorType::POP_CORN_LOADER, true), _num(num){
 
     if(num > 6){
         logs << ERR << "Num too big";
@@ -34,7 +34,7 @@ Clap::~Clap() {
     // TODO Auto-generated destructor stub
 }
 
-int Clap::loopObj(){
+int Clap::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&){
     _state = FINISH;
     return 0;
 };

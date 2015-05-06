@@ -84,7 +84,7 @@ void loadingPath(sPath_t /*_path*/, int /*num*/) {
 /*
  * Positions of robots must be already updated in obs
  */
-int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated,const int robot, const bool axle) {
+int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated,const int robot, const bool axle, const vector<Actuator>& act) {
     float tmp_val = 0.;
     float tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
@@ -108,11 +108,18 @@ int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<as
             continue;
         }
 
+        if(listObj[i]->updateDestPointOrient(act) < 0){
+#ifdef DEBUG_OBJ
+            logs << DEBUG << "No actuator available for objective n°" << i;
+#endif
+            continue;
+        }
+
         tmp_val2 = listObj[i]->getYield(start_time);
 #ifdef DEBUG_OBJ
         logs << DEBUG << "objectif n°" << i << " with ratio=" << tmp_val2;
 #endif
-        if (tmp_val2 > tmp_val) {  // Update best objective
+        if (tmp_val2 > tmp_val && listObj[i]->getDestPointOrient() != -1) {  // Update best objective
             tmp_val = tmp_val2;
             tmp_inx = i;
         }
@@ -134,7 +141,7 @@ int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<as
 
 
 
-int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated){
+int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, std::vector<Actuator>& act){
     static bool first = true;
 
     if(numObj < 0 || numObj > (int) listObj.size()){
@@ -143,11 +150,11 @@ int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, s
     }
 
     if(first){
-        listObj[numObj]->initObj();
+        listObj[numObj]->initObj({obs[0].c.x, obs[0].c.y}, obs, listObj);
         first = false;
         logs << INFO << "Starting objective number : " << numObj;
     }else{
-        if(listObj[numObj]->loopObj() == 0){ //0 finished
+        if(listObj[numObj]->loopObj(obs, obs_updated, listObj, act) == 0){ //0 finished
             first = true;
             logs << INFO << "Ending objective number : " << numObj;
             vector <unsigned int> num = listObj[numObj]->getNumObs();

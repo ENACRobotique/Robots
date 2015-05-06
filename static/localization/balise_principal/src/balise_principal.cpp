@@ -16,14 +16,32 @@
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "lib_domitille.h"
 #include "../../../communication/network_tools/bn_debug.h"
-#include "lib_sync_turret.h"
 #include "loc_tools_turret.h"
 #include "global_errors.h"
 extern "C" {
 #include "roles.h"
 }
 
+#ifdef SYNC_WIRELESS
+#include "shared/lib_synchro_laser_turret.h"
+#endif
+
+#ifdef SYNC_WIRED
+#include "shared/lib_synchro_wire.h"
+
+#endif
+
+
+
+
+#ifdef SYNC_WIRELESS
 mainState state=S_SYNC_ELECTION;
+#endif
+
+#ifdef SYNC_WIRED
+mainState state=S_SYNC_MEASURE;
+#endif
+
 
 sDeviceInfo devicesInfo[D_AMOUNT];
 int iDeviceSync=0,iDevicePeriodBcast=0;
@@ -37,6 +55,9 @@ void setup(){
 
     setupFreeTest();
 
+#ifdef SYNC_WIRED
+    wiredSync_senderInit(PIN_SYNC);
+#endif
     // initializes the local state of the beacons to "off"
     for (int i=0;i<D_AMOUNT;i++) {
         devicesInfo[i].state=DS_OFF;
@@ -96,9 +117,18 @@ void loop(){
 
     //blinking
 #ifdef BLINK_1S
-    if((time - time_prev_led)>=10000) {
+    if((time - time_prev_led)>=1000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
+#ifdef DEBUG_SYNC_WIRE
+        if (millis() > 35000){
+            wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
+            delay(WIREDSYNC_LOWTIME/1000);
+            wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
+            uint32_t end = micros();
+            bn_printfDbg("tur, %lu,",micros2s(end));
+        }
+#endif
 #ifdef DEBUG
     bn_printfDbg("%lu period %lu",micros(),domi_meanPeriod());
 //        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
@@ -122,7 +152,12 @@ void loop(){
 
     ///////state machine
     switch (state){
-
+#ifdef SYNC_WIRED
+    case S_SYNC_MEASURE :
+        if (wiredSync_sendSignal(0) == -1) state = S_GAME;
+        break;
+#endif
+#ifdef SYNC_WIRELESS
     case S_SYNC_ELECTION :
         if (!sw){
             // set speed to high
@@ -173,7 +208,7 @@ void loop(){
         }
         state=S_GAME;
         break;
-
+#endif
     case S_GAME :
         // if new turn
         if (lastIndex!=domi_nbTR()){

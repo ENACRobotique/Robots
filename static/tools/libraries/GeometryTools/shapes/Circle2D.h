@@ -16,6 +16,10 @@
 #include <iostream>
 #include <utility>
 
+#ifndef SIGN
+#define SIGN(x) ((x > 0) - (x < 0))
+#endif
+
 template<typename T>
 class Circle2D/*: public Ellipse2D<T>*/ {
     public:
@@ -76,6 +80,14 @@ class Circle2D/*: public Ellipse2D<T>*/ {
 
             pt.x = c.x + v.x * r / n;
             pt.y = c.y + v.y * r / n;
+
+            return pt;
+        }
+        Point2D<T> projecteSup(const Point2D<T>& p, T sup) const{
+            Point2D<T> pt = projecte(p);
+
+            pt.x += SIGN(pt.x - c.x)*sup;
+            pt.y += SIGN(pt.y - c.y)*sup;
 
             return pt;
         }

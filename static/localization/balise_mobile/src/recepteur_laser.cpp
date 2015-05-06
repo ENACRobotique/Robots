@@ -11,12 +11,17 @@
 #include "params.h"
 #include "network_cfg.h"
 #include "MemoryFree.h"
-#include "shared/lib_synchro_beacon.h"
 #include "../../../communication/network_tools/bn_debug.h"
 extern "C" {
 #include "roles.h"
 }
 
+#ifdef SYNC_WIRELESS
+#include "shared/lib_synchro_beacon.h"
+#endif
+#ifdef SYNC_WIRED
+#include "shared/lib_synchro_wire.h"
+#endif
 
 unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;
 unsigned long time_prev_led=0, sw=0, time_data_send=0;
@@ -30,9 +35,18 @@ uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the lase
 uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
 char chosenOne=0;                           // interruption chosen for synchronization
 
+#ifdef SYNC_WIRED
+int lastSyncSampleIndex = -1,initIndex=-1;
+uint32_t firstSyncSample = 0;
+#endif
 
 char debug_led=1;
-mainState state=S_SYNC_ELECTION, prevState=S_BEGIN;                           // State machine state
+#ifdef SYNC_WIRELESS
+mainState state=S_SYNC_ELECTION, prevState=S_BEGIN,newState=S_SYNC_ELECTION;                           // State machine state
+#endif
+#ifdef SYNC_WIRED
+mainState state=S_SYNC_MEASURES, prevState=S_BEGIN,newState=S_SYNC_MEASURES;                           // State machine state
+#endif
 
 inline void periodHandle(sMsg *msg){
     if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
@@ -49,6 +63,10 @@ void setup() {
   bn_attach(E_PERIOD,&periodHandle);
   bn_printfDbg("start mobile %hx\n",MYADDR);
   setupFreeTest();
+
+#ifdef SYNC_WIRED
+  wiredSync_receiverInit(PIN_SYNC);
+#endif
 }
 
 void loop() {
@@ -57,7 +75,9 @@ void loop() {
     plStruct laserStruct={0}; //structure containing info about the last laser detection (deleted if not processed within one loop)
     int rxB=0; // size (bytes) of message available to read
     unsigned long time = millis(),timeMicros=micros();
-
+#ifdef SYNC_WIRED
+    int tempIndex=-1;
+#endif
 
     updateSync();
     //blink
@@ -72,6 +92,7 @@ void loop() {
 //MUST ALWAYS BE DONE (any state)
 
     updateSync();
+
 
     // routine and receive
     rxB=bn_receive(&inMsg);
@@ -126,7 +147,7 @@ void loop() {
     }
 
 
-// In any state, if we receive a "begin election" message, be begin election.
+// In any state, if we receive a "begin election" message, we begin election.
     if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
         state=S_SYNC_ELECTION;
 #ifdef VERBOSE_SYNC
@@ -137,12 +158,30 @@ void loop() {
 
 //STATE MACHINE
     switch (state){
+#ifdef SYNC_WIRED
+        case S_SYNC_MEASURES :
+            if ((tempIndex=wiredSync_waitSignal(0))!=lastSyncSampleIndex){
+                if (tempIndex != -1){
+                    lastSyncSampleIndex = tempIndex;
+                    initIndex = tempIndex;
+                }
+                if (tempIndex == 0){
+                    firstSyncSample = micros();
+                }
+            }
+            if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD))
+                    || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
+                wiredSync_finalCompute(1);
+                newState=S_GAME;
+            }
+            break;
+#endif
+#ifdef SYNC_WIRELESS
         case S_SYNC_ELECTION :
             if (prevState!=state) {
                 // reset counters
                 intLas0=0;
                 intLas1=0;
-                prevState=state;
             }
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
             if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
@@ -150,7 +189,7 @@ void loop() {
 #ifdef VERBOSE_SYNC
                 bn_printDbg("end election\n");
 #endif
-                state=S_SYNC_MEASURES;
+                newState=S_SYNC_MEASURES;
             }
             else {
                 break;
@@ -173,27 +212,25 @@ void loop() {
 #ifdef VERBOSE_SYNC
                     bn_printfDbg("syncComputation : %lu\n",micros2s(micros()));
 #endif
-                    state=S_GAME;
+                    newState=S_GAME;
                 }
                 else {
                     syncComputationMsg(&inMsg.payload.sync);
                 }
             }
         	break;
-#if 0   // probably not usefull, so skipped.
-        case S_SYNCED : // waiting the signal from main to go to game mode
-            if (prevState!=state) {
-                prevState=state;
-            }
-            if (rxB && inMsg.header.type==E_SYNC_OK && inMsg.header.srcAddr==ADDRX_MAIN){
-                state=S_GAME;
-            }
-
-            break;
 #endif
         case S_GAME :
-            if (prevState!=state) {
-                prevState=state;
+
+            if ((tempIndex=wiredSync_waitSignal(1))!=lastSyncSampleIndex){
+                if (tempIndex != -1){
+#ifdef DEBUG_SYNC_WIRE
+                    lastSyncSampleIndex = tempIndex;
+                    initIndex = tempIndex;
+                    firstSyncSample = micros();
+                    newState = S_SYNC_MEASURES;
+#endif
+                }
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
         	    if (millis()-time_data_send>=SENDING_PERIOD){
@@ -216,5 +253,7 @@ void loop() {
           break;
         default : break;
     }
+    prevState = state;
+    state = newState;
 }
 

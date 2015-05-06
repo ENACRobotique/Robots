@@ -1,17 +1,18 @@
 /*
- * lib_sync_turret.cpp
+ * lib_sync_laser_turret.cpp
  *
  *  Created on: 18 mars 2014
  *      Author: quentin
  */
 
-#include "lib_sync_turret.h"
+#include "lib_synchro_laser_turret.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "../../../communication/network_tools/bn_debug.h"
 #include "network_cfg.h"
-#include "Arduino.h"
 #include "lib_domitille.h"
 #include "params.h"
+
+#error "re-check synchronization equations. updateSync sign was changed. (was local - _offset, is now local+_offset)"
 
 int sync_beginElection(bn_Address addr){
     sMsg outMsg;

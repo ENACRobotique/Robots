@@ -14,6 +14,7 @@
  * Creates an environment for up to four robots, developed for the "Coupe de France de Robotique 2015"
  */
 
+#define BLOCK_START_ZONE    42
 
 namespace Env2015{
     extern Environment env;

@@ -16,7 +16,7 @@
 
 
 
-Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E_SPOT), _num(num), _color(color){
+Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E_SPOT, ActuatorType::ELEVATOR, true), _num(num), _color(color){
 
     if(num > 8){
         logs << ERR << "Num too big";
@@ -40,7 +40,7 @@ Spot::~Spot() {
     // TODO Auto-generated destructor stub
 }
 
-int Spot::loopObj(){
+int Spot::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>&, std::vector<Actuator>&){
     _state = FINISH;
     return 0;
 };

@@ -87,12 +87,12 @@ int time2rad(uint32_t time, float *ret){
  *  pLoad : pointer to the data send by remote beacon
  * Return value :
  *  0 : everything went fine, *Pload can be cleared, the message to IA has been send
- *  <0 : something went wrong. Test return value to know if retries would be a good thing.
+ *  <0 : something went wrong. Testing return value to know if retries would be a good thing.
  */
 int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     float angle=0;
     int err=0;
-    if ((err=time2rad(pLoad->date,&angle))){
+    if ((err=time2rad(pLoad->date,&angle))){ // FIXME use conversion function from synchronized to local (modify also in description)
         return err;
     }
 
