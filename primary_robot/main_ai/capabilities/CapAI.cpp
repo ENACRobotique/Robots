@@ -13,6 +13,7 @@
 #include "CapTeam.h"
 #include "tools.h"
 #include "ai_tools.h"
+#include "a_star_tools.h"
 #include "obj_tools.h"
 #include "communications.h"
 extern "C"{
@@ -22,6 +23,7 @@ extern "C"{
 #include "spot.h"
 #include "cup.h"
 #include "dropCup.h"
+#include "environment.h"
 
 
 int CapAI::loop(){
@@ -42,6 +44,10 @@ int CapAI::loop(){
         logs << INFO << "SHUT_DOWN : time = " << (unsigned int) (millis() - start_time) / 1000;
         path.stopRobot(capProp->getPropType()==HOLO?true:false);
         return 0;
+    }
+
+    if(colissionDetection()){
+        last_time = 0;
     }
 
     if (!mode_obj) {
@@ -71,7 +77,7 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated) == 0){
+        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated, capActuator->_act ) == 0){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
@@ -106,7 +112,7 @@ void CapAI::initObjective(){
         listObj.push_back(new Cup(i, robot->env->obs));
 
     for(unsigned int i = 0 ; i < 3 ; i++)
-        listObj.push_back(new DropCup(capTeam->getColor()));
+        listObj.push_back(new DropCup(i, capTeam->getColor()));
 
     if(capTeam->getColor() == YELLOW){
         for(unsigned int i = 12 ; i < 20 ; i++){
@@ -121,6 +127,15 @@ void CapAI::initObjective(){
         }
     }
 
+    if(capTeam->getColor() == GREEN)
+        robot->env->obs[BLOCK_START_ZONE].c = {45, 100};
+    else
+        robot->env->obs[BLOCK_START_ZONE].c = {300-45, 100};
+
+    robot->env->obs[BLOCK_START_ZONE].active = 1;
+    robot->env->obs[BLOCK_START_ZONE].r = 20. + R_ROBOT;
+
+    robot->env->obs_updated[BLOCK_START_ZONE]++;
 
 }
 

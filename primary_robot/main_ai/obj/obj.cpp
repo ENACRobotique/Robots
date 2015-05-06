@@ -22,14 +22,14 @@ extern "C"{
 
 //#define DEBUG_OBJ
 
-Obj::Obj() : _type(E_NULL), _point(-1), _state(ACTIVE), _access_select_angle(0), _access_point_select(-1),_dist(-1), _time(-1), _done(0){
+Obj::Obj() : _type(E_NULL), _typeAct(ActuatorType::ANY), _get(true), _point(-1), _state(ACTIVE), _access_select_angle(0), _actuator_select(-1),_dist(-1), _time(-1), _done(0){
 }
 
-Obj::Obj(eObj_t type) : _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _access_point_select(-1), _dist(-1), _time(-1), _done(0){
+Obj::Obj(eObj_t type, ActuatorType typeAct, bool get) : _type(type),  _typeAct(typeAct), _get(get), _point(-1), _state(ACTIVE), _access_select_angle(0), _actuator_select(-1), _dist(-1), _time(-1), _done(0){
 }
 
-Obj::Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint) :
-        _type(type), _point(-1), _state(ACTIVE), _access_select_angle(0), _access_point_select(-1), _dist(-1), _time(-1), _done(0){
+Obj::Obj(eObj_t type, ActuatorType typeAct, bool get, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint) :
+        _type(type), _typeAct(typeAct), _get(get), _point(-1), _state(ACTIVE), _access_select_angle(0), _actuator_select(-1), _dist(-1), _time(-1), _done(0){
 
     for(unsigned int i : numObs){
         _num_obs.push_back(i);
@@ -164,7 +164,7 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                 _dist = path_loc.dist;
             }
 
-            _access_point_select = i;
+            _actuator_select = i;
             _access_select = _path.path[_path.path_len - 1].p2;
         }
     }
@@ -181,19 +181,19 @@ int Obj::updateDestPointOrient(const vector<Actuator>& act){
         return -1;
 
     for(i = 0 ; i < act.size() ; i++){ //TODO optimize for the moment the first find is used
-        if( act[i].type == _type){
-            if(act[i].full)
-                continue;
-            break;
+        if( act[i].type == _typeAct){
+            if((!act[i].full && _get) || (act[i].full && !_get))
+                break;
         }
     }
 
     if(i == act.size()){
-        logs << ERR << "Any actuator define for this objective";
+        _actuator_select = -1;
         return -1;
     }
 
      _access_select_angle += act[i].angle;
+     _actuator_select = act[i].id;
 
     return 0;
 }
@@ -246,7 +246,9 @@ float Obj::getYield(const unsigned int start_time){
 void Obj::print(){
     logs << DEBUG << fixed << setprecision(2) << "type : " << objType() << " : " << objState();
     if(_state == ACTIVE){
-        if(_dist > 0)
+        if(_actuator_select == -1 && _dist > 0)
+            logs << " : no actuator available";
+        else if(_dist > 0)
             logs << " : " << _dist << "cm to go" << _access_select << "(" << _access_select_angle*180/M_PI << "°)";
         else
             logs << " : no path found";

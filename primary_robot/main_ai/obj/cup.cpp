@@ -22,7 +22,7 @@ extern "C"{
 
 
 
-Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP), _num(num), _time(0){
+Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType::CUP, true), _num(num), _time(0){
 
     if(num > 4)
         logs << ERR << "Num too big";
@@ -48,18 +48,25 @@ void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&)
 
     dest = cir.projecte(pos);
 
-    path.go2Point(dest,true, obs, true); //FIXME angle actionneur
+    path.go2PointOrient(dest, obs, _access_select_angle);
 
     _time = millis();
 }
 
-int Cup::loopObj(vector<Obj*>& listObj){
+int Cup::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>& listObj, std::vector<Actuator>& actuator){
 
     if(millis() - _time > 2000){
         for(Obj* i : listObj){
             if(i->type() == E_DROP_CUP && i->state() == WAIT_MES){
                 i->state() = ACTIVE;
                 break;
+            }
+        }
+
+        for(Actuator& i : actuator){
+            if(i.type == ActuatorType::CUP && i.id == _actuator_select){
+                i.full = true;
+                i.cupActuator.distributor = false; //to be sure
             }
         }
         _state = FINISH;

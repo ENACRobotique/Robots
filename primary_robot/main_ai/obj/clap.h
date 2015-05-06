@@ -20,7 +20,7 @@ class Clap : public Obj{
         virtual ~Clap();
 
         void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) override {};
-        int loopObj(vector<Obj*>&) override;
+        int loopObj(std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, vector<Obj*>&, std::vector<Actuator>&) override;
         eObj_t type() const override {return E_CLAP;};
         //float gain(){return 1;};
 

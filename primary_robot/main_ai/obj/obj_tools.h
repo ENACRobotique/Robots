@@ -21,7 +21,7 @@ void updateNoHaftTurn(float theta, Point2D<float>& pt, vector<astar::sObs_t>& ob
 void set_traj(sPath_t *p, astar::iABObs_t l[], int nb);
 
 int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated, const int robot, const bool axle, const vector<Actuator>& act) ;
-int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated);
+int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, std::vector<Actuator>& act);
 
 
 #endif /* OBJ_OBJ_TOOLS_H_ */
