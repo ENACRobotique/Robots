@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "lib_domitille.h"
 #include "params.h"
+#include "shared/lib_synchro.h"
 
 //interruption pin, sense pin
 int _pinInt;
@@ -26,7 +27,7 @@ volatile int led=0;
 void domi_isr(){
     static unsigned long prev_int=0;
     static unsigned long prev_duration=0;
-    unsigned long time=micros();
+    volatile unsigned long time=micros2s(micros());
     if ( (time-prev_int)> (prev_duration + (prev_duration>>1))) {      // because of the shape of the signal
         uint32_t period=time-TR_lastDate;
         TR_InfoBuf[TR_iNext].period=period;          // period of the previous turn
@@ -61,9 +62,9 @@ void domi_init(int pinInt, int pinSpeed){
 
     pinMode(_pinSpeed,OUTPUT);
 #ifdef SYNC_WIRED
-    digitalWrite(_pinSpeed,SPEED_20HZ);
+    analogWrite(_pinSpeed,SPEED_20HZ);
 #elif defined(SYNC_WIRELESS)
-    digitalWrite(_pinSpeed,SPEED_HIGH);
+    analogWrite(_pinSpeed,SPEED_HIGH);
 #endif
 }
 
