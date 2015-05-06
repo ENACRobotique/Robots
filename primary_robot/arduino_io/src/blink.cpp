@@ -19,35 +19,34 @@ extern "C" {
 #include "roles.h"
 }
 
-typedef struct {
-        eServos id;
-        int pca_id;
+typedef struct {;
+        int id;
         float a; //director coeff. for degrees to us conversion (associated to each physical servo)   us = a * deg + b
         float b; //additive coeff.
 } sServoData;
-sServoData servosTable[] = {
-        {SERVO_PRIM_GLASS1_HOLD,     0, 10, 520},
-        {SERVO_PRIM_GLASS1_RAISE,    1, 10, 520},
-        {SERVO_PRIM_GLASS2_HOLD,     2, 10, 520},
-        {SERVO_PRIM_GLASS2_RAISE,    3, 10, 520},
-        {SERVO_PRIM_GLASS3_HOLD,     4, 10, 520},
-        {SERVO_PRIM_GLASS3_RAISE,    5, 10, 520},
-        {SERVO_PRIM_LIFT1_UP,        6, 10, 520},
-        {SERVO_PRIM_LIFT1_DOOR,      7, 10, 520},
-        {SERVO_PRIM_LIFT1_HOLD,      8, 10, 520},
-        {SERVO_PRIM_LIFT2_UP,        9, 10, 520},
-        {SERVO_PRIM_LIFT2_DOOR,     10, 10, 520},
-        {SERVO_PRIM_LIFT2_HOLD,     11, 10, 520},
-        {SERVO_PRIM_CORN1_RAMP,     12, 10, 520},
-        {SERVO_PRIM_CORN2_RAMP,     13, 10, 520},
-        {SERVO_PRIM_CORN_DOOR,      14, 10, 520}
+sServoData servosTable[] = { //servo number (club)|a|b   (us = a*deg+b)
+        {1, 10, 520},
+        {2, 10, 520},
+        {3, 10.033, 526},
+        {4, 9.833, 615},
+        {5, 10, 520},
+        {6, 10, 520},
+        {7, 10, 520},
+        {8, 10, 520},
+        {9, 10, 520},
+        {10, 10, 520},
+        {11, 10, 520},
+        {12, 10, 520},
+        {13, 10, 520},
+        {14, 10, 520}
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
-#define PIN_MODE_SWICTH (3)
+#define PIN_MODE_SWITCH (3)
 #define PIN_STARTING_CORD (2)
-#define PIN_LED_1 (4)
-#define PIN_LED_2 (5)
+#define PIN_LED_BLUE (4)
+#define PIN_LED_RED (5)
+#define PIN_LED_GREEN (6)
 
 #define PIN_LIMIT_SWITCH_RIGHT (A2)
 #define PIN_LIMIT_SWITCH_LEFT (A3)
@@ -66,13 +65,15 @@ void setup(){
     attachInterrupt(0, fctStartingCord, CHANGE);
     attachInterrupt(1, fctModeSwitch, CHANGE);
 
-    pinMode(PIN_LED_1, OUTPUT);
-    pinMode(PIN_LED_2, OUTPUT);
+    pinMode(PIN_LED_BLUE, OUTPUT);
+    pinMode(PIN_LED_RED, OUTPUT);
+    pinMode(PIN_LED_GREEN, OUTPUT);
     pinMode(PIN_DBG_LED, OUTPUT);
 
     //init led
-    digitalWrite(PIN_LED_1, HIGH);
-    digitalWrite(PIN_LED_2, LOW);
+    digitalWrite(PIN_LED_BLUE, LOW);
+    digitalWrite(PIN_LED_RED, LOW);
+    digitalWrite(PIN_LED_GREEN, LOW);
 
     bn_init();
 
@@ -86,7 +87,7 @@ void setup(){
 
 
 sMsg inMsg, outMsg;
-int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwicth = 0, StartingCord = 0, Led = 0;
+int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwitch = 0, StartingCord = 0, Led = 0;
 int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, limitSwitchLeft = 0;
 unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord, timeLimitSwitchRight, timeLimitSwitchLeft;
 
@@ -103,7 +104,7 @@ void loop(){
                 for(j = 0; j < (int)NUM_SERVOS; j++){
                     if(servosTable[j].id == inMsg.payload.servos.servos[i].id){
                         int servoCmd = degreesTo4096th(inMsg.payload.servos.servos[i].angle, servosTable[j].a, servosTable[j].b);
-                        pwm.setPWM(servosTable[j].pca_id, 0, servoCmd);
+                        pwm.setPWM(inMsg.payload.servos.servos[i].pca_id, 0, servoCmd);
                     }
                 }
             }
@@ -119,8 +120,8 @@ void loop(){
                 outMsg.payload.ihmStatus.states[0].id = IHM_STARTING_CORD;
                 outMsg.payload.ihmStatus.states[0].state = StartingCord;
 
-                outMsg.payload.ihmStatus.states[1].id = IHM_MODE_SWICTH;
-                outMsg.payload.ihmStatus.states[1].state = ModeSwicth;
+                outMsg.payload.ihmStatus.states[1].id = IHM_MODE_SWITCH;
+                outMsg.payload.ihmStatus.states[1].state = ModeSwitch;
 
                 outMsg.payload.ihmStatus.states[2].id = IHM_LED;
                 outMsg.payload.ihmStatus.states[2].state = Led;
@@ -132,25 +133,58 @@ void loop(){
                     switch(inMsg.payload.ihmStatus.states[i].id){
                     case IHM_LED:
                         switch(inMsg.payload.ihmStatus.states[i].state){
-                        case 0:
-                            digitalWrite(PIN_LED_1, LOW);
-                            digitalWrite(PIN_LED_2, LOW);
+                        case LED_OFF:
+                            digitalWrite(PIN_LED_RED, LOW);
+                            digitalWrite(PIN_LED_GREEN, LOW);
+                            digitalWrite(PIN_LED_BLUE, LOW);
                             Led = 0;
                             break;
-                        case 1:
-                            digitalWrite(PIN_LED_1, HIGH);
-                            digitalWrite(PIN_LED_2, LOW);
+                        case LED_RED:
+                        	digitalWrite(PIN_LED_RED, HIGH);
+                        	digitalWrite(PIN_LED_GREEN, LOW);
+                        	digitalWrite(PIN_LED_BLUE, LOW);
                             Led = 1;
                             break;
-                        case 2:
-                            digitalWrite(PIN_LED_1, LOW);
-                            digitalWrite(PIN_LED_2, HIGH);
+                        case LED_GREEN:
+                        	digitalWrite(PIN_LED_RED, LOW);
+                        	digitalWrite(PIN_LED_GREEN, HIGH);
+                        	digitalWrite(PIN_LED_BLUE, LOW);
                             Led = 2;
+                            break;
+                        case LED_BLUE:
+                        	digitalWrite(PIN_LED_RED, LOW);
+                        	digitalWrite(PIN_LED_GREEN, LOW);
+                        	digitalWrite(PIN_LED_BLUE, HIGH);
+                        	Led = 3;
+                        	break;
+                        case LED_YELLOW:
+                        	digitalWrite(PIN_LED_RED, HIGH);
+                        	digitalWrite(PIN_LED_GREEN, HIGH);
+                        	digitalWrite(PIN_LED_BLUE, LOW);
+                            Led = 4;
+                            break;
+                        case LED_MAGENTA:
+                        	digitalWrite(PIN_LED_RED, HIGH);
+                        	digitalWrite(PIN_LED_GREEN, LOW);
+                        	digitalWrite(PIN_LED_BLUE, HIGH);
+                            Led = 5;
+                            break;
+                        case LED_CYAN:
+                        	digitalWrite(PIN_LED_RED, LOW);
+                        	digitalWrite(PIN_LED_GREEN, HIGH);
+                        	digitalWrite(PIN_LED_BLUE, HIGH);
+                            Led = 6;
+                            break;
+                        case LED_WHITE:
+                        	digitalWrite(PIN_LED_RED, HIGH);
+                        	digitalWrite(PIN_LED_GREEN, HIGH);
+                        	digitalWrite(PIN_LED_BLUE, HIGH);
+                            Led = 7;
                             break;
                         }
                         break;
                     case IHM_STARTING_CORD:
-                    case IHM_MODE_SWICTH:
+                    case IHM_MODE_SWITCH:
                     default:
                         break;
                     }
@@ -184,16 +218,14 @@ void loop(){
     }
 
     if( (time -  timeModeSwitch > 20) && flagModeSwitch){
-        ModeSwicth = digitalRead(PIN_MODE_SWICTH);
-        digitalWrite(PIN_LED_1, ledState1^=1);
-        digitalWrite(PIN_LED_2, !ledState1);
+        ModeSwitch = digitalRead(PIN_MODE_SWITCH);
 
         outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         outMsg.header.type = E_IHM_STATUS;
         outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         outMsg.payload.ihmStatus.nb_states = 1;
-        outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWICTH;
-        outMsg.payload.ihmStatus.states[0].state = ModeSwicth;
+        outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWITCH;
+        outMsg.payload.ihmStatus.states[0].state = ModeSwitch;
         while( (ret = bn_send(&outMsg)) <= 0);
 
         flagModeSwitch = 0;

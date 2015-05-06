@@ -10,39 +10,19 @@
 
 #include <stdint.h>
 
-typedef enum{
-    SERVO_PRIM_GLASS1_HOLD,
-    SERVO_PRIM_GLASS1_RAISE,
-    SERVO_PRIM_GLASS2_HOLD,
-    SERVO_PRIM_GLASS2_RAISE,
-    SERVO_PRIM_GLASS3_HOLD,
-    SERVO_PRIM_GLASS3_RAISE,
-
-    SERVO_PRIM_LIFT1_UP,
-    SERVO_PRIM_LIFT1_DOOR,
-    SERVO_PRIM_LIFT1_HOLD,
-    SERVO_PRIM_LIFT2_UP,
-    SERVO_PRIM_LIFT2_DOOR,
-    SERVO_PRIM_LIFT2_HOLD,
-
-    SERVO_PRIM_CORN1_RAMP,
-    SERVO_PRIM_CORN2_RAMP,
-    SERVO_PRIM_CORN_DOOR,
-
-    NUM_E_SERVO
-} eServos;
 
 typedef struct __attribute__((packed)){
     uint16_t nb_servos; // must be <=10
     struct __attribute__((packed)){ // 5 bytes
-            eServos id :8; // identifier of the servomotor
-            float angle; // servo setpoint in degrees (0-*)
+    	uint16_t id; // identifier of the servomotor (club number)
+    	uint16_t pca_id; // plug number (on the card 0-15)
+        float angle; // servo setpoint in degrees (0-*)
     } servos[];
 } sServos;
 
 typedef enum{
     IHM_STARTING_CORD,
-    IHM_MODE_SWICTH,
+    IHM_MODE_SWITCH,
     IHM_LED,
     IHM_LIMIT_SWITCH_RIGHT,
     IHM_LIMIT_SWITCH_LEFT
@@ -62,8 +42,19 @@ typedef enum {
 typedef enum {
     LED_OFF,
     LED_RED,
-    LED_YELLOW,
-    LED_GREEN
+    LED_GREEN,
+    LED_BLUE,
+	LED_YELLOW,
+	LED_MAGENTA,
+	LED_CYAN,
+	LED_WHITE,
+	LED_RED_BLINK,
+	LED_GREEN_BLINK,
+	LED_BLUE_BLINK,
+	LED_YELLOW_BLINK,
+	LED_PURPLE_BLINK,
+	LED_CYAN_BLINK,
+	LED_WHITE_BLINK
 }eIhmLed;
 
 typedef struct __attribute__((packed)){
