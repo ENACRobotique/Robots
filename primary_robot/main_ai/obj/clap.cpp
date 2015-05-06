@@ -34,7 +34,7 @@ Clap::~Clap() {
     // TODO Auto-generated destructor stub
 }
 
-int Clap::loopObj(vector<Obj*>&, std::vector<Actuator>&){
+int Clap::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&){
     _state = FINISH;
     return 0;
 };

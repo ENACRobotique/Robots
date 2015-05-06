@@ -40,7 +40,8 @@ class DropCup : public Obj{
         void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) override {
 
         }
-        int loopObj(vector<Obj*>& listObj, std::vector<Actuator>& actuator) override{
+        int loopObj(std::vector<astar::sObs_t>& listObs, std::vector<uint8_t>& obsUpdated, vector<Obj*>& listObj, std::vector<Actuator>& actuator) override{
+            unsigned int i;
 
             for(Actuator& i : actuator){
                 if(i.type == ActuatorType::CUP && i.id == _actuator_select){
@@ -49,7 +50,18 @@ class DropCup : public Obj{
                 }
             }
 
-            unsigned int i;
+            for(i = START_CUP ; i < START_CUP + 5 ; i++){
+                if(!listObs[i].active){
+                    listObs[i].active = 1;
+                    listObs[i].c = {_access[0].cir.c.x, _access[0].cir.c.y};
+                    listObs[i].r = 5 + R_ROBOT;
+                    obsUpdated[i]++;
+                    break;
+                }
+            }
+            if(i == START_CUP + 5)
+                logs << ERR << "Magic Cup ??";
+
             for(i = 0 ; i < actuator.size() ; i++)
                 if(actuator[i].type == ActuatorType::CUP && actuator[i].full)
                     break;

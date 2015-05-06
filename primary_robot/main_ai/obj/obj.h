@@ -86,7 +86,7 @@ class Obj {
         virtual ~Obj();
 
         virtual void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) = 0;
-        virtual int loopObj(vector<Obj*>&, std::vector<Actuator>&) = 0;
+        virtual int loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&) = 0;
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return _dist;};
 

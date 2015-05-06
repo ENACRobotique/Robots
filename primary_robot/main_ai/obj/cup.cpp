@@ -53,7 +53,7 @@ void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&)
     _time = millis();
 }
 
-int Cup::loopObj(vector<Obj*>& listObj, std::vector<Actuator>& actuator){
+int Cup::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>& listObj, std::vector<Actuator>& actuator){
 
     if(millis() - _time > 2000){
         for(Obj* i : listObj){

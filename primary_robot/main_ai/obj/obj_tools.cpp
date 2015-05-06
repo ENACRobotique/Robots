@@ -154,7 +154,7 @@ int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, s
         first = false;
         logs << INFO << "Starting objective number : " << numObj;
     }else{
-        if(listObj[numObj]->loopObj(listObj, act) == 0){ //0 finished
+        if(listObj[numObj]->loopObj(obs, obs_updated, listObj, act) == 0){ //0 finished
             first = true;
             logs << INFO << "Ending objective number : " << numObj;
             vector <unsigned int> num = listObj[numObj]->getNumObs();
