@@ -81,6 +81,9 @@ void Path::maintenace(){
  */
 void Path::sendRobot(bool holo, float thetaEnd) {
     static sPath_t path;
+    static deque<sTrajOrientEl_t> pathOrient;
+
+    logs << INFO << "Starting sendRobot()";
 
     if(!_path.empty() && !_path_orient.empty()){
         logs << ERR << "Try to send a path : _path and _path_orient are not empty";
@@ -96,35 +99,35 @@ void Path::sendRobot(bool holo, float thetaEnd) {
     if(holo)
         convPathToPathOrient(thetaEnd);
 
-    if (!checkSamePath(path) || checkRobotBlock()){
-        logs << INFO << "Preparation to send a path";
-        if (!_path.empty()){
-            //delete the previous path sent;
-            if(path.path)
-                delete path.path;
+    if (!_path.empty() && (!checkSamePath(path) || checkRobotBlock())){
+        //delete the previous path sent;
+        if(path.path)
+            delete path.path;
 
-            //save the new path sent
-            path.dist = _dist;
-            path.path_len = _path.size();
-            path.path = new sTrajEl_t[path.path_len];
-            for(unsigned int i = 0 ; i < path.path_len ; i++){
-                path.path[i] = _path[i];
-            }
-            //sends the path
-            net.sendPath(_path);
-
-            //print the path to the display
-            for(unsigned int i = 0 ; i < _path.size() ; i++)
-                printElTraj(i);
+        //save the new path sent
+        path.dist = _dist;
+        path.path_len = _path.size();
+        path.path = new sTrajEl_t[path.path_len];
+        for(unsigned int i = 0 ; i < path.path_len ; i++){
+            path.path[i] = _path[i];
         }
-        else{ //!_path_orient.empty()
-            //sends the path //TODO save path and compare if the same
+        //sends the path
+        net.sendPath(_path);
+
+        //print the path to the display
+        for(unsigned int i = 0 ; i < _path.size() ; i++)
+            printElTraj(i);
+    }
+    else if(!_path_orient.empty() && (!checkSamePathOrient(pathOrient) || checkRobotBlock())){
+            pathOrient.clear();
+
+            for(const sTrajOrientEl_t& i : _path_orient)
+                pathOrient.push_back(i);
+
             net.sendPathOrient(_path_orient);
 
-            //print the path to the display
             for(unsigned int i = 0 ; i < _path_orient.size() ; i++)
                 printElTrajOrient(i);
-        }
     }
 }
 
@@ -135,6 +138,8 @@ void Path::stopRobot(bool holo) {
     Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
     float theta = statuses.getLastOrient(ELT_PRIMARY);
     sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
+
+    logs << INFO << "Stop Robot";
 
     clear();
 
@@ -417,28 +422,24 @@ bool Path::checkSamePath(sPath_t &path){
 
     if(path.path_len==0 || _path.size()==0)
         return false;
-    if(verbose > 2)
-        cout << "same_t 1.0" << endl;
+    logs << DEBUG << "same_t 1.0";
 
     while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminé
-        if(verbose > 2)
-            cout << "same_t 2.0" << endl;
+        logs << DEBUG << "same_t 2.0";
         if (checkSameObs((path.path[t1_ind-1].obs), (_path[t2_ind-1].obs)) ){
           t1_ind--;
            t2_ind--;
            }
        else return 0;
     }
-    if(verbose > 2)
-        cout << "same_t 3.0" << endl;
+    logs << DEBUG << "same_t 3.0";
     if (!(checkSameObs((path.path[t1_ind].obs), (_path[t2_ind].obs))))
         return 0;
 
     if ( (fabs(path.path[t1_ind].p2.x - _path[t2_ind].p2.x ) > 2.) && (fabs(path.path[t1_ind].p2.y - _path[t2_ind].p2.y) > 2.) )
         return 0;
     else
-        if(verbose > 2)
-            cout << "same_t 4.0" << endl;
+        logs << DEBUG << "same_t 4.0";
 
     logs << INFO << "Same path";
     return 1 ;
@@ -455,6 +456,25 @@ bool Path::checkSamePath2(deque<sTrajEl_t>& path){
 
     while (i >= 0 && j >= 0) {
         if(checkSameObs(path[i].obs, _path[j].obs)){
+            i--;
+            j--;
+        }else
+            return false;
+    }
+    return true;
+}
+
+/*
+ * Return 1 if the same path else 0.
+ */
+bool Path::checkSamePathOrient(deque<sTrajOrientEl_t>& path){
+    int i = path.size(), j = _path_orient.size();
+
+    if(i != j)
+        return false;
+
+    while (i >= 0 && j >= 0) {
+        if(checkSameObs(path[i].obs, _path_orient[j].obs)){
             i--;
             j--;
         }else
