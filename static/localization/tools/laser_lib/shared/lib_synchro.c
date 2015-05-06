@@ -18,7 +18,7 @@
 #include "millis.h"
 #endif
 syncStruc syncParam={0,0,0};    // Synchronization parameters
-int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
+volatile int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
 
 void setSyncParam(syncStruc syncParameters){
     syncParam = syncParameters;

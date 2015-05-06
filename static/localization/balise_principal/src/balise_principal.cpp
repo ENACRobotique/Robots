@@ -199,7 +199,12 @@ void loop(){
             for (int i=0;i<D_AMOUNT;i++) {
                 if (devicesInfo[i].state == DS_SYNCED) synced++;
             }
-            if (synced == D_AMOUNT) state = S_GAME;
+            if (synced == D_AMOUNT) {
+                state = S_GAME;
+#ifdef DEBUG_SYNC
+                bn_printDbg("sync ok\n");
+#endif
+            }
             if (endSync && (micros() - endSync) > 4*WIREDSYNC_PERIOD){
 #ifdef DEBUG_SYNC
                 for (int i=0;i<D_AMOUNT;i++) {
