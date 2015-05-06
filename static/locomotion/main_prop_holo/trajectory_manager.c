@@ -84,7 +84,10 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te)
     sTrajSlot_t* s1 = &tm->slots[tm->slots_insert_idx];
     sTrajSlot_t* s2 = &tm->slots[(tm->slots_insert_idx + 1) % TRAJ_MAX_SLOTS];
 
-    if(s1->state != SLOT_EMPTY || s2->state != SLOT_EMPTY) {
+    int s1_ok = s1->state == SLOT_EMPTY || s1->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s1->sid < tm->slots[tm->curr_element >> 1].sid);
+    int s2_ok = s2->state == SLOT_EMPTY || s2->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s2->sid < tm->slots[tm->curr_element >> 1].sid);
+
+    if(!s1_ok || !s2_ok) {
         return -1; // no more empty slots
     }
 
