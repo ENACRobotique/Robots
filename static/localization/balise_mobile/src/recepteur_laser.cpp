@@ -37,7 +37,7 @@ char chosenOne=0;                           // interruption chosen for synchroni
 
 #ifdef SYNC_WIRED
 int lastSyncSampleIndex = -1,initIndex=-1;
-uint32_t firstSyncSample = 0;
+uint32_t firstSyncSample = 0,lastSyncSample = 0;
 #endif
 
 char debug_led=1;
@@ -163,14 +163,17 @@ void loop() {
             if ((tempIndex=wiredSync_waitSignal(0))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
                     lastSyncSampleIndex = tempIndex;
+                    lastSyncSample = micros();
                 }
                 if (tempIndex == 0){
                     initIndex = tempIndex;
                     firstSyncSample = micros();
+                    lastSyncSample = firstSyncSample;
                 }
             }
             if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES) * WIREDSYNC_PERIOD))
-                    || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
+                    || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES
+                    || (lastSyncSample && (micros() - lastSyncSample) > WIREDSYNC_PERIOD * 3 )){
                 wiredSync_finalCompute(1);
                 newState=S_GAME;
             }
