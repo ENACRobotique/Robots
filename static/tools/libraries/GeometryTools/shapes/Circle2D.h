@@ -83,8 +83,8 @@ class Circle2D/*: public Ellipse2D<T>*/ {
 
             return pt;
         }
-        Point2D<T> projecteSup(const Point2D<T>& p, T sup) const{
-            Point2D<T> pt = projecte(p);
+        Point2D<T> projectSup(const Point2D<T>& p, T sup) const{
+            Point2D<T> pt = project(p);
 
             pt.x += SIGN(pt.x - c.x)*sup;
             pt.y += SIGN(pt.y - c.y)*sup;

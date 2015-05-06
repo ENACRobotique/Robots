@@ -52,7 +52,7 @@ typedef enum{
     E_GENERIC_STATUS,       // @payload.genericStatus: generic status of an element
     E_POS_STATS,            // @payload.posStats: position statistics (packed)
     E_TRAJ_ORIENT_EL,       // @payload.trajOrientEl: complex trajectory element (position + orientation wrt time)
-    E_POS_CAM,               // @payload.posCam: For position computed from CAM
+    E_POS_CAM,              // @payload.posCam: For position computed from CAM
     E_SYNC_QUERY,           // @payload.syncQuery: for time synchronization
     E_SYNC_RESPONSE,        // @payload.syncResponse: for time synchronization
 /************************ user types stop ************************/
