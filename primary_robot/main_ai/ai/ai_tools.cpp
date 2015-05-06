@@ -72,11 +72,12 @@ Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>&
 /*
  * Stops the robot if collision detected
  */
-void colissionDetection(){
+int colissionDetection(){
     Point2D<float> ptPr = statuses.getLastPosXY(ELT_PRIMARY);
     float anglePr = statuses.getLastOrient(ELT_PRIMARY);
     Point2D<float> ptAPr = statuses.getLastPosXY(ELT_ADV_PRIMARY);
     Point2D<float> ptASc = statuses.getLastPosXY(ELT_ADV_SECONDARY);
+    Point2D<float> ptSc = statuses.getLastPosXY(ELT_SECONDARY);
     sNum_t d, dot;
     int contact = 0;
 
@@ -98,9 +99,21 @@ void colissionDetection(){
         contact = 1;
     }
 
+    d = ptPr.distanceTo(ptSc);
+    Vector2D<float> v4(ptPr, ptSc);
+    dot = v1 * v4;
+
+    if (d < 40 && dot > 0.6 * d) {
+        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
+        contact = 1;
+    }
+
     if (contact) {
         path.stopRobot(true);
+        return 1;
     }
+
+    return 0;
 }
 
 /*

@@ -23,7 +23,7 @@
 void printObsActive(std::vector<astar::sObs_t>& obs);
 unsigned int checkPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
 Point2D<float> projectPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
-void colissionDetection();
+int colissionDetection();
 void posPrimary(std::vector<astar::sObs_t>& obs);
 
 #endif /* AI_TOOLS_H_ */

@@ -46,6 +46,10 @@ int CapAI::loop(){
         return 0;
     }
 
+    if(colissionDetection()){
+        last_time = 0;
+    }
+
     if (!mode_obj) {
         if(listObj.empty()) //Test if all objective have finished
             logs << INFO << "Objective list is empty";
