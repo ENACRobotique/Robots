@@ -38,6 +38,7 @@ typedef struct {
         int id;         //id by type of actuator
         bool full;      //true if full
         float angle;
+        Point2D<float> pos;
 
         struct{
             unsigned int number;
@@ -86,7 +87,7 @@ class Obj {
         virtual ~Obj();
 
         virtual void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) = 0;
-        virtual int loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&) = 0;
+        virtual int loopObj(const float& angleRobot, std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&) = 0;
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return _dist;};
 

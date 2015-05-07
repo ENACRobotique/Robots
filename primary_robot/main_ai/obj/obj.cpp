@@ -175,7 +175,6 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                 _dist = path_loc.dist;
             }
 
-            _actuator_select = i;
             _access_select = _path.path[_path.path_len - 1].p2;
         }
     }
