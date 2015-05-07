@@ -25,6 +25,9 @@ class CapPosSimuSecondary : public CapPosition{
         virtual ~CapPosSimuSecondary(){}
 
         virtual Point2D<float> getLastPosXY();
+        virtual float getLastTheta(){
+            return 0;
+        }
 };
 
 #endif /* CAP_POS_SIMU_SECONDARY_H_ */
