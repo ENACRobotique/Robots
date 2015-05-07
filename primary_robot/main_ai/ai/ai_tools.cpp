@@ -47,7 +47,7 @@ unsigned int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs
 Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
     unsigned int n = checkPointInObs(p, obs);
 
-    if ( n > 0) {
+    if (n > 0) {
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         Point2D<float> r;
 
@@ -70,47 +70,39 @@ Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>&
 }
 
 /*
- * Stops the robot if collision detected
+ * Return > 0 if collision detected
  */
-int colissionDetection(){
-    Point2D<float> ptPr = statuses.getLastPosXY(ELT_PRIMARY);
-    float anglePr = statuses.getLastOrient(ELT_PRIMARY);
-    Point2D<float> ptAPr = statuses.getLastPosXY(ELT_ADV_PRIMARY);
-    Point2D<float> ptASc = statuses.getLastPosXY(ELT_ADV_SECONDARY);
-    Point2D<float> ptSc = statuses.getLastPosXY(ELT_SECONDARY);
-    sNum_t d, dot;
-    int contact = 0;
 
-    d = ptPr.distanceTo(ptAPr);
-    Vector2D<float> v1(cos(anglePr), sin(anglePr)), v2(ptPr, ptAPr);
-    dot = v1*v2;
+int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& pos){
+    Point2D<float> ptPr(pos[0].c.x, pos[0].c.y);
+    Point2D<float> ptSc(pos[1].c.x, pos[1].c.y);
+    Point2D<float> ptAPr(pos[2].c.x, pos[2].c.y);
+    Point2D<float> ptASc(pos[3].c.x, pos[3].c.y);
+    Point2D<float> ptRobot(pos[robot].c.x, pos[robot].c.y);
+    float d;
 
-    if (d < 50 && dot > 0.6 * d) {
-        logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
-        contact = 1;
-    }
-
-    d = ptPr.distanceTo(ptASc);
-    Vector2D<float> v3(ptPr, ptASc);
-    dot = v1 * v3;
-
-    if (d < 40 && dot > 0.6 * d) {
-        logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
-        contact = 1;
-    }
-
-    d = ptPr.distanceTo(ptSc);
-    Vector2D<float> v4(ptPr, ptSc);
-    dot = v1 * v4;
-
-    if (d < 40 && dot > 0.6 * d) {
-        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
-        contact = 1;
-    }
-
-    if (contact) {
-        path.stopRobot(true);
+    d = ptRobot.distanceTo(ptPr);
+    if (d < (pos[robot].r + pos[0].r) && d) {
+        logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 1;
+    }
+
+    d = ptRobot.distanceTo(ptSc);
+    if (d < (pos[robot].r + pos[1].r) && d) {
+        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 2;
+    }
+
+    d = ptRobot.distanceTo(ptAPr);
+    if (d < (pos[robot].r + pos[2].r) && d) {
+        logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 3;
+    }
+
+    d = ptRobot.distanceTo(ptASc);
+    if (d < (pos[robot].r + pos[3].r) && d) {
+        logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 4;
     }
 
     return 0;

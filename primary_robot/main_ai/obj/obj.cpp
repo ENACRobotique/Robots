@@ -64,6 +64,17 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
 
     _dist = -1;
     Point2D<float> p = projectPointInObs(posRobot, obs);
+
+    if(checkPointInObs(p, obs)){ //Robot is block
+        for(unsigned int i = 4 ; i < obs.size() - 1 ; i++){
+            if(obs[i].active && obs[i].moved){
+                logs << DEBUG << "Disable obstacle number 2 : " << i;
+                list.push_back(i);
+                obs[i].active = 0;
+            }
+        }
+    }
+
     obs[robot].c = {p.x, p.y};
 
     for (unsigned int i = 0 ; i < _access.size(); i++) {
@@ -120,11 +131,11 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
         astar::fill_tgts_lnk(obs);
         a_star(A(robot), A(N-1), &path_loc);
 
-        if(_access[i].type == E_CIRCLE){
-            for(int i : list){
-                obs[i].active = 1;
-            }
+
+        for(int i : list){
+            obs[i].active = 1;
         }
+
 
         for(unsigned int j : _num_obs){ // Reactivation obstacle
             obs[j].active = 1;
