@@ -23,8 +23,7 @@ typedef struct __attribute__((packed)){
 typedef enum{
     IHM_STARTING_CORD,
     IHM_MODE_SWITCH,
-    IHM_LED_STEADY,
-	IHM_LED_BLINK,
+    IHM_LED,
     IHM_LIMIT_SWITCH_RIGHT,
     IHM_LIMIT_SWITCH_LEFT
 } eIhmElement;
@@ -40,23 +39,6 @@ typedef enum {
     SWITCH_INTER
 } eIhmSwitch;
 
-typedef enum {
-    LED_OFF,
-    LED_RED,
-    LED_GREEN,
-    LED_BLUE,
-	LED_YELLOW,
-	LED_MAGENTA,
-	LED_CYAN,
-	LED_WHITE,
-	LED_RED_BLINK,
-	LED_GREEN_BLINK,
-	LED_BLUE_BLINK,
-	LED_YELLOW_BLINK,
-	LED_PURPLE_BLINK,
-	LED_CYAN_BLINK,
-	LED_WHITE_BLINK
-}eIhmLed;
 
 typedef struct __attribute__((packed)){
 	uint8_t red, green, blue;
@@ -64,17 +46,20 @@ typedef struct __attribute__((packed)){
 
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_states; // must be <=5
+    uint16_t nb_states; // must be <=4
     struct __attribute__((packed)){
         eIhmElement id :8; // identifier of the ihm element
-        union{
-
-				};
-        	} led;
-            eIhmCord state_cord :8;
-            eIhmSwitch state_switch :8;
-            eIhmLed sate_led :8;
-        };
+        union __attribute__((packed)){
+        	eIhmCord state_cord :8;
+        	eIhmSwitch state_switch :8;
+        	struct __attribute__((packed)){
+        		sRGB color1; //first color
+        		sRGB color2; //second color
+        		uint16_t time1 :14; //time while 1st color is on (ms)
+        		uint16_t time2 :14; //time while 2nd color is on (ms)
+        		uint8_t nb :4;  //number of periods (0 for infinite loop)
+        	};
+        } state;
     } states[];
 } sIhmStatus;
 
