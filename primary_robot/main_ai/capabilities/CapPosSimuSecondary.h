@@ -16,6 +16,7 @@
 
 #define SPEED_SECONDARY 10      // (cm/s)
 #define START_DELAY     1000    // (ms)
+#define RESTART_DELAY   1000    // (ms)
 
 class CapPosSimuSecondary : public CapPosition{
     public:

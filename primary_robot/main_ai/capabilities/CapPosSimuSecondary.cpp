@@ -19,6 +19,7 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
     static bool first = true;
     static unsigned int state = 0;
     static unsigned int lastTime = 0;
+    static unsigned int lastTime2 = 0;
     static unsigned int startTime = 0;
     static unsigned int waitTime = 0;
     static unsigned int diffTime = 0;
@@ -46,10 +47,13 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
                 wait = true;
                 waitTime = millis();
             }
+            lastTime2 = millis();
         }
         else if(wait){
-            wait = false;
-            diffTime += millis() - waitTime;
+            if(millis() - lastTime2 > RESTART_DELAY){
+                wait = false;
+                diffTime += millis() - waitTime;
+            }
         }
         else if(time - startTime > START_DELAY){
             if(update) {
