@@ -17,9 +17,9 @@
 //#define SETTINGS_HSV
 #define SRC_VID 1  // 0 for cam, 1 for source file. In the last case define path in sourceVid.cpp
 
-// User, only one at a time
-#define YOYO
-//#define LUDO
+#define YOYO 0
+#define LUDO 1
+#define USER LUDO
 
 //################################################################
 //#### Remarkable values about the elements of the playground ####

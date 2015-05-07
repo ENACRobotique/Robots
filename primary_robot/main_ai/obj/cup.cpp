@@ -46,7 +46,7 @@ void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&)
     Circle2D<float> cir(obs[_num_obs[0]].c.x, obs[_num_obs[0]].c.y, 10);
     Point2D<float> dest;
 
-    dest = cir.projecte(pos);
+    dest = cir.project(pos);
 
     path.go2PointOrient(dest, obs, _access_select_angle);
 

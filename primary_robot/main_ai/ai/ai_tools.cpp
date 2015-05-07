@@ -51,7 +51,7 @@ Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>&
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         Point2D<float> r;
 
-        r = c.projecte(p);
+        r = c.project(p);
         r.x += SIGN(r.x - c.c.x)*0.1;
         r.y += SIGN(r.y - c.c.y)*0.1;
 
@@ -120,7 +120,7 @@ void posPrimary(vector<astar::sObs_t>& obs) { //FIXME permet de deplacer les obj
         if (obs[i].moved == 1) {
             pt = {obs[0].c.x, obs[0].c.y};
             Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);
-            pt = cir.projecte(pt);
+            pt = cir.project(pt);
             Vector2D<float> v(pt, {obs[0].c.x, obs[0].c.y});
 
             obs[i].c.x += v.x;
@@ -130,7 +130,7 @@ void posPrimary(vector<astar::sObs_t>& obs) { //FIXME permet de deplacer les obj
         }
         Point2D<float> p(_current_pos.x, _current_pos.y);
         Circle2D<float> c(obs[i].c.x, obs[i].c.y, obs[i].r);
-        p = c.projecte(p);
+        p = c.project(p);
         _current_pos = {p.x, p.y};
         if (sqrt(pow(_current_pos.x - obs[0].c.x, 2) + pow(_current_pos.y - obs[0].c.y, 2) < 2)) {
 

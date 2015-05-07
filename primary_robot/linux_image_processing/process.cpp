@@ -126,7 +126,7 @@ int frameProcess(Mat& frameRaw, Mat& framePattern, sPosOrien& posOrienRob){
 	imshow("frameTopViewHSV", frameTopView);
 //    imshow("frameGreen",frameThresGreen);
 //    imshow("frameYellow",frameThresYellow);
-//    imshow("frameRed",frameThresRed);
+    imshow("frameRed",frameThresRed);
 //    imshow("frameBlue",frameThresBlue);
 
     // Uptade the view on the pattern frame
@@ -214,7 +214,7 @@ int frameCrop2Circle(Mat& frame, Point2i& center, int radius){
  * \param int sizeDilate
  * \return int: 0 if OK, -1 otherwise
  */
-int frameThresh(const Mat frameIn, Mat frameOut, Scalar hsvMin, Scalar hsvMax, int sizeErode, int sizeDilate){
+int frameThresh(const Mat& frameIn, Mat& frameOut, Scalar hsvMin, Scalar hsvMax, int sizeErode, int sizeDilate){
 //	Mat frame2Tresh(frameIn);
 	frameIn.copyTo(frameOut);
 	// Create elements for erode and dilate operations
@@ -228,7 +228,7 @@ int frameThresh(const Mat frameIn, Mat frameOut, Scalar hsvMin, Scalar hsvMax, i
 					Point( 0, 0 ) );
 
 	//RGB to HSV
-	cvtColor(frameOut, frameOut, CV_RGB2HSV);
+	cvtColor(frameOut, frameOut, CV_RGB2HSV, 1);
 	// Apply a threshold
 	inRange(frameOut , hsvMin, hsvMax, frameOut);
 
