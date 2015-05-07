@@ -89,6 +89,13 @@ public:
         y = pc.x * sin(a) + pc.y * cos(a);
         return *this;
     }
+
+    Point2D tranform(const T& a, const Point2D<T>& p){
+        Point2D<T> ret;
+        ret.x = x + p.x * cos(a) - p.y * sin(a);
+        ret.y = y + p.x * sin(a) + p.y * cos(a);
+        return ret;
+    }
 };
 
 template<typename T>
