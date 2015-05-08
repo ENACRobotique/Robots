@@ -19,7 +19,7 @@
 #define NB_PREVIOUS_POSITIONS (500/20 + 1 + 1)
 
 typedef struct {
-    sGenericStatus s;
+    sGenericPosStatus s;
     sDate d;
 } sPHPos;
 extern sPHPos ph_cbuf[NB_PREVIOUS_POSITIONS];
@@ -37,15 +37,15 @@ static inline void ph_incr_new_slot_pointer(){
     ph_newest = (ph_newest + 1)%NB_PREVIOUS_POSITIONS;
 }
 
-static inline void ph_enqueue(sGenericStatus *s, sDate t){
+static inline void ph_enqueue(sGenericPosStatus *s, sDate t){
     sPHPos *new = ph_get_new_slot_pointer();
 
-    memcpy(&new->s, s, sizeof(*new));
+    memcpy(&new->s, s, sizeof(new->s));
     new->d = t;
 
     ph_incr_new_slot_pointer();
 }
 
-int ph_get_pos(sGenericStatus *s, sDate date);
+int ph_get_pos(sGenericPosStatus *s, sDate date);
 
 #endif /* LIB_POSTOOLS_POS_HISTORY_H_ */

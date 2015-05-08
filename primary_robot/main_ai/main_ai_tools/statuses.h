@@ -31,9 +31,9 @@ class Statuses {
         void setConfig();
 
 
-        int receivedNewStatus(sGenericStatus &status);
+        int receivedNewStatus(sGenericPosStatus &status);
 
-        sGenericStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);
+        sGenericPosStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);
 
         //Simple function define in the FRAME_PLAYGROUND
         Point2D<float> getLastPosXY(eElement el);
@@ -43,7 +43,7 @@ class Statuses {
     private:
         void fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *srcPAPG, s2DPAUncert *srcUPG, s2DPosAtt *dstPAPG, s2DPAUncert *dstUPG);
 
-        array <deque <sGenericStatus>, NUM_E_ELEMENT> _list;
+        array <deque <sGenericPosStatus>, NUM_E_ELEMENT> _list;
         array <statusConfig_t, NUM_E_ELEMENT> _config;
 
 };

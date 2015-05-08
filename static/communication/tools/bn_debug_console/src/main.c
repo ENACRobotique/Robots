@@ -136,9 +136,6 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu), seq : %02hhu ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type, msgIn.header.seqNum);
             }
             switch (msgIn.header.type){
-            case E_GENERIC_STATUS:
-                printf("%.2fcm, %.2fcm, %.2f°\n", msgIn.payload.genericStatus.prop_status.pos.x, msgIn.payload.genericStatus.prop_status.pos.y, msgIn.payload.genericStatus.prop_status.pos.theta*180./M_PI);
-                break;
             case E_ASSERV_STATS :
                 {
                     int i;
@@ -173,8 +170,8 @@ int main(int argc, char **argv){
                     }
                 }
                 break;
-            case E_POS :
-                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
+            case E_GENERIC_POS_STATUS:
+                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.genericPosStatus.id, msgIn.payload.genericPosStatus.pos.x, msgIn.payload.genericPosStatus.pos.y, msgIn.payload.genericPosStatus.pos.theta*180./M_PI);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
                 break;
             default :
