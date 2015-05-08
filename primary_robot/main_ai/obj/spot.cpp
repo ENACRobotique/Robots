@@ -40,7 +40,7 @@ Spot::~Spot() {
     // TODO Auto-generated destructor stub
 }
 
-int Spot::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>&, std::vector<Actuator>&){
+int Spot::loopObj(const float&, std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>&, std::vector<Actuator>&){
     _state = FINISH;
     return 0;
 };

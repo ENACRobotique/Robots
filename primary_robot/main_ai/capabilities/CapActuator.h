@@ -26,7 +26,13 @@ class CapActuator : public Capability{
             Actuator spot, cup;
             float spotAngle[2] = {M_PI/6, 5*M_PI/6};
             float cupAngle[3] = {0, 2*M_PI/3, 4*M_PI/3};
-
+            Point2D<float> cupPos[3];
+            cupPos[0].x = (R_ROBOT + 4.)*cos(cupAngle[0]);
+            cupPos[0].y = (R_ROBOT + 4.)*sin(cupAngle[0]);
+            cupPos[1].x = (R_ROBOT + 4.)*cos(cupAngle[1]);
+            cupPos[1].y = (R_ROBOT + 4.)*sin(cupAngle[1]);
+            cupPos[2].x = (R_ROBOT + 4.)*cos(cupAngle[2]);
+            cupPos[2].y = (R_ROBOT + 4.)*sin(cupAngle[2]);
 
             for(unsigned int i = 0 ; i < 2 ; i++){
                 _act.push_back(spot);
@@ -44,6 +50,7 @@ class CapActuator : public Capability{
                 _act.back().type = ActuatorType::CUP;
                 _act.back().full = false;
                 _act.back().angle = cupAngle[i];
+                _act.back().pos = cupPos[i];
                 _act.back().cupActuator.distributor = false;
             }
         }

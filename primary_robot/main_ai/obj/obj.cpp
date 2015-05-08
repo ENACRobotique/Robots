@@ -160,7 +160,7 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                     Point2D<float> pt = _path.path[_path.path_len - 1].p1;
                     Circle2D<float> cir(_access[i].cir.c.x, _access[i].cir.c.y, _access[i].cir.r);
 
-                    pt = cir.projecteSup(pt, 0.1);
+                    pt = cir.projectSup(pt, 0.1);
                     if(checkPointInObs(pt, obs)){
                         continue;
                     }
@@ -175,7 +175,6 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                 _dist = path_loc.dist;
             }
 
-            _actuator_select = i;
             _access_select = _path.path[_path.path_len - 1].p2;
         }
     }

@@ -46,14 +46,14 @@ void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&)
     Circle2D<float> cir(obs[_num_obs[0]].c.x, obs[_num_obs[0]].c.y, 10);
     Point2D<float> dest;
 
-    dest = cir.projecte(pos);
+    dest = cir.project(pos);
 
     path.go2PointOrient(dest, obs, _access_select_angle);
 
     _time = millis();
 }
 
-int Cup::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>& listObj, std::vector<Actuator>& actuator){
+int Cup::loopObj(const float&, std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>& listObj, std::vector<Actuator>& actuator){
 
     if(millis() - _time > 2000){
         for(Obj* i : listObj){

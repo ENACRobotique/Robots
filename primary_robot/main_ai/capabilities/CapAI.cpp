@@ -83,7 +83,7 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated, capActuator->_act ) == 0){
+        if (metObj(capPos->getLastTheta(), current_obj, listObj, robot->env->obs, robot->env->obs_updated, capActuator->_act ) == 0){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;

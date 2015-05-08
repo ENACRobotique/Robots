@@ -1,15 +1,15 @@
-#include "sourceVid.h"
+#include "sourceVid.hpp"
 
-#ifdef YOYO
+#if USER == YOYO
 // Path to the image sources for YOYO
 string strFramePattern("/home/yoyo/Robots/primary_robot/linux_image_processing/Images/Table2015.png");
 string strFrameRaw("/home/yoyo/Robots/primary_robot/linux_image_processing/Videos/Feux.mp4");
 string strFrameHSV("/home/yoyo/Robots/primary_robot/linux_image_processing/Images/HSV.png");
-#endif
-#ifdef LUDO
+#elif USER == LUDO
 // Path to the image sources for Ludo
-string strFramePattern("/home/ludo/.../Table2015.png");
-string strFrameRaw("/home/yoyo/ludo/.../Feux.mp4");
+string strFramePattern("Images/Table2015.png");
+string strFrameRaw("MyVideo.avi");
+string strFrameHSV("Images/HSV.png");
 #endif
 
 int initCapture(string& title, VideoCapture& srcCap, int valBegVid, bool offsetVid){
@@ -33,7 +33,7 @@ int initCapture(string& title, VideoCapture& srcCap, int valBegVid, bool offsetV
 	if(offsetVid)
 		srcCap.set(CV_CAP_PROP_POS_MSEC, valBegVid);
 
-	namedWindow(title.c_str(),CV_WINDOW_AUTOSIZE);
+	namedWindow(title,CV_WINDOW_AUTOSIZE);
 
 	return 0;
 }
