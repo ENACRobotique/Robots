@@ -84,10 +84,10 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te)
     sTrajSlot_t* s1 = &tm->slots[tm->slots_insert_idx];
     sTrajSlot_t* s2 = &tm->slots[(tm->slots_insert_idx + 1) % TRAJ_MAX_SLOTS];
 
-    int s1_ok = s1->state == SLOT_EMPTY || s1->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s1->sid < tm->slots[tm->curr_element >> 1].sid);
-    int s2_ok = s2->state == SLOT_EMPTY || s2->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s2->sid < tm->slots[tm->curr_element >> 1].sid);
+    int s1_empty = s1->state == SLOT_EMPTY || s1->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s1->sid < tm->slots[tm->curr_element >> 1].sid);
+    int s2_empty = s2->state == SLOT_EMPTY || s2->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s2->sid < tm->slots[tm->curr_element >> 1].sid);
 
-    if(!s1_ok || !s2_ok) {
+    if(tm->state != TM_STATE_WAIT_TRAJ && (!s1_empty || !s2_empty)) {
         return -1; // no more empty slots
     }
 
@@ -187,7 +187,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
                         // switch to next element's segment
                         dt = t - s_next->seg_start_date;
                         if(dt >= 0) {
-                            tm->curr_element++;
+                            tm->curr_element = (tm->curr_element + 1)%(TRAJ_MAX_SLOTS<<1);
 
                             quit = 0; // one more loop
                         }
@@ -202,7 +202,7 @@ int trajmngr_update(trajectory_manager_t* tm) {
                     // switch to arc
                     dt = t - s->arc_start_date;
                     if(dt >= 0) {
-                        tm->curr_element++;
+                        tm->curr_element = (tm->curr_element + 1)%(TRAJ_MAX_SLOTS<<1);
 
                         quit = 0; // one more loop
                     }
@@ -364,13 +364,13 @@ int trajmngr_update(trajectory_manager_t* tm) {
  * Store and convert the position and heading in robot units received by "bn_received function"
  * If the robot is motionless, the goal of robot is actualized
  */
-void trajmngr_set_pos(trajectory_manager_t* tm, const sPosPayload *pos) {
+void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos) {
     if(pos->id == ELT_PRIMARY) { // Keep information for primary robot
         int x, y, theta;
 
-        x = isD2I(pos->x); // (I << SHIFT)
-        y = isD2I(pos->y); // (I << SHIFT)
-        theta = iROUND(dASHIFT*pos->theta); // (rad << (RAD_SHIFT + SHIFT))
+        x = isD2I(pos->pos.x); // (I << SHIFT)
+        y = isD2I(pos->pos.y); // (I << SHIFT)
+        theta = iROUND(dASHIFT*pos->pos.theta); // (rad << (RAD_SHIFT + SHIFT))
 
         posctlr_set_pos(&tm->ctlr, x, y, theta);
 
@@ -380,4 +380,44 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sPosPayload *pos) {
             tm->gtheta = theta;
         }
     }
+}
+
+void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
+    ps->id = ELT_PRIMARY;
+    ps->date = bn_intp_micros2s(micros()); // now
+
+    int x, y, theta;
+    posctrl_get_pos(&tm->ctlr, &x, &y, &theta);
+    ps->pos.x = I2Ds(x);
+    ps->pos.y = I2Ds(y);
+    ps->pos.theta = (double) theta / dASHIFT;
+
+    // TODO
+//    ps->pos_u
+
+    switch(tm->state){
+    default:
+    case TM_STATE_WAIT_TRAJ:
+        ps->prop_status.status = PROP_IDLE;
+        break;
+    case TM_STATE_WAIT_START:
+    case TM_STATE_FOLLOWING:
+        ps->prop_status.status = PROP_RUNNING;
+
+#ifdef ARCH_X86_LINUX
+        assert(tm->slots[tm->curr_element >> 1].state != SLOT_EMPTY);
+#endif
+
+        ps->prop_status.tid = tm->curr_tid;
+        ps->prop_status.sid = tm->slots[tm->curr_element >> 1].sid >> 1;
+        ps->prop_status.ssid = tm->slots[tm->curr_element >> 1].sid & 1;
+        ps->prop_status.sssid = tm->curr_element & 1;
+        break;
+    }
+
+    int vx, vy, oz;
+    posctrl_get_spd(&tm->ctlr, &vx, &vy, &oz);
+    ps->prop_status.spd.vx = IpP2DpSs(vx);
+    ps->prop_status.spd.vy = IpP2DpSs(vy);
+    ps->prop_status.spd.oz = oz / dASHIFT;
 }

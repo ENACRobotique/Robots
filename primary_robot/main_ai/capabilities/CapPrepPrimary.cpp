@@ -48,7 +48,7 @@ int CapPrepPrimary::loop(){
                 return -1;
             }
 
-            sendPos(pos_robot, theta_robot);            // Sending approximate initial position to the propulsion
+            sendPosPrimary(pos_robot, theta_robot);            // Sending approximate initial position to the propulsion
 
             //TODO procedure de mise en place
 

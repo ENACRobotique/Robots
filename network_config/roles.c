@@ -257,7 +257,7 @@ int role_get_msgclass(E_TYPE msgType, uint8_t srcRole, uint8_t destRole, eRoleMs
             break;
         }
         break;
-    case E_POS:
+    case E_GENERIC_POS_STATUS:
         switch(destRole){
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:

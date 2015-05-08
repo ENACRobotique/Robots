@@ -16,7 +16,7 @@ uint8_t ph_newest = 0;
 #define D_VALID(i) TD_VALID(D(i))
 #define OF(i) ((NB_PREVIOUS_POSITIONS + (i))%NB_PREVIOUS_POSITIONS)
 
-int ph_get_pos(sGenericStatus *s, sDate date){
+int ph_get_pos(sGenericPosStatus *s, sDate date){
     uint8_t before, after, next;
     sPHPos *phBefore, *phAfter;
     sPeriod periodBefore, periodAfter, periodFull;
@@ -52,37 +52,37 @@ int ph_get_pos(sGenericStatus *s, sDate date){
     // linear interpolation of positions and attitude to find new one
     s->date = TD_GET_GlUs(date);
     s->id = phBefore->s.id;
-    s->prop_status.pos.frame = FRAME_PLAYGROUND;
-    s->prop_status.pos.x = (phAfter->s.prop_status.pos.x * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos.x * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
-    s->prop_status.pos.y = (phAfter->s.prop_status.pos.y * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos.y * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    s->pos.frame = FRAME_PLAYGROUND;
+    s->pos.x = (phAfter->s.pos.x * (float)TP_GET_Us(periodBefore) + phBefore->s.pos.x * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    s->pos.y = (phAfter->s.pos.y * (float)TP_GET_Us(periodBefore) + phBefore->s.pos.y * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
     {
-        float tb = phBefore->s.prop_status.pos.theta;
-        float ta = phAfter->s.prop_status.pos.theta;
+        float tb = phBefore->s.pos.theta;
+        float ta = phAfter->s.pos.theta;
 
-        while(fabs(tb - (ta + 2.*M_PI)) < fabs(tb - ta)){
+        while(tb - ta > M_PI){
             ta += 2.*M_PI;
         }
-        while(fabs(tb - (ta - 2.*M_PI)) < fabs(tb - ta)){
+        while(tb - ta < -M_PI){
             ta -= 2.*M_PI;
         }
-        s->prop_status.pos.theta = (ta * (float)TP_GET_Us(periodBefore) + tb * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+        s->pos.theta = (ta * (float)TP_GET_Us(periodBefore) + tb * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
     }
 
-    s->prop_status.pos_u.a_var = (phAfter->s.prop_status.pos_u.a_var * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos_u.a_var * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
-    s->prop_status.pos_u.b_var = (phAfter->s.prop_status.pos_u.b_var * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos_u.b_var * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    s->pos_u.a_var = (phAfter->s.pos_u.a_var * (float)TP_GET_Us(periodBefore) + phBefore->s.pos_u.a_var * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    s->pos_u.b_var = (phAfter->s.pos_u.b_var * (float)TP_GET_Us(periodBefore) + phBefore->s.pos_u.b_var * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
     {
-        float tb = phBefore->s.prop_status.pos_u.a_angle;
-        float ta = phAfter->s.prop_status.pos_u.a_angle;
+        float tb = phBefore->s.pos_u.a_angle;
+        float ta = phAfter->s.pos_u.a_angle;
 
-        while(fabs(tb - (ta + 2.*M_PI)) < fabs(tb - ta)){
+        while(tb - ta > M_PI){
             ta += 2.*M_PI;
         }
-        while(fabs(tb - (ta - 2.*M_PI)) < fabs(tb - ta)){
+        while(tb - ta < -M_PI){
             ta -= 2.*M_PI;
         }
-        s->prop_status.pos_u.a_angle = (ta * (float)TP_GET_Us(periodBefore) + tb * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+        s->pos_u.a_angle = (ta * (float)TP_GET_Us(periodBefore) + tb * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
     }
-    s->prop_status.pos_u.theta = (phAfter->s.prop_status.pos_u.theta * (float)TP_GET_Us(periodBefore) + phBefore->s.prop_status.pos_u.theta * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    s->pos_u.theta = (phAfter->s.pos_u.theta * (float)TP_GET_Us(periodBefore) + phBefore->s.pos_u.theta * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
 
     return 0;
 }

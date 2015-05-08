@@ -67,10 +67,18 @@
 #define iRpS2IpP(o) iROUND(RpS2IpP(o))  // (IpP)
 #define isRpS2IpP(o) isROUND(RpS2IpP(o)) // (IpP<<SHIFT)
 
+// increments per sampling period to revolution per second
+#define IpP2RpS(o) ((o)/IpR/SpP)
+#define IpP2RpSs(os) IpP2RpS((o)/dSHIFT)
+
 // centimeters per second to increments per sampling period
 #define DpS2IpP(o) RpS2IpP((o)/DpR)
 #define iDpS2IpP(o) iROUND(DpS2IpP(o))  // (IpP)
 #define isDpS2IpP(o) isROUND(DpS2IpP(o))  // (IpP<<SHIFT)
+
+// increments per sampling period to centimeters per second
+#define IpP2DpS(o) (IpP2RpS(o)*DpR)
+#define IpP2DpSs(os) (IpP2DpS((os)/dSHIFT))
 
 // centimeters to increments
 #define D2I(d) ((d)*IpR/DpR) // (265.982871309 increments per centimeter)
@@ -88,7 +96,7 @@
 #define isR2I(R) isROUND(R2I(R)) // (I<<SHIFT)
 
 // LPC parameters
-#define PWM_RANGE 1024  // If you want to change the resolution of the motor command, just don't change this value, you're doing it wrong...
+#define PWM_RANGE 1024  // If you want to change the resolution/range of the motor command, just don't change this value, you're doing it wrong...
 
 // Parameters for control loops
 #define SPEED_NOMI 20 // in cm/s

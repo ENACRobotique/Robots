@@ -114,8 +114,8 @@ int main() {
             case E_TRAJ_ORIENT_EL: // Get the new step of a trajectory
                 trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
-            case E_POS:
-                trajmngr_set_pos(&traj_mngr, &inMsg.payload.pos);
+            case E_GENERIC_POS_STATUS:
+                trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
                 break;
             }
         } // End: if(ret > 0)
@@ -136,23 +136,16 @@ int main() {
         }
 
         time_ms = millis();
+        // Periodic position send
         if (time_ms - prevPos_ms >= 100) {
             prevPos_ms = time_ms;
 
-            // FIXME todo
-//            outMsg.header.type = E_GENERIC_STATUS;
-//            outMsg.header.size = sizeof(outMsg.payload.genericStatus);
-//            trajmngr_fill_pos(&traj_mngr, &outMsg.payload.genericStatus);
+            memset(&outMsg, 0, sizeof(outMsg));
 
-            {
-                //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
-                outMsg.header.type = E_POS;
-                outMsg.header.size = sizeof(outMsg.payload.pos);
-                outMsg.payload.pos.id = ELT_PRIMARY; // main robot
-                outMsg.payload.pos.x = I2Ds(traj_mngr.ctlr.x);
-                outMsg.payload.pos.y = I2Ds(traj_mngr.ctlr.y);
-                outMsg.payload.pos.theta = (double) traj_mngr.ctlr.theta / dASHIFT;
-            }
+            outMsg.header.type = E_GENERIC_POS_STATUS;
+            outMsg.header.size = sizeof(outMsg.payload.genericPosStatus);
+
+            trajmngr_get_pos_status(&traj_mngr, &outMsg.payload.genericPosStatus);
 
             role_send(&outMsg, ROLEMSG_PRIM_POS);
         }

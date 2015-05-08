@@ -18,7 +18,7 @@ void pl_init(sPosList *pl, int maxlen){
     pl->curr = NULL;
 }
 
-int pl_addTail(sPosList *pl, sPosPayload *p){
+int pl_addTail(sPosList *pl, sGenericPosStatus *p){
     sPosLEl *el;
     assert(pl);
 
