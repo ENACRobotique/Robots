@@ -26,6 +26,7 @@ class DropCup : public Obj{
             _state = WAIT_MES;
 
             objEP.type = E_CIRCLE;
+            objEP.delta = 0;
             if(color == YELLOW)
                 objEP.cir.c = {listEP[num].x, listEP[num].y};
             else

@@ -31,6 +31,7 @@ Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType
 
     sObjEntry_t objEP;
     objEP.type = E_CIRCLE;
+    objEP.delta = 0;
     objEP.cir.c = {obs[_num_obs.back()].c.x, obs[_num_obs.back()].c.y};
     objEP.cir.r = 5. + R_ROBOT;
 

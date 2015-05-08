@@ -84,11 +84,10 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
         switch(_access[i].type){
             case E_POINT :
                 obs[obs.size() - 1].c = {_access[i].pt.p.x, _access[i].pt.p.y};
-                if(axle)
-                    updateEndTraj(_access[i].pt.angle, &_access[i].pt.p, _access[i].radius, obs);
-                    p = {obs[robot].c.x,obs[robot].c.y};
-                    p = projectPointInObs(p, obs);
-                    obs[robot].c = {p.x, p.y};
+                updateEndTraj(_access[i].pt.angle, &_access[i].pt.p, _access[i].radius, obs);
+                p = {obs[robot].c.x,obs[robot].c.y};
+                p = projectPointInObs(p, obs);
+                obs[robot].c = {p.x, p.y};
                 break;
             case E_CIRCLE:
                 obs[obs.size() - 1].c = {_access[i].cir.c.x, _access[i].cir.c.y};
@@ -174,7 +173,8 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                 _access_select_angle = _access[i].pt.angle + M_PI; //M_PI because reference inverse
                 _dist = path_loc.dist;
             }
-
+            _access_select_angle += _access[i].delta;
+            _access_select_angle = fmod(_access_select_angle, 2*M_PI);
             _access_select = _path.path[_path.path_len - 1].p2;
         }
     }

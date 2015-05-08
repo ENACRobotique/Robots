@@ -29,6 +29,7 @@ Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E
 
     sObjEntry_t objEP;
     objEP.type = E_CIRCLE;
+    objEP.delta = 0;
     objEP.cir.c = {obs[_num_obs.back()].c.x, obs[_num_obs.back()].c.y};
     objEP.cir.r = 3. + R_ROBOT;
 
