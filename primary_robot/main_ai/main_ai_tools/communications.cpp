@@ -152,6 +152,21 @@ int roleSetup(bool simu_ai, bool simu_prop){
             logs << ERR << "FAILED ROLE SETUP 3: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
             return -1;
         }
+
+        msg.header.type = E_ROLE_SETUP;
+        msg.header.destAddr = ADDRI_MAIN_IO;
+        msg.payload.roleSetup.nb_steps = 1;
+        msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+        // step #0
+        msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+        msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+        msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+        ret = bn_sendAck(&msg);
+        if(ret < 0){
+            logs << ERR << "FAILED ROLE SETUP 4: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return -1;
+        }
     }
 
     return 0;
@@ -283,10 +298,10 @@ int sendSpeedPrimary(float speed) {
     msgOut.payload.speedSetPoint.speed = speed;
 
     if ((ret = bn_sendRetry(&msgOut, MAX_RETRIES)) <= 0) {
-        cerr << "[ERROR] [communication.cpp] bn_sendRetry(E_SPEED_SETPOINT) error #" << -ret << endl;
+        logs << ERR << "bn_sendRetry(E_SPEED_SETPOINT) error #" << -ret;
         return -2;
     }
-    cout << "[SEND MES] [SPEED_SETPOINT] Sending speed to primary robot (" << msgOut.payload.speedSetPoint.speed << ")" << endl;
+    logs << MES << "Sending speed to primary robot (" << msgOut.payload.speedSetPoint.speed << ")";
 
     return 1;
 }
@@ -300,13 +315,13 @@ void checkInbox(int /*verbose*/){
     int ret;
 
     if((ret = bn_receive(&msgIn)) < 0){ //get the message
-        cerr << "[ERROR] [communication.cpp] bn_receive() error #" << -ret << endl;
+        logs << ERR << "bn_receive() error #" << -ret;
         return;
     }else if( ret == 0) //no message
         return;
 
     if ((ret = role_relay(&msgIn)) < 0 ) { // relay the message
-        cerr << "[ERROR] [communication.cpp] role_relay() error #" << -ret << endl;
+        logs << ERR << "role_relay() error #" << -ret;
     }
 
     // print message
@@ -315,7 +330,7 @@ void checkInbox(int /*verbose*/){
     // processing of the message
     switch (msgIn.header.type) {
         case E_DEBUG:
-            cout << "[DEBUG]" << msgIn.payload.debug << endl;
+            logs << MES << "[DEBUG]" << msgIn.payload.debug;
             break;
         case E_GENERIC_POS_STATUS:
             logs << MES_V(E_V3) << "[GENERIC_POS_STATUS] robot" << msgIn.payload.genericPosStatus.id << "@(" << msgIn.payload.genericPosStatus.pos.x << ", " << msgIn.payload.genericPosStatus.pos.y << ", " << msgIn.payload.genericPosStatus.pos.theta * 180. / M_PI << ")";
@@ -323,24 +338,22 @@ void checkInbox(int /*verbose*/){
             statuses.receivedNewStatus(msgIn.payload.genericPosStatus);
             break;
         case E_GOAL:
-            cout << "[GOAL] robot" << msgIn.payload.genericPosStatus.id << "@(" << msgIn.payload.genericPosStatus.pos.x << ", " << msgIn.payload.genericPosStatus.pos.y << ", " << msgIn.payload.genericPosStatus.pos.theta * 180. / M_PI << ")" << endl;
+            logs << MES << "[GOAL] robot" << msgIn.payload.genericPosStatus.id << "@(" << msgIn.payload.genericPosStatus.pos.x << ", " << msgIn.payload.genericPosStatus.pos.y << ", " << msgIn.payload.genericPosStatus.pos.theta * 180. / M_PI << ")";
 
             goal.x = msgIn.payload.genericPosStatus.pos.x;
             goal.y = msgIn.payload.genericPosStatus.pos.y;
             lastGoal(goal, false);
             break;
         case E_OBS_CFG:
-            cout << "[OBS_CFS]" << endl;
+            logs << MES << "[OBS_CFS] receive";
 
             askObsCfg(false);
             break;
         case E_IHM_STATUS:
-            cout << "[IHM_STATUS] ";
-
             ihm.receivedNewIhm(msgIn.payload.ihmStatus);
             break;
         default:
-            cout << "[WARNING] message type not define or doesn't exist : " << eType2str((E_TYPE)msgIn.header.type) << endl;
+            logs << WAR << "message type not define or doesn't exist : " << eType2str((E_TYPE)msgIn.header.type);
     }
 }
 
@@ -354,7 +367,7 @@ bool lastGoal(Point2D<float>& goal, bool get){
     static bool new_goal = false;
 
     if(!get){
-        cout << "[INFO] Save new goal" << endl;
+        logs << INFO << "Save new goal";
         pt = goal;
         new_goal = true;
         return true;
