@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "messages-elements.h"
 #include "messages-position.h"
-#include <shared/message_header.h>
+#include "message_header.h"
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
