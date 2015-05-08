@@ -58,12 +58,13 @@ int CapPrepPrimary::loop(){
         break;
 
     case Step::WAIT_STARTING_CORD: //Wait to take in the starting cord
-        if(capIO->getHMI(IHM_STARTING_CORD) == CORD_IN)
+        if(capIO->getHMI(IHM_STARTING_CORD) == CORD_IN){
             if(CapAI* capAI = dynamic_cast<CapAI*> (robot->caps[eCap::AI]))
                 capAI->initObjective();
 
             logs << INFO << "End step wait starting cord";
             _step = Step::WAIT_START;
+        }
         break;
 
     case Step::WAIT_START: //Wait the start (take off the starting cord)

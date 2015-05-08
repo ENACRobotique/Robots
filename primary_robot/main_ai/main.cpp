@@ -58,6 +58,7 @@ int main(int argc, char **argv) {
     eAIState_t eAIState = E_AI_SLAVE;
     bool simu_primary = true;
     bool holo_primary = true;
+    bool hmi_simu_primary = false;
     eColor_t color_primary = GREEN;
 
 
@@ -151,7 +152,7 @@ int main(int argc, char **argv) {
 
     Env2015::setup();
 
-    setupRobots(simu_primary, holo_primary, true /*hmi simu*/, color_primary, eAIState);
+    setupRobots(simu_primary, holo_primary, hmi_simu_primary, color_primary, eAIState);
 
     ret = 1;
 

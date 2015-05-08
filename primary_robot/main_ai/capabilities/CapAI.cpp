@@ -103,6 +103,8 @@ int CapAI::loop(){
 void CapAI::initObjective(){
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
 
+    logs << INFO << "InitOjective for AI";
+
     if(capTeam->getColor() == YELLOW){
         listObj.push_back(new Clap(0));
         listObj.push_back(new Clap(2));
