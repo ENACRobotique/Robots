@@ -75,6 +75,7 @@ void setup(){
     digitalWrite(PIN_LED_RED, LOW);
     digitalWrite(PIN_LED_GREEN, LOW);
 
+    bn_attach(E_ROLE_SETUP, role_setup);
     bn_init();
 
     // do not call init because I²C has already been initialized in bn_init

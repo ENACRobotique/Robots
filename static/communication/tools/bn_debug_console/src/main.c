@@ -289,12 +289,26 @@ int main(int argc, char **argv){
                     else{
                         printf("OK!\n");
                     }
-		case 'v':
-                    verbose++;
-                    break;
-                case 'V':
-                    verbose--;
-                    verbose=(verbose<0?0:verbose);
+
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+                    printf("Sending RoleSetup message to ADDRI_MAIN_IO... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+
+
                     break;
                 }
                 case 'h':{
@@ -308,7 +322,13 @@ int main(int argc, char **argv){
                     }
                     break;
                 }
-
+                case 'v':
+                    verbose++;
+                    break;
+                case 'V':
+                    verbose--;
+                    verbose=(verbose<0?0:verbose);
+                    break;
                 case 'f':{
                     sMsg msg = {{0}};
                     sRGB color1, color2;
