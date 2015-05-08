@@ -60,8 +60,8 @@ Servo::~Servo() {
 //    msg.payload.servos.servos[0].us = us;
 //
 //    bn_sendRetry(&msg, MAX_RETRIES_SERVO);
-
-int Servo::sendPosServo(eServos s, float angle /* deg */) {
+/*
+int Servo::sendPosServo(eServos s, float angle / deg /) {
     sMsg msg;
 
     msg.header.destAddr = ADDRI_MAIN_IO;
@@ -74,3 +74,4 @@ int Servo::sendPosServo(eServos s, float angle /* deg */) {
     bn_sendRetry(&msg, MAX_RETRIES_SERVO);
     return 1;
 }
+*/
