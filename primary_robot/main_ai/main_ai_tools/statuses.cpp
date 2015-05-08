@@ -54,6 +54,8 @@ int Statuses::receivedNewStatus(sGenericStatus &status){
     }
     logs << INFO_V(E_V3) << "New status : " << status.pos.x << ", " << status.pos.y << ", " << status.pos.theta * 180 / M_PI;
 
+    //TODO Adds security if position incoherent
+
     _list[status.id].push_back(status); //TODO sort by date
 
     if(status.id == ELT_PRIMARY)
@@ -83,7 +85,10 @@ sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
 Point2D<float> Statuses::getLastPosXY(eElement el){
     sGenericStatus& status = getLastStatus(el);
 
-    return {status.pos.x, status.pos.y};
+    if(status.date)
+        return {status.pos.x, status.pos.y};
+
+    return {0,0};
 }
 
 float Statuses::getLastOrient(eElement el){
