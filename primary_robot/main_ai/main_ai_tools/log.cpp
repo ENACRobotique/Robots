@@ -56,6 +56,13 @@ void Log::putNewMes(){
     if ((length = strlen(date)) > 0)
         date[length-1] = ' ';
 
+    cout << "\033[0m";
+
+    if(_type == E_ERR)
+        cout << "\033[31m";
+    else if(_type == E_WAR)
+        cout << "\033[33m";
+
     _file << endl << date;
     if(term()){
         if(_pos)
