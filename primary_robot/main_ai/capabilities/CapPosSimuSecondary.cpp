@@ -19,7 +19,11 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
     static bool first = true;
     static unsigned int state = 0;
     static unsigned int lastTime = 0;
+    static unsigned int lastTime2 = 0;
     static unsigned int startTime = 0;
+    static unsigned int waitTime = 0;
+    static unsigned int diffTime = 0;
+    static bool wait = false;
     static Point2D<float> pos;
     static Vector2D<float> spd;
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
@@ -36,9 +40,22 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
             first = false;
         }
 
-        unsigned int time = millis();
+        unsigned int time = millis() - diffTime;
 
-        if( time - startTime > START_DELAY){
+        if(colissionDetection(robot->el, robot->env->obs)){
+            if(!wait){
+                wait = true;
+                waitTime = millis();
+            }
+            lastTime2 = millis();
+        }
+        else if(wait){
+            if(millis() - lastTime2 > RESTART_DELAY){
+                wait = false;
+                diffTime += millis() - waitTime;
+            }
+        }
+        else if(time - startTime > START_DELAY){
             if(update) {
                 pos = trjS[state];
                 float theta, ctheta, stheta;
@@ -56,7 +73,7 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
                 update = true;
             }
 
-            lastTime = millis();
+            lastTime = millis() - diffTime;
         }
     }
 

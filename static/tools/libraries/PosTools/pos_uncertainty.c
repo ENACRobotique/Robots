@@ -17,7 +17,7 @@
 #define MIN(a, b) ((a)>(b)?(b):(a))
 #define CLAMP(m, v, M) MAX((m), MIN((v), (M)))
 
-void pos_uncertainty_step_update(sGenericStatus *prev, sGenericStatus *next){
+void pos_uncertainty_step_update(sGenericPosStatus *prev, sGenericPosStatus *next){
     // TODO
 }
 
@@ -57,24 +57,23 @@ void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
     *an = asinf(CLAMP(-1., sin_2a, 1.))/2;
 }
 
-void gstatus2internal(sGenericStatus *i, s2DPUncert_internal *o){
+void gstatus2internal(sGenericPosStatus *i, s2DPUncert_internal *o){
     varxya2abc(i->pos_u.a_var, i->pos_u.b_var, cosf(i->pos_u.a_angle), sinf(i->pos_u.a_angle), o);
     o->x = i->pos.x;
     o->y = i->pos.y;
 }
 
-void internal2gstatus(s2DPUncert_internal *i, sGenericStatus *o){
+void internal2gstatus(s2DPUncert_internal *i, sGenericPosStatus *o){
     abc2varxya(i, &o->pos_u.a_var, &o->pos_u.b_var, &o->pos_u.a_angle);
     o->pos.x = i->x;
     o->pos.y = i->y;
 }
 
-void pos_uncertainty_mix(sGenericStatus *i1, sGenericStatus *i2, sGenericStatus *o){
+void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o){
     s2DPUncert_internal pg, mn, nw;
 
     // necessary verifications
     assert(i1 && i2 && o);
-    assert(elementHasPosition(i1->id));
     assert(i1->pos.frame == FRAME_PLAYGROUND);
     assert(i1->pos.frame == i2->pos.frame);
     assert(i1->id == i2->id);

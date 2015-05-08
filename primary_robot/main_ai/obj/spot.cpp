@@ -29,6 +29,7 @@ Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E
 
     sObjEntry_t objEP;
     objEP.type = E_CIRCLE;
+    objEP.delta = 0;
     objEP.cir.c = {obs[_num_obs.back()].c.x, obs[_num_obs.back()].c.y};
     objEP.cir.r = 3. + R_ROBOT;
 
@@ -40,7 +41,7 @@ Spot::~Spot() {
     // TODO Auto-generated destructor stub
 }
 
-int Spot::loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>&, std::vector<Actuator>&){
+int Spot::loopObj(const float&, std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>&, std::vector<Actuator>&){
     _state = FINISH;
     return 0;
 };

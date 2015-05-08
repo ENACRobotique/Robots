@@ -42,6 +42,7 @@ typedef struct {
     int x, y; // (in I << SHIFT)
     int theta; // (in R << (RAD_SHIFT + SHIFT))
     int cos_theta, sin_theta; // (in <<SHIFT)
+    int vx, vy, oz; // (in IpP << SHIFT  or  RpP << (RAD_SHIFT + SHIFT))
 
     // PID
     PID_t pid_xtraj;
@@ -66,6 +67,8 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
 void posctlr_begin_update(position_controller_t* tc);
 void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp);
 void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta);
+void posctrl_get_pos(position_controller_t* tc, int *x, int *y, int *theta);
+void posctrl_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz);
 void posctlr_reset(position_controller_t* tc);
 
 #endif /* POSITION_CONTROLLER_H_ */

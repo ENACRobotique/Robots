@@ -20,8 +20,8 @@ void sendPing();
 int roleSetup(bool simu_ai, bool simu_prop);
 void sendObsCfg(const int n, const int rRobot, const int xMin, const int xMax, const int yMin, const int yMax);
 void sendObss(vector<astar::sObs_t>& obs, vector<uint8_t>& obs_updated);
-int sendPos(Point2D<float>& p, float theta);
-int sendSpeed(float speed);
+int sendPosPrimary(Point2D<float>& p, float theta);
+int sendSpeedPrimary(float speed);
 
 //Receive message
 void checkInbox(int verbose);

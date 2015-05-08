@@ -21,6 +21,9 @@ class CapPosStatuses : public CapPosition{
         virtual Point2D<float> getLastPosXY(){
             return statuses.getLastPosXY(robot->el);
         }
+        virtual float getLastTheta(){
+            return statuses.getLastOrient(robot->el);
+        }
 };
 
 #endif /* CAP_POS_STATUSES_H_ */

@@ -64,6 +64,17 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
 
     _dist = -1;
     Point2D<float> p = projectPointInObs(posRobot, obs);
+
+    if(checkPointInObs(p, obs)){ //Robot is block
+        for(unsigned int i = 4 ; i < obs.size() - 1 ; i++){
+            if(obs[i].active && obs[i].moved){
+                logs << DEBUG << "Disable obstacle number 2 : " << i;
+                list.push_back(i);
+                obs[i].active = 0;
+            }
+        }
+    }
+
     obs[robot].c = {p.x, p.y};
 
     for (unsigned int i = 0 ; i < _access.size(); i++) {
@@ -73,11 +84,10 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
         switch(_access[i].type){
             case E_POINT :
                 obs[obs.size() - 1].c = {_access[i].pt.p.x, _access[i].pt.p.y};
-                if(axle)
-                    updateEndTraj(_access[i].pt.angle, &_access[i].pt.p, _access[i].radius, obs);
-                    p = {obs[robot].c.x,obs[robot].c.y};
-                    p = projectPointInObs(p, obs);
-                    obs[robot].c = {p.x, p.y};
+                updateEndTraj(_access[i].pt.angle, &_access[i].pt.p, _access[i].radius, obs);
+                p = {obs[robot].c.x,obs[robot].c.y};
+                p = projectPointInObs(p, obs);
+                obs[robot].c = {p.x, p.y};
                 break;
             case E_CIRCLE:
                 obs[obs.size() - 1].c = {_access[i].cir.c.x, _access[i].cir.c.y};
@@ -120,11 +130,11 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
         astar::fill_tgts_lnk(obs);
         a_star(A(robot), A(N-1), &path_loc);
 
-        if(_access[i].type == E_CIRCLE){
-            for(int i : list){
-                obs[i].active = 1;
-            }
+
+        for(int i : list){
+            obs[i].active = 1;
         }
+
 
         for(unsigned int j : _num_obs){ // Reactivation obstacle
             obs[j].active = 1;
@@ -149,7 +159,7 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                     Point2D<float> pt = _path.path[_path.path_len - 1].p1;
                     Circle2D<float> cir(_access[i].cir.c.x, _access[i].cir.c.y, _access[i].cir.r);
 
-                    pt = cir.projecteSup(pt, 0.1);
+                    pt = cir.projectSup(pt, 0.1);
                     if(checkPointInObs(pt, obs)){
                         continue;
                     }
@@ -163,8 +173,8 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                 _access_select_angle = _access[i].pt.angle + M_PI; //M_PI because reference inverse
                 _dist = path_loc.dist;
             }
-
-            _actuator_select = i;
+            _access_select_angle += _access[i].delta;
+            _access_select_angle = fmod(_access_select_angle, 2*M_PI);
             _access_select = _path.path[_path.path_len - 1].p2;
         }
     }

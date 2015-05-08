@@ -204,23 +204,23 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 
                     // Header
                     msg_out.header.destAddr = role_get_addr(ROLE_PRIM_AI);
-                    msg_out.header.type = E_GENERIC_STATUS;
-                    msg_out.header.size = sizeof(sGenericStatus);
+                    msg_out.header.type = E_GENERIC_POS_STATUS;
+                    msg_out.header.size = sizeof(msg_out.payload.genericPosStatus);
 
                     // Payload
-                    msg_out.payload.genericStatus.date = micros2s(buffer[last_date_idx].date);
-                    msg_out.payload.genericStatus.id = ELT_PRIMARY;
-                    msg_out.payload.genericStatus.pos.x = x0.x*100.;
-                    msg_out.payload.genericStatus.pos.y = x0.y*100.;
-                    msg_out.payload.genericStatus.pos.frame = FRAME_PLAYGROUND;
-                    msg_out.payload.genericStatus.pos_u.a_var = 0.;
-                    msg_out.payload.genericStatus.pos_u.b_var = 0.;
-                    msg_out.payload.genericStatus.pos_u.a_angle = 0.;
-                    msg_out.payload.genericStatus.pos_u.theta = -1.;
+                    msg_out.payload.genericPosStatus.date = micros2s(buffer[last_date_idx].date);
+                    msg_out.payload.genericPosStatus.id = ELT_PRIMARY;
+                    msg_out.payload.genericPosStatus.pos.x = x0.x*100.;
+                    msg_out.payload.genericPosStatus.pos.y = x0.y*100.;
+                    msg_out.payload.genericPosStatus.pos.frame = FRAME_PLAYGROUND;
+                    msg_out.payload.genericPosStatus.pos_u.a_var = 0.;
+                    msg_out.payload.genericPosStatus.pos_u.b_var = 0.;
+                    msg_out.payload.genericPosStatus.pos_u.a_angle = 0.;
+                    msg_out.payload.genericPosStatus.pos_u.theta = -1.;
 
                     //					bn_send(&msg_out);
 #ifdef DEBUG_POS
-                    bn_printfDbg("date %lu, x: %d, y: %d\n",msg_out.payload.genericStatus.date,(int)(x0.x*100.),(int)(x0.y*100.));
+                    bn_printfDbg("date %lu, x: %d, y: %d\n",msg_out.payload.genericPosStatus.date,(int)(x0.x*100.),(int)(x0.y*100.));
 #endif
                 }else{
                     LastPos[0] = LastPos[1];
@@ -282,23 +282,23 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
 
                     // Header
                     msg_out.header.destAddr = role_get_addr(ROLE_PRIM_AI);
-                    msg_out.header.type = E_GENERIC_STATUS;
-                    msg_out.header.size = sizeof(sGenericStatus);
+                    msg_out.header.type = E_GENERIC_POS_STATUS;
+                    msg_out.header.size = sizeof(sGenericPosStatus);
 
                     // Payload
-                    msg_out.payload.genericStatus.date = micros2s(buffer[last_date_idx].date);
-                    msg_out.payload.genericStatus.id = ELT_PRIMARY;
-                    msg_out.payload.genericStatus.pos.x = x0.x*100.;
-                    msg_out.payload.genericStatus.pos.y = x0.y*100.;
-                    msg_out.payload.genericStatus.pos.frame = FRAME_PLAYGROUND;
-                    msg_out.payload.genericStatus.pos_u.a_var = 0.;
-                    msg_out.payload.genericStatus.pos_u.b_var = 0.;
-                    msg_out.payload.genericStatus.pos_u.a_angle = 0.;
-                    msg_out.payload.genericStatus.pos_u.theta = -1.;
+                    msg_out.payload.genericPosStatus.date = micros2s(buffer[last_date_idx].date);
+                    msg_out.payload.genericPosStatus.id = ELT_PRIMARY;
+                    msg_out.payload.genericPosStatus.pos.x = x0.x*100.;
+                    msg_out.payload.genericPosStatus.pos.y = x0.y*100.;
+                    msg_out.payload.genericPosStatus.pos.frame = FRAME_PLAYGROUND;
+                    msg_out.payload.genericPosStatus.pos_u.a_var = 0.;
+                    msg_out.payload.genericPosStatus.pos_u.b_var = 0.;
+                    msg_out.payload.genericPosStatus.pos_u.a_angle = 0.;
+                    msg_out.payload.genericPosStatus.pos_u.theta = -1.;
 
                     //                  bn_send(&msg_out);
 #ifdef DEBUG_POS
-bn_printfDbg("date2B %lu, x: %d, y: %d\n",msg_out.payload.genericStatus.date,(int)(x0.x*100.),(int)(x0.y*100.));
+bn_printfDbg("date2B %lu, x: %d, y: %d\n",msg_out.payload.genericPosStatus.date,(int)(x0.x*100.),(int)(x0.y*100.));
 #endif
                 }else{
                     LastPos[0] = LastPos[1];

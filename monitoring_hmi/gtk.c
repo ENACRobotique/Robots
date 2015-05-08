@@ -87,7 +87,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         }
 
         if(ctx->verbose >= 1){
-            if(inMsg.header.type != E_POS)
+            if(inMsg.header.type != E_GENERIC_POS_STATUS)
             printf("message received from %s (%03hx), type : %s (%hhu)\n", role_string(role_get_role(inMsg.header.srcAddr)), inMsg.header.srcAddr, eType2str(inMsg.header.type), inMsg.header.type);
         }
 
@@ -177,14 +177,14 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             update_media = 1;
             break;
-        case E_POS:{
+        case E_GENERIC_POS_STATUS:{
             if(ctx->verbose >= 2){
-                printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.pos.id, inMsg.payload.pos.x, inMsg.payload.pos.y, inMsg.payload.pos.theta*180./M_PI);
+                printf("  robot%hhu@(%fcm,%fcm,%f°)\n", inMsg.payload.genericPosStatus.id, inMsg.payload.genericPosStatus.pos.x, inMsg.payload.genericPosStatus.pos.y, inMsg.payload.genericPosStatus.pos.theta*180./M_PI);
             }
 
-            curr_x = inMsg.payload.pos.x;
-            curr_y = inMsg.payload.pos.y;
-            curr_theta = inMsg.payload.pos.theta;
+            curr_x = inMsg.payload.genericPosStatus.pos.x;
+            curr_y = inMsg.payload.genericPosStatus.pos.y;
+            curr_theta = inMsg.payload.genericPosStatus.pos.theta;
 
             // updates list of obstacles
             if(obss){
@@ -195,17 +195,20 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             }
 
             // adds position to list of positions to draw
-            pl_addTail(&ctx->poslist, &inMsg.payload.pos);
+            pl_addTail(&ctx->poslist, &inMsg.payload.genericPosStatus);
 
             // send trajectory if event
             if(ctx->mouse_event){
+                memset(&outMsg, 0, sizeof(outMsg));
+
                 outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
                 outMsg.header.type = E_GOAL;
-                outMsg.header.size = sizeof(outMsg.payload.pos);
+                outMsg.header.size = sizeof(outMsg.payload.genericPosStatus);
 
-                outMsg.payload.pos.id = 0; // main
-                outMsg.payload.pos.x = X_PX2CM(ctx->mouse_x);
-                outMsg.payload.pos.y = Y_PX2CM(ctx->mouse_y);
+                outMsg.payload.genericPosStatus.id = ELT_PRIMARY; // main
+                outMsg.payload.genericPosStatus.pos.x = X_PX2CM(ctx->mouse_x);
+                outMsg.payload.genericPosStatus.pos.y = Y_PX2CM(ctx->mouse_y);
+                outMsg.payload.genericPosStatus.pos.theta = 0;
 
                 ret = bn_sendAck(&outMsg);
                 if(ret <= 0){
@@ -429,8 +432,8 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         // draw previous positions
         r = CM2PX(3.);
         for(i = 0, pel = pl_getFirst(&ctx->poslist); pel && pel->next; i++, pel = pl_getNext(&ctx->poslist)){
-            x = X_CM2PX(pel->pos.x);
-            y = Y_CM2PX(pel->pos.y);
+            x = X_CM2PX(pel->pos.pos.x);
+            y = Y_CM2PX(pel->pos.pos.y);
 
             video_draw_pixel(ctx->pos_data[ctx->pos_cur], ROWSTRIDE(), HEIGHT(), x, y, BLUE(255), 255*(i + ctx->poslist.maxlen - ctx->poslist.len)/ctx->poslist.maxlen);
             video_draw_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, BLUE(255), 255*(i + ctx->poslist.maxlen - ctx->poslist.len)/ctx->poslist.maxlen);

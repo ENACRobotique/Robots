@@ -16,6 +16,7 @@
 
 #define SPEED_SECONDARY 10      // (cm/s)
 #define START_DELAY     1000    // (ms)
+#define RESTART_DELAY   1000    // (ms)
 
 class CapPosSimuSecondary : public CapPosition{
     public:
@@ -25,6 +26,9 @@ class CapPosSimuSecondary : public CapPosition{
         virtual ~CapPosSimuSecondary(){}
 
         virtual Point2D<float> getLastPosXY();
+        virtual float getLastTheta(){
+            return 0;
+        }
 };
 
 #endif /* CAP_POS_SIMU_SECONDARY_H_ */

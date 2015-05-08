@@ -68,10 +68,10 @@ int main(int argc, char *argv[]){
             case E_TRAJ:
                 new_traj_el(&inMsg.payload.traj);
                 break;
-            case E_POS:
+            case E_GENERIC_POS_STATUS:
                 bn_printDbg("got pos");
 
-                new_pos(&inMsg.payload.pos);
+                new_pos(&inMsg.payload.genericPosStatus);
                 break;
             case E_TRAJ_ORIENT_EL:
                 new_traj_orient_el(&inMsg.payload.trajOrientEl);
@@ -79,10 +79,10 @@ int main(int argc, char *argv[]){
             case E_POS_QUERY:
                 if(inMsg.payload.posQuery.id == ELT_PRIMARY){
                     outMsg.header.destAddr = inMsg.header.srcAddr;
-                    outMsg.header.size = sizeof(outMsg.payload.genericStatus);
-                    outMsg.header.type = E_GENERIC_STATUS;
+                    outMsg.header.size = sizeof(outMsg.payload.genericPosStatus);
+                    outMsg.header.type = E_GENERIC_POS_STATUS;
 
-                    if(!ph_get_pos(&outMsg.payload.genericStatus, tD_newFrom_GlUs(inMsg.payload.posQuery.date))){
+                    if(!ph_get_pos(&outMsg.payload.genericPosStatus, tD_newFrom_GlUs(inMsg.payload.posQuery.date))){
                         bn_send(&outMsg);
                     }
                 }
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]){
                 unsigned int p_t; // local time (µs)
                 sPHPos *slot = ph_get_new_slot_pointer();
 
-                get_pos(&slot->s.prop_status.pos, &slot->s.prop_status.pos_u, &p_t);
+                get_pos(&slot->s.pos, &slot->s.pos_u, &p_t);
 
                 slot->s.date = bn_intp_micros2s(p_t); // global time
                 slot->s.id = ELT_PRIMARY;

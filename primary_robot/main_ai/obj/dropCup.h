@@ -26,6 +26,7 @@ class DropCup : public Obj{
             _state = WAIT_MES;
 
             objEP.type = E_CIRCLE;
+            objEP.delta = 0;
             if(color == YELLOW)
                 objEP.cir.c = {listEP[num].x, listEP[num].y};
             else
@@ -40,20 +41,23 @@ class DropCup : public Obj{
         void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) override {
 
         }
-        int loopObj(std::vector<astar::sObs_t>& listObs, std::vector<uint8_t>& obsUpdated, vector<Obj*>& listObj, std::vector<Actuator>& actuator) override{
+        int loopObj(const float& angleRobot, std::vector<astar::sObs_t>& listObs, std::vector<uint8_t>& obsUpdated, vector<Obj*>& listObj, std::vector<Actuator>& actuator) override{
             unsigned int i;
+            Point2D<float> posActuator, posRobot(listObs[0].c.x, listObs[0].c.y);
 
             for(Actuator& i : actuator){
                 if(i.type == ActuatorType::CUP && i.id == _actuator_select){
                     i.full = false;
                     i.cupActuator.distributor = false;
+                    posActuator = posRobot.tranform(i.angle + angleRobot, i.pos);
+                    break;
                 }
             }
 
             for(i = START_CUP ; i < START_CUP + 5 ; i++){
                 if(!listObs[i].active){
                     listObs[i].active = 1;
-                    listObs[i].c = {_access[0].cir.c.x, _access[0].cir.c.y};
+                    listObs[i].c = {posActuator.x, posActuator.y};
                     listObs[i].r = 5 + R_ROBOT;
                     obsUpdated[i]++;
                     break;

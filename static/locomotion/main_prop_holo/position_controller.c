@@ -66,7 +66,7 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
     mf_init(&tc->mf_orien, 10);
 }
 
-void _update_pos_orien(position_controller_t* tc, MT_VEC *spd_pv_rob);
+void _update_pos_spd(position_controller_t* tc, MT_VEC *spd_pv_rob);
 
 void posctlr_begin_update(position_controller_t* tc) {
     int i;
@@ -91,7 +91,7 @@ void posctlr_begin_update(position_controller_t* tc) {
 
     // Compute new position and orientation from
     // (Vx_pv, Vy_pv, Oz_pv, x, y, o) => (x, y, o)
-    _update_pos_orien(tc, &spd_pv_rob);
+    _update_pos_spd(tc, &spd_pv_rob);
 }
 
 void _linear_control(position_controller_t* tc, int x_sp, int y_sp, int vx_sp, int vy_sp, MT_VEC* spd_cmd_rob);
@@ -123,18 +123,34 @@ void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta) {
     tc->x = x;
     tc->y = y;
     tc->theta = theta;
+    tc->vx = 0;
+    tc->vy = 0;
+    tc->oz = 0;
+}
+
+void posctrl_get_pos(position_controller_t* tc, int *x, int *y, int *theta) {
+    *x = tc->x;
+    *y = tc->y;
+    *theta = tc->theta;
+}
+
+void posctrl_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz) {
+    *vx = tc->vx;
+    *vy = tc->vy;
+    *oz = tc->oz;
 }
 
 void posctlr_reset(position_controller_t* tc) {
     encoders_reset(tc->encs);
 }
 
-void _update_pos_orien(position_controller_t* tc, MT_VEC* spd_pv_rob) {
+void _update_pos_spd(position_controller_t* tc, MT_VEC* spd_pv_rob) {
     // spd_pv_rob->ve[0..1] expressed in IpP << SHIFT
     // spd_pv_rob->ve[2] expressed in RpP << (RAD_SHIFT + SHIFT)
 
-    // Update orientation in playground reference frame
+    // Update orientation and angular speed in playground reference frame
     tc->theta += spd_pv_rob->ve[2];
+    tc->oz = spd_pv_rob->ve[2];
 
     // get theta's principal angle value
     if(tc->theta > issPI) {
@@ -153,9 +169,12 @@ void _update_pos_orien(position_controller_t* tc, MT_VEC* spd_pv_rob) {
     int vx_pg = (int32_t)(((int64_t)tc->cos_theta * (int64_t)vx_rob - (int64_t)tc->sin_theta * (int64_t)vy_rob) >> SHIFT);
     int vy_pg = (int32_t)(((int64_t)tc->sin_theta * (int64_t)vx_rob + (int64_t)tc->cos_theta * (int64_t)vy_rob) >> SHIFT);
 
-    // Update position in playground reference frame
+    // Update position and speed in playground reference frame
     tc->x += vx_pg;
     tc->y += vy_pg;
+
+    tc->vx = vx_pg;
+    tc->vy = vy_pg;
 }
 
 void _linear_control(position_controller_t* tc, int x_sp, int y_sp, int vx_sp, int vy_sp, MT_VEC* spd_cmd_rob) {

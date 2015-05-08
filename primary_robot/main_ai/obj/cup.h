@@ -23,7 +23,7 @@ class Cup : public Obj{
         virtual ~Cup();
 
         void initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&) override;
-        int loopObj(std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, vector<Obj*>& listObj, std::vector<Actuator>& act) override;
+        int loopObj(const float&, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, vector<Obj*>& listObj, std::vector<Actuator>& act) override;
         eObj_t type() const override {return E_CUP;};
 
     private :
