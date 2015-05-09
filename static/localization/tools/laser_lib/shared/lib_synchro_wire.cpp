@@ -49,13 +49,19 @@ int wiredSync_waitSignal(int reset){
     static int sampleIndex = -1;
     static uint32_t prevReceived = 0;
     static int locked = 0;
-    if (reset || locked){
+    if (reset || locked!=0){
         sampleIndex = -1;
         prevReceived = 0;
     }
     // if we detected a locked line, we won't actively wait for a signal until line has been freed again
-    if (locked && wiredSync_signalPresent()==WIREDSYNC_SIGNANOTHERE){
+    if (locked!=0 && wiredSync_signalPresent()==WIREDSYNC_SIGNANOTHERE){
         locked = 0;
+#if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
+    bn_printfDbg("line unblocked \n");
+#endif
+        return -1;
+    }
+    else if (locked!=0){
         return -1;
     }
 
@@ -63,15 +69,19 @@ int wiredSync_waitSignal(int reset){
     uint32_t begin = micros();
     // if signal is here
     while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE
-            && ((end=micros())-begin) < (WIREDSYNC_PERIOD * WIREDSYNC_FIRST_SAMPLE_MULT + 16) ); // this line is to prevent the locking of the beacon (receiver). If the wait is too long (16µs longer than the longest waiting period),
+            && (micros()-begin) < (uint32_t)(WIREDSYNC_LOWTIME * WIREDSYNC_FIRST_SAMPLE_MULT + 32) ); // this line is to prevent the locking of the beacon (receiver). If the wait is too long (32µs longer than the longest waiting period),
+    end=micros();
     // if we waited too long, the line was locked
-    if ((end-begin) >= (WIREDSYNC_PERIOD * WIREDSYNC_FIRST_SAMPLE_MULT + 64) ){
+    if ((end-begin) >= (uint32_t)(WIREDSYNC_LOWTIME * WIREDSYNC_FIRST_SAMPLE_MULT + 32) ){
         locked = 1;
+#if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
+    bn_printfDbg("line blocked %lu\n", end-begin);
+#endif
         return -1;
     }
     // if signal stayed here for more than debounce time, record sample
     else if ((end-begin) > WIREDSYNC_DEBOUNCE){
-#if WIREDSYNC_DEBOUNCE > (WIREDSYNC_LOWTIME*3)
+#if WIREDSYNC_DEBOUNCE > (WIREDSYNC_LOWTIME*WIREDSYNC_FIRST_SAMPLE_MULT+64)
 #error "will not work. Debounce too slow, or lowtime too fast"
 #endif
         if (prevReceived) {
@@ -222,7 +232,7 @@ int wiredSync_sendSignal(int reset){
         wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
         if (!prevSignal) {
             uint32_t begin=micros();
-            while(micros()-begin < WIREDSYNC_FIRST_SAMPLE_MULT * WIREDSYNC_LOWTIME );   // we must force the waiting for the first call. Given that everything in this mechanism works with active waiting, using a delay() is not that bad. Why delay and not delayMicrosecond ? Take a look at the prototype of delayMicrosecond... Also, wait 2 time the normal duration is to ensure that every receiver catches the first sample (critical). Why exactly 2 ? I don't know.
+            while(micros()-begin < WIREDSYNC_FIRST_SAMPLE_MULT * WIREDSYNC_LOWTIME );   // we must force the waiting for the first call.
         }
         else while(micros()-prevSignal < WIREDSYNC_PERIOD);     // in the other cases, wait until exactly one period has elapsed since last signal
         wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);

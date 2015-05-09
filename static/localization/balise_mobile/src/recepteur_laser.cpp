@@ -172,10 +172,13 @@ void loop() {
                 }
             }
             if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES) * WIREDSYNC_PERIOD))
-                    || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES
+                    || (tempIndex != -1 && tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES)
                     || (lastSyncSample && (micros() - lastSyncSample) > WIREDSYNC_PERIOD * 3 )){
                 wiredSync_finalCompute(1);
                 newState=S_GAME;
+#ifdef DEBUG_SYNC_WIRE
+                    bn_printDbg("go to  s_game\n");
+#endif
             }
             break;
 #endif
@@ -224,16 +227,18 @@ void loop() {
         	break;
 #endif
         case S_GAME :
-
-            if ((tempIndex=wiredSync_waitSignal(1))!=lastSyncSampleIndex){
-                if (tempIndex != -1){
+            tempIndex=wiredSync_waitSignal(1);
+            if (tempIndex!=-1){
 #ifndef DEBUG_SYNC_WIRE_EVAL
-                    lastSyncSampleIndex = tempIndex;
-                    initIndex = tempIndex;
-                    firstSyncSample = micros();
-                    newState = S_SYNC_MEASURES;
+                lastSyncSampleIndex = tempIndex;
+                initIndex = tempIndex;
+                firstSyncSample = micros();
+                lastSyncSample = firstSyncSample;
+                newState = S_SYNC_MEASURES;
 #endif
-                }
+#ifdef DEBUG_SYNC_WIRE
+                bn_printDbg("return to s_sync_measures\n");
+#endif
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
         	    if (millis()-time_data_send>=SENDING_PERIOD){
