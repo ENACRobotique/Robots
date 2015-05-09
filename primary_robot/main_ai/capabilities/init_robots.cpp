@@ -5,7 +5,7 @@
  *      Author: Sébastien Malissard
  */
 
-#include <Environment.h>
+#include <Env.h>
 #include <vector>
 
 #include "init_robots.h"
