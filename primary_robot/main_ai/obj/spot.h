@@ -22,8 +22,8 @@ class Spot : public Obj{
         Spot(const unsigned int num, eColor_t color, vector<astar::sObs_t>& obs);
         virtual ~Spot();
 
-        void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>& ) override {};
-        int loopObj(const float&, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, vector<Obj*>&, std::vector<Actuator>&) override;
+        void initObj(paramObj) override {};
+        int loopObj(paramObj) override;
         eObj_t type() const override {return E_SPOT;};
 
     private :
@@ -32,4 +32,4 @@ class Spot : public Obj{
 
 };
 
-#endif /* OBJ_CLAP_H_ */
+#endif /* OBJ_SPOT_H_ */

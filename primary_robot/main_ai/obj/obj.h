@@ -83,6 +83,16 @@ typedef struct {
 typedef enum {
     ACTIVE, WAIT_MES, NO_TIME, FINISH
 } eStateObj_t;
+class Obj ;
+typedef struct{
+        Point2D<float>&         posRobot;
+        float&                  angleRobot;
+        vector<astar::sObs_t>&  obs;
+        vector<uint8_t>&        obsUpdated;
+        vector<Obj*>&           obj;
+        vector<Actuator>&       act;
+
+}paramObj;
 
 class Obj {
     public:
@@ -91,8 +101,8 @@ class Obj {
         Obj(eObj_t type, ActuatorType _typeAct, bool get, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint);
         virtual ~Obj();
 
-        virtual void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) = 0;
-        virtual int loopObj(const float& angleRobot, std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&) = 0;
+        virtual void initObj(paramObj) = 0;
+        virtual int loopObj(paramObj) = 0;
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return _dist;};
 

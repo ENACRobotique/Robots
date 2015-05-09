@@ -141,26 +141,26 @@ int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<as
 
 
 
-int metObj(const float angleRobot, int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, std::vector<Actuator>& act){
+int metObj(int numObj, paramObj par){
     static bool first = true;
 
-    if(numObj < 0 || numObj > (int) listObj.size()){
+    if(numObj < 0 || numObj > (int) par.obj.size()){
         logs << ERR << "metObj, bad numObj=" << numObj;
         return -1;
     }
 
     if(first){
-        listObj[numObj]->initObj({obs[0].c.x, obs[0].c.y}, obs, listObj);
+        par.obj[numObj]->initObj(par);
         first = false;
         logs << INFO << "Starting objective number : " << numObj;
     }else{
-        if(listObj[numObj]->loopObj(angleRobot, obs, obs_updated, listObj, act) == 0){ //0 finished
+        if(par.obj[numObj]->loopObj(par) == 0){ //0 finished
             first = true;
             logs << INFO << "Ending objective number : " << numObj;
-            vector <unsigned int> num = listObj[numObj]->getNumObs();
+            vector <unsigned int> num = par.obj[numObj]->getNumObs();
             for(unsigned int i : num){
-                obs[i].active = 0;
-                obs_updated[i]++;
+                par.obs[i].active = 0;
+                par.obsUpdated[i]++;
             }
             return 0;
         }

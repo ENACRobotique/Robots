@@ -43,28 +43,28 @@ Cup::~Cup() {
     // TODO Auto-generated destructor stub
 }
 
-void Cup::initObj(Point2D<float> pos, vector<astar::sObs_t>& obs, vector<Obj*>&){
-    Circle2D<float> cir(obs[_num_obs[0]].c.x, obs[_num_obs[0]].c.y, 10);
+void Cup::initObj(paramObj par){
+    Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 10);
     Point2D<float> dest;
 
-    dest = cir.project(pos);
+    dest = cir.project(par.posRobot);
 
-    path.go2PointOrient(dest, obs, _access_select_angle);
+    path.go2PointOrient(dest, par.obs, _access_select_angle);
 
     _time = millis();
 }
 
-int Cup::loopObj(const float&, std::vector<astar::sObs_t>&, std::vector<uint8_t>&,vector<Obj*>& listObj, std::vector<Actuator>& actuator){
+int Cup::loopObj(paramObj par){
 
     if(millis() - _time > 2000){
-        for(Obj* i : listObj){
+        for(Obj* i : par.obj){
             if(i->type() == E_DROP_CUP && i->state() == WAIT_MES){
                 i->state() = ACTIVE;
                 break;
             }
         }
 
-        for(Actuator& i : actuator){
+        for(Actuator& i : par.act){
             if(i.type == ActuatorType::CUP && i.id == _actuator_select){
                 i.full = true;
                 i.cupActuator.distributor = false; //to be sure

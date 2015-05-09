@@ -55,18 +55,17 @@ Clap::~Clap() {
     // TODO Auto-generated destructor stub
 }
 
-void Clap::initObj(Point2D<float> , vector<astar::sObs_t>& obs, vector<Obj*>&){
-    _dest.x = obs[0].c.x - 25*cos(_access[0].pt.angle);
+void Clap::initObj(paramObj par){
+    _dest.x = par.obs[0].c.x - 25*cos(_access[0].pt.angle);
     _dest.y = ECART;
 
-    path.go2PointOrient(_dest, obs, _access_select_angle);
+    path.go2PointOrient(_dest, par.obs, _access_select_angle);
 
 }
 
-int Clap::loopObj(const float&, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&){
-    Point2D<float> posRobot(obs[0].c.x, obs[0].c.y);
+int Clap::loopObj(paramObj par){
 
-    if(posRobot.distanceTo(_dest) < 2.){
+    if(par.posRobot.distanceTo(_dest) < 2.){
         _state = FINISH;
         return 0;
     }

@@ -90,7 +90,17 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        if (metObj(capPos->getLastTheta(), current_obj, listObj, robot->env->obs, robot->env->obs_updated, capActuator->_act ) == 0){
+        float angleRobot = capPos->getLastTheta();
+        Point2D<float> posRobot = capPos->getLastPosXY();
+
+        paramObj par = {posRobot,
+                angleRobot,
+                robot->env->obs,
+                robot->env->obs_updated,
+                listObj,
+                capActuator->_act};
+
+        if (metObj(current_obj, par) == 0){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
