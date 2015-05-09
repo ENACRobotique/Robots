@@ -76,7 +76,7 @@ public:
             T n = nv.norm();
             _a = _a / n;
             _b = _b / n;
-            c = c / n;
+            _c = _c / n;
             norm = true;
         }
         return *this;
