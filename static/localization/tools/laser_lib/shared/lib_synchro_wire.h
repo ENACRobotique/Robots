@@ -23,10 +23,11 @@
 
 //#define DEBUG_SYNC_WIRE
 
-#define WIREDSYNC_INITIAL 0         // time to set when we receive the first sync signal.
-#define WIREDSYNC_LOWTIME 100000    // duration during which the signal is set (in µs)
-#define WIREDSYNC_PERIOD  1000000   // time duration between two signals (in µs)
-#define WIREDSYNC_DEBOUNCE 10000    // in µs
+#define WIREDSYNC_INITIAL 0             // time to set when we receive the first sync signal.
+#define WIREDSYNC_LOWTIME 100000        // duration during which the signal is set (in µs)
+#define WIREDSYNC_FIRST_SAMPLE_MULT 2   // Time multiplier for the first sample lowtime
+#define WIREDSYNC_PERIOD  1000000       // time duration between two signals (in µs)
+#define WIREDSYNC_DEBOUNCE 10000        // in µs
 #define WIREDSYNC_NBSAMPLES 20
 #define WIREDSYNC_ACCEPTABLE_OFFSET 280 // acceptable offset (in µs). 139 µs = 1° @ 20Hz
 

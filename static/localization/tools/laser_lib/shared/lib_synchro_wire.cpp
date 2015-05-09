@@ -48,16 +48,29 @@ static wsType_t sum_lt_gt_lt=0;// sum of (local date)*(global date - local date)
 int wiredSync_waitSignal(int reset){
     static int sampleIndex = -1;
     static uint32_t prevReceived = 0;
-    if (reset){
+    static int locked = 0;
+    if (reset || locked){
         sampleIndex = -1;
         prevReceived = 0;
     }
+    // if we detected a locked line, we won't actively wait for a signal until line has been freed again
+    if (locked && wiredSync_signalPresent()==WIREDSYNC_SIGNANOTHERE){
+        locked = 0;
+        return -1;
+    }
+
+    uint32_t end=0;
     uint32_t begin = micros();
     // if signal is here
-    while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
-    uint32_t end = micros();
+    while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE
+            && ((end=micros())-begin) < (WIREDSYNC_PERIOD * WIREDSYNC_FIRST_SAMPLE_MULT + 16) ); // this line is to prevent the locking of the beacon (receiver). If the wait is too long (16µs longer than the longest waiting period),
+    // if we waited too long, the line was locked
+    if ((end-begin) >= (WIREDSYNC_PERIOD * WIREDSYNC_FIRST_SAMPLE_MULT + 64) ){
+        locked = 1;
+        return -1;
+    }
     // if signal stayed here for more than debounce time, record sample
-    if ((end-begin) > WIREDSYNC_DEBOUNCE && (end-begin) < WIREDSYNC_LOWTIME*3){
+    else if ((end-begin) > WIREDSYNC_DEBOUNCE){
 #if WIREDSYNC_DEBOUNCE > (WIREDSYNC_LOWTIME*3)
 #error "will not work. Debounce too slow, or lowtime too fast"
 #endif
@@ -207,7 +220,10 @@ int wiredSync_sendSignal(int reset){
     }
     if (nbSamples && (micros() - prevSignal) > (WIREDSYNC_PERIOD - WIREDSYNC_LOWTIME)){
         wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
-        if (!prevSignal) delay(2 * WIREDSYNC_LOWTIME / 1000);   // we must force the waiting for the first call. Given that everything in this mechanism works with active waiting, using a delay() is not that bad. Why delay and not delayMicrosecond ? Take a look at the prototype of delayMicrosecond... Also, wait 2 time the normal duration is to ensure that every receiver catches the first sample (critical). Why exactly 2 ? I don't know.
+        if (!prevSignal) {
+            uint32_t begin=micros();
+            while(micros()-begin < WIREDSYNC_FIRST_SAMPLE_MULT * WIREDSYNC_LOWTIME );   // we must force the waiting for the first call. Given that everything in this mechanism works with active waiting, using a delay() is not that bad. Why delay and not delayMicrosecond ? Take a look at the prototype of delayMicrosecond... Also, wait 2 time the normal duration is to ensure that every receiver catches the first sample (critical). Why exactly 2 ? I don't know.
+        }
         else while(micros()-prevSignal < WIREDSYNC_PERIOD);     // in the other cases, wait until exactly one period has elapsed since last signal
         wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
         uint32_t end=micros();

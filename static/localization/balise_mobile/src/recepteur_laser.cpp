@@ -246,10 +246,9 @@ void loop() {
                     outMsg.payload.mobileReport.date=micros2s(laserStruct.date);
                     outMsg.payload.mobileReport.precision=laserStruct.precision;
                     outMsg.payload.mobileReport.sureness=laserStruct.sureness;
+                    bn_send(&outMsg);
 #ifdef DEBUG_CALIBRATION
                     bn_printfDbg("d, %lu, p, %lu, t, %lu",laserStruct.deltaT,laserStruct.period,laserStruct.thickness);
-#else
-                    bn_send(&outMsg);
 #endif
         	    }
           }
