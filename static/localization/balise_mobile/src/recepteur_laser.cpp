@@ -27,10 +27,10 @@ unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;
 unsigned long time_prev_led=0, sw=0, time_data_send=0;
 uint32_t time_prev_laser=0;
 
-
+#define DEFAULT_LASER_PERIOD 50000
 
 plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detection infos
-uint32_t laser_period=50000;       // in µs, to be confirmed by the main robot
+uint32_t laser_period=DEFAULT_LASER_PERIOD;                // in µs, to be confirmed by the main robot
 uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the laser structure
 uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
 char chosenOne=0;                           // interruption chosen for synchronization
@@ -49,7 +49,10 @@ mainState state=S_SYNC_MEASURES, prevState=S_BEGIN,newState=S_SYNC_MEASURES;    
 #endif
 
 inline void periodHandle(sMsg *msg){
-    if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
+    if (msg->header.type==E_PERIOD
+            && msg->payload.period < (DEFAULT_LASER_PERIOD * 10)) { // This line is here to prevent deadlock in laser detection case of one incorrect and huge period received.
+        laser_period=msg->payload.period;
+    }
 }
 
 void setup() {
