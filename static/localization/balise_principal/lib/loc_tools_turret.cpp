@@ -119,7 +119,8 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
 
     bn_send(&msg);
 #ifdef DEBUG_CALIBRATION
-    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, ((int)(angle*180./M_PI))%360,(int)msg.payload.genericStatus.adv_status.pos.x,(int)msg.payload.genericStatus.adv_status.pos.y);
+    int intangle10 = ((int)((angle*10*180./M_PI))%360);
+    bn_printfDbg((char*)"%hx : (%d.%d °,%lu mm) (%d,%d)\n", origin, intangle10/10, intangle10%10, pLoad->value, (int)msg.payload.genericStatus.adv_status.pos.x,(int)msg.payload.genericStatus.adv_status.pos.y);
 #endif
     return 0;
 
