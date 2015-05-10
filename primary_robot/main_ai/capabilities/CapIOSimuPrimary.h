@@ -27,7 +27,7 @@ class CapIOSimuPrimary : public CapIO {
                     else
                         cord = CORD_OUT;
                     return static_cast <unsigned int>(cord);
-                case IHM_MODE_SWICTH:
+                case IHM_MODE_SWITCH:
                     return static_cast <unsigned int>(eIhmSwitch::SWITCH_OFF);
                 case IHM_LED:
                     if(capTeam->getColor() == YELLOW)

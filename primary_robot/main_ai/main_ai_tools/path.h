@@ -51,6 +51,7 @@ class Path {
         //Send methods
         void sendRobot(bool holo, float thetaEnd);
         void stopRobot(bool holo);
+        void go2PointOrient(const Point2D<float> &dest, vector<astar::sObs_t>& obs, float angle);
         void go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs_t>& obs, bool holo); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
         void followPath(vector <astar::sObs_t>& obs, vector <astar::iABObs_t> &l, bool holo);
         void convPathToPathOrient(float thetaEnd);
@@ -74,6 +75,7 @@ class Path {
         bool checkSameObs(astar::sObs_t& obs1, astar::sObs_t& obs2);
         bool checkSamePath(sPath_t& path);
         bool checkSamePath2(deque<sTrajEl_t>& path);
+        bool checkSamePathOrient(deque<sTrajOrientEl_t>& path);
         int checkRobotBlock();
         void updateNoHaftTurn(vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated);
 

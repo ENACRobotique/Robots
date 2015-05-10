@@ -8,20 +8,20 @@
 #ifndef LIB_GEOMETRYTOOLS_CIRCLE2D_H_
 #define LIB_GEOMETRYTOOLS_CIRCLE2D_H_
 
-#include <iostream>
+#include <Line2D.h>
+#include <Point2D.h>
+//#include <shapes/Ellipse2D.h>
+#include <Vector2D.h>
 #include <cmath>
+#include <iostream>
+#include <utility>
 
 #ifndef SIGN
 #define SIGN(x) ((x > 0) - (x < 0))
 #endif
 
 template<typename T>
-class Point2D;
-template<typename T>
-class Line2D;
-
-template<typename T>
-class Circle2D {
+class Circle2D/*: public Ellipse2D<T>*/ {
     public:
         Circle2D() : c(0, 0), r(0){}
         Circle2D(Point2D<T> _c, T _r) : c(_c), r(_r){}
@@ -73,7 +73,7 @@ class Circle2D {
 
             return p1, p2;
         }
-        Point2D<T> projecte(const Point2D<T>& p) const{
+        Point2D<T> project(const Point2D<T>& p) const{
             Vector2D<T> v(c, p);
             Point2D<T> pt;
             T n = v.norm();
@@ -83,8 +83,8 @@ class Circle2D {
 
             return pt;
         }
-        Point2D<T> projecteSup(const Point2D<T>& p, T sup) const{
-            Point2D<T> pt = projecte(p);
+        Point2D<T> projectSup(const Point2D<T>& p, T sup) const{
+            Point2D<T> pt = project(p);
 
             pt.x += SIGN(pt.x - c.x)*sup;
             pt.y += SIGN(pt.y - c.y)*sup;

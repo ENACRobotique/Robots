@@ -16,12 +16,12 @@
 #include <getopt.h> // parameters parsing
 #include <errno.h>
 
-#include "../botNet/shared/botNet_core.h"
-#include "../network_tools/bn_debug.h"
-#include "../network_tools/bn_intp.h"
-#include "../network_tools/bn_utils.h"
+#include "botNet_core.h"
+#include "bn_debug.h"
+#include "bn_intp.h"
+#include "bn_utils.h"
 #include "global_errors.h"
-#include "../../core/linux/libraries/Millis/millis.h"
+#include "millis.h"
 #include "node_cfg.h"
 #include "roles.h"
 
@@ -136,9 +136,6 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu), seq : %02hhu ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type, msgIn.header.seqNum);
             }
             switch (msgIn.header.type){
-            case E_GENERIC_STATUS:
-                printf("%.2fcm, %.2fcm, %.2f°\n", msgIn.payload.genericStatus.prop_status.pos.x, msgIn.payload.genericStatus.prop_status.pos.y, msgIn.payload.genericStatus.prop_status.pos.theta*180./M_PI);
-                break;
             case E_ASSERV_STATS :
                 {
                     int i;
@@ -173,8 +170,8 @@ int main(int argc, char **argv){
                     }
                 }
                 break;
-            case E_POS :
-                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
+            case E_GENERIC_POS_STATUS:
+                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.genericPosStatus.id, msgIn.payload.genericPosStatus.pos.x, msgIn.payload.genericPosStatus.pos.y, msgIn.payload.genericPosStatus.pos.theta*180./M_PI);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
                 break;
             default :
@@ -235,6 +232,8 @@ int main(int argc, char **argv){
                 printf("\ndebug reader menu\n");
                 printf("a : INIT: send RoleSetup messages to prop and moni to tell ai is simulated\n");
                 printf("h : INIT: synchronize time on propulsion\n");
+                printf("f : start RGB Led debug\n");
+                printf("g : Start servo calibration\n");
                 printf("d : send speed setpoint to the primary robot\n");
                 printf("s : send debugger address\n");
                 printf("p : ping\n");
@@ -290,12 +289,26 @@ int main(int argc, char **argv){
                     else{
                         printf("OK!\n");
                     }
-		case 'v':
-                    verbose++;
-                    break;
-                case 'V':
-                    verbose--;
-                    verbose=(verbose<0?0:verbose);
+
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+                    printf("Sending RoleSetup message to ADDRI_MAIN_IO... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+
+
                     break;
                 }
                 case 'h':{
@@ -309,41 +322,85 @@ int main(int argc, char **argv){
                     }
                     break;
                 }
-                case 'e':{
-                    sMsg msg = {{0}};
-                    static int angle = 50;
-                    angle = 180 - angle;
-
-                    msg.header.destAddr = ADDRI_MAIN_IO;
-                    msg.header.type = E_SERVOS;
-                    msg.payload.servos.nb_servos = 3;
-                    msg.header.size = 2 + msg.payload.servos.nb_servos * sizeof(msg.payload.servos.servos[0]);
-                    msg.payload.servos.servos[0].id = SERVO_PRIM_CORN1_RAMP;
-                    msg.payload.servos.servos[0].angle = angle;
-                    msg.payload.servos.servos[1].id = SERVO_PRIM_CORN_DOOR;
-                    msg.payload.servos.servos[1].angle = 140 - angle;
-                    msg.payload.servos.servos[2].id = SERVO_PRIM_GLASS3_HOLD;
-                    msg.payload.servos.servos[2].angle = 30 + angle;
-
-                    bn_send(&msg);
+                case 'v':
+                    verbose++;
                     break;
-                }
+                case 'V':
+                    verbose--;
+                    verbose=(verbose<0?0:verbose);
+                    break;
                 case 'f':{
                     sMsg msg = {{0}};
-                    float angle;
+                    sRGB color1, color2;
+                    unsigned int time1, time2, nb, red1, red2, green1, green2, blue1, blue2;
 
-                    printf("angle (deg): "); fflush(stdout);
-                    ret = scanf("%f", &angle);
+                    printf("1st color (red): "); fflush(stdout);
+                    ret = scanf("%i", &red1);
                     if (ret != 1){
-                        printf("error getting angle setpoint\n");
+                        printf("error getting color (red)\n");
                     }
 
+                    printf("1st color (green): "); fflush(stdout);
+                    ret = scanf("%i", &green1);
+                    if (ret != 1){
+                        printf("error getting color (green)\n");
+                    }
+
+                    printf("1st color (blue): "); fflush(stdout);
+                    ret = scanf("%i", &blue1);
+                    if (ret != 1){
+                        printf("error getting color (blue)\n");
+                    }
+
+                    printf("2nd color (red): "); fflush(stdout);
+                    ret = scanf("%i", &red2);
+                    if (ret != 1){
+                        printf("error getting color (red)\n");
+                    }
+
+                    printf("2nd color (green): "); fflush(stdout);
+                    ret = scanf("%i", &green2);
+                    if (ret != 1){
+                        printf("error getting color (green)\n");
+                    }
+
+                    printf("2nd color (blue): "); fflush(stdout);
+                    ret = scanf("%i", &blue2);
+                    if (ret != 1){
+                        printf("error getting color (blue)\n");
+                    }
+
+                    printf("time displaying 1st color (ms): "); fflush(stdout);
+                    ret = scanf("%i", &time1);
+                    if (ret != 1){
+                        printf("error getting time1\n");
+                    }
+
+                    printf("time displaying 2nd color (ms): "); fflush(stdout);
+                    ret = scanf("%i", &time2);
+                    if (ret != 1){
+                        printf("error getting time2\n");
+                    }
+
+                    printf("number of repetitions: "); fflush(stdout);
+                    ret = scanf("%i", &nb);
+                    if (ret != 1){
+                        printf("error getting repetitions\n");
+                    }
+
+                    color1.red = red1; color1.green = green1; color1.blue = blue1;
+                    color2.red = red2; color2.green = green2; color2.blue = blue2;
+
                     msg.header.destAddr = ADDRI_MAIN_IO;
-                    msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 1 * sizeof(msg.payload.servos.servos[0]);
-                    msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = SERVO_PRIM_CORN1_RAMP;
-                    msg.payload.servos.servos[0].angle = angle;
+                    msg.header.type = E_IHM_STATUS;
+                    msg.header.size = 2 + 1 * sizeof(msg.payload.ihmStatus.states[0]);
+                    msg.payload.ihmStatus.nb_states = 1;
+                    msg.payload.ihmStatus.states[0].id = IHM_LED;
+                    msg.payload.ihmStatus.states[0].state.color1 = color1;
+                    msg.payload.ihmStatus.states[0].state.color2 = color2;
+                    msg.payload.ihmStatus.states[0].state.time1 = time1;
+                    msg.payload.ihmStatus.states[0].state.time2 = time2;
+                    msg.payload.ihmStatus.states[0].state.nb = nb;
 
                     bn_send(&msg);
                     break;
@@ -351,28 +408,18 @@ int main(int argc, char **argv){
                 case 'g':{
                     sMsg msg = {{0}};
                     float angle;
-                    int id;
+                    int club_id, hw_id;
 
-                    printf(" 0:SERVO_PRIM_GLASS1_HOLD\n");
-                    printf(" 1:SERVO_PRIM_GLASS1_RAISE\n");
-                    printf(" 2:SERVO_PRIM_GLASS2_HOLD\n");
-                    printf(" 3:SERVO_PRIM_GLASS2_RAISE\n");
-                    printf(" 4:SERVO_PRIM_GLASS3_HOLD\n");
-                    printf(" 5:SERVO_PRIM_GLASS3_RAISE\n");
-                    printf(" 6:SERVO_PRIM_LIFT1_UP\n");
-                    printf(" 7:SERVO_PRIM_LIFT1_DOOR\n");
-                    printf(" 8:SERVO_PRIM_LIFT1_HOLD\n");
-                    printf(" 9:SERVO_PRIM_LIFT2_UP\n");
-                    printf("10:SERVO_PRIM_LIFT2_DOOR\n");
-                    printf("11:SERVO_PRIM_LIFT2_HOLD\n");
-                    printf("12:SERVO_PRIM_CORN1_RAMP\n");
-                    printf("13:SERVO_PRIM_CORN2_RAMP\n");
-                    printf("14:SERVO_PRIM_CORN_DOOR\n");
-
-                    printf("id: "); fflush(stdout);
-                    ret = scanf("%i", &id);
+                    printf("club id: "); fflush(stdout);
+                    ret = scanf("%i", &club_id);
                     if (ret != 1){
-                        printf("error getting servo id\n");
+                        printf("error getting servo club id\n");
+                    }
+
+                    printf("hardware id: "); fflush(stdout);
+                    ret = scanf("%i", &hw_id);
+                    if (ret != 1){
+                        printf("error getting servo hardware id\n");
                     }
 
                     printf("angle (deg): "); fflush(stdout);
@@ -385,7 +432,8 @@ int main(int argc, char **argv){
                     msg.header.type = E_SERVOS;
                     msg.header.size = 2 + 1 * sizeof(msg.payload.servos.servos[0]);
                     msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = id;
+                    msg.payload.servos.servos[0].club_id = club_id;
+                    msg.payload.servos.servos[0].hw_id = hw_id;
                     msg.payload.servos.servos[0].angle = angle;
 
                     bn_send(&msg);

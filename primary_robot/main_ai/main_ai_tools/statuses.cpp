@@ -46,13 +46,15 @@ void Statuses::maintenace(){
     //        }
 }
 
-int Statuses::receivedNewStatus(sGenericStatus &status){
+int Statuses::receivedNewStatus(sGenericPosStatus &status){
 
     if(status.id >= NUM_E_ELEMENT){
         cerr << "[ERROR] [statuses.cpp] Unknown status id" << endl;
         return -1;
     }
     logs << INFO_V(E_V3) << "New status : " << status.pos.x << ", " << status.pos.y << ", " << status.pos.theta * 180 / M_PI;
+
+    //TODO Adds security if position incoherent
 
     _list[status.id].push_back(status); //TODO sort by date
 
@@ -62,7 +64,7 @@ int Statuses::receivedNewStatus(sGenericStatus &status){
     return 1;
 }
 
-sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
+sGenericPosStatus& Statuses::getLastStatus(eElement el, frame_t fr){
     if(!_list[el].empty()){
         if(_list[el].back().pos.frame == fr){
             return _list[el].back();
@@ -73,7 +75,7 @@ sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
         }
     }
     //TODO ask position
-    static sGenericStatus status;
+    static sGenericPosStatus status;
     status.id = el;
     status.date = 0;
 
@@ -81,13 +83,16 @@ sGenericStatus& Statuses::getLastStatus(eElement el, frame_t fr){
 }
 
 Point2D<float> Statuses::getLastPosXY(eElement el){
-    sGenericStatus& status = getLastStatus(el);
+    sGenericPosStatus& status = getLastStatus(el);
 
-    return {status.pos.x, status.pos.y};
+    if(status.date)
+        return {status.pos.x, status.pos.y};
+
+    return {0,0};
 }
 
 float Statuses::getLastOrient(eElement el){
-    sGenericStatus& status = getLastStatus(el);
+    sGenericPosStatus& status = getLastStatus(el);
 
     return status.pos.theta;
 }
@@ -95,10 +100,10 @@ float Statuses::getLastOrient(eElement el){
 float Statuses::getLastSpeed(eElement el){
 
     if(_list[el].size() >=2){
-        sGenericStatus& status1 = getLastStatus(el);
+        sGenericPosStatus& status1 = getLastStatus(el);
         Point2D<float> pt1 = {status1.pos.x, status1.pos.y};
 
-        sGenericStatus& status2 =_list[el][_list[el].size() - 2];
+        sGenericPosStatus& status2 =_list[el][_list[el].size() - 2];
         Point2D<float> pt2 = {status2.pos.x, status2.pos.y};
 
         float dist = pt1.distanceTo(pt2);

@@ -47,11 +47,11 @@ unsigned int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs
 Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
     unsigned int n = checkPointInObs(p, obs);
 
-    if ( n > 0) {
+    if (n > 0) {
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         Point2D<float> r;
 
-        r = c.projecte(p);
+        r = c.project(p);
         r.x += SIGN(r.x - c.c.x)*0.1;
         r.y += SIGN(r.y - c.c.y)*0.1;
 
@@ -70,37 +70,42 @@ Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>&
 }
 
 /*
- * Stops the robot if collision detected
+ * Return > 0 if collision detected
  */
-void colissionDetection(){
-    Point2D<float> ptPr = statuses.getLastPosXY(ELT_PRIMARY);
-    float anglePr = statuses.getLastOrient(ELT_PRIMARY);
-    Point2D<float> ptAPr = statuses.getLastPosXY(ELT_ADV_PRIMARY);
-    Point2D<float> ptASc = statuses.getLastPosXY(ELT_ADV_SECONDARY);
-    sNum_t d, dot;
-    int contact = 0;
 
-    d = ptPr.distanceTo(ptAPr);
-    Vector2D<float> v1(cos(anglePr), sin(anglePr)), v2(ptPr, ptAPr);
-    dot = v1*v2;
+int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& pos){
+    Point2D<float> ptPr(pos[0].c.x, pos[0].c.y);
+    Point2D<float> ptSc(pos[1].c.x, pos[1].c.y);
+    Point2D<float> ptAPr(pos[2].c.x, pos[2].c.y);
+    Point2D<float> ptASc(pos[3].c.x, pos[3].c.y);
+    Point2D<float> ptRobot(pos[robot].c.x, pos[robot].c.y);
+    float d;
 
-    if (d < 50 && dot > 0.6 * d) {
+    d = ptRobot.distanceTo(ptPr);
+    if (d < (pos[robot].r + pos[0].r) && d) {
+        logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 1;
+    }
+
+    d = ptRobot.distanceTo(ptSc);
+    if (d < (pos[robot].r + pos[1].r) && d) {
+        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 2;
+    }
+
+    d = ptRobot.distanceTo(ptAPr);
+    if (d < (pos[robot].r + pos[2].r) && d) {
         logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
-        contact = 1;
+        return 3;
     }
 
-    d = ptPr.distanceTo(ptASc);
-    Vector2D<float> v3(ptPr, ptASc);
-    dot = v1 * v3;
-
-    if (d < 40 && dot > 0.6 * d) {
+    d = ptRobot.distanceTo(ptASc);
+    if (d < (pos[robot].r + pos[3].r) && d) {
         logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
-        contact = 1;
+        return 4;
     }
 
-    if (contact) {
-        path.stopRobot(true);
-    }
+    return 0;
 }
 
 /*
@@ -115,7 +120,7 @@ void posPrimary(vector<astar::sObs_t>& obs) { //FIXME permet de deplacer les obj
         if (obs[i].moved == 1) {
             pt = {obs[0].c.x, obs[0].c.y};
             Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);
-            pt = cir.projecte(pt);
+            pt = cir.project(pt);
             Vector2D<float> v(pt, {obs[0].c.x, obs[0].c.y});
 
             obs[i].c.x += v.x;
@@ -125,7 +130,7 @@ void posPrimary(vector<astar::sObs_t>& obs) { //FIXME permet de deplacer les obj
         }
         Point2D<float> p(_current_pos.x, _current_pos.y);
         Circle2D<float> c(obs[i].c.x, obs[i].c.y, obs[i].r);
-        p = c.projecte(p);
+        p = c.project(p);
         _current_pos = {p.x, p.y};
         if (sqrt(pow(_current_pos.x - obs[0].c.x, 2) + pow(_current_pos.y - obs[0].c.y, 2) < 2)) {
 

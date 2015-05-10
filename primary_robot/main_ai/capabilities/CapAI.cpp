@@ -13,6 +13,7 @@
 #include "CapTeam.h"
 #include "tools.h"
 #include "ai_tools.h"
+#include "a_star_tools.h"
 #include "obj_tools.h"
 #include "communications.h"
 extern "C"{
@@ -21,6 +22,8 @@ extern "C"{
 #include "clap.h"
 #include "spot.h"
 #include "cup.h"
+#include "dropCup.h"
+#include "environment.h"
 
 
 int CapAI::loop(){
@@ -29,6 +32,8 @@ int CapAI::loop(){
     static Point2D<float> pt_select;
     static unsigned int last_time = 0;
     static unsigned int start_time = 0;
+    static bool prevDetection = false;
+    static int contact = 0;
 
     CapPropulsion* capProp = dynamic_cast<CapPropulsion*> (robot->caps[eCap::PROP]);
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
@@ -43,11 +48,26 @@ int CapAI::loop(){
         return 0;
     }
 
+    if(colissionDetection(robot->el, robot->env->obs)){
+        if(!prevDetection){
+            path.stopRobot(true);
+            prevDetection = true;
+            return 1;
+        }
+        contact ++;
+
+
+    }
+    else{
+        prevDetection = false;
+        contact = 0;
+    }
+
     if (!mode_obj) {
         if(listObj.empty()) //Test if all objective have finished
             logs << INFO << "Objective list is empty";
 
-        if ((millis() - last_time) > 1000){ //Calculation of the next objective
+        if (((millis() - last_time) > 1000) || (contact == 1)){ //Calculation of the next objective
             last_time = millis();
 
             if ((current_obj = nextObj(start_time, listObj, robot->env->obs, robot->env->obs_updated ,(int) capPos->getIobs(), capProp->getPropType()==AXLE?true:false, capActuator->_act)) != -1) {
@@ -70,7 +90,17 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated) == 0){
+        float angleRobot = capPos->getLastTheta();
+        Point2D<float> posRobot = capPos->getLastPosXY();
+
+        paramObj par = {posRobot,
+                angleRobot,
+                robot->env->obs,
+                robot->env->obs_updated,
+                listObj,
+                capActuator->_act};
+
+        if (metObj(current_obj, par) == 0){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
@@ -82,6 +112,8 @@ int CapAI::loop(){
 
 void CapAI::initObjective(){
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
+
+    logs << INFO << "InitOjective for AI";
 
     if(capTeam->getColor() == YELLOW){
         listObj.push_back(new Clap(0));
@@ -104,6 +136,9 @@ void CapAI::initObjective(){
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));
 
+    for(unsigned int i = 0 ; i < 3 ; i++)
+        listObj.push_back(new DropCup(i, capTeam->getColor()));
+
     if(capTeam->getColor() == YELLOW){
         for(unsigned int i = 12 ; i < 20 ; i++){
             robot->env->obs[i].active = 0;
@@ -116,6 +151,16 @@ void CapAI::initObjective(){
             robot->env->obs_updated[i]++;
         }
     }
+
+    if(capTeam->getColor() == GREEN)
+        robot->env->obs[BLOCK_START_ZONE].c = {45, 100};
+    else
+        robot->env->obs[BLOCK_START_ZONE].c = {300-45, 100};
+
+    robot->env->obs[BLOCK_START_ZONE].active = 1;
+    robot->env->obs[BLOCK_START_ZONE].r = 20. + R_ROBOT;
+
+    robot->env->obs_updated[BLOCK_START_ZONE]++;
 
 }
 

@@ -30,7 +30,11 @@
 							</builder>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.558820910" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.895090958" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
-								<option id="de.innot.avreclipse.asm.option.include.paths.146979975" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths"/>
+								<option id="de.innot.avreclipse.asm.option.include.paths.146979975" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;/${ProjName}/lib/botNet&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduino_io/${ProjName}}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/li/network_tools}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1848144619" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
 							<tool command="avr-gcc" id="de.innot.avreclipse.tool.compiler.winavr.app.debug.2128608292" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug">
@@ -44,6 +48,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet/shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_tools}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.208635980" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.362673118" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
@@ -67,6 +74,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet/shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_tools}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.1604727248" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.97618727" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -104,6 +114,117 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.520253623" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620.501621799" name="/" resourcePath="lib/network_config">
+						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.1382973296" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug" unusedChildren="">
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1705657212.1927116952" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1705657212"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.718641330.802936074" name="Generate HEX file for EEPROM" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.718641330"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.344739338.1537327355" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.344739338"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1897113889.1653513966" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1897113889"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.425565252.365006483" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.425565252"/>
+							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.app.debug" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.debug"/>
+							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.182212843" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug.558820910">
+								<inputType id="de.innot.avreclipse.tool.assembler.input.1094171242" superClass="de.innot.avreclipse.tool.assembler.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1913808751" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.2128608292">
+								<option id="de.innot.avreclipse.compiler.option.incpath.874064087" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/PCA9685}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/${ProjName}/lib/botNet/shared&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/${ProjName}/lib/communication/tools/bn_debug_console&quot;"/>
+								</option>
+								<inputType id="de.innot.avreclipse.compiler.winavr.input.1699244894" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.1635059085" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug.1507895834">
+								<inputType id="de.innot.avreclipse.cppcompiler.input.1255054260" superClass="de.innot.avreclipse.cppcompiler.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.537977510" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug.383375915"/>
+							<tool id="de.innot.avreclipse.tool.cpplinker.app.debug.1148883579" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug.884040402"/>
+							<tool id="de.innot.avreclipse.tool.archiver.winavr.base.643255580" name="AVR Archiver" superClass="de.innot.avreclipse.tool.archiver.winavr.base.1835124959"/>
+							<tool id="de.innot.avreclipse.tool.objdump.winavr.app.debug.1890767410" name="AVR Create Extended Listing" superClass="de.innot.avreclipse.tool.objdump.winavr.app.debug.2080801332"/>
+							<tool id="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.515947244" name="AVR Create Flash image" superClass="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.195208318"/>
+							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.497425238" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.1068122420"/>
+							<tool id="de.innot.avreclipse.tool.size.winavr.app.debug.559702092" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.debug.176159645"/>
+							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.302195544" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug.520253623"/>
+						</toolChain>
+					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620.1742726094" name="roles.c" rcbsApplicability="disable" resourcePath="lib/network_config/roles.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1913808751.1953326710">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1913808751.1953326710" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1913808751">
+							<option id="de.innot.avreclipse.compiler.option.incpath.2075413105" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/Wire}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Core}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/PCA9685}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/communication/tools/bn_debug_console}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet/shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.408983044" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620.1776449518" name="messages.c" rcbsApplicability="disable" resourcePath="lib/network_config/messages.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1913808751.1586320035">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1913808751.1586320035" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1913808751">
+							<option id="de.innot.avreclipse.compiler.option.incpath.360384221" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/Wire}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Core}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/PCA9685}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/communication/tools/bn_debug_console}&quot;"/>
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet/shared}&quot;"/>
+							</option>
+							<inputType id="de.innot.avreclipse.compiler.winavr.input.1957708802" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+						</tool>
+					</fileInfo>
+					<folderInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620.1321040125" name="/" resourcePath="lib/botNet/shared">
+						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.408106780" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug" unusedChildren="">
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1705657212.189591260" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1705657212"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.718641330.1076794821" name="Generate HEX file for EEPROM" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.718641330"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.344739338.1849369605" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.344739338"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1897113889.410192760" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.1897113889"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.425565252.847145616" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.425565252"/>
+							<targetPlatform id="de.innot.avreclipse.targetplatform.winavr.app.debug" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.debug"/>
+							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.1757819367" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug.558820910">
+								<inputType id="de.innot.avreclipse.tool.assembler.input.812987247" superClass="de.innot.avreclipse.tool.assembler.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.385698989" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.2128608292">
+								<option id="de.innot.avreclipse.compiler.option.incpath.2137439320" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/arduinoUno_core/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/Core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduinolib/PCA9685}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet/shared}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/botNet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/network_tools}&quot;"/>
+								</option>
+								<inputType id="de.innot.avreclipse.compiler.winavr.input.467689116" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.1453359821" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug.1507895834">
+								<inputType id="de.innot.avreclipse.cppcompiler.input.840380455" superClass="de.innot.avreclipse.cppcompiler.input"/>
+							</tool>
+							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.697846713" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug.383375915"/>
+							<tool id="de.innot.avreclipse.tool.cpplinker.app.debug.320937446" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug.884040402"/>
+							<tool id="de.innot.avreclipse.tool.archiver.winavr.base.1981780108" name="AVR Archiver" superClass="de.innot.avreclipse.tool.archiver.winavr.base.1835124959"/>
+							<tool id="de.innot.avreclipse.tool.objdump.winavr.app.debug.1483731613" name="AVR Create Extended Listing" superClass="de.innot.avreclipse.tool.objdump.winavr.app.debug.2080801332"/>
+							<tool id="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.1244178433" name="AVR Create Flash image" superClass="de.innot.avreclipse.tool.objcopy.flash.winavr.app.debug.195208318"/>
+							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.1991864738" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.1068122420"/>
+							<tool id="de.innot.avreclipse.tool.size.winavr.app.debug.71668526" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.debug.176159645"/>
+							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.2095810086" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug.520253623"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
 						<entry excluding="lib/PCA9685/examples|arduinolib/Servo/examples|arduinolib/Wire/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -131,16 +252,20 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620;de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620.;de.innot.avreclipse.tool.compiler.winavr.app.debug.2128608292;de.innot.avreclipse.compiler.winavr.input.1782711175">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.2007273000;de.innot.avreclipse.configuration.app.release.2007273000.;de.innot.avreclipse.tool.cppcompiler.app.release.561395067;de.innot.avreclipse.cppcompiler.input.1208963467">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.265048592;de.innot.avreclipse.configuration.app.debug.265048592.;de.innot.avreclipse.tool.cppcompiler.app.debug.373422634;de.innot.avreclipse.cppcompiler.input.459308552">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.115956720;de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.115956720.;de.innot.avreclipse.tool.cppcompiler.app.debug.880282652;de.innot.avreclipse.cppcompiler.input.649476527">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.2007273000;de.innot.avreclipse.configuration.app.release.2007273000.;de.innot.avreclipse.tool.compiler.winavr.app.release.362618810;de.innot.avreclipse.compiler.winavr.input.1558634230">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.265048592;de.innot.avreclipse.configuration.app.debug.265048592.;de.innot.avreclipse.tool.compiler.winavr.app.debug.624343265;de.innot.avreclipse.compiler.winavr.input.1259416131">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
@@ -148,9 +273,11 @@
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.115956720;de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.115956720.;de.innot.avreclipse.tool.compiler.winavr.app.debug.1389530244;de.innot.avreclipse.compiler.winavr.input.1551089020">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.2007273000;de.innot.avreclipse.configuration.app.release.2007273000.;de.innot.avreclipse.tool.cppcompiler.app.release.561395067;de.innot.avreclipse.cppcompiler.input.1208963467">
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.2007273000;de.innot.avreclipse.configuration.app.release.2007273000.;de.innot.avreclipse.tool.compiler.winavr.app.release.362618810;de.innot.avreclipse.compiler.winavr.input.1558634230">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620;de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.884209622.605231620.;de.innot.avreclipse.tool.cppcompiler.app.debug.1507895834;de.innot.avreclipse.cppcompiler.input.626075002">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

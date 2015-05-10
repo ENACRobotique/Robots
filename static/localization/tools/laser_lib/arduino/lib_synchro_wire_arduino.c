@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#ifdef ARCH_328P_ARDUINO
+
 #include "Arduino.h"
 #include "lib_synchro_wire_arduino.h"
 
@@ -41,3 +43,5 @@ int wiredSync_signalPresent(){
 void wiredSync_setSignal(int val){
     digitalWrite(syncPin,val);
 }
+
+#endif

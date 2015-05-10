@@ -17,11 +17,11 @@ typedef struct{
     float x, y; // (cm)
 } s2DPUncert_internal;
 
-void gstatus2internal(sGenericStatus *i, s2DPUncert_internal *o);
-void internal2gstatus(s2DPUncert_internal *i, sGenericStatus *o);
+void gstatus2internal(sGenericPosStatus *i, s2DPUncert_internal *o);
+void internal2gstatus(s2DPUncert_internal *i, sGenericPosStatus *o);
 #endif
 
-void pos_uncertainty_update(sGenericStatus *prev, sGenericStatus *next);
-void pos_uncertainty_mix(sGenericStatus *i1, sGenericStatus *i2, sGenericStatus *o);
+void pos_uncertainty_update(sGenericPosStatus *prev, sGenericPosStatus *next);
+void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o);
 
 #endif /* LIB_POSTOOLS_POS_UNCERTAINTY_H_ */

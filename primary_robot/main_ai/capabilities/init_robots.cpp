@@ -5,7 +5,7 @@
  *      Author: Sébastien Malissard
  */
 
-#include <Environment.h>
+#include <Env.h>
 #include <vector>
 
 #include "init_robots.h"
@@ -97,20 +97,24 @@ int loopRobots(){ //TODO end of game
     }
     else{
         for(Robot* r : robots){
+            Point2D<float> pos(0,0);
             if(CapPosition* capPos = dynamic_cast<CapPosition*> (r->caps[eCap::POS])){
-                Point2D<float> pos = capPos->getLastPosXY(), prevPos(r->env->obs[capPos->getIobs()].c.x, r->env->obs[capPos->getIobs()].c.y);
+                Point2D<float> prevPos(r->env->obs[capPos->getIobs()].c.x, r->env->obs[capPos->getIobs()].c.y);
+                pos = capPos->getLastPosXY();
                 if(prevPos != pos){
                     r->env->obs[capPos->getIobs()].c = {pos.x, pos.y};
                     r->env->obs_updated[capPos->getIobs()]++;
                 }
             }
 
-            if(CapAI* capAI = dynamic_cast<CapAI*> (r->caps[eCap::AI])){
-                if(!capAI->loop())
-                    return 0;
-            }
-            if(CapSlave* capSlave = dynamic_cast<CapSlave*> (r->caps[eCap::SLAVE])){
-                capSlave->loop();
+            if(pos.x != 0 && pos.y != 0){
+                if(CapAI* capAI = dynamic_cast<CapAI*> (r->caps[eCap::AI])){
+                    if(!capAI->loop())
+                        return 0;
+                }
+                if(CapSlave* capSlave = dynamic_cast<CapSlave*> (r->caps[eCap::SLAVE])){
+                    capSlave->loop();
+                }
             }
         }
     }

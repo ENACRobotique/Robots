@@ -10,47 +10,27 @@
 
 #include <stdint.h>
 
-typedef enum{
-    SERVO_PRIM_GLASS1_HOLD,
-    SERVO_PRIM_GLASS1_RAISE,
-    SERVO_PRIM_GLASS2_HOLD,
-    SERVO_PRIM_GLASS2_RAISE,
-    SERVO_PRIM_GLASS3_HOLD,
-    SERVO_PRIM_GLASS3_RAISE,
-
-    SERVO_PRIM_LIFT1_UP,
-    SERVO_PRIM_LIFT1_DOOR,
-    SERVO_PRIM_LIFT1_HOLD,
-    SERVO_PRIM_LIFT2_UP,
-    SERVO_PRIM_LIFT2_DOOR,
-    SERVO_PRIM_LIFT2_HOLD,
-
-    SERVO_PRIM_CORN1_RAMP,
-    SERVO_PRIM_CORN2_RAMP,
-    SERVO_PRIM_CORN_DOOR,
-
-    NUM_E_SERVO
-} eServos;
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_servos; // must be <=10
+    uint16_t nb_servos; // must be <=9
     struct __attribute__((packed)){ // 5 bytes
-            eServos id :8; // identifier of the servomotor
-            float angle; // servo setpoint in degrees (0-*)
+    	uint8_t club_id; // identifier of the servomotor (club number)
+    	uint8_t hw_id; // plug number (on the card 0-15)
+        float angle; // servo setpoint in degrees (0-*)
     } servos[];
 } sServos;
 
 typedef enum{
     IHM_STARTING_CORD,
-    IHM_MODE_SWICTH,
+    IHM_MODE_SWITCH,
     IHM_LED,
     IHM_LIMIT_SWITCH_RIGHT,
     IHM_LIMIT_SWITCH_LEFT
 } eIhmElement;
 
 typedef enum {
-    CORD_IN,
-    CORD_OUT
+    CORD_OUT,
+    CORD_IN
 } eIhmCord;
 
 typedef enum {
@@ -59,23 +39,27 @@ typedef enum {
     SWITCH_INTER
 } eIhmSwitch;
 
-typedef enum {
-    LED_OFF,
-    LED_RED,
-    LED_YELLOW,
-    LED_GREEN
-}eIhmLed;
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_states; // must be <=18
+	uint8_t red, green, blue;
+} sRGB;
+
+
+typedef struct __attribute__((packed)){
+    uint16_t nb_states; // must be <=4
     struct __attribute__((packed)){
         eIhmElement id :8; // identifier of the ihm element
-        union{
-            uint16_t state; // generic status
-            eIhmCord state_cord :8;
-            eIhmSwitch state_switch :8;
-            eIhmLed sate_led :8;
-        };
+        union __attribute__((packed)){
+        	eIhmCord state_cord :8;
+        	eIhmSwitch state_switch :8;
+        	struct __attribute__((packed)){
+        		sRGB color1; //first color
+        		sRGB color2; //second color
+        		uint16_t time1 :14; //time while 1st color is on (ms)
+        		uint16_t time2 :14; //time while 2nd color is on (ms)
+        		uint8_t nb :4;  //number of periods (0 for infinite loop)
+        	};
+        } state;
     } states[];
 } sIhmStatus;
 

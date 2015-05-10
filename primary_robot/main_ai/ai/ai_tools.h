@@ -8,9 +8,12 @@
 #ifndef AI_TOOLS_H_
 #define AI_TOOLS_H_
 
+#include <vector>
+
 #include "GeometryTools.h"
 #include "a_star_tools.h"
-#include <vector>
+#include "messages-elements.h"
+
 
 #define RESO_POS 2
 #define END_MATCH 90000 //in ms
@@ -23,7 +26,7 @@
 void printObsActive(std::vector<astar::sObs_t>& obs);
 unsigned int checkPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
 Point2D<float> projectPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
-void colissionDetection();
+int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& pos);
 void posPrimary(std::vector<astar::sObs_t>& obs);
 
 #endif /* AI_TOOLS_H_ */

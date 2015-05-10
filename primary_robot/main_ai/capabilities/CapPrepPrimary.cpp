@@ -48,15 +48,7 @@ int CapPrepPrimary::loop(){
                 return -1;
             }
 
-            sendPos(pos_robot, theta_robot);            // Sending approximate initial position to the propulsion
-            sGenericStatus sta;
-            sta.date = micros();
-            sta.id = ELT_PRIMARY;
-            sta.prop_status.pos.frame = FRAME_PLAYGROUND;
-            sta.prop_status.pos.theta = theta_robot;
-            sta.prop_status.pos.x = pos_robot.x;
-            sta.prop_status.pos.y = pos_robot.y;
-            statuses.receivedNewStatus(sta);            // Save the position send
+            sendPosPrimary(pos_robot, theta_robot);            // Sending approximate initial position to the propulsion
 
             //TODO procedure de mise en place
 
@@ -66,12 +58,13 @@ int CapPrepPrimary::loop(){
         break;
 
     case Step::WAIT_STARTING_CORD: //Wait to take in the starting cord
-        if(capIO->getHMI(IHM_STARTING_CORD) == CORD_IN)
+        if(capIO->getHMI(IHM_STARTING_CORD) == CORD_IN){
             if(CapAI* capAI = dynamic_cast<CapAI*> (robot->caps[eCap::AI]))
                 capAI->initObjective();
 
             logs << INFO << "End step wait starting cord";
             _step = Step::WAIT_START;
+        }
         break;
 
     case Step::WAIT_START: //Wait the start (take off the starting cord)
