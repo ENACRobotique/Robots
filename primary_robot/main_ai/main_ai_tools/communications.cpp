@@ -102,6 +102,7 @@ void sendPing(){
 int roleSetup(bool simu_ai, bool simu_prop){
     int ret;
     sMsg msg;
+    memset(&msg, 0, sizeof(msg));
 
     if(simu_prop){
         role_set_addr(ROLE_PRIM_PROPULSION, ADDRD1_MAIN_PROP_SIMU);
@@ -117,8 +118,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return -1;
+            logs << WAR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return 0;
         }
     }
 
@@ -149,8 +150,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 3: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return -1;
+            logs << WAR << "FAILED ROLE SETUP 3: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return 0;
         }
 
         msg.header.type = E_ROLE_SETUP;
@@ -164,8 +165,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 4: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return -1;
+            logs << WAR << "FAILED ROLE SETUP 4: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return 0;
         }
     }
 
@@ -178,6 +179,7 @@ int roleSetup(bool simu_ai, bool simu_prop){
 void sendObsCfg(const int n, const int rRobot, const int xMin, const int xMax, const int yMin, const int yMax){
     sMsg msgOut;
     int ret;
+    memset(&msgOut, 0, sizeof(msgOut));
 
     msgOut.header.destAddr = role_get_addr(ROLE_MONITORING);
     msgOut.header.type = E_OBS_CFG;
@@ -206,6 +208,7 @@ void sendObss(vector<astar::sObs_t>& obs, vector<uint8_t>& obs_updated){
     static unsigned int prevSendObss;
     static int send_obss_idx = 0;
     int i, ret, N = obs.size();
+    memset(&msgOut, 0, sizeof(msgOut));
 
     if (millis() - prevSendObss > 150){
         prevSendObss = millis();
@@ -278,6 +281,7 @@ int sendPosPrimary(Point2D<float> &p, float theta) {
     }
     logs << MES << "[POS] Sending position to primary robot (" << msgOut.payload.genericPosStatus.pos.x << ", " << msgOut.payload.genericPosStatus.pos.y << ", " << msgOut.payload.genericPosStatus.pos.theta * 180. / M_PI << ")";
 
+    statuses.posSend(ELT_PRIMARY, p);
     return 1;
 }
 
@@ -287,6 +291,7 @@ int sendPosPrimary(Point2D<float> &p, float theta) {
 int sendSpeedPrimary(float speed) {
     sMsg msgOut;
     int ret;
+    memset(&msgOut, 0, sizeof(msgOut));
 
     if (fabs(speed) > MAX_SPEED)
         return -1;

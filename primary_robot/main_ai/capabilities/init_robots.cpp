@@ -15,6 +15,7 @@
 #include "Robot.h"
 #include "CapPosition.h"
 #include "CapPosSimuSecondary.h"
+#include "CapPosSimuAdversary.h"
 #include "CapPreparation.h"
 #include "CapPrepPrimary.h"
 #include "CapIOSimuPrimary.h"
@@ -64,6 +65,11 @@ void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hm
 
         robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color);
         robots.back()->caps[eCap::POS] = new CapPosSimuSecondary(robots.back(), 1);
+
+        robots.push_back(new Robot("", ELT_ADV_PRIMARY, &env));
+
+        robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color==YELLOW?GREEN:YELLOW);
+        robots.back()->caps[eCap::POS] = new CapPosSimuAdversary(robots.back(), 2);
     }
 
     // Call setup method

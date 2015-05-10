@@ -66,7 +66,7 @@ int Cup::loopObj(paramObj par){
 
         for(Actuator& i : par.act){
             if(i.type == ActuatorType::CUP && i.id == _actuator_select){
-                i.full = true;
+                i.cupActuator.full = true;
                 i.cupActuator.distributor = false; //to be sure
             }
         }

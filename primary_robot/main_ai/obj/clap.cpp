@@ -56,7 +56,7 @@ Clap::~Clap() {
 }
 
 void Clap::initObj(paramObj par){
-    _dest.x = par.obs[0].c.x - 25*cos(_access[0].pt.angle);
+    _dest.x = par.obs[0].c.x - 15*cos(_access[0].pt.angle);
     _dest.y = ECART;
 
     path.go2PointOrient(_dest, par.obs, _access_select_angle);
