@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     eAIState_t eAIState = E_AI_SLAVE;
     bool simu_primary = true;
     bool holo_primary = true;
-    bool hmi_simu_primary = false;
+    bool hmi_simu_primary = true;
     eColor_t color_primary = GREEN;
 
 
@@ -91,8 +91,10 @@ int main(int argc, char **argv) {
                 logs.changeFile(optarg);
                 break;
             case 'p':
-                if(strstr(optarg, "real"))
+                if(strstr(optarg, "real")){
                     simu_primary = false;
+                    hmi_simu_primary = false;
+                }
                 else if(strstr(optarg, "simu"))
                     simu_primary = true;
                 if(strstr(optarg, "axle"))

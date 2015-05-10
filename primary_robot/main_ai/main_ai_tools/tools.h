@@ -16,9 +16,9 @@
 
 
 
-#define MAX_SPEED_ROT   M_PI_2  //in rad/s
-#define MAX_SPEED       20      //in cm/s
-#define DELAY_MS           10      //in ms
+#define MAX_SPEED           20.      //in cm/s
+#define MAX_SPEED_ROT       (MAX_SPEED/14)  //in rad/s
+#define DELAY_MS            40      //in ms
 
 typedef enum {
     E_AI_SLAVE, E_AI_PROG, E_AI_AUTO
