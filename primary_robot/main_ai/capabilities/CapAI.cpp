@@ -21,8 +21,11 @@ extern "C"{
 }
 #include "clap.h"
 #include "spot.h"
+#include "spot2.h"
+#include "spot3.h"
 #include "cup.h"
 #include "dropCup.h"
+#include "light.h"
 #include "environment.h"
 
 
@@ -39,6 +42,18 @@ int CapAI::loop(){
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
     CapActuator* capActuator = dynamic_cast<CapActuator*> (robot->caps[eCap::ACTUATOR]);
+
+    float angleRobot = capPos->getLastTheta();
+    Point2D<float> posRobot = capPos->getLastPosXY();
+    eColor_t color = capTeam->getColor();
+
+    paramObj par = {posRobot,
+            angleRobot,
+            color,
+            robot->env->obs,
+            robot->env->obs_updated,
+            listObj,
+            capActuator->_act};
 
     start_time = capTeam->getStartGame();
 
@@ -70,7 +85,7 @@ int CapAI::loop(){
         if (((millis() - last_time) > 1000) || (contact == 1)){ //Calculation of the next objective
             last_time = millis();
 
-            if ((current_obj = nextObj(start_time, listObj, robot->env->obs, robot->env->obs_updated ,(int) capPos->getIobs(), capProp->getPropType()==AXLE?true:false, capActuator->_act)) != -1) {
+            if ((current_obj = nextObj(start_time, (int) capPos->getIobs(), capProp->getPropType()==AXLE?true:false, par)) != -1) {
                 pt_select = listObj[current_obj]->getDestPoint();
                 logs << INFO << "Selected point is (" << pt_select.x << " ; " << pt_select.y << ")";
 
@@ -90,17 +105,8 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        float angleRobot = capPos->getLastTheta();
-        Point2D<float> posRobot = capPos->getLastPosXY();
-
-        paramObj par = {posRobot,
-                angleRobot,
-                robot->env->obs,
-                robot->env->obs_updated,
-                listObj,
-                capActuator->_act};
-
         if (metObj(current_obj, par) == 0){
+            last_time = 0; //mode obj < 1 second
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
@@ -130,8 +136,15 @@ void CapAI::initObjective(){
         exit(EXIT_FAILURE);
     }
 
-    for(unsigned int i = 0 ; i < 8 ; i++)
+    for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
+
+    for(unsigned int i = 0 ; i < 2 ; i++)
+        listObj.push_back(new Spot2(i, capTeam->getColor()));
+
+    listObj.push_back(new Spot3(robot->env->obs, capTeam->getColor()));
+
+    listObj.push_back(new Light(capTeam->getColor()));
 
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));

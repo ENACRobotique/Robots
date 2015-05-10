@@ -26,12 +26,13 @@ extern "C"{
  *  <0 is error.
  *
  */
-int time2rad(uint32_t time, float *ret){
+int time2rad(uint32_t stime, float *ret){
     int tempIndex=0;
     int tempIndexI=-1;
     int err=0;
     int tries=0;
     uint32_t tempPeriod=0,tempDate=0;
+    uint32_t time = sl2micros(stime);   //date converted to local
 #ifdef DEBUG_LOC
     uint32_t earliest=0,oldest=0;
 #endif
@@ -103,7 +104,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     msg.header.type=E_GENERIC_POS_STATUS;
     msg.header.destAddr=role_get_addr(ROLE_PRIM_AI);
 
-    msg.payload.genericPosStatus.date=pLoad->date;        // todo : synchronize this with ia
+    msg.payload.genericPosStatus.date=sl2micros(pLoad->date);        // fixme : synchronize this with ia
     msg.payload.genericPosStatus.id=(origin==ADDRX_MOBILE_1?ELT_ADV_PRIMARY:ELT_ADV_SECONDARY);
 
     msg.payload.genericPosStatus.pos.x=(float)(pLoad->value)/10.*sin(angle);
@@ -119,7 +120,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     bn_send(&msg);
 #ifdef DEBUG_CALIBRATION
     int intangle10 = ((int)((angle*10*180./M_PI))%360);
-    bn_printfDbg((char*)"%hx : (%d.%d °,%lu mm) (%d,%d)\n", origin, intangle10/10, intangle10%10, pLoad->value, (int)msg.payload.genericStatus.adv_status.pos.x,(int)msg.payload.genericStatus.adv_status.pos.y);
+    bn_printfDbg((char*)"%hx : (%d.%d °,%lu mm) (%d,%d)\n", origin, intangle10/10, intangle10%10, pLoad->value, (int)msg.payload.genericPosStatus.pos.x,(int)msg.payload.genericPosStatus.pos.y);
 #endif
     return 0;
 

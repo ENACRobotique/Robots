@@ -25,7 +25,9 @@
 
 void printObsActive(std::vector<astar::sObs_t>& obs);
 unsigned int checkPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
+unsigned int checkPointInLimitPlayground(const Point2D<float>& p, const float limit);
 Point2D<float> projectPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
+Point2D<float> projectPointInLimitPlayground(const Point2D<float>& p,  const float limit);
 int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& pos);
 void posPrimary(std::vector<astar::sObs_t>& obs);
 

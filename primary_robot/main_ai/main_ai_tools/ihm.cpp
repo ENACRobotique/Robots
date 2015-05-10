@@ -8,13 +8,12 @@
 #include <ihm.h>
 
 #include <iostream>
+#include <cstring>
+#include <cmath>
 
 #include "tools.h"
 #include "network_cfg.h"
 #include "botNet_core.h"
-extern "C"{
-#include <math.h>
-}
 
 eIhmLed ihmLedConvertRGBToEnum(sRGB rgb){
     if(rgb.red < 64 && rgb.green > 127 && rgb.blue < 64)
@@ -68,6 +67,7 @@ void Ihm::receivedNewIhm(sIhmStatus &ihm){ //TODO check all value with arduino_i
 
 void Ihm::sendIhm(const eIhmElement& id, const unsigned int& state){
     sMsg msgOut ;
+    memset(&msgOut, 0, sizeof(msgOut));
 
     msgOut.header.destAddr = ADDRI_MAIN_IO;
     msgOut.header.type = E_IHM_STATUS;

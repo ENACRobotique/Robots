@@ -136,14 +136,14 @@ void loop(){
             delay(WIREDSYNC_LOWTIME/1000);
             wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
             uint32_t end = micros();
-            bn_printfDbg("tur, %lu,",micros2s(end));
+            bn_printfDbg("tur, %lu,",micros2sl(end));
         }
 #endif
 #ifdef DEBUG
-    bn_printfDbg("%lu period %lu",micros(),domi_meanPeriod());
+    bn_printfDbg("%lu period %lu %lu",micros(),domi_meanPeriod(),domi_lastTR());
 //        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
 #endif
-#ifdef DEBUG_CALIBRATION
+#if defined(DEBUG_CALIBRATION) && defined(DEBUG_CALIBRATION_speed)
     static int setSpeed=0;
     switch (setSpeed){
     case 0 : setSpeed=1;

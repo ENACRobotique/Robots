@@ -19,7 +19,10 @@
 void printObsActive(vector<astar::sObs_t>& obs) {
     logs << INFO << "List of obs[i].active :\n";
     for (unsigned int i = 0; i < obs.size(); i++)
-        logs << "    obs[" << i << "].active=" << obs[i].active << "\n";
+        if(obs[i].active)
+            logs << "    obs[" << i << "].active=" << "1" << "\n";
+        else
+            logs << "    obs[" << i << "].active=" << "0" << "\n";
 }
 
 
@@ -41,12 +44,25 @@ unsigned int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs
     return 0;
 }
 
+unsigned int checkPointInLimitPlayground(const Point2D<float>& p, const float limit){
+
+    //playground
+    if(p.x < limit || p.x > 300 - limit || p.y < limit || p.y > 200 - limit)
+        return 1;
+
+    //stairs
+    if(p.y > 200 - 58 - limit && p.x > 96 - limit && p.x < 204 + limit)
+        return 2;
+
+    return 0;
+}
+
 /*
  * Project the point if inside an obstacle
  */
 Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
     unsigned int n = checkPointInObs(p, obs);
-
+logs << WAR << "Projection function: n="<< n;
     if (n > 0) {
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         Point2D<float> r;
@@ -62,6 +78,50 @@ Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>&
 
         //TODO if the point is in several obstacle !
         //TODO MAX of projection
+
+        return r;
+    }
+
+    return p;
+}
+
+Point2D<float> projectPointInLimitPlayground(const Point2D<float>& p,  const float limit){
+
+    if (checkPointInLimitPlayground(p, limit) > 0) {
+        Point2D<float> r(p);
+logs << INFO << "Projection detect";
+        if(r.x < limit){
+            Line2D<float> l({limit, 0}, (Point2D<float>){limit, 200});
+            r = l.project(r);
+        }
+        if(r.x > 300 - limit){
+            Line2D<float> l({300 - limit, 0}, (Point2D<float>){300 - limit, 200});
+            r = l.project(r);
+        }
+        if(r.y < limit){
+            Line2D<float> l({0, limit}, (Point2D<float>){300, limit});
+            r = l.project(r);
+        }
+        if(r.y > 200 - limit){
+            Line2D<float> l({0, 200 - limit}, (Point2D<float>){300, 200 - limit});
+            r = l.project(r);
+        }
+
+        if(checkPointInLimitPlayground(r, limit) > 1){
+            logs << INFO << "Projection detect escalier";
+            if(r.y > 200 - 58 - limit){
+                Line2D<float> l({0, 200 - 58 - limit}, (Point2D<float>){300, 200 - 58 - limit});
+                r = l.project(r);
+            }
+            if(r.x > 150 && r.x < 204 + limit){
+                Line2D<float> l({204 + limit, 0}, (Point2D<float>){204 + limit, 200});
+                r = l.project(r);
+            }
+            if(r.x < 150 && r.x > 96 - limit){
+                Line2D<float> l({96 - limit, 0}, (Point2D<float>){96 - limit, 200});
+                r = l.project(r);
+            }
+        }
 
         return r;
     }

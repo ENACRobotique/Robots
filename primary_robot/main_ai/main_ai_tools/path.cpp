@@ -192,6 +192,7 @@ void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs
             logs << INFO << "go2Point() : New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
             addPath2(path);
             sendRobot(holo, atan2(_path[_path.size()-1].p2.y - _path[_path.size()-1].p1.y, _path[_path.size()-1].p2.x - _path[_path.size()-1].p1.x));
+            free(path.path);
         }
         else {
             logs << INFO << "go2Point() : No path from 0a to " << N - 1;
@@ -468,7 +469,7 @@ bool Path::checkSamePath2(deque<sTrajEl_t>& path){
  * Return 1 if the same path else 0.
  */
 bool Path::checkSamePathOrient(deque<sTrajOrientEl_t>& path){
-    int i = path.size(), j = _path_orient.size();
+    int i = path.size() - 1, j = _path_orient.size() - 1;
 
     if(i != j)
         return false;

@@ -18,7 +18,7 @@
 
 Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E_SPOT, ActuatorType::ELEVATOR, true), _num(num), _color(color){
 
-    if(num > 8){
+    if(num > 4){
         logs << ERR << "Num too big";
     }
 
@@ -41,7 +41,13 @@ Spot::~Spot() {
     // TODO Auto-generated destructor stub
 }
 
-int Spot::loopObj(paramObj){
+int Spot::loopObj(paramObj par){
+    par.act[_actuator_select].elevator.number++;
+    par.act[_actuator_select].elevator.empty = false;
+
+    if(par.act[_actuator_select].elevator.number == 4)
+        par.act[_actuator_select].elevator.full = true;
+
     _state = FINISH;
     return 0;
 };
