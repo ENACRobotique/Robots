@@ -72,6 +72,7 @@ class Light : public Obj{
                     break;
                 case lightStep::END_LIGHT:
                     if(par.posRobot.distanceTo(destSelect) < 1.){
+                        par.act[_actuator_select].elevator.ball = true;
                         _state = FINISH;
                         return 0;
                     }
@@ -91,7 +92,7 @@ class Light : public Obj{
 
         for(i = 0 ; i < par.act.size() ; i++){
             if( par.act[i].type == ELEVATOR){
-                if(!par.act[i].elevator.ball && par.act[i].empty)
+                if(!par.act[i].elevator.ball && par.act[i].elevator.empty)
                     break;
             }
         }

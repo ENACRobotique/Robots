@@ -40,8 +40,8 @@ class CapActuator : public Capability{
                 _act.push_back(spot);
                 _act.back().type = ActuatorType::ELEVATOR;
                 _act.back().id = i;
-                _act.back().full = false;
-                _act.back().empty = true;
+                _act.back().elevator.full = false;
+                _act.back().elevator.empty = true;
                 _act.back().angle = spotAngle[i];
                 //TODO _act.back().pos
                 _act.back().elevator.ball = i==0?true:false;
@@ -52,8 +52,7 @@ class CapActuator : public Capability{
                 _act.push_back(cup);
                 _act.back().id = i;
                 _act.back().type = ActuatorType::CUP;
-                _act.back().full = false;
-                _act.back().empty = true;
+                _act.back().cupActuator.full = false;
                 _act.back().angle = cupAngle[i];
                 _act.back().pos = cupPos[i];
                 _act.back().cupActuator.distributor = false;
@@ -63,7 +62,6 @@ class CapActuator : public Capability{
                 _act.push_back(popCornLoader);
                 _act.back().id = i;
                 _act.back().type = ActuatorType::POP_CORN_LOADER;
-                _act.back().full = false; /* nothing for this actuator*/
                 _act.back().angle = popCornLoaderAngle[i];
                 //TODO _act.back().pos
                 _act.back().cupActuator.distributor = false;

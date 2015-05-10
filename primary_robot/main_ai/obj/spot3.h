@@ -36,11 +36,8 @@ class Spot3 : public Obj{
 
             objEP.pt.p = EP;
             Vector2D<float> v1({obs[num_obs].c.x,obs[num_obs].c.y}, EP), v2(1,0);
-            logs << WAR << "EP.x" << EP.x << "EP.y" << EP.y;
-            logs << WAR << "obs.x=" << obs[num_obs].c.x << "obs.y=" << obs[num_obs].c.y;
             objEP.pt.angle = v2.angle(v1);
-logs << ERR << "angle =" <<  objEP.pt.angle*180/M_PI;
-//objEP.cir.c.xgetchar();
+
             _access.push_back(objEP);
             _num_obs.push_back(num_obs);
 
@@ -60,6 +57,13 @@ logs << ERR << "angle =" <<  objEP.pt.angle*180/M_PI;
             if(par.posRobot.distanceTo(destPoint) < 1.){
                 //TODO servo elevator
                 _state = FINISH;
+
+                par.act[_actuator_select].elevator.number++;
+                par.act[_actuator_select].elevator.empty = false;
+
+                if(par.act[_actuator_select].elevator.number == 4)
+                    par.act[_actuator_select].elevator.full = true;
+
                 return 0;
             }
             return 1;
@@ -67,6 +71,30 @@ logs << ERR << "angle =" <<  objEP.pt.angle*180/M_PI;
 
         eObj_t type() const override {
             return E_SPOT3;
+        }
+
+        int updateDestPointOrient(paramObj par){
+            unsigned int i;
+
+            if(par.act.empty())
+                return -1;
+
+            for(i = 0 ; i < par.act.size() ; i++){ //TODO optimize for the moment the first find is used
+                if( par.act[i].type == _typeAct){
+                    if((!par.act[i].elevator.full) && par.act[i].elevator.ball == true)
+                        break;
+                }
+            }
+
+            if(i == par.act.size()){
+                _actuator_select = -1;
+                return -1;
+            }
+
+             _access_select_angle += par.act[i].angle;
+             _actuator_select = par.act[i].id;
+
+            return 0;
         }
 
     private:

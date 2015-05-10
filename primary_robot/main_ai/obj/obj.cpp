@@ -230,7 +230,6 @@ int Obj::updateDestPointOrient(paramObj par){
 
     for(i = 0 ; i < par.act.size() ; i++){ //TODO optimize for the moment the first find is used
         if( par.act[i].type == _typeAct){
-            if((!par.act[i].full && _get) || (par.act[i].full && !_get))
                 break;
         }
     }
@@ -299,7 +298,7 @@ float Obj::getYield(const unsigned int start_time){
 
 
 void Obj::print(){
-    logs << DEBUG << fixed << setprecision(2) << "type : " << objType() << " : " << objState();
+    logs << INFO << fixed << setprecision(2) << "type : " << objType() << " : " << objState();
     if(_state == ACTIVE){
         if(_actuator_select == -1 && _dist > 0)
             logs << " : no actuator available";

@@ -69,8 +69,6 @@ class Spot2 : public Obj{
             Vector2D<float> v1(accessPoint[num], _posSpot[0]), v2(0,1);
             objEP.delta = v2.angle(v1);
 
-            logs << ERR << objEP.delta*180/M_PI;
-
             _access.push_back(objEP);
         }
         virtual ~Spot2(){};
@@ -133,6 +131,17 @@ class Spot2 : public Obj{
                     par.obs[_num_obs_loc[1]].active = 0;
                     par.obsUpdated[_num_obs_loc[0]]++;
                     par.obsUpdated[_num_obs_loc[1]]++;
+
+                    par.act[_actuator_select].elevator.number += 2;
+                    par.act[_actuator_select].elevator.empty = false;
+
+                    if(par.act[_actuator_select].elevator.number > 4){
+                        logs << ERR << "No place in elevator";
+                    }
+
+                    if(par.act[_actuator_select].elevator.number == 4)
+                        par.act[_actuator_select].elevator.full = true;
+
                     return 0;
                     break;
             }
@@ -142,6 +151,30 @@ class Spot2 : public Obj{
         eObj_t type() const override {
             return E_SPOT2;
         };
+
+        int updateDestPointOrient(paramObj par){
+            unsigned int i;
+
+            if(par.act.empty())
+                return -1;
+
+            for(i = 0 ; i < par.act.size() ; i++){ //TODO optimize for the moment the first find is used
+                if( par.act[i].type == _typeAct){
+                    if((!par.act[i].elevator.full && par.act[i].elevator.number < 3) && par.act[i].elevator.ball == true)
+                        break;
+                }
+            }
+
+            if(i == par.act.size()){
+                _actuator_select = -1;
+                return -1;
+            }
+
+             _access_select_angle += par.act[i].angle;
+             _actuator_select = par.act[i].id;
+
+            return 0;
+        }
 
     private :
         float rotAngle;

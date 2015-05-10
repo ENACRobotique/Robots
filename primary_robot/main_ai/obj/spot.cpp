@@ -41,7 +41,13 @@ Spot::~Spot() {
     // TODO Auto-generated destructor stub
 }
 
-int Spot::loopObj(paramObj){
+int Spot::loopObj(paramObj par){
+    par.act[_actuator_select].elevator.number++;
+    par.act[_actuator_select].elevator.empty = false;
+
+    if(par.act[_actuator_select].elevator.number == 4)
+        par.act[_actuator_select].elevator.full = true;
+
     _state = FINISH;
     return 0;
 };

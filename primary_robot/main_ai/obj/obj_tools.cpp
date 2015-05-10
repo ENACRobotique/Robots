@@ -131,8 +131,26 @@ int nextObj(const unsigned int start_time, const int robot, const bool axle, par
         par.obsUpdated[N - 1]++;
     }
 
+    logs << INFO << "State of objectives :";
     for(Obj* i : par.obj)  // Print the all the objective list
         i->print();
+
+    logs << INFO << "State of actuators :";
+    for(Actuator const& i : par.act){
+        logs << INFO << "type=" << i.type
+                     << "; id=" << i.id;
+
+        if(i.type == ELEVATOR){
+            logs << "; number element=" << i.elevator.number
+                 << "; light=" << i.elevator.ball
+                 << "; full=" << i.elevator.full
+                 << "; empty=" << i.elevator.empty;
+        }
+        else if(i.type == CUP){
+            logs << "; distributor=" << i.cupActuator.distributor
+                 << "; full=" << i.cupActuator.full;
+        }
+    }
 
     logs << INFO << "The selected objective is :" << tmp_inx;
 

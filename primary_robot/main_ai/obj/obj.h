@@ -37,17 +37,18 @@ typedef enum {
 typedef struct {
         ActuatorType type;
         int id;         //id by type of actuator
-        bool full;      //true if full
-        bool empty;
         float angle;
         Point2D<float> pos;
 
         struct{
+            bool full;
+            bool empty;
             unsigned int number;
             bool ball;
         }elevator;
 
         struct{
+            bool full;
             bool distributor; //true if the cup was fill by a distributor
         }cupActuator;
 
@@ -83,7 +84,7 @@ typedef struct {
 } sObjEntry_t;
 
 typedef enum {
-    ACTIVE, WAIT_MES, NO_TIME, FINISH
+    ACTIVE, WAIT_MES, NO_TIME, WAIT_FREE_ZONE,FINISH
 } eStateObj_t;
 class Obj ;
 typedef struct{
@@ -116,7 +117,7 @@ class Obj {
 
 
         float getDist() const;
-        sPath_t getPath() const;
+        sPath_t const& getPath() const;
         Point2D<float> getDestPoint() const;
         float getDestPointOrient() const;
         eStateObj_t getState() const;
