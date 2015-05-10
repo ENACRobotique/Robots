@@ -10,7 +10,7 @@
 
 
 
-extern sState sservo_selecter1;
+extern sState sservo_deg_validation;
 
 void servo_selecter1();
 

@@ -1,5 +1,5 @@
 /*
- * state_servo_selecter2.h
+ * state_servo_deg_tps_reel.h
  *
  *  Created on: 03 avril 2014
  *      Author: Fab
@@ -10,7 +10,7 @@
 
 
 
-extern sState sservo_selecter2;
+extern sState sservo_deg_tps_reel;
 
 void servo_selecter2();
 

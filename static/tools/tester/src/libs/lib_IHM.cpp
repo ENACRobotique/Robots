@@ -9,24 +9,33 @@
 #include <params.h>
 #include <state_types.h>
 #include <stddef.h>
+#include <stdarg.h>
 #include <tools.h>
-#include "state_blink.h"
+#include "lib_IHM.h"
 
 #ifndef NOLCD
 #include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
 LiquidCrystal lcd(LCD1,LCD2,LCD3,LCD4,LCD5,LCD6); //pins a vérifier
 #endif
 
+Encoder myEnc(ENCODER1, ENCODER2);
 
-void afficher(const char * chaine)
+void afficher(const char * format...)
 {
+	char buffer[17];
+
+	va_list ap;
+	va_start(ap, format);
+	vsnprintf(buffer, sizeof(buffer), format, ap);
+	va_end(ap);
+
 #ifndef NOLCD
 	  lcd.clear();
 	  lcd.home();
-	  lcd.write(chaine);
+	  lcd.write(buffer);
 #endif
 #ifdef NOLCD
-		Serial.println(chaine);
+		Serial.println(buffer);
 #endif
 }
 

@@ -9,8 +9,11 @@
 #define STATE_BLINK_H_
 
 #include <state_types.h>
+#include "Encoder.h"
 
-void afficher(const char* chaine);
+extern Encoder myEnc;
+
+void afficher(const char * format...) __attribute__((format (printf, 1, 2)));
 
 void ret();
 

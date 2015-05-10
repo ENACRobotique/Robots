@@ -12,11 +12,11 @@
 
 #include "state_Menu_principal.h"
 #include "state_Menu_servo.h"
-#include "state_servo_selecter1.h"
-#include "state_blink.h"
+#include "state_servo_deg_validation.h"
+#include "lib_IHM.h"
 
 
-sState* testservo_selecter1(){
+sState* testservo_deg_validation(){
 	static int memAngle=servotest.read();
 	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();
@@ -49,11 +49,7 @@ sState* testservo_selecter1(){
 
 	if(Angle!=memAngle)
 	{
-		char affich[16];
-		//int serv=servotest.read();
-		//snprintf(affich,17,"Angle= %d %d",Angle,serv);
-		snprintf(affich,17,"Angle= %d",Angle);
-		afficher(affich);
+		afficher("Angle= %d",Angle);
 		memAngle=Angle;
 	}
 
@@ -66,7 +62,7 @@ sState* testservo_selecter1(){
 	}
     return NULL;
 }
-void initservo_selecter1(sState *prev){
+void initservo_deg_validation(sState *prev){
 	servotest.attach(PIN_PWM_SERVO);
 	int angle=servotest.read();
 	int value_enc=angle*2.0/5.0;
@@ -75,19 +71,19 @@ void initservo_selecter1(sState *prev){
 	snprintf(affich,17,"Angle = %d",angle);
 	afficher(affich);
 }
-void deinitservo_selecter1(sState *next){
+void deinitservo_deg_validation(sState *next){
 	servotest.detach();
 }
 
-void servo_selecter1(){
+void servo_deg_validation(){
 
 }
 
-sState sservo_selecter1={
+sState sservo_deg_validation={
     0,
-    &initservo_selecter1,
-    &deinitservo_selecter1,
-    &testservo_selecter1
+    &initservo_deg_validation,
+    &deinitservo_deg_validation,
+    &testservo_deg_validation
 };
 
 

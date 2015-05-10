@@ -10,13 +10,12 @@
 #include "../tools.h"
 #include "state_types.h"
 
-#include "state_Menu_principal.h"
 #include "state_Menu_servo.h"
-#include "state_servo_selecter2.h"
-#include "state_blink.h"
+#include "state_servo_deg_tps_reel.h"
+#include "lib_IHM.h"
 
 
-sState* testservo_selecter2(){
+sState* testservo_deg_tps_reel(){
 	static int memAngle=servotest.read();
 	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();
@@ -31,26 +30,20 @@ sState* testservo_selecter2(){
 
 	if(pos_enc!=pos_enc_old)
 	{
-		long deltat=millis()-temps_enc;
-		if(deltat<DUREE_BIG_STEPS)
+		if(millis()-temps_enc<DUREE_BIG_STEPS)
 		{
 			delta=10;
 		}
 		temps_enc=millis();
 	}
-	int Angle = max((memAngle+delta*(pos_enc-pos_enc_old)),0);
-	Angle=min(Angle,180);
+	int Angle = CLAMP(0,memAngle+delta*(pos_enc-pos_enc_old),180);
 	pos_enc_old=pos_enc;
 
 	servotest.write(Angle);
 
 	if(Angle!=memAngle)
 	{
-		char affich[16];
-		//int serv=servotest.read();
-		//snprintf(affich,17,"Angle= %d %d",Angle,serv);
-		snprintf(affich,17,"Angle= %d",Angle);
-		afficher(affich);
+		afficher("Angle= %d", Angle);
 		memAngle=Angle;
 	}
 
@@ -62,7 +55,7 @@ sState* testservo_selecter2(){
 	}
     return NULL;
 }
-void initservo_selecter2(sState *prev){
+void initservo_deg_tps_reel(sState *prev){
 	servotest.attach(PIN_PWM_SERVO);
 	int angle=servotest.read();
 	int value_enc=angle*2.0/5.0;
@@ -71,19 +64,19 @@ void initservo_selecter2(sState *prev){
 	snprintf(affich,17,"Angle = %d",angle);
 	afficher(affich);
 }
-void deinitservo_selecter2(sState *next){
+void deinitservo_deg_tps_reel(sState *next){
 	servotest.detach();
 }
 
-void servo_selecter2(){
+void servo_deg_tps_reel(){
 
 }
 
-sState sservo_selecter2={
+sState sservo_deg_tps_reel={
     0,
-    &initservo_selecter2,
-    &deinitservo_selecter2,
-    &testservo_selecter2
+    &initservo_deg_tps_reel,
+    &deinitservo_deg_tps_reel,
+    &testservo_deg_tps_reel
 };
 
 
