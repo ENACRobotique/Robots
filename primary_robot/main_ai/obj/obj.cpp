@@ -242,6 +242,9 @@ float Obj::getYield(const unsigned int start_time){
     }
 
     switch (_type) {
+        case E_LIGHT:
+            ratio = 1/_dist * 100 + 500;
+            break;
         case E_CLAP:
         case E_CUP:
         case E_SPOT:
