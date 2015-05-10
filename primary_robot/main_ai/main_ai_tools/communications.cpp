@@ -117,8 +117,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return -1;
+            logs << WAR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return 0;
         }
     }
 
@@ -149,8 +149,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 3: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return -1;
+            logs << WAR << "FAILED ROLE SETUP 3: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return 0;
         }
 
         msg.header.type = E_ROLE_SETUP;
@@ -164,8 +164,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 4: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return -1;
+            logs << WAR << "FAILED ROLE SETUP 4: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return 0;
         }
     }
 
