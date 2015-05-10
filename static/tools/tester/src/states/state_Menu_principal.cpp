@@ -1,42 +1,37 @@
 /*
- * state-blink.cpp
+ * state-Menu_principal.cpp
  *
- *  Created on: 15 mai 2013
- *      Author: quentin
+ *  Created on: 2015
+ *      Author: Fab
  */
 
 #include <Arduino.h>
 #include <Encoder.h>
 #include <params.h>
-#include <state_blink.h>
+#include <lib_IHM.h>
 #include <state_Menu_servo.h>
 #include <state_Menu_pwm.h>
 #include <state_types.h>
 #include <stddef.h>
-//#include "../tools.h"
 #include "state_Menu_principal.h"
-#include "state_analogRead.h"
 
 #include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
 
-#define NB_menu_principal 5
-
-Encoder myEnc(ENCODER1, ENCODER2);
-
-
-sState* testMenu_principal(){
-	const char *menu_principal[] = {
+#define NB_menu_principal 4
+const char *menu_principal[] = {
 		  "SERVOS",
 		  "PWM",
-		  "Analog Read",
 		  "I2C",
-		  "LIAISON SERIE",
+		  "UART",
 		};
 
-
+sState* testMenu_principal(){
 		static int memPosition;
-		int Position = (abs(myEnc.read())/2)%NB_menu_principal;    //position du selecteur
-		//int Position = (myEnc.read()/2)%NB_menu_principal;    //position du selecteur
+		int Position = (myEnc.read()/2)%NB_menu_principal;    //position du selecteur modulo le nombre de choix possible
+		if (Position < 0){		//on ne descend pas dans les négatifs
+			Position=0;
+			myEnc.write(0);
+		}
 
 		   if(Position != memPosition)  //on affiche que si on change de position
 		   {
@@ -44,17 +39,16 @@ sState* testMenu_principal(){
 		      memPosition=Position;
 		   }
 
-		  if(!digitalRead(SELECT))
+		  if(!digitalRead(SELECT))	//si on appui sur select:
 		  {
-			  while(!digitalRead(SELECT));
+			  while(!digitalRead(SELECT));		//on attend qu'on relache
 
-		    switch (Position)
+		    switch (Position)		//et on va dans le bon état
 		    {
 		        case 0:{ return(&sMenu_servo); break; }
 		        case 1:{ return(&sMenu_pwm); break; }
-		        case 2:{ return(&sanalogRead); break; }
-	//	        case 3:{ i2c(); break; }
-	//	        case 4:{ liaison_serie(); break; }
+	//	        case 2:{ i2c(); break; }
+	//	        case 3:{ liaison_serie(); break; }
 		        //default:
 		     }
 		  }
@@ -64,13 +58,6 @@ sState* testMenu_principal(){
 }
 
 void initMenu_principal(sState *prev){
-	const char *menu_principal[] = {
-			  "SERVOS",
-			  "PWM",
-			  "Analog Read",
-			  "I2C",
-			  "LIAISON SERIE",
-			};
 	myEnc.write(0);
 	afficher(menu_principal[0]);
 

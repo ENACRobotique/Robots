@@ -13,32 +13,10 @@
 #include "state_Menu_principal.h"
 #include "state_Menu_pwm.h"
 #include "state_pwm_0_255.h"
-#include "state_blink.h"
+#include "lib_IHM.h"
 
 
 sState* testpwm_0_255(){
-/*	static int memPosition=0;
-	int Position = (myEnc.read()/2*5)%260;
-	if (Position<0)
-	{
-		Position=0;
-		myEnc.write(0);
-	}
-
-	if(!digitalRead(SELECT))	//nécessite de valider
-	{
-		while(!digitalRead(SELECT));	//attente du relachement du bouton
-		analogWrite(PIN_PWM_SERVO,Position);
-	}
-
-	if(Position!=memPosition)
-	{
-		char affich[16];
-		snprintf(affich,17,"Pos= %d /255",Position);
-		afficher(affich);
-		memPosition=Position;
-	}
-*/
 	static int memValue=0;
 	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();

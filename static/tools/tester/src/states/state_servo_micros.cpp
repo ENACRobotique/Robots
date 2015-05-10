@@ -13,7 +13,7 @@
 #include "state_Menu_principal.h"
 #include "state_Menu_servo.h"
 #include "state_servo_micros.h"
-#include "state_blink.h"
+#include "lib_IHM.h"
 
 
 sState* testservo_micros(){

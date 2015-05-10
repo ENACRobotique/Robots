@@ -1,8 +1,8 @@
 /*
- * state-blink.cpp
+ * state_Menu_servo.cpp
  *
- *  Created on: 15 mai 2013
- *      Author: quentin
+ *  Created on: 2015
+ *      Author: Fab
  */
 
 #include "Arduino.h"
@@ -12,27 +12,22 @@
 
 #include "state_Menu_principal.h"
 #include "state_Menu_servo.h"
-#include "state_blink.h"
-#include "state_servo_selecter1.h"
-#include "state_servo_selecter2.h"
+#include "lib_IHM.h"
+#include "state_servo_deg_validation.h"
+#include "state_servo_deg_tps_reel.h"
 #include "state_servo_micros.h"
-#define NB_menu_servo 3
-
-
 
 Servo servotest;
 
+#define NB_menu_servo 3
+const char *menu_servo[] = {
+	  "ANGLE tps reel",
+	  "ANGLE validation",
+	  "MICROSECONDES",
+	};
 
 sState* testMenu_servo(){
-	const char *menu_servo[] = {
-		  "ANGLE tps reel",
-		  "ANGLE validation",
-		  "MICROSECONDES",
-		};
-
-
 		static int memPosition;
-//int Position = (abs(myEnc.read())/2)%NB_menu_servo;    //position du selecteur
 		int Position = (myEnc.read()/2)%NB_menu_servo;    //position du selecteur
 		   if(Position != memPosition)  //on affiche que si on change de position
 		   {
@@ -45,8 +40,8 @@ sState* testMenu_servo(){
 			while(!digitalRead(SELECT));
 		    switch (Position)
 		    {
-		        case 0:{ return(&sservo_selecter2); break; }
-		        case 1:{ return(&sservo_selecter1); break; }
+		        case 0:{ return(&sservo_deg_tps_reel); break; }
+		        case 1:{ return(&sservo_deg_validation); break; }
 		        case 2:{ return(&sservo_micros); break; }
 		        //default:
 		     }
@@ -64,8 +59,7 @@ sState* testMenu_servo(){
 }
 void initMenu_servo(sState *prev){
 			myEnc.write(0);
-//int Position = (abs(myEnc.read())/2)%NB_menu_servo;
-			afficher("ANGLE tps reel");
+			afficher(menu_servo[0]);
 }
 void deinitMenu_servo(sState *next){
 

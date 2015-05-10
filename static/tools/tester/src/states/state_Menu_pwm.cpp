@@ -12,7 +12,7 @@
 
 #include "state_Menu_principal.h"
 #include "state_Menu_pwm.h"
-#include "state_blink.h"
+#include "lib_IHM.h"
 #include "state_pwm_0_255.h"
 #include "state_pwm_pc.h"
 #include "state_pwm_0_5.h"
