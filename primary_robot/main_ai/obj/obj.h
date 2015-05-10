@@ -27,7 +27,7 @@ typedef enum{
 }objective;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT, E_SPOT2, E_LIGHT, E_CUP, E_DROP_CUP
+    E_NULL, E_CLAP, E_SPOT, E_SPOT2, E_SPOT3, E_LIGHT, E_CUP, E_DROP_CUP
 } eObj_t;
 
 typedef enum {
@@ -148,6 +148,8 @@ class Obj {
                     return "SPOT";
                 case E_SPOT2:
                     return "SPOT2";
+                case E_SPOT3:
+                    return "SPOT3";
                 case E_CUP:
                     return "CUP ";
                 case E_DROP_CUP:
