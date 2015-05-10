@@ -276,6 +276,7 @@ float Obj::getYield(const unsigned int start_time){
     }
 
     switch (_type) {
+        case E_SPOT3:
         case E_SPOT2:
             ratio = 1/_dist * 100 + 1000;
             break;

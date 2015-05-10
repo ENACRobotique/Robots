@@ -51,11 +51,9 @@ logs << ERR << "angle =" <<  objEP.pt.angle*180/M_PI;
 
         void initObj(paramObj par) override {
             Point2D<float> posSpot(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y);
-            Vector2D<float> v1(par.posRobot, posSpot), v2(0,1);
             Circle2D<float> c(posSpot, 15.);
             destPoint = c.project(par.posRobot);
-            path.go2PointOrient(destPoint, par.obs,
-                    _access[0].pt.angle + M_PI + v2.angle(v1) + par.act[_actuator_select].angle);
+            path.go2PointOrient(destPoint, par.obs, _access_select_angle);
         }
 
         int loopObj(paramObj par) override{
