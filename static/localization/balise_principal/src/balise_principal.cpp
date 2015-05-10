@@ -21,6 +21,7 @@
 #include "messages.h"
 extern "C" {
 #include "roles.h"
+#include "global_sync.h"
 }
 
 #ifdef SYNC_WIRELESS
@@ -69,6 +70,7 @@ void setup(){
     bn_init();
 
     bn_attach(E_ROLE_SETUP,role_setup);
+    bn_attach(E_SYNC_QUERY,gs_receiveQuery);
 #ifdef DEBUG
     bn_printfDbg("start turret, free mem : %d o\n",freeMemory());
 #endif
