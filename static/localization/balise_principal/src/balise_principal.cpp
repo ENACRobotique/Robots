@@ -18,6 +18,7 @@
 #include "../../../communication/network_tools/bn_debug.h"
 #include "loc_tools_turret.h"
 #include "global_errors.h"
+#include "messages.h"
 extern "C" {
 #include "roles.h"
 }
@@ -34,19 +35,13 @@ extern "C" {
 
 
 
-#ifdef SYNC_WIRELESS
-mainState state=S_SYNC_ELECTION;
-#endif
-
-#ifdef SYNC_WIRED
-mainState state=S_SYNC_MEASURE;
-#endif
+mainState state=S_CHECKREMOTE;
 
 
 sDeviceInfo devicesInfo[D_AMOUNT];
 int iDeviceSync=0,iDevicePeriodBcast=0;
 int lastIndex=0;    // to detect new turn in game state
-
+uint32_t endSync = 0;
 sMsg inMsg,outMsg;
 
 unsigned long sw=0, sw2=0;
@@ -99,6 +94,21 @@ void loop(){
 
     //eventual receiving && routine
     rxB=bn_receive(&inMsg);  // rxB>0 if message written in inMsg, <0 if error
+    if (rxB>0) {
+        switch (inMsg.header.type) {
+        case E_SYNC_STATUS :
+            for (int i=0; i<D_AMOUNT; i++){
+                if (devicesInfo[i].addr == inMsg.header.srcAddr) {
+                    if (inMsg.payload.syncWired.flag == SYNC_OK){
+                        devicesInfo[i].state = DS_SYNCED;
+                    }
+                }
+            }
+            break;
+        default :
+            break;
+        }
+    }
 
     //period broadcast : one by one TODO : broadcast
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
@@ -120,7 +130,7 @@ void loop(){
     if((time - time_prev_led)>=1000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
-#ifdef DEBUG_SYNC_WIRE
+#ifdef DEBUG_SYNC_WIRE_EVAL
         if (millis() > 35000){
             wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
             delay(WIREDSYNC_LOWTIME/1000);
@@ -152,9 +162,63 @@ void loop(){
 
     ///////state machine
     switch (state){
+    case S_CHECKREMOTE :
+        int switchState ;
+        switchState = 1;
+        // check if every device is on
+        for (int i=0;i<D_AMOUNT;i++) {
+            outMsg.header.destAddr = devicesInfo[i].addr;
+            outMsg.header.srcAddr = MYADDRX;
+            outMsg.header.size = 0;
+            if (int err=bn_sendAck(&outMsg)!=1){
+                // FIXME handle case
+                // loop in there, with a warning ?
+                switchState = 0;
+#ifdef DEBUG_SYNC
+                bn_printfDbg("%hx offline (error : %d)\n",devicesInfo[i].addr,err);
+#endif
+            }
+        }
+        if (switchState) {
+#ifdef SYNC_WIRED
+            state = S_SYNC_MEASURE;
+#elif defined(SYNC_WIRELESS)
+            state = S_SYNC_ELECTION;
+#endif
+        }
+        break;
 #ifdef SYNC_WIRED
     case S_SYNC_MEASURE :
-        if (wiredSync_sendSignal(0) == -1) state = S_GAME;
+        if (wiredSync_sendSignal(0) != -1) {
+            endSync = micros();
+        }
+        else {
+            // wait until we receive the sync statuses
+            int synced;
+            synced=0;
+            for (int i=0;i<D_AMOUNT;i++) {
+                if (devicesInfo[i].state == DS_SYNCED) synced++;
+            }
+            if (synced == D_AMOUNT) {
+                state = S_GAME;
+#ifdef DEBUG_SYNC
+                bn_printDbg("sync ok\n");
+#endif
+            }
+            if (endSync && (micros() - endSync) > 4*WIREDSYNC_PERIOD){
+#ifdef DEBUG_SYNC
+                for (int i=0;i<D_AMOUNT;i++) {
+                    if (devicesInfo[i].state != DS_SYNCED) bn_printfDbg("%hx not synchronized (status %d)\n",devicesInfo[i].addr,devicesInfo[i].state);
+                }
+#endif
+                // FIXME Do something better
+                // restart sync ?
+                // must wait at least for the duration of the whole experiment (to let remote node timeout)
+                delay((WIREDSYNC_PERIOD/1000)*WIREDSYNC_NBSAMPLES);
+                wiredSync_sendSignal(1);
+                endSync = micros();
+            }
+        }
         break;
 #endif
 #ifdef SYNC_WIRELESS

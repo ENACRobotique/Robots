@@ -16,7 +16,7 @@ extern "C"{
 #include "math.h"
 #include "Arduino.h"
 #include "params.h"
-
+#include "shared/lib_synchro.h"
 
 /* Converts a time value to a angle in radian, based on the last few recorded turns of the turret
  * Argument :
@@ -44,7 +44,7 @@ int time2rad(uint32_t time, float *ret){
 
 
         // sweep TR_infoBuf to find the appropriate time interval
-        while ( tries!=TR_INFO_BUFFER_SIZE && (TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period)<time){ //fixme overflow error (test instead  : "(time-TR_...date)<TR_...period" ?)
+        while ( tries!=TR_INFO_BUFFER_SIZE && ((TR_InfoBuf[tempIndex].date)+TR_InfoBuf[tempIndex].period)<time){ //fixme overflow error (test instead  : "(time-TR_...date)<TR_...period" ?)
             tempIndex=(tempIndex+1)%TR_INFO_BUFFER_SIZE;
             tries++;
         }
@@ -52,10 +52,6 @@ int time2rad(uint32_t time, float *ret){
             err=-ERR_NOT_FOUND;
         }
         else if (tries==TR_INFO_BUFFER_SIZE) { // if too early
-#ifdef DEBUG_LOC
-            earliest=TR_InfoBuf[TR_iNext].date;
-            oldest=(TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period);
-#endif
             err=-ERR_TRY_AGAIN;
         }
         else {
@@ -65,7 +61,9 @@ int time2rad(uint32_t time, float *ret){
     }
     if (err) {
 #ifdef DEBUG_LOC
-        bn_printfDbg((char*)"err %d early %lu old %lu time %lu\n",err,earliest,oldest,time);
+            earliest=TR_InfoBuf[TR_iNext].date;
+            oldest=TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period;
+        bn_printfDbg((char*)"e %d e %lu o %lu t %lu n %d\n",err,earliest,oldest,time,TR_iNext);
 #endif
         return err;
     }
@@ -92,7 +90,7 @@ int time2rad(uint32_t time, float *ret){
 int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     float angle=0;
     int err=0;
-    if ((err=time2rad(pLoad->date,&angle))){ // FIXME use conversion function from synchronized to local (modify also in description)
+    if ((err=time2rad(pLoad->date,&angle))){ // All dates stored and used are the global ones.
         return err;
     }
 
@@ -119,9 +117,10 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     msg.payload.genericPosStatus.pos_u.theta=-1;
 
     bn_send(&msg);
-
-//    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, (int)(angle*180./M_PI),(int)msg.payload.genericStatus.adv_status.pos.x,(int)msg.payload.genericStatus.adv_status.pos.y);
-
+#ifdef DEBUG_CALIBRATION
+    int intangle10 = ((int)((angle*10*180./M_PI))%360);
+    bn_printfDbg((char*)"%hx : (%d.%d °,%lu mm) (%d,%d)\n", origin, intangle10/10, intangle10%10, pLoad->value, (int)msg.payload.genericStatus.adv_status.pos.x,(int)msg.payload.genericStatus.adv_status.pos.y);
+#endif
     return 0;
 
 }

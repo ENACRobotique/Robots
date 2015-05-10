@@ -20,7 +20,7 @@
 // Iterative sums for least-square computation (sum_bb=sum(for i=0..N, b_i*b_i)...)
 static int64_t sum_OO=0,sum_D=0,sum_O=0,sum_OD=0,sum_ones=0;
 
-sSyncPayload firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
+sSyncPayload_wireless firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
 syncMesStruc firstLaserMeasure={0,-2},lastLaserMeasure={0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
 
 /* Return rank of highest bit, or -1 if val==0
@@ -38,7 +38,7 @@ int hbit(uint64_t val){
  * Usage : feed syncComputationMsg with data broadcasted by the turret, including the first message stating "begin measure (i.e. index=0)" until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
  *         /!\ feed also syncComputationLaser with laser data
  */
-void syncComputationMsg(sSyncPayload *pload){
+void syncComputationMsg(sSyncPayload_wireless *pload){
 
     // if no update, return
     if (pload->lastTurnDate==lastRxSyncData.lastTurnDate) return;
@@ -129,7 +129,7 @@ void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t perio
 /* SyncComputationFinal : Computes the sync parameters based on all the values recorded (least square method).
  * Usage : feed syncComputationLaser and syncComputationMsg for long enough then call syncComputationFinal.
  */
-void syncComputationFinal(sSyncPayload *pload){
+void syncComputationFinal(sSyncPayload_wireless *pload){
     int64_t det=0;
 
     syncComputationMsg(pload);

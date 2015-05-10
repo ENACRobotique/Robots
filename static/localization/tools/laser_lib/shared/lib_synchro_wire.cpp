@@ -7,9 +7,14 @@
 
 #include "timeout.h"
 #include "lib_synchro_wire.h"
+#include "network_cfg.h"
+#include "messages.h"
+#ifndef WIREDSYNC_BENCHMARK
+#include "botNet_core.h"
+#include "params.h"
+#endif
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
 #include "bn_debug.h"
-#include "params.h"
 #endif
 #if defined(WIREDSYNC_BENCHMARK) && defined(ARCH_X86_LINUX)
 #include <stdio.h>
@@ -43,21 +48,44 @@ static wsType_t sum_lt_gt_lt=0;// sum of (local date)*(global date - local date)
 int wiredSync_waitSignal(int reset){
     static int sampleIndex = -1;
     static uint32_t prevReceived = 0;
-    if (reset){
+    static int locked = 0;
+    if (reset || locked!=0){
         sampleIndex = -1;
         prevReceived = 0;
     }
+    // if we detected a locked line, we won't actively wait for a signal until line has been freed again
+    if (locked!=0 && wiredSync_signalPresent()==WIREDSYNC_SIGNANOTHERE){
+        locked = 0;
+#if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
+    bn_printfDbg("line unblocked \n");
+#endif
+        return -1;
+    }
+    else if (locked!=0){
+        return -1;
+    }
+
+    uint32_t end=0;
     uint32_t begin = micros();
     // if signal is here
-    while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE);
-    uint32_t end = micros();
+    while (wiredSync_signalPresent()==WIREDSYNC_SIGNALISHERE
+            && (micros()-begin) < (uint32_t)(WIREDSYNC_LOWTIME * WIREDSYNC_FIRST_SAMPLE_MULT + 32) ); // this line is to prevent the locking of the beacon (receiver). If the wait is too long (32µs longer than the longest waiting period),
+    end=micros();
+    // if we waited too long, the line was locked
+    if ((end-begin) >= (uint32_t)(WIREDSYNC_LOWTIME * WIREDSYNC_FIRST_SAMPLE_MULT + 32) ){
+        locked = 1;
+#if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
+    bn_printfDbg("line blocked %lu\n", end-begin);
+#endif
+        return -1;
+    }
     // if signal stayed here for more than debounce time, record sample
-    if ((end-begin) > WIREDSYNC_DEBOUNCE && (end-begin) < WIREDSYNC_LOWTIME*3){
-#if WIREDSYNC_DEBOUNCE > (WIREDSYNC_LOWTIME*3)
+    else if ((end-begin) > WIREDSYNC_DEBOUNCE){
+#if WIREDSYNC_DEBOUNCE > (WIREDSYNC_LOWTIME*WIREDSYNC_FIRST_SAMPLE_MULT+64)
 #error "will not work. Debounce too slow, or lowtime too fast"
 #endif
         if (prevReceived) {
-            sampleIndex += (end - prevReceived + WIREDSYNC_PERIOD/4)/WIREDSYNC_PERIOD; // keep track of the indexes (takes into account missed ones,with a signal up to WIREDSYNC_PERIOD/4 early)
+            sampleIndex += (end - prevReceived + WIREDSYNC_PERIOD/3)/WIREDSYNC_PERIOD; // keep track of the indexes (takes into account missed ones,with a signal up to WIREDSYNC_PERIOD/4 early)
         }
         else {
             sampleIndex = 0;
@@ -128,21 +156,34 @@ int wiredSync_finalCompute(int reset){
                             static_cast<uint32_t>(abs(inv_delta)),
                             increment};
         setSyncParam(sStruc);
+        sMsg tmpMsg;
         updateSync();
+        if ( static_cast<int32_t>(offset)>(int32_t)WIREDSYNC_ACCEPTABLE_OFFSET
+                || static_cast<int32_t>(offset)<(int32_t)-WIREDSYNC_ACCEPTABLE_OFFSET
+                || sum_ones < (WIREDSYNC_NBSAMPLES*3)/4){
+            tmpMsg.payload.syncWired.flag = SYNC_UNSYNC;
 #ifdef DEBUG_SYNC_WIRE
-        if (abs(offset)>WIREDSYNC_ACCEPTABLE_OFFSET){
-            bn_printfDbg("sync error : offset = %lu\n",static_cast<int32_t>(offset));
+            bn_printfDbg("sync error : offset = %ld, %d samples\n",static_cast<int32_t>(offset),static_cast<int>(sum_ones));
+#endif
         }
+        else tmpMsg.payload.syncWired.flag = SYNC_OK;
+        tmpMsg.header.destAddr = ADDRX_MAIN_TURRET;
+        tmpMsg.header.type = E_SYNC_STATUS;
+        tmpMsg.header.size = sizeof(sSyncPayload_wired);
+        bn_send(&tmpMsg);
+
+#ifdef DEBUG_SYNC_WIRE
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
         bn_printfDbg(", mob1 end, %d, %ld,%ld, %lu",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2 end, %d, %ld,%ld, %lu\n",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
+        bn_printfDbg(", mob2 end, %d, %ld,%lu, %lu\n",(int)sum_ones, static_cast<int32_t>(offset),firstSampleTime, static_cast<uint32_t>(abs(inv_delta)));
 #endif
 #endif
-#else
+#endif
+#ifdef DEBUG_SYNC_WIRE
 #ifdef ARCH_328P_ARDUINO
 #else
         wsType_t delta = 1/inv_delta;
@@ -189,7 +230,10 @@ int wiredSync_sendSignal(int reset){
     }
     if (nbSamples && (micros() - prevSignal) > (WIREDSYNC_PERIOD - WIREDSYNC_LOWTIME)){
         wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
-        if (!prevSignal) delay(2 * WIREDSYNC_LOWTIME / 1000);   // we must force the waiting for the first call. Given that everything in this mechanism works with active waiting, using a delay() is not that bad. Why delay and not delayMicrosecond ? Take a look at the prototype of delayMicrosecond... Also, wait 2 time the normal duration is to ensure that every receiver catches the first sample (critical). Why exactly 2 ? I don't know.
+        if (!prevSignal) {
+            uint32_t begin=micros();
+            while(micros()-begin < WIREDSYNC_FIRST_SAMPLE_MULT * WIREDSYNC_LOWTIME );   // we must force the waiting for the first call.
+        }
         else while(micros()-prevSignal < WIREDSYNC_PERIOD);     // in the other cases, wait until exactly one period has elapsed since last signal
         wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
         uint32_t end=micros();
@@ -198,7 +242,7 @@ int wiredSync_sendSignal(int reset){
 
         // set the "zero" right after the first signal
         if (nbSamples == WIREDSYNC_NBSAMPLES) {
-            syncStruc tmpStruc = {static_cast<int32_t>(end-WIREDSYNC_INITIAL),0,0};
+            syncStruc tmpStruc = {static_cast<int32_t>(WIREDSYNC_INITIAL-end),0,0};
             setSyncParam(tmpStruc);
             updateSync();
         }

@@ -28,6 +28,7 @@ extern volatile unsigned int _nbTR;
 extern volatile uint32_t TR_mean_period,TR_lastDate;
 
 // Rotating buffer recording informations about few last turns (to compute angle)
+// Dates stored are referenced to the "global" timeframe.
 extern volatile int TR_iNext;   // index for the rotating buffer of the last period (current turn, for TR_infobuf[TR_cur], ONLY the date is set, not the period )
 extern volatile sTurnInfo TR_InfoBuf[TR_INFO_BUFFER_SIZE];
 
