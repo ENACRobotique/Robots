@@ -55,8 +55,7 @@ class Path {
         void go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs_t>& obs, bool holo); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
         void followPath(vector <astar::sObs_t>& obs, vector <astar::iABObs_t> &l, bool holo);
         void convPathToPathOrient(float thetaEnd);
-        void computeOrientPathForHolonomic(float theta_end_obj);
-        void computeTimePathForHolonomic();
+        void computePathHolonomic(float theta_end_obj);
 
         //Get methods
         void print() const; //TODO Idee : reutiliser le parseur yaml
