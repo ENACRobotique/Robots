@@ -18,7 +18,7 @@
 
 Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E_SPOT, ActuatorType::ELEVATOR, true), _num(num), _color(color){
 
-    if(num > 8){
+    if(num > 4){
         logs << ERR << "Num too big";
     }
 

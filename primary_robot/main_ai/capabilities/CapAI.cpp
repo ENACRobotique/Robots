@@ -21,6 +21,7 @@ extern "C"{
 }
 #include "clap.h"
 #include "spot.h"
+#include "spot2.h"
 #include "cup.h"
 #include "dropCup.h"
 #include "light.h"
@@ -104,6 +105,7 @@ int CapAI::loop(){
         }
     }else{
         if (metObj(current_obj, par) == 0){
+            last_time = 0; //mode obj < 1 second
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
@@ -133,7 +135,7 @@ void CapAI::initObjective(){
         exit(EXIT_FAILURE);
     }
 
-    for(unsigned int i = 0 ; i < 8 ; i++)
+    for(unsigned int i = 0 ; i < 4 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
 
     for(unsigned int i = 0 ; i < 2 ; i++)

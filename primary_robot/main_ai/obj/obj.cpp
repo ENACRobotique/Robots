@@ -20,7 +20,7 @@ extern "C"{
 #include "millis.h"
 }
 
-//#define DEBUG_OBJ
+#define DEBUG_OBJ
 
 Obj::Obj() : _type(E_NULL), _typeAct(ActuatorType::ANY), _get(true), _point(-1), _state(ACTIVE), _access_select_angle(0), _actuator_select(-1),_dist(-1), _time(-1), _done(0){
 }
@@ -53,9 +53,8 @@ void Obj::addAccess(sObjEntry_t &access){
 /*
  * Computing the shortest distance between the position of the robot and the objective entry point.
  * And update the others parameters
- * //TODO Considering the orientation of the robot
  */
-float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int robot) {
+float Obj::update(const bool /*axle*/,  std::vector<astar::sObs_t>& obs, const int robot) {
     sPath_t path_loc;
     Point2D<float> posRobot(obs[robot].c.x, obs[robot].c.y);
     int N = obs.size();
@@ -63,12 +62,15 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
     int result;
 
     _dist = -1;
+
     Point2D<float> p = projectPointInObs(posRobot, obs);
 
     if(checkPointInObs(p, obs)){ //Robot is block
         for(unsigned int i = 4 ; i < obs.size() - 1 ; i++){
             if(obs[i].active && obs[i].moved){
+#ifdef DEBUG_OBJ
                 logs << DEBUG << "Disable obstacle number 2 : " << i;
+#endif
                 list.push_back(i);
                 obs[i].active = 0;
             }
@@ -86,15 +88,20 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
                 obs[obs.size() - 1].c = {_access[i].pt.p.x, _access[i].pt.p.y};
                 updateEndTraj(_access[i].pt.angle, &_access[i].pt.p, _access[i].radius, obs);
                 p = {obs[robot].c.x,obs[robot].c.y};
-                p = projectPointInObs(p, obs);
+                p = projectPointInObs(p, obs); //TODO pas top !!
                 obs[robot].c = {p.x, p.y};
                 break;
             case E_CIRCLE:
-                obs[obs.size() - 1].c = {_access[i].cir.c.x, _access[i].cir.c.y};
-                if(axle){
+                {
+                    Point2D<float> d;
+                    d = projectPointInLimitPlayground({_access[i].cir.c.x, _access[i].cir.c.y},  R_ROBOT);
+                    logs << INFO << "demande de projection point destination limit playground resultat x="
+                            << d.x << " y=" << d.y;
+                    obs[obs.size() - 1].c = {d.x, d.y};
                     obs[N - 2].active = 0;
                     obs[N - 3].active = 0;
                     obs[N - 4].active = 0;
+
                 }
                 break;
             case E_SEGMENT:
@@ -121,7 +128,15 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
             Point2D<float> dest(obs[obs.size() - 1].c.x, obs[obs.size() - 1].c.y);
 
             while((result = checkPointInObs(dest, obs)) != 0){
+                if(obs[result].moved == 0){
+                    dest = projectPointInObs(dest, obs);
+                    obs[obs.size() - 1].c.x = dest.x;
+                    obs[obs.size() - 1].c.y = dest.y;
+                    break;
+                }
+#ifdef DEBUG_OBJ
                 logs << DEBUG << "Disable obstacle number : " << result;
+#endif
                 list.push_back(result);
                 obs[result].active = 0;
             }
@@ -130,9 +145,11 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
         astar::fill_tgts_lnk(obs);
         a_star(A(robot), A(N-1), &path_loc);
 
-
         for(int i : list){
             obs[i].active = 1;
+#ifdef DEBUG_OBJ
+            logs << DEBUG << "Reactivation of obstacle number :" << i;
+#endif
         }
 
 
@@ -152,19 +169,36 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
             _path = path_loc;
 
             if(_access[i].type == E_CIRCLE){
-                if(_path.path[_path.path_len - 1].p1.distanceTo(_path.path[_path.path_len - 1].p2) < _access[i].cir.r){
+                if(_path.path[_path.path_len - 1].p1.distanceTo(_access[i].cir.c) < _access[i].cir.r){
+                    logs << ERR << _path.path[_path.path_len - 1].p1.distanceTo(_access[i].cir.c);
                     continue;
                 }
                 else{
                     Point2D<float> pt = _path.path[_path.path_len - 1].p1;
                     Circle2D<float> cir(_access[i].cir.c.x, _access[i].cir.c.y, _access[i].cir.r);
-
                     pt = cir.projectSup(pt, 0.1);
+
                     if(checkPointInObs(pt, obs)){
                         continue;
                     }
                     _path.path[_path.path_len - 1].p2 = pt;
-                    _dist = path_loc.dist - _access[i].cir.r;
+
+
+                    for (unsigned int j = 0; j < _path.path_len - 1; j++) {
+                        Circle2D<float> c(_path.path[j].obs.c.x, _path.path[j].obs.c.y, _path.path[j].obs.r);
+                        Point2D<float> p1(_path.path[j].p2.x, _path.path[j].p2.y), p2(_path.path[j+1].p1.x, _path.path[j+1].p1.y);
+                        _path.path[j].arc_len = c.arcLenght(p1, p2);
+                        _path.path[j].seg_len = _path.path[j].p1.distanceTo(_path.path[j].p2);
+                    }
+
+                    _path.path[_path.path_len - 1].arc_len = 0;
+                    _path.path[_path.path_len - 1].seg_len = _path.path[_path.path_len - 1].p1.distanceTo(_path.path[_path.path_len - 1].p2);
+
+                    _dist = 0;
+                    for (unsigned int j = 0; j < _path.path_len; j++) {
+                        _dist += _path.path[j].seg_len + _path.path[j].arc_len;
+                    }
+
                     Vector2D<float> v1(1,0), v2(cir.c, pt);
                     _access_select_angle = v1.angle(v2) + M_PI; //M_PI because reference inverse
                 }
@@ -184,26 +218,26 @@ float Obj::update(const bool axle,  std::vector<astar::sObs_t>& obs, const int r
     return _dist;
 }
 
-int Obj::updateDestPointOrient(const vector<Actuator>& act){
+int Obj::updateDestPointOrient(paramObj par){
     unsigned int i;
 
-    if(act.empty())
+    if(par.act.empty())
         return -1;
 
-    for(i = 0 ; i < act.size() ; i++){ //TODO optimize for the moment the first find is used
-        if( act[i].type == _typeAct){
-            if((!act[i].full && _get) || (act[i].full && !_get))
+    for(i = 0 ; i < par.act.size() ; i++){ //TODO optimize for the moment the first find is used
+        if( par.act[i].type == _typeAct){
+            if((!par.act[i].full && _get) || (par.act[i].full && !_get))
                 break;
         }
     }
 
-    if(i == act.size()){
+    if(i == par.act.size()){
         _actuator_select = -1;
         return -1;
     }
 
-     _access_select_angle += act[i].angle;
-     _actuator_select = act[i].id;
+     _access_select_angle += par.act[i].angle;
+     _actuator_select = par.act[i].id;
 
     return 0;
 }
@@ -242,6 +276,9 @@ float Obj::getYield(const unsigned int start_time){
     }
 
     switch (_type) {
+        case E_SPOT2:
+            ratio = 1/_dist * 100 + 1000;
+            break;
         case E_LIGHT:
             ratio = 1/_dist * 100 + 500;
             break;

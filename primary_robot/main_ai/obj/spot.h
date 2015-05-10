@@ -13,7 +13,7 @@
 #include "obj.h"
 #include "tools.h"
 
-#define START_STAND 4 //number of the first stand element in obs[]
+#define START_STAND 8 //number of the first stand element in obs[]
 
 using namespace std;
 

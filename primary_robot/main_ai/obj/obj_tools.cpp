@@ -84,54 +84,54 @@ void loadingPath(sPath_t /*_path*/, int /*num*/) {
 /*
  * Positions of robots must be already updated in obs
  */
-int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated,const int robot, const bool axle, const vector<Actuator>& act) {
+int nextObj(const unsigned int start_time, const int robot, const bool axle, paramObj par) {
     float tmp_val = 0.;
     float tmp_val2;
     int tmp_inx = -1; //index of the objective will be selected
-    int N = obs.size();
-    Point2D<float> pos_robot(obs[robot].c.x, obs[robot].c.y);
+    int N = par.obs.size();
+    Point2D<float> pos_robot(par.obs[robot].c.x, par.obs[robot].c.y);
 
     logs << INFO << "Starting NextObj";
 
     // Active the robot and the destination point
-    obs[robot].active = 1;
-    obs[obs.size()-1].active = 1;
+    par.obs[robot].active = 1;
+    par.obs[par.obs.size()-1].active = 1;
 
-    for (unsigned int i = 0 ; i < listObj.size() ; i++) {  // Search the best objective
-        if (listObj[i]->getState() != ACTIVE)
+    for (unsigned int i = 0 ; i < par.obj.size() ; i++) {  // Search the best objective
+        if (par.obj[i]->getState() != ACTIVE)
             continue;
 
-        if (listObj[i]->update(axle, obs, robot) < 0) {
+        if (par.obj[i]->update(axle, par.obs, robot) < 0) {
 #ifdef DEBUG_OBJ
             logs << DEBUG << "No find path to achieve the objective for objective n°" << i;
 #endif
             continue;
         }
 
-        if(listObj[i]->updateDestPointOrient(act) < 0){
+        if(par.obj[i]->updateDestPointOrient(par) < 0){
 #ifdef DEBUG_OBJ
             logs << DEBUG << "No actuator available for objective n°" << i;
 #endif
             continue;
         }
 
-        tmp_val2 = listObj[i]->getYield(start_time);
+        tmp_val2 = par.obj[i]->getYield(start_time);
 #ifdef DEBUG_OBJ
         logs << DEBUG << "objectif n°" << i << " with ratio=" << tmp_val2;
 #endif
-        if (tmp_val2 > tmp_val && listObj[i]->getDestPointOrient() != -1) {  // Update best objective
+        if (tmp_val2 > tmp_val && par.obj[i]->getDestPointOrient() != -1) {  // Update best objective
             tmp_val = tmp_val2;
             tmp_inx = i;
         }
     }  // End of search the best objective
 
     if (tmp_inx >= 0) {  // Update end of trajectory
-        loadingPath(listObj[tmp_inx]->getPath(), tmp_inx); //FIXME
-        obs[N - 1].c = {listObj[tmp_inx]->getDestPoint().x, listObj[tmp_inx]->getDestPoint().y};
-        obs_updated[N - 1]++;
+        loadingPath(par.obj[tmp_inx]->getPath(), tmp_inx); //FIXME
+        par.obs[N - 1].c = {par.obj[tmp_inx]->getDestPoint().x, par.obj[tmp_inx]->getDestPoint().y};
+        par.obsUpdated[N - 1]++;
     }
 
-    for(Obj* i : listObj)  // Print the all the objective list
+    for(Obj* i : par.obj)  // Print the all the objective list
         i->print();
 
     logs << INFO << "The selected objective is :" << tmp_inx;
