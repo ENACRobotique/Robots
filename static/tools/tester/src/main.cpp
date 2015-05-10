@@ -9,7 +9,7 @@
 #include "tools.h"
 #include "states/state_types.h"
 #include "states/state_hardinit.h"
-#include "states/state_blink.h"
+#include "libs/lib_IHM.h"
 #include "states/state_Menu_principal.h"
 #include "states/state_Menu_servo.h"
 #include "states/state_Menu_pwm.h"
