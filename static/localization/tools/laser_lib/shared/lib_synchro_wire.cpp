@@ -97,11 +97,11 @@ int wiredSync_waitSignal(int reset){
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
 #if MYADDRX == ADDRX_MOBILE_1
         delay(20);
-        bn_printfDbg(", mob1, %d, %lu, %lu",sampleIndex, micros2s(end) , sampleIndex*WIREDSYNC_PERIOD);
+        bn_printfDbg(", mob1, %d, %lu, %lu",sampleIndex, micros2sl(end) , sampleIndex*WIREDSYNC_PERIOD);
 #endif
 #if MYADDRX == ADDRX_MOBILE_2
         delay(40);
-        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, micros2s(end) , sampleIndex*WIREDSYNC_PERIOD);
+        bn_printfDbg(", mob2, %d, %lu, %lu\n",sampleIndex, micros2sl(end) , sampleIndex*WIREDSYNC_PERIOD);
 #endif
 #endif
         return sampleIndex;
@@ -149,15 +149,12 @@ int wiredSync_finalCompute(int reset){
         inv_delta = det / inv_delta_den;
         offset_num = sum_ltsq * sum_gt_lt - sum_lt * sum_lt_gt_lt;
         offset = offset_num / det;
-        int increment = (inv_delta>0?1:-1);
 
 #ifndef WIREDSYNC_BENCHMARK
         syncStruc sStruc = {static_cast<int32_t>(offset)-static_cast<int32_t>(firstSampleTime*(1+(1/inv_delta))) + static_cast<int32_t>((micros()-firstSampleTime)/inv_delta),
-                            static_cast<uint32_t>(abs(inv_delta)),
-                            increment};
+                            static_cast<int32_t>(inv_delta)};
         setSyncParam(sStruc);
         sMsg tmpMsg;
-        updateSync();
         if ( static_cast<int32_t>(offset)>(int32_t)WIREDSYNC_ACCEPTABLE_OFFSET
                 || static_cast<int32_t>(offset)<(int32_t)-WIREDSYNC_ACCEPTABLE_OFFSET
                 || sum_ones < (WIREDSYNC_NBSAMPLES*3)/4){
@@ -242,9 +239,8 @@ int wiredSync_sendSignal(int reset){
 
         // set the "zero" right after the first signal
         if (nbSamples == WIREDSYNC_NBSAMPLES) {
-            syncStruc tmpStruc = {static_cast<int32_t>(WIREDSYNC_INITIAL-end),0,0};
+            syncStruc tmpStruc = {static_cast<int32_t>(WIREDSYNC_INITIAL-end),0};
             setSyncParam(tmpStruc);
-            updateSync();
         }
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
         bn_printfDbg("tur, %d, %lu", WIREDSYNC_NBSAMPLES - nbSamples, end);

@@ -13,7 +13,7 @@ int _pinSpeed;
 volatile unsigned int _nbTR=0;
 volatile uint32_t TR_mean_period=0,TR_lastDate=0;
 
-// records of laste turn informations (to compute angles)
+// records of last turn informations (to compute angles)
 volatile int TR_iNext=0;    // where the next value will be written (by interruption)
 volatile sTurnInfo TR_InfoBuf[TR_INFO_BUFFER_SIZE]={{0}};
 
@@ -27,7 +27,7 @@ volatile int led=0;
 void domi_isr(){
     static unsigned long prev_int=0;
     static unsigned long prev_duration=0;
-    volatile unsigned long time=micros2s(micros());
+    volatile unsigned long time=micros();
     if ( (time-prev_int)> (prev_duration + (prev_duration>>1))) {      // because of the shape of the signal
         uint32_t period=time-TR_lastDate;
         TR_InfoBuf[TR_iNext].period=period;          // period of the previous turn

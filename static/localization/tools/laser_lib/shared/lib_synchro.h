@@ -21,46 +21,41 @@ enum {
 
 typedef struct {
     int32_t initialDelay;       // Initial delay, Delta_i
-    uint32_t driftUpdatePeriod; // 1/abs(First order drift), 1/abs(undercase delta)
-    int     inc;                // signed increment to add to the offset every driftUpdatePeriod to correct drift.
+    int32_t invDelta; // 1/abs(First order drift), 1/abs(undercase delta)
 }syncStruc;
 
-/* updateSync : Updates the correction done by millis2s and micros2s
- * /!\ Must be called often (more often than 1/syncStruct.driftUpdatePeriod microsecond)
- */
-void updateSync();
 
-/* micros2s : local to synchronized time (microsecond).
+/* micros2sl : local to synchronized time (microsecond).
  * Argument :
  *  local : local date in microsecond.
  * Return value :
- *  Synchronized date (expressed in microsecond)
+ *  Synchronized "laser" date (expressed in microsecond)
  */
-uint32_t micros2s(uint32_t local);
+uint32_t micros2sl(uint32_t local);
 
-/* s2micros : synchronized to local time (microsecond).
+/* sl2micros : synchronized to local time (microsecond).
  * Argument :
- *  local : date in microsecond.
+ *  syncronized : "laser" date in microsecond.
  * Return value :
  *  local date (expressed in microsecond)
  */
-uint32_t s2micros(uint32_t syncronized);
+uint32_t sl2micros(uint32_t syncronized);
 
-/* millis2s : local to synchronized time (millisecond).
+/* millis2sl : local to synchronized time (millisecond).
  * Argument :
  *  local : local date in millisecond.
  * Return value :
- *  Synchronized date (expressed in millisecond)
+ *  Synchronized "laser" date (expressed in millisecond)
  */
-uint32_t millis2s(uint32_t local);
+uint32_t millis2sl(uint32_t local);
 
-/* s2millis : synchronized to local time (millisecond).
+/* sl2millis : synchronized to local time (millisecond).
  * Argument :
- *  local : date in millisecond.
+ *  syncronized : "laser" date in millisecond.
  * Return value :
  *  local date (expressed in millisecond)
  */
-uint32_t s2millis(uint32_t syncronized);
+uint32_t sl2millis(uint32_t syncronized);
 
 void setSyncParam(syncStruc syncParameters);
 syncStruc getSyncParam();
