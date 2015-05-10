@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "messages-elements.h"
 #include "messages-position.h"
-#include "messages.h"
+#include "shared/message_header.h"
 
 typedef enum {
     PROP_IDLE,
