@@ -166,6 +166,10 @@ float Obj::update(const bool /*axle*/,  std::vector<astar::sObs_t>& obs, const i
 #endif
         }
         else if (_dist > path_loc.dist || _dist == -1) { // The new path is better to access the objective
+            if(_path.path){
+                free(_path.path);
+            }
+
             _path = path_loc;
 
             if(_access[i].type == E_CIRCLE){
@@ -246,7 +250,7 @@ float Obj::getDist() const{
     return _dist;
 }
 
-sPath_t Obj::getPath() const{
+sPath_t const& Obj::getPath() const{
     return _path;
 }
 

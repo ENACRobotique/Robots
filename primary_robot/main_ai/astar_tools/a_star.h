@@ -16,13 +16,15 @@ typedef struct {
     unsigned short sid;
 } sTrajEl_t;
 
-typedef struct {
+struct sPath_t {
     sNum_t dist;
     unsigned short tid;
 
     unsigned int path_len;
     sTrajEl_t *path;
-} sPath_t;
+
+    sPath_t():dist(0),tid(0),path_len(0),path(nullptr) {}
+};
 
 
 void a_star(astar::iABObs_t start, astar::iABObs_t goal, sPath_t *path);
