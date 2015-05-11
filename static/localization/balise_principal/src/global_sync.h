@@ -13,6 +13,7 @@
 #define SYNC_ARRAY_SIZE 10 // size of the global array that stores sync queries
 
 void gs_receiveQuery(sMsg *msg);
-int gs_loop();
+int gs_testOne();
+void gs_beaconStatus(eSyncStatus status);
 
 #endif /* SRC_GLOBAL_SYNC_H_ */

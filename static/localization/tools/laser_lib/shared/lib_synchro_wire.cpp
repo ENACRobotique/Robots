@@ -10,7 +10,7 @@
 #include "network_cfg.h"
 #include "messages.h"
 #ifndef WIREDSYNC_BENCHMARK
-#include "botNet_core.h"
+#include "shared/botNet_core.h"
 #include "params.h"
 #endif
 #if defined(DEBUG_SYNC_WIRE) && !defined(WIREDSYNC_BENCHMARK)
