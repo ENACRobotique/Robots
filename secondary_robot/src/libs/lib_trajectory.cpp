@@ -17,9 +17,10 @@
 int _backFromPause = 0;
 
 int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
+	static int teta0 = headingGetCon();
 	int dt = millis() - *prev_millis -*pausetime;    //time since start of the current traj element
-	int teta = tab[*i].teta*min((dt*FACTOR_HEADING_ASSERV/tab[*i].duration),1);
-	headingSetCon( teta);
+	int dteta = (tab[*i].teta-teta0)*min((dt*FACTOR_HEADING_ASSERV/tab[*i].duration),1);
+	headingSetCon( teta0+dteta);
 
     if (!(*prev_millis)){
     	*prev_millis=millis();
@@ -36,6 +37,7 @@ int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, uns
         (*i)++;
         *prev_millis=millis();
         *pausetime=0;
+        teta0 = headingGetCon();
         speedSetCon(tab[*i].speed);
     }
     if ( tab[*i].teta==0 && tab[*i].duration==0 && tab[*i].speed==0) {
