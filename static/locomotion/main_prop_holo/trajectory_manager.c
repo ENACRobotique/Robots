@@ -247,8 +247,8 @@ int trajmngr_update(trajectory_manager_t* tm) {
                 case TM_CACHE_STATE_LINE:
                     {
                         // compute (co)sinus of line
-                        int cl = ((int64_t) (s->p2_x - s->p1_x) << SHIFT) / s->seg_len; // (<< SHIFT)
-                        int sl = ((int64_t) (s->p2_y - s->p1_y) << SHIFT) / s->seg_len; // (<< SHIFT)
+                        int cl = s->seg_len ? ((int64_t) (s->p2_x - s->p1_x) << SHIFT) / s->seg_len : 0; // (<< SHIFT)
+                        int sl = s->seg_len ? ((int64_t) (s->p2_y - s->p1_y) << SHIFT) / s->seg_len : 0; // (<< SHIFT)
 
                         // compute desired speed for x and y
                         sc->line.spd_x = ((int64_t) s->seg_spd * (int64_t) cl) >> SHIFT; // (IpP << SHIFT)

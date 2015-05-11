@@ -259,23 +259,7 @@ void Path::convPathToPathOrient(float thetaEnd){
         _path_orient.push_back(trajOrient);
     }
 
-    computeTimePathForHolonomic();
-    computeOrientPathForHolonomic(thetaEnd);
-}
-
-/*
- * Computes time path holonomic robot
- */
-void Path::computeTimePathForHolonomic(){
-    double dist = 0;
-    uint32_t time_us = bn_intp_micros2s(micros());
-
-    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        _path_orient[i].t1 = (uint32_t)((dist/MAX_SPEED)*1e6) + time_us; //in us
-        dist += _path_orient[i].seg_len;
-        _path_orient[i].t2 = (uint32_t)((dist/MAX_SPEED)*1e6) + time_us; //in us
-        dist += _path_orient[i].arc_len;
-    }
+    computePathHolonomic(thetaEnd);
 }
 
 float getPrincipalAngleValue(float a){
@@ -289,20 +273,50 @@ float getPrincipalAngleValue(float a){
 /*
  * Computes a orient path for holonomic robot
  */
-void Path::computeOrientPathForHolonomic(float theta_end_obj){
+void Path::computePathHolonomic(float theta_end_obj){
     float theta = statuses.getLastOrient(ELT_PRIMARY);
     float deltaTheta = getPrincipalAngleValue(theta_end_obj - theta);
-    float Time = _path_orient[_path_orient.size()-1].t2 - _path_orient[0].t1;
-
-    logs << DEBUG << "Destination angle is :" << theta_end_obj*180/M_PI << "°";
+    float distTotal = 0, dist = 0;
+    uint32_t time_us = bn_intp_micros2s(micros());
 
     for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        _path_orient[i].theta1 = getPrincipalAngleValue((_path_orient[i].t1 - _path_orient[0].t1)*deltaTheta/Time + theta);
-        _path_orient[i].theta2 = getPrincipalAngleValue((_path_orient[i].t2 - _path_orient[0].t1)*deltaTheta/Time + theta);
-
-        _path_orient[i].rot1_dir = deltaTheta > 0;
-        _path_orient[i].rot2_dir = deltaTheta > 0;
+        distTotal += _path_orient[i].seg_len;
+        distTotal += _path_orient[i].arc_len;
     }
+
+    float timeLinear = distTotal/MAX_SPEED;
+    float timeAngular = fabs(deltaTheta/MAX_SPEED_ROT);
+
+    float Time = timeLinear>timeAngular?timeLinear:timeAngular;
+
+    if(distTotal > 0.01){
+        for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
+            _path_orient[i].t1 = (uint32_t)((dist/distTotal)*Time*1e6) + time_us; //in us
+            _path_orient[i].theta1 = getPrincipalAngleValue((dist/distTotal)*deltaTheta + theta);
+            dist += _path_orient[i].seg_len;
+
+            _path_orient[i].t2 = (uint32_t)((dist/distTotal)*Time*1e6) + time_us; //in us
+            _path_orient[i].theta2 = getPrincipalAngleValue((dist/distTotal)*deltaTheta + theta);
+            dist += _path_orient[i].arc_len;
+
+            _path_orient[i].rot1_dir = deltaTheta > 0;
+            _path_orient[i].rot2_dir = deltaTheta > 0;
+        }
+    }
+    else if(_path_orient.size() == 1){ //rotation
+        logs << ERR << "Rotation";
+        _path_orient[0].t1 = (uint32_t) time_us; //in us
+        _path_orient[0].t2 = (uint32_t) (Time*1e6) + time_us; //in us
+
+        _path_orient[0].theta1 = getPrincipalAngleValue(theta);
+        _path_orient[0].theta2 = getPrincipalAngleValue(theta + deltaTheta);
+
+        _path_orient[0].rot1_dir = deltaTheta > 0;
+        _path_orient[0].rot2_dir = deltaTheta > 0;
+    }else{
+        logs << ERR << "Strange trajectory : angle doesn't computed";
+    }
+
 }
 
 /*
