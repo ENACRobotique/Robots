@@ -23,9 +23,11 @@ class CapActuator : public Capability{
         }
 
         void setup(){
-            Actuator spot, cup;
-            float spotAngle[2] = {M_PI/6, 5*M_PI/6};
+            Actuator spot, cup, popCornLoader;
+            float spotAngle[2] = {M_PI/2, 3*M_PI/2};
             float cupAngle[3] = {0, 2*M_PI/3, 4*M_PI/3};
+            float popCornLoaderAngle[] = {M_PI/2, 3*M_PI/2};
+
             Point2D<float> cupPos[3];
             cupPos[0].x = (R_ROBOT + 4.)*cos(cupAngle[0]);
             cupPos[0].y = (R_ROBOT + 4.)*sin(cupAngle[0]);
@@ -38,8 +40,10 @@ class CapActuator : public Capability{
                 _act.push_back(spot);
                 _act.back().type = ActuatorType::ELEVATOR;
                 _act.back().id = i;
-                _act.back().full = false;
+                _act.back().elevator.full = false;
+                _act.back().elevator.empty = true;
                 _act.back().angle = spotAngle[i];
+                //TODO _act.back().pos
                 _act.back().elevator.ball = i==0?true:false;
                 _act.back().elevator.number = 0;
             }
@@ -48,9 +52,18 @@ class CapActuator : public Capability{
                 _act.push_back(cup);
                 _act.back().id = i;
                 _act.back().type = ActuatorType::CUP;
-                _act.back().full = false;
+                _act.back().cupActuator.full = false;
                 _act.back().angle = cupAngle[i];
                 _act.back().pos = cupPos[i];
+                _act.back().cupActuator.distributor = false;
+            }
+
+            for(unsigned int i = 0 ; i < 2 ; i++){
+                _act.push_back(popCornLoader);
+                _act.back().id = i;
+                _act.back().type = ActuatorType::POP_CORN_LOADER;
+                _act.back().angle = popCornLoaderAngle[i];
+                //TODO _act.back().pos
                 _act.back().cupActuator.distributor = false;
             }
         }

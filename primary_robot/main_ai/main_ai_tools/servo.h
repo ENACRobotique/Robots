@@ -15,7 +15,7 @@ extern "C"{
 }
 
 typedef struct {
-        eServos id;
+       // eServos id;
         uint16_t u1;      //min servo in millisecond
         uint16_t a1;      //min servo in radian
         uint16_t u2;
@@ -28,7 +28,7 @@ class Servo {
         Servo();
         ~Servo();
 
-        int sendPosServo(eServos s, float angle /* deg */);
+       // int sendPosServo(eServos s, float angle /* deg */);
 
     private:
         sServo_t _servo;

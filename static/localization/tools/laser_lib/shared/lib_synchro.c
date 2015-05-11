@@ -17,8 +17,7 @@
 #ifdef ARCH_X86_LINUX
 #include "millis.h"
 #endif
-syncStruc syncParam={0,0,0};    // Synchronization parameters
-int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
+syncStruc syncParam={0,0};    // Synchronization parameters
 
 void setSyncParam(syncStruc syncParameters){
     syncParam = syncParameters;
@@ -28,62 +27,49 @@ syncStruc getSyncParam(){
     return syncParam;
 }
 
-/* micros2s : local to synchronized time (microsecond).
+/* micros2sl : local to synchronized time (microsecond).
  * Argument :
  *  local : local date in microsecond.
  * Return value :
- *  Synchronized date (expressed in microsecond)
+ *  Synchronized "laser" date (expressed in microsecond)
  */
-uint32_t micros2s(uint32_t local){
-    return local+_offset;
+uint32_t micros2sl(uint32_t local){
+    return local + local/syncParam.invDelta + syncParam.initialDelay;
 }
 
-/* s2micros : synchronized to local time (microsecond).
+/* sl2micros : synchronized to local time (microsecond).
  * Argument :
- *  local : date in microsecond.
+ *  syncronized : "laser" date in microsecond.
  * Return value :
  *  local date (expressed in microsecond)
  */
-uint32_t s2micros(uint32_t syncronized){
-    return syncronized-_offset;
+uint32_t sl2micros(uint32_t syncronized){
+    int64_t ret = (syncronized - syncParam.initialDelay)*syncParam.invDelta;
+    ret /= (1+syncParam.invDelta);
+    return ret;
 }
 
-/* millis2s : local to synchronized time (millisecond).
+/* millis2sl : local to synchronized time (millisecond).
  * Argument :
  *  local : local date in millisecond.
  * Return value :
- *  Synchronized date (expressed in millisecond)
+ *  Synchronized "laser" date (expressed in millisecond)
  */
-uint32_t millis2s(uint32_t local){
-    return local+(_offset/1000);
+uint32_t millis2sl(uint32_t local){
+    return local + local/(syncParam.invDelta/1000) + syncParam.initialDelay/1000;
 }
 
 
-/* s2millis : synchronized to local time (millisecond).
+/* sl2millis : synchronized to local time (millisecond).
  * Argument :
- *  local : date in millisecond.
+ *  syncronized : "laser" date in millisecond.
  * Return value :
  *  local date (expressed in millisecond)
  */
-uint32_t s2millis(uint32_t syncronized){
-    return syncronized-(_offset/1000);
-}
-/* updateSync : Updates the correction done by millis2s and micros2s. Must be called regularly
- */
-void updateSync(){
-    static uint32_t lastUpdate=0;
-    uint32_t timeMicros=micros();
-
-    if (!lastUpdate && !_offset && (syncParam.initialDelay || syncParam.driftUpdatePeriod)){      //only in the first call after successful synchronization
-        _offset=syncParam.initialDelay;
-        lastUpdate=timeMicros;
-    }
-    else if(syncParam.driftUpdatePeriod) {
-        if ((timeMicros-lastUpdate)>syncParam.driftUpdatePeriod){
-            _offset+=syncParam.inc;
-            lastUpdate+=syncParam.driftUpdatePeriod;
-        }
-    }
+uint32_t sl2millis(uint32_t syncronized){
+    int64_t ret = (syncronized - syncParam.initialDelay/1000)*syncParam.invDelta/1000;
+    ret /= (1+syncParam.invDelta/1000);
+    return ret;
 }
 
 #endif /* LIB_SYNCHRO_C_ */

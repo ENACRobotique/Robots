@@ -11,60 +11,37 @@
 #include <stdint.h>
 #include "messages-elements.h"
 #include "messages-position.h"
-#include <shared/message_header.h>
+#include "shared/message_header.h"
+
+typedef enum {
+    PROP_IDLE,
+    PROP_RUNNING
+} ePropStatus;
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
     eElement id :8;
-    union{
-        // generic way to access position (if present in type)
-        struct{
-            s2DPosAtt pos;
-            s2DPAUncert pos_u;
-        };
 
+    s2DPosAtt pos;
+    s2DPAUncert pos_u;
+
+    union{
         // in case of pos.id == ELT_PRIMARY
         struct{
-            s2DPosAtt pos;
-            s2DPAUncert pos_u;
-
             s2DSpeed spd;
 
-            uint16_t tid; // trajectory identifier
-            uint8_t sid; // step identifier
-            uint8_t ssid; // sub-step identifier (0:line, 1:circle)
+            ePropStatus status;
+            uint16_t tid :12; // trajectory identifier
+            uint8_t sid :4; // step identifier
+            uint8_t ssid :1; // sub-step identifier (0:first element of message, 1:second element of message)
+            uint8_t sssid :1; // sub-sub-step identifier (0:line, 1:circle)
         } prop_status;
 
         // in case of pos.id == ELT_ADV_*
         struct{
-            s2DPosAtt pos;
-            s2DPAUncert pos_u;
         } adv_status;
-
-        // in case of pos.id == ELT_FIRE
-        struct{
-            s2DPosAtt pos;
-            s2DPAUncert pos_u;
-
-            enum{
-                FIRE_HORIZ_YELLOW,
-                FIRE_HORIZ_RED,
-                FIRE_VERTICAL,
-                FIRE_OBLIQUE,
-                FIRE_VERTICAL_TORCH
-            } state :8;
-        } fire_status;
-
-        // in case of pos.id == ELT_ZONE
-        struct{
-            s2DPosAtt pos;
-            s2DPAUncert pos_u;
-            uint8_t nbpt;
-            uint8_t nbfire;
-            uint8_t nbtorch;
-        } zone_status;
     };
-} sGenericStatus;
+} sGenericPosStatus;
 
 typedef struct __attribute__((packed)){
     uint8_t nb_obs;
@@ -104,7 +81,9 @@ typedef struct __attribute__((packed)){
 } sSyncQuery;
 
 typedef enum{
+    SYNCSTATUS_TODO,
     SYNCSTATUS_KO,
+    SYNCSTATUS_MEM_KO,
     SYNCSTATUS_ROLE_KO,
     SYNCSTATUS_PING_KO,
     SYNCSTATUS_SYNC_KO,

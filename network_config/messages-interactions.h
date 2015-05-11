@@ -12,10 +12,10 @@
 
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_servos; // must be <=10
+    uint16_t nb_servos; // must be <=9
     struct __attribute__((packed)){ // 5 bytes
-    	uint16_t id; // identifier of the servomotor (club number)
-    	uint16_t pca_id; // plug number (on the card 0-15)
+    	uint8_t club_id; // identifier of the servomotor (club number)
+    	uint8_t hw_id; // plug number (on the card 0-15)
         float angle; // servo setpoint in degrees (0-*)
     } servos[];
 } sServos;
@@ -29,8 +29,8 @@ typedef enum{
 } eIhmElement;
 
 typedef enum {
-    CORD_IN,
-    CORD_OUT
+    CORD_OUT,
+    CORD_IN
 } eIhmCord;
 
 typedef enum {
@@ -39,34 +39,27 @@ typedef enum {
     SWITCH_INTER
 } eIhmSwitch;
 
-typedef enum {
-    LED_OFF,
-    LED_RED,
-    LED_GREEN,
-    LED_BLUE,
-	LED_YELLOW,
-	LED_MAGENTA,
-	LED_CYAN,
-	LED_WHITE,
-	LED_RED_BLINK,
-	LED_GREEN_BLINK,
-	LED_BLUE_BLINK,
-	LED_YELLOW_BLINK,
-	LED_PURPLE_BLINK,
-	LED_CYAN_BLINK,
-	LED_WHITE_BLINK
-}eIhmLed;
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_states; // must be <=18
+	uint8_t red, green, blue;
+} sRGB;
+
+
+typedef struct __attribute__((packed)){
+    uint16_t nb_states; // must be <=4
     struct __attribute__((packed)){
         eIhmElement id :8; // identifier of the ihm element
-        union{
-            uint16_t state; // generic status
-            eIhmCord state_cord :8;
-            eIhmSwitch state_switch :8;
-            eIhmLed sate_led :8;
-        };
+        union __attribute__((packed)){
+        	eIhmCord state_cord :8;
+        	eIhmSwitch state_switch :8;
+        	struct __attribute__((packed)){
+        		sRGB color1; //first color
+        		sRGB color2; //second color
+        		uint16_t time1 :14; //time while 1st color is on (ms)
+        		uint16_t time2 :14; //time while 2nd color is on (ms)
+        		uint8_t nb :4;  //number of periods (0 for infinite loop)
+        	};
+        } state;
     } states[];
 } sIhmStatus;
 

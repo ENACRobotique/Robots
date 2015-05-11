@@ -14,6 +14,7 @@
 #include "GeometryTools.h"
 #include "a_star.h"
 #include "obj.h"
+#include "tools.h"
 
 //#define DEBUG_OBJ
 
@@ -26,7 +27,7 @@ typedef enum{
 }objective;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT, E_CUP, E_DROP_CUP
+    E_NULL, E_CLAP, E_SPOT, E_SPOT2, E_SPOT3, E_LIGHT, E_CUP, E_DROP_CUP
 } eObj_t;
 
 typedef enum {
@@ -36,18 +37,24 @@ typedef enum {
 typedef struct {
         ActuatorType type;
         int id;         //id by type of actuator
-        bool full;      //true if full
         float angle;
         Point2D<float> pos;
 
         struct{
+            bool full;
+            bool empty;
             unsigned int number;
             bool ball;
         }elevator;
 
         struct{
+            bool full;
             bool distributor; //true if the cup was fill by a distributor
         }cupActuator;
+
+        struct{
+            bool direction; //direction of the opening servo
+        }popCornLoader;
 
 } Actuator;
 
@@ -56,6 +63,7 @@ typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
 typedef struct {
     eTypeEntry_t type;      //type of access
     float radius;           //size of the 3 approach circles
+    float delta;            //delta between the actuator and the approach angle;
 
 
     struct{
@@ -76,8 +84,19 @@ typedef struct {
 } sObjEntry_t;
 
 typedef enum {
-    ACTIVE, WAIT_MES, NO_TIME, FINISH
+    ACTIVE, WAIT_MES, NO_TIME, WAIT_FREE_ZONE,FINISH
 } eStateObj_t;
+class Obj ;
+typedef struct{
+        Point2D<float>&         posRobot;
+        float&                  angleRobot;
+        eColor_t                color;
+        vector<astar::sObs_t>&  obs;
+        vector<uint8_t>&        obsUpdated;
+        vector<Obj*>&           obj;
+        vector<Actuator>&       act;
+
+}paramObj;
 
 class Obj {
     public:
@@ -86,19 +105,19 @@ class Obj {
         Obj(eObj_t type, ActuatorType _typeAct, bool get, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint);
         virtual ~Obj();
 
-        virtual void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) = 0;
-        virtual int loopObj(const float& angleRobot, std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&) = 0;
+        virtual void initObj(paramObj) = 0;
+        virtual int loopObj(paramObj) = 0;
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return _dist;};
 
         void addAccess(sObjEntry_t &access);
 
         float update(const bool axle,  std::vector<astar::sObs_t>& obs, const int robot);
-        int updateDestPointOrient(const vector<Actuator>& act);
+        virtual int updateDestPointOrient(paramObj par);
 
 
         float getDist() const;
-        sPath_t getPath() const;
+        sPath_t const& getPath() const;
         Point2D<float> getDestPoint() const;
         float getDestPointOrient() const;
         eStateObj_t getState() const;
@@ -128,8 +147,14 @@ class Obj {
                     return "CLAP";
                 case E_SPOT:
                     return "SPOT";
+                case E_SPOT2:
+                    return "SPOT2";
+                case E_SPOT3:
+                    return "SPOT3";
                 case E_CUP:
                     return "CUP ";
+                case E_DROP_CUP:
+                    return "E_DROP_CUP";
                 default:
                     return "Undefined";
             }

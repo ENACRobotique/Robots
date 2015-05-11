@@ -8,7 +8,7 @@
 #ifndef CAPABILITIES_ENVIRONMENT_2015_H_
 #define CAPABILITIES_ENVIRONMENT_2015_H_
 
-#include "Environment.h"
+#include <Env.h>
 
 /*
  * Creates an environment for up to four robots, developed for the "Coupe de France de Robotique 2015"
