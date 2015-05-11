@@ -81,7 +81,9 @@ typedef struct __attribute__((packed)){
 } sSyncQuery;
 
 typedef enum{
+    SYNCSTATUS_TODO,
     SYNCSTATUS_KO,
+    SYNCSTATUS_MEM_KO,
     SYNCSTATUS_ROLE_KO,
     SYNCSTATUS_PING_KO,
     SYNCSTATUS_SYNC_KO,

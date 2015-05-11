@@ -82,7 +82,6 @@ void loop() {
     int tempIndex=-1;
 #endif
 
-    updateSync();
     //blink
     if((time - time_prev_led)>=1000) {
       time_prev_led= time;
@@ -93,9 +92,6 @@ void loop() {
     }
 
 //MUST ALWAYS BE DONE (any state)
-
-    updateSync();
-
 
     // routine and receive
     rxB=bn_receive(&inMsg);
@@ -238,9 +234,9 @@ void loop() {
                 firstSyncSample = micros();
                 lastSyncSample = firstSyncSample;
                 newState = S_SYNC_MEASURES;
-#endif
 #ifdef DEBUG_SYNC_WIRE
                 bn_printDbg("return to s_sync_measures\n");
+#endif
 #endif
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
@@ -251,7 +247,7 @@ void loop() {
                     outMsg.header.size=sizeof(sMobileReportPayload);
                     if (laserStruct.period) outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laserStruct.period);
                     else outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laser_period);
-                    outMsg.payload.mobileReport.date=micros2s(laserStruct.date);
+                    outMsg.payload.mobileReport.date=micros2sl(laserStruct.date);
                     outMsg.payload.mobileReport.precision=laserStruct.precision;
                     outMsg.payload.mobileReport.sureness=laserStruct.sureness;
                     bn_send(&outMsg);
