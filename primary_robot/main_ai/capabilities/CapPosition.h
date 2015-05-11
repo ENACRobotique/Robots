@@ -19,6 +19,7 @@ class CapPosition : public Capability{
         virtual ~CapPosition(){}
 
         virtual Point2D<float> getLastPosXY() = 0;
+        virtual float getLastTheta() = 0;
 
         astar::iABObs_t getIobs(){
             return iobs;

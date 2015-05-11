@@ -132,7 +132,7 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            logs << ERR << "FAILED ROLE SETUP 2: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
             return -1;
         }
 
@@ -147,7 +147,7 @@ int roleSetup(bool simu_ai, bool simu_prop){
 
         ret = bn_sendAck(&msg);
         if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 2: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            logs << ERR << "FAILED ROLE SETUP 3: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
             return -1;
         }
     }
@@ -309,7 +309,7 @@ void checkInbox(int verbose){
     }
 
     // print message
-    logs << MES_V(E_V3) << "message received from : " << role_string(role_get_role(msgIn.header.srcAddr)) << "(" << msgIn.header.srcAddr << "), type : " << eType2str((E_TYPE) msgIn.header.type) << "(" << msgIn.header.type << ")";
+    logs << MES_V(E_V3) << "message received from : " << role_string(role_get_role(msgIn.header.srcAddr)) << "(" << msgIn.header.srcAddr << "), type : " << eType2str((E_TYPE) msgIn.header.type);
 
     // processing of the message
     switch (msgIn.header.type) {

@@ -12,10 +12,10 @@
 
 
 typedef struct __attribute__((packed)){
-	float x; 
+	float x;
 	float f;
 	float theta;
-	//bool goCapture;  // To start a capture
+	int goCapture;  // To start a capture
 } sPosCam;
 
 

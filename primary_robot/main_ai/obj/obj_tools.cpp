@@ -141,7 +141,7 @@ int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<as
 
 
 
-int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, std::vector<Actuator>& act){
+int metObj(const float angleRobot, int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, std::vector<Actuator>& act){
     static bool first = true;
 
     if(numObj < 0 || numObj > (int) listObj.size()){
@@ -154,7 +154,7 @@ int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, s
         first = false;
         logs << INFO << "Starting objective number : " << numObj;
     }else{
-        if(listObj[numObj]->loopObj(obs, obs_updated, listObj, act) == 0){ //0 finished
+        if(listObj[numObj]->loopObj(angleRobot, obs, obs_updated, listObj, act) == 0){ //0 finished
             first = true;
             logs << INFO << "Ending objective number : " << numObj;
             vector <unsigned int> num = listObj[numObj]->getNumObs();

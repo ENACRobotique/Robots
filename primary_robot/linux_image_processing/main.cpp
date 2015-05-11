@@ -6,15 +6,15 @@
  */
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include "opencv2/highgui/highgui.hpp"
+#include <processes/ProcAbsPosNTree.h>
+#include <processes/ProcAbsPos.h>
+#include <processes/Process.h>
+#include <tools/AbsPos2D.h>
+#include <tools/Acq.h>
+#include <tools/Cam.h>
+#include <tools/Uncertainty2D.h>
 #include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <math.h>
+#include <vector>
 
 // For communications
 //#include "../../network_config/messages.h"
@@ -27,112 +27,100 @@
 using namespace cv;
 using namespace std;
 
+#include "shared/botNet_core.h"
+
 #include "tools.hpp"
 #include "params.hpp"
 #include "process.hpp"
-#include "performance.h"
-#include "save.h"
-#include "sourceVid.h"
+#include "performance.hpp"
+#include "save.hpp"
+#include "sourceVid.hpp"
 
-//###############
-//#### TODO ####
-//##############
-/* To create build configuration for PC and BBB (BeagleBon Black)
- * Add bn communication
- */
+//##### TODO ####
 
-//####################
-//#### Information ##
-//###################
+//##### Information ##
 // To param cam manually:
 // In terminal -> $ locate svv;  $ cd ->svv;  $ ./svv /dev/video1
-//##################################
-//############## Main ##############
-//##################################
+
+//##### Main #####
 int main(int argc, char* argv[]) {
-	sPerf sValPerf;
-	sPosOrien posOriRobot;
-	Mat framePattern;
-	Mat frameRaw;
-//	int ret;
-//	sMsg inMsg = {{0}}, outMsg = {{0}};s
+    Perf& perf = Perf::getPerf();
+    Mat frameRaw;
 
-    // botNet initialization
-//    bn_init();
+    // init cameras
+    map<Cam*, VideoCapture*> camList;
+    camList.insert(make_pair(
+            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),
+            //            new VideoCapture("MyVideo.avi")));
+//            new VideoCapture(0)));
+//            new VideoCapture("Images/captures/guvcview_image-25.jpg"))); // coin avec 2 pieds
+//            new VideoCapture("Images/captures/1-955-743.jpg"))); // zone de départ jaune
+            new VideoCapture("Images/captures/z1.png"))); // "obomovie"
 
-	// Init video sources
-	VideoCapture srcFramePattern;  // For the pattern of the table
-	VideoCapture cap;
-	string titleFrameRaw("frameRaw");
-	initCapture(titleFrameRaw, cap, 0, false); // FIXME: default parameter not working
-	string titleFramePatt("framePattern");
-	initFramePattern(titleFramePatt, srcFramePattern, framePattern); //// Initialize the pattern frame
+// init processes
+    vector<Process*> processList;
+    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "simu/testpoints.csv"));
 
-#ifdef SETTINGS_HSV
-	// For calibration
-	Mat frameHSVPattern;
-	Mat frameHSVCalib;
-	VideoCapture srcHSVPattern;
-	VideoCapture srcHSVCalib;
-	// Initialize calibration
-	Mat frameGlobCalib;
-	initCalibHSV(srcHSVPattern, frameHSVPattern);
-	initCalibHSV(srcHSVCalib, frameHSVCalib);
-	string titleCalib("HSV_Calib");
-	initTrackbarCalib(frameHSVCalib, titleCalib);
-#endif
+    // init botnet
+    bn_init();
 
-	// Create  windows
-//	namedWindow("Anything", CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameGreen",CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameRed",CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameBlue",CV_WINDOW_AUTOSIZE);
-//	namedWindow("frameYellow",CV_WINDOW_AUTOSIZE);
+    if (!camList.begin()->second->read(frameRaw)) { //if not success, break loop
+        cout << "Cannot read the frame from source video file" << endl;
+    }
 
-	// Iinit the record of the video
-#ifdef SAVE
-	VideoWriter oVideoWriter;
-	if(initSave(cap, oVideoWriter) == -1) {
-		cout<<"Error: Failed to initialize the VideoWritter"<<endl;
-		return -1;
-	}
-#endif
-
-	while (1) {
+    bool quit = false;
+    do {
 //		ret = bn_receive(&inMsg);
 //
 //		switch(inMsg.header.type){
 //            case E_POS_CAM:
-				cmptPerfFrame(StartPerf, sValPerf);
-				// Read a new frame from the video source
-				if (!cap.read(frameRaw)) {  //if not success, break loop
-					cout << "Cannot read the frame from source video file" << endl;
-					break;
-				}
+        perf.beginFrame();
 
-				// Write the raw frame into the file
-				#ifdef SAVE
-				save(oVideoWriter, frameRaw);
-				#endif
+        for (Process* p : processList) {
+            vector<Acq*> acqList;
 
-				// Image processing
-				if (frameProcess(frameRaw, framePattern, posOriRobot)) {
-					break;
-				}
+            for (Cam* c : p->getCamList()) {
+                map<Cam*, VideoCapture*>::iterator it = camList.find(c);
 
-				//// Image calibration
-				#ifdef SETTINGS_HSV
-				// Apply a threshold
-				if(frameThresh(frameHSVCalib, frameHSVCalib, hsvCalib_min, hsvCalib_max, 5, 8) < 0) {
-					cout<<"process_frame(): Error during the threshold operation"<<endl;
-					return -1;
-				}
-				// Show calibration
-				displTwinImages(titleCalib, 700, frameHSVPattern, frameHSVCalib, frameGlobCalib, 10);
-				#endif
+                // Read a new frame from the video source
+//                if (!it->second->read(frameRaw)) {  //if not success, break loop
+//                    cout << "Cannot read the frame from source video file" << endl;
+//                    continue;
+//                }
 
-				// End of measurements
-				cmptPerfFrame(EndPerf, sValPerf);
+                if (frameRaw.size() != c->getSize()) {
+                    continue;
+                }
+
+//                imshow("rgb", frameRaw);
+
+                acqList.push_back(new Acq(frameRaw, BGR, c));
+            }
+
+            perf.endOfStep("acquisitions");
+
+//            p->process(acqList, AbsPos2D<float>(45, 65, 130. * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 39.58, 59.58, 134.99
+//            p->process(acqList, AbsPos2D<float>(100, 62, 60 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 93.58, 73.58, 64
+            p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
+
+            for (Acq* a : acqList) {
+                delete a;
+            }
+
+            perf.endOfStep("process");
+        }
+
+//        switch(waitKey(1000./10)){
+//        case 0x110001B:
+//        case 27:
+//            quit = true;
+//            break;
+//        default:
+//            break;
+//        }
+
+        perf.endFrame();
+        quit = 1;
 //
 //                break;
 //            case E_DATA:
@@ -143,10 +131,10 @@ int main(int argc, char* argv[]) {
 //                break;
 //		}  // End switch
 
-	}  // End while
+    } while (!quit);  // End while
 
-	printf("End loop\n");
+    printf("End loop\n");
 
-	return 0;
+    return 0;
 }
 

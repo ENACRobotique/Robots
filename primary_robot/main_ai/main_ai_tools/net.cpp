@@ -56,9 +56,10 @@ void Net::maintenace(){
 void Net::clearEl(){
     if(!_trajEl.empty() || !_trajOrientEl.empty())
         logs << WAR << "Clear trajectory but elements are present";
+    else
+        _tid++; //TODO tid independent of path type
 
     _sid = 0;
-    _tid++;
 
     queue <sTrajEl_t> empty;
     swap(_trajEl, empty);

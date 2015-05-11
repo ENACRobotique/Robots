@@ -32,6 +32,8 @@ int CapAI::loop(){
     static Point2D<float> pt_select;
     static unsigned int last_time = 0;
     static unsigned int start_time = 0;
+    static unsigned int lastDectectTime = 0;
+    bool contact = false;
 
     CapPropulsion* capProp = dynamic_cast<CapPropulsion*> (robot->caps[eCap::PROP]);
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
@@ -46,15 +48,19 @@ int CapAI::loop(){
         return 0;
     }
 
-    if(colissionDetection()){
+    if(colissionDetection(robot->el, robot->env->obs) && ((millis() - lastDectectTime) > 500)){
+        lastDectectTime = millis();
+        path.stopRobot(true);
         last_time = 0;
+        contact = true;
+
     }
 
     if (!mode_obj) {
         if(listObj.empty()) //Test if all objective have finished
             logs << INFO << "Objective list is empty";
 
-        if ((millis() - last_time) > 1000){ //Calculation of the next objective
+        if (((millis() - last_time) > 1000) || contact){ //Calculation of the next objective
             last_time = millis();
 
             if ((current_obj = nextObj(start_time, listObj, robot->env->obs, robot->env->obs_updated ,(int) capPos->getIobs(), capProp->getPropType()==AXLE?true:false, capActuator->_act)) != -1) {
@@ -77,7 +83,7 @@ int CapAI::loop(){
             mode_obj = true;
         }
     }else{
-        if (metObj(current_obj, listObj, robot->env->obs, robot->env->obs_updated, capActuator->_act ) == 0){
+        if (metObj(capPos->getLastTheta(), current_obj, listObj, robot->env->obs, robot->env->obs_updated, capActuator->_act ) == 0){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
