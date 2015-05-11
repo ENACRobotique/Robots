@@ -42,9 +42,9 @@ sServoData servosTable[] = { //servo number (club)|a|b   (us = a*deg+b)
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
-#define PIN_MODE_SWITCH (4)
+#define PIN_MODE_SWITCH (3)
 #define PIN_STARTING_CORD (2)
-#define PIN_LED_BLUE (3)
+#define PIN_LED_BLUE (9)
 #define PIN_LED_RED (5)
 #define PIN_LED_GREEN (6)
 
@@ -56,6 +56,8 @@ Adafruit_PWMServoDriver pwm(0x40);
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
 #define SERVO_FREQ 50. //the servo command frequency (Hz)
+
+#define DEBUG
 
 void fctModeSwitch(void);
 void fctStartingCord(void);
@@ -88,7 +90,8 @@ void setup(){
 
 sMsg inMsg, outMsg;
 int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwitch = 0, StartingCord = 0, Led = 0;
-int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, limitSwitchLeft = 0;
+int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, limitSwitchLeft = 0, debounceModeSwitch=0;
+int debounceStartingCord;
 unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord, timeLimitSwitchRight, timeLimitSwitchLeft,timeLedStart;
 unsigned int numberLedRepetitions,ledBlinkTimes, durationLedColorCurrent, durationLedColorNext;
 sRGB currentLedColor, nextLedColor;
@@ -192,31 +195,34 @@ void loop(){
         digitalWrite(PIN_DBG_LED, ledState^=1);
     }
 
-    if( (time -  timeStartingCord > 20) && flagStartingCord){
+    if( (time -  timeStartingCord > 40) && flagStartingCord){
         StartingCord = digitalRead(PIN_STARTING_CORD);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
-        outMsg.header.type = E_IHM_STATUS;
-        outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
-        outMsg.payload.ihmStatus.nb_states = 1;
-        outMsg.payload.ihmStatus.states[0].id = IHM_STARTING_CORD;
-        outMsg.payload.ihmStatus.states[0].state.state_cord = eIhmCord(StartingCord);
+        if (StartingCord == debounceStartingCord){
+        	outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+        	outMsg.header.type = E_IHM_STATUS;
+        	outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+        	outMsg.payload.ihmStatus.nb_states = 1;
+        	outMsg.payload.ihmStatus.states[0].id = IHM_STARTING_CORD;
+        	outMsg.payload.ihmStatus.states[0].state.state_cord = eIhmCord(StartingCord);
 
-        while( (ret = bn_send(&outMsg)) <= 0);
-
+        	while( (ret = bn_send(&outMsg)) <= 0);
+        }
         flagStartingCord = 0;
     }
 
-    if( (time -  timeModeSwitch > 20) && flagModeSwitch){
+    if( (time -  timeModeSwitch > 40) && flagModeSwitch){
         ModeSwitch = digitalRead(PIN_MODE_SWITCH);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
-        outMsg.header.type = E_IHM_STATUS;
-        outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
-        outMsg.payload.ihmStatus.nb_states = 1;
-        outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWITCH;
-        outMsg.payload.ihmStatus.states[0].state.state_switch = eIhmSwitch(ModeSwitch);
-        while( (ret = bn_send(&outMsg)) <= 0);
+        if (ModeSwitch == debounceModeSwitch){
+        	outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+        	outMsg.header.type = E_IHM_STATUS;
+        	outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+        	outMsg.payload.ihmStatus.nb_states = 1;
+        	outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWITCH;
+        	outMsg.payload.ihmStatus.states[0].state.state_switch = eIhmSwitch(ModeSwitch);
+        	while( (ret = bn_send(&outMsg)) <= 0);
+        }
 
         flagModeSwitch = 0;
     }
@@ -256,11 +262,13 @@ void loop(){
 
 void fctModeSwitch(void){
     timeModeSwitch = millis();
+    debounceModeSwitch = digitalRead(PIN_MODE_SWITCH);
     flagModeSwitch = 1;
 }
 
 void fctStartingCord(void){
     timeStartingCord = millis();
+    debounceStartingCord = digitalRead(PIN_STARTING_CORD);
     flagStartingCord = 1;
 }
 
@@ -271,7 +279,12 @@ int degreesTo4096th(float degrees, float a, float b){
 }
 
 void setLedRGB(unsigned int red, unsigned int green, unsigned int blue){
-	analogWrite(red,PIN_LED_RED);
-	analogWrite(green, PIN_LED_GREEN);
-	analogWrite(blue, PIN_LED_BLUE);
+#ifdef DEBUG
+	Serial.println(red);
+	Serial.print(green);
+	Serial.print(blue);
+#endif
+	analogWrite(PIN_LED_RED, red);
+	analogWrite(PIN_LED_GREEN, green);
+	analogWrite(PIN_LED_BLUE, blue);
 }
