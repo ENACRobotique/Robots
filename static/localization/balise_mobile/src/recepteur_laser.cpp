@@ -82,7 +82,6 @@ void loop() {
     int tempIndex=-1;
 #endif
 
-    updateSync();
     //blink
     if((time - time_prev_led)>=1000) {
       time_prev_led= time;
