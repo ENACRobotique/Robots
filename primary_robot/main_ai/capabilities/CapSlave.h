@@ -28,7 +28,7 @@ class CapSlave: public Capability {
         }
         void setup(){
             Point2D<float> pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
-            sendPos(pt, INIT_ANGLE_SLAVE);
+            sendPosPrimary(pt, INIT_ANGLE_SLAVE);
         }
 
         int loop(){

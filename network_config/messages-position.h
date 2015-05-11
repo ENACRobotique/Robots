@@ -25,7 +25,7 @@ typedef struct __attribute__((packed)){
 // speed in reference frame
     float vx; // linear velocity along x axis of specified reference frame (cm/s)
     float vy; // linear velocity along y axis of specified reference frame (cm/s)
-    float oz; // angular velocity along z axis of specified reference frame (cm/s)
+    float oz; // angular velocity along z axis of specified reference frame (rad/s)
 } s2DSpeed; // 2D linear and angular speeds
 
 typedef struct __attribute__((packed)){
@@ -51,22 +51,5 @@ typedef struct __attribute__((packed)){
         uint16_t theta :12; // 0-4095 (tenth of °)
     }steps[NB_POS_STEPS_PER_MSG];
 } sPosStats;
-
-typedef struct {
-// position in game area frame
-    float x; // (cm)
-    float y; // (cm)
-    float theta; // (rad)
-// uncertainty (oriented rectangle)
-    float u_a_theta; // (rad)
-    float u_a; // (cm)
-    float u_b; // (cm)
-// trajectory steps
-    int tid; // trajectory identifier               // FIXME int -> intxx_t
-    int sid; // step identifier                     // FIXME int -> intxx_t
-    uint8_t ssid; // sub-step identifier (0:line, 1:circle)
-// identifier of the robot/element
-    uint8_t id; // 0:prim, 1:sec, 2:adv_prim, 3:adv_sec
-} sPosPayload; // XXX DEPRECATED use sGenericStatus instead
 
 #endif /* LIB_NETWORK_CONFIG_MESSAGES_POSITION_H_ */

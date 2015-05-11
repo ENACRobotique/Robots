@@ -7,7 +7,7 @@
 
 typedef struct sPosLEl sPosLEl;
 struct sPosLEl{
-    sPosPayload pos;
+    sGenericPosStatus pos;
 //    unsigned int t; // time
     struct sPosLEl *next;
 };
@@ -22,7 +22,7 @@ typedef struct{
 } sPosList;
 
 void    pl_init     (sPosList *pl, int maxlen); // maxlen=-1 if no limit
-int     pl_addTail  (sPosList *pl, sPosPayload *p);
+int     pl_addTail  (sPosList *pl, sGenericPosStatus *p);
 sPosLEl *pl_getFirst (sPosList *pl);
 sPosLEl *pl_getNext  (sPosList *pl);
 

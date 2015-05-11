@@ -11,6 +11,7 @@
 #include "messages.h"
 
 typedef enum{
+    S_CHECKREMOTE,
     S_CHANNEL,
     S_SYNC_ELECTION,
     S_SYNC_MEASURE,
@@ -47,7 +48,7 @@ typedef struct{
 #define ELECTION_TIME       2000000  // in µs, duration during which the beacon choose their laser interruption
 #define SYNCRONIZATION_TIME 10000000 // in µs
 
-#define ANGLE_ZERO      3.63028415//3.97935 //value (in rad) to substract from the angle measured to match with this year robot's geometry (2014 : 228°)
+#define ANGLE_ZERO      0.09424778 //value (in rad) to substract from the angle measured to match with this year robot's geometry (2014 : 228°)
 // fixme : we can not determine yet if the rotation is clockwise or anticlockwise. The above value is valid only for clockwise
 
 #define PIN_RST_XBEE    5
@@ -64,9 +65,6 @@ typedef struct{
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
-
-#define HARDUPDATEPERIOD  0    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
-#define HARDUPDATESIGN    0
 
 #define SYNC_WIRED
 //#define SYNC_WIRELESS

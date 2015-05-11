@@ -43,7 +43,7 @@ public:
         return !(*this == l);
     }
 
-    Point2D<T> projecte(const Point2D<T>& p) const { //projection on the segment or shortest extremity point
+    Point2D<T> project(const Point2D<T>& p) const { //projection on the segment or shortest extremity point
         Vector2D<T> p1p(p1, p), p1p2(p1, p2);
         T t = (p1p * p1p2) / length();
 

@@ -32,20 +32,20 @@ class CapIO : public Capability {
 
             switch(state) {
                 case 0 :
-                    if(getHMI(IHM_MODE_SWICTH) == 0) {
+                    if(getHMI(IHM_MODE_SWITCH) == 0) {
                         state = 1;
-                        capTeam->setColor(YELLOW);
+                        capTeam->setColor(GREEN);
                         setHMI(IHM_LED, LED_YELLOW);
                     }
                     break;
                 case 1 :
-                    if(getHMI(IHM_MODE_SWICTH) == 1)
+                    if(getHMI(IHM_MODE_SWITCH) == 1)
                         state = 2;
                     break;
                 case 2 :
-                    if(getHMI(IHM_MODE_SWICTH) == 0) {
+                    if(getHMI(IHM_MODE_SWITCH) == 0) {
                         state = 3;
-                        capTeam->setColor(GREEN);
+                        capTeam->setColor(YELLOW);
                         setHMI(IHM_LED, LED_GREEN);
                     }
                     break;

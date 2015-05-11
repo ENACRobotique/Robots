@@ -16,7 +16,7 @@ void asserv_init();
 int new_traj_el(sTrajElRaw_t *te);
 int new_traj_orient_el(sTrajOrientElRaw_t *toe);
 int new_speed_setpoint(float speed);
-int new_pos(sPosPayload *pos);
+int new_pos(sGenericPosStatus *pos);
 int send_pos();
 void get_pos(s2DPosAtt *p, s2DPAUncert *p_u, unsigned int *p_t);
 int new_asserv_step();

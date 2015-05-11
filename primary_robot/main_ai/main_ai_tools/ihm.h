@@ -17,6 +17,15 @@
 
 using namespace std;
 
+typedef enum{
+    LED_OFF,
+    LED_YELLOW,
+    LED_GREEN
+}eIhmLed;
+
+eIhmLed ihmLedConvertRGBToEnum(sRGB rgb);
+sRGB ihmLedConvertEnumToRgb(eIhmLed led);
+
 class Ihm {
     public:
         Ihm(){}
@@ -29,7 +38,7 @@ class Ihm {
             return static_cast <eIhmCord>(list[eIhmElement::IHM_STARTING_CORD]);
         }
         eIhmSwitch getSwitchColor(){
-            return static_cast <eIhmSwitch>(list[eIhmElement::IHM_MODE_SWICTH]);
+            return static_cast <eIhmSwitch>(list[eIhmElement::IHM_MODE_SWITCH]);
         }
         eIhmLed getLed(){
             return static_cast <eIhmLed>(list[eIhmElement::IHM_LED]);

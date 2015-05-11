@@ -29,8 +29,8 @@ typedef enum{
 } eIhmElement;
 
 typedef enum {
-    CORD_IN,
-    CORD_OUT
+    CORD_OUT,
+    CORD_IN
 } eIhmCord;
 
 typedef enum {

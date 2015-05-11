@@ -57,17 +57,17 @@ typedef enum{
 
 typedef struct __attribute__((packed)){
     uint16_t nb_steps; // must be <=13 to fit in a sMsg payload (2+4*13=54)
-    struct{ // 3bytes
-        eStep step_type :4;
+    struct __attribute__((packed)){ // 4bytes
+        eStep step_type :8;
         union{
             // case update address
             struct __attribute__((packed)){
-                uint8_t role :4;
+                uint8_t role;
                 bn_Address address;
             };
             // case update actions
             struct __attribute__((packed)){
-                eRoleMsgClass type :4;
+                eRoleMsgClass type :8;
                 sRoleActions actions;
             };
         };

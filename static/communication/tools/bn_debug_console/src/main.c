@@ -136,9 +136,6 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu), seq : %02hhu ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type, msgIn.header.seqNum);
             }
             switch (msgIn.header.type){
-            case E_GENERIC_STATUS:
-                printf("%.2fcm, %.2fcm, %.2f°\n", msgIn.payload.genericStatus.prop_status.pos.x, msgIn.payload.genericStatus.prop_status.pos.y, msgIn.payload.genericStatus.prop_status.pos.theta*180./M_PI);
-                break;
             case E_ASSERV_STATS :
                 {
                     int i;
@@ -173,8 +170,8 @@ int main(int argc, char **argv){
                     }
                 }
                 break;
-            case E_POS :
-                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
+            case E_GENERIC_POS_STATUS:
+                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.genericPosStatus.id, msgIn.payload.genericPosStatus.pos.x, msgIn.payload.genericPosStatus.pos.y, msgIn.payload.genericPosStatus.pos.theta*180./M_PI);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
                 break;
             default :
@@ -292,12 +289,26 @@ int main(int argc, char **argv){
                     else{
                         printf("OK!\n");
                     }
-		case 'v':
-                    verbose++;
-                    break;
-                case 'V':
-                    verbose--;
-                    verbose=(verbose<0?0:verbose);
+
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+                    printf("Sending RoleSetup message to ADDRI_MAIN_IO... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+
+
                     break;
                 }
                 case 'h':{
@@ -311,7 +322,13 @@ int main(int argc, char **argv){
                     }
                     break;
                 }
-
+                case 'v':
+                    verbose++;
+                    break;
+                case 'V':
+                    verbose--;
+                    verbose=(verbose<0?0:verbose);
+                    break;
                 case 'f':{
                     sMsg msg = {{0}};
                     sRGB color1, color2;
