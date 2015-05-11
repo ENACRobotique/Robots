@@ -167,7 +167,7 @@ int wiredSync_finalCompute(int reset){
         tmpMsg.header.destAddr = ADDRX_MAIN_TURRET;
         tmpMsg.header.type = E_SYNC_STATUS;
         tmpMsg.header.size = sizeof(sSyncPayload_wired);
-        bn_send(&tmpMsg);
+        while (bn_sendAck(&tmpMsg)<0); // XXX critical, hence blocking.
 
 #ifdef DEBUG_SYNC_WIRE
 #if MYADDRX == ADDRX_MOBILE_1

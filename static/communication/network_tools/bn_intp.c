@@ -84,7 +84,7 @@ void bn_intp_msgHandle(sMsg *msg){
 /* bn_intp_sync : Makes the synchronization with device at address slave.
  * Argument :
  *  slave : address of the device to synchronize (must have bn_intp installed, cf bn_intp_install).
- *  retries : number of synchronization message to send.
+ *  retries : number of synchronization message to send (minimum 2).
  * Return value :
  *  >0 if synchronization happened correctly on the master side (amount of pair of sychronization messages acked)
  *  <0 otherwise (see global_errors.h), or details in the code here.
@@ -116,6 +116,6 @@ int bn_intp_sync(bn_Address slave, int retries){
     }
 
     if (nbSuccess>0) return nbSuccess;
-    else if (!nbAcked) return ret;      // no ak at all ? slave device is probably off, return last error code
+    else if (!nbAcked) return ret;      // no ack at all ? slave device is probably off, return last error code
     else return -ERR_TRY_AGAIN;         // no success but some acks ? well, network very busy, you may retry and pray to have more luck.
 }

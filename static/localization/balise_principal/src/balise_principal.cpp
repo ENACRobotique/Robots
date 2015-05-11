@@ -19,6 +19,7 @@
 #include "loc_tools_turret.h"
 #include "global_errors.h"
 #include "messages.h"
+#include "bn_utils.h"
 extern "C" {
 #include "roles.h"
 #include "global_sync.h"
@@ -162,6 +163,14 @@ void loop(){
     }
 #endif
 
+    if (gs_isBeaconRequested() && (state != S_CHECKREMOTE
+                                    || state != S_SYNC_MEASURE
+                                    || state != S_SYNC_ELECTION
+                                    || state != S_SYNC_END) ){
+        state = S_CHECKREMOTE;
+
+    }
+
     ///////state machine
     switch (state){
     case S_CHECKREMOTE :
@@ -169,13 +178,19 @@ void loop(){
         switchState = 1;
         // check if every device is on
         for (int i=0;i<D_AMOUNT;i++) {
-            outMsg.header.destAddr = devicesInfo[i].addr;
-            outMsg.header.srcAddr = MYADDRX;
-            outMsg.header.size = 0;
-            if (int err=bn_sendAck(&outMsg)!=1){
-                // FIXME handle case
-                // loop in there, with a warning ?
+            if (int err=bn_ping(devicesInfo[i].addr)<0){
                 switchState = 0;
+                if (gs_isBeaconRequested()) {
+                    outMsg.header.destAddr = gs_getBeaconQueryOrigin();
+                    outMsg.header.type = E_SYNC_RESPONSE;
+                    outMsg.header.size = sizeof(outMsg.payload.syncResponse.cfgs[0]);
+                    outMsg.payload.syncResponse.nb = 1;
+                    outMsg.payload.syncResponse.cfgs[0].type = SYNCTYPE_ADDRESS;
+                    outMsg.payload.syncResponse.cfgs[0].addr = devicesInfo[i].addr;
+                    outMsg.payload.syncResponse.cfgs[0].status = SYNCSTATUS_PING_KO;
+                    while (bn_sendAck(&outMsg)<0); // critical, so loop.
+                }
+
 #ifdef DEBUG_SYNC
                 bn_printfDbg("%hx offline (error : %d)\n",devicesInfo[i].addr,err);
 #endif
@@ -203,6 +218,7 @@ void loop(){
             }
             if (synced == D_AMOUNT) {
                 state = S_GAME;
+                gs_beaconStatus(SYNCSTATUS_OK);
 #ifdef DEBUG_SYNC
                 bn_printDbg("sync ok\n");
 #endif
@@ -213,12 +229,7 @@ void loop(){
                     if (devicesInfo[i].state != DS_SYNCED) bn_printfDbg("%hx not synchronized (status %d)\n",devicesInfo[i].addr,devicesInfo[i].state);
                 }
 #endif
-                // FIXME Do something better
-                // restart sync ?
-                // must wait at least for the duration of the whole experiment (to let remote node timeout)
-                delay((WIREDSYNC_PERIOD/1000)*WIREDSYNC_NBSAMPLES);
-                wiredSync_sendSignal(1);
-                endSync = micros();
+                gs_beaconStatus(SYNCSTATUS_SYNC_KO);
             }
         }
         break;

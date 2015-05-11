@@ -119,10 +119,6 @@ int gs_testOne(){
             else if (queryArray[gs_oIndex].type == SYNCTYPE_ROLE){
                 msg.payload.syncResponse.cfgs[msg.payload.syncResponse.nb].role = queryArray[gs_oIndex].role;
             }
-            if (queryArray[gs_oIndex].type != SYNCTYPE_BEACONS){    // skip the bacon case, it is done on its own
-                msg.payload.syncResponse.cfgs[msg.payload.syncResponse.nb].status = queryArray[gs_oIndex].status;
-                msg.payload.syncResponse.nb++;
-            }
             gs_oIndex = (gs_oIndex+1)%SYNC_ARRAY_SIZE;
             gs_size--;
         }
@@ -154,6 +150,10 @@ void gs_beaconStatus(eSyncStatus status){
  */
 int gs_isBeaconRequested(){
     return (queryBeacons.addr != 0 && queryBeacons.status==SYNCSTATUS_TODO?1:0);
+}
+
+bn_Address gs_getBeaconQueryOrigin(){
+    return queryBeacons.queryOrigin;
 }
 
 
