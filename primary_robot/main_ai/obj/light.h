@@ -21,7 +21,7 @@ typedef enum{ GO_TO_LIGHT, WAIT_LIGHT, BACK, END_LIGHT} lightStep;
 class Light : public Obj{
     public:
         Light(eColor_t color) : Obj(E_LIGHT, ActuatorType::ELEVATOR, false), step(lightStep::GO_TO_LIGHT){
-            Point2D<float> EP(30, 100); //Yellow
+            Point2D<float> EP(55, 100); //Yellow
             sObjEntry_t objEP;
 
             if(color == GREEN)
@@ -44,7 +44,7 @@ class Light : public Obj{
         virtual ~Light(){}
 
         void initObj(paramObj par) override {
-            destSelect = {3.5 + R_ROBOT, 100};
+            destSelect = {8 + R_ROBOT, 100}; //3.5
             if(par.color == GREEN)
                 destSelect.x = 300. - destSelect.x;
 

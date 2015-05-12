@@ -23,11 +23,58 @@ extern "C"{
 #include "spot.h"
 #include "spot2.h"
 #include "spot3.h"
+#include "dropSpot.h"
 #include "cup.h"
 #include "dropCup.h"
 #include "light.h"
+#include "objStartingZone.h"
 #include "environment.h"
 
+
+void CapAI::updateWaitObj(paramObj& par){
+
+    for (unsigned int i = 0 ; i < par.obj.size() ; i++){
+        if(par.obj[i]->state() == WAIT_MES){
+            switch(par.obj[i]->type()){
+                case E_OBJ_STARTING_ZONE:
+                    {
+                        int perform = 0;
+                        for(Actuator& j : par.act){
+                            if(j.type == ActuatorType::ELEVATOR){
+                                if(j.elevator.ball && j.elevator.number == 3){
+                                    j.elevator.full = 1;
+                                    perform++;
+                                }
+                                else if(!j.elevator.ball && j.elevator.number == 2){
+                                    j.elevator.full = 1;
+                                    perform++;
+                                }
+                            }
+                        }
+                        if(perform == 2){
+                            logs << INFO << "Activation OBJ Starting zone";
+                            par.obj[i]->state() = ACTIVE;
+                        }
+                    }
+                    break;
+                case E_DROP_CUP:
+                    for(Actuator& j : par.act){
+                        if(j.type == ActuatorType::CUP){
+                            if(j.cupActuator.full){
+                                par.obj[i]->state() = ACTIVE;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    logs << ERR << "No action define in WAIT_MES for this objective";
+            }
+
+        }
+
+    }
+}
 
 int CapAI::loop(){
     static bool mode_obj = false;
@@ -110,6 +157,7 @@ int CapAI::loop(){
             pt_select.x = -1;
             pt_select.y = -1;
             mode_obj = false;
+            updateWaitObj(par);
         }
     }
 
@@ -135,6 +183,7 @@ void CapAI::initObjective(){
         logs << ERR << "Color ???";
         exit(EXIT_FAILURE);
     }
+    listObj.push_back(new ObjStartingZone(capTeam->getColor()));
 
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
@@ -143,14 +192,21 @@ void CapAI::initObjective(){
         listObj.push_back(new Spot2(i, capTeam->getColor()));
 
     listObj.push_back(new Spot3(robot->env->obs, capTeam->getColor()));
-
+/*
+    for(unsigned int i = 0 ; i < 2 ; i++)
+        listObj.push_back(new DropSpot(i, capTeam->getColor()));
+*/
+/*
     listObj.push_back(new Light(capTeam->getColor()));
-
+*/
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));
 
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new DropCup(i, capTeam->getColor()));
+
+
+
 
     if(capTeam->getColor() == YELLOW){
         for(unsigned int i = 12 ; i < 20 ; i++){

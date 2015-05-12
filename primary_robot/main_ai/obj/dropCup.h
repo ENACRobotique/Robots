@@ -24,7 +24,7 @@ class DropCup : public Obj{
             sObjEntry_t objEP;
 
             if(num == 0)
-                _state = WAIT_FREE_ZONE;
+                _state = FINISH;
             else
                 _state = WAIT_MES;
 

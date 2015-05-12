@@ -57,13 +57,6 @@ void Cup::initObj(paramObj par){
 int Cup::loopObj(paramObj par){
 
     if(millis() - _time > 2000){
-        for(Obj* i : par.obj){
-            if(i->type() == E_DROP_CUP && i->state() == WAIT_MES){
-                i->state() = ACTIVE;
-                break;
-            }
-        }
-
         for(Actuator& i : par.act){
             if(i.type == ActuatorType::CUP && i.id == _actuator_select){
                 i.cupActuator.full = true;

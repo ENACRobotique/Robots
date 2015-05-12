@@ -35,7 +35,7 @@ class Spot : public Obj{
 
             for(i = 0 ; i < par.act.size() ; i++){ //TODO optimize for the moment the first find is used
                 if( par.act[i].type == _typeAct){
-                    if((!par.act[i].elevator.full) && par.act[i].elevator.ball == true)
+                    if((!par.act[i].elevator.full))
                         break;
                 }
             }
