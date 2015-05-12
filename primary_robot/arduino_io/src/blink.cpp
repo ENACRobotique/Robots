@@ -48,8 +48,11 @@ sServoData servosTable[] = { //servo number (club)|a|b   (us = a*deg+b)
 #define PIN_LED_RED (5)
 #define PIN_LED_GREEN (6)
 
-#define PIN_LIMIT_SWITCH_RIGHT (A2)
-#define PIN_LIMIT_SWITCH_LEFT (A3)
+#define PIN_PRESENCE_1 (4)
+#define PIN_PRESENCE_2 (7)
+#define PIN_PRESENCE_3 (8)
+#define PIN_PRESENCE_4 (10)
+#define PIN_PRESENCE_5 (11)
 
 Adafruit_PWMServoDriver pwm(0x40);
 
@@ -85,15 +88,19 @@ void setup(){
     pwm.reset();
     pwm.setPWMFreq(SERVO_FREQ);  // 50Hz
 
+#ifdef DEBUG
     bn_printDbg("start arduino_io");
+#endif
 }
 
 
 sMsg inMsg, outMsg;
 int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwitch = 0, StartingCord = 0, Led = 0;
-int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, limitSwitchLeft = 0, debounceModeSwitch=0;
-int debounceStartingCord;
-unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord, timeLimitSwitchRight, timeLimitSwitchLeft,timeLedStart;
+int flagPresence1=0, flagPresence2=0, flagPresence3=0, flagPresence4=0, debounceModeSwitch=0;
+int debounceStartingCord, presence1Old=0, presence1=0, presence2Old=0, presence2=0, presence3Old=0, presence3=0, presence4Old=0;
+int presence4=0, presence5Old=0, presence5=0, flagPresence5=0;
+unsigned long led_prevT = 0, time=0, timeModeSwitch=0, timeStartingCord=0, timePresence1=0, timePresence2=0, timePresence3=0,timeLedStart=0;
+unsigned long timePresence4=0, timePresence5=0;
 unsigned int numberLedRepetitions,ledBlinkTimes, durationLedColorCurrent, durationLedColorNext;
 sRGB currentLedColor, nextLedColor;
 
@@ -139,6 +146,8 @@ void loop(){
                 outMsg.payload.ihmStatus.states[2].state.nb = ledBlinkTimes;
 
                 while( (ret = bn_send(&outMsg)) <= 0);
+
+
             }
             else{
                 for(i = 0; i < (int)inMsg.payload.ihmStatus.nb_states; i++){
@@ -228,47 +237,154 @@ void loop(){
         flagModeSwitch = 0;
     }
 
-//    if( (time -  timeLimitSwitchRight) > 20 ){
-//        limitSwitchRight = digitalRead(PIN_LIMIT_SWITCH_RIGHT);
-//
-//        if(limitSwitchRight != prevLimitSwitchRight){
-//            prevLimitSwitchRight = limitSwitchRight;
-//
-//            outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
-//            outMsg.header.type = E_IHM_STATUS;
-//            outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
-//            outMsg.payload.ihmStatus.nb_states = 1;
-//            outMsg.payload.ihmStatus.states[0].id = IHM_LIMIT_SWITCH_RIGHT;
-//            outMsg.payload.ihmStatus.states[0].state = limitSwitchRight;
-//            while( (ret = bn_send(&outMsg)) <= 0);
-//        }
-//    }
 
-//    if( (time -  timeLimitSwitchLeft) > 20 ){
-//        limitSwitchLeft = digitalRead(PIN_LIMIT_SWITCH_LEFT);
-//
-//        if(limitSwitchLeft != prevLimitSwitchLeft){
-//            prevLimitSwitchLeft = limitSwitchLeft;
-//
-//            outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
-//            outMsg.header.type = E_IHM_STATUS;
-//            outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
-//            outMsg.payload.ihmStatus.nb_states = 1;
-//            outMsg.payload.ihmStatus.states[0].id = IHM_LIMIT_SWITCH_LEFT;
-//            outMsg.payload.ihmStatus.states[0].state = limitSwitchLeft;
-//            while( (ret = bn_send(&outMsg)) <= 0);
-//        }
-//    }
+
+    	if (!flagPresence1){
+    		presence1Old = presence1;
+    		presence1 = digitalRead(PIN_PRESENCE_1);
+
+    		if (presence1Old != presence1){
+    			flagPresence1 = 1;
+    			timePresence1 = time;
+    			presence1Old = presence1;
+    		}
+    	}
+        if (flagPresence1 && (time-timePresence1 >= 40)){
+        	presence1 = digitalRead(PIN_PRESENCE_1);;
+        	if (presence1Old == presence1){
+        		setLedRGB(presence1*255, 0, 0);
+        		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+        		outMsg.header.type = E_IHM_STATUS;
+        		outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+        		outMsg.payload.ihmStatus.nb_states = 1;
+        		outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_1;
+        		outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence1);
+        		while( (ret = bn_send(&outMsg)) <= 0);
+        	}
+        	flagPresence1 = 0;
+        }
+
+
+
+
+    if (!flagPresence2){
+		presence2Old = presence2;
+   		presence2 = digitalRead(PIN_PRESENCE_2);
+
+   		if (presence2Old != presence2){
+    		flagPresence2 = 1;
+    		timePresence2 = time;
+    		presence2Old = presence2;
+
+    	}
+    }
+
+    if (flagPresence2 && time-timePresence2 >= 40){
+       	presence2 = digitalRead(PIN_PRESENCE_2);
+       	if (presence2Old == presence2){
+       		setLedRGB(0,presence2*255,0);
+       		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+    		outMsg.header.type = E_IHM_STATUS;
+    	    outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+    	    outMsg.payload.ihmStatus.nb_states = 1;
+    	    outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_2;
+    	    outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence2);
+    	    while( (ret = bn_send(&outMsg)) <= 0);
+       	}
+       	flagPresence2 = 0;
+    }
+
+
+
+    if (!flagPresence3){
+    	presence3Old = presence3;
+    	presence3 = digitalRead(PIN_PRESENCE_3);
+
+    	if (presence3Old != presence3){
+    			flagPresence3 = 1;
+    			timePresence3 = time;
+    			presence3Old = presence3;
+    		}
+    	}
+        if (flagPresence3 && time-timePresence3 >= 40){
+        	presence3 = digitalRead(PIN_PRESENCE_3);
+        	if (presence3Old == presence3){
+        		setLedRGB(0,0,presence3*255);
+        		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+        			outMsg.header.type = E_IHM_STATUS;
+        		    outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+        		    outMsg.payload.ihmStatus.nb_states = 1;
+        		    outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_3;
+        		    outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence3);
+        		    while( (ret = bn_send(&outMsg)) <= 0);
+        	}
+        	flagPresence3 = 0;
+        }
+
+
+
+
+    	if (!flagPresence4){
+    		presence4Old = presence4;
+    		presence4 = digitalRead(PIN_PRESENCE_4);
+
+    		if (presence4Old != presence4){
+    			flagPresence4 = 1;
+    			timePresence4 = time;
+    			presence4Old = presence4;
+    		}
+    	}
+        if (flagPresence4 && time-timePresence4 >= 40){
+        	presence4 = digitalRead(PIN_PRESENCE_4);
+        	if (presence4Old == presence4){
+
+        		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+        			outMsg.header.type = E_IHM_STATUS;
+        		    outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+        		    outMsg.payload.ihmStatus.nb_states = 1;
+        		    outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_4;
+        		    outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence4);
+        		    while( (ret = bn_send(&outMsg)) <= 0);
+        	}
+        	flagPresence4 = 0;
+        }
+
+
+
+    	if (!flagPresence5){
+    		presence5Old = presence5;
+    		presence5 = digitalRead(PIN_PRESENCE_5);
+
+    		if (presence5Old != presence5){
+    			flagPresence5 = 1;
+    			timePresence5 = time;
+    			presence5Old = presence5;
+    		}
+    	}
+        if (flagPresence5 && time-timePresence5 >= 40){
+        	presence5 = digitalRead(PIN_PRESENCE_5);
+        	if (presence5Old == presence5){
+        		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+        			outMsg.header.type = E_IHM_STATUS;
+        		    outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+        		    outMsg.payload.ihmStatus.nb_states = 1;
+        		    outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_5;
+        		    outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence5);
+        		    while( (ret = bn_send(&outMsg)) <= 0);
+        	}
+        	flagPresence5 = 0;
+        }
+
 }
 
 void fctModeSwitch(void){
-    timeModeSwitch = millis();
+    timeModeSwitch = time;
     debounceModeSwitch = digitalRead(PIN_MODE_SWITCH);
     flagModeSwitch = 1;
 }
 
 void fctStartingCord(void){
-    timeStartingCord = millis();
+    timeStartingCord = time;
     debounceStartingCord = digitalRead(PIN_STARTING_CORD);
     flagStartingCord = 1;
 }

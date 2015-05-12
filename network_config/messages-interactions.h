@@ -24,8 +24,11 @@ typedef enum{
     IHM_STARTING_CORD,
     IHM_MODE_SWITCH,
     IHM_LED,
-    IHM_LIMIT_SWITCH_RIGHT,
-    IHM_LIMIT_SWITCH_LEFT
+    IHM_PRESENCE_1,
+	IHM_PRESENCE_2,
+	IHM_PRESENCE_3,
+	IHM_PRESENCE_4,
+	IHM_PRESENCE_5
 } eIhmElement;
 
 typedef enum {
@@ -38,6 +41,11 @@ typedef enum {
     SWITCH_OFF,
     SWITCH_INTER
 } eIhmSwitch;
+
+typedef enum {
+	PRESENCE_FALSE,
+	PRESENCE_TRUE
+} eIhmPresence;
 
 
 typedef struct __attribute__((packed)){
@@ -52,6 +60,7 @@ typedef struct __attribute__((packed)){
         union __attribute__((packed)){
         	eIhmCord state_cord :8;
         	eIhmSwitch state_switch :8;
+        	eIhmPresence state_presence :8;
         	struct __attribute__((packed)){
         		sRGB color1; //first color
         		sRGB color2; //second color
