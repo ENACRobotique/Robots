@@ -54,7 +54,7 @@ typedef struct __attribute__((packed)){
 
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_states; // must be <=4
+    uint16_t nb_states; // must be <=3
     struct __attribute__((packed)){
         eIhmElement id :8; // identifier of the ihm element
         union __attribute__((packed)){

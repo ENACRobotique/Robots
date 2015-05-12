@@ -147,6 +147,36 @@ void loop(){
 
                 while( (ret = bn_send(&outMsg)) <= 0);
 
+                outMsg.header.destAddr = inMsg.header.srcAddr;
+                outMsg.header.type = E_IHM_STATUS;
+                outMsg.header.size = 2 + 3*sizeof(*outMsg.payload.ihmStatus.states);
+
+                outMsg.payload.ihmStatus.nb_states = 3;
+
+                outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_1;
+                outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence1);
+
+                outMsg.payload.ihmStatus.states[1].id = IHM_PRESENCE_2;
+                outMsg.payload.ihmStatus.states[1].state.state_presence = eIhmPresence(presence2);
+
+                outMsg.payload.ihmStatus.states[2].id = IHM_PRESENCE_3;
+                outMsg.payload.ihmStatus.states[2].state.state_presence = eIhmPresence(presence3);
+
+                while( (ret = bn_send(&outMsg)) <= 0);
+
+                outMsg.header.destAddr = inMsg.header.srcAddr;
+                outMsg.header.type = E_IHM_STATUS;
+                outMsg.header.size = 2 + 3*sizeof(*outMsg.payload.ihmStatus.states);
+
+                outMsg.payload.ihmStatus.nb_states = 2;
+
+                outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_4;
+                outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence4);
+
+                outMsg.payload.ihmStatus.states[1].id = IHM_PRESENCE_5;
+                outMsg.payload.ihmStatus.states[1].state.state_presence = eIhmPresence(presence5);
+
+                while( (ret = bn_send(&outMsg)) <= 0);
 
             }
             else{
