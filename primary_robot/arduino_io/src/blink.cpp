@@ -246,7 +246,7 @@ void loop(){
         	outMsg.payload.ihmStatus.states[0].id = IHM_STARTING_CORD;
         	outMsg.payload.ihmStatus.states[0].state.state_cord = eIhmCord(StartingCord);
 
-        	while( (ret = bn_send(&outMsg)) <= 0);
+        	while( (ret = bn_sendAck(&outMsg)) <= 0);
         }
         flagStartingCord = 0;
     }
@@ -261,7 +261,10 @@ void loop(){
         	outMsg.payload.ihmStatus.nb_states = 1;
         	outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWITCH;
         	outMsg.payload.ihmStatus.states[0].state.state_switch = eIhmSwitch(ModeSwitch);
-        	while( (ret = bn_send(&outMsg)) <= 0);
+
+        	ret = bn_send(&outMsg);
+        	Serial.println(ret);
+
         }
 
         flagModeSwitch = 0;
@@ -280,16 +283,15 @@ void loop(){
     		}
     	}
         if (flagPresence1 && (time-timePresence1 >= 40)){
-
+        	presence1 = digitalRead(PIN_PRESENCE_1);
         	if (presence1Old == presence1){
-        		setLedRGB(presence1*255, 0, 0);
         		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         		outMsg.header.type = E_IHM_STATUS;
         		outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         		outMsg.payload.ihmStatus.nb_states = 1;
         		outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_1;
         		outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence1);
-        		while( (ret = bn_send(&outMsg)) <= 0);
+        		ret = bn_send(&outMsg);
         	}
         	flagPresence1 = 0;
         }
@@ -310,9 +312,8 @@ void loop(){
     }
 
     if (flagPresence2 && time-timePresence2 >= 40){
-
+    	presence2 = digitalRead(PIN_PRESENCE_2);
        	if (presence2Old == presence2){
-       		setLedRGB(0,presence2*255,0);
        		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
     		outMsg.header.type = E_IHM_STATUS;
     	    outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
@@ -337,9 +338,8 @@ void loop(){
     		}
     	}
         if (flagPresence3 && time-timePresence3 >= 40){
-
+        	presence3 = digitalRead(PIN_PRESENCE_3);
         	if (presence3Old == presence3){
-        		setLedRGB(0,0,presence3*255);
         		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         			outMsg.header.type = E_IHM_STATUS;
         		    outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
