@@ -61,15 +61,18 @@ void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hm
 
     // Secondary
     if(eState == E_AI_AUTO){
+/*
         robots.push_back(new Robot("", ELT_SECONDARY, &env));
 
         robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color);
         robots.back()->caps[eCap::POS] = new CapPosSimuSecondary(robots.back(), 1);
+*/
 
         robots.push_back(new Robot("", ELT_ADV_PRIMARY, &env));
 
         robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color==YELLOW?GREEN:YELLOW);
-        robots.back()->caps[eCap::POS] = new CapPosSimuAdversary(robots.back(), 2);
+        robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 2);
+
     }
 
     // Call setup method

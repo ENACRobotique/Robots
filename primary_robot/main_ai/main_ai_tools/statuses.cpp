@@ -12,9 +12,17 @@
 #include "ai_tools.h"
 #include "tools.h"
 #include "time_tools.h"
+extern "C"{
+#include "string.h"
+}
 
 
 Statuses::Statuses() {
+    for(unsigned int i = 0 ; i < NUM_E_ELEMENT; i++)
+        reset[i] = false;
+
+    reset[ELT_PRIMARY] = true;
+    pt[ELT_PRIMARY] = {0, 0};
 
 
 }
@@ -46,17 +54,51 @@ void Statuses::maintenace(){
     //        }
 }
 
-int Statuses::receivedNewStatus(sGenericPosStatus &status){
+int Statuses::receivedNewStatus(sGenericPosStatus& status){
 
+    logs << INFO_V(E_V3) << "New status (id:)" << status.id << " : (" << status.pos.x << ", " << status.pos.y << ", " << status.pos.theta * 180 / M_PI << "°)";
+    logs << ERR << "Date:" << status.date;
     if(status.id >= NUM_E_ELEMENT){
-        cerr << "[ERROR] [statuses.cpp] Unknown status id" << endl;
+        logs << ERR << "Unknown status id=" << status.id;
         return -1;
     }
-    logs << INFO_V(E_V3) << "New status : " << status.pos.x << ", " << status.pos.y << ", " << status.pos.theta * 180 / M_PI;
+    if(!status.date){
+        logs << ERR << "Date null";
+        return -1;
+    }
+    if(status.pos.frame >= NUM_FRAME){
+        logs << ERR << "Unknown frame=" << status.pos.frame;
+        return -1;
+    }
+    if(fabs(status.pos.x) > 500. || fabs(status.pos.y) > 500.){
+        logs << ERR << "Incoherent position x=" << status.pos.x << " y=" << status.pos.y;
+        return -1;
+    }
+    if(fabs(status.pos.theta) > 10*M_PI){
+        logs << ERR << "Incoherent angle theta=" << status.pos.theta*180/M_PI;
+        return -1;
+    }
 
-    //TODO Adds security if position incoherent
+    if(status.pos.frame == FRAME_PRIMARY){
+        if(!_list[ELT_PRIMARY].empty()){
+            sGenericPosStatus statusRet = status;
+            sGenericPosStatus statusPrim = _list[eElement::ELT_PRIMARY].back();
 
-    _list[status.id].push_back(status); //TODO sort by date
+            //FIXME get coherent primary date
+
+            fromPRPG2PG(&status.pos, &status.pos_u, &statusPrim.pos,
+                    &statusPrim.pos_u, &statusRet.pos, &statusRet.pos_u);
+
+            status = statusRet;
+        }
+        else
+            return -2;
+    }
+
+    if(status.pos.frame == FRAME_PLAYGROUND)
+        _list[status.id].push_back(status); //TODO short by date
+    else
+        logs << ERR << "Position not save frame not in playground";
 
     if(status.id == ELT_PRIMARY)
         logs.putNewPos(status.pos.x, status.pos.y, status.pos.theta);
@@ -64,20 +106,37 @@ int Statuses::receivedNewStatus(sGenericPosStatus &status){
     return 1;
 }
 
+void Statuses::posSend(eElement el, Point2D<float>& p){
+    reset[el] = true;
+    pt[el] = p;
+}
+
 sGenericPosStatus& Statuses::getLastStatus(eElement el, frame_t fr){
+    static sGenericPosStatus status;
+    status.id = el;
+    status.date = 0;
+
     if(!_list[el].empty()){
+        if(reset[el]){
+            logs << WAR << "Waiting positing for this element : " << el;
+            Point2D<float> pos(_list[el].back().pos.x, _list[el].back().pos.y);
+            if(pt[el].distanceTo(pos) < 3.){
+                reset[el] = false;
+            }
+            else{
+                return status;
+            }
+
+        }
         if(_list[el].back().pos.frame == fr){
             return _list[el].back();
         }
         else{
-            //TODO convert, used fromPRPG2PG
-            return _list[el].back();
+            logs << ERR << "Bad reference";
         }
     }
+
     //TODO ask position
-    static sGenericPosStatus status;
-    status.id = el;
-    status.date = 0;
 
     return status;
 }
@@ -88,6 +147,7 @@ Point2D<float> Statuses::getLastPosXY(eElement el){
     if(status.date)
         return {status.pos.x, status.pos.y};
 
+    logs << ERR << "date nul";
     return {0,0};
 }
 
@@ -99,7 +159,14 @@ float Statuses::getLastOrient(eElement el){
 
 float Statuses::getLastSpeed(eElement el){
 
-    if(_list[el].size() >=2){
+    if(el == ELT_PRIMARY){
+        if(_list[el].size() > 0) {
+            sGenericPosStatus& status = getLastStatus(el);
+            Vector2D<float> v{status.prop_status.spd.vx, status.prop_status.spd.vy};
+            return v.norm();
+        }
+    }
+    else if(_list[el].size() >=2){
         sGenericPosStatus& status1 = getLastStatus(el);
         Point2D<float> pt1 = {status1.pos.x, status1.pos.y};
 
@@ -110,7 +177,6 @@ float Statuses::getLastSpeed(eElement el){
 
         return dist/(status1.date - status2.date)*1000000;
     }
-
 
     return 0;
 }
@@ -128,7 +194,7 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
         dstPAPG->x = cos(theta) * srcPAPR->x - sin(theta) * srcPAPR->y + srcPAPG->x;
         dstPAPG->y = sin(theta) * srcPAPR->x + cos(theta) * srcPAPR->y + srcPAPG->y;
         dstPAPG->theta = theta + srcPAPR->theta;
-    //    dstPAPG->frame = FRAME_PLAYGROUND;
+        dstPAPG->frame = FRAME_PLAYGROUND;
     }
 
     // create uncertainty if asked to

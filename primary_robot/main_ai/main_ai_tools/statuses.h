@@ -31,7 +31,8 @@ class Statuses {
         void setConfig();
 
 
-        int receivedNewStatus(sGenericPosStatus &status);
+        int receivedNewStatus(sGenericPosStatus& status);
+        void posSend(eElement el, Point2D<float>& p);
 
         sGenericPosStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);
 
@@ -45,6 +46,8 @@ class Statuses {
 
         array <deque <sGenericPosStatus>, NUM_E_ELEMENT> _list;
         array <statusConfig_t, NUM_E_ELEMENT> _config;
+        bool reset[NUM_E_ELEMENT];
+        Point2D<float> pt[NUM_E_ELEMENT];
 
 };
 
