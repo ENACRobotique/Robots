@@ -11,7 +11,7 @@
 #include <messages-elements.h>
 #include <stdint.h>
 
-typedef enum{FRAME_PLAYGROUND, FRAME_PRIMARY}frame_t;
+typedef enum{FRAME_PLAYGROUND, FRAME_PRIMARY, NUM_FRAME}frame_t;
 
 typedef struct __attribute__((packed)){
 // position in reference frame (specified in field "frame")

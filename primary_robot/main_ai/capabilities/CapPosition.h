@@ -15,7 +15,9 @@
 
 class CapPosition : public Capability{
     public:
-        CapPosition(Robot* rob_init, astar::iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){}
+        CapPosition(Robot* rob_init, astar::iABObs_t iobs_init) : Capability(rob_init), iobs(iobs_init){
+            robot->env->obs[iobs_init].active = 1;
+        }
         virtual ~CapPosition(){}
 
         virtual Point2D<float> getLastPosXY() = 0;
