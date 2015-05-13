@@ -14,7 +14,7 @@
 #include <deque>
 #include "GeometryTools.h"
 
-#define MAX_RETRIES 1 //FIXME bug with simulation
+#define MAX_RETRIES 5
 
 
 using namespace std;

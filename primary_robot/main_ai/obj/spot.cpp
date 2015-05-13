@@ -45,8 +45,17 @@ int Spot::loopObj(paramObj par){
     par.act[_actuator_select].elevator.number++;
     par.act[_actuator_select].elevator.empty = false;
 
-    if(par.act[_actuator_select].elevator.number == 4)
+    if(par.act[_actuator_select].elevator.number == 4){
         par.act[_actuator_select].elevator.full = true;
+/*
+        for(Obj* i : par.obj){
+            if(i->type() == E_DROP_SPOT && i->state() == WAIT_MES){
+                i->state() = ACTIVE;
+                break;
+            }
+        }
+*/
+    }
 
     _state = FINISH;
     return 0;

@@ -23,6 +23,7 @@ extern "C"{
 #include "spot.h"
 #include "spot2.h"
 #include "spot3.h"
+#include "spot4.h"
 #include "dropSpot.h"
 #include "cup.h"
 #include "dropCup.h"
@@ -166,6 +167,20 @@ int CapAI::loop(){
 
 void CapAI::initObjective(){
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
+    CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
+    CapActuator* capActuator = dynamic_cast<CapActuator*> (robot->caps[eCap::ACTUATOR]);
+
+    float angleRobot = capPos->getLastTheta();
+    Point2D<float> posRobot = capPos->getLastPosXY();
+    eColor_t color = capTeam->getColor();
+
+    paramObj par = {posRobot,
+            angleRobot,
+            color,
+            robot->env->obs,
+            robot->env->obs_updated,
+            listObj,
+            capActuator->_act};
 
     logs << INFO << "InitOjective for AI";
 
@@ -188,10 +203,12 @@ void CapAI::initObjective(){
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
 
-    for(unsigned int i = 0 ; i < 2 ; i++)
-        listObj.push_back(new Spot2(i, capTeam->getColor()));
+
+    listObj.push_back(new Spot2(0, capTeam->getColor()));
 
     listObj.push_back(new Spot3(robot->env->obs, capTeam->getColor()));
+
+    listObj.push_back(new Spot4(par));
 /*
     for(unsigned int i = 0 ; i < 2 ; i++)
         listObj.push_back(new DropSpot(i, capTeam->getColor()));
