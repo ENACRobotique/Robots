@@ -22,7 +22,9 @@ using namespace std;
 #define DELTA_X                         22.
 #define SPOT4_POINT_ENTRY               45.
 #define SPOT4_POINT_GET_FRIST_STAND     40.
-#define SPOT4_POINT_GET_SECOND_STAND    20.
+#define SPOT4_POINT_GET_SECOND_STAND    30.
+#define SPOT4_POINT_CLAP                20. //y
+#define SPOT4_POINT_END                 50. //x
 
 
 typedef enum {
@@ -34,6 +36,10 @@ typedef enum {
     SPOT4_TRAJ2,
     SPOT4_WAIT_TRAJ2,
     SPOT4_GET_STAND2,
+    SPOT4_TRAJ3,
+    SPOT4_WAIT_TRAJ3,
+    SPOT4_TRAJ4,
+    SPOT4_WAIT_TRAJ4,
     SPOT4_END
 } stepSpot4;
 
@@ -121,7 +127,43 @@ class Spot4 : public Obj{
                     break;
 
                 case SPOT4_GET_STAND2:
-                    _state_loc = SPOT4_END;
+                    _state_loc = SPOT4_TRAJ3;
+                    break;
+
+                case SPOT4_TRAJ3:
+                    unsigned int i;
+                    for(i = 0 ; i < par.act.size() ; i++){
+                        if(par.act[i].type == POP_CORN_LOADER){
+                            break;
+                        }
+                    }
+
+                    angleSelect = M_PI  + par.act[i].angle;
+                    angleSelect += color==YELLOW?M_PI:0;
+                    angleSelect += color==YELLOW?-M_PI/2:M_PI/2; //delta
+
+                    setDestPoint(SPOT4_POINT_CLAP);
+                    path.go2PointOrient(destPoint, par.obs, angleSelect);
+                    _state_loc = SPOT4_WAIT_TRAJ3;
+                    break;
+
+                case SPOT4_WAIT_TRAJ3:
+                    if(par.posRobot.distanceTo(destPoint) < 1.){
+                        _state_loc = SPOT4_TRAJ4;
+                    }
+                    break;
+
+                case SPOT4_TRAJ4:
+                    destPoint.x = color==YELLOW?SPOT4_POINT_END:300.-SPOT4_POINT_END;
+                    destPoint.y = SPOT4_POINT_CLAP;
+                    path.go2PointOrient(destPoint, par.obs, angleSelect);
+                    _state_loc = SPOT4_WAIT_TRAJ4;
+                    break;
+
+                case SPOT4_WAIT_TRAJ4:
+                    if(par.posRobot.distanceTo(destPoint) < 1.){
+                        _state_loc = SPOT4_END;
+                    }
                     break;
 
                 case SPOT4_END:
