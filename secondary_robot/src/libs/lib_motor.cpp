@@ -33,8 +33,8 @@ void motorInitHard(int pinDir[],int pinPWM[]){
 
 }
 #if NB_MOTORS == 1
-int Kp[NB_MOTORS] ={18}; // >>2
-int Ki[NB_MOTORS] = {5}; // >>2
+int Kp[NB_MOTORS] ={1}; // >>2
+int Ki[NB_MOTORS] = {0}; // >>2
 #elif NB_MOTORS == 2
 int Kp[NB_MOTORS] ={18,18}; // >>2
 int Ki[NB_MOTORS] = {5,5}; // >>2
