@@ -81,6 +81,9 @@ void Path::maintenace(){
  */
 void Path::sendRobot(bool holo, float thetaEnd) {
     static sPath_t path;
+    static deque<sTrajOrientEl_t> pathOrient;
+
+    logs << INFO << "Starting sendRobot()";
 
     if(!_path.empty() && !_path_orient.empty()){
         logs << ERR << "Try to send a path : _path and _path_orient are not empty";
@@ -96,35 +99,35 @@ void Path::sendRobot(bool holo, float thetaEnd) {
     if(holo)
         convPathToPathOrient(thetaEnd);
 
-    if (!checkSamePath(path) || checkRobotBlock()){
-        logs << INFO << "Preparation to send a path";
-        if (!_path.empty()){
-            //delete the previous path sent;
-            if(path.path)
-                delete path.path;
+    if (!_path.empty() && (!checkSamePath(path) || checkRobotBlock())){
+        //delete the previous path sent;
+        if(path.path)
+            delete path.path;
 
-            //save the new path sent
-            path.dist = _dist;
-            path.path_len = _path.size();
-            path.path = new sTrajEl_t[path.path_len];
-            for(unsigned int i = 0 ; i < path.path_len ; i++){
-                path.path[i] = _path[i];
-            }
-            //sends the path
-            net.sendPath(_path);
-
-            //print the path to the display
-            for(unsigned int i = 0 ; i < _path.size() ; i++)
-                printElTraj(i);
+        //save the new path sent
+        path.dist = _dist;
+        path.path_len = _path.size();
+        path.path = new sTrajEl_t[path.path_len];
+        for(unsigned int i = 0 ; i < path.path_len ; i++){
+            path.path[i] = _path[i];
         }
-        else{ //!_path_orient.empty()
-            //sends the path //TODO save path and compare if the same
+        //sends the path
+        net.sendPath(_path);
+
+        //print the path to the display
+        for(unsigned int i = 0 ; i < _path.size() ; i++)
+            printElTraj(i);
+    }
+    else if(!_path_orient.empty() && (!checkSamePathOrient(pathOrient) || checkRobotBlock())){
+            pathOrient.clear();
+
+            for(const sTrajOrientEl_t& i : _path_orient)
+                pathOrient.push_back(i);
+
             net.sendPathOrient(_path_orient);
 
-            //print the path to the display
             for(unsigned int i = 0 ; i < _path_orient.size() ; i++)
                 printElTrajOrient(i);
-        }
     }
 }
 
@@ -135,6 +138,8 @@ void Path::stopRobot(bool holo) {
     Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
     float theta = statuses.getLastOrient(ELT_PRIMARY);
     sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
+
+    logs << INFO << "Stop Robot";
 
     clear();
 
@@ -187,6 +192,7 @@ void Path::go2Point(const Point2D<float> &dest, const bool f, vector<astar::sObs
             logs << INFO << "go2Point() : New path from 0a to " <<  N-1 << " (" << path.dist << ", " << path.path_len << " steps )";
             addPath2(path);
             sendRobot(holo, atan2(_path[_path.size()-1].p2.y - _path[_path.size()-1].p1.y, _path[_path.size()-1].p2.x - _path[_path.size()-1].p1.x));
+            free(path.path);
         }
         else {
             logs << INFO << "go2Point() : No path from 0a to " << N - 1;
@@ -253,23 +259,7 @@ void Path::convPathToPathOrient(float thetaEnd){
         _path_orient.push_back(trajOrient);
     }
 
-    computeTimePathForHolonomic();
-    computeOrientPathForHolonomic(thetaEnd);
-}
-
-/*
- * Computes time path holonomic robot
- */
-void Path::computeTimePathForHolonomic(){
-    double dist = 0;
-    uint32_t time_us = bn_intp_micros2s(micros());
-
-    for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        _path_orient[i].t1 = (uint32_t)((dist/MAX_SPEED)*1e6) + time_us; //in us
-        dist += _path_orient[i].seg_len;
-        _path_orient[i].t2 = (uint32_t)((dist/MAX_SPEED)*1e6) + time_us; //in us
-        dist += _path_orient[i].arc_len;
-    }
+    computePathHolonomic(thetaEnd);
 }
 
 float getPrincipalAngleValue(float a){
@@ -283,20 +273,50 @@ float getPrincipalAngleValue(float a){
 /*
  * Computes a orient path for holonomic robot
  */
-void Path::computeOrientPathForHolonomic(float theta_end_obj){
+void Path::computePathHolonomic(float theta_end_obj){
     float theta = statuses.getLastOrient(ELT_PRIMARY);
     float deltaTheta = getPrincipalAngleValue(theta_end_obj - theta);
-    float Time = _path_orient[_path_orient.size()-1].t2 - _path_orient[0].t1;
-
-    logs << DEBUG << "Destination angle is :" << theta_end_obj*180/M_PI << "°";
+    float distTotal = 0, dist = 0;
+    uint32_t time_us = bn_intp_micros2s(micros());
 
     for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
-        _path_orient[i].theta1 = getPrincipalAngleValue((_path_orient[i].t1 - _path_orient[0].t1)*deltaTheta/Time + theta);
-        _path_orient[i].theta2 = getPrincipalAngleValue((_path_orient[i].t2 - _path_orient[0].t1)*deltaTheta/Time + theta);
-
-        _path_orient[i].rot1_dir = deltaTheta > 0;
-        _path_orient[i].rot2_dir = deltaTheta > 0;
+        distTotal += _path_orient[i].seg_len;
+        distTotal += _path_orient[i].arc_len;
     }
+
+    float timeLinear = distTotal/MAX_SPEED;
+    float timeAngular = fabs(deltaTheta/MAX_SPEED_ROT);
+
+    float Time = timeLinear>timeAngular?timeLinear:timeAngular;
+
+    if(distTotal > 0.01){
+        for(unsigned int i = 0 ; i < _path_orient.size() ; i++){
+            _path_orient[i].t1 = (uint32_t)((dist/distTotal)*Time*1e6) + time_us; //in us
+            _path_orient[i].theta1 = getPrincipalAngleValue((dist/distTotal)*deltaTheta + theta);
+            dist += _path_orient[i].seg_len;
+
+            _path_orient[i].t2 = (uint32_t)((dist/distTotal)*Time*1e6) + time_us; //in us
+            _path_orient[i].theta2 = getPrincipalAngleValue((dist/distTotal)*deltaTheta + theta);
+            dist += _path_orient[i].arc_len;
+
+            _path_orient[i].rot1_dir = deltaTheta > 0;
+            _path_orient[i].rot2_dir = deltaTheta > 0;
+        }
+    }
+    else if(_path_orient.size() == 1){ //rotation
+        logs << ERR << "Rotation";
+        _path_orient[0].t1 = (uint32_t) time_us; //in us
+        _path_orient[0].t2 = (uint32_t) (Time*1e6) + time_us; //in us
+
+        _path_orient[0].theta1 = getPrincipalAngleValue(theta);
+        _path_orient[0].theta2 = getPrincipalAngleValue(theta + deltaTheta);
+
+        _path_orient[0].rot1_dir = deltaTheta > 0;
+        _path_orient[0].rot2_dir = deltaTheta > 0;
+    }else{
+        logs << ERR << "Strange trajectory : angle doesn't computed";
+    }
+
 }
 
 /*
@@ -417,28 +437,24 @@ bool Path::checkSamePath(sPath_t &path){
 
     if(path.path_len==0 || _path.size()==0)
         return false;
-    if(verbose > 2)
-        cout << "same_t 1.0" << endl;
+    logs << DEBUG << "same_t 1.0";
 
     while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminé
-        if(verbose > 2)
-            cout << "same_t 2.0" << endl;
+        logs << DEBUG << "same_t 2.0";
         if (checkSameObs((path.path[t1_ind-1].obs), (_path[t2_ind-1].obs)) ){
           t1_ind--;
            t2_ind--;
            }
        else return 0;
     }
-    if(verbose > 2)
-        cout << "same_t 3.0" << endl;
+    logs << DEBUG << "same_t 3.0";
     if (!(checkSameObs((path.path[t1_ind].obs), (_path[t2_ind].obs))))
         return 0;
 
     if ( (fabs(path.path[t1_ind].p2.x - _path[t2_ind].p2.x ) > 2.) && (fabs(path.path[t1_ind].p2.y - _path[t2_ind].p2.y) > 2.) )
         return 0;
     else
-        if(verbose > 2)
-            cout << "same_t 4.0" << endl;
+        logs << DEBUG << "same_t 4.0";
 
     logs << INFO << "Same path";
     return 1 ;
@@ -455,6 +471,32 @@ bool Path::checkSamePath2(deque<sTrajEl_t>& path){
 
     while (i >= 0 && j >= 0) {
         if(checkSameObs(path[i].obs, _path[j].obs)){
+            i--;
+            j--;
+        }else
+            return false;
+    }
+    return true;
+}
+
+/*
+ * Return 1 if the same path else 0.
+ */
+bool Path::checkSamePathOrient(deque<sTrajOrientEl_t>& path){
+    int i = path.size() - 1, j = _path_orient.size() - 1;
+
+    if(i == 0 && j == 0){//rotation
+        if(path[0].theta2 == _path_orient[0].theta2 && path[0].p2 == _path_orient[0].p2)
+            return true;
+        else
+            return false;
+    }
+
+    if(i != j)
+        return false;
+
+    while (i >= 0 && j >= 0) {
+        if(checkSameObs(path[i].obs, _path_orient[j].obs)){
             i--;
             j--;
         }else

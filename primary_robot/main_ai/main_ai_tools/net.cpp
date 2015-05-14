@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <cmath>
 #include <iostream>
+#include <cstring>
 
 extern "C"{
 #include <unistd.h>
@@ -56,9 +57,10 @@ void Net::maintenace(){
 void Net::clearEl(){
     if(!_trajEl.empty() || !_trajOrientEl.empty())
         logs << WAR << "Clear trajectory but elements are present";
+    else
+        _tid++; //TODO tid independent of path type
 
     _sid = 0;
-    _tid++;
 
     queue <sTrajEl_t> empty;
     swap(_trajEl, empty);
@@ -131,6 +133,7 @@ void Net::convTrajToTrajOrient(){
 void Net::sendPathToNet(){
     sMsg outMsg;
     int ret;
+    memset(&outMsg, 0, sizeof(outMsg));
 
     if(!_trajEl.empty()){
         outMsg.header.type = E_TRAJ;
@@ -167,6 +170,7 @@ void Net::sendPathToNet(){
 void Net::sendPathOrientToNet(){
     sMsg outMsg;
     int ret;
+    memset(&outMsg, 0, sizeof(outMsg));
 
     if(!_trajOrientEl.empty()){
         outMsg.header.type = E_TRAJ_ORIENT_EL;

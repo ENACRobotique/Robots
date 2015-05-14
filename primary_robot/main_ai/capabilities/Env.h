@@ -5,8 +5,8 @@
  *      Author: Sebastien Malissard
  */
 
-#ifndef CAPABILITIES_ENVIRONMENT_H_
-#define CAPABILITIES_ENVIRONMENT_H_
+#ifndef CAPABILITIES_ENV_H_
+#define CAPABILITIES_ENV_H_
 
 #include <vector>
 
@@ -29,4 +29,4 @@ class Environment{
 };
 
 
-#endif /* CAPABILITIES_ENVIRONMENT_H_ */
+#endif /* CAPABILITIES_ENV_H_ */

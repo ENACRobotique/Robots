@@ -19,6 +19,7 @@ extern "C"{
 #include "roles.h"
 #include "global_errors.h"
 #include "bn_intp.h"
+#include "messages-position.h"
 }
 
 #include "botNet_core.h"
@@ -29,6 +30,9 @@ extern "C"{
 #include "init_robots.h"
 #include "environment.h"
 
+//#define SYNC_PROP_IA    // sync is done by IA, and only between IA and prop
+#define SYNC_TURRET     // sync is done by turret
+
 #ifdef CTRLC_MENU
 static int menu = 0;
 
@@ -36,6 +40,11 @@ void intHandler(int dummy) {
     menu = 1;
 }
 #endif
+
+void exitAI(int status){
+    cout << "\033[0m";
+    exit(status);
+}
 
 void usage(char *cl) {
     printf("main ia\n");
@@ -53,6 +62,7 @@ int main(int argc, char **argv) {
     eAIState_t eAIState = E_AI_SLAVE;
     bool simu_primary = true;
     bool holo_primary = true;
+    bool hmi_simu_primary = true;
     eColor_t color_primary = GREEN;
 
 
@@ -85,8 +95,10 @@ int main(int argc, char **argv) {
                 logs.changeFile(optarg);
                 break;
             case 'p':
-                if(strstr(optarg, "real"))
+                if(strstr(optarg, "real")){
                     simu_primary = false;
+                    hmi_simu_primary = false;
+                }
                 else if(strstr(optarg, "simu"))
                     simu_primary = true;
                 if(strstr(optarg, "axle"))
@@ -125,28 +137,51 @@ int main(int argc, char **argv) {
     // network initialization
     if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
         logs << ERR << "bn_attach() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
-        exit(EXIT_FAILURE);
+        exitAI(EXIT_FAILURE);
     }
 
     if ((ret = bn_init()) < 0) {
         logs << ERR << "bn_init() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
-        exit(EXIT_FAILURE);
+        exitAI(EXIT_FAILURE);
     }
 
 
     if(roleSetup(true, simu_primary) < 0)
-        exit(EXIT_FAILURE);
+        exitAI(EXIT_FAILURE);
 
+#ifdef SYNC_PROP_IA
     if((ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 50)) < 0){
         logs << ERR << "FAILED SYNC: " << getErrorStr(-ret) << "(#" << -ret << ")\n";
-        exit(EXIT_FAILURE);
+        exitAI(EXIT_FAILURE);
     }
+#endif
+#ifdef SYNC_TURRET
+    sMsg queryMsg;
+    queryMsg.header.destAddr = ADDRI_MAIN_TURRET;
+    queryMsg.header.type = E_SYNC_QUERY;
+    // beacons
+    queryMsg.payload.syncQuery.cfgs[0].type = SYNCTYPE_BEACONS;
+    // main AI
+    queryMsg.payload.syncQuery.cfgs[1].type = SYNCTYPE_ROLE;
+    queryMsg.payload.syncQuery.cfgs[1].role = ROLE_PRIM_AI;
+    // prop
+    queryMsg.payload.syncQuery.cfgs[2].type = SYNCTYPE_ROLE;
+    queryMsg.payload.syncQuery.cfgs[2].role = ROLE_PRIM_PROPULSION;
+    // arduino IO
+    queryMsg.payload.syncQuery.cfgs[3].type = SYNCTYPE_ADDRESS;
+    queryMsg.payload.syncQuery.cfgs[3].addr = ADDRI_MAIN_IO;
+    // set sizes
+    queryMsg.payload.syncQuery.nb = 4;
+    queryMsg.header.size = queryMsg.payload.syncQuery.nb * sizeof(queryMsg.payload.syncQuery.cfgs[0]);
+    while (bn_sendAck(&queryMsg)<0);
+#endif
+
 
     sendPing();
 
     Env2015::setup();
 
-    setupRobots(simu_primary, holo_primary, true /*hmi simu*/, color_primary, eAIState);
+    setupRobots(simu_primary, holo_primary, hmi_simu_primary, color_primary, eAIState);
 
     ret = 1;
 

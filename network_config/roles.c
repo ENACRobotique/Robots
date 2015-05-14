@@ -24,16 +24,14 @@ bn_Address role_addresses[] = {
 #if MYROLE != ROLE_DEBUG
     ADDR_DEBUG_DFLT,
 #endif
-#if MYROLE
-#   if MYROLE != ROLE_MONITORING
+#if MYROLE != ROLE_MONITORING
         ADDR_MONITORING_DFLT,
-#   endif
-#   if MYROLE != ROLE_PRIM_AI
+#endif
+#if MYROLE != ROLE_PRIM_AI
         ADDR_AI_DFLT,
-#   endif
-#   if MYROLE != ROLE_PRIM_PROPULSION
+#endif
+#if MYROLE != ROLE_PRIM_PROPULSION
         ADDR_PROP_DFLT,
-#   endif
 #endif
 };
 #define NB_ROLE_ADDRESSES (sizeof(role_addresses)/sizeof(*role_addresses))
@@ -51,9 +49,8 @@ sRoleActions role_actions[] = {
                 }
         },
 
-#if MYROLE
         // ROLEMSG_PRIM_TRAJ messages
-#   if MYROLE == ROLE_PRIM_AI
+#if MYROLE == ROLE_PRIM_AI
         {
                 .sendTo={
                     .first = ROLE_PRIM_PROPULSION,
@@ -64,7 +61,7 @@ sRoleActions role_actions[] = {
                     .n2 = 0
                 }
         },
-#   else
+#else
         {
                 .sendTo={
                     .first = 0,
@@ -75,10 +72,10 @@ sRoleActions role_actions[] = {
                     .n2 = 0
                 }
         },
-#   endif
+#endif
 
         // ROLEMSG_PRIM_POS messages
-#   if MYROLE == ROLE_PRIM_AI
+#if MYROLE == ROLE_PRIM_AI
         {
                 .sendTo={
                     .first = ROLE_PRIM_PROPULSION,
@@ -89,7 +86,7 @@ sRoleActions role_actions[] = {
                     .n2 = ROLE_MONITORING
                 }
         },
-#   else
+#else
         {
                 .sendTo={
                     .first = ROLE_PRIM_AI,
@@ -100,7 +97,6 @@ sRoleActions role_actions[] = {
                     .n2 = 0
                 }
         },
-#   endif
 #endif
 };
 #define NB_ROLE_ACTIONS (sizeof(role_actions)/sizeof(*role_actions))
@@ -113,14 +109,14 @@ void role_setup(sMsg *msg){
         return;
     }
 
-    for(i = 0; i < MIN(18, rs->nb_steps); i++){
+    for(i = 0; i < MIN(13, rs->nb_steps); i++){
         typeof(rs->steps[0]) *s = &rs->steps[i];
         switch(s->step_type){
         case UPDATE_ADDRESS:
             role_set_addr(s->role, s->address);
             break;
         case UPDATE_ACTIONS:
-            if(s->type >= 0 && s->type < NB_ROLE_ACTIONS){
+            if(/*s->type >= 0 &&*/ s->type < NB_ROLE_ACTIONS){
                 memcpy((void*)&role_actions[s->type], (void*)&s->actions, sizeof(*role_actions));
             }
             break;
@@ -139,9 +135,11 @@ int role_set_addr(uint8_t role, bn_Address address){
         return -1;
     }
 
+#if MYROLE
     if(role > MYROLE){
         role--;
     }
+#endif
     role--; // roles are 1-based
 
     if(role >= NB_ROLE_ADDRESSES){
@@ -257,7 +255,7 @@ int role_get_msgclass(E_TYPE msgType, uint8_t srcRole, uint8_t destRole, eRoleMs
             break;
         }
         break;
-    case E_POS:
+    case E_GENERIC_POS_STATUS:
         switch(destRole){
         case ROLE_PRIM_AI:
         case ROLE_PRIM_PROPULSION:

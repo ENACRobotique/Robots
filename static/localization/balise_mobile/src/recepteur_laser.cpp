@@ -27,17 +27,17 @@ unsigned long lastLaserDetectMillis=0,lastLaserDetectMicros=0;
 unsigned long time_prev_led=0, sw=0, time_data_send=0;
 uint32_t time_prev_laser=0;
 
-
+#define DEFAULT_LASER_PERIOD 50000
 
 plStruct laserStruct0={0},laserStruct1={0}; // Structure storing laser detection infos
-uint32_t laser_period=50000;       // in µs, to be confirmed by the main robot
+uint32_t laser_period=DEFAULT_LASER_PERIOD;                // in µs, to be confirmed by the main robot
 uint32_t lasStrRec0=0,lasStrRec1=0;         // date at which we updated the laser structure
 uint32_t intLas0=0, intLas1=0;              // sum of all laser interruption thickness detected on channel n
 char chosenOne=0;                           // interruption chosen for synchronization
 
 #ifdef SYNC_WIRED
 int lastSyncSampleIndex = -1,initIndex=-1;
-uint32_t firstSyncSample = 0;
+uint32_t firstSyncSample = 0,lastSyncSample = 0;
 #endif
 
 char debug_led=1;
@@ -49,7 +49,10 @@ mainState state=S_SYNC_MEASURES, prevState=S_BEGIN,newState=S_SYNC_MEASURES;    
 #endif
 
 inline void periodHandle(sMsg *msg){
-    if (msg->header.type==E_PERIOD)  laser_period=msg->payload.period;
+    if (msg->header.type==E_PERIOD
+            && msg->payload.period < (DEFAULT_LASER_PERIOD * 10)) { // This line is here to prevent deadlock in laser detection case of one incorrect and huge period received.
+        laser_period=msg->payload.period;
+    }
 }
 
 void setup() {
@@ -79,7 +82,6 @@ void loop() {
     int tempIndex=-1;
 #endif
 
-    updateSync();
     //blink
     if((time - time_prev_led)>=1000) {
       time_prev_led= time;
@@ -90,9 +92,6 @@ void loop() {
     }
 
 //MUST ALWAYS BE DONE (any state)
-
-    updateSync();
-
 
     // routine and receive
     rxB=bn_receive(&inMsg);
@@ -148,7 +147,7 @@ void loop() {
 
 
 // In any state, if we receive a "begin election" message, we begin election.
-    if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_BEGIN_ELECTION){
+    if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.syncWireless.flag==SYNCF_BEGIN_ELECTION){
         state=S_SYNC_ELECTION;
 #ifdef VERBOSE_SYNC
         printf("begin election");
@@ -163,16 +162,22 @@ void loop() {
             if ((tempIndex=wiredSync_waitSignal(0))!=lastSyncSampleIndex){
                 if (tempIndex != -1){
                     lastSyncSampleIndex = tempIndex;
-                    initIndex = tempIndex;
+                    lastSyncSample = micros();
                 }
                 if (tempIndex == 0){
+                    initIndex = tempIndex;
                     firstSyncSample = micros();
+                    lastSyncSample = firstSyncSample;
                 }
             }
-            if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES+1) * WIREDSYNC_PERIOD))
-                    || tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES){
+            if ( (firstSyncSample && (micros() - firstSyncSample > (WIREDSYNC_NBSAMPLES) * WIREDSYNC_PERIOD))
+                    || (tempIndex != -1 && tempIndex-initIndex+1 >= WIREDSYNC_NBSAMPLES)
+                    || (lastSyncSample && (micros() - lastSyncSample) > WIREDSYNC_PERIOD * 3 )){
                 wiredSync_finalCompute(1);
                 newState=S_GAME;
+#ifdef DEBUG_SYNC_WIRE
+                    bn_printDbg("go to  s_game\n");
+#endif
             }
             break;
 #endif
@@ -184,7 +189,7 @@ void loop() {
                 intLas1=0;
             }
             // Determine the best laser interruption to perform the synchronization (the one with the highest count during syncIntSelection)
-            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.sync.flag==SYNCF_MEASURES){
+            if (rxB && inMsg.header.type==E_SYNC_DATA && inMsg.payload.syncWireless.flag==SYNCF_MEASURES){
                 chosenOne=(intLas0<intLas1?1:0);
 #ifdef VERBOSE_SYNC
                 bn_printDbg("end election\n");
@@ -206,8 +211,8 @@ void loop() {
             // handling data broadcasted by turret
             if (rxB && inMsg.header.type==E_SYNC_DATA){
                     rxB=0;
-                if (inMsg.payload.sync.flag==SYNCF_END_MEASURES){
-                    syncComputationFinal(&inMsg.payload.sync);
+                if (inMsg.payload.syncWireless.flag==SYNCF_END_MEASURES){
+                    syncComputationFinal(&inMsg.payload.syncWireless);
                     updateSync();
 #ifdef VERBOSE_SYNC
                     bn_printfDbg("syncComputation : %lu\n",micros2s(micros()));
@@ -215,22 +220,24 @@ void loop() {
                     newState=S_GAME;
                 }
                 else {
-                    syncComputationMsg(&inMsg.payload.sync);
+                    syncComputationMsg(&inMsg.payload.syncWireless);
                 }
             }
         	break;
 #endif
         case S_GAME :
-
-            if ((tempIndex=wiredSync_waitSignal(1))!=lastSyncSampleIndex){
-                if (tempIndex != -1){
+            tempIndex=wiredSync_waitSignal(1);
+            if (tempIndex!=-1){
+#ifndef DEBUG_SYNC_WIRE_EVAL
+                lastSyncSampleIndex = tempIndex;
+                initIndex = tempIndex;
+                firstSyncSample = micros();
+                lastSyncSample = firstSyncSample;
+                newState = S_SYNC_MEASURES;
 #ifdef DEBUG_SYNC_WIRE
-                    lastSyncSampleIndex = tempIndex;
-                    initIndex = tempIndex;
-                    firstSyncSample = micros();
-                    newState = S_SYNC_MEASURES;
+                bn_printDbg("return to s_sync_measures\n");
 #endif
-                }
+#endif
             }
         	if ( laserStruct.thickness ) { //if there is some data to send
         	    if (millis()-time_data_send>=SENDING_PERIOD){
@@ -240,13 +247,12 @@ void loop() {
                     outMsg.header.size=sizeof(sMobileReportPayload);
                     if (laserStruct.period) outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laserStruct.period);
                     else outMsg.payload.mobileReport.value=delta2dist(laserStruct.deltaT,laser_period);
-                    outMsg.payload.mobileReport.date=micros2s(laserStruct.date);
+                    outMsg.payload.mobileReport.date=micros2sl(laserStruct.date);
                     outMsg.payload.mobileReport.precision=laserStruct.precision;
                     outMsg.payload.mobileReport.sureness=laserStruct.sureness;
+                    bn_send(&outMsg);
 #ifdef DEBUG_CALIBRATION
                     bn_printfDbg("d, %lu, p, %lu, t, %lu",laserStruct.deltaT,laserStruct.period,laserStruct.thickness);
-#else
-                    bn_send(&outMsg);
 #endif
         	    }
           }

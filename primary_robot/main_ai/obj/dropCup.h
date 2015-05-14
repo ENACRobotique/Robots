@@ -23,9 +23,13 @@ class DropCup : public Obj{
             vector<Point2D<float>> listEP{{50, 100}, {280, 50}, {280, 150}}; //Yellow
             sObjEntry_t objEP;
 
-            _state = WAIT_MES;
+            if(num == 0)
+                _state = FINISH;
+            else
+                _state = WAIT_MES;
 
             objEP.type = E_CIRCLE;
+            objEP.delta = 0;
             if(color == YELLOW)
                 objEP.cir.c = {listEP[num].x, listEP[num].y};
             else
@@ -37,42 +41,57 @@ class DropCup : public Obj{
         }
         virtual ~DropCup(){}
 
-        void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) override {
-
-        }
-        int loopObj(std::vector<astar::sObs_t>& listObs, std::vector<uint8_t>& obsUpdated, vector<Obj*>& listObj, std::vector<Actuator>& actuator) override{
-            unsigned int i;
-
-            for(Actuator& i : actuator){
+        void initObj(paramObj par) override {
+            for(Actuator& i : par.act){
                 if(i.type == ActuatorType::CUP && i.id == _actuator_select){
-                    i.full = false;
-                    i.cupActuator.distributor = false;
-                }
-            }
+                    Point2D<float> posCup(par.posRobot.tranform(i.angle + par.angleRobot, i.pos));
+                    Circle2D<float> c(posCup, 30);
+                    destPoint = c.project(par.posRobot);
+                    path.go2PointOrient(destPoint, par.obs, _access_select_angle);
 
-            for(i = START_CUP ; i < START_CUP + 5 ; i++){
-                if(!listObs[i].active){
-                    listObs[i].active = 1;
-                    listObs[i].c = {_access[0].cir.c.x, _access[0].cir.c.y};
-                    listObs[i].r = 5 + R_ROBOT;
-                    obsUpdated[i]++;
                     break;
                 }
             }
-            if(i == START_CUP + 5)
-                logs << ERR << "Magic Cup ??";
+        }
+        int loopObj(paramObj par) override{
+            if(destPoint.distanceTo(par.posRobot) < 1.){
+                unsigned int i;
+                Point2D<float> posActuator, posRobot(par.obs[0].c.x, par.obs[0].c.y);
 
-            for(i = 0 ; i < actuator.size() ; i++)
-                if(actuator[i].type == ActuatorType::CUP && actuator[i].full)
-                    break;
+                for(Actuator& i : par.act){
+                    if(i.type == ActuatorType::CUP && i.id == _actuator_select){
+                        i.cupActuator.full = false;
+                        i.cupActuator.distributor = false;
+                        posActuator = par.posRobot.tranform(i.angle + par.angleRobot, i.pos);
+                        break;
+                    }
+                }
 
-            if(i == actuator.size())
-                for(Obj* i : listObj)
-                    if((i->type() == E_DROP_CUP) && (i->state() == ACTIVE))
-                        i->state() = WAIT_MES;
+                for(i = START_CUP ; i < START_CUP + 5 ; i++){
+                    if(!par.obs[i].active){
+                        par.obs[i].active = 1;
+                        par.obs[i].c = {posActuator.x, posActuator.y};
+                        par.obs[i].r = 5 + R_ROBOT;
+                        par.obsUpdated[i]++;
+                        break;
+                    }
+                }
+                if(i == START_CUP + 5)
+                    logs << ERR << "Magic Cup ??";
 
-            _state = FINISH;
-            return 0;
+                for(i = 0 ; i < par.act.size() ; i++)
+                    if(par.act[i].type == ActuatorType::CUP && par.act[i].cupActuator.full)
+                        break;
+
+                if(i == par.act.size())
+                    for(Obj* i : par.obj)
+                        if((i->type() == E_DROP_CUP) && (i->state() == ACTIVE))
+                            i->state() = WAIT_MES;
+
+                _state = FINISH;
+                return 0;
+            }
+            return 1;
         }
         eObj_t type() const override {
             return E_DROP_CUP;
@@ -80,6 +99,7 @@ class DropCup : public Obj{
 
     public:
         int EP_selected;
+        Point2D<float> destPoint;
 
 };
 

@@ -66,7 +66,8 @@ typedef struct {
 void trajmngr_init(trajectory_manager_t* tm, const int32_t mat_rob2pods[NB_PODS][NB_SPDS]);
 void trajmngr_reset(trajectory_manager_t* tm);
 int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te);
-void trajmngr_set_pos(trajectory_manager_t* tm, const sPosPayload *pos);
+void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos);
+void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps);
 int trajmngr_update(trajectory_manager_t* tm);
 
 #endif /* TRAJECTORY_MANAGER_H_ */
