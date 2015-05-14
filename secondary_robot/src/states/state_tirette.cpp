@@ -29,6 +29,7 @@
 
 sState* testTirette()
 	{
+	_matchStart=millis();
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
     static unsigned long timepull=0;
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
