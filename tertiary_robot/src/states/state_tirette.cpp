@@ -29,7 +29,7 @@ sState* testTirette()
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
     	{
-        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajRed;
+        if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajGreen;
         else return &sTrajYellow;
     	}
     return 0;
