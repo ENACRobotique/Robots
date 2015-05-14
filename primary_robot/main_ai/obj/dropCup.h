@@ -48,7 +48,7 @@ class DropCup : public Obj{
                     Circle2D<float> c(posCup, 30);
                     destPoint = c.project(par.posRobot);
                     path.go2PointOrient(destPoint, par.obs, _access_select_angle);
-
+                    servo.unlockPince(i.id);
                     break;
                 }
             }
@@ -63,6 +63,8 @@ class DropCup : public Obj{
                         i.cupActuator.full = false;
                         i.cupActuator.distributor = false;
                         posActuator = par.posRobot.tranform(i.angle + par.angleRobot, i.pos);
+                        servo.lockPince(i.id);
+                        servo.downPince(i.id);
                         break;
                     }
                 }
