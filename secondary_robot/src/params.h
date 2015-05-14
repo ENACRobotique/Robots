@@ -16,7 +16,7 @@
 #define HEADING
 #define ATTITUDE
 
-#define NO_ATTITUDE_BEFORE_STAIRS
+//#define NO_ATTITUDE_BEFORE_STAIRS
 
 #define TIME_BEFORE_START 1000
 /* Defines ************************************************/
