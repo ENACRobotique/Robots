@@ -4,7 +4,6 @@ this library contains the different functions useful for the motor and its contr
 
 #include "lib_attitude.h"
 #include "MPU_6050.h"
-#include "../params.h"
 
 extern "C" {
 #include "median_filter.h"

@@ -5,7 +5,6 @@ this library contains the different functions useful for the motor and its contr
 #include "lib_heading.h"
 #include "MPU_6050.h"
 #include "lib_move.h"
-#include "../params.h"
 
 //defines
 #define HEADING_ASSER_PERIOD 20 // milliseconds

@@ -1,7 +1,7 @@
 
 #include "MPU_6050.h"
 #include "lib_attitude.h"
-#include "../params.h"
+#include "params.h"
 #include "Arduino.h"
 #include "Wire.h"
 

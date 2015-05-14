@@ -9,7 +9,6 @@
 #define LIB_ATTITUDE_H_
 
 #include "Arduino.h"
-#include "../params.h"
 #include "Servo.h"
 #include "Wire.h"
 //#define DEBUG_ATTITUDE
