@@ -28,16 +28,19 @@ extern "C"{
 #define ANGLE_ELEVATOR_UP2          90.
 #define ANGLE_ELEVATOR_DOWN2        0.
 
+#define ANGLE_PINCE_IN1             0.
 #define ANGLE_PINCE_LOCK1           90.
 #define ANGLE_PINCE_UNLOCK1         0.
 #define ANGLE_PINCE_UP1             90.
 #define ANGLE_PINCE_DOWN1           0.
 
+#define ANGLE_PINCE_IN2             0.
 #define ANGLE_PINCE_LOCK2           90.
 #define ANGLE_PINCE_UNLOCK2         0.
 #define ANGLE_PINCE_UP2             90.
 #define ANGLE_PINCE_DOWN2           0.
 
+#define ANGLE_PINCE_IN3             0.
 #define ANGLE_PINCE_LOCK3           90.
 #define ANGLE_PINCE_UNLOCK3         0.
 #define ANGLE_PINCE_UP3             90.
@@ -75,10 +78,18 @@ typedef struct{
 class Servo {
     public:
         Servo(){
-            tabServo.insert(std::make_pair(ELEVATOR_UP_DOWN1, servoId{0, 0}));
-            tabServo.insert(std::make_pair(ELEVATOR_UNLOCK_LOCK1   , servoId{0, 0}));
-            tabServo.insert(std::make_pair(ELEVATOR_UP_DOWN1, servoId{0, 0}));
-            tabServo.insert(std::make_pair(ELEVATOR_UNLOCK_LOCK2   , servoId{0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_UP_DOWN1       , servoId{ 0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_DOOR1          , servoId{ 0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_UNLOCK_LOCK1   , servoId{ 0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_UP_DOWN2       , servoId{ 2, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_DOOR2          , servoId{ 8, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_UNLOCK_LOCK2   , servoId{ 6, 0}));
+            tabServo.insert(std::make_pair(PINCE_UP_DOWN1          , servoId{12, 0}));
+            tabServo.insert(std::make_pair(PINCE_UNLOCK_LOCK1      , servoId{11, 0}));
+            tabServo.insert(std::make_pair(PINCE_UP_DOWN2          , servoId{16, 0}));
+            tabServo.insert(std::make_pair(PINCE_UNLOCK_LOCK2      , servoId{15, 0}));
+            tabServo.insert(std::make_pair(PINCE_UP_DOWN3          , servoId{18, 0}));
+            tabServo.insert(std::make_pair(PINCE_UNLOCK_LOCK3      , servoId{17, 0}));
         }
         ~Servo(){};
 
@@ -111,6 +122,19 @@ class Servo {
         void closeDoorElevator(int num){
             if(num == 0)
                 sendPosServo(ELEVATOR_DOOR1, ANGLE_ELEVATOR_CLOSE1);
+        }
+        void inPince(int num){
+            switch(num){
+                case 0 :
+                    sendPosServo(PINCE_UNLOCK_LOCK1, ANGLE_PINCE_IN1);
+                    break;
+                case 1 :
+                    sendPosServo(PINCE_UNLOCK_LOCK2, ANGLE_PINCE_IN2);
+                    break;
+                case 2 :
+                    sendPosServo(PINCE_UNLOCK_LOCK3, ANGLE_PINCE_IN3);
+                    break;
+            }
         }
         void lockPince(int num){
             switch(num){

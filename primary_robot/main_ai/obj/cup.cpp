@@ -74,7 +74,7 @@ int Cup::loopObj(paramObj par){
             break;
 
         case CUP_CLOSE:
-            servo.lockPince(par.act[_actuator_select].id);
+            servo.inPince(par.act[_actuator_select].id);
             _time = millis();
             stepLoc = CUP_UP;
             break;

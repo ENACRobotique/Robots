@@ -21,6 +21,18 @@ typedef enum {
     GET_STAND_UP
 }stepGetStand;
 
+typedef enum {
+    DROP_CUP_DOWN,
+    DROP_CUP_UNLOCK,
+    DROP_CUP_END
+}stepDropCup;
+
+typedef enum {
+    CUP_CLOSE,
+    CUP_UP,
+    CUP_END
+}stepRangePince;
+
 
 int getStand(unsigned int id){
     static stepGetStand step = GET_STAND_ENTRY;
@@ -66,7 +78,65 @@ int getStand(unsigned int id){
             break;
 
     }
+    return 0;
+}
 
+int dropCup(unsigned int id){
+    static stepDropCup step;
+    static unsigned int timePrev = 0;
+
+    switch(step){
+        case DROP_CUP_DOWN:
+            servo.downPince(id);
+            timePrev = millis();
+            break;
+
+        case DROP_CUP_UNLOCK:
+            if(millis() - timePrev > 500){
+                servo.unlockPince(id);
+                timePrev = millis();
+            }
+            break;
+
+        case DROP_CUP_END:
+            if(millis() - timePrev > 500){
+                step = DROP_CUP_DOWN;
+                timePrev = 0;
+                return 1;
+            }
+            break;
+    }
+
+    return 0;
+}
+
+int rangePince(unsigned int id){
+    static stepRangePince step = CUP_CLOSE;
+    static unsigned int timePrev = 0;
+
+    switch(step){
+        case CUP_CLOSE:
+            servo.lockPince(id);
+            timePrev = millis();
+            step = CUP_UP;
+            break;
+
+        case CUP_UP:
+            if(millis() - timePrev > 500){
+                servo.upPince(id);
+                timePrev = millis();
+                step = CUP_END;
+            }
+            break;
+
+        case CUP_END:
+            if(millis() - timePrev > 500){
+                step = CUP_CLOSE;
+                timePrev = 0;
+                return 1;
+            }
+            break;
+    }
     return 0;
 }
 
