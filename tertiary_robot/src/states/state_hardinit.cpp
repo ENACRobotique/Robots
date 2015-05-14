@@ -12,6 +12,7 @@
 #include "lib_motor.h"
 #include "lib_radar.h"
 #include "lib_wall.h"
+#include "lib_move.h"
 
 sState* reTirette(){
     return &sTirette;
@@ -19,7 +20,7 @@ sState* reTirette(){
 void initHard(sState *prev){
 
 #ifdef DEBUG
-    Serial.println("debut init matérielles");
+    Serial.println("debut init matérielles tertiary");
 #endif
     //movements
     //movements
@@ -28,6 +29,7 @@ void initHard(sState *prev){
     pin_motors_dir[0]=PIN_MOTOR1_DIR;
     pin_motors_pwm[0]=PIN_MOTOR1_PWM;
     motorInitHard(pin_motors_dir,pin_motors_pwm);
+    moveInitHard(PIN_DIR_SERVO, ANGLE_ZERO, DIR_SERVO_START);
     int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT};
     int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN};
     odoInitHard(pin_odo_int,pin_odo_sen);
@@ -38,18 +40,14 @@ void initHard(sState *prev){
     //line following/detector
     //Wire.begin(); already done
 
-    //launcher
-    pinMode(PIN_LAUNCHER_1,OUTPUT);
-    pinMode(PIN_LAUNCHER_2,OUTPUT);
-    pinMode(PIN_LAUNCHER_NET,OUTPUT);
-    launcherServoUp.attach(PIN_LAUNCHER_1);
-    launcherServoDown.attach(PIN_LAUNCHER_2);
-    launcherServoNet.attach(PIN_LAUNCHER_NET);
-
-
-
-    //wall
-    wallInitHard(PIN_SHARP_FRONT_RIGHT ,PIN_SHARP_BACK_RIGHT,PIN_SHARP_FRONT_LEFT  ,PIN_SHARP_BACK_LEFT);
+    //claps
+    pinMode(PIN_CLAP,OUTPUT);
+    servoClap.attach(PIN_CLAP);
+    servoClap.write(CLAPNEUTRAL);
+#ifdef DEBUG
+    Serial.print("servo_init ");
+    Serial.println(servoClap.read());
+#endif
 
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);
