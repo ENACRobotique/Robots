@@ -21,9 +21,6 @@
 #include "state_wait.h"
 
 
-
-Servo launcherServoUp,launcherServoDown, launcherServoNet;
-
 sState *current=&sInitHard;
 
 unsigned long _matchStart;
@@ -74,10 +71,15 @@ void loop(){
     sState *next;
     if (current->testFunction){
         if ( (next=(current->testFunction()) ) ) {	// we call the current test function, wich return the next state, or NULL to continue in the same state
-        	if((millis() - _matchStart) > TIME_MATCH_STOP) next = &sWait;	//stop the match
             if (current->deinit) current->deinit(next); //we call deinit of the current state with the pointer to next state
             if (next->init) next->init(current); //we call init of the next state with the pointer of current state
             current=next; //we set the new state
+        }
+        if((millis() - _matchStart) > TIME_MATCH_STOP){
+        	next = &sWait;	//stop the match
+        	if (current->deinit) current->deinit(next); //we call deinit of the current state with the pointer to next state
+        	if (next->init) next->init(current); //we call init of the next state with the pointer of current state
+        	current=next; //we set the new state
         }
     }
 
