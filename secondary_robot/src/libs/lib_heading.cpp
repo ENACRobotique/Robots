@@ -7,7 +7,7 @@ this library contains the different functions useful for the motor and its contr
 #include "lib_move.h"
 
 //defines
-#define HEADING_ASSER_PERIOD 20 // milliseconds
+#define HEADING_ASSER_PERIOD 80 // milliseconds
 #define ANGLE_TO_ASSERV Z_ANGLE
 
 #ifndef CLAMP
