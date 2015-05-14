@@ -37,7 +37,7 @@ extern "C" {
 
 
 
-mainState state=S_CHECKREMOTE;
+mainState state=S_GAME;
 
 
 sDeviceInfo devicesInfo[D_AMOUNT];
