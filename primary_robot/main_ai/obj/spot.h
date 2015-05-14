@@ -15,6 +15,15 @@
 
 #define START_STAND 9 //number of the first stand element in obs[]
 
+typedef enum {
+    SPOT_TRAJ1,
+    SPOT_UNLOCK,
+    SPOT_DOWN,
+    SPOT_LOCK,
+    SPOT_UP,
+    SPOT_END
+} stepSpot;
+
 using namespace std;
 
 class Spot : public Obj{
@@ -54,6 +63,9 @@ class Spot : public Obj{
     private :
         unsigned int _num;
         eColor_t _color;
+        stepSpot stepLoc;
+        unsigned int timePrev;
+        Point2D<float> destPoint;
 
 };
 
