@@ -15,29 +15,32 @@ extern "C"{
 #include "messages-interactions.h"
 }
 
-#define ANGLE_ELEVATOR_LOCK1    90.
-#define ANGLE_ELEVATOR_LOCK2    90.
-#define ANGLE_ELEVATOR_UNLOCK1  0.
-#define ANGLE_ELEVATOR_UNLOCK2  0.
-#define ANGLE_ELEVATOR_UP1      90.
-#define ANGLE_ELEVATOR_UP2      90.
-#define ANGLE_ELEVATOR_DOWN1    0.
-#define ANGLE_ELEVATOR_DOWN2    0.
+#define ANGLE_ELEVATOR_LOCK1        90.
+#define ANGLE_ELEVATOR_LOCK2        90.
+#define ANGLE_ELEVATOR_UNLOCK1      0.
+#define ANGLE_ELEVATOR_UNLOCK2      0.
+#define ANGLE_ELEVATOR_UP1          90.
+#define ANGLE_ELEVATOR_UP2          90.
+#define ANGLE_ELEVATOR_DOWN1        0.
+#define ANGLE_ELEVATOR_DOWN2        0.
 
-#define ANGLE_PINCE_LOCK1       90.
-#define ANGLE_PINCE_UNLOCK1     0.
-#define ANGLE_PINCE_UP1         90.
-#define ANGLE_PINCE_DOWN1       0.
+#define ANGLE_PINCE_LOCK1           90.
+#define ANGLE_PINCE_UNLOCK1         0.
+#define ANGLE_PINCE_UP1             90.
+#define ANGLE_PINCE_DOWN1           0.
 
-#define ANGLE_PINCE_LOCK2       90.
-#define ANGLE_PINCE_UNLOCK2     0.
-#define ANGLE_PINCE_UP2         90.
-#define ANGLE_PINCE_DOWN2       0.
+#define ANGLE_PINCE_LOCK2           90.
+#define ANGLE_PINCE_UNLOCK2         0.
+#define ANGLE_PINCE_UP2             90.
+#define ANGLE_PINCE_DOWN2           0.
 
-#define ANGLE_PINCE_LOCK3       90.
-#define ANGLE_PINCE_UNLOCK3     0.
-#define ANGLE_PINCE_UP3         90.
-#define ANGLE_PINCE_DOWN3       0.
+#define ANGLE_PINCE_LOCK3           90.
+#define ANGLE_PINCE_UNLOCK3         0.
+#define ANGLE_PINCE_UP3             90.
+#define ANGLE_PINCE_DOWN3           0.
+
+#define ANGLE_POPCORN_LOADER_OPEN1  90.
+#define ANGLE_POPCORN_LOADER_CLOSE1 0.
 
 
 
@@ -51,7 +54,8 @@ typedef enum {
     PINCE_UP_DOWN2,
     PINCE_UNLOCK_LOCK2,
     PINCE_UP_DOWN3,
-    PINCE_UNLOCK_LOCK3
+    PINCE_UNLOCK_LOCK3,
+    POPCORN_LOARDER1
 }servoName;
 
 typedef struct{
@@ -144,7 +148,20 @@ class Servo {
                     sendPosServo(PINCE_UP_DOWN3, ANGLE_PINCE_DOWN3);
                     break;
             }
-
+        }
+        void openPopcornLoader(int num){
+            switch(num){
+                case 0 :
+                    sendPosServo(POPCORN_LOARDER1, ANGLE_POPCORN_LOADER_OPEN1);
+                    break;
+            }
+        }
+        void closePopcornLoader(int num){
+            switch(num){
+                case 0 :
+                    sendPosServo(POPCORN_LOARDER1, ANGLE_POPCORN_LOADER_CLOSE1);
+                    break;
+            }
         }
     private:
         std::map<servoName, servoId> tabServo;

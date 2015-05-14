@@ -60,12 +60,14 @@ void Clap::initObj(paramObj par){
     _dest.y = ECART;
 
     path.go2PointOrient(_dest, par.obs, _access_select_angle);
+    servo.openPopcornLoader(_actuator_select);
 
 }
 
 int Clap::loopObj(paramObj par){
 
     if(par.posRobot.distanceTo(_dest) < 2.){
+        servo.closePopcornLoader(_actuator_select);
         _state = FINISH;
         return 0;
     }
