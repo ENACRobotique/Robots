@@ -64,7 +64,7 @@ sState *testStairs()
 	//arret TIME_STOP après
 	if(timeStopSoon!=0 && millis() - timeStopSoon > TIME_STOP){
 		Serial.println("STOP !!!");
-		if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
+		if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajEndStairsGreen;
 		else return &sTrajEndStairsYellow;
 	}
 	return 0;
@@ -76,7 +76,7 @@ sState *testStairs()
 	}
 
 	if(millis()-timestart > 14000){
-		if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
+		if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajEndStairsGreen;
 				else return &sTrajEndStairsYellow;
 	}
 	return 0;
