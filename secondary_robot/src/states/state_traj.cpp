@@ -66,7 +66,7 @@ trajElem start_green[]={
 				{30,0,5500},
 				{0,-90,9000},
 				{0,-90,2000},
-				{10,-90,2000},
+				{10,-90,3000},
 				{0,0,0},
 #else
 				{30,0,4000},
@@ -80,7 +80,7 @@ radarElem start_green_radar[]={
 				{40,20,5500},
 				{0,0,9000},
 				{0,0,2000},
-				{30,30,2000},
+				{30,30,3000},
 				{0,0,0},
 				};
 
@@ -169,10 +169,20 @@ trajElem start_yellow[]={
 				{0,0,0},
 #endif
 				};
+
+radarElem start_yellow_radar[]={
+				{40,20,5500},
+				{0,0,9000},
+				{0,0,2000},
+				{30,30,3000},
+				{0,0,0},
+				};
 sState *testTrajYellowInit()
 	{
 	static int i=0;
-		    static unsigned long prev_millis=0;
+	static int i_radar=0;
+    static unsigned long prev_millis=0;
+    static unsigned long prev_millis_radar=0;
 		    if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
 		   	    {
 				#ifdef DEBUG
@@ -180,6 +190,12 @@ sState *testTrajYellowInit()
 				#endif
 		    	return &sPrestairs;
 		   	    }
+
+		    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
+		    			#ifdef DEBUG
+		    				Serial.println("\tFin radar 1 !");
+		    			#endif
+		    		}
 
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
