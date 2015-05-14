@@ -14,9 +14,10 @@ sState* testPause(){
     static unsigned long lastSeen;
     if(radarIntrusion()) lastSeen=millis();
     if( (millis()-lastSeen)>= RADAR_SAFETY_TIME ) return pausePrevState;
-    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
-    if ((millis()-_matchStart) > TIME_MATCH_LAUN ) {
-	launcherServoUp.write(10);}
+    if ((millis()-_matchStart) > TIME_MATCH_STOP ) {
+    	emergencyStop();
+    	return &sDead;
+    }
     return 0;
 }
 
