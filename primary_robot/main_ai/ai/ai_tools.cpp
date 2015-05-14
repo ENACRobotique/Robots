@@ -1,189 +1,214 @@
 /*
- * obj_fct.c
+ * ai_tools.cpp
  *
  *  Created on: 29 mars 2014
- *      Author: seb
+ *      Author: Sebastien Malissard
  */
 
+#include <iomanip>
 
-#include <ai_tools.h>
-#include <geometry_tools.h>
-#include <obj_tools.h>
-#include "math_ops.h"
-#include "ai.h"
+#include "ai_tools.h"
+#include "obj_tools.h"
+#include "tools.h"
 
+//#define AI_TOOLS
 
-extern "C"{
-#include "millis.h"
-#include "botNet_core.h"
-#include <string.h>
-}
-
-void printListObj(void) {
-    for(Obj* i : listObj)
-        i->print();
-}
-
-void printObsActive(void) {
-    int i;
-    printf("Liste des obs[i].active :\n");
-    for (i = 0; i < N; i++)
-        printf("obs[%d].active=%d\n", i, obs[i].active);
-    printf("\n");
+/*
+ * Print to the screen the list of active obstacle
+ */
+void printObsActive(vector<astar::sObs_t>& obs) {
+    logs << INFO << "List of obs[i].active :\n";
+    for (unsigned int i = 0; i < obs.size(); i++)
+        if(obs[i].active)
+            logs << "    obs[" << i << "].active=" << "1" << "\n";
+        else
+            logs << "    obs[" << i << "].active=" << "0" << "\n";
 }
 
 
-int test_in_obs(sPt_t *p) { //retourne le numéros de l'obstable si la position est a l'interieur de celui ci
-    //FIXME si le robot dans plusieurs obstable
-    int i;
-    sNum_t dist;
-    for (i = 1; i < N - 1; i++) {
+/*
+ * Returns the first obstacle number find if this point is inside else 0.
+ */
+unsigned int checkPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs) {
+    for (unsigned int i = 1; i < obs.size() - 1; i++) {
         if (obs[i].active == 0)
             continue;
-        distPt2Pt(&obs[i].c, p, &dist);
-        if (dist < obs[i].r) {
-            //printf("Le robot est dans l'obstacle n=%i, robs=%f, xobs=%f, yobs=%f, currentpos x=%f, y=%f\n",i,obs[i].r,obs[i].c.x,obs[i].c.y, _current_pos.x, _current_pos.y);
+        Point2D<float> c(obs[i].c.x, obs[i].c.y);
+        if (c.distanceTo(p) < obs[i].r){
+#ifdef AI_TOOLS
+            logs << DEBUG << fixed << setprecision(2) << "Point is inside obs n°" << i << " (" << obs[i].c.x << " ; " << obs[i].c.y << ")";
+#endif
             return i;
         }
     }
     return 0;
 }
 
-int test_tirette(void) {
-#if SIMU
-    return 1;
+unsigned int checkPointInLimitPlayground(const Point2D<float>& p, const float limit){
+
+    //playground
+    if(p.x < limit || p.x > 300 - limit || p.y < limit || p.y > 200 - limit)
+        return 1;
+
+    //stairs
+    if(p.y > 200 - 58 - limit && p.x > 96 - limit && p.x < 204 + limit)
+        return 2;
+
+    return 0;
+}
+
+/*
+ * Project the point if inside an obstacle
+ */
+Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
+    unsigned int n = checkPointInObs(p, obs);
+logs << WAR << "Projection function: n="<< n;
+    if (n > 0) {
+        Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
+        Point2D<float> r;
+
+        r = c.project(p);
+        r.x += SIGN(r.x - c.c.x)*0.1;
+        r.y += SIGN(r.y - c.c.y)*0.1;
+
+#ifdef AI_TOOLS
+            logs << DEBUG << fixed << setprecision(2) << "Old position : (" << p.x << " ; " << p.y << ")";
+            logs << DEBUG << fixed << setprecision(2) << "New position : (" << r.x << " ; " << r.y << ")";
 #endif
-    return starting_cord;
-}
 
-void startColor(void) {
+        //TODO if the point is in several obstacle !
+        //TODO MAX of projection
 
-#if SIMU
-    color = COLOR_SIMU;
-#else
-    static int state = 0;
-    sMsg msgOut;
-
-    switch(state) {
-        case 0 :
-        if(mode_switch == 0) { //Red color
-            state = 1;
-            color = 0;
-
-            msgOut.header.destAddr = ADDRI1_MAIN_IO;
-            msgOut.header.type = E_IHM_STATUS;
-            msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
-
-            msgOut.payload.ihmStatus.nb_states = 1;
-            msgOut.payload.ihmStatus.states[0].id = IHM_LED;
-            msgOut.payload.ihmStatus.states[0].state = 1;
-
-            bn_sendRetry(&msgOut, MAX_RETRIES);
-        }
-        break;
-        case 1 :
-
-        if(mode_switch == 1) {
-            state = 2;
-        }
-        break;
-        case 2 :
-        if(mode_switch == 0) { //Yellow color
-            state = 3;
-            color = 1;
-
-            msgOut.header.destAddr = ADDRI1_MAIN_IO;
-            msgOut.header.type = E_IHM_STATUS;
-            msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
-
-            msgOut.payload.ihmStatus.nb_states = 1;
-            msgOut.payload.ihmStatus.states[0].id = IHM_LED;
-            msgOut.payload.ihmStatus.states[0].state = 2;
-
-            bn_sendRetry(&msgOut, MAX_RETRIES);
-        }
-        break;
-        case 3 :
-        if(mode_switch == 1) {
-            state = 0;
-        }
-        break;
-    }
-#endif
-}
-
-
-void simuSecondary(void) { //TODO if a other robot on trajectory
-    sPt_t trjS[4] = {{ 10., 100. }, { 100., 100. }, { 125., 120. }, { 125., 190. }}; //trajectory of the secondary robot : Yellow
-
-    static unsigned int state = 0;
-    static unsigned int lastTime = 0;
-    static sPt_t pos;
-
-    if(color == GREEN)
-        for(unsigned int i = 0 ; i < (sizeof(trjS) / sizeof(*trjS)); i++)
-            trjS[i].x = 300 - trjS[i].x;
-
-    unsigned int time = millis();
-    sNum_t theta;
-
-    obs[1].active = 1;
-
-    if (!lastTime) {
-        lastTime = millis();
-        pos = trjS[0];
+        return r;
     }
 
-    if (state < (sizeof(trjS) / sizeof(*trjS) - 1)) {
-        theta = atan2((trjS[state + 1].y - trjS[state].y), (trjS[state + 1].x - trjS[state].x));
-        pos.x += (SPEED_SECONDARY * (time - lastTime) * cos(theta)) / 1000;
-        pos.y += (SPEED_SECONDARY * (time - lastTime) * sin(theta)) / 1000;
-
-     /*   if (testPtInPt(&pos, &trjS[state + 1], 1)) { //FIXME use new lib MathTools
-            state++;
-        }
-*/
-        obs[1].c = pos;
-        obs_updated[1]++;
-
-        lastTime = millis();
-    }
+    return p;
 }
 
+Point2D<float> projectPointInLimitPlayground(const Point2D<float>& p,  const float limit){
 
-void posPrimary(void) { //FIXME permet de deplacer les objects mobile en cas de contact
-    int i;
-    sPt_t pt;
-    sVec_t v;
-    sPt_t _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
+    if (checkPointInLimitPlayground(p, limit) > 0) {
+        Point2D<float> r(p);
+logs << INFO << "Projection detect";
+        if(r.x < limit){
+            Line2D<float> l({limit, 0}, (Point2D<float>){limit, 200});
+            r = l.project(r);
+        }
+        if(r.x > 300 - limit){
+            Line2D<float> l({300 - limit, 0}, (Point2D<float>){300 - limit, 200});
+            r = l.project(r);
+        }
+        if(r.y < limit){
+            Line2D<float> l({0, limit}, (Point2D<float>){300, limit});
+            r = l.project(r);
+        }
+        if(r.y > 200 - limit){
+            Line2D<float> l({0, 200 - limit}, (Point2D<float>){300, 200 - limit});
+            r = l.project(r);
+        }
 
-    if (((i = test_in_obs(&_current_pos)) != 0)) {
+        if(checkPointInLimitPlayground(r, limit) > 1){
+            logs << INFO << "Projection detect escalier";
+            if(r.y > 200 - 58 - limit){
+                Line2D<float> l({0, 200 - 58 - limit}, (Point2D<float>){300, 200 - 58 - limit});
+                r = l.project(r);
+            }
+            if(r.x > 150 && r.x < 204 + limit){
+                Line2D<float> l({204 + limit, 0}, (Point2D<float>){204 + limit, 200});
+                r = l.project(r);
+            }
+            if(r.x < 150 && r.x > 96 - limit){
+                Line2D<float> l({96 - limit, 0}, (Point2D<float>){96 - limit, 200});
+                r = l.project(r);
+            }
+        }
+
+        return r;
+    }
+
+    return p;
+}
+
+/*
+ * Return > 0 if collision detected
+ */
+
+int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& pos){
+    Point2D<float> ptPr(pos[0].c.x, pos[0].c.y);
+    Point2D<float> ptSc(pos[1].c.x, pos[1].c.y);
+    Point2D<float> ptAPr(pos[2].c.x, pos[2].c.y);
+    Point2D<float> ptASc(pos[3].c.x, pos[3].c.y);
+    Point2D<float> ptRobot(pos[robot].c.x, pos[robot].c.y);
+    float d;
+
+    d = ptRobot.distanceTo(ptPr);
+    if (d < (pos[robot].r + pos[0].r) && d) {
+        logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 1;
+    }
+
+    d = ptRobot.distanceTo(ptSc);
+    if (d < (pos[robot].r + pos[1].r) && d) {
+        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 2;
+    }
+
+    d = ptRobot.distanceTo(ptAPr);
+    if (d < (pos[robot].r + pos[2].r) && d) {
+        logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 3;
+    }
+
+    d = ptRobot.distanceTo(ptASc);
+    if (d < (pos[robot].r + pos[3].r) && d) {
+        logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+        return 4;
+    }
+
+    return 0;
+}
+
+/*
+ * FIXME Check the utility
+ */
+void posPrimary(vector<astar::sObs_t>& obs) { //FIXME permet de deplacer les objects mobile en cas de contact
+    int i/*, N = obs.size()*/;
+    Point2D<float> pt;
+    Point2D<float> _current_pos = statuses.getLastPosXY(ELT_PRIMARY);
+
+    if (((i = checkPointInObs(_current_pos, obs)) != 0)) {
         if (obs[i].moved == 1) {
-            pt = obs[0].c;
-            projPtOnCircle(&obs[i].c, obs[i].r, &pt);
-            convPts2Vec(&pt, &obs[0].c, &v);
+            pt = {obs[0].c.x, obs[0].c.y};
+            Circle2D<float> cir(obs[i].c.x, obs[i].c.y, obs[i].r);
+            pt = cir.project(pt);
+            Vector2D<float> v(pt, {obs[0].c.x, obs[0].c.y});
 
             obs[i].c.x += v.x;
             obs[i].c.y += v.y;
 
-            obs_updated[i]++;
+     //       obs_updated[i]++;
         }
-        projectPoint(_current_pos.x, _current_pos.y, obs[i].r, obs[i].c.x, obs[i].c.y, &_current_pos);
+        Point2D<float> p(_current_pos.x, _current_pos.y);
+        Circle2D<float> c(obs[i].c.x, obs[i].c.y, obs[i].r);
+        p = c.project(p);
+        _current_pos = {p.x, p.y};
         if (sqrt(pow(_current_pos.x - obs[0].c.x, 2) + pow(_current_pos.y - obs[0].c.y, 2) < 2)) {
-            memcpy(&obs[0].c, &_current_pos, sizeof(obs[0].c));
-            obs_updated[0]++;
+
+            obs[0].c = {_current_pos.x, _current_pos.y};
+    //        obs_updated[0]++;
         }
         else {
-            memcpy(&_current_pos, &obs[0].c, sizeof(obs[0].c));
-            obs_updated[0]++;
+            _current_pos = {obs[0].c.x, obs[0].c.y};
+     //       obs_updated[0]++;
         }
     }
     //if non holmic
     float theta_robot = statuses.getLastOrient(ELT_ADV_PRIMARY);
-    updateNoHaftTurn(theta_robot * 180 / M_PI, &obs[0].c);
-    obs_updated[N - 5]++;
-    obs_updated[N - 6]++;
-    obs_updated[N - 7]++;
+    Point2D<float> p = {obs[0].c.x, obs[0].c.y};
+    updateNoHaftTurn(theta_robot * 180 / M_PI, pt, obs);
+//    obs_updated[N - 5]++;
+ //   obs_updated[N - 6]++;
+ //   obs_updated[N - 7]++;
     //end if
 }
 

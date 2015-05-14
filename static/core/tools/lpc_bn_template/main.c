@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <string.h>
 #include <uart0.h>
+#include "roles.h"
 
 #include "node_cfg.h"
 

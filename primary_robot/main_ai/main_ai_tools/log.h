@@ -9,6 +9,7 @@
 #define MAIN_AI_TOOLS_LOG_H_
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 
 #define ERR_V(a)  E_ERR  << a << "[ERROR]   " << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -36,6 +37,7 @@ class Log {
         Log(char* file);
         ~Log();
 
+       // void setOption(eLog_t op){};
         void changeFile(const char* file);
         void setType(const eLog_t& log);
         void setVer(const eVer_t& ver);
@@ -43,24 +45,28 @@ class Log {
         void putNewMes();
         void putNewPos(float x, float y, float theta);
 
-        void putText(const char* text);
-        void putNum(const float& num);
-
         bool term() const;
+
+        template<typename T>
+        void put(T v){
+            _file << v;
+            if(term())
+                cout << v;
+        }
 
     private:
         ofstream _file;
         eLog_t _type;
         eVer_t _ver;
         bool _pos; //true if the previous message was a position
-
 };
 
-extern Log& operator<<(Log& log, const char*text);
-extern Log& operator<<(Log& log, const int num);
-extern Log& operator<<(Log& log, const float num);
-extern Log& operator<<(Log& log, const double num);
-extern Log& operator<<(Log& log, const uint32_t num);
+template<typename T>
+Log& operator<<(Log& log, T v){
+    log.put(v);
+    return log;
+}
+
 extern Log& operator<<(Log& log, eLog_t type);
 extern Log& operator<<(Log& log, eVer_t ver);
 

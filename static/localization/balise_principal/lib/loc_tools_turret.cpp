@@ -16,7 +16,7 @@ extern "C"{
 #include "math.h"
 #include "Arduino.h"
 #include "params.h"
-
+#include "shared/lib_synchro.h"
 
 /* Converts a time value to a angle in radian, based on the last few recorded turns of the turret
  * Argument :
@@ -26,12 +26,13 @@ extern "C"{
  *  <0 is error.
  *
  */
-int time2rad(uint32_t time, float *ret){
+int time2rad(uint32_t stime, float *ret){
     int tempIndex=0;
     int tempIndexI=-1;
     int err=0;
     int tries=0;
     uint32_t tempPeriod=0,tempDate=0;
+    uint32_t time = sl2micros(stime);   //date converted to local
 #ifdef DEBUG_LOC
     uint32_t earliest=0,oldest=0;
 #endif
@@ -44,7 +45,7 @@ int time2rad(uint32_t time, float *ret){
 
 
         // sweep TR_infoBuf to find the appropriate time interval
-        while ( tries!=TR_INFO_BUFFER_SIZE && (TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period)<time){ //fixme overflow error (test instead  : "(time-TR_...date)<TR_...period" ?)
+        while ( tries!=TR_INFO_BUFFER_SIZE && ((TR_InfoBuf[tempIndex].date)+TR_InfoBuf[tempIndex].period)<time){ //fixme overflow error (test instead  : "(time-TR_...date)<TR_...period" ?)
             tempIndex=(tempIndex+1)%TR_INFO_BUFFER_SIZE;
             tries++;
         }
@@ -52,10 +53,6 @@ int time2rad(uint32_t time, float *ret){
             err=-ERR_NOT_FOUND;
         }
         else if (tries==TR_INFO_BUFFER_SIZE) { // if too early
-#ifdef DEBUG_LOC
-            earliest=TR_InfoBuf[TR_iNext].date;
-            oldest=(TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period);
-#endif
             err=-ERR_TRY_AGAIN;
         }
         else {
@@ -65,7 +62,9 @@ int time2rad(uint32_t time, float *ret){
     }
     if (err) {
 #ifdef DEBUG_LOC
-        bn_printfDbg((char*)"err %d early %lu old %lu time %lu\n",err,earliest,oldest,time);
+            earliest=TR_InfoBuf[TR_iNext].date;
+            oldest=TR_InfoBuf[tempIndex].date+TR_InfoBuf[tempIndex].period;
+        bn_printfDbg((char*)"e %d e %lu o %lu t %lu n %d\n",err,earliest,oldest,time,TR_iNext);
 #endif
         return err;
     }
@@ -87,12 +86,12 @@ int time2rad(uint32_t time, float *ret){
  *  pLoad : pointer to the data send by remote beacon
  * Return value :
  *  0 : everything went fine, *Pload can be cleared, the message to IA has been send
- *  <0 : something went wrong. Test return value to know if retries would be a good thing.
+ *  <0 : something went wrong. Testing return value to know if retries would be a good thing.
  */
 int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     float angle=0;
     int err=0;
-    if ((err=time2rad(pLoad->date,&angle))){
+    if ((err=time2rad(pLoad->date,&angle))){ // All dates stored and used are the global ones.
         return err;
     }
 
@@ -101,28 +100,28 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     if (angle<0) angle+=2*M_PI;
 
     sMsg msg={{0}};
-    msg.header.size=sizeof(sGenericStatus);
-    msg.header.type=E_GENERIC_STATUS;
-    msg.header.destAddr=role_get_addr(ROLE_AI);
+    msg.header.size=sizeof(msg.payload.genericPosStatus);
+    msg.header.type=E_GENERIC_POS_STATUS;
+    msg.header.destAddr=role_get_addr(ROLE_PRIM_AI);
 
-    msg.payload.genericStatus.date=pLoad->date;        // todo : synchronize this with ia
-    msg.payload.genericStatus.id=(origin==ADDRX_MOBILE_1?ELT_ADV_PRIMARY:ELT_ADV_SECONDARY);
+    msg.payload.genericPosStatus.date=sl2micros(pLoad->date);        // fixme : synchronize this with ia
+    msg.payload.genericPosStatus.id=(origin==ADDRX_MOBILE_1?ELT_ADV_PRIMARY:ELT_ADV_SECONDARY);
 
-    msg.payload.genericStatus.adv_status.pos.x=(float)(pLoad->value)/10.*sin(angle);
-    msg.payload.genericStatus.adv_status.pos.y=(float)(pLoad->value)/10.*cos(angle);
-    msg.payload.genericStatus.adv_status.pos.theta=0;
-    msg.payload.genericStatus.adv_status.pos.frame=FRAME_PRIMARY;
+    msg.payload.genericPosStatus.pos.x=(float)(pLoad->value)/10.*sin(angle);
+    msg.payload.genericPosStatus.pos.y=(float)(pLoad->value)/10.*cos(angle);
+    msg.payload.genericPosStatus.pos.theta=0;
+    msg.payload.genericPosStatus.pos.frame=FRAME_PRIMARY;
 
-    msg.payload.genericStatus.adv_status.pos_u.a_angle=-1;
-    msg.payload.genericStatus.adv_status.pos_u.a_var=-1;
-    msg.payload.genericStatus.adv_status.pos_u.b_var=-1;
-    msg.payload.genericStatus.adv_status.pos_u.theta=-1;
-
+    msg.payload.genericPosStatus.pos_u.a_angle=-1;
+    msg.payload.genericPosStatus.pos_u.a_var=-1;
+    msg.payload.genericPosStatus.pos_u.b_var=-1;
+    msg.payload.genericPosStatus.pos_u.theta=-1;
 
     bn_send(&msg);
-
-//    bn_printfDbg((char*)"%hx : (%lu,%d) (%d,%d)", origin, pLoad->value, (int)(angle*180./M_PI),(int)msg.payload.genericStatus.adv_status.pos.x,(int)msg.payload.genericStatus.adv_status.pos.y);
-
+#ifdef DEBUG_CALIBRATION
+    int intangle10 = ((int)((angle*10*180./M_PI))%360);
+    bn_printfDbg((char*)"%hx : (%d.%d °,%lu mm) (%d,%d)\n", origin, intangle10/10, intangle10%10, pLoad->value, (int)msg.payload.genericPosStatus.pos.x,(int)msg.payload.genericPosStatus.pos.y);
+#endif
     return 0;
 
 }

@@ -16,17 +16,34 @@
 #include "../../../communication/botNet/shared/botNet_core.h"
 #include "lib_domitille.h"
 #include "../../../communication/network_tools/bn_debug.h"
-#include "lib_sync_turret.h"
-#include "roles.h"
 #include "loc_tools_turret.h"
 #include "global_errors.h"
+#include "messages.h"
+#include "bn_utils.h"
+extern "C" {
+#include "roles.h"
+#include "global_sync.h"
+}
 
-mainState state=S_SYNC_ELECTION;
+#ifdef SYNC_WIRELESS
+#include "shared/lib_synchro_laser_turret.h"
+#endif
+
+#ifdef SYNC_WIRED
+#include "shared/lib_synchro_wire.h"
+
+#endif
+
+
+
+
+mainState state=S_GAME;
+
 
 sDeviceInfo devicesInfo[D_AMOUNT];
 int iDeviceSync=0,iDevicePeriodBcast=0;
 int lastIndex=0;    // to detect new turn in game state
-
+uint32_t endSync = 0;
 sMsg inMsg,outMsg;
 
 unsigned long sw=0, sw2=0;
@@ -35,6 +52,9 @@ void setup(){
 
     setupFreeTest();
 
+#ifdef SYNC_WIRED
+    wiredSync_senderInit(PIN_SYNC);
+#endif
     // initializes the local state of the beacons to "off"
     for (int i=0;i<D_AMOUNT;i++) {
         devicesInfo[i].state=DS_OFF;
@@ -51,6 +71,7 @@ void setup(){
     bn_init();
 
     bn_attach(E_ROLE_SETUP,role_setup);
+    bn_attach(E_SYNC_QUERY,gs_receiveQuery);
 #ifdef DEBUG
     bn_printfDbg("start turret, free mem : %d o\n",freeMemory());
 #endif
@@ -76,6 +97,21 @@ void loop(){
 
     //eventual receiving && routine
     rxB=bn_receive(&inMsg);  // rxB>0 if message written in inMsg, <0 if error
+    if (rxB>0) {
+        switch (inMsg.header.type) {
+        case E_SYNC_STATUS :
+            for (int i=0; i<D_AMOUNT; i++){
+                if (devicesInfo[i].addr == inMsg.header.srcAddr) {
+                    if (inMsg.payload.syncWired.flag == SYNC_OK){
+                        devicesInfo[i].state = DS_SYNCED;
+                    }
+                }
+            }
+            break;
+        default :
+            break;
+        }
+    }
 
     //period broadcast : one by one TODO : broadcast
     if((time - time_prev_period)>=ROT_PERIOD_BCAST) {
@@ -94,14 +130,23 @@ void loop(){
 
     //blinking
 #ifdef BLINK_1S
-    if((time - time_prev_led)>=10000) {
+    if((time - time_prev_led)>=1000) {
         time_prev_led = millis();
         digitalWrite(PIN_DBG_LED,debug_led^=1);
+#ifdef DEBUG_SYNC_WIRE_EVAL
+        if (millis() > 35000){
+            wiredSync_setSignal(WIREDSYNC_SIGNALISHERE);
+            delay(WIREDSYNC_LOWTIME/1000);
+            wiredSync_setSignal(WIREDSYNC_SIGNANOTHERE);
+            uint32_t end = micros();
+            bn_printfDbg("tur, %lu,",micros2sl(end));
+        }
+#endif
 #ifdef DEBUG
-    bn_printfDbg("%lu period %lu",micros(),domi_meanPeriod());
+    bn_printfDbg("%lu period %lu %lu",micros(),domi_meanPeriod(),domi_lastTR());
 //        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
 #endif
-#ifdef DEBUG_CALIBRATION
+#if defined(DEBUG_CALIBRATION) && defined(DEBUG_CALIBRATION_speed)
     static int setSpeed=0;
     switch (setSpeed){
     case 0 : setSpeed=1;
@@ -118,9 +163,78 @@ void loop(){
     }
 #endif
 
+    if (gs_isBeaconRequested() && (state != S_CHECKREMOTE
+                                    || state != S_SYNC_MEASURE
+                                    || state != S_SYNC_ELECTION
+                                    || state != S_SYNC_END) ){
+        state = S_CHECKREMOTE;
+
+    }
+
     ///////state machine
     switch (state){
+    case S_CHECKREMOTE :
+        int switchState ;
+        switchState = 1;
+        // check if every device is on
+        for (int i=0;i<D_AMOUNT;i++) {
+            if (int err=bn_ping(devicesInfo[i].addr)<0){
+                switchState = 0;
+                if (gs_isBeaconRequested()) {
+                    outMsg.header.destAddr = gs_getBeaconQueryOrigin();
+                    outMsg.header.type = E_SYNC_RESPONSE;
+                    outMsg.header.size = sizeof(outMsg.payload.syncResponse.cfgs[0]);
+                    outMsg.payload.syncResponse.nb = 1;
+                    outMsg.payload.syncResponse.cfgs[0].type = SYNCTYPE_ADDRESS;
+                    outMsg.payload.syncResponse.cfgs[0].addr = devicesInfo[i].addr;
+                    outMsg.payload.syncResponse.cfgs[0].status = SYNCSTATUS_PING_KO;
+                    while (bn_sendAck(&outMsg)<0); // critical, so loop.
+                }
 
+#ifdef DEBUG_SYNC
+                bn_printfDbg("%hx offline (error : %d)\n",devicesInfo[i].addr,err);
+#endif
+            }
+        }
+        if (switchState) {
+#ifdef SYNC_WIRED
+            state = S_SYNC_MEASURE;
+#elif defined(SYNC_WIRELESS)
+            state = S_SYNC_ELECTION;
+#endif
+        }
+        break;
+#ifdef SYNC_WIRED
+    case S_SYNC_MEASURE :
+        if (wiredSync_sendSignal(0) != -1) {
+            endSync = micros();
+        }
+        else {
+            // wait until we receive the sync statuses
+            int synced;
+            synced=0;
+            for (int i=0;i<D_AMOUNT;i++) {
+                if (devicesInfo[i].state == DS_SYNCED) synced++;
+            }
+            if (synced == D_AMOUNT) {
+                state = S_GAME;
+                gs_beaconStatus(SYNCSTATUS_OK);
+#ifdef DEBUG_SYNC
+                bn_printDbg("sync ok\n");
+#endif
+            }
+            if (endSync && (micros() - endSync) > 4*WIREDSYNC_PERIOD){
+#ifdef DEBUG_SYNC
+                for (int i=0;i<D_AMOUNT;i++) {
+                    if (devicesInfo[i].state != DS_SYNCED) bn_printfDbg("%hx not synchronized (status %d)\n",devicesInfo[i].addr,devicesInfo[i].state);
+                }
+#endif
+                gs_beaconStatus(SYNCSTATUS_SYNC_KO);
+            }
+        }
+        break;
+#endif
+#ifdef SYNC_WIRELESS
     case S_SYNC_ELECTION :
         if (!sw){
             // set speed to high
@@ -171,7 +285,7 @@ void loop(){
         }
         state=S_GAME;
         break;
-
+#endif
     case S_GAME :
         // if new turn
         if (lastIndex!=domi_nbTR()){

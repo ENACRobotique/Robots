@@ -16,13 +16,14 @@
 #include <getopt.h> // parameters parsing
 #include <errno.h>
 
-#include "../botNet/shared/botNet_core.h"
-#include "../network_tools/bn_debug.h"
-#include "../network_tools/bn_intp.h"
-#include "../network_tools/bn_utils.h"
+#include "botNet_core.h"
+#include "bn_debug.h"
+#include "bn_intp.h"
+#include "bn_utils.h"
 #include "global_errors.h"
-#include "../../core/linux/libraries/Millis/millis.h"
+#include "millis.h"
 #include "node_cfg.h"
+#include "roles.h"
 
 
 static int sigint = 0;
@@ -44,7 +45,7 @@ void usage(char *cl){
 }
 
 int main(int argc, char **argv){
-    int quit=0,quitMenu=0,err,benchmark=0;
+    int quit=0,quitMenu=0,ret,benchmark=0;
     char oLF=1,verbose=1;           //booleans used for display options, add new line char if missing (default yes), pure console mode (default no)
     FILE *fd = NULL;
 
@@ -107,9 +108,9 @@ int main(int argc, char **argv){
 
     bn_attach(E_ROLE_SETUP, role_setup);
 
-    err = bn_init();
-    if (err < 0){
-        printf("bn_init() error #%i\n", -err);
+    ret = bn_init();
+    if (ret < 0){
+        printf("bn_init() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
         exit(1);
     }
 
@@ -123,11 +124,11 @@ int main(int argc, char **argv){
         usleep(500);
 
         //receives messages, displays string if message is a debug message
-        err = bn_receive(&msgIn);
-        if (err > 0){
-            err = role_relay(&msgIn);
-            if(err < 0){
-                printf("role_relay() error #%i\n", -err);
+        ret = bn_receive(&msgIn);
+        if (ret > 0){
+            ret = role_relay(&msgIn);
+            if(ret < 0){
+                printf("role_relay() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
             }
 
             if (verbose>=1) {
@@ -135,9 +136,6 @@ int main(int argc, char **argv){
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu), seq : %02hhu ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type, msgIn.header.seqNum);
             }
             switch (msgIn.header.type){
-            case E_GENERIC_STATUS:
-                printf("%.2fcm, %.2fcm, %.2f°\n", msgIn.payload.genericStatus.prop_status.pos.x, msgIn.payload.genericStatus.prop_status.pos.y, msgIn.payload.genericStatus.prop_status.pos.theta*180./M_PI);
-                break;
             case E_ASSERV_STATS :
                 {
                     int i;
@@ -172,8 +170,8 @@ int main(int argc, char **argv){
                     }
                 }
                 break;
-            case E_POS :
-                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.pos.id, msgIn.payload.pos.x, msgIn.payload.pos.y, msgIn.payload.pos.theta*180./M_PI);
+            case E_GENERIC_POS_STATUS:
+                printf("robot%hhu@(%fcm,%fcm,%f°)\n", msgIn.payload.genericPosStatus.id, msgIn.payload.genericPosStatus.pos.x, msgIn.payload.genericPosStatus.pos.y, msgIn.payload.genericPosStatus.pos.theta*180./M_PI);
                 if(fd) fprintf(fd,"message received from %hx, type : %s (%hhu)  ",msgIn.header.srcAddr,eType2str(msgIn.header.type),msgIn.header.type);
                 break;
             default :
@@ -185,14 +183,14 @@ int main(int argc, char **argv){
                 break;
             }
         }
-        else if (err < 0){
-            if (err == -ERR_SYSERRNO && errno == EINTR){
+        else if (ret < 0){
+            if (ret == -ERR_SYSERRNO && errno == EINTR){
                 sigint=1;
             }
             else{
-                fprintf(stderr, "bn_receive() error #%i\n", -err);
-                if(err == -ERR_SYSERRNO){
-                    fprintf(stderr, "errno=%i\n", errno);
+                fprintf(stderr, "bn_receive() failed: %s (#%i)\n", getErrorStr(-ret), -ret);
+                if(ret == -ERR_SYSERRNO){
+                    fprintf(stderr, "errno=%s (#%i)\n", strerror(errno), errno);
                 }
                 exit(1);
             }
@@ -232,6 +230,10 @@ int main(int argc, char **argv){
                 char input[32];
 
                 printf("\ndebug reader menu\n");
+                printf("a : INIT: send RoleSetup messages to prop and moni to tell ai is simulated\n");
+                printf("h : INIT: synchronize time on propulsion\n");
+                printf("f : start RGB Led debug\n");
+                printf("g : Start servo calibration\n");
                 printf("d : send speed setpoint to the primary robot\n");
                 printf("s : send debugger address\n");
                 printf("p : ping\n");
@@ -244,88 +246,203 @@ int main(int argc, char **argv){
                 printf("r : return\n");
                 printf("q : quit\n");
 
-                err = !fgets(input, sizeof(input), stdin);
+                ret = !fgets(input, sizeof(input), stdin);
                 p = &input[0];
                 while(*p && isspace(*p)) p++;
 
                 switch (*p){
-                case 'e':{
+                case 'a':{ // setup nodes for simulated AI
                     sMsg msg = {{0}};
-                    static int us = 1200;
-                    us = 3000 - us;
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
-                    msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 3;
-                    msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
-                    msg.payload.servos.servos[0].us = us;
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
-                    bn_send(&msg);
-                    break;
-                }
-                case 'f':{
-                    sMsg msg = {{0}};
-                    int us;
-
-                    printf("us: "); fflush(stdout);
-                    err = scanf("%i", &us);
-                    if (err != 1){
-                        printf("error getting us setpoint\n");
+                    printf("Sending RoleSetup message to propulsion... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
                     }
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
-                    msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 3;
-                    msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = SERVO_PRIM_DOOR;
-                    msg.payload.servos.servos[0].us = us;
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = role_get_addr(ROLE_MONITORING);
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+                    printf("Sending RoleSetup message to monitoring... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+
+                    msg.header.type = E_ROLE_SETUP;
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.payload.roleSetup.nb_steps = 1;
+                    msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+                    // step #0
+                    msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+                    msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+                    msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+                    printf("Sending RoleSetup message to ADDRI_MAIN_IO... "); fflush(stdout);
+                    ret = bn_sendAck(&msg);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+
+
+                    break;
+                }
+                case 'h':{
+                    printf("Syncing propulsion... "); fflush(stdout);
+                    ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 100);
+                    if(ret < 0){
+                        printf("FAILED: %s (#%i)\n", getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("OK!\n");
+                    }
+                    break;
+                }
+                case 'v':
+                    verbose++;
+                    break;
+                case 'V':
+                    verbose--;
+                    verbose=(verbose<0?0:verbose);
+                    break;
+                case 'f':{
+                    sMsg msg = {{0}};
+                    sRGB color1, color2;
+                    unsigned int time1, time2, nb, red1, red2, green1, green2, blue1, blue2;
+
+                    printf("1st color (red): "); fflush(stdout);
+                    ret = scanf("%i", &red1);
+                    if (ret != 1){
+                        printf("error getting color (red)\n");
+                    }
+
+                    printf("1st color (green): "); fflush(stdout);
+                    ret = scanf("%i", &green1);
+                    if (ret != 1){
+                        printf("error getting color (green)\n");
+                    }
+
+                    printf("1st color (blue): "); fflush(stdout);
+                    ret = scanf("%i", &blue1);
+                    if (ret != 1){
+                        printf("error getting color (blue)\n");
+                    }
+
+                    printf("2nd color (red): "); fflush(stdout);
+                    ret = scanf("%i", &red2);
+                    if (ret != 1){
+                        printf("error getting color (red)\n");
+                    }
+
+                    printf("2nd color (green): "); fflush(stdout);
+                    ret = scanf("%i", &green2);
+                    if (ret != 1){
+                        printf("error getting color (green)\n");
+                    }
+
+                    printf("2nd color (blue): "); fflush(stdout);
+                    ret = scanf("%i", &blue2);
+                    if (ret != 1){
+                        printf("error getting color (blue)\n");
+                    }
+
+                    printf("time displaying 1st color (ms): "); fflush(stdout);
+                    ret = scanf("%i", &time1);
+                    if (ret != 1){
+                        printf("error getting time1\n");
+                    }
+
+                    printf("time displaying 2nd color (ms): "); fflush(stdout);
+                    ret = scanf("%i", &time2);
+                    if (ret != 1){
+                        printf("error getting time2\n");
+                    }
+
+                    printf("number of repetitions: "); fflush(stdout);
+                    ret = scanf("%i", &nb);
+                    if (ret != 1){
+                        printf("error getting repetitions\n");
+                    }
+
+                    color1.red = red1; color1.green = green1; color1.blue = blue1;
+                    color2.red = red2; color2.green = green2; color2.blue = blue2;
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
+                    msg.header.type = E_IHM_STATUS;
+                    msg.header.size = 2 + 1 * sizeof(msg.payload.ihmStatus.states[0]);
+                    msg.payload.ihmStatus.nb_states = 1;
+                    msg.payload.ihmStatus.states[0].id = IHM_LED;
+                    msg.payload.ihmStatus.states[0].state.color1 = color1;
+                    msg.payload.ihmStatus.states[0].state.color2 = color2;
+                    msg.payload.ihmStatus.states[0].state.time1 = time1;
+                    msg.payload.ihmStatus.states[0].state.time2 = time2;
+                    msg.payload.ihmStatus.states[0].state.nb = nb;
 
                     bn_send(&msg);
                     break;
                 }
                 case 'g':{
                     sMsg msg = {{0}};
-                    int us;
-                    int id;
+                    float angle;
+                    int club_id, hw_id;
 
-                    printf(" 0:SERVO_PRIM_DOOR\n");
-                    printf(" 1:SERVO_PRIM_FIRE1\n");
-                    printf(" 2:SERVO_PRIM_FIRE2\n");
-                    printf(" 3:SERVO_PRIM_ARM_LEFT\n");
-                    printf(" 4:SERVO_PRIM_ARM_RIGHT\n");
-
-                    printf("id: "); fflush(stdout);
-                    err = scanf("%i", &id);
-                    if (err != 1){
-                        printf("error getting servo id\n");
+                    printf("club id: "); fflush(stdout);
+                    ret = scanf("%i", &club_id);
+                    if (ret != 1){
+                        printf("error getting servo club id\n");
                     }
 
-                    printf("us: "); fflush(stdout);
-                    err = scanf("%i", &us);
-                    if (err != 1){
-                        printf("error getting us setpoint\n");
+                    printf("hardware id: "); fflush(stdout);
+                    ret = scanf("%i", &hw_id);
+                    if (ret != 1){
+                        printf("error getting servo hardware id\n");
                     }
 
-                    msg.header.destAddr = ADDRI1_MAIN_IO;
+                    printf("angle (deg): "); fflush(stdout);
+                    ret = scanf("%f", &angle);
+                    if (ret != 1){
+                        printf("error getting angle setpoint\n");
+                    }
+
+                    msg.header.destAddr = ADDRI_MAIN_IO;
                     msg.header.type = E_SERVOS;
-                    msg.header.size = 2 + 3;
+                    msg.header.size = 2 + 1 * sizeof(msg.payload.servos.servos[0]);
                     msg.payload.servos.nb_servos = 1;
-                    msg.payload.servos.servos[0].id = id;
-                    msg.payload.servos.servos[0].us = us;
+                    msg.payload.servos.servos[0].club_id = club_id;
+                    msg.payload.servos.servos[0].hw_id = hw_id;
+                    msg.payload.servos.servos[0].angle = angle;
 
                     bn_send(&msg);
                     break;
                 }
-                case 'h':
-                    printf("Syncing propulsion..."); fflush(stdout);
-                    bn_intp_sync(role_get_addr(ROLE_PROPULSION), 100);
-                    printf("done\n");
-                    break;
                 case 'w':{
                     sMsg msg = {{0}};
 
-                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
                     msg.header.type = E_POS_QUERY;
                     msg.header.size = sizeof(msg.payload.posQuery);
 
@@ -340,15 +457,15 @@ int main(int argc, char **argv){
                 case 'd':{ // sends new setpoint to the propulsion // FIXME: use sGenericStatus
                     sMsg msg = {{0}};
 
-                    msg.header.destAddr = role_get_addr(ROLE_PROPULSION);
+                    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
                     msg.header.type = E_SPEED_SETPOINT;
                     msg.header.size = sizeof(msg.payload.speedSetPoint);
 
                     do{
                         printf("speed (cm/s): ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%f", &msg.payload.speedSetPoint.speed);
-                    }while(err != 1 || msg.payload.speedSetPoint.speed < -150. || msg.payload.speedSetPoint.speed > 150.);
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%f", &msg.payload.speedSetPoint.speed);
+                    }while(ret != 1 || msg.payload.speedSetPoint.speed < -150. || msg.payload.speedSetPoint.speed > 150.);
 
                     bn_send(&msg);
                     break;
@@ -356,30 +473,37 @@ int main(int argc, char **argv){
                 case 's' :  //sends debug address to distant node
                     do{
                         printf("enter destination address\n");
-                        err = scanf("%hx",&destAd);
-                        if (err != 1){
+                        ret = scanf("%hx",&destAd);
+                        if (ret != 1){
                             printf("error getting destination address\n");
                         }
-                    }while(err != 1);
+                    }while(ret != 1);
                     while(getchar() != '\n');
-                    if ( (err=bn_debugSendAddr(destAd)) > 0){
+                    if ( (ret=bn_debugSendAddr(destAd)) > 0){
                         printf("signalling send\n");
                         quitMenu=1;
                     }
                     else {
-                        printf("error while sending : %d\n", err);
+                        printf("error while sending : %d\n", ret);
                     }
                     break;
                 case 'p' :
                     do{
                         printf("enter destination address\n");
-                        err = scanf("%hx",&destAd);
-                        if (err != 1){
+                        ret = scanf("%hx",&destAd);
+                        if (ret != 1){
                             printf("error getting destination address\n");
                         }
-                    }while(err != 1);
+                    }while(ret != 1);
                     while(getchar() != '\n');
-                    printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
+
+                    ret = bn_ping(destAd);
+                    if(ret < 0){
+                        printf("bn_ping(%hx) failed: %s (#%i)\n", destAd, getErrorStr(-ret), -ret);
+                    }
+                    else{
+                        printf("ping %hx : %d ms\n",destAd,ret);
+                    }
                     break;
                 case 't' :
                     {
@@ -387,19 +511,19 @@ int main(int argc, char **argv){
                         int depth;
                         do{
                              printf("enter destination address\n");
-                             err = scanf("%hx",&destAd);
-                             if (err != 1){
+                             ret = scanf("%hx",&destAd);
+                             if (ret != 1){
                                  printf("error getting destination address\n");
                              }
-                        }while(err != 1);
+                        }while(ret != 1);
                         while(getchar() != '\n');
                         do{
                              printf("enter depth\n");
-                             err = scanf("%i",&depth);
-                             if (err != 1 || depth <= 0){
+                             ret = scanf("%i",&depth);
+                             if (ret != 1 || depth <= 0){
                                  printf("error getting depth\n");
                              }
-                        }while(err != 1 || depth <= 0);
+                        }while(ret != 1 || depth <= 0);
                         while(getchar() != '\n');
                         trInfo = (sTraceInfo *)malloc(depth * sizeof(sTraceInfo));
                         nbTraces=bn_traceroute(destAd,trInfo,depth,1000);
@@ -412,21 +536,21 @@ int main(int argc, char **argv){
                 {
                     do{
                         printf("dest address: ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%hx", &bench_dest_addr);
-                    }while(err != 1);
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%hx", &bench_dest_addr);
+                    }while(ret != 1);
 
                     do{
                         printf("msg size: ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%i", &bench_sz_msg);
-                    }while(err != 1 || bench_sz_msg < 0 || bench_sz_msg > BN_MAX_PDU - sizeof(msgIn.header));
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%i", &bench_sz_msg);
+                    }while(ret != 1 || bench_sz_msg < 0 || bench_sz_msg > BN_MAX_PDU - sizeof(msgIn.header));
 
                     do{
                         printf("msg period: ");
-                        err = !fgets(input, sizeof(input), stdin);
-                        err = err?0:sscanf(input, "%i", &bench_period);
-                    }while(err != 1 || bench_period < 2);
+                        ret = !fgets(input, sizeof(input), stdin);
+                        ret = ret?0:sscanf(input, "%i", &bench_period);
+                    }while(ret != 1 || bench_period < 2);
 
                     bench_time_ok = 0;
                     bench_time_ko = 0;
@@ -494,8 +618,8 @@ int main(int argc, char **argv){
                 msgOut.header.size = bench_sz_msg;
                 msgOut.header.type = E_DATA;
 
-                err = bn_sendAck(&msgOut);
-                if(err <= 0){
+                ret = bn_sendAck(&msgOut);
+                if(ret <= 0){
                     if(!bench_nb_msg_lost){
                         bench_time_ko = (millis() - prevBench)<<BENCH_TIME_SHIFT;
                     }

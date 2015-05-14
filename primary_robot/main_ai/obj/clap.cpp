@@ -10,24 +10,43 @@
 #include <iostream>
 #include <cmath>
 
-#include "math_types.h"
 #include "types.h"
+#include "tools.h"
 
+#define ECART 20.
 
-sPt_t obsClap[6]={{32., R_ROBOT}, {62., R_ROBOT}, {92., R_ROBOT}, {208. , R_ROBOT}, {238., R_ROBOT}, {268., R_ROBOT}} ;
+Point2D<float> obsClap[6]={
+        { 15., ECART},
+        { 45., ECART},
+        { 75., ECART},
+        {225., ECART},
+        {255., ECART},
+        {285., ECART}
+        };
 
-Clap::Clap(unsigned int num) : Obj(E_CLAP), _num(num){
-
-    if(num > 6){
-        cerr << "[Error] [clap.cpp] Num too big" << endl;
-    }
+Clap::Clap(unsigned int num) : Obj(E_CLAP, ActuatorType::POP_CORN_LOADER, true), _num(num){
     sObjEntry_t objEP;
+
+    switch(num){
+        case 0:
+        case 1:
+        case 2:
+            objEP.pt.angle = M_PI;
+            objEP.delta = -M_PI/2;
+            break;
+        case 3:
+        case 4:
+        case 5:
+            objEP.pt.angle = 0;
+            objEP.delta = M_PI/2;
+            break;
+        default:
+            logs << ERR << "Num too big";
+    }
+
     objEP.type = E_POINT;
     objEP.pt.p = obsClap[num];
-#if NON_HOLONOMIC
     objEP.radius = 8.;
-#endif
-    objEP.pt.angle = M_PI_2;
 
     _access.push_back(objEP);
 }
@@ -36,9 +55,21 @@ Clap::~Clap() {
     // TODO Auto-generated destructor stub
 }
 
-int Clap::loopObj(){
-    _state = FINISH;
-    return 0;
+void Clap::initObj(paramObj par){
+    _dest.x = par.obs[0].c.x - 15*cos(_access[0].pt.angle);
+    _dest.y = ECART;
+
+    path.go2PointOrient(_dest, par.obs, _access_select_angle);
+
+}
+
+int Clap::loopObj(paramObj par){
+
+    if(par.posRobot.distanceTo(_dest) < 2.){
+        _state = FINISH;
+        return 0;
+    }
+    return 1;
 };
 
 

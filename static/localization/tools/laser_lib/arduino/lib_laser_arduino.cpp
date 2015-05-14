@@ -9,7 +9,10 @@
 
 #include "Arduino.h"
 #include "../shared/lib_int_laser.h"
-#include "../src/params.h"
+#include "params.h"
+
+#undef BIT
+#define BIT(a) (1<<a)
 
 void laser_arduino_IntHand0(){ //interrupt handler, puts the time in the rolling buffer
   //new! debouce, will hide any interruption happening less than DEBOUNCETIME µsec after the last registered interruption

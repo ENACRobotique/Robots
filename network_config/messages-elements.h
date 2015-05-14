@@ -13,12 +13,8 @@ typedef enum{
     ELT_SECONDARY,
     ELT_ADV_PRIMARY,
     ELT_ADV_SECONDARY,
-    ELT_FIRE,
-    ELT_ZONE,
 
     NUM_E_ELEMENT
 } eElement;
-
-int elementHasPosition(eElement id);
 
 #endif /* LIB_NETWORK_CONFIG_MESSAGES_ELEMENTS_H_ */

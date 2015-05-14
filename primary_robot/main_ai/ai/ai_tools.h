@@ -1,26 +1,34 @@
 /*
- * obj_fct.h
+ * ai_tools.h
  *
  *  Created on: 29 mars 2014
- *      Author: seb
+ *      Author: Sébastien Malissard
  */
 
-#ifndef OBJ_FCT_H_
-#define OBJ_FCT_H_
+#ifndef AI_TOOLS_H_
+#define AI_TOOLS_H_
 
-#include <ai_types.h>
-#include <time_tools.h>
+#include <vector>
 
-//void printServoPos(eServoPos_t *pos);
-void printObsActive(void);
-void init_ele(void);
-void printListObj(void);
-int test_in_obs(sPt_t *p);
-int test_tirette(void);
-void simuSecondary(void);
-void posPrimary(void);
-void checkRobot2Obj(void);
-int checkAdvOnRobot(void);
-void startColor(void);
+#include "GeometryTools.h"
+#include "a_star_tools.h"
+#include "messages-elements.h"
 
-#endif /* OBJ_FCT_H_ */
+
+#define RESO_POS 2
+#define END_MATCH 90000 //in ms
+#define ERR_DIST 2.
+#define NOMINAL_SPEED 20
+#define LOW_SPEED 10
+#define NB_MAX_PT_ZONE 10
+
+
+void printObsActive(std::vector<astar::sObs_t>& obs);
+unsigned int checkPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
+unsigned int checkPointInLimitPlayground(const Point2D<float>& p, const float limit);
+Point2D<float> projectPointInObs(const Point2D<float>& p, std::vector<astar::sObs_t>& obs);
+Point2D<float> projectPointInLimitPlayground(const Point2D<float>& p,  const float limit);
+int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& pos);
+void posPrimary(std::vector<astar::sObs_t>& obs);
+
+#endif /* AI_TOOLS_H_ */

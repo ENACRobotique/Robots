@@ -16,7 +16,7 @@ extern "C" {
 
 #include <stdint.h>
 
-uint8_t checkSum(sMsg *msg);
+int checkSum(sMsg *msg);
 void setSum(sMsg *msg);
 
 #ifdef __cplusplus

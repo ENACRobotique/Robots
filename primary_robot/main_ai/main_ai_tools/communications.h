@@ -9,20 +9,23 @@
 #define COMMUNICATIONS_TOOLS_H_
 
 #include <fstream>
-
-#include "math_types.h"
+#include <vector>
+#include "GeometryTools.h"
+#include "a_star_tools.h"
 
 using namespace std;
 
 //Send message
 void sendPing();
-void sendObsCfg();
-void sendObss();
-int sendPos(sPt_t &p, sNum_t theta);
-int sendSpeed(sNum_t speed);
+int roleSetup(bool simu_ai, bool simu_prop);
+void sendObsCfg(const int n, const int rRobot, const int xMin, const int xMax, const int yMin, const int yMax);
+void sendObss(vector<astar::sObs_t>& obs, vector<uint8_t>& obs_updated);
+int sendPosPrimary(Point2D<float>& p, float theta);
+int sendSpeedPrimary(float speed);
 
 //Receive message
 void checkInbox(int verbose);
-bool lastGoal(sPt_t &goal, bool get);
+bool lastGoal(Point2D<float>& goal, bool get);
+bool askObsCfg(bool get);
 
 #endif /* COMMUNICATIONS_TOOLS_H_ */

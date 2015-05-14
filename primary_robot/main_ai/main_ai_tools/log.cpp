@@ -56,6 +56,13 @@ void Log::putNewMes(){
     if ((length = strlen(date)) > 0)
         date[length-1] = ' ';
 
+    cout << "\033[0m";
+
+    if(_type == E_ERR)
+        cout << "\033[31m";
+    else if(_type == E_WAR)
+        cout << "\033[33m";
+
     _file << endl << date;
     if(term()){
         if(_pos)
@@ -72,26 +79,9 @@ void Log::putNewPos(float x, float y, float theta){
 
     _pos = true;
 
+    auto flags = cout.flags();
     cout << fixed << setprecision(2) << "\x1b[K\x1b[s" << "pos : " << x << "cm, " << y << "cm, " << theta * 180. / M_PI << "°" << "\x1b[u" << flush;
-
-}
-
-/*
- * Writes a string format in char*
- */
-void Log::putText(const char* text){
-    _file << text;
-    if(term())
-        cout << text;
-}
-
-/*
- * Writes a float
- */
-void Log::putNum(const float& num){
-    _file << num;
-    if(term())
-        cout << num;
+    cout.flags(flags);
 }
 
 /*
@@ -103,32 +93,6 @@ bool Log::term() const{
     return false;
 }
 
-
-Log& operator<<(Log& log, const char*text){
-    log.putText(text);
-    return log;
-}
-
-Log& operator<<(Log& log, const int num){
-    log.putNum((float) num);
-    return log;
-}
-
-Log& operator<<(Log& log, const float num){
-    log.putNum(num);
-    return log;
-}
-
-Log& operator<<(Log& log, const double num){
-    log.putNum((float) num);
-    return log;
-}
-
-Log& operator<<(Log& log, const uint32_t num){
-    log.putNum((float) num);
-    return log;
-}
-
 Log& operator<<(Log& log, eLog_t type){
     log.setType(type);
     return log;
@@ -138,4 +102,3 @@ Log& operator<<(Log& log, eVer_t ver){
     log.setVer(ver);
     return log;
 }
-

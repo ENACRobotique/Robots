@@ -36,11 +36,11 @@ typedef enum{
     E_INTP,                 // @payload.intp: bn_intp synchronization message
 
 /************************ user types start ************************/
-    E_SYNC_DATA,            // @payload.sync: sync data (send from the turret to the receiver)
+    E_SYNC_DATA,            // @payload.syncWireless: sync data (send from the turret to the receiver)
+    E_SYNC_STATUS,          // @payload.syncWired: sync status
     E_PERIOD,               // @payload.period period measurement
     E_MEASURE,              // @payload.mobileReport laser delta-time measurement
     E_TRAJ,                 // @payload.traj: a trajectory step
-    E_POS,                  // @payload.pos: position (w/ uncertainty) of an element (deprecated use E_GENERIC_STATUS)
     E_ASSERV_STATS,         // @payload.asservStats: control loop statistics
     E_GOAL,                 // @payload.pos asks the robot to go to this goal (x,y)
     E_OBS_CFG,              // @payload.obsCfg: obstacle array configuration
@@ -49,9 +49,12 @@ typedef enum{
     E_SERVOS,               // @payload.servos: servo messages (posStats)
     E_IHM_STATUS,           // @payload.ihmStatus: ihm status
     E_SPEED_SETPOINT,       // @payload.speedSetPoint: speed setpoint
-    E_GENERIC_STATUS,       // @payload.genericStatus: generic status of an element
+    E_GENERIC_POS_STATUS,   // @payload.genericPosStatus: generic position and status of an element
     E_POS_STATS,            // @payload.posStats: position statistics (packed)
     E_TRAJ_ORIENT_EL,       // @payload.trajOrientEl: complex trajectory element (position + orientation wrt time)
+    E_POS_CAM,              // @payload.posCam: For position computed from CAM
+    E_SYNC_QUERY,           // @payload.syncQuery: for time synchronization
+    E_SYNC_RESPONSE,        // @payload.syncResponse: for time synchronization
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -88,6 +91,7 @@ const char *eType2str(E_TYPE elem);
 #include "messages-localization.h"
 #include "messages-interactions.h"
 #include "messages-statuses.h"
+#include "messages-image-processing.h"
 
 /************************ user payload definition stop ************************/
 
@@ -113,7 +117,6 @@ typedef union{
 // POSITION (cf messages-position.h)
     sPosQuery posQuery;                 // E_POS_QUERY
     sPosStats posStats;                 // E_POS_STATS
-    sPosPayload pos;                    // E_POS (deprecated, use genericStatus instead)
 
 // LOCOMOTION (cf messages-locomotion.h)
     sSpeedSetPoint speedSetPoint;       // E_SPEED_SETPOINT
@@ -122,10 +125,11 @@ typedef union{
     sTrajOrientElRaw_t trajOrientEl;    // E_TRAJ_ORIENT_EL
 
 // LOCALIZATION (cf messages-localization.h)
-    sMobileReportPayload mobileReport;  // E_
-    sSyncPayload sync;                  // E_
+    sMobileReportPayload mobileReport;  // E_MEASURE
+    sSyncPayload_wireless syncWireless; // E_SYNC_DATA
+    sSyncPayload_wired syncWired;       // E_SYNC_STATUS
     uint8_t channel;                    // E_
-    uint32_t period;                    // E_
+    uint32_t period;                    // E_E_PERIOD
 
 // INTERACTIONS (cf messages-interactions.h)
     sServos servos;                     // E_SERVOS
@@ -134,7 +138,12 @@ typedef union{
 // STATUSES (cf messages-statuses.h)
     sObsConfig obsCfg;                  // E_OBS_CFG
     sObss obss;                         // E_OBSS
-    sGenericStatus genericStatus;       // E_GENERIC_STATUS
+    sGenericPosStatus genericPosStatus; // E_GENERIC_POS_STATUS
+    sSyncQuery syncQuery;               // E_SYNC_QUERY
+    sSyncResponse syncResponse;         // E_SYNC_RESPONSE
+
+// IMAGE PROCESSING (cf messages-image-processing.h)
+    sPosCam posCam;                     // E_POS_CAM
 /************************ user payload stop ************************/
 
 }uPayload;

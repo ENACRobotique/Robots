@@ -14,7 +14,7 @@
 #define MYADDRD ADDRD1_MAIN_AI_SIMU
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
-#define MYROLE ROLE_AI
+#define MYROLE ROLE_PRIM_AI
 // MYROLE must be equal to role_get_role(MYADDR)
 
 #define BN_INC_MSG_BUF_SIZE     4

@@ -24,7 +24,6 @@ const char *eType2str(E_TYPE elem){
     case E_PERIOD :                 return "PERIOD";
     case E_MEASURE :                return "MEASURE";
     case E_TRAJ :                   return "TRAJ";
-    case E_POS :                    return "POS";
     case E_ASSERV_STATS :           return "ASSERV_STATS";
     case E_GOAL :                   return "GOAL";
     case E_OBS_CFG :                return "OBS_CFG";
@@ -32,9 +31,11 @@ const char *eType2str(E_TYPE elem){
     case E_POS_QUERY :              return "POS_QUERY" ;
     case E_SERVOS :                 return "SERVOS" ;
     case E_IHM_STATUS :             return "IHM_STATUS" ;
-    case E_GENERIC_STATUS :         return "GENERIC_STATUS" ;
+    case E_GENERIC_POS_STATUS :     return "GENERIC_POS_STATUS" ;
     case E_POS_STATS :              return "POS_STATS" ;
     case E_TRAJ_ORIENT_EL :         return "TRAJ_ORIENT_EL" ;
+    case E_SYNC_QUERY :             return "SYNC_QUERY" ;
+    case E_SYNC_RESPONSE :          return "SYNC_RESPONSE" ;
     /************************ user types stop ************************/
 
     default :

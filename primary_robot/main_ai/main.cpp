@@ -15,14 +15,23 @@
 #include <getopt.h> //already exist extern "C"
 
 extern "C"{
-#include <unistd.h> //for uslepp
+#include <unistd.h> //for usleep
+#include "roles.h"
+#include "global_errors.h"
+#include "bn_intp.h"
+#include "messages-position.h"
 }
 
 #include "botNet_core.h"
 #include "communications.h"
 #include "tools.h"
-#include "ai.h"
 #include "net.h"
+#include "GeometryTools.h"
+#include "init_robots.h"
+#include "environment.h"
+
+//#define SYNC_PROP_IA    // sync is done by IA, and only between IA and prop
+#define SYNC_TURRET     // sync is done by turret
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -32,11 +41,16 @@ void intHandler(int dummy) {
 }
 #endif
 
+void exitAI(int status){
+    cout << "\033[0m";
+    exit(status);
+}
+
 void usage(char *cl) {
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
     printf("Options:\n");
-    printf("\t--mode,     -m        AI mode (slave | auto | prog | fire)\n");
+    printf("\t--mode,     -m        AI mode (slave | auto | prog)\n");
     printf("\t--log-file, -f        output log file of received messages (overwritten)\n");
     printf("\t--verbose,  -v        increases verbosity\n");
     printf("\t--quiet,    -q        not verbose\n");
@@ -46,6 +60,11 @@ void usage(char *cl) {
 int main(int argc, char **argv) {
     int ret;
     eAIState_t eAIState = E_AI_SLAVE;
+    bool simu_primary = true;
+    bool holo_primary = true;
+    bool hmi_simu_primary = true;
+    eColor_t color_primary = GREEN;
+
 
 #ifdef CTRLC_MENU
     char cmd;
@@ -55,9 +74,9 @@ int main(int argc, char **argv) {
 
     // arguments parsing
     while (1) {
-        static struct option long_options[] = { { "mode", required_argument, NULL, 'm' }, { "log-file", required_argument, NULL, 'f' }, { "verbose", no_argument, NULL, 'v' }, { "quiet", no_argument, NULL, 'q' }, { "help", no_argument, NULL, 'h' }, { NULL, 0, NULL, 0 } };
+        static struct option long_options[] = { { "mode", required_argument, NULL, 'm' }, { "log-file", required_argument, NULL, 'f' }, { "primary", required_argument, NULL, 'p' }, { "secondary", required_argument, NULL, 's' }, { "adv-primary", required_argument, NULL, 'a' }, { "adv-secondary", required_argument, NULL, 'b' }, { "verbose", no_argument, NULL, 'v' }, { "quiet", no_argument, NULL, 'q' }, { "help", no_argument, NULL, 'h' }, { NULL, 0, NULL, 0 } };
 
-        int c = getopt_long(argc, argv, "m:f:vqh?", long_options, NULL);
+        int c = getopt_long(argc, argv, "m:f:p:s:a:b:vqh?", long_options, NULL);
         if (c == -1)
             break;
         switch (c) {
@@ -74,6 +93,28 @@ int main(int argc, char **argv) {
                 break;
             case 'f':
                 logs.changeFile(optarg);
+                break;
+            case 'p':
+                if(strstr(optarg, "real")){
+                    simu_primary = false;
+                    hmi_simu_primary = false;
+                }
+                else if(strstr(optarg, "simu"))
+                    simu_primary = true;
+                if(strstr(optarg, "axle"))
+                    holo_primary = false;
+                else if(strstr(optarg, "holo"))
+                    holo_primary = true;
+                if(strstr(optarg, "green"))
+                    color_primary = GREEN;
+                else if(strstr(optarg, "yellow"))
+                    color_primary = YELLOW;
+                break;
+            case 's':
+                break;
+            case 'a':
+                break;
+            case 'b':
                 break;
             case 'v':
                 verbose++;
@@ -95,37 +136,52 @@ int main(int argc, char **argv) {
 
     // network initialization
     if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
-        cerr << "[ERROR] [main.cpp] bn_attach() error : " << -ret << endl;
-        exit(EXIT_FAILURE);
+        logs << ERR << "bn_attach() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+        exitAI(EXIT_FAILURE);
     }
 
     if ((ret = bn_init()) < 0) {
-        cerr << "[ERROR] [main.cpp] bn_init() error : " << -ret << endl;
-        exit(EXIT_FAILURE);
+        logs << ERR << "bn_init() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+        exitAI(EXIT_FAILURE);
     }
+
+
+    if(roleSetup(true, simu_primary) < 0)
+        exitAI(EXIT_FAILURE);
+
+#ifdef SYNC_PROP_IA
+    if((ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 50)) < 0){
+        logs << ERR << "FAILED SYNC: " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+        exitAI(EXIT_FAILURE);
+    }
+#endif
+#ifdef SYNC_TURRET
+    sMsg queryMsg;
+    queryMsg.header.destAddr = ADDRI_MAIN_TURRET;
+    queryMsg.header.type = E_SYNC_QUERY;
+    // beacons
+    queryMsg.payload.syncQuery.cfgs[0].type = SYNCTYPE_BEACONS;
+    // main AI
+    queryMsg.payload.syncQuery.cfgs[1].type = SYNCTYPE_ROLE;
+    queryMsg.payload.syncQuery.cfgs[1].role = ROLE_PRIM_AI;
+    // prop
+    queryMsg.payload.syncQuery.cfgs[2].type = SYNCTYPE_ROLE;
+    queryMsg.payload.syncQuery.cfgs[2].role = ROLE_PRIM_PROPULSION;
+    // arduino IO
+    queryMsg.payload.syncQuery.cfgs[3].type = SYNCTYPE_ADDRESS;
+    queryMsg.payload.syncQuery.cfgs[3].addr = ADDRI_MAIN_IO;
+    // set sizes
+    queryMsg.payload.syncQuery.nb = 4;
+    queryMsg.header.size = queryMsg.payload.syncQuery.nb * sizeof(queryMsg.payload.syncQuery.cfgs[0]);
+    while (bn_sendAck(&queryMsg)<0);
+#endif
+
 
     sendPing();
 
-    // calls initialization functions
-    switch (eAIState) {
-        case E_AI_AUTO:
-        case E_AI_PROG:
-            ret = initAI();
-            if (ret < 0) {
-                cerr << "[ERROR] [main.cpp] obj_init() error #" << -ret << endl;
-            }
-            break;
-        case E_AI_SLAVE:
-            sPt_t pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
-            sendPos(pt, INIT_ANGLE_SLAVE);
-            break;
-    }
+    Env2015::setup();
 
-    // send configuration of the playground and all obs to monitoring if activate
-    sendObsCfg();
-    for(int i = 0 ; i < N ; i++)
-        if(obs[i].active)
-            obs_updated[i] = 1;
+    setupRobots(simu_primary, holo_primary, hmi_simu_primary, color_primary, eAIState);
 
     ret = 1;
 
@@ -148,33 +204,14 @@ int main(int argc, char **argv) {
         checkInbox(verbose);
 
         // calls loop functions
-        switch (eAIState) {
-            case E_AI_SLAVE:
-                sPt_t goal;
-                if (lastGoal(goal, true)) {
-                    logs << INFO << "New goal available";
-                    path.go2Point(goal, false);
-                }
-                break;
-            case E_AI_AUTO:
-            case E_AI_PROG:
-                ret = stepAI();
-                break;
-            default:
-                break;
-        }
+        Env2015::loop();
+        if (!loopRobots())
+            break;
 
         // calls maintenance function
         statuses.maintenace();
         path.maintenace();
         net.maintenace();
-
-        // sending obstacles to monitoring
-        sendObss();
-
-        // end
-        if(ret == 0)
-            break;
 
         // menu
 #ifdef CTRLC_MENU
