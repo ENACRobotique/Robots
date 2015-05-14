@@ -11,8 +11,10 @@
 #include "Arduino.h"
 
 #include "Wire.h"
-
+#include "params.h" //to override adress values
+#ifndef US_LOWEST_ADDR
 #define US_LOWEST_ADDR 	0xE0  //lowest address of the sensors
+#endif
 #define US_NB_DEVICES 	2
 
 // functions to range using I²C ultrasons
