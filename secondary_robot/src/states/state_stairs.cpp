@@ -15,6 +15,8 @@
 #include "../params.h"
 #include "state_traj.h"
 #include "state_wait.h"
+#include "lib_radar.h"
+#include "state_pause.h"
 
 #define ANGLE_STAIRS_STARTED 11
 #define ANGLE_CMD_STOP 5
@@ -48,6 +50,8 @@ sState *testStairs()
 #ifndef NO_ATTITUDE_BEFORE_STAIRS
 	if (abs(attitudeCmdStairs-attitudeCmdStartStairs) > ANGLE_STAIRS_STARTED && timeStairsStarted == 0 ){
 		timeStairsStarted = millis();
+		sStairs.flag &= ~E_RADAR;	//désactivation des radars
+		fanSetCon(FAN_SPEED);	//démarrage du ventilateur
 		Serial.println("Début montée");
 	}
 #endif
@@ -75,6 +79,11 @@ sState *testStairs()
 		Serial.println("STOP !!!");
 		return &sWait;
 	}
+
+	if(timeStairsStarted==0){
+		if (radarIntrusion()) return &sPause;
+	}
+
 	return 0;
 #else
 	static unsigned long timestart = millis();
@@ -88,11 +97,11 @@ sState *testStairs()
 	}
 	return 0;
 #endif
+
 }
 
 void initStairs(sState *prev)
 	{
-	fanSetCon(FAN_SPEED);
 	attitudeCmdStartStairs = servoAttitude.read();
 #ifdef NO_ATTITUDE_BEFORE_STAIRS
 	attitudeCmdStartStairs = ANGLE_ON_FLOOR;
@@ -105,6 +114,9 @@ void initStairs(sState *prev)
 	#ifdef DEBUG
 		Serial.println("Starting stairs");
 	#endif
+
+	uint16_t limits[RAD_NB_PTS]={30,30};
+	radarSetLim(limits);
 
 }
 
@@ -119,7 +131,7 @@ void deinitStairs(sState *next)
 }
 
 sState sStairs={
-		BIT(E_MOTOR) |BIT(E_ATTITUDE),
+		BIT(E_MOTOR) |BIT(E_ATTITUDE)|BIT(E_RADAR),
 		&initStairs,
 		&deinitStairs,
 		&testStairs
