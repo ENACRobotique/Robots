@@ -15,8 +15,9 @@
 #include "state_Prestairs.h"
 #include "state_wait.h"
 #include "state_lineMonit.h"
+#include "lib_radar_mask.h"
 
-unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
+unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
 #ifdef HEADING
 periodicTraj periodicFunction = &periodicProgTrajHeading;
 #else
@@ -35,6 +36,7 @@ void initTrajGreenInit(sState *prev)
 				Serial.println("\tback from pause");
 			#endif
 	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+	        st_saveTime_radar=millis()-st_saveTime_radar+st_prevSaveTime_radar;
 	        _backFromPause = 1;
 	    	}
 	    uint16_t limits[RAD_NB_PTS]={40,40};
@@ -47,11 +49,15 @@ void deinitTrajGreenInit(sState *next)
 	    	{
 	        st_prevSaveTime=st_saveTime;
 	        st_saveTime=millis();
+	        st_prevSaveTime_radar=st_saveTime_radar;
+	        st_saveTime_radar=millis();
 	    	}
 	    else
 	    	{
 	        st_saveTime=0;
 	        st_prevSaveTime=0;
+	        st_saveTime_radar=0;
+	        st_prevSaveTime_radar=0;
 	    	}
 	}
 
@@ -70,10 +76,20 @@ trajElem start_green[]={
 #endif
 				};
 
+radarElem start_green_radar[]={
+				{40,20,5500},
+				{0,0,9000},
+				{0,0,2000},
+				{30,30,2000},
+				{0,0,0},
+				};
+
 sState *testTrajGreenInit()
 	{
 		static int i=0;
+		static int i_radar=0;
 	    static unsigned long prev_millis=0;
+	    static unsigned long prev_millis_radar=0;
 
 	    if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis))
 	    {
@@ -84,6 +100,13 @@ sState *testTrajGreenInit()
 
 	    	 return &sPrestairs;
 	    }
+
+	    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
+			#ifdef DEBUG
+				Serial.println("\tFin radar 1 !");
+			#endif
+		}
+
 	    if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
@@ -124,6 +147,9 @@ void deinitTrajYellowInit(sState *next)
 		    	}
 		    else
 		    	{
+#ifdef DEBUG
+	Serial.println("Fin traj jaune");
+#endif
 		        st_saveTime=0;
 		        st_prevSaveTime=0;
 		    	}
@@ -149,8 +175,12 @@ sState *testTrajYellowInit()
 		    static unsigned long prev_millis=0;
 		    if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
 		   	    {
+				#ifdef DEBUG
+					Serial.println("\tTrajet 1 fini !");
+				#endif
 		    	return &sPrestairs;
 		   	    }
+
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
