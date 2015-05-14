@@ -19,6 +19,7 @@ extern "C"{
 #include "roles.h"
 #include "global_errors.h"
 #include "bn_intp.h"
+#include "messages-position.h"
 }
 
 #include "botNet_core.h"
@@ -28,6 +29,9 @@ extern "C"{
 #include "GeometryTools.h"
 #include "init_robots.h"
 #include "environment.h"
+
+//#define SYNC_PROP_IA    // sync is done by IA, and only between IA and prop
+#define SYNC_TURRET     // sync is done by turret
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -145,10 +149,33 @@ int main(int argc, char **argv) {
     if(roleSetup(true, simu_primary) < 0)
         exitAI(EXIT_FAILURE);
 
+#ifdef SYNC_PROP_IA
     if((ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 50)) < 0){
         logs << ERR << "FAILED SYNC: " << getErrorStr(-ret) << "(#" << -ret << ")\n";
         exitAI(EXIT_FAILURE);
     }
+#endif
+#ifdef SYNC_TURRET
+    sMsg queryMsg;
+    queryMsg.header.destAddr = ADDRI_MAIN_TURRET;
+    queryMsg.header.type = E_SYNC_QUERY;
+    // beacons
+    queryMsg.payload.syncQuery.cfgs[0].type = SYNCTYPE_BEACONS;
+    // main AI
+    queryMsg.payload.syncQuery.cfgs[1].type = SYNCTYPE_ROLE;
+    queryMsg.payload.syncQuery.cfgs[1].role = ROLE_PRIM_AI;
+    // prop
+    queryMsg.payload.syncQuery.cfgs[2].type = SYNCTYPE_ROLE;
+    queryMsg.payload.syncQuery.cfgs[2].role = ROLE_PRIM_PROPULSION;
+    // arduino IO
+    queryMsg.payload.syncQuery.cfgs[3].type = SYNCTYPE_ADDRESS;
+    queryMsg.payload.syncQuery.cfgs[3].addr = ADDRI_MAIN_IO;
+    // set sizes
+    queryMsg.payload.syncQuery.nb = 4;
+    queryMsg.header.size = queryMsg.payload.syncQuery.nb * sizeof(queryMsg.payload.syncQuery.cfgs[0]);
+    while (bn_sendAck(&queryMsg)<0);
+#endif
+
 
     sendPing();
 
