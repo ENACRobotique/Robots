@@ -8,30 +8,43 @@
 #ifndef AI_SERVO_H_
 #define AI_SERVO_H_
 
-#define MAX_RETRIES_SERVO 1
+#define MAX_RETRIES_SERVO 5
 
+#include <map>
 extern "C"{
 #include "messages-interactions.h"
 }
 
-typedef struct {
-       // eServos id;
-        uint16_t u1;      //min servo in millisecond
-        uint16_t a1;      //min servo in radian
-        uint16_t u2;
-        uint16_t a2;
-} sServo_t;
+typedef enum {
+    ELEVATOR_LOW_TOP1,
+    ELEVATOR_LOCK1,
+    ELEVATOR_LOW_TOP2,
+    ELEVATOR_LOCK2,
+}servoName;
+
+typedef struct{
+    uint8_t club_id;    // identifier of the servomotor (club number)
+    uint8_t hw_id;      // plug number (on the card 0-15)
+} servoId;
+
+
 
 
 class Servo {
     public:
-        Servo();
-        ~Servo();
+        Servo(){
+            tabServo.insert(std::make_pair(ELEVATOR_LOW_TOP1, servoId{0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_LOCK1   , servoId{0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_LOW_TOP1, servoId{0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_LOCK2   , servoId{0, 0}));
+        }
+        ~Servo(){};
 
-       // int sendPosServo(eServos s, float angle /* deg */);
+        int sendPosServo(const servoName name, const float angle /* rad */);
 
     private:
-        sServo_t _servo;
+        std::map<servoName, servoId> tabServo;
+
 };
 
 #endif /* AI_SERVO_H_ */
