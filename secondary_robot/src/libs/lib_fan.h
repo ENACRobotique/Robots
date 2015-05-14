@@ -9,7 +9,6 @@
 #define LIB_FAN_H_
 
 #include "Arduino.h"
-#include "../params.h"
 
 void fanInitHard(int pinFan);
 void fanSetCon(int fanSpeed);

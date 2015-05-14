@@ -11,10 +11,9 @@
 #include "state_traj.h"
 #include "lib_radar.h"
 #include "lib_line.h"
-#include "../params.h"
-#include "../tools.h"
-#include "state_ALACON.h"
-#include "state_stairs.h"
+#include "params.h"
+#include "tools.h"
+
 #include "lib_move.h"
 #include "sharp_2d120x.h"
 
@@ -27,15 +26,11 @@
 sState* testTirette()
 	{
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
-    static unsigned long timepull=0;
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
     	{
-    		if(timepull==0){timepull = millis();}
-			if(millis() - timepull > TIME_BEFORE_START){
-				if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenInit;
-				else /*return &sAlacon*/return &sTrajYellowInit;
-			}
+        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajRed;
+        else return &sTrajYellow;
     	}
     return 0;
 	}
@@ -43,6 +38,7 @@ sState* testTirette()
 void initTirette(sState *prev)
 	{
     move(0,0);
+
 #ifdef DEBUG
     Serial.println("j'entre en tirette");
 #endif
@@ -60,7 +56,7 @@ void deinitTirette(sState *next)
 	}
 
 sState sTirette={
-        BIT(E_MOTOR)|BIT(E_RADAR),
+        BIT(E_MOTOR),
         &initTirette,
         &deinitTirette,
         &testTirette

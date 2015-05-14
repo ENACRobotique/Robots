@@ -1,27 +1,20 @@
 #include "state_hardinit.h"
 
 #include "state_types.h"
-#include "../params.h"
+#include "params.h"
 #include "Arduino.h"
 #include "Wire.h"
 
-#include "state_dead.h"
-#include "state_stairs.h"
-#include "state_ALACON.h"
-#include "state_traj.h"
-#include "state_Manualdrive.h"
 #include "state_tirette.h"
 
-#include "../libs/lib_attitude.h"
-#include "../libs/MPU_6050.h"
-#include "../libs/lib_move.h"
-#include "../libs/lib_motor.h"
-#include "../libs/lib_radar.h"
-#include "../libs/lib_fan.h"
+
+#include "lib_move.h"
+#include "lib_motor.h"
+#include "lib_radar.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
-	return &sTirette;
+    return &sTirette;
 }
 void initHard(sState *prev){
 
@@ -29,29 +22,34 @@ void initHard(sState *prev){
     Serial.println("debut init matérielles");
 #endif
     //movements
+    //movements
     int pin_motors_dir[NB_MOTORS];
     int pin_motors_pwm[NB_MOTORS];
     pin_motors_dir[0]=PIN_MOTOR1_DIR;
     pin_motors_pwm[0]=PIN_MOTOR1_PWM;
-    pin_motors_dir[1]=PIN_MOTOR2_DIR;
-    pin_motors_pwm[1]=PIN_MOTOR2_PWM;
     motorInitHard(pin_motors_dir,pin_motors_pwm);
-    int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT,PIN_ODO2_INT};
-    int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN,PIN_ODO2_SEN};
+    int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT};
+    int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN};
     odoInitHard(pin_odo_int,pin_odo_sen);
 
     //radar
     Wire.begin();
-    servoInitHard(PIN_SERVO_ATTITUDE);
-#ifdef ATTITUDE
-    delay(1000); // waiting for servo to reach its initial position an to stand still
-    initInertial();
-#endif
+
     //line following/detector
     //Wire.begin(); already done
-    //fan
-    fanInitHard(PIN_VENTILO);
-    initHardStairs(PIN_SERVO_CARPET);
+
+    //launcher
+    pinMode(PIN_LAUNCHER_1,OUTPUT);
+    pinMode(PIN_LAUNCHER_2,OUTPUT);
+    pinMode(PIN_LAUNCHER_NET,OUTPUT);
+    launcherServoUp.attach(PIN_LAUNCHER_1);
+    launcherServoDown.attach(PIN_LAUNCHER_2);
+    launcherServoNet.attach(PIN_LAUNCHER_NET);
+
+
+
+    //wall
+    wallInitHard(PIN_SHARP_FRONT_RIGHT ,PIN_SHARP_BACK_RIGHT,PIN_SHARP_FRONT_LEFT  ,PIN_SHARP_BACK_LEFT);
 
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);
@@ -59,6 +57,9 @@ void initHard(sState *prev){
     //"color" (start side) button
     pinMode(PIN_COLOR,INPUT_PULLUP);
 
+    //led pin
+    pinMode( PIN_LED , OUTPUT);
+    digitalWrite(PIN_LED,LOW);
 
 #ifdef DEBUG
     Serial.println("fin init matérielles");

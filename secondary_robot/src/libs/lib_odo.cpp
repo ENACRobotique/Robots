@@ -4,7 +4,7 @@
 
 
 #include "lib_odo.h"
-#include "../params.h"
+#include "params.h"
 
 #if NB_MOTORS > 2
 #error "Too many motors. You have 2 interruptions pin on arduino UNO"
