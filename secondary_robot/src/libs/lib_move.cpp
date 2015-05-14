@@ -7,6 +7,7 @@
 #include "Arduino.h"
 #include "Servo.h"
 #include "lib_move.h"
+#include "lib_motor.h"
 #include "lib_heading.h"
 
 #if defined(TANK) && defined(TRIKE)
@@ -48,5 +49,11 @@ void move(int speed,int omega){
 #endif
 }
 
+void emergencyStop(){
+	move(0,0);
+	for(int i=0;i<NB_MOTORS;i++){
+		analogWrite(_motPinPWM[i], 0);
+	}
+}
 
 
