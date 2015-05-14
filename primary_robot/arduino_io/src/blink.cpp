@@ -8,24 +8,39 @@
 
 #include <Arduino.h>
 #include <messages.h>
+#include <Adafruit_PWMServoDriver.h>
+#include <Wire.h>
 //#include "network_cfg.h"
 
 #include "../../../static/communication/network_tools/bn_debug.h"
 #include "../../../static/communication/botNet/shared/botNet_core.h"
 #include "../../../static/communication/botNet/shared/message_header.h"
-#include "../../../static/core/arduino/libraries/Servo/Servo.h"
+extern "C" {
+#include "roles.h"
+}
 
 typedef struct {
-        Servo fd;
         eServos id;
-        int pin;
+        int pca_id;
+        float a; //director coeff. for degrees to us conversion (associated to each physical servo)   us = a * deg + b
+        float b; //additive coeff.
 } sServoData;
 sServoData servosTable[] = {
-        {Servo(), SERVO_PRIM_DOOR, 10},     //5
-        {Servo(), SERVO_PRIM_FIRE1, 8},     //3
-        {Servo(), SERVO_PRIM_FIRE2, 9},     //4
-        {Servo(), SERVO_PRIM_ARM_LEFT, 6},  //1
-        {Servo(), SERVO_PRIM_ARM_RIGHT, 7}, //2
+        {SERVO_PRIM_GLASS1_HOLD,     0, 10, 520},
+        {SERVO_PRIM_GLASS1_RAISE,    1, 10, 520},
+        {SERVO_PRIM_GLASS2_HOLD,     2, 10, 520},
+        {SERVO_PRIM_GLASS2_RAISE,    3, 10, 520},
+        {SERVO_PRIM_GLASS3_HOLD,     4, 10, 520},
+        {SERVO_PRIM_GLASS3_RAISE,    5, 10, 520},
+        {SERVO_PRIM_LIFT1_UP,        6, 10, 520},
+        {SERVO_PRIM_LIFT1_DOOR,      7, 10, 520},
+        {SERVO_PRIM_LIFT1_HOLD,      8, 10, 520},
+        {SERVO_PRIM_LIFT2_UP,        9, 10, 520},
+        {SERVO_PRIM_LIFT2_DOOR,     10, 10, 520},
+        {SERVO_PRIM_LIFT2_HOLD,     11, 10, 520},
+        {SERVO_PRIM_CORN1_RAMP,     12, 10, 520},
+        {SERVO_PRIM_CORN2_RAMP,     13, 10, 520},
+        {SERVO_PRIM_CORN_DOOR,      14, 10, 520}
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
@@ -37,39 +52,45 @@ sServoData servosTable[] = {
 #define PIN_LIMIT_SWITCH_RIGHT (A2)
 #define PIN_LIMIT_SWITCH_LEFT (A3)
 
+Adafruit_PWMServoDriver pwm(0x40);
+
+#define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
+#define SERVO_FREQ 50. //the servo command frequency (Hz)
+
 void fctModeSwitch(void);
 void fctStartingCord(void);
 
 
 void setup(){
-    int i;
-
-    pinMode(PIN_DBG_LED, OUTPUT);
-    pinMode(PIN_LED_1, OUTPUT);
-    pinMode(PIN_LED_2, OUTPUT);
-    pinMode(PIN_LIMIT_SWITCH_RIGHT, INPUT);
-    pinMode(PIN_LIMIT_SWITCH_LEFT, INPUT);
-
     attachInterrupt(0, fctStartingCord, CHANGE);
     attachInterrupt(1, fctModeSwitch, CHANGE);
 
+    pinMode(PIN_LED_1, OUTPUT);
+    pinMode(PIN_LED_2, OUTPUT);
+    pinMode(PIN_DBG_LED, OUTPUT);
+
     //init led
-    digitalWrite(PIN_LED_1, LOW);
+    digitalWrite(PIN_LED_1, HIGH);
     digitalWrite(PIN_LED_2, LOW);
 
     bn_init();
 
-    bn_printDbg("start arduino_bn_template");
+    // do not call init because I²C has already been initialized in bn_init
+    // be sure to call reset and setPWMFreq after bn_init...
+    pwm.reset();
+    pwm.setPWMFreq(SERVO_FREQ);  // 50Hz
 
-    for(i = 0; i < (int)NUM_SERVOS; i++){
-        servosTable[i].fd.attach(servosTable[i].pin);
-    }
+    bn_printDbg("start arduino_io");
 }
 
+
 sMsg inMsg, outMsg;
-int ledState = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwicth = 0, StartingCord = 0, Led = 0;
+int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwicth = 0, StartingCord = 0, Led = 0;
 int prevLimitSwitchRight = 0, limitSwitchRight = 0, prevLimitSwitchLeft = 0, limitSwitchLeft = 0;
 unsigned long led_prevT = 0, time, timeModeSwitch, timeStartingCord, timeLimitSwitchRight, timeLimitSwitchLeft;
+
+int degreesTo4096th(float degrees, float a, float b);
 
 void loop(){
     int ret;
@@ -81,7 +102,8 @@ void loop(){
             for(i = 0; i < (int)inMsg.payload.servos.nb_servos; i++){
                 for(j = 0; j < (int)NUM_SERVOS; j++){
                     if(servosTable[j].id == inMsg.payload.servos.servos[i].id){
-                        servosTable[j].fd.writeMicroseconds(inMsg.payload.servos.servos[i].us);
+                        int servoCmd = degreesTo4096th(inMsg.payload.servos.servos[i].angle, servosTable[j].a, servosTable[j].b);
+                        pwm.setPWM(servosTable[j].pca_id, 0, servoCmd);
                     }
                 }
             }
@@ -132,7 +154,6 @@ void loop(){
                     default:
                         break;
                     }
-
                 }
             }
             break;
@@ -141,7 +162,7 @@ void loop(){
         }
     }
 
-    if(time - led_prevT > 200){
+    if (time - led_prevT > 200u) {
         led_prevT = time;
 
         digitalWrite(PIN_DBG_LED, ledState^=1);
@@ -150,7 +171,7 @@ void loop(){
     if( (time -  timeStartingCord > 20) && flagStartingCord){
         StartingCord = digitalRead(PIN_STARTING_CORD);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_AI);
+        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         outMsg.header.type = E_IHM_STATUS;
         outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         outMsg.payload.ihmStatus.nb_states = 1;
@@ -164,8 +185,10 @@ void loop(){
 
     if( (time -  timeModeSwitch > 20) && flagModeSwitch){
         ModeSwicth = digitalRead(PIN_MODE_SWICTH);
+        digitalWrite(PIN_LED_1, ledState1^=1);
+        digitalWrite(PIN_LED_2, !ledState1);
 
-        outMsg.header.destAddr = role_get_addr(ROLE_AI);
+        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         outMsg.header.type = E_IHM_STATUS;
         outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
         outMsg.payload.ihmStatus.nb_states = 1;
@@ -182,7 +205,7 @@ void loop(){
         if(limitSwitchRight != prevLimitSwitchRight){
             prevLimitSwitchRight = limitSwitchRight;
 
-            outMsg.header.destAddr = role_get_addr(ROLE_AI);
+            outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
             outMsg.header.type = E_IHM_STATUS;
             outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
             outMsg.payload.ihmStatus.nb_states = 1;
@@ -198,7 +221,7 @@ void loop(){
         if(limitSwitchLeft != prevLimitSwitchLeft){
             prevLimitSwitchLeft = limitSwitchLeft;
 
-            outMsg.header.destAddr = role_get_addr(ROLE_AI);
+            outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
             outMsg.header.type = E_IHM_STATUS;
             outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
             outMsg.payload.ihmStatus.nb_states = 1;
@@ -217,4 +240,10 @@ void fctModeSwitch(void){
 void fctStartingCord(void){
     timeStartingCord = millis();
     flagStartingCord = 1;
+}
+
+int degreesTo4096th(float degrees, float a, float b){
+    float fCmdOutOf4096 = SERVO_FREQ*4096.*(a*degrees + b)/1000000.;
+    unsigned int cmdOutOf4096 (fCmdOutOf4096+0.5);
+    return cmdOutOf4096;
 }

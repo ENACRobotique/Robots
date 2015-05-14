@@ -8,42 +8,71 @@
 #ifndef OBJ_OBJ_H_
 #define OBJ_OBJ_H_
 
-#include <ai_types.h>
+#include <ai_tools.h>
 #include "types.h"
 #include <vector>
+#include "GeometryTools.h"
+#include "a_star.h"
+#include "obj.h"
+
+//#define DEBUG_OBJ
 
 using namespace std;
+
+typedef enum{
+    SPOT,
+    CLAP,
+    POP_CORN
+}objective;
+
+typedef enum {
+    E_NULL, E_CLAP, E_SPOT, E_CUP, E_DROP_CUP
+} eObj_t;
+
+typedef enum {
+    ANY, CUP, ELEVATOR, POP_CORN_LOADER
+}ActuatorType;
+
+typedef struct {
+        ActuatorType type;
+        int id;         //id by type of actuator
+        bool full;      //true if full
+        float angle;
+
+        struct{
+            unsigned int number;
+            bool ball;
+        }elevator;
+
+        struct{
+            bool distributor; //true if the cup was fill by a distributor
+        }cupActuator;
+
+} Actuator;
 
 typedef enum {E_POINT, E_CIRCLE, E_SEGMENT}eTypeEntry_t;
 
 typedef struct {
     eTypeEntry_t type;      //type of access
-
-#if NON_HOLONOMIC
     float radius;           //size of the 3 approach circles
-#endif
 
-    union{
-        struct{
-            sPt_t p;        //point
-            float angle;    //approach angle between 0 and 2 M_PI
-        }pt;
 
-        struct{
-            sPt_t c;        //enter of the circle
-            float r;        //radius of the circle
-        }cir;
+    struct{
+        Point2D<float> p;        //point
+        float angle;    //approach angle between 0 and 2 M_PI
+    }pt;
 
-        struct{
-            sSeg_t s;       //segment
-            bool dir;       //true if (p1;p2)^(p1;probot) > 0
-        }seg;
-    };
+    struct{
+            Point2D<float> c;        //enter of the circle
+        float r;        //radius of the circle
+    }cir;
+
+    struct{
+        Segment2D<float> s;       //segment
+        bool dir;       //true if (p1;p2)^(p1;probot) > 0
+    }seg;
+
 } sObjEntry_t;
-
-typedef enum {
-    E_NULL, E_CLAP, E_SPOT
-} eObj_t;
 
 typedef enum {
     ACTIVE, WAIT_MES, NO_TIME, FINISH
@@ -52,40 +81,91 @@ typedef enum {
 class Obj {
     public:
         Obj();
-        Obj(eObj_t type);
-        Obj(eObj_t type, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint);
+        Obj(eObj_t type, ActuatorType typeAct, bool get);
+        Obj(eObj_t type, ActuatorType _typeAct, bool get, vector<unsigned int> &numObs, vector<sObjEntry_t> &entryPoint);
         virtual ~Obj();
 
-        virtual void initObj(){};
-        virtual int loopObj(){return -1;};
+        virtual void initObj(Point2D<float> , vector<astar::sObs_t>&, vector<Obj*>&) = 0;
+        virtual int loopObj(std::vector<astar::sObs_t>&, std::vector<uint8_t>&, vector<Obj*>&, std::vector<Actuator>&) = 0;
         virtual eObj_t type() const {return E_NULL;} ;
         virtual float gain(){return _dist;};
 
         void addAccess(sObjEntry_t &access);
 
-        sNum_t update(sPt_t posRobot);
+        float update(const bool axle,  std::vector<astar::sObs_t>& obs, const int robot);
+        int updateDestPointOrient(const vector<Actuator>& act);
+
 
         float getDist() const;
         sPath_t getPath() const;
-        sPt_t getDestPoint() const;
+        Point2D<float> getDestPoint() const;
         float getDestPointOrient() const;
         eStateObj_t getState() const;
-        sNum_t getYield();
-
-        void print() const;
+        float getYield(const unsigned int start_time);
+        vector<unsigned int> getNumObs(){
+            return _num_obs;
+        }
+        void print();
 
     protected:
+        string objAccess(eTypeEntry_t access){
+            switch(access){
+                case E_POINT:
+                    return "POINT";
+                case E_CIRCLE:
+                    return "CIRCLE";
+                case E_SEGMENT:
+                    return "SEGMENT";
+                default:
+                    return "Unknown type of access point";
+            }
+        }
+
+        string objType(){
+            switch(_type){
+                case E_CLAP:
+                    return "CLAP";
+                case E_SPOT:
+                    return "SPOT";
+                case E_CUP:
+                    return "CUP ";
+                default:
+                    return "Undefined";
+            }
+        }
+
+        string objState(){
+            switch(_state){
+                case  ACTIVE:
+                    return "activated";
+                case WAIT_MES:
+                    return "waiting a message";
+                case NO_TIME:
+                    return "no time to go to the goal";
+                case FINISH:
+                    return "finished";
+                default:
+                    return "Unknown state !!!";
+            }
+        }
+
         eObj_t _type;                       //objective type
+        ActuatorType _typeAct;
+        bool _get;                          //get or free object
         int _point;                         //point number of the objective
         eStateObj_t _state;                 //if the objective is used or not
-        sPt_t _access_select;               //the closest access select
+        Point2D<float> _access_select;      //the closest access select
         float _access_select_angle;         //angle of the access select
-        sNum_t _dist;                       //distance robot-objective (the closest access)
-        sNum_t _time;                       //time robot-objective (the closest access) TODO no compute for the moment
+        int _actuator_select;               //id of the actuator selected for this objective (link with the type of objective)
+        float _dist;                        //distance robot-objective (the closest access)
+        float _time;                        //time robot-objective (the closest access) TODO no compute for the moment
         sPath_t _path;                      //path robot-objective (the closest access)
-        sNum_t _done;                       //probability than the objective has already been completed by another robot
+        float _done;                        //probability than the objective has already been completed by another robot
         vector<unsigned int> _num_obs;      //obstacle number associate to the objective need to deactivate
+    public:
         vector<sObjEntry_t> _access;        //list of access to reach the objective
+        vector<sObjEntry_t>& access() { return _access; }        //list of access to reach the objective
+        eStateObj_t& state() { return _state; }
 };
 
 #endif /* OBJ_OBJ_H_ */

@@ -11,7 +11,7 @@
 
 extern "C"{
 #include <stdio.h>
-
+#include "global_errors.h"
 #include "millis.h"
 #include "messages.h"
 #include "roles.h"
@@ -23,7 +23,7 @@ extern "C"{
 
 #include <a_star_tools.h>
 #include <tools.h>
-#include "ai_types.h"
+#include "ai_tools.h"
 
 
 /*
@@ -32,8 +32,8 @@ extern "C"{
  * If the interface is critical a new ping is send in loop and a message error is print.
  */
 void sendPing(){
-    int state = 0, ret ;
 /*
+    int state = 0, ret ;
     while(1){
         switch(state){
             //Minimum necessary
@@ -96,10 +96,69 @@ void sendPing(){
         }*/
 }
 
+
+int roleSetup(bool simu_ai, bool simu_prop){
+    int ret;
+    sMsg msg;
+
+    if(simu_prop){
+        role_set_addr(ROLE_PRIM_PROPULSION, ADDRD1_MAIN_PROP_SIMU);
+
+        msg.header.type = E_ROLE_SETUP;
+        msg.header.destAddr = role_get_addr(ROLE_MONITORING);
+        msg.payload.roleSetup.nb_steps = 1;
+        msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+        // step #0
+        msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+        msg.payload.roleSetup.steps[0].role = ROLE_PRIM_PROPULSION;
+        msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_PROP_SIMU;
+
+        ret = bn_sendAck(&msg);
+        if(ret < 0){
+            logs << ERR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return -1;
+        }
+    }
+
+    if(simu_ai){
+        msg.header.type = E_ROLE_SETUP;
+        msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
+        msg.payload.roleSetup.nb_steps = 1;
+        msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+        // step #0
+        msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+        msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+        msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+        ret = bn_sendAck(&msg);
+        if(ret < 0){
+            logs << ERR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return -1;
+        }
+
+        msg.header.type = E_ROLE_SETUP;
+        msg.header.destAddr = role_get_addr(ROLE_MONITORING);
+        msg.payload.roleSetup.nb_steps = 1;
+        msg.header.size = 2 + 4*msg.payload.roleSetup.nb_steps;
+        // step #0
+        msg.payload.roleSetup.steps[0].step_type = UPDATE_ADDRESS;
+        msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
+        msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
+
+        ret = bn_sendAck(&msg);
+        if(ret < 0){
+            logs << ERR << "FAILED ROLE SETUP 2: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 /*
  * Send the limit of the playground to monitoring
  */
-void sendObsCfg(){
+void sendObsCfg(const int n, const int rRobot, const int xMin, const int xMax, const int yMin, const int yMax){
     sMsg msgOut;
     int ret;
 
@@ -107,15 +166,15 @@ void sendObsCfg(){
     msgOut.header.type = E_OBS_CFG;
     msgOut.header.size = sizeof(msgOut.payload.obsCfg);
 
-    msgOut.payload.obsCfg.nb_obs = N;
-    msgOut.payload.obsCfg.r_robot = R_ROBOT;
-    msgOut.payload.obsCfg.x_min = X_MIN;
-    msgOut.payload.obsCfg.x_max = X_MAX;
-    msgOut.payload.obsCfg.y_min = Y_MIN;
-    msgOut.payload.obsCfg.y_max = Y_MAX;
+    msgOut.payload.obsCfg.nb_obs = n;
+    msgOut.payload.obsCfg.r_robot = rRobot;
+    msgOut.payload.obsCfg.x_min = xMin;
+    msgOut.payload.obsCfg.x_max = xMax;
+    msgOut.payload.obsCfg.y_min = yMin;
+    msgOut.payload.obsCfg.y_max = yMax;
 
     if ( (ret = bn_send(&msgOut)) < 0) {
-        cerr << "[ERROR] [communications.cpp] bn_send(E_OBS_CFG) error #%i" << -ret << endl;
+        logs << ERR << "bn_send(E_OBS_CFG) error #%i" << -ret;
         return;
     }
 
@@ -125,11 +184,11 @@ void sendObsCfg(){
 /*
  * Send obs where obs_updated was modified to monitoring
  */
-void sendObss(){
+void sendObss(vector<astar::sObs_t>& obs, vector<uint8_t>& obs_updated){
     sMsg msgOut;
     static unsigned int prevSendObss;
     static int send_obss_idx = 0;
-    int i, ret;
+    int i, ret, N = obs.size();
 
     if (millis() - prevSendObss > 150){
         prevSendObss = millis();
@@ -164,7 +223,7 @@ void sendObss(){
                 send_obss_idx = 0;
 
             if ((ret = bn_send(&msgOut)) < 0) {
-                cerr << "[ERROR] [communication.cpp] bn_send(E_OBSS) error #%i" << -ret << endl;
+                logs << ERR << "bn_send(E_OBSS) error #%i" << -ret;
                 return;
             }
 
@@ -177,7 +236,7 @@ void sendObss(){
 /*
  * Send a new position imposed to the robot
  */
-int sendPos(sPt_t &p, sNum_t theta) {
+int sendPos(Point2D<float> &p, float theta) {
     sMsg msgOut ;
     int ret;
 
@@ -197,7 +256,7 @@ int sendPos(sPt_t &p, sNum_t theta) {
 
     //XXX Created an intern message generic status for update the position, and if message not pos not receive --> position problem !!!
 
-    if ((ret = role_sendRetry(&msgOut, MAX_RETRIES)) <= 0) {
+    if ((ret = role_sendRetry(&msgOut, ROLEMSG_PRIM_POS, MAX_RETRIES)) <= 0) {
         logs << ERR << "bn_sendRetry(E_POS) error #" << -ret;
         return -2;
     }
@@ -209,14 +268,14 @@ int sendPos(sPt_t &p, sNum_t theta) {
 /*
  * Send a new speed imposed to the robot
  */
-int sendSpeed(sNum_t speed) {
+int sendSpeed(float speed) {
     sMsg msgOut;
     int ret;
 
     if (fabs(speed) > MAX_SPEED)
         return -1;
 
-    msgOut.header.destAddr = role_get_addr(ROLE_PROPULSION);
+    msgOut.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
     msgOut.header.type = E_SPEED_SETPOINT;
     msgOut.header.size = sizeof(msgOut.payload.speedSetPoint);
 
@@ -236,6 +295,7 @@ int sendSpeed(sNum_t speed) {
  */
 void checkInbox(int verbose){
     sMsg msgIn;
+    Point2D<float> goal;
     int ret;
 
     if((ret = bn_receive(&msgIn)) < 0){ //get the message
@@ -246,7 +306,6 @@ void checkInbox(int verbose){
 
     if ((ret = role_relay(&msgIn)) < 0 ) { // relay the message
         cerr << "[ERROR] [communication.cpp] role_relay() error #" << -ret << endl;
-        return;
     }
 
     // print message
@@ -279,7 +338,6 @@ void checkInbox(int verbose){
         case E_GOAL:
             cout << "[GOAL] robot" << msgIn.payload.pos.id << "@(" << msgIn.payload.pos.x << ", " << msgIn.payload.pos.y << ", " << msgIn.payload.pos.theta * 180. / M_PI << ")" << endl;
 
-            sPt_t goal;
             goal.x = msgIn.payload.pos.x;
             goal.y = msgIn.payload.pos.y;
             lastGoal(goal, false);
@@ -287,7 +345,7 @@ void checkInbox(int verbose){
         case E_OBS_CFG:
             cout << "[OBS_CFS]" << endl;
 
-            sendObsCfg();
+            askObsCfg(false);
             break;
         case E_GENERIC_STATUS:
             if( verbose >= 2)
@@ -301,7 +359,7 @@ void checkInbox(int verbose){
             ihm.receivedNewIhm(msgIn.payload.ihmStatus);
             break;
         default:
-            cout << "[WARNING] message type not define or doesn't exist" << endl << endl;
+            cout << "[WARNING] message type not define or doesn't exist : " << eType2str((E_TYPE)msgIn.header.type) << endl;
     }
 }
 
@@ -310,8 +368,8 @@ void checkInbox(int verbose){
  * get == true -> get
  * get == false -> set
  */
-bool lastGoal(sPt_t &goal, bool get){
-    static sPt_t pt;
+bool lastGoal(Point2D<float>& goal, bool get){
+    static Point2D<float> pt;
     static bool new_goal = false;
 
     if(!get){
@@ -324,5 +382,20 @@ bool lastGoal(sPt_t &goal, bool get){
         new_goal = false;
         return true;
     }else
+        return false;
+}
+
+bool askObsCfg(bool get){
+    static bool ask = true; // True if monitoring want receive the congiguration of the playground
+
+    if(!get){
+        ask = true;
+        return true;
+    }
+    else if(ask){
+        ask = false;
+        return true;
+    }
+    else
         return false;
 }

@@ -8,16 +8,20 @@
 #ifndef OBJ_OBJ_TOOLS_H_
 #define OBJ_OBJ_TOOLS_H_
 
-#include <a_star_tools.h>
+#include <vector>
+
+#include "a_star.h"
+#include "obj.h"
+
 
 void loadingPath(sPath_t _path, int num = -1);
 int checkCurrentPathLenght(sPath_t &path);
-void updateEndTraj(sNum_t theta, sPt_t *pt, sNum_t r);
-void updateNoHaftTurn(sNum_t theta, sPt_t *pt);
-void set_traj(sPath_t *p, iABObs_t l[], int nb);
+void updateEndTraj(float theta, Point2D<float> *pt, float r, vector<astar::sObs_t>& obs);
+void updateNoHaftTurn(float theta, Point2D<float>& pt, vector<astar::sObs_t>& obs);
+void set_traj(sPath_t *p, astar::iABObs_t l[], int nb);
 
-int next_obj(void);
-int metObj(int numObj);
+int nextObj(const unsigned int start_time, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated, const int robot, const bool axle, const vector<Actuator>& act) ;
+int metObj(int numObj, vector<Obj*>& listObj, std::vector<astar::sObs_t>& obs, std::vector<uint8_t>& obs_updated, std::vector<Actuator>& act);
 
 
 #endif /* OBJ_OBJ_TOOLS_H_ */

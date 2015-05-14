@@ -1,12 +1,9 @@
 #ifndef _MATH_OPS_H
 #define _MATH_OPS_H
 
-extern "C"{
 #include <stdio.h>
+
 #include "error.h"
-}
-
-
 #include "math_types.h"
 
 ERROR normVec(const sVec_t *v, sNum_t *n);

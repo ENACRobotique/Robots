@@ -28,7 +28,7 @@ class Servo {
         Servo();
         ~Servo();
 
-        int sendPosServo(eServos s, int16_t us, int16_t a);
+        int sendPosServo(eServos s, float angle /* deg */);
 
     private:
         sServo_t _servo;

@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include "messages-elements.h"
 #include "messages-position.h"
+#include <shared/message_header.h>
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
@@ -84,5 +85,42 @@ typedef struct __attribute__((packed)){
         uint8_t id; // index in the tab of obstacles
     } obs[];
 } sObss;
+
+typedef enum{
+    SYNCTYPE_BEACONS,
+    SYNCTYPE_ADDRESS,
+    SYNCTYPE_ROLE
+}eSyncType;
+
+typedef struct __attribute__((packed)){
+    uint8_t nb; // must be <= 18
+    struct __attribute__((packed)){ // 3bytes
+        eSyncType type :8;
+        union{
+            bn_Address addr;
+            uint8_t role;
+        };
+    } cfgs[];
+} sSyncQuery;
+
+typedef enum{
+    SYNCSTATUS_KO,
+    SYNCSTATUS_ROLE_KO,
+    SYNCSTATUS_PING_KO,
+    SYNCSTATUS_SYNC_KO,
+    SYNCSTATUS_OK,
+}eSyncStatus;
+
+typedef struct __attribute__((packed)){
+    uint8_t nb; // must be <= 18
+    struct __attribute__((packed)){ // 3bytes
+        eSyncType type :8;
+        union{
+            bn_Address addr;
+            uint8_t role;
+        };
+        eSyncStatus status;
+    } cfgs[];
+} sSyncResponse;
 
 #endif /* LIB_NETWORK_CONFIG_MESSAGES_STATUSES_H_ */

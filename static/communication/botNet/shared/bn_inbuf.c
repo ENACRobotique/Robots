@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "message_header.h"
+#include "node_cfg.h"
 
 #include "global_errors.h"
 
@@ -23,7 +24,7 @@
 //incoming message buffer, indexes to parse it and total number of messages.
 //Warning : central buffer where most of the incoming messages will be stacked
 //Policy : drop oldest (except when there is an ack, the ack has always priority)
-sMsgIf msgIfBuf[BN_INC_MSG_BUF_SIZE]={{{{0}}}}; // DAT buffer.
+sMsgIf msgIfBuf[BN_INC_MSG_BUF_SIZE]; // DAT buffer.
 int iFirst=0,iNext=0;   // index of the first (oldest) message written in the buffer and index of where the next message will be written
 int nbMsg=0;            // nb of message available in msgBuf (enables to distinguish the case iFirst==iNext when the buffer is full form the case iFirst==iNext when the buffer is empty)
 

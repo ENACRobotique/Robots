@@ -8,6 +8,8 @@
 #ifndef LIB_GEOMETRYTOOLS_POLYGON2D_H_
 #define LIB_GEOMETRYTOOLS_POLYGON2D_H_
 
+#include <vector>
+
 template<typename T>
 class Point2D;
 

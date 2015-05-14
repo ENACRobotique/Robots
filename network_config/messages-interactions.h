@@ -11,20 +11,32 @@
 #include <stdint.h>
 
 typedef enum{
-    SERVO_PRIM_DOOR,
-    SERVO_PRIM_FIRE1,
-    SERVO_PRIM_FIRE2,
-    SERVO_PRIM_ARM_LEFT,
-    SERVO_PRIM_ARM_RIGHT,
+    SERVO_PRIM_GLASS1_HOLD,
+    SERVO_PRIM_GLASS1_RAISE,
+    SERVO_PRIM_GLASS2_HOLD,
+    SERVO_PRIM_GLASS2_RAISE,
+    SERVO_PRIM_GLASS3_HOLD,
+    SERVO_PRIM_GLASS3_RAISE,
+
+    SERVO_PRIM_LIFT1_UP,
+    SERVO_PRIM_LIFT1_DOOR,
+    SERVO_PRIM_LIFT1_HOLD,
+    SERVO_PRIM_LIFT2_UP,
+    SERVO_PRIM_LIFT2_DOOR,
+    SERVO_PRIM_LIFT2_HOLD,
+
+    SERVO_PRIM_CORN1_RAMP,
+    SERVO_PRIM_CORN2_RAMP,
+    SERVO_PRIM_CORN_DOOR,
 
     NUM_E_SERVO
 } eServos;
 
 typedef struct __attribute__((packed)){
-    uint16_t nb_servos; // must be <=18
-    struct __attribute__((packed)){
+    uint16_t nb_servos; // must be <=10
+    struct __attribute__((packed)){ // 5 bytes
             eServos id :8; // identifier of the servomotor
-            uint16_t us; // servo setpoint in µs
+            float angle; // servo setpoint in degrees (0-*)
     } servos[];
 } sServos;
 
@@ -36,11 +48,34 @@ typedef enum{
     IHM_LIMIT_SWITCH_LEFT
 } eIhmElement;
 
+typedef enum {
+    CORD_IN,
+    CORD_OUT
+} eIhmCord;
+
+typedef enum {
+    SWITCH_ON,
+    SWITCH_OFF,
+    SWITCH_INTER
+} eIhmSwitch;
+
+typedef enum {
+    LED_OFF,
+    LED_RED,
+    LED_YELLOW,
+    LED_GREEN
+}eIhmLed;
+
 typedef struct __attribute__((packed)){
     uint16_t nb_states; // must be <=18
     struct __attribute__((packed)){
         eIhmElement id :8; // identifier of the ihm element
-        uint16_t state; // status
+        union{
+            uint16_t state; // generic status
+            eIhmCord state_cord :8;
+            eIhmSwitch state_switch :8;
+            eIhmLed sate_led :8;
+        };
     } states[];
 } sIhmStatus;
 

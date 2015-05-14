@@ -1,20 +1,21 @@
-#include <a_star_tools.h>
 #include "a_star.h"
 
+#include "a_star_tools.h"
 #include "math_ops.h"
 
-extern "C"{
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 
 #ifdef AS_STATS
+extern "C"{
 #include "millis.h"
-#endif
 }
+#endif
 
+using namespace astar;
 
 void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {
-    int i, j;
+    int i, j, N = obs.size();
     iABObs_t tmp;
     sNum_t tmp_g_score, s_l;
     sSeg_t *seg;
@@ -90,13 +91,13 @@ void a_star(iABObs_t _start, iABObs_t _goal, sPath_t *path) {
 
                 // segment section
                 seg = tgt(current.o1, current.o2);
-                path->path[i].p1 = seg->p1;
-                path->path[i].p2 = seg->p2;
+                path->path[i].p1 = {seg->p1.x, seg->p1.y};
+                path->path[i].p2 = {seg->p2.x, seg->p2.y};
                 distPt2Pt(&seg->p1, &seg->p2, &path->path[i].seg_len);
                 // arc section
                 path->path[i].obs = obs[O(current.o2)];
                 path->path[i].obs.r = fabs(path->path[i].obs.r) * (1 - 2 * DIR(current.o2)); // r>0 CW/A ; r<0 CCW/B
-                if (i == path->path_len - 1) {
+                if ((unsigned)i + 1 == path->path_len) {
                     path->path[i].arc_len = 0.;
                 }
                 if (i > 0) {

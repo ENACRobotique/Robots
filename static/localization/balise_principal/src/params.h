@@ -51,6 +51,7 @@ typedef struct{
 // fixme : we can not determine yet if the rotation is clockwise or anticlockwise. The above value is valid only for clockwise
 
 #define PIN_RST_XBEE    5
+#define PIN_SYNC        7
 #define PIN_DBG_LED     13
 
 #define ROT_PERIOD_BCAST 500 //in ms
@@ -59,11 +60,16 @@ typedef struct{
 //#define DEBUG_SYNC
 //#define DEBUG_LOC
 //#define DEBUG_CALIBRATION
+//#define DEBUG_PRINT
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
 
+#define HARDUPDATEPERIOD  0    // 1/abs(delta) or O if disabled. delta is the first order drift between the turret and the considered beacon)
+#define HARDUPDATESIGN    0
 
-//#define DEBUG_PRINT
+#define SYNC_WIRED
+//#define SYNC_WIRELESS
+
 
 #endif /* PARAMS_H_ */

@@ -11,6 +11,10 @@
 #include <iostream>
 #include <cmath>
 
+#ifndef SIGN
+#define SIGN(x) ((x > 0) - (x < 0))
+#endif
+
 template<typename T>
 class Point2D;
 template<typename T>
@@ -69,15 +73,21 @@ class Circle2D {
 
             return p1, p2;
         }
-        Point2D<T> projecte(Point2D<T>& p) const{
-            Vector2D<T> v;
+        Point2D<T> projecte(const Point2D<T>& p) const{
+            Vector2D<T> v(c, p);
             Point2D<T> pt;
-            T n;
+            T n = v.norm();
 
-            v.convPts2Vec(c, p);
-            v.normVec(n);
             pt.x = c.x + v.x * r / n;
             pt.y = c.y + v.y * r / n;
+
+            return pt;
+        }
+        Point2D<T> projecteSup(const Point2D<T>& p, T sup) const{
+            Point2D<T> pt = projecte(p);
+
+            pt.x += SIGN(pt.x - c.x)*sup;
+            pt.y += SIGN(pt.y - c.y)*sup;
 
             return pt;
         }

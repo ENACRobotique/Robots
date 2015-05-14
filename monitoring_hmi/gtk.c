@@ -20,6 +20,10 @@
 #include "context.h"
 #include "draw_list.h"
 
+#define SQR(v) ((long long)(v)*(v))
+#define SIGN(v) (((v)>0) - ((v)<0))
+#define CONV2TRAJ(a, b) ((double) a/(pow(2,b)))
+
 gint event_cb(GtkWidget *widget, GdkEvent *event, context_t *ctx) {
     GdkEventButton *bevent = (GdkEventButton *)event;
 
@@ -72,6 +76,8 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
     sMsg inMsg, outMsg = {{0}};
     int ret, i;
     uint8_t update_media = 0;
+    sTrajElRaw_t te;
+    sTrajOrientElRaw_t toe;
 
     ret = bn_receive(&inMsg);
     if(ret > 0){
@@ -104,7 +110,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             break;
         case E_OBSS:
             if(!nb_obss){
-                outMsg.header.destAddr = role_get_addr(ROLE_AI);
+                outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
                 outMsg.header.type = E_OBS_CFG;
                 outMsg.header.size = sizeof(outMsg.payload.obsCfg);
 
@@ -139,6 +145,33 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             update_media = 1;
             break;
+        case E_TRAJ_ORIENT_EL:
+            toe = inMsg.payload.trajOrientEl;
+
+            for(i = 0 ; i < 2 ; i++){
+                te.p1_x = CONV2TRAJ(toe.elts[i].p1_x, 6);
+                te.p1_y = CONV2TRAJ(toe.elts[i].p1_y, 6);
+                te.p2_x = CONV2TRAJ(toe.elts[i].p2_x, 6);
+                te.p2_y = CONV2TRAJ(toe.elts[i].p2_y, 6);
+
+                te.c_x = CONV2TRAJ(toe.elts[i].c_x, 6);
+                te.c_y = CONV2TRAJ(toe.elts[i].c_y, 6);
+                te.c_r = CONV2TRAJ(toe.elts[i].c_r, 5);
+
+                te.seg_len = CONV2TRAJ(toe.elts[i].seg_len, 5);
+                te.arc_len = CONV2TRAJ(toe.elts[i].arc_len, 5);
+
+                te.sid = toe.sid*2 + i;
+                te.tid = toe.tid;
+
+                tl_addTail(&ctx->trajlist, &te);
+
+                if(toe.elts[i].is_last_element) //end of trajectory
+                    break;
+            }
+            update_media = 1;
+
+            break;
         case E_TRAJ:
             tl_addTail(&ctx->trajlist, &inMsg.payload.traj);
 
@@ -166,7 +199,7 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
 
             // send trajectory if event
             if(ctx->mouse_event){
-                outMsg.header.destAddr = role_get_addr(ROLE_AI);
+                outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
                 outMsg.header.type = E_GOAL;
                 outMsg.header.size = sizeof(outMsg.payload.pos);
 
@@ -558,7 +591,7 @@ int main(int argc, char *argv[]) {
 //        }
 
 // ask obstacles
-        outMsg.header.destAddr = role_get_addr(ROLE_AI);
+        outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         outMsg.header.type = E_OBS_CFG;
         outMsg.header.size = sizeof(outMsg.payload.obsCfg);
 

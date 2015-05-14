@@ -12,7 +12,7 @@
 #include <array>
 
 #include "messages-statuses.h"
-#include "math_types.h"
+#include "GeometryTools.h"
 
 using namespace std;
 
@@ -36,13 +36,12 @@ class Statuses {
         sGenericStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);
 
         //Simple function define in the FRAME_PLAYGROUND
-        sPt_t getLastPosXY(eElement el);
+        Point2D<float> getLastPosXY(eElement el);
         float getLastOrient(eElement el);
         float getLastSpeed(eElement el);
 
     private:
         void fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *srcPAPG, s2DPAUncert *srcUPG, s2DPosAtt *dstPAPG, s2DPAUncert *dstUPG);
-        void posUpdated(sGenericStatus &status);
 
         array <deque <sGenericStatus>, NUM_E_ELEMENT> _list;
         array <statusConfig_t, NUM_E_ELEMENT> _config;

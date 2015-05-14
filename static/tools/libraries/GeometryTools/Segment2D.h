@@ -39,24 +39,24 @@ class Segment2D {
 
         Point2D<T> projecte(const Point2D<T>& p) const{ //projection on the segment or shortest extremity point
             Vector2D<T> p1p(p1, p), p1p2(p1, p2);
-            T t = (p1p * p1p2) / p1p2.norm();
+            T t = (p1p * p1p2) / length();
 
-            if (t < 0. || !lenght())
+            if (t < 0. || length() == 0)
                 return p1;
-            else if (t > lenght())
+            else if (t > length())
                 return p2;
 
             Line2D<T> l(p1, p2);
-            return l.projecte(p);
+            return l.project(p);
         }
         T squareDistance(const Point2D<T>& p) const{
-            return p.distance(projecte(p));
+            return p.distanceSqTo(projecte(p));
         }
         T distance(const Point2D<T>& p) const{
             return sqrt(squareDistance(p));
         }
-        T lenght() const{
-            return p1.distance(p2);
+        T length() const{
+            return p1.distanceTo(p2);
         }
 
         Point2D<T> p1;
