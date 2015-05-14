@@ -16,12 +16,16 @@ extern "C"{
 }
 
 #define ANGLE_ELEVATOR_LOCK1        90.
-#define ANGLE_ELEVATOR_LOCK2        90.
 #define ANGLE_ELEVATOR_UNLOCK1      0.
-#define ANGLE_ELEVATOR_UNLOCK2      0.
 #define ANGLE_ELEVATOR_UP1          90.
-#define ANGLE_ELEVATOR_UP2          90.
 #define ANGLE_ELEVATOR_DOWN1        0.
+#define ANGLE_ELEVATOR_OPEN1        90.
+#define ANGLE_ELEVATOR_MIDDLE1      45.
+#define ANGLE_ELEVATOR_CLOSE1       0.
+
+#define ANGLE_ELEVATOR_LOCK2        90.
+#define ANGLE_ELEVATOR_UNLOCK2      0.
+#define ANGLE_ELEVATOR_UP2          90.
 #define ANGLE_ELEVATOR_DOWN2        0.
 
 #define ANGLE_PINCE_LOCK1           90.
@@ -46,8 +50,10 @@ extern "C"{
 
 typedef enum {
     ELEVATOR_UP_DOWN1,
+    ELEVATOR_DOOR1,
     ELEVATOR_UNLOCK_LOCK1,
     ELEVATOR_UP_DOWN2,
+    ELEVATOR_DOOR2,
     ELEVATOR_UNLOCK_LOCK2,
     PINCE_UP_DOWN1,
     PINCE_UNLOCK_LOCK1,
@@ -93,6 +99,18 @@ class Servo {
         void downElevator(int num){
             sendPosServo(num==0?ELEVATOR_UP_DOWN1:ELEVATOR_UP_DOWN2,
                     num==0?ANGLE_ELEVATOR_DOWN1:ANGLE_ELEVATOR_DOWN2);
+        }
+        void openDoorElevator(int num){
+            if(num == 0)
+                sendPosServo(ELEVATOR_DOOR1, ANGLE_ELEVATOR_OPEN1);
+        }
+        void middleDoorElevator(int num){
+            if(num == 0)
+                sendPosServo(ELEVATOR_DOOR1, ANGLE_ELEVATOR_MIDDLE1);
+        }
+        void closeDoorElevator(int num){
+            if(num == 0)
+                sendPosServo(ELEVATOR_DOOR1, ANGLE_ELEVATOR_CLOSE1);
         }
         void lockPince(int num){
             switch(num){

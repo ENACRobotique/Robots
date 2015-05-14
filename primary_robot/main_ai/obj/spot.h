@@ -17,10 +17,8 @@
 
 typedef enum {
     SPOT_TRAJ1,
-    SPOT_UNLOCK,
-    SPOT_DOWN,
-    SPOT_LOCK,
-    SPOT_UP,
+    SPOT_WAIT_TRAJ1,
+    SPOT_GET_STAND1,
     SPOT_END
 } stepSpot;
 

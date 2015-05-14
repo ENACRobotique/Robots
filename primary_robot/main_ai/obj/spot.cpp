@@ -12,6 +12,7 @@
 
 #include "types.h"
 #include "tools.h"
+#include "servoTools.h"
 
 extern "C"{
 #include "millis.h"
@@ -52,41 +53,22 @@ int Spot::loopObj(paramObj par){
         case SPOT_TRAJ1:
             {
                 Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 5);
-
                 destPoint = cir.project(par.posRobot);
-                logs << ERR << "destPoint" << destPoint << "obs" << par.obs[_num_obs[0]].c.x;
                 path.go2PointOrient(destPoint, par.obs, _access_select_angle);
-
-                stepLoc = SPOT_UNLOCK;
+                stepLoc = SPOT_WAIT_TRAJ1;
             }
             break;
 
-        case SPOT_UNLOCK:
-            logs << ERR << "SPOT_UNLOCK" << destPoint << "pos Robot" <<  par.posRobot;
+        case SPOT_WAIT_TRAJ1:
             if(par.posRobot.distanceTo(destPoint) < 1.){
-                servo.lockElevator(par.act[_actuator_select].id);
-                stepLoc = SPOT_DOWN;
-                timePrev = millis();
+                stepLoc = SPOT_GET_STAND1;
             }
             break;
 
-        case SPOT_DOWN:
-            if(millis() - timePrev > TIME_ELEVATOR_LOCK_UNCLOK){
-                servo.downElevator(par.act[_actuator_select].id);
-                stepLoc = SPOT_LOCK;
+        case SPOT_GET_STAND1:
+            if(getStand(par.act[_actuator_select].id)){
+                stepLoc = SPOT_END;
             }
-            break;
-
-        case SPOT_LOCK:
-            if(millis() - timePrev > TIME_ELEVATOR_DOWN_UP){
-                servo.lockElevator(par.act[_actuator_select].id);
-                stepLoc = SPOT_UP;
-            }
-            break;
-
-        case SPOT_UP:
-            servo.upElevator(par.act[_actuator_select].id);
-            stepLoc = SPOT_END;
             break;
 
         case SPOT_END:

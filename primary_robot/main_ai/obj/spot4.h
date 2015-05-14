@@ -11,6 +11,8 @@
 #include <types.h>
 #include "obj.h"
 #include "tools.h"
+#include "servoTools.h"
+
 
 #define START_STAND4 6 //number of the first stand element in obs[]
 
@@ -45,7 +47,7 @@ typedef enum {
 
 class Spot4 : public Obj{
     public:
-        Spot4(paramObj par) : Obj(E_SPOT2, ActuatorType::ELEVATOR, true), color(par.color),angleSelect(0), rotAngle(0), _state_loc(SPOT4_TRAJ1), actClap(0), timePrev(0){
+        Spot4(paramObj par) : Obj(E_SPOT2, ActuatorType::ELEVATOR, true), color(par.color),angleSelect(0), rotAngle(0), _state_loc(SPOT4_TRAJ1), actClap(0){
             sObjEntry_t objEP;
             Point2D<float> EP(DELTA_X, SPOT4_POINT_ENTRY);
 
@@ -93,17 +95,12 @@ class Spot4 : public Obj{
 
                 case SPOT4_WAIT_TRAJ1:
                     if(par.posRobot.distanceTo(destPoint) < 1.){
-                        servo.unlockElevator(_actuator_select);
-                        servo.downElevator(_actuator_select);
-                        timePrev = millis();
                         _state_loc = SPOT4_GET_STAND1;
                     }
                     break;
 
                 case SPOT4_GET_STAND1:
-                    if(millis() - timePrev > 500){
-                        servo.lockElevator(_actuator_select);
-                        servo.upElevator(_actuator_select);
+                    if(getStand(par.act[_actuator_select].id)){
                         _state_loc = SPOT4_ROT1;
                     }
                     break;
@@ -128,17 +125,12 @@ class Spot4 : public Obj{
                     break;
                 case SPOT4_WAIT_TRAJ2:
                     if(par.posRobot.distanceTo(destPoint) < 1.){
-                        servo.unlockElevator(_actuator_select);
-                        servo.downElevator(_actuator_select);
-                        timePrev = millis();
                         _state_loc = SPOT4_GET_STAND2;
                     }
                     break;
 
                 case SPOT4_GET_STAND2:
-                    if(millis() - timePrev > 500){
-                        servo.lockElevator(_actuator_select);
-                        servo.upElevator(_actuator_select);
+                    if(getStand(par.act[_actuator_select].id)){
                         _state_loc = SPOT4_TRAJ3;
                     }
                     break;
@@ -264,7 +256,6 @@ class Spot4 : public Obj{
         stepSpot4 _state_loc;
         unsigned int _num_obs_loc[2];
         unsigned int actClap;
-        unsigned int timePrev;
         Point2D<float> destPoint;
         Point2D<float> _posSpot[2];
         Point2D<float> _posRobotSpot[2]; //position of the robot to get the spot
