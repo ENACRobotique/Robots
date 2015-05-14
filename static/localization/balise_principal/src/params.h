@@ -59,14 +59,18 @@ typedef struct{
 
 //#define DEBUG
 //#define DEBUG_SYNC
+//#define DEBUG_SYNC_WIRE
+//#define DEBUG_SYNC_VALUES
 //#define DEBUG_LOC
 //#define DEBUG_CALIBRATION
+//#define DEBUG_CALIBRATION_SPEED
+//#define DEBUG_SYNC_WIRE_EVAL
 //#define DEBUG_PRINT
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
 
-#define SYNC_WIRED
+//#define SYNC_WIRED
 //#define SYNC_WIRELESS
 
 
