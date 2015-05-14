@@ -28,7 +28,7 @@ int Servo::sendPosServo(const servoName name, const float angle) {
     msg.header.size = 2 + 6*msg.payload.servos.nb_servos;
     msg.payload.servos.servos[0].club_id = tabServo[name].club_id;
     msg.payload.servos.servos[0].hw_id = tabServo[name].hw_id;
-    msg.payload.servos.servos[0].angle = angle * 180 / M_PI;
+    msg.payload.servos.servos[0].angle = angle;
 
     bn_sendRetry(&msg, MAX_RETRIES_SERVO);
     return 1;

@@ -13,7 +13,7 @@
 
 typedef struct __attribute__((packed)){
     uint16_t nb_servos; // must be <=9
-    struct __attribute__((packed)){ // 5 bytes
+    struct __attribute__((packed)){ // 6 bytes
     	uint8_t club_id; // identifier of the servomotor (club number)
     	uint8_t hw_id; // plug number (on the card 0-15)
         float angle; // servo setpoint in degrees (0-*)
