@@ -244,7 +244,7 @@ void CapAI::initObjective(){
         robot->env->obs[BLOCK_START_ZONE].c = {300-45, 100};
 
     robot->env->obs[BLOCK_START_ZONE].active = 1;
-    robot->env->obs[BLOCK_START_ZONE].r = 20. + R_ROBOT;
+    robot->env->obs[BLOCK_START_ZONE].r = 24. + R_ROBOT;
 
     robot->env->obs_updated[BLOCK_START_ZONE]++;
 

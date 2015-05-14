@@ -13,8 +13,8 @@ std::vector<astar::sObs_t> obs= {
    // robots
    {{0., 0.},          0., 1, 1, 1},    //primary
    {{0., 0.}, R_ROBOT+8. , 1, 0, 1},    //secondary
-   {{0., 0.}, R_ROBOT+20., 1, 0, 1},    //primary adv
-   {{0., 0.}, R_ROBOT+15., 1, 0, 1},    //secondary adv
+   {{0., 0.}, R_ROBOT+25., 1, 0, 1},    //primary adv
+   {{0., 0.}, R_ROBOT+20., 1, 0, 1},    //secondary adv
 
    //Yellow spots //if moved change START_STAND
    {{85. ,180.}, 3. + R_ROBOT, 1, 1, 1}, //4
