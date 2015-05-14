@@ -77,7 +77,7 @@ trajElem start_green[]={
 				};
 
 radarElem start_green_radar[]={
-				{40,20,5500},
+				{40,25,5500},
 				{0,0,9000},
 				{0,0,2000},
 				{30,30,3000},
@@ -171,7 +171,7 @@ trajElem start_yellow[]={
 				};
 
 radarElem start_yellow_radar[]={
-				{40,20,5500},
+				{40,25,5500},
 				{0,0,9000},
 				{0,0,2000},
 				{30,30,3000},
@@ -191,7 +191,7 @@ sState *testTrajYellowInit()
 		    	return &sPrestairs;
 		   	    }
 
-		    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
+		    if(periodicProgRadarLimit(start_yellow_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
 		    			#ifdef DEBUG
 		    				Serial.println("\tFin radar 1 !");
 		    			#endif
