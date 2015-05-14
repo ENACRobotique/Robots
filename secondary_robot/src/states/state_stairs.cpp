@@ -14,6 +14,7 @@
 #include "../tools.h"
 #include "../params.h"
 #include "state_traj.h"
+#include "state_wait.h"
 
 #define ANGLE_STAIRS_STARTED 11
 #define ANGLE_CMD_STOP 5
@@ -23,7 +24,7 @@
 #define ANGLE_CARPET_RELEASE 40
 #define FILTER_SHIFT 4
 #define TIME_RAG_RLSD_NO_ATTITUDE 6000
-#define ANGLE_ON_FLOOR 126
+#define ANGLE_ON_FLOOR 123
 
 int attitudeCmdStartStairs;
 unsigned long timeStairsStarted = 0;
@@ -72,8 +73,7 @@ sState *testStairs()
 	//arret TIME_STOP après
 	if(timeStopSoon!=0 && millis() - timeStopSoon > TIME_STOP){
 		Serial.println("STOP !!!");
-		if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
-		else return &sTrajEndStairsYellow;
+		return &sWait;
 	}
 	return 0;
 #else
@@ -84,8 +84,7 @@ sState *testStairs()
 	}
 
 	if(millis()-timestart > 14000){
-		if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajEndStairsGreen;
-				else return &sTrajEndStairsYellow;
+		return &sWait;
 	}
 	return 0;
 #endif
