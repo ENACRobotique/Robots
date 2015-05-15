@@ -7,6 +7,8 @@
 #include "Arduino.h"
 #include "Servo.h"
 #include "lib_move.h"
+#include "lib_motor.h"
+#include "lib_heading.h"
 
 #if defined(TANK) && defined(TRIKE)
 #error "TANK and TRIKE defined. Only one possible."
@@ -16,8 +18,6 @@
 #ifndef CLAMP
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 #endif
-
-#define DERIVE 0
 
 #ifdef TRIKE
 Servo _dirServo;
@@ -39,20 +39,21 @@ void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
 //sets speed motors (omega=0 means straight line)
 void move(int speed,int omega){
 #ifdef TANK
-	int derive = 0;
-	if (speed || omega)
-	{
-		derive = DERIVE;
-	}
-	int speeds[NB_MOTORS]={-speed - omega, -speed + omega + derive};
+	int speeds[NB_MOTORS]={-speed - omega, -speed + omega};
     motSetCon(speeds);
 #else
 #ifdef TRIKE
-    motSetCon({speed});
-    _dirServo.write(CLAMP(MIN_ANGLE , angle+_servo_zero, MAX_ANGLE));
+    motSetCon(&speed);
+    _dirServo.write(CLAMP(MIN_ANGLE , omega+_servo_zero, MAX_ANGLE));
 #endif
 #endif
 }
 
+void emergencyStop(){
+	move(0,0);
+	for(int i=0;i<NB_MOTORS;i++){
+		analogWrite(_motPinPWM[i], 0);
+	}
+}
 
 

@@ -17,6 +17,7 @@
 #include "lib_wall.h"
 #include "lib_line.h"
 #include "lib_attitude.h"
+#include "lib_heading.h"
 
 
 
@@ -58,11 +59,16 @@ void loop(){
 #endif
 
     if (current->flag & BIT(E_BLINK) ) blink();
-    if (current->flag & BIT(E_WALL)  ) periodicWall();
+    //if (current->flag & BIT(E_WALL)  ) periodicWall();
     if (current->flag & BIT(E_RADAR) ) radarRefresh();
     if (current->flag & BIT(E_MOTOR) ) motAsser();
     if (current->flag & BIT(E_LINE) )  asserLine();
+#ifdef ATTITUDE
     if (current->flag & BIT(E_ATTITUDE) )  attitudeAsser();
+#endif
+#ifdef HEADING
+    if (current->flag & BIT(E_HEADING) )  headingAsser();
+#endif
 
     sState *next;
     if (current->testFunction){
