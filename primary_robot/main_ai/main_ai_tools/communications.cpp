@@ -28,6 +28,42 @@ extern "C"{
 #include "ai_tools.h"
 
 
+void bnSendBlock(sMsg& msg, string txt){
+    int ret = -1;
+    int i = 0;
+
+    while(ret < 0){
+        ret = bn_send(&msg);
+        if(ret < 0){
+            if(!i){
+                logs << ERR << txt << "bn_send failed" << getErrorStr(-ret) << "(#" << -ret << ")";
+            }
+            i++;
+        }
+        else if (i){
+            logs << WAR << "bn_send success after " << i << "tries";
+        }
+    }
+}
+
+void roleSendBlock(sMsg& msg, eRoleMsgClass mc, string txt){
+    int ret = -1;
+    int i = 0;
+
+    while(ret < 0){
+        ret = role_send(&msg, mc);
+        if(ret < 0){
+            if(!i){
+                logs << ERR << txt << "role_send failed" << getErrorStr(-ret) << "(#" << -ret << ")";
+            }
+            i++;
+        }
+        else if (i){
+            logs << WAR << "role_send success after " << i << "tries";
+        }
+    }
+}
+
 /*
  * Ping all the interface.
  * If the interface is optional a message warning is print.
@@ -95,12 +131,12 @@ void sendPing(){
 
             }
         if(state == 6) break;
-        }*/
+        }
+        */
 }
 
 
 int roleSetup(bool simu_ai, bool simu_prop){
-    int ret;
     sMsg msg;
     memset(&msg, 0, sizeof(msg));
 
@@ -116,11 +152,7 @@ int roleSetup(bool simu_ai, bool simu_prop){
         msg.payload.roleSetup.steps[0].role = ROLE_PRIM_PROPULSION;
         msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_PROP_SIMU;
 
-        ret = bn_sendAck(&msg);
-        if(ret < 0){
-            logs << WAR << "FAILED ROLE SETUP 1: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return 0;
-        }
+        bnSendBlock(msg, "FAILED ROLE SETUP 1 (MONITORING)");
     }
 
     if(simu_ai){
@@ -133,11 +165,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
         msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
         msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
-        ret = bn_sendAck(&msg);
-        if(ret < 0){
-            logs << ERR << "FAILED ROLE SETUP 2: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return -1;
-        }
+        bnSendBlock(msg, "FAILED ROLE SETUP 2 (PRIM_PROPULSION)");
+
 
         msg.header.type = E_ROLE_SETUP;
         msg.header.destAddr = role_get_addr(ROLE_MONITORING);
@@ -148,11 +177,8 @@ int roleSetup(bool simu_ai, bool simu_prop){
         msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
         msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
-        ret = bn_sendAck(&msg);
-        if(ret < 0){
-            logs << WAR << "FAILED ROLE SETUP 3: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return 0;
-        }
+        bnSendBlock(msg, "FAILED ROLE SETUP 3 (MONITORING)");
+
 
         msg.header.type = E_ROLE_SETUP;
         msg.header.destAddr = ADDRI_MAIN_IO;
@@ -163,11 +189,7 @@ int roleSetup(bool simu_ai, bool simu_prop){
         msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
         msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
-        ret = bn_sendAck(&msg);
-        if(ret < 0){
-            logs << WAR << "FAILED ROLE SETUP 4: "<< getErrorStr(-ret) << "(#" << -ret << ")\n";
-            return 0;
-        }
+        bnSendBlock(msg, "FAILED ROLE SETUP 4 (MAIN_IO)");
     }
 
     return 0;
@@ -290,8 +312,8 @@ int sendPosPrimary(Point2D<float> &p, float theta) {
  */
 int sendSpeedPrimary(float speed) {
     sMsg msgOut;
-    int ret;
     memset(&msgOut, 0, sizeof(msgOut));
+    int ret;
 
     if (fabs(speed) > MAX_SPEED)
         return -1;
