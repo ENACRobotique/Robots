@@ -25,20 +25,26 @@ typedef struct {;
         float b; //additive coeff.
 } sServoData;
 sServoData servosTable[] = { //servo number (club)|a|b   (us = a*deg+b)
-        {1, 10, 520},
-        {2, 10, 520},
+        {1, -9.5, 2350},
+        {2, -9.5, 2350},
         {3, 10.033, 526},
         {4, 9.833, 615},
-        {5, 10, 520},
-        {6, 10, 520},
-        {7, 10, 520},
-        {8, 10, 520},
-        {9, 10, 520},
-        {10, 10, 520},
-        {11, 10, 520},
-        {12, 10, 520},
-        {13, 10, 520},
-        {14, 10, 520}
+        {5, 9.289, 619},
+        {6, 9.944, 552.5},
+        {7, 9.20, 545},
+        {8, 9.74, 548},
+        {9, 9.59, 554},
+        {10, 10.26, 554},
+        {11, -9.24, 2373},
+        {12, -9.12, 2375},
+        {13, -9.50, 2402},
+        {14, -9.57, 2366},
+		{15, -9.80, 2386},
+		{16, -10.268, 2396},
+		{17, -9.68, 2400},
+		{18, -8.50, 2410},
+		{19, 12.15, 883},
+		{20, 11.73, 881}
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
@@ -60,7 +66,7 @@ Adafruit_PWMServoDriver pwm(0x40);
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
 #define SERVO_FREQ 50. //the servo command frequency (Hz)
 
-#define DEBUG
+//#define DEBUG
 
 void fctModeSwitch(void);
 void fctStartingCord(void);
@@ -74,11 +80,14 @@ void setup(){
     pinMode(PIN_LED_RED, OUTPUT);
     pinMode(PIN_LED_GREEN, OUTPUT);
     pinMode(PIN_DBG_LED, OUTPUT);
+    pinMode(PIN_MODE_SWITCH, INPUT);
+    pinMode(PIN_STARTING_CORD, INPUT);
 
     //init led
     digitalWrite(PIN_LED_BLUE, LOW);
     digitalWrite(PIN_LED_RED, LOW);
     digitalWrite(PIN_LED_GREEN, LOW);
+
 
     bn_attach(E_ROLE_SETUP, role_setup);
     bn_init();
@@ -261,15 +270,12 @@ void loop(){
         	outMsg.payload.ihmStatus.nb_states = 1;
         	outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWITCH;
         	outMsg.payload.ihmStatus.states[0].state.state_switch = eIhmSwitch(ModeSwitch);
-
-        	ret = bn_send(&outMsg);
-        	Serial.println(ret);
+        	while((ret = bn_send(&outMsg)) <=0);
 
         }
 
         flagModeSwitch = 0;
     }
-
 
 
     	if (!flagPresence1){
@@ -291,7 +297,10 @@ void loop(){
         		outMsg.payload.ihmStatus.nb_states = 1;
         		outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_1;
         		outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence1);
-        		ret = bn_send(&outMsg);
+        		while( (ret = bn_send(&outMsg)) <= 0);
+#ifdef DEBUG
+        		Serial.println(ret);
+#endif
         	}
         	flagPresence1 = 0;
         }
