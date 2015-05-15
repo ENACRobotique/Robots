@@ -19,7 +19,7 @@ typedef struct{
         bn_Address addr;
         uint8_t role;
     };
-    eSyncStatus status;
+    eSyncStatus status :8;
 }syncQueryStatus;
 
 syncQueryStatus queryArray[SYNC_ARRAY_SIZE];    // circular buffer
@@ -106,7 +106,7 @@ int gs_testOne(){
         }
         gs_rIndex = (gs_rIndex+1)%SYNC_ARRAY_SIZE;
     }
-    if (ret<0 || gs_rIndex==gs_wIndex){
+    if (ret<0 || (gs_rIndex==gs_wIndex && gs_size)){
         // sent result on first error or if everything has been tested
         sMsg msg;
         msg.header.destAddr = queryArray[gs_oIndex].queryOrigin;
