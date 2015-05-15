@@ -98,7 +98,7 @@ typedef struct __attribute__((packed)){
             bn_Address addr;
             uint8_t role;
         };
-        eSyncStatus status;
+        eSyncStatus status :8;
     } cfgs[];
 } sSyncResponse;
 

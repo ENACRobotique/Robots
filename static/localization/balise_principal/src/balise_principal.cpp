@@ -183,7 +183,7 @@ void loop(){
                 if (gs_isBeaconRequested()) {
                     outMsg.header.destAddr = gs_getBeaconQueryOrigin();
                     outMsg.header.type = E_SYNC_RESPONSE;
-                    outMsg.header.size = sizeof(outMsg.payload.syncResponse.cfgs[0]);
+                    outMsg.header.size = sizeof(outMsg.payload.syncResponse.nb) + sizeof(outMsg.payload.syncResponse.cfgs[0]);
                     outMsg.payload.syncResponse.nb = 1;
                     outMsg.payload.syncResponse.cfgs[0].type = SYNCTYPE_ADDRESS;
                     outMsg.payload.syncResponse.cfgs[0].addr = devicesInfo[i].addr;
@@ -208,6 +208,7 @@ void loop(){
     case S_SYNC_MEASURE :
         if (wiredSync_sendSignal(0) != -1) {
             endSync = micros();
+            gs_testOne();
         }
         else {
             // wait until we receive the sync statuses
@@ -287,6 +288,7 @@ void loop(){
         break;
 #endif
     case S_GAME :
+        gs_testOne();
         // if new turn
         if (lastIndex!=domi_nbTR()){
             lastIndex=domi_nbTR();
