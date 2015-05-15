@@ -19,6 +19,9 @@
 #include "state_wall.h"
 #include "state_wait.h"
 #include "state_dead.h"
+#include "sharp_2d120x.h"
+
+#define TIME_SHARP 200
 
 static unsigned long st_saveTime=0,st_prevSaveTime=0;
 Servo servoClap;
@@ -35,6 +38,7 @@ void initClap1_YELLOW(sState *prev)
 					Serial.println("\tback from pause");
 				#endif
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		        _backFromPause=1;
 		    	}
 		    else{
 		    	if (digitalRead(PIN_COLOR)==COLOR_YELLOW){
@@ -42,8 +46,8 @@ void initClap1_YELLOW(sState *prev)
 		    	}
 		    	else{servoClap.write(CLAPGREEN);}
 		    }
-		    uint16_t limits[RAD_NB_PTS]={30,0};
-		    	radarSetLim(limits);
+		    int limits[NB_SHARP]={0,20};
+		    	    sharpSetLim(limits);
 	}
 
 void deinitClap1_YELLOW(sState *next)
@@ -62,7 +66,7 @@ void deinitClap1_YELLOW(sState *next)
 }
 
 trajElem Clap1_YELLOW_traj[]={
-	{30,-3,5000},
+	{-500,-5,3000},
 	{0,0,0}
 };
 
@@ -70,7 +74,7 @@ sState *testClap1_YELLOW()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-
+		    static unsigned long sharptime = 0;
 			if(periodicProgTraj(Clap1_YELLOW_traj,&st_saveTime,&i,&prev_millis))
 			 	{
 				emergencyStop();
@@ -82,7 +86,21 @@ sState *testClap1_YELLOW()
 				 return &sDead;
 			 }
 
-		if (radarIntrusion()) return &sPause;
+			 if (sharpIntrusion()){
+					if(sharptime == 0){
+						sharptime = millis();
+					}
+					else{
+						if( (millis() - sharptime) > TIME_SHARP ){
+							sharptime = 0;
+							return &sPause;
+							}
+					}
+
+				}
+				else{
+					sharptime = 0;
+				}
 	    return 0;
 	}
 
@@ -105,6 +123,7 @@ void initClap1_GREEN(sState *prev)
 					Serial.println("\tback from pause");
 				#endif
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		        _backFromPause=1;
 		    	}
 		    else{
 		    	if (digitalRead(PIN_COLOR)==COLOR_YELLOW){
@@ -112,8 +131,8 @@ void initClap1_GREEN(sState *prev)
 		    	}
 		    	else{servoClap.write(CLAPGREEN);}
 		    }
-		    uint16_t limits[RAD_NB_PTS]={30,0};
-		    	radarSetLim(limits);
+		    int limits[RAD_NB_PTS]={0,20};
+		    	    sharpSetLim(limits);
 	}
 
 void deinitClap1_GREEN(sState *next)
@@ -140,7 +159,7 @@ sState *testClap1_GREEN()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-
+		    static unsigned long sharptime = 0;
 			if(periodicProgTraj(Clap1_YELLOW_traj,&st_saveTime,&i,&prev_millis))
 			 	{
 				emergencyStop();
@@ -152,7 +171,21 @@ sState *testClap1_GREEN()
 				 return &sDead;
 			 }
 
-		if (radarIntrusion()) return &sPause;
+			 if (sharpIntrusion()){
+			 			 		    	    	if(sharptime == 0){
+			 			 		    	    		sharptime = millis();
+			 			 		    	    	}
+			 			 		    	    	else{
+			 			 		    	    		if( (millis() - sharptime) > TIME_SHARP ){
+			 			 		    	    			sharptime = 0;
+			 			 		    					return &sPause;
+			 			 		    					}
+			 			 		    	    	}
+
+			 			 		    	    }
+			 			 		    	    else{
+			 			 		    	    	sharptime = 0;
+			 			 		    	    }
 	    return 0;
 	}
 
