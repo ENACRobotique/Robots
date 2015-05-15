@@ -58,9 +58,9 @@ void deinitTrajGreen(sState *next)
 }
 
 trajElem start_green[]={
-	{-500,0,7500},
+	{-500,0,6000},
 	{-200,45,7500},
-	{500,-3,8000},
+	{500,-3,7000},
 	{0,0,0}
 };
 
