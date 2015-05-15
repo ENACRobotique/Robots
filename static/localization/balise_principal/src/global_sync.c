@@ -11,6 +11,8 @@
 #include "stddef.h"
 #include "roles.h"
 #include "string.h"
+#include "params.h"
+#include "bn_debug.h"
 
 typedef struct{
     bn_Address queryOrigin;
@@ -33,6 +35,9 @@ void gs_receiveQuery(sMsg *msg){
     int i=0;
 
     if (msg->header.type == E_SYNC_QUERY){
+#ifdef DEBUG_GLOBAL_SYNC
+        bn_printfDbg("squery received from %hx, %d elem\n", msg->header.srcAddr,msg->payload.syncQuery.nb);
+#endif
         while (i<msg->payload.syncQuery.nb && gs_size<SYNC_ARRAY_SIZE){
             queryArray[gs_wIndex].queryOrigin = msg->header.srcAddr;
             queryArray[gs_wIndex].type = msg->payload.syncQuery.cfgs[i].type;
@@ -126,7 +131,13 @@ int gs_testOne(){
             msg.payload.syncResponse.nb++;
         }
         msg.header.size = sizeof(msg.payload.syncResponse.nb) + msg.payload.syncResponse.nb*sizeof(msg.payload.syncResponse.cfgs[0]);
+#ifndef DEBUG_GLOBAL_SYNC
         while (bn_sendAck(&msg)<0); // critical, Infinite loop
+#else
+        int nbtries = 0;
+        while (bn_sendAck(&msg)<0) nbtries++; // critical, Infinite loop
+        bn_printfDbg("tried to send %d times\n",nbtries);
+#endif
     }
     return 0;
 }

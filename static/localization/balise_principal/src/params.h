@@ -61,6 +61,7 @@ typedef struct{
 //#define DEBUG_SYNC
 //#define DEBUG_SYNC_WIRE
 //#define DEBUG_SYNC_VALUES
+//#define DEBUG_GLOBAL_SYNC
 //#define DEBUG_LOC
 //#define DEBUG_CALIBRATION
 //#define DEBUG_CALIBRATION_SPEED
@@ -70,8 +71,25 @@ typedef struct{
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
 
+//#define SYNC_GLOBAL
+#define SYNC_LOCAL
 #define SYNC_WIRED
 //#define SYNC_WIRELESS
+
+
+
+// protections
+#if defined(SYNC_LOCAL) && defined(SYNC_GLOBAL)
+#error "please define only one sync range"
+#elif !defined(SYNC_LOCAL) && !defined(SYNC_GLOBAL)
+#error "please define at least one sync range"
+#endif
+
+#if defined(SYNC_WIRED) && defined(SYNC_WIRELESS)
+#error "please define only one sync method"
+#elif !defined(SYNC_WIRED) && !defined(SYNC_WIRELESS)
+#error "please define at least one sync method"
+#endif
 
 
 #endif /* PARAMS_H_ */

@@ -10,7 +10,6 @@
 #include "float.h"
 #include "MemoryFree.h"
 
-#include "messages.h"
 #include "network_cfg.h"
 #include "params.h"
 #include "../../../communication/botNet/shared/botNet_core.h"
@@ -21,8 +20,11 @@
 #include "messages.h"
 #include "bn_utils.h"
 extern "C" {
+#include "messages.h"
 #include "roles.h"
+#ifdef SYNC_GLOBAL
 #include "global_sync.h"
+#endif
 }
 
 #ifdef SYNC_WIRELESS
@@ -36,9 +38,11 @@ extern "C" {
 
 
 
-
+#ifdef SYNC_GLOBAL
 mainState state=S_GAME;
-
+#elif defined SYNC_LOCAL
+mainState state=S_CHECKREMOTE;
+#endif
 
 sDeviceInfo devicesInfo[D_AMOUNT];
 int iDeviceSync=0,iDevicePeriodBcast=0;
@@ -71,7 +75,9 @@ void setup(){
     bn_init();
 
     bn_attach(E_ROLE_SETUP,role_setup);
+#ifdef SYNC_GLOBAL
     bn_attach(E_SYNC_QUERY,gs_receiveQuery);
+#endif
 #ifdef DEBUG
     bn_printfDbg("start turret, free mem : %d o\n",freeMemory());
 #endif
@@ -163,13 +169,14 @@ void loop(){
     }
 #endif
 
+#ifdef SYNC_GLOBAL
     if (gs_isBeaconRequested() && (state != S_CHECKREMOTE
                                     || state != S_SYNC_MEASURE
                                     || state != S_SYNC_ELECTION
                                     || state != S_SYNC_END) ){
         state = S_CHECKREMOTE;
-
     }
+#endif
 
     ///////state machine
     switch (state){
@@ -179,21 +186,21 @@ void loop(){
         // check if every device is on
         for (int i=0;i<D_AMOUNT;i++) {
             if (int err=bn_ping(devicesInfo[i].addr)<0){
-                switchState = 0;
-                if (gs_isBeaconRequested()) {
-                    outMsg.header.destAddr = gs_getBeaconQueryOrigin();
-                    outMsg.header.type = E_SYNC_RESPONSE;
-                    outMsg.header.size = sizeof(outMsg.payload.syncResponse.nb) + sizeof(outMsg.payload.syncResponse.cfgs[0]);
-                    outMsg.payload.syncResponse.nb = 1;
-                    outMsg.payload.syncResponse.cfgs[0].type = SYNCTYPE_ADDRESS;
-                    outMsg.payload.syncResponse.cfgs[0].addr = devicesInfo[i].addr;
-                    outMsg.payload.syncResponse.cfgs[0].status = SYNCSTATUS_PING_KO;
-                    while (bn_sendAck(&outMsg)<0); // critical, so loop.
-                }
-
 #ifdef DEBUG_SYNC
                 bn_printfDbg("%hx offline (error : %d)\n",devicesInfo[i].addr,err);
 #endif
+                switchState = 0;
+#ifdef SYNC_GLOLAB
+                outMsg.header.destAddr = gs_getBeaconQueryOrigin();
+                outMsg.header.type = E_SYNC_RESPONSE;
+                outMsg.header.size = sizeof(outMsg.payload.syncResponse.nb) + sizeof(outMsg.payload.syncResponse.cfgs[0]);
+                outMsg.payload.syncResponse.nb = 1;
+                outMsg.payload.syncResponse.cfgs[0].type = SYNCTYPE_ADDRESS;
+                outMsg.payload.syncResponse.cfgs[0].addr = devicesInfo[i].addr;
+                outMsg.payload.syncResponse.cfgs[0].status = SYNCSTATUS_PING_KO;
+                while (bn_sendAck(&outMsg)<0); // critical, so loop.
+#endif
+
             }
         }
         if (switchState) {
@@ -208,7 +215,9 @@ void loop(){
     case S_SYNC_MEASURE :
         if (wiredSync_sendSignal(0) != -1) {
             endSync = micros();
+#ifdef SYNC_GLOBAL
             gs_testOne();
+#endif
         }
         else {
             // wait until we receive the sync statuses
@@ -219,7 +228,9 @@ void loop(){
             }
             if (synced == D_AMOUNT) {
                 state = S_GAME;
+#ifdef SYNC_GLOBAL
                 gs_beaconStatus(SYNCSTATUS_OK);
+#endif
 #ifdef DEBUG_SYNC
                 bn_printDbg("sync ok\n");
 #endif
@@ -230,7 +241,9 @@ void loop(){
                     if (devicesInfo[i].state != DS_SYNCED) bn_printfDbg("%hx not synchronized (status %d)\n",devicesInfo[i].addr,devicesInfo[i].state);
                 }
 #endif
+#ifdef SYNC_GLOBAL
                 gs_beaconStatus(SYNCSTATUS_SYNC_KO);
+#endif
             }
         }
         break;
@@ -288,7 +301,9 @@ void loop(){
         break;
 #endif
     case S_GAME :
+#ifdef SYNC_GLOBAL
         gs_testOne();
+#endif
         // if new turn
         if (lastIndex!=domi_nbTR()){
             lastIndex=domi_nbTR();
