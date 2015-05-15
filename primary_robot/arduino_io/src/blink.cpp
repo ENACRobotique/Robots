@@ -66,7 +66,7 @@ Adafruit_PWMServoDriver pwm(0x40);
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
 #define SERVO_FREQ 50. //the servo command frequency (Hz)
 
-#define DEBUG
+//#define DEBUG
 
 void fctModeSwitch(void);
 void fctStartingCord(void);
@@ -80,11 +80,14 @@ void setup(){
     pinMode(PIN_LED_RED, OUTPUT);
     pinMode(PIN_LED_GREEN, OUTPUT);
     pinMode(PIN_DBG_LED, OUTPUT);
+    pinMode(PIN_MODE_SWITCH, INPUT);
+    pinMode(PIN_STARTING_CORD, INPUT);
 
     //init led
     digitalWrite(PIN_LED_BLUE, LOW);
     digitalWrite(PIN_LED_RED, LOW);
     digitalWrite(PIN_LED_GREEN, LOW);
+
 
     bn_attach(E_ROLE_SETUP, role_setup);
     bn_init();
@@ -267,15 +270,12 @@ void loop(){
         	outMsg.payload.ihmStatus.nb_states = 1;
         	outMsg.payload.ihmStatus.states[0].id = IHM_MODE_SWITCH;
         	outMsg.payload.ihmStatus.states[0].state.state_switch = eIhmSwitch(ModeSwitch);
-
-        	ret = bn_send(&outMsg);
-        	Serial.println(ret);
+        	while((ret = bn_send(&outMsg)) <=0);
 
         }
 
         flagModeSwitch = 0;
     }
-
 
 
     	if (!flagPresence1){
@@ -297,7 +297,10 @@ void loop(){
         		outMsg.payload.ihmStatus.nb_states = 1;
         		outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_1;
         		outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence1);
-        		ret = bn_send(&outMsg);
+        		while( (ret = bn_send(&outMsg)) <= 0);
+#ifdef DEBUG
+        		Serial.println(ret);
+#endif
         	}
         	flagPresence1 = 0;
         }
