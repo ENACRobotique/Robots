@@ -10,7 +10,7 @@
 
 #include "messages.h"
 
-#define SYNC_ARRAY_SIZE 10 // size of the global array that stores sync queries
+#define SYNC_ARRAY_SIZE 5 // size of the global array that stores sync queries
 
 void gs_receiveQuery(sMsg *msg);
 int gs_testOne();

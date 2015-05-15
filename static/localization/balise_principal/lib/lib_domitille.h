@@ -12,7 +12,7 @@
 
 #define FILTER_SHIFT 2
 
-#define TR_INFO_BUFFER_SIZE 16
+#define TR_INFO_BUFFER_SIZE 8
 
 #define SPEED_HIGH  200
 #define SPEED_20HZ  46
