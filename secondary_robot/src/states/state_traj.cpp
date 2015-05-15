@@ -15,10 +15,9 @@
 #include "state_Prestairs.h"
 #include "state_wait.h"
 #include "state_lineMonit.h"
+#include "lib_radar_mask.h"
 
-#define FACTOR_HEADING_ASSERV 1.5
-
-unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
+unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
 #ifdef HEADING
 periodicTraj periodicFunction = &periodicProgTrajHeading;
 #else
@@ -37,6 +36,7 @@ void initTrajGreenInit(sState *prev)
 				Serial.println("\tback from pause");
 			#endif
 	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+	        st_saveTime_radar=millis()-st_saveTime_radar+st_prevSaveTime_radar;
 	        _backFromPause = 1;
 	    	}
 	    uint16_t limits[RAD_NB_PTS]={40,40};
@@ -49,23 +49,24 @@ void deinitTrajGreenInit(sState *next)
 	    	{
 	        st_prevSaveTime=st_saveTime;
 	        st_saveTime=millis();
+	        st_prevSaveTime_radar=st_saveTime_radar;
+	        st_saveTime_radar=millis();
 	    	}
 	    else
 	    	{
 	        st_saveTime=0;
 	        st_prevSaveTime=0;
+	        st_saveTime_radar=0;
+	        st_prevSaveTime_radar=0;
 	    	}
 	}
 
 trajElem start_green[]={
 #ifdef HEADING
-				//{30,0,4500},
-				//{15,-90,6000},
-				//{15,0,750},
-				//{0,0,0},
-				{30,0,4500},
-				{10,-90,5000},
-				{10,0,1000},
+				{30,0,5500},
+				{0,-90,9000},
+				{0,-90,2000},
+				{10,-90,3000},
 				{0,0,0},
 #else
 				{30,0,4000},
@@ -75,10 +76,20 @@ trajElem start_green[]={
 #endif
 				};
 
+radarElem start_green_radar[]={
+				{40,25,5500},
+				{0,0,9000},
+				{0,0,2000},
+				{30,30,3000},
+				{0,0,0},
+				};
+
 sState *testTrajGreenInit()
 	{
 		static int i=0;
+		static int i_radar=0;
 	    static unsigned long prev_millis=0;
+	    static unsigned long prev_millis_radar=0;
 
 	    if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis))
 	    {
@@ -89,6 +100,13 @@ sState *testTrajGreenInit()
 
 	    	 return &sPrestairs;
 	    }
+
+	    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
+			#ifdef DEBUG
+				Serial.println("\tFin radar 1 !");
+			#endif
+		}
+
 	    if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
@@ -129,6 +147,9 @@ void deinitTrajYellowInit(sState *next)
 		    	}
 		    else
 		    	{
+#ifdef DEBUG
+	Serial.println("Fin traj jaune");
+#endif
 		        st_saveTime=0;
 		        st_prevSaveTime=0;
 		    	}
@@ -136,10 +157,11 @@ void deinitTrajYellowInit(sState *next)
 
 trajElem start_yellow[]={
 #ifdef HEADING
-				{30,0,4500},
-				{20,90,6000},
-				{15,0,750},
-				{0,0,0},
+		{30,0,5500},
+		{0,90,9000},
+		{0,90,2000},
+		{10,90,2000},
+		{0,0,0},
 #else
 				{30,0,4500},
 				{20,10,6000},
@@ -147,14 +169,34 @@ trajElem start_yellow[]={
 				{0,0,0},
 #endif
 				};
+
+radarElem start_yellow_radar[]={
+				{40,25,5500},
+				{0,0,9000},
+				{0,0,2000},
+				{30,30,3000},
+				{0,0,0},
+				};
 sState *testTrajYellowInit()
 	{
 	static int i=0;
-		    static unsigned long prev_millis=0;
+	static int i_radar=0;
+    static unsigned long prev_millis=0;
+    static unsigned long prev_millis_radar=0;
 		    if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
 		   	    {
+				#ifdef DEBUG
+					Serial.println("\tTrajet 1 fini !");
+				#endif
 		    	return &sPrestairs;
 		   	    }
+
+		    if(periodicProgRadarLimit(start_yellow_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
+		    			#ifdef DEBUG
+		    				Serial.println("\tFin radar 1 !");
+		    			#endif
+		    		}
+
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
@@ -180,7 +222,6 @@ void initTrajEndStairsYellow(sState *prev)
 				#endif
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 		    	}
-		    	else{TimeToLauncher = millis() ;}
 		    uint16_t limits[RAD_NB_PTS]={30,3};
 		    	radarSetLim(limits);
 	}
@@ -246,7 +287,6 @@ void initTrajEndStairsGreen(sState *prev)
 			#endif
 	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 	    	}
-	    else{TimeToLauncher = millis() ;}
 
 	    uint16_t limits[RAD_NB_PTS]={3,40};
 	    		radarSetLim(limits);
@@ -278,12 +318,6 @@ sState *testTrajEndStairsGreen()
 	    if(periodicFunction(Final_green,&st_saveTime,&i,&prev_millis))
 		{
 	    	return &sWait;
-		}
-
-
-	    if((millis()-st_saveTime)-TimeToLauncher > 1500 && TimeToLauncher!=0 ){
-	    	launcherServoDown.write(15);
-	    	TimeToLauncher=0;
 		}
 
 

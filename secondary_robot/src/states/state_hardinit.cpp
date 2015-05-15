@@ -45,7 +45,6 @@ void initHard(sState *prev){
     servoInitHard(PIN_SERVO_ATTITUDE);
 #ifdef ATTITUDE
     delay(1000); // waiting for servo to reach its initial position an to stand still
-    initInertial();
 #endif
     //line following/detector
     //Wire.begin(); already done
