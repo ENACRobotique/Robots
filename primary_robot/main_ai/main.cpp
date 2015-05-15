@@ -30,8 +30,8 @@ extern "C"{
 #include "init_robots.h"
 #include "environment.h"
 
-//#define SYNC_PROP_IA    // sync is done by IA, and only between IA and prop
-#define SYNC_TURRET     // sync is done by turret
+#define SYNC_PROP_IA    // sync is done by IA, and only between IA and prop
+//#define SYNC_TURRET     // sync is done by turret
 
 #ifdef CTRLC_MENU
 static int menu = 0;
@@ -135,14 +135,22 @@ int main(int argc, char **argv) {
     }
 
     // network initialization
-    if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
-        logs << ERR << "bn_attach() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
-        exitAI(EXIT_FAILURE);
+    while(1){
+        if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
+            logs << ERR << "bn_attach() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+            //exitAI(EXIT_FAILURE);
+        }
+        else
+            break;
     }
 
-    if ((ret = bn_init()) < 0) {
-        logs << ERR << "bn_init() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
-        exitAI(EXIT_FAILURE);
+    while(1){
+        if ((ret = bn_init()) < 0) {
+            logs << ERR << "bn_init() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+            //exitAI(EXIT_FAILURE);
+        }
+        else
+            break;
     }
 
 

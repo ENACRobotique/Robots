@@ -13,6 +13,7 @@
 #include "ihm.h"
 #include "net.h"
 #include "log.h"
+#include "servo.h"
 
 
 
@@ -35,5 +36,6 @@ extern Path path;
 extern Ihm ihm;
 extern Net net;
 extern Log logs;
+extern Servo servo;
 
 #endif /* MAIN_AI_TOOLS_TOOLS_H_ */
