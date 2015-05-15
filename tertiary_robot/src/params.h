@@ -29,7 +29,8 @@
 #define PIN_LED 13
 #define PIN_CLAP 3
 #define PIN_COLOR 12
-
+#define PIN_SHARP1 A1
+#define PIN_SHARP2 A2
 //times
 #define TIME_MATCH_STOP 90000   //in ms
 
@@ -51,7 +52,7 @@
 #define CLAPGREEN 37
 
 #define US_LOWEST_ADDR 0xE2
-
+#define SHARP_ONLY
 #define DEBUG
 
 /* endDefines *********************************************/

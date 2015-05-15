@@ -7,7 +7,7 @@
 
 #include "state_tirette.h"
 
-
+#include "sharp_2d120x.h"
 #include "lib_move.h"
 #include "lib_motor.h"
 #include "lib_radar.h"
@@ -35,8 +35,9 @@ void initHard(sState *prev){
     odoInitHard(pin_odo_int,pin_odo_sen);
 
     //radar
-    Wire.begin();
-
+    //Wire.begin();
+    int pin_sharp[]={PIN_SHARP1,PIN_SHARP2};
+    setSharpPin(pin_sharp);
     //line following/detector
     //Wire.begin(); already done
 
