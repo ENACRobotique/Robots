@@ -57,7 +57,7 @@ void Statuses::maintenace(){
 int Statuses::receivedNewStatus(sGenericPosStatus& status){
 
     logs << INFO_V(E_V3) << "New status (id:)" << status.id << " : (" << status.pos.x << ", " << status.pos.y << ", " << status.pos.theta * 180 / M_PI << "°)";
-    logs << ERR << "Date:" << status.date;
+
     if(status.id >= NUM_E_ELEMENT){
         logs << ERR << "Unknown status id=" << status.id;
         return -1;
@@ -147,7 +147,6 @@ Point2D<float> Statuses::getLastPosXY(eElement el){
     if(status.date)
         return {status.pos.x, status.pos.y};
 
-    logs << ERR << "date nul";
     return {0,0};
 }
 

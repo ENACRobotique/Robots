@@ -22,7 +22,7 @@ extern "C"{
 
 
 
-Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType::CUP, true), _num(num), _time(0){
+Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType::CUP, true), _num(num), _time(0), stepLoc(CUP_OPEN_PINCE){
 
     if(num > 4)
         logs << ERR << "Num too big";
@@ -43,35 +43,62 @@ Cup::~Cup() {
     // TODO Auto-generated destructor stub
 }
 
-void Cup::initObj(paramObj par){
-    Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 10);
-    Point2D<float> dest;
+void Cup::initObj(paramObj){
 
-    dest = cir.project(par.posRobot);
-
-    path.go2PointOrient(dest, par.obs, _access_select_angle);
-
-    _time = millis();
 }
 
 int Cup::loopObj(paramObj par){
 
-    if(millis() - _time > 2000){
-        for(Obj* i : par.obj){
-            if(i->type() == E_DROP_CUP && i->state() == WAIT_MES){
-                i->state() = ACTIVE;
-                break;
-            }
-        }
+    switch(stepLoc){
+        case CUP_OPEN_PINCE :
+            servo.unlockPince(par.act[_actuator_select].id);
+            stepLoc = CUP_TRAJ1;
+            break;
+        case CUP_TRAJ1:
+            {
+                Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 10);
+                Point2D<float> dest;
 
-        for(Actuator& i : par.act){
-            if(i.type == ActuatorType::CUP && i.id == _actuator_select){
-                i.cupActuator.full = true;
-                i.cupActuator.distributor = false; //to be sure
+                destPoint = cir.project(par.posRobot);
+
+                path.go2PointOrient(destPoint, par.obs, _access_select_angle);
+
+                stepLoc = CUP_WAIT_TRAJ1;
             }
-        }
-        _state = FINISH;
-        return 0;
+            break;
+
+        case CUP_WAIT_TRAJ1:
+            if(par.posRobot.distanceTo(destPoint)){
+                stepLoc = CUP_CLOSE;
+            }
+            break;
+
+        case CUP_CLOSE:
+            servo.inPince(par.act[_actuator_select].id);
+            _time = millis();
+            stepLoc = CUP_UP;
+            break;
+
+        case CUP_UP:
+            if(millis() - _time > 500){
+                servo.upPince(par.act[_actuator_select].id);
+                _time = millis();
+                stepLoc = CUP_END;
+            }
+            break;
+
+        case CUP_END:
+            if(millis() - _time > 500){
+                for(Actuator& i : par.act){
+                    if(i.type == ActuatorType::CUP && i.id == _actuator_select){
+                        i.cupActuator.full = true;
+                        i.cupActuator.distributor = false; //to be sure
+                    }
+                }
+                _state = FINISH;
+                return 0;
+            }
+            break;
     }
 
     return 1;

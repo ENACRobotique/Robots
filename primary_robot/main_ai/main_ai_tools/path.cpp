@@ -485,6 +485,13 @@ bool Path::checkSamePath2(deque<sTrajEl_t>& path){
 bool Path::checkSamePathOrient(deque<sTrajOrientEl_t>& path){
     int i = path.size() - 1, j = _path_orient.size() - 1;
 
+    if(i == 0 && j == 0){//rotation
+        if(path[0].theta2 == _path_orient[0].theta2 && path[0].p2 == _path_orient[0].p2)
+            return true;
+        else
+            return false;
+    }
+
     if(i != j)
         return false;
 

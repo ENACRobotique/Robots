@@ -27,11 +27,15 @@
 sState* testTirette()
 	{
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
+    static unsigned long timepull=0;
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
     	{
-        if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenInit;
-        else /*return &sAlacon*/return &sTrajYellowInit;
+    		if(timepull==0){timepull = millis();}
+			if(millis() - timepull > TIME_BEFORE_START){
+				if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenInit;
+				else /*return &sAlacon*/return &sTrajYellowInit;
+			}
     	}
     return 0;
 	}

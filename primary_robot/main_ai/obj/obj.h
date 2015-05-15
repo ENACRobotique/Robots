@@ -27,11 +27,11 @@ typedef enum{
 }objective;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT, E_SPOT2, E_SPOT3, E_DROP_SPOT, E_LIGHT, E_CUP, E_DROP_CUP
+    E_NULL, E_CLAP, E_SPOT, E_SPOT2, E_SPOT3, E_DROP_SPOT, E_LIGHT, E_CUP, E_DROP_CUP, E_OBJ_STARTING_ZONE
 } eObj_t;
 
 typedef enum {
-    ANY, CUP, ELEVATOR, POP_CORN_LOADER
+    ANY, CUP, ELEVATOR, POP_CORN_LOADER, CAMERA
 }ActuatorType;
 
 typedef struct {
@@ -158,7 +158,9 @@ class Obj {
                 case E_CUP:
                     return "CUP ";
                 case E_DROP_CUP:
-                    return "E_DROP_CUP";
+                    return "DROP_CUP";
+                case E_OBJ_STARTING_ZONE:
+                    return "OBJ_STARTING_ZONE";
                 default:
                     return "Undefined";
             }

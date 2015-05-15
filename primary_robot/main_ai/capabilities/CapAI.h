@@ -25,6 +25,8 @@ class CapAI: public Capability {
         int loop();
         void initObjective();
 
+        void updateWaitObj(paramObj& );
+
     private:
         std::vector<Obj*> listObj;
 

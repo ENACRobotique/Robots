@@ -279,18 +279,30 @@ float Obj::getYield(const unsigned int start_time){
     }
 
     switch (_type) {
+        case E_OBJ_STARTING_ZONE:
+            ratio = 10000000000;
+            break;
         case E_SPOT3:
         case E_SPOT2:
-            ratio = 1/_dist * 100 + 1000;
+            ratio = 1/_dist * 10000 ;
+            logs << WAR << "ratio="<< ratio;
             break;
         case E_LIGHT:
-            ratio = 1/_dist * 100 + 500;
+            ratio = 1/_dist * 10000 ;
+            logs << WAR << "ratio="<< ratio;
+            break;
+        case E_CUP:
+            logs << ERR << millis();
+            logs << ERR << start_time;
+            ratio = 1/_dist * 10000 - ((int)millis() - (int)start_time)/1000;
+            ratio = ratio>0?ratio:1;
+            logs << ERR << "ratio_cup="<< ratio;
             break;
         case E_CLAP:
-        case E_CUP:
         case E_SPOT:
         default:
-            ratio = 1/_dist * 100; //TODO
+            ratio = 1/_dist * 10000; //TODO
+            logs << WAR << "ratio="<< ratio;
             break;
     }
     return ratio * (1. - _done);

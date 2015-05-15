@@ -23,8 +23,8 @@ class CapActuator : public Capability{
         }
 
         void setup(){
-            Actuator spot, cup, popCornLoader;
-            float spotAngle[2] = {M_PI/2, 3*M_PI/2};
+            Actuator spot, cup, popCornLoader, camera;
+            float spotAngle[2] = {M_PI/2, -M_PI/2};
             float cupAngle[3] = {0, 2*M_PI/3, 4*M_PI/3};
             float popCornLoaderAngle[] = {M_PI/2, 3*M_PI/2};
 
@@ -44,7 +44,7 @@ class CapActuator : public Capability{
                 _act.back().elevator.empty = true;
                 _act.back().angle = spotAngle[i];
                 //TODO _act.back().pos
-                _act.back().elevator.ball = i==0?true:false;
+                _act.back().elevator.ball = i==0?true:false; //if modify, change in objStatingZone
                 _act.back().elevator.number = 0;
             }
 
@@ -66,6 +66,12 @@ class CapActuator : public Capability{
                 //TODO _act.back().pos
                 _act.back().cupActuator.distributor = false;
             }
+
+            _act.push_back(camera);
+            _act.back().id = 0;
+            _act.back().type = ActuatorType::CAMERA;
+            _act.back().angle = M_PI;
+            _act.back().pos = {-20., 0.};
         }
 
         std::vector<Actuator> _act;

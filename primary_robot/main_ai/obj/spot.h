@@ -15,6 +15,13 @@
 
 #define START_STAND 9 //number of the first stand element in obs[]
 
+typedef enum {
+    SPOT_TRAJ1,
+    SPOT_WAIT_TRAJ1,
+    SPOT_GET_STAND1,
+    SPOT_END
+} stepSpot;
+
 using namespace std;
 
 class Spot : public Obj{
@@ -35,7 +42,7 @@ class Spot : public Obj{
 
             for(i = 0 ; i < par.act.size() ; i++){ //TODO optimize for the moment the first find is used
                 if( par.act[i].type == _typeAct){
-                    if((!par.act[i].elevator.full) && par.act[i].elevator.ball == true)
+                    if((!par.act[i].elevator.full))
                         break;
                 }
             }
@@ -54,6 +61,9 @@ class Spot : public Obj{
     private :
         unsigned int _num;
         eColor_t _color;
+        stepSpot stepLoc;
+        unsigned int timePrev;
+        Point2D<float> destPoint;
 
 };
 

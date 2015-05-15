@@ -13,20 +13,23 @@
 #include "obj.h"
 #include "tools.h"
 #include "GeometryTools.h"
+#include "servoTools.h"
 
+typedef enum {
+    DROP_CUP_DROP,
+    DROP_CUP_BACK,
+    DROP_CUP_END
+}StepdropCup;
 
 using namespace std;
 
 class DropCup : public Obj{
     public:
-        DropCup(int num, eColor_t color) : Obj(E_DROP_CUP, ActuatorType::CUP, false), EP_selected(-1){
+        DropCup(int num, eColor_t color) : Obj(E_DROP_CUP, ActuatorType::CUP, false), EP_selected(-1), step(DROP_CUP_DROP){
             vector<Point2D<float>> listEP{{50, 100}, {280, 50}, {280, 150}}; //Yellow
             sObjEntry_t objEP;
 
-            if(num == 0)
-                _state = WAIT_FREE_ZONE;
-            else
-                _state = WAIT_MES;
+            _state = WAIT_MES;
 
             objEP.type = E_CIRCLE;
             objEP.delta = 0;
@@ -41,56 +44,74 @@ class DropCup : public Obj{
         }
         virtual ~DropCup(){}
 
-        void initObj(paramObj par) override {
-            for(Actuator& i : par.act){
-                if(i.type == ActuatorType::CUP && i.id == _actuator_select){
-                    Point2D<float> posCup(par.posRobot.tranform(i.angle + par.angleRobot, i.pos));
-                    Circle2D<float> c(posCup, 30);
-                    destPoint = c.project(par.posRobot);
-                    path.go2PointOrient(destPoint, par.obs, _access_select_angle);
-
-                    break;
-                }
-            }
+        void initObj(paramObj) override {
         }
         int loopObj(paramObj par) override{
-            if(destPoint.distanceTo(par.posRobot) < 1.){
-                unsigned int i;
-                Point2D<float> posActuator, posRobot(par.obs[0].c.x, par.obs[0].c.y);
 
-                for(Actuator& i : par.act){
-                    if(i.type == ActuatorType::CUP && i.id == _actuator_select){
-                        i.cupActuator.full = false;
-                        i.cupActuator.distributor = false;
-                        posActuator = par.posRobot.tranform(i.angle + par.angleRobot, i.pos);
-                        break;
+            switch(step){
+                case DROP_CUP_DROP:
+                    if(dropCup(par.act[_access_select_angle].id)){
+                        for(Actuator& i : par.act){
+                            if(i.type == ActuatorType::CUP && i.id == _actuator_select){
+                                Point2D<float> posCup(par.posRobot.tranform(i.angle + par.angleRobot, i.pos));
+                                Circle2D<float> c(posCup, 30);
+                                destPoint = c.project(par.posRobot);
+                                path.go2PointOrient(destPoint, par.obs, _access_select_angle);
+                                break;
+                            }
+                        }
+                        step = DROP_CUP_BACK;
                     }
-                }
+                    break;
 
-                for(i = START_CUP ; i < START_CUP + 5 ; i++){
-                    if(!par.obs[i].active){
-                        par.obs[i].active = 1;
-                        par.obs[i].c = {posActuator.x, posActuator.y};
-                        par.obs[i].r = 5 + R_ROBOT;
-                        par.obsUpdated[i]++;
-                        break;
+                case DROP_CUP_BACK:
+                    if(destPoint.distanceTo(par.posRobot) < 1.){
                     }
-                }
-                if(i == START_CUP + 5)
-                    logs << ERR << "Magic Cup ??";
+                    step = DROP_CUP_END;
+                    break;
 
-                for(i = 0 ; i < par.act.size() ; i++)
-                    if(par.act[i].type == ActuatorType::CUP && par.act[i].cupActuator.full)
-                        break;
+                case DROP_CUP_END:
 
-                if(i == par.act.size())
-                    for(Obj* i : par.obj)
-                        if((i->type() == E_DROP_CUP) && (i->state() == ACTIVE))
-                            i->state() = WAIT_MES;
+                    unsigned int i;
+                    Point2D<float> posActuator, posRobot(par.obs[0].c.x, par.obs[0].c.y);
 
-                _state = FINISH;
-                return 0;
+                    for(Actuator& i : par.act){
+                        if(i.type == ActuatorType::CUP && i.id == _actuator_select){
+                            i.cupActuator.full = false;
+                            i.cupActuator.distributor = false;
+                            posActuator = par.posRobot.tranform(i.angle + par.angleRobot, i.pos);
+                            servo.lockPince(i.id);
+                            servo.downPince(i.id);
+                            break;
+                        }
+                    }
+
+                    for(i = START_CUP ; i < START_CUP + 5 ; i++){
+                        if(!par.obs[i].active){
+                            par.obs[i].active = 1;
+                            par.obs[i].c = {posActuator.x, posActuator.y};
+                            par.obs[i].r = 5 + R_ROBOT;
+                            par.obsUpdated[i]++;
+                            break;
+                        }
+                    }
+                    if(i == START_CUP + 5)
+                        logs << ERR << "Magic Cup ??";
+
+                    for(i = 0 ; i < par.act.size() ; i++)
+                        if(par.act[i].type == ActuatorType::CUP && par.act[i].cupActuator.full)
+                            break;
+
+                    if(i == par.act.size())
+                        for(Obj* i : par.obj)
+                            if((i->type() == E_DROP_CUP) && (i->state() == ACTIVE))
+                                i->state() = WAIT_MES;
+
+                    _state = FINISH;
+                    return 0;
+
             }
+
             return 1;
         }
         eObj_t type() const override {
@@ -100,6 +121,7 @@ class DropCup : public Obj{
     public:
         int EP_selected;
         Point2D<float> destPoint;
+        StepdropCup step;
 
 };
 
