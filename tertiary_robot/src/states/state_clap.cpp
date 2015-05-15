@@ -30,7 +30,7 @@ void initClap1_YELLOW(sState *prev)
 	{
 
 			#ifdef DEBUG
-				Serial.println("debut clap1");
+				Serial.println("debut clap1 YELLOW");
 			#endif
 		    if (prev==&sPause)
 		    	{
@@ -46,7 +46,7 @@ void initClap1_YELLOW(sState *prev)
 		    	}
 		    	else{servoClap.write(CLAPGREEN);}
 		    }
-		    int limits[NB_SHARP]={0,20};
+		    int limits[NB_SHARP]={0,15};
 		    	    sharpSetLim(limits);
 	}
 
@@ -77,8 +77,7 @@ sState *testClap1_YELLOW()
 		    static unsigned long sharptime = 0;
 			if(periodicProgTraj(Clap1_YELLOW_traj,&st_saveTime,&i,&prev_millis))
 			 	{
-				emergencyStop();
-				return &sDead;
+				return &sTrajBetweenClaps_YELLOW;
 			 	}
 
 			 if (millis() - _matchStart >= TIME_MATCH_STOP){
@@ -115,7 +114,7 @@ void initClap1_GREEN(sState *prev)
 	{
 
 			#ifdef DEBUG
-				Serial.println("debut clap1");
+				Serial.println("debut clap1 GREEN");
 			#endif
 		    if (prev==&sPause)
 		    	{
@@ -131,7 +130,7 @@ void initClap1_GREEN(sState *prev)
 		    	}
 		    	else{servoClap.write(CLAPGREEN);}
 		    }
-		    int limits[RAD_NB_PTS]={0,20};
+		    int limits[RAD_NB_PTS]={0,15};
 		    	    sharpSetLim(limits);
 	}
 
@@ -151,7 +150,7 @@ void deinitClap1_GREEN(sState *next)
 }
 
 trajElem Clap1_GREEN_traj[]={
-	{-500,3,3000},
+	{-500,5,3000},
 	{0,0,0}
 };
 
@@ -167,8 +166,7 @@ sState *testClap1_GREEN()
 			 	}
 
 			 if (millis() - _matchStart >= TIME_MATCH_STOP){
-				 emergencyStop();
-				 return &sDead;
+				 return &sTrajBetweenClaps_GREEN;
 			 }
 
 			 if (sharpIntrusion()){
@@ -197,11 +195,11 @@ sState sClap1_GREEN={
 };
 
 
-void initClap2(sState *prev)
+void initClap2_YELLOW(sState *prev)
 	{
 
 			#ifdef DEBUG
-				Serial.println("debut clap1");
+				Serial.println("debut clap2 YELLOW");
 			#endif
 		    if (prev==&sPause)
 		    	{
@@ -209,6 +207,7 @@ void initClap2(sState *prev)
 					Serial.println("\tback from pause");
 				#endif
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		        _backFromPause=1;
 		    	}
 		    else{
 		    	if (digitalRead(PIN_COLOR)==COLOR_YELLOW){
@@ -216,11 +215,11 @@ void initClap2(sState *prev)
 		    	}
 		    	else{servoClap.write(CLAPGREEN);}
 		    }
-		    uint16_t limits[RAD_NB_PTS]={30,0};
-		    	radarSetLim(limits);
+		    int limits[RAD_NB_PTS]={0,15};
+		    sharpSetLim(limits);
 	}
 
-void deinitClap2(sState *next)
+void deinitClap2_YELLOW(sState *next)
 	{
 		    if (next==&sPause)
 		    	{
@@ -235,39 +234,127 @@ void deinitClap2(sState *next)
 		    	}
 }
 
-trajElem Clap2_traj[]={
-		        {30,0,5500},
-		};
+trajElem TrajClap2_YELLOW[]={
+	{-500,-5,3000},
+	{0,0,0}
+};
 
-sState *testClap2()
+sState *testClap2_YELLOW()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-
-			if(periodicProgTraj(Clap2_traj,&st_saveTime,&i,&prev_millis))
-			 	{
-				if (digitalRead(PIN_COLOR) == COLOR_YELLOW){
-					return &sTrajYellowFinal;
-				}
-				else{
-				return &sTrajGreenFinal;
-				}
-			 	}
-
-			 if (millis() - _matchStart >= TIME_MATCH_STOP){
-				 emergencyStop();
-				 return &sDead;
+		    static unsigned long sharptime = 0;
+			if(periodicProgTraj(TrajClap2_YELLOW,&st_saveTime,&i,&prev_millis)){
+				emergencyStop();
+				return &sDead;
+			}
+			if (millis() - _matchStart >= TIME_MATCH_STOP){
+				emergencyStop();
+				return &sDead;
 			 }
-
-		if (radarIntrusion()) return &sPause;
+			 if (sharpIntrusion()){
+				if(sharptime == 0){
+					sharptime = millis();
+			 	}
+				else{
+					if( (millis() - sharptime) > TIME_SHARP ){
+						sharptime = 0;
+						return &sPause;
+					}
+				}
+			 }
+			 else{
+			sharptime = 0;
+		}
 	    return 0;
 	}
 
-sState sClap2={
+sState sClap2_YELLOW={
         BIT(E_MOTOR)|BIT(E_RADAR),
-        &initClap2,
-        &deinitClap2,
-        &testClap2
+        &initClap2_YELLOW,
+        &deinitClap2_YELLOW,
+        &testClap2_YELLOW
 };
 
+
+void initClap2_GREEN(sState *prev)
+	{
+
+			#ifdef DEBUG
+				Serial.println("debut clap2 GREEN");
+			#endif
+		    if (prev==&sPause)
+		    	{
+				#ifdef DEBUG
+					Serial.println("\tback from pause");
+				#endif
+		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		        _backFromPause=1;
+		    	}
+		    else{
+		    	if (digitalRead(PIN_COLOR)==COLOR_YELLOW){
+		    		servoClap.write(CLAPYELLOW);
+		    	}
+		    	else{servoClap.write(CLAPGREEN);}
+		    }
+		    int limits[RAD_NB_PTS]={0,15};
+		    sharpSetLim(limits);
+	}
+
+void deinitClap2_GREEN(sState *next)
+	{
+		    if (next==&sPause)
+		    	{
+		        st_prevSaveTime=st_saveTime;
+		        st_saveTime=millis();
+		    	}
+		    else
+		    	{
+		        st_saveTime=0;
+		        st_prevSaveTime=0;
+		        servoClap.write(CLAPNEUTRAL);
+		    	}
+}
+
+trajElem TrajClap2_GREEN[]={
+	{-500,5,3000},
+	{0,0,0}
+};
+
+sState *testClap2_GREEN()
+	{
+	static int i=0;
+		    static unsigned long prev_millis=0;
+		    static unsigned long sharptime = 0;
+			if(periodicProgTraj(TrajClap2_YELLOW,&st_saveTime,&i,&prev_millis)){
+				emergencyStop();
+				return &sDead;
+			}
+			if (millis() - _matchStart >= TIME_MATCH_STOP){
+				emergencyStop();
+				return &sDead;
+			 }
+			 if (sharpIntrusion()){
+				if(sharptime == 0){
+					sharptime = millis();
+			 	}
+				else{
+					if( (millis() - sharptime) > TIME_SHARP ){
+						sharptime = 0;
+						return &sPause;
+					}
+				}
+			 }
+			 else{
+			sharptime = 0;
+		}
+	    return 0;
+	}
+
+sState sClap2_GREEN={
+        BIT(E_MOTOR)|BIT(E_RADAR),
+        &initClap2_GREEN,
+        &deinitClap2_GREEN,
+        &testClap2_GREEN
+};
 

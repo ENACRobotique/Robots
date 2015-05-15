@@ -10,7 +10,8 @@
 
 extern sState sClap1_YELLOW;
 extern sState sClap1_GREEN;
-extern sState sClap2;
+extern sState sClap2_YELLOW;
+extern sState sClap2_GREEN;
 
 
 
