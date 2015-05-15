@@ -29,8 +29,8 @@
 #define PIN_LED 13
 #define PIN_CLAP 3
 #define PIN_COLOR 12
-#define PIN_SHARP1 A1
-#define PIN_SHARP2 A2
+#define PIN_SHARP1 A2
+#define PIN_SHARP2 A3
 //times
 #define TIME_MATCH_STOP 90000   //in ms
 
@@ -38,7 +38,7 @@
 #define TIRETTE_IN HIGH
 #define DEBOUNCE_DELAY 100 //(in ms)
 
-#define ANGLE_ZERO      30
+#define ANGLE_ZERO      32
 #define DIR_SERVO_START 0// rem : en tenant compte de ANGLE_ZERO
 
 #define COLOR_GREEN LOW
@@ -48,8 +48,8 @@
 #define RADAR_SAFETY_TIME 500 //in ms
 
 #define CLAPNEUTRAL 100
-#define CLAPYELLOW 176
-#define CLAPGREEN 37
+#define CLAPYELLOW 35
+#define CLAPGREEN 160
 
 #define US_LOWEST_ADDR 0xE2
 #define SHARP_ONLY
