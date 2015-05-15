@@ -23,6 +23,7 @@
 #include "state_wall.h"
 #include "state_wait.h"
 #include "state_dead.h"
+#include "sharp_2d120x.h"
 
 static unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
 
@@ -40,7 +41,7 @@ void initTrajGreen(sState *prev)
 	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 	    	}
 	    uint16_t limits[RAD_NB_PTS]={40,40};
-	   	    		radarSetLim(limits);
+	    sharpSetLim(limits);
 	}
 
 void deinitTrajGreen(sState *next)
