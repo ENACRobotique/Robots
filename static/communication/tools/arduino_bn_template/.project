@@ -96,12 +96,12 @@
 		<link>
 			<name>arduinolib/Wire</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/arduino/libraries/Wire</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/core/arduino/libraries/Wire</locationURI>
 		</link>
 		<link>
 			<name>lib/Core</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/shared/Core</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/core/shared/Core</locationURI>
 		</link>
 		<link>
 			<name>lib/Timeout</name>
