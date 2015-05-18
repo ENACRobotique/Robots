@@ -23,7 +23,7 @@ extern "C" {
 #define DEVICE_ADDR_SIZE 8      //in bits, on a 16 bits address. Must equal the larger size of the address in the different subnetworks
 
 //masks
-#define SUBNET_MASK (0xff<<DEVICE_ADDR_SIZE)  //on a 16-bits address
+#define SUBNET_MASK  ( ~(BIT(DEVICE_ADDR_SIZE)-1) )
 #define DEVICEX_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
 #define DEVICEI_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
 #define DEVICEU_MASK ( BIT(DEVICE_ADDR_SIZE)-1 )
@@ -37,8 +37,8 @@ extern "C" {
 #define SUBNETX     (1<<DEVICE_ADDR_SIZE)
 #define SUBNETI     (2<<DEVICE_ADDR_SIZE)   // MAIN
 #define SUBNETU1    (3<<DEVICE_ADDR_SIZE)   // DEBUG
-#define SUBNETD1    (4<<DEVICE_ADDR_SIZE)   // DEBUG
-#define SUBNETU2    (5<<DEVICE_ADDR_SIZE)   // MAIN
+#define SUBNETU2    (4<<DEVICE_ADDR_SIZE)   // MAIN
+#define SUBNETD1    (5<<DEVICE_ADDR_SIZE)   // DEBUG
 #define SUBNETD2    (6<<DEVICE_ADDR_SIZE)   // MAIN
 
 //xbee addresses
@@ -56,6 +56,7 @@ extern "C" {
 #define ADDRI_MAIN_PROP         ( (2<<1)    | SUBNETI )
 #define ADDRI_MAIN_IO           ( (3<<1)    | SUBNETI )
 #define ADDRI_DBGBRIDGE         ( (4<<1)    | SUBNETI )
+#define ADDRI_DEBUG             ( (5<<1)    | SUBNETI )
 
 //UART addresses (SUBNETU1 ; DEBUG)
 #define ADDRU1_DBGBRIDGE        ( 1         | SUBNETU1 )
@@ -63,7 +64,7 @@ extern "C" {
 
 //UART addresses (SUBNETU2)
 #define ADDRU2_MAIN_PROP        ( 1         | SUBNETU2 )
-#define ADDRU2_MAIN_AI          ( 2         | SUBNETU2 )
+#define ADDRU2_MAIN_AIBRIDGE    ( 2         | SUBNETU2 )
 
 //UDP addresses (SUBNETD1 ; DEBUG)
 #define ADDRD1_DEBUG1           ( 1         | SUBNETD1 )
@@ -78,12 +79,14 @@ extern "C" {
 //UDP addresses (SUBNETD2)
 #define ADDRD2_MAIN_AI          ( 1         | SUBNETD2 )
 #define ADDRD2_MAIN_VIDEO       ( 2         | SUBNETD2 )
+#define ADDRD2_MAIN_AIBRIDGE    ( 3         | SUBNETD2 )
 
-//default debug address :
+//default addresses
+#define ADDR_DEBUG_DFLT         (ADDRI_DEBUG)   // servo tester connected on robot
 #define ADDR_MONITORING_DFLT    (ADDRD1_MONITORING)
-#define ADDR_AI_DFLT            (ADDRD2_MAIN_AI)
-#define ADDR_PROP_DFLT          (ADDRI_MAIN_PROP)
-#define ADDR_DEBUG_DFLT         (ADDRX_DEBUG)
+#define ADDR_PRIM_AI_DFLT       (ADDRD2_MAIN_AI)
+#define ADDR_PRIM_PROP_DFLT     (ADDRI_MAIN_PROP)
+#define ADDR_PRIM_VIDEO_DFLT    (ADDRD2_MAIN_VIDEO)
 
 /* Interface enum
  *
@@ -93,7 +96,7 @@ typedef enum{
     IF_I2C,
     IF_UART,
     IF_UDP,
-    IF_LOCAL,     //virtual interface, describing local node. A message send to "self" should be popped out and "given" to the node through the sb_receive() api
+    IF_LOCAL,   //virtual interface, describing local node. A message send to "self" should be popped out and "given" to the node through the sb_receive() api
     IF_DROP,    //virtual interface, equivalent to /dev/null in linux
 
     IF_COUNT
