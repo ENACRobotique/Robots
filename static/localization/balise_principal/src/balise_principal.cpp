@@ -45,10 +45,10 @@ mainState state=S_CHECKREMOTE;
 #endif
 
 sDeviceInfo devicesInfo[D_AMOUNT];
-int iDeviceSync=0,iDevicePeriodBcast=0;
+int iDevicePeriodBcast=0;
 int lastIndex=0;    // to detect new turn in game state
 uint32_t endSync = 0;
-sMsg inMsg,outMsg;
+sMsg inMsg;
 
 unsigned long sw=0, sw2=0;
 
@@ -124,6 +124,7 @@ void loop(){
         time_prev_period = millis();
 
         //bcast to current device
+        sMsg outMsg;
         outMsg.header.destAddr=devicesInfo[iDevicePeriodBcast].addr;
         outMsg.header.type=E_PERIOD;
         outMsg.header.size=sizeof(outMsg.payload.period);
@@ -190,7 +191,8 @@ void loop(){
                 bn_printfDbg("%hx offline (error : %d)\n",devicesInfo[i].addr,err);
 #endif
                 switchState = 0;
-#ifdef SYNC_GLOLAB
+#ifdef SYNC_GLOBAL
+                sMsg outMsg;
                 outMsg.header.destAddr = gs_getBeaconQueryOrigin();
                 outMsg.header.type = E_SYNC_RESPONSE;
                 outMsg.header.size = sizeof(outMsg.payload.syncResponse.nb) + sizeof(outMsg.payload.syncResponse.cfgs[0]);
