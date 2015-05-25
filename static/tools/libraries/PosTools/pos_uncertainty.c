@@ -34,8 +34,8 @@ void varxya2abc(float var_x, float var_y, float an, s2DPUncert_internal *o){
 
     float ca = cosf(an), sa = sinf(an);
 
-    var_x = CLAMP(MINVARIANCE, var_x, MAXVARIANCE);
-    var_y = CLAMP(MINVARIANCE, var_y, MAXVARIANCE);
+    var_x = CLAMP(MINVARIANCE_XY, var_x, MAXVARIANCE_XY);
+    var_y = CLAMP(MINVARIANCE_XY, var_y, MAXVARIANCE_XY);
 
     o->a = ca*ca/(2*var_x) + sa*sa/(2*var_y);
     o->b = ca*sa*(1/var_x - 1/var_y)/2;
@@ -73,15 +73,25 @@ void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
 }
 
 void gstatus2internal(sGenericPosStatus *i, s2DPUncert_internal *o){
+    // linear position
     varxya2abc(i->pos_u.a_var, i->pos_u.b_var, i->pos_u.a_angle, o);
     o->x = i->pos.x;
     o->y = i->pos.y;
+
+    // angular position
+    o->d = 1/(2*CLAMP(MINVARIANCE_THETA, i->pos_u.theta_var, MAXVARIANCE_THETA));
+    o->theta = i->pos.theta;
 }
 
 void internal2gstatus(s2DPUncert_internal *i, sGenericPosStatus *o){
+    // linear position
     abc2varxya(i, &o->pos_u.a_var, &o->pos_u.b_var, &o->pos_u.a_angle);
     o->pos.x = i->x;
     o->pos.y = i->y;
+
+    // angular position
+    o->pos_u.theta_var = 1/(2*i->d);
+    o->pos.theta = i->theta;
 }
 
 void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o){
@@ -97,7 +107,7 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     gstatus2internal(i1, &pg);
     gstatus2internal(i2, &mn);
 
-    // actual calculation
+    // actual calculation (linear position)
     nw.a = pg.a + mn.a;
     nw.b = pg.b + mn.b;
     nw.c = pg.c + mn.c;
@@ -107,6 +117,14 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     float H = -(mn.b*(mn.x - pg.x) + mn.c*(mn.y - pg.y));
     nw.x = (H*nw.b - G*nw.c) / den + pg.x;
     nw.y = (G*nw.b - H*nw.a) / den + pg.y;
+
+    // actual calculation (angular position)
+    nw.d = pg.d + mn.d;
+
+    float mn_theta = mn.theta;
+    while(pg.theta - mn_theta > M_PI) mn_theta -= 2*M_PI;
+    while(pg.theta - mn_theta < -M_PI) mn_theta += 2*M_PI;
+    nw.theta = (pg.d*pg.theta + mn.d*mn_theta)/nw.d;
 
     // fill output
     o->id = i1->id;
@@ -122,10 +140,14 @@ s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
     gstatus2internal(i, &ii);
 
     s2DPAProbability o;
-    float x = p->x - ii.x;
-    float y = p->y - ii.y;
+    float dx = p->x - ii.x;
+    float dy = p->y - ii.y;
+    float dtheta = p->theta - ii.theta;
+    while(dtheta > M_PI) dtheta -= 2*M_PI;
+    while(dtheta < -M_PI) dtheta += 2*M_PI;
 
-    o.xy_probability = expf(-(ii.a*x*x + 2*ii.b*x*y + ii.c*y*y))/(2*M_PI*sqrtf(i->pos_u.a_var*i->pos_u.b_var));
-    o.theta_probability = 0.f;
+    o.xy_probability = expf(-(ii.a*dx*dx + 2*ii.b*dx*dy + ii.c*dy*dy))/(2*M_PI*sqrtf(i->pos_u.a_var*i->pos_u.b_var));
+    o.theta_probability = expf(-ii.d*dtheta*dtheta)/sqrtf(2*M_PI*i->pos_u.theta_var);
+
     return o;
 }

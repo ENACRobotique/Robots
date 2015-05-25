@@ -24,20 +24,18 @@ void dump_gstatus(sGenericPosStatus *gs, char *prefix){
     printf("%s  a:% -15.5g\n", prefix, o.a);
     printf("%s  b:% -15.5g\n", prefix, o.b);
     printf("%s  c:% -15.5g\n", prefix, o.c);
+    printf("%s  d:% -15.5g\n", prefix, o.d);
 
     printf("%s     BEFORE        AFTER\n", prefix);
     printf("%spos:\n", prefix);
     printf("%s  x:% -10.5fcm  % -10.5f\n", prefix, gs->pos.x, oo.pos.x);
     printf("%s  y:% -10.5fcm  % -10.5f\n", prefix, gs->pos.y, oo.pos.y);
-    printf("%s  a:% -10.5f°   % -10.5f\n", prefix, gs->pos.theta * 180. / M_PI,
-            oo.pos.theta * 180. / M_PI);
+    printf("%s  t:% -10.5f°   % -10.5f\n", prefix, gs->pos.theta * 180. / M_PI, oo.pos.theta * 180. / M_PI);
     printf("%spos_u:\n", prefix);
-    printf("%s  av:% -9.5fcm² % -10.5f\n", prefix, gs->pos_u.a_var,
-            oo.pos_u.a_var);
-    printf("%s  bv:% -9.5fcm² % -10.5f\n", prefix, gs->pos_u.b_var,
-            oo.pos_u.b_var);
-    printf("%s  an:% -9.5f°   % -10.5f\n", prefix,
-            gs->pos_u.a_angle * 180. / M_PI, oo.pos_u.a_angle * 180. / M_PI);
+    printf("%s  av:% -10.5fcm² % -10.5f\n", prefix, gs->pos_u.a_var, oo.pos_u.a_var);
+    printf("%s  bv:% -10.5fcm² % -10.5f\n", prefix, gs->pos_u.b_var, oo.pos_u.b_var);
+    printf("%s  an:% -10.5f°   % -10.5f\n", prefix, gs->pos_u.a_angle * 180. / M_PI, oo.pos_u.a_angle * 180. / M_PI);
+    printf("%s  tv:% -10.5f°²  % -10.5f\n", prefix, gs->pos_u.theta_var * powf(180. / M_PI, 2), oo.pos_u.theta_var * powf(180. / M_PI, 2));
 #else
     printf("%spos:\n", prefix);
     printf("%s  x:%.3fcm\n", prefix, gs->pos.x);
@@ -67,7 +65,7 @@ int main(int argc, char *argv[]){
     i1.pos_u.a_var = 100; // we are along a axis
     i1.pos_u.b_var = 0;
     i1.pos.theta = 0.;
-    i1.pos_u.theta = 0.;
+    i1.pos_u.theta_var = 0.;
 
     printf("i1:\n");
     dump_gstatus(&i1, "  ");
@@ -82,7 +80,7 @@ int main(int argc, char *argv[]){
     i2.pos_u.a_var = 10;
     i2.pos_u.b_var = 10;
     i2.pos.theta = 0.;
-    i2.pos_u.theta = 0.;
+    i2.pos_u.theta_var = 0.;
 
     printf("i2:\n");
     dump_gstatus(&i2, "  ");
@@ -94,9 +92,9 @@ int main(int argc, char *argv[]){
 
 #ifdef HAS_POS_UNCERTAINTY_INTERNALS
     {
-#define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= fabs(a)*(eps))
+#define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= fabs(a)*(eps) || (a) < 1e-25f)
 #define EXPECT_NEAR_PERCENT(a, b, eps, err) do {if(!IS_NEAR(a, b, eps)) {\
-    printf("!!!!i=%i  not near: %g%%, %s\n", i, fabs(((a) - (b))/((a)?(a):(b)))*100., err);\
+    printf("!!!!i=%i  not near: %g%%, %s\n", i, fabs(((a) - (b))/((a)?(a):(b)))*100, err);\
     printf("!!!! \""#a"\" evaluates to: %g\n", (a));\
     printf("!!!! \""#b"\" evaluates to: %g\n", (b));\
     dump_gstatus(&in, "!!!!  ");\
@@ -104,7 +102,7 @@ int main(int argc, char *argv[]){
 }\
 } while(0)
 
-#define THRESHOLD (0.03/100.)
+#define THRESHOLD (0.03f/100)
 
         s2DPUncert_internal tmp;
         sGenericPosStatus in = { 0 }, out = { 0 };
@@ -116,10 +114,10 @@ int main(int argc, char *argv[]){
             in.pos.x = rand_uniform(0, 300);
             in.pos.y = rand_uniform(0, 200);
             in.pos_u.a_angle = rand_uniform(-M_PI, M_PI);
-            in.pos_u.a_var = rand_uniform(MINVARIANCE, MAXVARIANCE);
-            in.pos_u.b_var = rand_uniform(MINVARIANCE, MAXVARIANCE);
-            in.pos.theta = 0.;
-            in.pos_u.theta = 0.;
+            in.pos_u.a_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            in.pos_u.b_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            in.pos.theta = rand_uniform(-M_PI, M_PI);
+            in.pos_u.theta_var = rand_uniform(MINVARIANCE_THETA, MAXVARIANCE_THETA);
 
             gstatus2internal(&in, &tmp);
             internal2gstatus(&tmp, &out);
@@ -138,8 +136,8 @@ int main(int argc, char *argv[]){
                 s2DPAProbability ipap = pos_uncertainty_eval(&in, &pa);
                 s2DPAProbability opap = pos_uncertainty_eval(&out, &pa);
 
-                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 0.05f, "xy_prob");
-//                EXPECT_NEAR_PERCENT(ipap.theta_probability, opap.theta_probability, THRESHOLD, "theta_prob");
+                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 0.02f, "xy_prob");
+                EXPECT_NEAR_PERCENT(ipap.theta_probability, opap.theta_probability, THRESHOLD, "theta_prob");
             }
         }
 
