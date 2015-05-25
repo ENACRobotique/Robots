@@ -23,7 +23,7 @@ void pos_uncertainty_step_update(sGenericPosStatus *prev, sGenericPosStatus *nex
 
 // see static/locomotion/simu for design files
 
-void varxya2abc(float var_x, float var_y, float ca, float sa, s2DPUncert_internal *o){
+void varxya2abc(float var_x, float var_y, float an, s2DPUncert_internal *o){
 // Converts rotated 2D gaussian to quadratic form coefficients
 //   input:  f(x, y) = X²/(2*var_x) + Y²/(2*var_y)
 //               where: X =  cos(an)*x + sin(an)*y
@@ -31,6 +31,8 @@ void varxya2abc(float var_x, float var_y, float ca, float sa, s2DPUncert_interna
 //               where: cos(an) = ca
 //                      sin(an) = sa
 //   output: f(x, y) = ax² + 2bxy + cy²
+
+    float ca = cosf(an), sa = sinf(an);
 
     var_x = CLAMP(MINVARIANCE, var_x, MAXVARIANCE);
     var_y = CLAMP(MINVARIANCE, var_y, MAXVARIANCE);
@@ -71,7 +73,7 @@ void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
 }
 
 void gstatus2internal(sGenericPosStatus *i, s2DPUncert_internal *o){
-    varxya2abc(i->pos_u.a_var, i->pos_u.b_var, cosf(i->pos_u.a_angle), sinf(i->pos_u.a_angle), o);
+    varxya2abc(i->pos_u.a_var, i->pos_u.b_var, i->pos_u.a_angle, o);
     o->x = i->pos.x;
     o->y = i->pos.y;
 }
@@ -87,7 +89,6 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
 
     // necessary verifications
     assert(i1 && i2 && o);
-    assert(i1->pos.frame == FRAME_PLAYGROUND);
     assert(i1->pos.frame == i2->pos.frame);
     assert(i1->id == i2->id);
     assert(i1->date == i2->date);
@@ -111,7 +112,7 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     o->id = i1->id;
     o->date = i1->date;
     internal2gstatus(&nw, o);
-    o->pos.frame = FRAME_PLAYGROUND;
+    o->pos.frame = i1->pos.frame;
 }
 
 s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
@@ -123,7 +124,8 @@ s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
     s2DPAProbability o;
     float x = p->x - ii.x;
     float y = p->y - ii.y;
-    o.xy_probability = ii.a*x*x + 2*ii.b*x*y + ii.c*y*y;
+
+    o.xy_probability = expf(-(ii.a*x*x + 2*ii.b*x*y + ii.c*y*y))/(2*M_PI*sqrtf(i->pos_u.a_var*i->pos_u.b_var));
     o.theta_probability = 0.f;
     return o;
 }

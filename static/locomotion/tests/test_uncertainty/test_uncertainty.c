@@ -6,8 +6,6 @@
  */
 
 #include <math.h>
-#include <messages-elements.h>
-#include <messages-position.h>
 #include <messages-statuses.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -96,9 +94,11 @@ int main(int argc, char *argv[]){
 
 #ifdef HAS_POS_UNCERTAINTY_INTERNALS
     {
-#define IS_NEAR(a, b, eps) (fabs(((a) - (b))/(a)) < (eps))
+#define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= fabs(a)*(eps))
 #define EXPECT_NEAR_PERCENT(a, b, eps, err) do {if(!IS_NEAR(a, b, eps)) {\
-    printf("!!!!i=%i  not near: %g%%, %s\n", i, fabs(((a) - (b))/(a))*100., err);\
+    printf("!!!!i=%i  not near: %g%%, %s\n", i, fabs(((a) - (b))/((a)?(a):(b)))*100., err);\
+    printf("!!!! \""#a"\" evaluates to: %g\n", (a));\
+    printf("!!!! \""#b"\" evaluates to: %g\n", (b));\
     dump_gstatus(&in, "!!!!  ");\
     exit(1);\
 }\
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]){
                 s2DPAProbability ipap = pos_uncertainty_eval(&in, &pa);
                 s2DPAProbability opap = pos_uncertainty_eval(&out, &pa);
 
-                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, THRESHOLD, "xy_prob");
+                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 0.05f, "xy_prob");
 //                EXPECT_NEAR_PERCENT(ipap.theta_probability, opap.theta_probability, THRESHOLD, "theta_prob");
             }
         }
