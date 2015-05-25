@@ -30,7 +30,7 @@ typedef struct __attribute__((packed)){
 
 typedef struct __attribute__((packed)){
 // uncertainty (oriented 2D ellipse)
-    float theta;      // uncertainty of the 2D orientation (rad)
+    float theta_var;  // uncertainty of the 2D orientation (rad²)
     float a_angle;    // orientation of the uncertainty ellipse along "a" axis (rad)
     float a_var;      // variance along "a" axis (cm²)
     float b_var;      // variance along "b" axis (cm²)

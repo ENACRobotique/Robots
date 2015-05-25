@@ -82,7 +82,7 @@ int ph_get_pos(sGenericPosStatus *s, sDate date){
         }
         s->pos_u.a_angle = (ta * (float)TP_GET_Us(periodBefore) + tb * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
     }
-    s->pos_u.theta = (phAfter->s.pos_u.theta * (float)TP_GET_Us(periodBefore) + phBefore->s.pos_u.theta * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
+    s->pos_u.theta_var = (phAfter->s.pos_u.theta_var * (float)TP_GET_Us(periodBefore) + phBefore->s.pos_u.theta_var * (float)TP_GET_Us(periodAfter))/(float)TP_GET_Us(periodFull);
 
     return 0;
 }

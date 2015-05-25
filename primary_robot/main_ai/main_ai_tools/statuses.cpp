@@ -198,7 +198,6 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
 
     // create uncertainty if asked to
     if (srcUPR && srcUPG && dstUPG) {
-        dstUPG->theta = srcUPR->theta + srcUPG->theta;
         // TODO compute full uncertainty
     }
 }
