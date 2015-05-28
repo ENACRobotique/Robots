@@ -19,9 +19,9 @@ class Clap : public Obj{
         Clap(const unsigned int num);
         virtual ~Clap();
 
-        void initObj(paramObj) override;
-        int loopObj(paramObj) override;
-        eObj_t type() const override {return E_CLAP;};
+        void initObj(paramObj) ;
+        int loopObj(paramObj) ;
+        eObj_t type() const  {return E_CLAP;};
         //float gain(){return 1;};
 
     private :

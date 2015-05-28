@@ -212,7 +212,7 @@ float Obj::update(const bool /*axle*/,  std::vector<astar::sObs_t>& obs, const i
                 _dist = path_loc.dist;
             }
             _access_select_angle += _access[i].delta;
-            _access_select_angle = fmod(_access_select_angle, 2*M_PI);
+            _access_select_angle = fmodf(_access_select_angle, 2.f*M_PI);
             _access_select = _path.path[_path.path_len - 1].p2;
         }
     }

@@ -80,9 +80,9 @@ class Spot4 : public Obj{
         }
         virtual ~Spot4(){};
 
-        void initObj(paramObj) override {}
+        void initObj(paramObj)  {}
 
-        int loopObj(paramObj par) override{
+        int loopObj(paramObj par) {
             Vector2D<float> v2(0, 1);
 
             switch(_state_loc){
@@ -199,7 +199,7 @@ class Spot4 : public Obj{
             return 1;
         }
 
-        eObj_t type() const override {
+        eObj_t type() const  {
             return E_SPOT2;
         };
 
@@ -241,7 +241,7 @@ class Spot4 : public Obj{
         }
 
         bool distTheta(float angleRobot){
-            float deltaTheta = fabs(fmod(angleRobot - angleSelect, 2*M_PI));
+            float deltaTheta = fabs(fmodf(angleRobot - angleSelect, 2*M_PI));
 
             if( deltaTheta < RESOLUTION_ANGLE || deltaTheta > (2*M_PI - RESOLUTION_ANGLE))
                 return true;

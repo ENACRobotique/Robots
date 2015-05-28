@@ -31,9 +31,9 @@ class Cup : public Obj{
         Cup(const unsigned int num, vector<astar::sObs_t>& obs);
         virtual ~Cup();
 
-        void initObj(paramObj) override;
-        int loopObj(paramObj) override;
-        eObj_t type() const override {return E_CUP;};
+        void initObj(paramObj) ;
+        int loopObj(paramObj) ;
+        eObj_t type() const  {return E_CUP;};
 
         int updateDestPointOrient(paramObj par){
             unsigned int i;

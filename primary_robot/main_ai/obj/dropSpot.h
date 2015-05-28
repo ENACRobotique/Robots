@@ -37,7 +37,7 @@ class DropSpot : public Obj{
         }
         virtual ~DropSpot(){}
 
-        void initObj(paramObj par) override {
+        void initObj(paramObj par)  {
             for(Actuator& i : par.act){
                 if(i.type == ActuatorType::ELEVATOR && i.id == _actuator_select){
                     Point2D<float> posSpot(par.posRobot.tranform(i.angle + par.angleRobot, i.pos));
@@ -49,7 +49,7 @@ class DropSpot : public Obj{
                 }
             }
         }
-        int loopObj(paramObj par) override{
+        int loopObj(paramObj par) {
             if(destPoint.distanceTo(par.posRobot) < 1.){
                 unsigned int i;
                 Point2D<float> posActuator, posRobot(par.obs[0].c.x, par.obs[0].c.y);
@@ -89,7 +89,7 @@ class DropSpot : public Obj{
             }
             return 1;
         }
-        eObj_t type() const override {
+        eObj_t type() const  {
             return E_DROP_CUP;
         }
 

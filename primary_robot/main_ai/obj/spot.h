@@ -29,9 +29,9 @@ class Spot : public Obj{
         Spot(const unsigned int num, eColor_t color, vector<astar::sObs_t>& obs);
         virtual ~Spot();
 
-        void initObj(paramObj) override {};
-        int loopObj(paramObj) override;
-        eObj_t type() const override {return E_SPOT;};
+        void initObj(paramObj)  {};
+        int loopObj(paramObj) ;
+        eObj_t type() const  {return E_SPOT;};
 
 
         int updateDestPointOrient(paramObj par){

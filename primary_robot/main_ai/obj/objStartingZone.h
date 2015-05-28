@@ -91,9 +91,9 @@ class ObjStartingZone : public Obj{
         }
         virtual ~ObjStartingZone(){}
 
-        void initObj(paramObj) override {}
+        void initObj(paramObj)  {}
 
-        int loopObj(paramObj par) override{
+        int loopObj(paramObj par) {
             switch(stateLoc){
                 case GET_POS:
                     stateLoc = TRAJ1;
@@ -336,7 +336,7 @@ class ObjStartingZone : public Obj{
             return 1;
         }
 
-        eObj_t type() const override {
+        eObj_t type() const  {
             return E_OBJ_STARTING_ZONE;
         }
 
@@ -379,7 +379,7 @@ class ObjStartingZone : public Obj{
         }
 
         bool distTheta(float angleRobot){
-            float deltaTheta = fabs(fmod(angleRobot - angleSelect, 2*M_PI));
+            float deltaTheta = fabs(fmodf(angleRobot - angleSelect, 2*M_PI));
 
             if( deltaTheta < RESOLUTION_ANGLE || deltaTheta > (2*M_PI - RESOLUTION_ANGLE))
                 return true;

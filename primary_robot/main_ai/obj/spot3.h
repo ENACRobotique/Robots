@@ -46,14 +46,14 @@ class Spot3 : public Obj{
         }
         virtual ~Spot3(){}
 
-        void initObj(paramObj par) override {
+        void initObj(paramObj par)  {
             Point2D<float> posSpot(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y);
             Circle2D<float> c(posSpot, 15.);
             destPoint = c.project(par.posRobot);
             path.go2PointOrient(destPoint, par.obs, _access_select_angle);
         }
 
-        int loopObj(paramObj par) override{
+        int loopObj(paramObj par) {
             if(par.posRobot.distanceTo(destPoint) < 1.){
                 //TODO servo elevator
                 _state = FINISH;
@@ -69,7 +69,7 @@ class Spot3 : public Obj{
             return 1;
         }
 
-        eObj_t type() const override {
+        eObj_t type() const  {
             return E_SPOT3;
         }
 

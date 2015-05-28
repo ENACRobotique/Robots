@@ -18,7 +18,7 @@ public:
     Polygon2D();
     virtual ~Polygon2D();
 
-//    virtual bool contains(const Point2D<T>& pt) const override {
+//    virtual bool contains(const Point2D<T>& pt) const  {
 //        /*  std::array <Line, this->p.size()> l; //FIXME
 //
 //         for (unsigned int i = 0; i < this->p.size(); i++) {

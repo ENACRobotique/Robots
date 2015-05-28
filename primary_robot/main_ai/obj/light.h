@@ -43,7 +43,7 @@ class Light : public Obj{
         }
         virtual ~Light(){}
 
-        void initObj(paramObj par) override {
+        void initObj(paramObj par)  {
             destSelect = {8 + R_ROBOT, 100}; //3.5
             if(par.color == GREEN)
                 destSelect.x = 300. - destSelect.x;
@@ -51,7 +51,7 @@ class Light : public Obj{
             path.go2PointOrient(destSelect, par.obs, _access_select_angle);
 
         }
-        int loopObj(paramObj par) override{
+        int loopObj(paramObj par) {
             switch(step){
                 case lightStep::GO_TO_LIGHT:
                     //TODO preparation servo
@@ -80,11 +80,11 @@ class Light : public Obj{
             return 1;
 
         }
-        eObj_t type() const override {
+        eObj_t type() const  {
             return E_LIGHT;
         }
 
-    int updateDestPointOrient(paramObj par) override{
+    int updateDestPointOrient(paramObj par) {
         unsigned int i;
 
         if(par.act.empty())

@@ -56,7 +56,7 @@ public:
         return l.project(p);
     }
     T squareDistance(const Point2D<T>& p) const {
-        return p.distanceSqTo(projecte(p));
+        return p.distanceSqTo(project(p));
     }
     T distance(const Point2D<T>& p) const {
         return sqrt(squareDistance(p));

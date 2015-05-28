@@ -44,9 +44,9 @@ class DropCup : public Obj{
         }
         virtual ~DropCup(){}
 
-        void initObj(paramObj) override {
+        void initObj(paramObj)  {
         }
-        int loopObj(paramObj par) override{
+        int loopObj(paramObj par) {
 
             switch(step){
                 case DROP_CUP_DROP:
@@ -114,7 +114,7 @@ class DropCup : public Obj{
 
             return 1;
         }
-        eObj_t type() const override {
+        eObj_t type() const  {
             return E_DROP_CUP;
         }
 

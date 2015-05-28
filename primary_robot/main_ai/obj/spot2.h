@@ -73,9 +73,9 @@ class Spot2 : public Obj{
         }
         virtual ~Spot2(){};
 
-        void initObj(paramObj) override {}
+        void initObj(paramObj)  {}
 
-        int loopObj(paramObj par) override{
+        int loopObj(paramObj par) {
 
             switch(_state_loc){
                 case FIRST_ELEMENT:
@@ -104,7 +104,7 @@ class Spot2 : public Obj{
                     break;
 
                 case WAIT_ROTATION:
-                    if(fabs(fmod(rotAngle - par.angleRobot, 2*M_PI)) < M_PI/180.){
+                    if(fabs(fmodf(rotAngle - par.angleRobot, 2*M_PI)) < M_PI/180.){
                         //TODO servo elevator
                         _state_loc = SECOND_ELEMENT;
                     }
@@ -148,7 +148,7 @@ class Spot2 : public Obj{
             return 1;
         }
 
-        eObj_t type() const override {
+        eObj_t type() const  {
             return E_SPOT2;
         };
 

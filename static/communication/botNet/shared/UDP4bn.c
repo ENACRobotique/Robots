@@ -16,6 +16,7 @@
 #include <netinet/in.h> // struct sockaddr_in
 #include <arpa/inet.h> // inet_pton()
 #include <errno.h> // errno
+#include <string.h> // memset()
 
 #include "global_errors.h"
 
@@ -23,7 +24,8 @@ int udpsockfd = -1; // file descriptor
 
 int UDP_init(){
     int ret;
-    struct sockaddr_in serv_addr = { 0 };
+    struct sockaddr_in serv_addr;
+    memset(&serv_addr, 0, sizeof(serv_addr));
 
     udpsockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if(udpsockfd < 0){
@@ -51,7 +53,8 @@ int UDP_receive(sMsg *msg){
     fd_set rset;
     struct timeval tv;
     socklen_t len;
-    struct sockaddr_in cli_addr = { 0 };
+    struct sockaddr_in cli_addr;
+    memset(&cli_addr, 0, sizeof(cli_addr));
 
     // check if there is any data
     FD_ZERO(&rset);
@@ -83,7 +86,8 @@ int UDP_receive(sMsg *msg){
 
 int UDP_send(const sMsg *msg, bn_Address nextHop){
     int ret;
-    struct sockaddr_in serv_addr = { 0 };
+    struct sockaddr_in serv_addr;
+    memset(&serv_addr, 0, sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(42000 + nextHop);
