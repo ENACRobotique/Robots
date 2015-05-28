@@ -18,7 +18,7 @@
 #define v_init(v, e) mt_v_init((v), (e), VEC_SHIFT)
 #define V_INITS(e) MT_V_INITS((e), VEC_SHIFT)
 
-void test_machtypes(){
+void test_machtypes() {
     printf("sizeof(int)=%zu\n", sizeof(int));
     printf("sizeof(long int)=%zu\n", sizeof(long int));
     printf("sizeof(long long int)=%zu\n", sizeof(long long));
@@ -27,7 +27,38 @@ void test_machtypes(){
     printf("sizeof(MT_MAT)=%zu\n", sizeof(MT_MAT));
 }
 
-void test_linearsolve(){
+void test_matrixadd() {
+#define MAT_SHIFT (20)
+
+    int ret;
+
+    MT_MAT A = M_INITS(2, 2);
+    MT_MAT B = M_INITS(2, 2);
+    MT_MAT ApB = M_INITS(2, 2);
+
+    MT_M_AT(&A, 0, 0) =  M_PI * dMSHIFT;
+    MT_M_AT(&A, 0, 1) = -2.   * dMSHIFT;
+    MT_M_AT(&A, 1, 0) =  3.   * dMSHIFT;
+    MT_M_AT(&A, 1, 1) =  1.5  * dMSHIFT;
+
+    MT_M_AT(&B, 0, 0) = -M_PI * dMSHIFT;
+    MT_M_AT(&B, 0, 1) =  2.   * dMSHIFT;
+    MT_M_AT(&B, 1, 0) = -3.   * dMSHIFT;
+    MT_M_AT(&B, 1, 1) = -1.5  * dMSHIFT;
+
+    ret = mt_mm_add(&A, &B, &ApB);
+    assert(!ret);
+
+    for(int i = 0; i < 2; i++) {
+        for(int j = 0; j < 2; j++) {
+            assert(MT_M_AT(&ApB, i, j) < 1);
+        }
+    }
+
+#undef MAT_SHIFT
+}
+
+void test_linearsolve() {
 #define MAT_SHIFT (16)
 #define VEC_SHIFT (16)
 
@@ -286,6 +317,7 @@ struct{
     char* s;
 } tests[]={
         {test_machtypes,   "Machine types"},
+        {test_matrixadd,   "A+B"},
         {test_linearsolve, "Ax=b solutions (using explicit matrix inversion)"},
         {test_invmatrix,   "Matrix inversion"},
         {test_mtdm_square, "Matrix^T*diag(d)*Matrix (square matrices)"},

@@ -17,6 +17,10 @@
 
 #include "mt_mat.h"
 
+/*
+ * TODO check if an element has incorrectly been used as input and output
+ */
+
 #define MRC(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 #define M64(m, r, c) (int64_t)(MRC(m, r, c))
 #define VEL(v, e) (v)->ve[(e)]
@@ -108,6 +112,36 @@ void mt_m_init(MT_MAT* m, uint8_t rows, uint8_t cols, uint8_t shift) {
     assert(!SUB64_OK(1, -1, -2));
     assert(!SUB64_OK(-1, 1, 2));
 #endif
+}
+
+/**
+ * Matrix-Matrix addition
+ * OUT = A + B
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_mm_add(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
+    register int i, j;
+    register int64_t sum;
+
+    if (A->cols != B->cols || A->rows != B->rows || A->shift != B->shift) {
+        return -1;
+    }
+
+    if (OUT->cols != A->cols || OUT->rows != A->rows) {
+        return -2;
+    }
+
+    OUT->shift = A->shift;
+
+    for (i = 0; i < OUT->rows; i++) {
+        for (j = 0; j < OUT->cols; j++) {
+            CHECKED_SUM32(MRC(A, i, j), MRC(B, i, j), MRC(OUT, i, j));
+        }
+    }
+
+    return 0;
 }
 
 /**
