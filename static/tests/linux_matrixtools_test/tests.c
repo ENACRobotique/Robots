@@ -178,6 +178,109 @@ void test_invmatrix() {
 #undef IpR
 }
 
+void test_mtdm_square() {
+#define MAT_SHIFT (27)
+#define VEC_SHIFT (27)
+
+    int ret;
+
+    // static allocation on stack matrices (no need to free those)
+    MT_MAT M_T = M_INITS(2, 2);
+    MT_VEC V_Mdiag = V_INITS(2);
+    MT_MAT M_product = M_INITS(2, 2);
+
+    MT_M_AT(&M_T, 0, 0) =  1 << MAT_SHIFT;
+    MT_M_AT(&M_T, 0, 1) =  1 << MAT_SHIFT;
+    MT_M_AT(&M_T, 1, 0) =  1 << MAT_SHIFT;
+    MT_M_AT(&M_T, 1, 1) = -1 << MAT_SHIFT;
+
+    MT_V_AT(&V_Mdiag, 0) = 0.1*0.1 * dMSHIFT;
+    MT_V_AT(&V_Mdiag, 1) = 0.01*0.01 * dMSHIFT;
+
+//#define TIME_PERFS
+
+#ifdef TIME_PERFS
+    struct timeval time;
+    gettimeofday(&time, 0);
+    long start_time = 1000000 * time.tv_sec + time.tv_usec;
+
+    for(int i = 0; i < 1000000; i++){
+#endif
+        ret = mt_mtdm_mlt(&M_T, &V_Mdiag, &M_product);
+        assert(!ret);
+#ifdef TIME_PERFS
+    }
+
+    gettimeofday(&time, 0);
+    long cur_time = 1000000 * time.tv_sec + time.tv_usec;
+
+    printf("duration: %li\n", cur_time - start_time);
+#else
+    printf("M_T, ");
+    mt_m_output(&M_T);
+    printf("V_Mdiag, ");
+    mt_v_output(&V_Mdiag);
+    printf("M_product, ");
+    mt_m_output(&M_product);
+#endif
+
+#undef MAT_SHIFT
+#undef VEC_SHIFT
+}
+
+void test_mtdm() {
+#define MAT_SHIFT (27)
+#define VEC_SHIFT (27)
+
+    int ret;
+
+    // static allocation on stack matrices (no need to free those)
+    MT_MAT M_T = M_INITS(3, 2);
+    MT_VEC V_Mdiag = V_INITS(3);
+    MT_MAT M_product = M_INITS(2, 2);
+
+    MT_M_AT(&M_T, 0, 0) =  1 << MAT_SHIFT;
+    MT_M_AT(&M_T, 0, 1) =  1 << MAT_SHIFT;
+    MT_M_AT(&M_T, 1, 0) =  1 << MAT_SHIFT;
+    MT_M_AT(&M_T, 1, 1) = -1 << MAT_SHIFT;
+    MT_M_AT(&M_T, 2, 0) =  2 << MAT_SHIFT;
+    MT_M_AT(&M_T, 2, 1) =  3 << MAT_SHIFT;
+
+    MT_V_AT(&V_Mdiag, 0) = 0.1*0.1 * dMSHIFT;
+    MT_V_AT(&V_Mdiag, 1) = 0.01*0.01 * dMSHIFT;
+    MT_V_AT(&V_Mdiag, 2) = 0.5*0.5 * dMSHIFT;
+
+//#define TIME_PERFS
+
+#ifdef TIME_PERFS
+    struct timeval time;
+    gettimeofday(&time, 0);
+    long start_time = 1000000 * time.tv_sec + time.tv_usec;
+
+    for(int i = 0; i < 1000000; i++){
+#endif
+        ret = mt_mtdm_mlt(&M_T, &V_Mdiag, &M_product);
+        assert(!ret);
+#ifdef TIME_PERFS
+    }
+
+    gettimeofday(&time, 0);
+    long cur_time = 1000000 * time.tv_sec + time.tv_usec;
+
+    printf("duration: %li\n", cur_time - start_time);
+#else
+    printf("M_T, ");
+    mt_m_output(&M_T);
+    printf("V_Mdiag, ");
+    mt_v_output(&V_Mdiag);
+    printf("M_product, ");
+    mt_m_output(&M_product);
+#endif
+
+#undef MAT_SHIFT
+#undef VEC_SHIFT
+}
+
 struct{
     void (*f)();
     char* s;
@@ -185,6 +288,8 @@ struct{
         {test_machtypes,   "Machine types"},
         {test_linearsolve, "Ax=b solutions (using explicit matrix inversion)"},
         {test_invmatrix,   "Matrix inversion"},
+        {test_mtdm_square, "Matrix^T*diag(d)*Matrix (square matrices)"},
+        {test_mtdm,        "Matrix^T*diag(d)*Matrix"},
 };
 
 int main() {

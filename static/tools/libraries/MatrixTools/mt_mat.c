@@ -6,12 +6,12 @@
  */
 
 #ifdef ARCH_X86_LINUX
-#define PERFORM_OVERFLOW_TESTS
+#   define PERFORM_OVERFLOW_TESTS
 #endif
 
 #include <stdint.h>
 #include <stdlib.h>
-#ifdef PERFORM_OVERFLOW_TESTS
+#   ifdef PERFORM_OVERFLOW_TESTS
 #include <assert.h>
 #endif
 
@@ -19,11 +19,13 @@
 
 #define MRC(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 #define M64(m, r, c) (int64_t)(MRC(m, r, c))
+#define VEL(v, e) (v)->ve[(e)]
+#define V64(v, e) (int64_t)(VEL(v, e))
 
 #ifdef PERFORM_OVERFLOW_TESTS
 
 #ifndef ABS
-#define ABS(v) ((v)<0ll ? -(v) : (v))
+#   define ABS(v) ((v)<0ll ? -(v) : (v))
 #endif
 // 2-steps shift, 1 doesn't work here (x86)
 #define MASK_32S(s) ((~((1ull<<(s))-1))<<32)
@@ -228,6 +230,39 @@ int mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
     }
 
     return 0;
+}
+
+/**
+ * MatrixTransposed-DiagMatrix-Matrix multiplication
+ * OUT = A^T*diag(d)*A
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_mtdm_mlt(const MT_MAT* A, const MT_VEC* d, MT_MAT* OUT) {
+    register int i, j;
+    register int64_t sum;
+    MT_MAT Atd = MT_M_INITS(A->cols, A->rows, A->shift);
+
+    if (A->rows != d->elts || A->shift != d->shift) {
+        return -1;
+    }
+
+    // compute A^T*diag(d)
+    for (i = 0; i < Atd.rows; i++) {
+        for (j = 0; j < Atd.cols; j++) {
+            sum = M64(A, j, i) * V64(d, j);
+
+#ifdef PERFORM_OVERFLOW_TESTS
+            assert(RSHIFT_C32_OK(sum, A->shift));
+#endif
+
+            MRC(&Atd, i, j)= sum >> A->shift;
+        }
+    }
+
+    // compute Atd*A
+    return mt_mm_mlt(&Atd, A, OUT);
 }
 
 /**
