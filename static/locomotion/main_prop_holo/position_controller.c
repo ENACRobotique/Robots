@@ -6,6 +6,9 @@
  */
 
 #include <mt_mat.h>
+#ifdef ARCH_X86_LINUX
+#   include <mt_io.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -36,6 +39,13 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
     mt_m_inv(&tc->M_spds_rob2pods, &tc->M_spds_pods2rob);
 #else
 #error "Case where NB_PODS != NB_SPDS is not yet implemented"
+#endif
+
+#ifdef ARCH_X86_LINUX
+    printf("rob2pods:");
+    mt_m_foutput(&tc->M_spds_rob2pods, stdout);
+    printf("pods2rob:");
+    mt_m_foutput(&tc->M_spds_pods2rob, stdout);
 #endif
 
     // Position uncertainty matrix
@@ -102,7 +112,7 @@ void posctlr_begin_update(position_controller_t* tc) {
 
 void _linear_control(position_controller_t* tc, int x_sp, int y_sp, int vx_sp, int vy_sp, MT_VEC* spd_cmd_rob);
 void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC* spd_cmd_rob);
-void _update_pos_uncertainty(position_controller_t* tc);
+void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods);
 
 void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp) {
     int i;
@@ -126,7 +136,7 @@ void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta
     }
 
     // final step, update position uncertainty
-    _update_pos_uncertainty(tc);
+    _update_pos_uncertainty(tc, &spd_cmd_pods);
 }
 
 void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta) {
@@ -213,21 +223,21 @@ void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC
     spd_cmd_rob->ve[2] = oz_sp + mf_get(&tc->mf_orien); // do not right shift inputs of RAD_SHIFT, keep resolution
 }
 
-void _update_pos_uncertainty(position_controller_t* tc) {
+void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods) {
     MT_VEC diag_var_spds_pods = MT_V_INITS(NB_PODS, MAT_SHIFT); // TODO calculate uncertainty of each pod wrt the setpoints and/or processvalues
-    diag_var_spds_pods.ve[0] = iROUND(DpS2IpP(0.1)*DpS2IpP(0.1)*dMoVarPodsSHIFT);
-    diag_var_spds_pods.ve[1] = iROUND(DpS2IpP(0.1)*DpS2IpP(0.1)*dMoVarPodsSHIFT);
-    diag_var_spds_pods.ve[2] = iROUND(DpS2IpP(0.1)*DpS2IpP(0.1)*dMoVarPodsSHIFT);
+    diag_var_spds_pods.ve[0] = SQRis(spd_cmd_pods->ve[0] << (MAT_SHIFT - SHIFT - 4), MAT_SHIFT) >> VAR_PODS_SHIFT;
+    diag_var_spds_pods.ve[1] = SQRis(spd_cmd_pods->ve[1] << (MAT_SHIFT - SHIFT - 4), MAT_SHIFT) >> VAR_PODS_SHIFT;
+    diag_var_spds_pods.ve[2] = SQRis(spd_cmd_pods->ve[2] << (MAT_SHIFT - SHIFT - 4), MAT_SHIFT) >> VAR_PODS_SHIFT;
 
     MT_MAT M_rob2pg = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
     memset(M_rob2pg.me, 0, sizeof(*M_rob2pg.me)*M_rob2pg.rows*M_rob2pg.cols);
-    MT_M_AT(&M_rob2pg, 0, 0) =  tc->cos_theta << (MAT_SHIFT - SHIFT); // FIXME calculate the full cos_theta and sin_theta, we have a lost of precision here
+    MT_M_AT(&M_rob2pg, 0, 0) =  tc->cos_theta << (MAT_SHIFT - SHIFT); // FIXME calculate the full cos_theta and sin_theta, we have a loss of precision here
     MT_M_AT(&M_rob2pg, 0, 1) = -tc->sin_theta << (MAT_SHIFT - SHIFT);
     MT_M_AT(&M_rob2pg, 1, 0) =  tc->sin_theta << (MAT_SHIFT - SHIFT);
     MT_M_AT(&M_rob2pg, 1, 1) =  tc->cos_theta << (MAT_SHIFT - SHIFT);
     MT_M_AT(&M_rob2pg, 2, 2) =  1 << MAT_SHIFT;
 
-    MT_MAT M_pods2pg = MT_M_INITS(NB_PODS, NB_SPDS, MAT_SHIFT);
+    MT_MAT M_pods2pg = MT_M_INITS(NB_SPDS, NB_PODS, MAT_SHIFT);
     mt_mm_mlt(&M_rob2pg, &tc->M_spds_pods2rob, &M_pods2pg);
 
     MT_MAT M_uncert_spds = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
@@ -237,4 +247,21 @@ void _update_pos_uncertainty(position_controller_t* tc) {
     mt_mm_add(&tc->M_uncert_pos, &M_uncert_spds, &tc->M_uncert_pos);
 
     // TODO clamp to max var
+
+#ifdef ARCH_X86_LINUX
+    printf("spd_cmd_pods:");
+    mt_v_foutput(spd_cmd_pods, stdout);
+
+    printf("diag_var_spds_pods:");
+    mt_v_foutput(&diag_var_spds_pods, stdout);
+
+    printf("M_pods2pg:");
+    mt_m_foutput(&M_pods2pg, stdout);
+
+    printf("M_uncert_spds:");
+    mt_m_foutput(&M_uncert_spds, stdout);
+
+    printf("M_uncert_pos:");
+    mt_m_foutput(&tc->M_uncert_pos, stdout);
+#endif
 }

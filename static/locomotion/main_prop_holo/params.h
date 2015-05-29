@@ -34,7 +34,7 @@
 #define dASHIFT ((double)(1 << (VEC_SHIFT + RAD_SHIFT)))
 
 // variance/uncertainty shifts
-#define VAR_POS_SHIFT (9)
+#define VAR_POS_SHIFT (1)
 #define dVarPosSHIFT ((double)(1 << VAR_POS_SHIFT))
 #define dRadVarPosSHIFT ((double)(1 << (RAD_SHIFT + VAR_POS_SHIFT)))
 
