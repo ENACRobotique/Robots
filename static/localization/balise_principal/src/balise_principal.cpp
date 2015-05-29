@@ -325,10 +325,10 @@ void loop(){
             // if measure message received
             case E_MEASURE :
                 int error;
-                switch (inMsg.header.srcAddr){
+                switch (inMsg->header.srcAddr){
                 case ADDRX_MOBILE_1 :
-                    if ( (error=handleMeasurePayload(&(inMsg.payload.mobileReport),inMsg.header.srcAddr))==-ERR_TRY_AGAIN ) {
-                        memcpy(&devicesInfo[D_MOBILE_1].lastData,&inMsg.payload.mobileReport,sizeof(sMobileReportPayload));
+                    if ( (error=handleMeasurePayload(&(inMsg->payload.mobileReport),inMsg->header.srcAddr))==-ERR_TRY_AGAIN ) {
+                        memcpy(&devicesInfo[D_MOBILE_1].lastData,&inMsg->payload.mobileReport,sizeof(sMobileReportPayload));
                     }
                     break;
                 case ADDRX_MOBILE_2 :
