@@ -48,7 +48,7 @@ sDeviceInfo devicesInfo[D_AMOUNT];
 int iDevicePeriodBcast=0;
 int lastIndex=0;    // to detect new turn in game state
 uint32_t endSync = 0;
-sMsg inMsg;
+sMsg inMsg={0};
 
 unsigned long sw=0, sw2=0;
 

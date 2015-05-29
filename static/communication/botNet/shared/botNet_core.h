@@ -51,6 +51,7 @@ int bn_sendAck(sMsg *msg);
 int bn_sendRetry(sMsg *msg, int retries);
 int bn_routine();
 int bn_receive(sMsg *msg);
+int bn_receivePtr(sMsg **msg);
 void bn_route(const sMsg *msg,E_IFACE ifFrom, sRouteInfo *routeInfo);
 int bn_forward(const sMsg *msg, E_IFACE ifFrom);
 

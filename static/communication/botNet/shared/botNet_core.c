@@ -39,7 +39,7 @@
 #include <stdio.h>
 
 //local message to "transmit" via bn_receive()
-sMsg localMsg;
+sMsg localMsg={0};
 int localReceived=0; //indicates whether a message is available for local or not
 
 //sequence number counter;
@@ -346,15 +346,18 @@ int bn_routine(){
 }
 
 /*
- * pops the oldest message unread in the incoming message buffer
+ * pops the oldest message unread. If there exist attached functions for this type of messages, they will be executed.
+ * Otherwise, msg will be written with the address of the received message.
  * Argument :
- *      msg : pointer to the memory area where the last message will be written
+ *      msg : pointer to pointer the memory area where the last message will be written
  * Return value :
- *      nb of bytes written to msg if a message has been received
+ *      size of the message in msg if a message has been received
  *      0 if nothing is available
  *      <0 on error
+ * /!\ WARNING : if the returned value is >0, the message stored at msg MUST be handled BEFORE the next call to bn_receivePtr
+ * or bn_receive as it may be overwritten.
  */
-int bn_receive(sMsg *msg){
+int bn_receivePtr(sMsg **msg){
     sAttach *elem=firstAttach;
     int ret=0;
 
@@ -389,10 +392,27 @@ int bn_receive(sMsg *msg){
     // if no function is attached to this type
     localReceived=0;
     if (msg==NULL) return -ERR_NULL_POINTER_WRITE_ATTEMPT;
-    memcpy(msg,&localMsg,sizeof(sMsg));
-    return (msg->header.size + sizeof(sGenericHeader));
+    (*msg) = &localMsg;
+    return ((*msg)->header.size + sizeof(sGenericHeader));
 }
 
+/* Kept for backward compatibility. See bn_receivePtr for details.
+ * Argument :
+ *      msg : pointer to the memory area where the last message will be written
+ * Return value :
+ *      size of the message in msg if a message has been received
+ *      0 if nothing is available
+ *      <0 on error
+ * /!\ WARNING : if the returned value is >0, the message stored at msg MUST be handled BEFORE the next call to bn_receivePtr
+ * or bn_receive as it may be overwritten.
+ */
+int bn_receive(sMsg *msg){
+    sMsg *retPtr=NULL;
+    int ret=0;
+    ret = bn_receivePtr(&retPtr);
+    if (ret > 0) memcpy(msg,retPtr,sizeof(sMsg));
+    return ret;
+}
 
 /*
  * Handles the routing of a message
