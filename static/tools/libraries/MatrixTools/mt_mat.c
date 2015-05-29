@@ -145,6 +145,77 @@ int mt_mm_add(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
 }
 
 /**
+ * Matrix shift change
+ * OUT = A (shift changed)
+ * returns  0 in case of success
+ *         -2 if bad output
+ */
+int mt_m_shift(const MT_MAT* A, const uint8_t new_shift, MT_MAT* OUT) {
+    register int i, j;
+
+    if (OUT->cols != A->cols || OUT->rows != A->rows) {
+        return -2;
+    }
+
+    if(A->shift > new_shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) >> (A->shift - new_shift);
+            }
+        }
+    }
+    else if(new_shift > A->shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) << (new_shift - A->shift);
+            }
+        }
+    }
+
+    OUT->shift = new_shift;
+
+    return 0;
+}
+
+/**
+ * Matrix multiply by a constant (being a power of 2) and shift to new base
+ * OUT = A (shift changed) << data_shift
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_m_mltshift(const MT_MAT* A, const uint8_t new_shift, const int8_t data_shift, MT_MAT* OUT) {
+    register int i, j;
+
+    if((int8_t)new_shift + data_shift < 0) {
+        return -1;
+    }
+
+    if (OUT->cols != A->cols || OUT->rows != A->rows) {
+        return -2;
+    }
+
+    if(A->shift > new_shift + data_shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) >> (A->shift - (new_shift + data_shift));
+            }
+        }
+    }
+    else if(new_shift + data_shift > A->shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) << ((new_shift + data_shift) - A->shift);
+            }
+        }
+    }
+
+    OUT->shift = new_shift;
+
+    return 0;
+}
+
+/**
  * Matrix-Vector multiplication
  * returns  0 in case of success
  *         -1 if bad input

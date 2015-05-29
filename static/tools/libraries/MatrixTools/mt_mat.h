@@ -33,6 +33,8 @@ typedef struct {
 
 void mt_m_init      (MT_MAT* m, uint8_t rows, uint8_t cols, uint8_t shift);
 int  mt_mm_add      (const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT);
+int  mt_m_shift     (const MT_MAT* A, const uint8_t new_shift, MT_MAT* OUT);
+int  mt_m_mltshift  (const MT_MAT* A, const uint8_t new_shift, const int8_t data_shift, MT_MAT* OUT);
 int  mt_mv_mlt      (const MT_MAT* M, const MT_VEC* v, MT_VEC* out);
 int  mt_mv_mltadd   (const MT_VEC* v1, int32_t k, const MT_MAT* M, const MT_VEC* v2, MT_VEC* out);
 int  mt_mm_mlt      (const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT);

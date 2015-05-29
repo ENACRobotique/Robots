@@ -122,8 +122,8 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     nw.d = pg.d + mn.d;
 
     float mn_theta = mn.theta;
-    while(pg.theta - mn_theta > M_PI) mn_theta -= 2*M_PI;
-    while(pg.theta - mn_theta < -M_PI) mn_theta += 2*M_PI;
+    while(pg.theta - mn_theta > M_PI) mn_theta += 2*M_PI;
+    while(pg.theta - mn_theta < -M_PI) mn_theta -= 2*M_PI;
     nw.theta = (pg.d*pg.theta + mn.d*mn_theta)/nw.d;
 
     // fill output

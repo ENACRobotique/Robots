@@ -44,6 +44,9 @@ typedef struct {
     int cos_theta, sin_theta; // (in <<SHIFT)
     int vx, vy, oz; // (in IpP << SHIFT  or  RpP << (RAD_SHIFT + SHIFT))
 
+    // Position uncertainty
+    MT_MAT M_uncert_pos;
+
     // PID
     PID_t pid_xtraj;
     PID_t pid_ytraj;

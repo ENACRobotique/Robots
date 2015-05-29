@@ -38,6 +38,12 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
 #error "Case where NB_PODS != NB_SPDS is not yet implemented"
 #endif
 
+    // Position uncertainty matrix
+    mt_m_init(&tc->M_uncert_pos, NB_SPDS, NB_SPDS, VAR_POS_SHIFT); // FIXME max variance on start
+    MT_M_AT(&tc->M_uncert_pos, 0, 0) = iROUND(D2I(10)*D2I(10)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
+    MT_M_AT(&tc->M_uncert_pos, 1, 1) = iROUND(D2I(10)*D2I(10)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
+    MT_M_AT(&tc->M_uncert_pos, 2, 2) = iROUND(0.7*0.7*dRadVarPosSHIFT); // (rad² << (RAD_SHIFT + VAR_POS_SHIFT))
+
     // Init encoders, motors and speed controllers
     motors_init(tc->mots);
     encoders_init(tc->encs, tc->mots);
@@ -96,6 +102,7 @@ void posctlr_begin_update(position_controller_t* tc) {
 
 void _linear_control(position_controller_t* tc, int x_sp, int y_sp, int vx_sp, int vy_sp, MT_VEC* spd_cmd_rob);
 void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC* spd_cmd_rob);
+void _update_pos_uncertainty(position_controller_t* tc);
 
 void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp) {
     int i;
@@ -117,6 +124,9 @@ void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta
         spdctlr_update(&tc->spd_ctls[i], spd_cmd_pods.ve[i] >> SHIFT);
         tc->next_spd_cmds[i] = spdctlr_get(&tc->spd_ctls[i]);
     }
+
+    // final step, update position uncertainty
+    _update_pos_uncertainty(tc);
 }
 
 void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta) {
@@ -201,4 +211,30 @@ void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC
     // Compute the angular speed command Omega_cmd with pre-added estimated speed (feed forward)
     mf_update(&tc->mf_orien, pid_update(&tc->pid_orien, theta_sp >> SHIFT, tc->theta >> SHIFT) << SHIFT);
     spd_cmd_rob->ve[2] = oz_sp + mf_get(&tc->mf_orien); // do not right shift inputs of RAD_SHIFT, keep resolution
+}
+
+void _update_pos_uncertainty(position_controller_t* tc) {
+    MT_VEC diag_var_spds_pods = MT_V_INITS(NB_PODS, MAT_SHIFT); // TODO calculate uncertainty of each pod wrt the setpoints and/or processvalues
+    diag_var_spds_pods.ve[0] = iROUND(DpS2IpP(0.1)*DpS2IpP(0.1)*dMoVarPodsSHIFT);
+    diag_var_spds_pods.ve[1] = iROUND(DpS2IpP(0.1)*DpS2IpP(0.1)*dMoVarPodsSHIFT);
+    diag_var_spds_pods.ve[2] = iROUND(DpS2IpP(0.1)*DpS2IpP(0.1)*dMoVarPodsSHIFT);
+
+    MT_MAT M_rob2pg = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
+    memset(M_rob2pg.me, 0, sizeof(*M_rob2pg.me)*M_rob2pg.rows*M_rob2pg.cols);
+    MT_M_AT(&M_rob2pg, 0, 0) =  tc->cos_theta << (MAT_SHIFT - SHIFT); // FIXME calculate the full cos_theta and sin_theta, we have a lost of precision here
+    MT_M_AT(&M_rob2pg, 0, 1) = -tc->sin_theta << (MAT_SHIFT - SHIFT);
+    MT_M_AT(&M_rob2pg, 1, 0) =  tc->sin_theta << (MAT_SHIFT - SHIFT);
+    MT_M_AT(&M_rob2pg, 1, 1) =  tc->cos_theta << (MAT_SHIFT - SHIFT);
+    MT_M_AT(&M_rob2pg, 2, 2) =  1 << MAT_SHIFT;
+
+    MT_MAT M_pods2pg = MT_M_INITS(NB_PODS, NB_SPDS, MAT_SHIFT);
+    mt_mm_mlt(&M_rob2pg, &tc->M_spds_pods2rob, &M_pods2pg);
+
+    MT_MAT M_uncert_spds = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
+    mt_mtdm_mlt(&M_pods2pg, &diag_var_spds_pods, &M_uncert_spds);
+
+    mt_m_mltshift(&M_uncert_spds, tc->M_uncert_pos.shift, VAR_PODS_SHIFT, &M_uncert_spds); // correct shift to be able to add value and shift data left by VAR_PODS_SHIFT
+    mt_mm_add(&tc->M_uncert_pos, &M_uncert_spds, &tc->M_uncert_pos);
+
+    // TODO clamp to max var
 }
