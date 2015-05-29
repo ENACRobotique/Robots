@@ -48,7 +48,7 @@ sDeviceInfo devicesInfo[D_AMOUNT];
 int iDevicePeriodBcast=0;
 int lastIndex=0;    // to detect new turn in game state
 uint32_t endSync = 0;
-sMsg inMsg={0};
+sMsg* inMsg=NULL;
 
 unsigned long sw=0, sw2=0;
 
@@ -102,13 +102,13 @@ void loop(){
 ///////// must always be done, any state
 
     //eventual receiving && routine
-    rxB=bn_receive(&inMsg);  // rxB>0 if message written in inMsg, <0 if error
+    rxB=bn_receivePtr(&inMsg);  // rxB>0 if message written in inMsg, <0 if error
     if (rxB>0) {
-        switch (inMsg.header.type) {
+        switch (inMsg->header.type) {
         case E_SYNC_STATUS :
             for (int i=0; i<D_AMOUNT; i++){
-                if (devicesInfo[i].addr == inMsg.header.srcAddr) {
-                    if (inMsg.payload.syncWired.flag == SYNC_OK){
+                if (devicesInfo[i].addr == inMsg->header.srcAddr) {
+                    if (inMsg->payload.syncWired.flag == SYNC_OK){
                         devicesInfo[i].state = DS_SYNCED;
                     }
                 }
@@ -150,8 +150,8 @@ void loop(){
         }
 #endif
 #ifdef DEBUG
-    bn_printfDbg("%lu period %lu %lu",micros(),domi_meanPeriod(),domi_lastTR());
-//        bn_printfDbg((char*)"turret %lu, mem : %d, state : %d\n",millis()/1000,freeMemory(),state);
+//        bn_printfDbg("%lu period %lu %lu\n",micros(),domi_meanPeriod(),domi_lastTR());
+        bn_printfDbg((char*)"turret %lu, unused mem : %d, state : %d\n",millis()/1000,getFreeTest(),state);
 #endif
 #if defined(DEBUG_CALIBRATION) && defined(DEBUG_CALIBRATION_speed)
     static int setSpeed=0;
@@ -321,7 +321,7 @@ void loop(){
 
         //if message received
         if (rxB>0){
-            switch (inMsg.header.type){
+            switch (inMsg->header.type){
             // if measure message received
             case E_MEASURE :
                 int error;
@@ -332,8 +332,8 @@ void loop(){
                     }
                     break;
                 case ADDRX_MOBILE_2 :
-                    if ( (error=handleMeasurePayload(&(inMsg.payload.mobileReport),inMsg.header.srcAddr))==-ERR_TRY_AGAIN ) {
-                        memcpy(&devicesInfo[D_MOBILE_2].lastData,&inMsg.payload.mobileReport,sizeof(sMobileReportPayload));
+                    if ( (error=handleMeasurePayload(&(inMsg->payload.mobileReport),inMsg->header.srcAddr))==-ERR_TRY_AGAIN ) {
+                        memcpy(&devicesInfo[D_MOBILE_2].lastData,&inMsg->payload.mobileReport,sizeof(sMobileReportPayload));
                     }
                     break;
                 case ADDRX_SECOND :
