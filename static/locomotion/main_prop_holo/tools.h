@@ -22,5 +22,6 @@
 #define SQRT(v) iROUND(dSHIFT*sqrt((double)(v)/dSHIFT))
 
 #define SQRis(v, s) (((int64_t)(v)*(int64_t)(v))>>(s))
+#define ABS(v) ((v)>0?(v):-(v))
 
 #endif

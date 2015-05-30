@@ -38,6 +38,8 @@ typedef struct {
     MT_MAT M_spds_pods2rob;
     MT_MAT M_spds_rob2pods;
 
+    MT_MAT M_spds_rob2tpods; // transverse pods
+
     // Last known status
     int x, y; // (in I << SHIFT)
     int theta; // (in R << (RAD_SHIFT + SHIFT))

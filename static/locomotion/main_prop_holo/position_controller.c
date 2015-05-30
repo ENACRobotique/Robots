@@ -34,6 +34,12 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
             MT_M_AT(&tc->M_spds_rob2pods, i, j)= mat_rob2pods[i][j];
         }
     }
+    mt_m_init(&tc->M_spds_rob2tpods, NB_PODS, NB_SPDS, MAT_SHIFT);
+    for (i = 0; i < NB_PODS; i++) {
+        MT_M_AT(&tc->M_spds_rob2tpods, i, 0)=  MT_M_AT(&tc->M_spds_rob2pods, i, 1);
+        MT_M_AT(&tc->M_spds_rob2tpods, i, 1)= -MT_M_AT(&tc->M_spds_rob2pods, i, 0);
+        MT_M_AT(&tc->M_spds_rob2tpods, i, 2)=  MT_M_AT(&tc->M_spds_rob2pods, i, 2);
+    }
 
 #if NB_PODS == NB_SPDS
     mt_m_inv(&tc->M_spds_rob2pods, &tc->M_spds_pods2rob);
@@ -112,7 +118,7 @@ void posctlr_begin_update(position_controller_t* tc) {
 
 void _linear_control(position_controller_t* tc, int x_sp, int y_sp, int vx_sp, int vy_sp, MT_VEC* spd_cmd_rob);
 void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC* spd_cmd_rob);
-void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods);
+void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT_VEC* spd_cmd_tpods);
 
 void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp) {
     int i;
@@ -136,7 +142,10 @@ void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta
     }
 
     // final step, update position uncertainty
-    _update_pos_uncertainty(tc, &spd_cmd_pods);
+    MT_VEC spd_cmd_tpods = MT_V_INITS(NB_PODS, VEC_SHIFT);
+    mt_mv_mlt(&tc->M_spds_rob2tpods, &spd_cmd_rob, &spd_cmd_tpods);
+
+    _update_pos_uncertainty(tc, &spd_cmd_pods, &spd_cmd_tpods);
 }
 
 void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta) {
@@ -223,11 +232,17 @@ void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC
     spd_cmd_rob->ve[2] = oz_sp + mf_get(&tc->mf_orien); // do not right shift inputs of RAD_SHIFT, keep resolution
 }
 
-void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods) {
-    MT_VEC diag_var_spds_pods = MT_V_INITS(NB_PODS, MAT_SHIFT); // TODO calculate uncertainty of each pod wrt the setpoints and/or processvalues
-    diag_var_spds_pods.ve[0] = SQRis(spd_cmd_pods->ve[0] << (MAT_SHIFT - SHIFT - 4), MAT_SHIFT) >> VAR_PODS_SHIFT;
-    diag_var_spds_pods.ve[1] = SQRis(spd_cmd_pods->ve[1] << (MAT_SHIFT - SHIFT - 4), MAT_SHIFT) >> VAR_PODS_SHIFT;
-    diag_var_spds_pods.ve[2] = SQRis(spd_cmd_pods->ve[2] << (MAT_SHIFT - SHIFT - 4), MAT_SHIFT) >> VAR_PODS_SHIFT;
+void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT_VEC* spd_cmd_tpods) {
+    MT_VEC diag_var_spds_pods = MT_V_INITS(NB_PODS, MAT_SHIFT);
+
+    // TODO add some error if the sign of the setpoint changed (backlash)
+    int std_spd_pod0 = ABS(spd_cmd_pods->ve[0] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[0] << (MAT_SHIFT - SHIFT - 4));
+    int std_spd_pod1 = ABS(spd_cmd_pods->ve[1] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[1] << (MAT_SHIFT - SHIFT - 4));
+    int std_spd_pod2 = ABS(spd_cmd_pods->ve[2] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[2] << (MAT_SHIFT - SHIFT - 4));
+
+    diag_var_spds_pods.ve[0] = SQRis(std_spd_pod0, MAT_SHIFT) >> VAR_PODS_SHIFT;
+    diag_var_spds_pods.ve[1] = SQRis(std_spd_pod1, MAT_SHIFT) >> VAR_PODS_SHIFT;
+    diag_var_spds_pods.ve[2] = SQRis(std_spd_pod2, MAT_SHIFT) >> VAR_PODS_SHIFT;
 
     MT_MAT M_rob2pg = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
     memset(M_rob2pg.me, 0, sizeof(*M_rob2pg.me)*M_rob2pg.rows*M_rob2pg.cols);
