@@ -39,7 +39,7 @@
 #include <stdio.h>
 
 //local message to "transmit" via bn_receive()
-sMsg localMsg={0};
+sMsg localMsg={{0}};
 int localReceived=0; //indicates whether a message is available for local or not
 
 //sequence number counter;
@@ -175,10 +175,8 @@ int bn_genericSend(sMsg *msg){
  */
 int bn_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
-    sMsg msgIn; //incoming message (may be our ack)
+    sMsg *msgIn; //pointer to incoming message (may be our ack)
     int ret=0;
-
-    memset(&msgIn, 0, sizeof(msgIn));
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -192,22 +190,22 @@ int bn_sendAck(sMsg *msg){
     // waiting for the reply
     while ( testTimeout(BN_ACK_TIMEOUT*1000UL,&sw)){
         // if we receive a message
-        if (bn_receive(&msgIn)>0){
+        if (bn_receivePtr(&msgIn)>0){
 #ifdef DEBUG_PC_ACK
             {
-            sMsg *msgPtr=&msgIn;
+            sMsg *msgPtr=msgIn;
             printf("%hx -> %hx type %u seq %u ack %u [sndack received], ack addr %hx ans %d seq %d\n",msgPtr->header.srcAddr,msgPtr->header.destAddr,msgPtr->header.type,msgPtr->header.seqNum,msgPtr->header.ack,msgPtr->payload.ack.addr,msgPtr->payload.ack.ans,msgPtr->payload.ack.seqNum);
             }
 #endif
             //if this message is not an ack response,  put it back in the incoming buffer (sent to self)
-            if ( msgIn.header.type != E_ACK_RESPONSE ){
-                bn_pushInBufLast(&msgIn,IF_LOCAL);
+            if ( msgIn->header.type != E_ACK_RESPONSE ){
+                bn_pushInBufLast(msgIn,IF_LOCAL);
             }
             // if this msg is not the ack expected (not the good destination or seqnum), drop it (do nothing)
-            else if ( msgIn.payload.ack.addr != tmpAddr || msgIn.payload.ack.seqNum != tmpSeqNum) continue;
-            else if ( msgIn.payload.ack.ans == A_ACK) return 1;
-            else if ( msgIn.payload.ack.ans == A_NACK_BROKEN_LINK) return -ERR_BN_NACK_BROKEN_LINK;
-            else if ( msgIn.payload.ack.ans == A_NACK_BUFFER_FULL) return -ERR_BN_NACK_FULL_BUFFER; //XXX behavior?
+            else if ( msgIn->payload.ack.addr != tmpAddr || msgIn->payload.ack.seqNum != tmpSeqNum) continue;
+            else if ( msgIn->payload.ack.ans == A_ACK) return 1;
+            else if ( msgIn->payload.ack.ans == A_NACK_BROKEN_LINK) return -ERR_BN_NACK_BROKEN_LINK;
+            else if ( msgIn->payload.ack.ans == A_NACK_BUFFER_FULL) return -ERR_BN_NACK_FULL_BUFFER; //XXX behavior?
         }
     }
     return -ERR_BN_ACK_TIMEOUT;
