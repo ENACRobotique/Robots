@@ -27,6 +27,18 @@ void internal2gstatus(s2DPUncert_internal *i, sGenericPosStatus *o);
 #endif
 
 typedef struct{
+    // linear position
+    float a, b, c;
+    float x, y; // (cm)
+
+    // angular position
+    float d;
+    float theta; // (rad)
+} s2DPUncert_covar;
+
+void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o);
+
+typedef struct{
     float xy_probability;
     float theta_probability;
 } s2DPAProbability;

@@ -16,6 +16,7 @@
 #define MAX(a, b) ((a)>(b)?(a):(b))
 #define MIN(a, b) ((a)>(b)?(b):(a))
 #define CLAMP(m, v, M) MAX((m), MIN((v), (M)))
+#define SIGNf(v) ((signbit(v)<<1) - 1)
 
 void pos_uncertainty_step_update(sGenericPosStatus *prev, sGenericPosStatus *next){
     // TODO
@@ -91,6 +92,22 @@ void internal2gstatus(s2DPUncert_internal *i, sGenericPosStatus *o){
 
     // angular position
     o->pos_u.theta_var = 1/(2*i->d);
+    o->pos.theta = i->theta;
+}
+
+void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o){
+    // linear position
+    o->pos.x = i->x;
+    o->pos.y = i->y;
+    float trace = i->a + i->c;
+    float det = i->a*i->c - i->b*i->b;
+    float sqrt_delta = sqrtf(trace*trace - 4*det);
+    o->pos_u.a_var = (trace + sqrt_delta)/2;
+    o->pos_u.b_var = trace - o->pos_u.a_var;
+    o->pos_u.a_angle = asinf(2*i->b/sqrt_delta)/2 * SIGNf(i->a - i->c);
+
+    // angular position
+    o->pos_u.theta_var = i->d;
     o->pos.theta = i->theta;
 }
 
