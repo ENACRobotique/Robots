@@ -93,15 +93,15 @@ int main(int argc, char *argv[]){
 #ifdef HAS_POS_UNCERTAINTY_INTERNALS
     {
 #define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= fabs(a)*(eps) || (a) < 1e-25f)
-#define EXPECT_NEAR_PERCENT(a, b, eps, err) do {if(!IS_NEAR(a, b, eps)) {\
-    printf("!!!!i=%i  not near: %g%%, %s\n", i, fabs(((a) - (b))/((a)?(a):(b)))*100, err);\
-    printf("!!!! \""#a"\" evaluates to: %g\n", (a));\
-    printf("!!!! \""#b"\" evaluates to: %g\n", (b));\
-    dump_gstatus(&in, "!!!!  ");\
-    exit(1);\
-}\
-} while(0)
-
+#define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
+        if(!IS_NEAR(a, b, eps)) {                                                                   \
+            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabs(((a) - (b))/((a)?(a):(b)))*100, err);  \
+            printf("!!!! \""#a"\" evaluates to: %g\n", (a));                                        \
+            printf("!!!! \""#b"\" evaluates to: %g\n", (b));                                        \
+            dump_gstatus(&in, "!!!!  ");                                                            \
+            exit(1);                                                                                \
+        }                                                                                           \
+    } while(0)
 #define THRESHOLD (0.03f/100)
 
         s2DPUncert_internal tmp;
@@ -142,8 +142,89 @@ int main(int argc, char *argv[]){
         }
 
         printf("OK!!!\n");
+#undef IS_NEAR
+#undef EXPECT_NEAR_PERCENT
+#undef THRESHOLD
     }
 #endif
+
+    {
+#define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= (eps))
+#define EXPECT_NEAR(aa, bb, eps, err) do {                                                      \
+        if(!IS_NEAR(aa, bb, eps)) {                                                                     \
+            printf("!!!!i=%i  not near: %g, %s\n", i, fabs((aa) - (bb)), err); \
+            printf("!!!! \""#aa"\" evaluates to: %g\n", (aa));                                          \
+            printf("!!!! \""#bb"\" evaluates to: %g\n", (bb));                                          \
+            printf("!!!! av:%.4f ; bv:%4f\n", x_var, y_var);                                            \
+            exit(1);                                                                                    \
+        }                                                                                               \
+    } while(0)
+#define THRESHOLD_VAR (1)
+#define THRESHOLD_XY (1)
+#define THRESHOLD_THETA (1e-1)
+
+        int i;
+        for(i = 0; i < 10000; i++){
+            s2DPUncert_covar in;
+            sGenericPosStatus out;
+
+            float x_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            float y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            while(fabs(y_var - x_var) < 1e-2 * x_var){
+                y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            }
+            {
+                if(x_var < y_var){
+                    float tmp = x_var;
+                    x_var = y_var;
+                    y_var = tmp;
+                }
+            }
+
+            float x = rand_uniform(0, 300);
+            float y = rand_uniform(0, 200);
+            float x_angle = rand_uniform(-M_PI, M_PI);
+            float cxa = cosf(x_angle), sxa = sinf(x_angle);
+
+            in.x = x;
+            in.y = y;
+            in.a = cxa*cxa*x_var + sxa*sxa*y_var;
+            in.b = cxa*sxa*(x_var - y_var);
+            in.c = cxa*cxa*y_var + sxa*sxa*x_var;
+
+            covar2gstatus(&in, &out);
+
+//            printf("###############\n");
+//            printf("  a = %.4f\n", in.a);
+//            printf("  b = %.4f\n", in.b);
+//            printf("  c = %.4f\n", in.c);
+//            printf("  theta = %.4f\n", x_angle*180.f/M_PI);
+
+            EXPECT_NEAR(x, out.pos.x, THRESHOLD_XY, "x");
+            EXPECT_NEAR(y, out.pos.y, THRESHOLD_XY, "y");
+
+            if(out.pos_u.a_var < out.pos_u.b_var){
+                float tmp = out.pos_u.a_var;
+                out.pos_u.a_var = out.pos_u.b_var;
+                out.pos_u.b_var = tmp;
+                out.pos_u.a_angle += M_PI/2.;
+            }
+            EXPECT_NEAR(x_var, out.pos_u.a_var, THRESHOLD_VAR, "a_var");
+            EXPECT_NEAR(y_var, out.pos_u.b_var, THRESHOLD_VAR, "b_var");
+
+            float da = x_angle - out.pos_u.a_angle;
+            while(da > M_PI / 2.) da -= M_PI;
+            while(da < -M_PI / 2.) da += M_PI;
+            EXPECT_NEAR(da, 0., THRESHOLD_THETA, "a_angle");
+        }
+
+        printf("OK!!!\n");
+#undef IS_NEAR
+#undef EXPECT_NEAR
+#undef THRESHOLD_THETA
+#undef THRESHOLD_XY
+#undef THRESHOLD_VAR
+    }
 
     return 0;
 }
