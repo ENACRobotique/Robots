@@ -11,15 +11,13 @@
 #include <stdlib.h>
 #include <time_tools.h>
 
-#define POS_UNCERTAINTY_INTERNALS
 #include <pos_uncertainty.h>
 
 void dump_gstatus(sGenericPosStatus *gs, char *prefix){
-#ifdef HAS_POS_UNCERTAINTY_INTERNALS
-    s2DPUncert_internal o;
+    s2DPUncert_icovar o;
     sGenericPosStatus oo = { 0 };
-    gstatus2internal(gs, &o);
-    internal2gstatus(&o, &oo);
+    gstatus2icovar(gs, &o);
+    icovar2gstatus(&o, &oo);
 
     printf("%s  a:% -15.5g\n", prefix, o.a);
     printf("%s  b:% -15.5g\n", prefix, o.b);
@@ -36,16 +34,6 @@ void dump_gstatus(sGenericPosStatus *gs, char *prefix){
     printf("%s  bv:% -10.5fcm² % -10.5f\n", prefix, gs->pos_u.b_var, oo.pos_u.b_var);
     printf("%s  an:% -10.5f°   % -10.5f\n", prefix, gs->pos_u.a_angle * 180. / M_PI, oo.pos_u.a_angle * 180. / M_PI);
     printf("%s  tv:% -10.5f°²  % -10.5f\n", prefix, gs->pos_u.theta_var * powf(180. / M_PI, 2), oo.pos_u.theta_var * powf(180. / M_PI, 2));
-#else
-    printf("%spos:\n", prefix);
-    printf("%s  x:%.3fcm\n", prefix, gs->pos.x);
-    printf("%s  y:%.3fcm\n", prefix, gs->pos.y);
-    printf("%s  a:%.3f°\n", prefix, gs->pos.theta*180./M_PI);
-    printf("%spos_u:\n", prefix);
-    printf("%s  av:%.3fcm²\n", prefix, gs->pos_u.a_var);
-    printf("%s  bv:%.3fcm²\n", prefix, gs->pos_u.b_var);
-    printf("%s  an:%.3f°\n", prefix, gs->pos_u.a_angle*180./M_PI);
-#endif
 }
 
 float rand_uniform(float min, float max){
@@ -90,7 +78,6 @@ int main(int argc, char *argv[]){
     printf("o:\n");
     dump_gstatus(&o, "  ");
 
-#ifdef HAS_POS_UNCERTAINTY_INTERNALS
     {
 #define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= fabs(a)*(eps) || (a) < 1e-25f)
 #define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
@@ -104,7 +91,7 @@ int main(int argc, char *argv[]){
     } while(0)
 #define THRESHOLD (0.03f/100)
 
-        s2DPUncert_internal tmp;
+        s2DPUncert_icovar tmp;
         sGenericPosStatus in = { 0 }, out = { 0 };
         int i;
         for(i = 0; i < 10000; i++){
@@ -119,8 +106,8 @@ int main(int argc, char *argv[]){
             in.pos.theta = rand_uniform(-M_PI, M_PI);
             in.pos_u.theta_var = rand_uniform(MINVARIANCE_THETA, MAXVARIANCE_THETA);
 
-            gstatus2internal(&in, &tmp);
-            internal2gstatus(&tmp, &out);
+            gstatus2icovar(&in, &tmp);
+            icovar2gstatus(&tmp, &out);
 
             EXPECT_NEAR_PERCENT(in.pos.x, out.pos.x, THRESHOLD, "pos.x");
             EXPECT_NEAR_PERCENT(in.pos.y, out.pos.y, THRESHOLD, "pos.y");
@@ -146,7 +133,6 @@ int main(int argc, char *argv[]){
 #undef EXPECT_NEAR_PERCENT
 #undef THRESHOLD
     }
-#endif
 
     {
 #define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= (eps))

@@ -17,13 +17,9 @@
 #define MIN(a, b) ((a)>(b)?(b):(a))
 #define CLAMP(m, v, M) MAX((m), MIN((v), (M)))
 
-void pos_uncertainty_step_update(sGenericPosStatus *prev, sGenericPosStatus *next){
-    // TODO
-}
-
 // see static/locomotion/simu for design files
 
-void varxya2abc(float var_x, float var_y, float an, s2DPUncert_internal *o){
+void varxya2abc(float var_x, float var_y, float an, s2DPUncert_icovar *o){
 // Converts rotated 2D gaussian to quadratic form coefficients
 //   input:  f(x, y) = X²/(2*var_x) + Y²/(2*var_y)
 //               where: X =  cos(an)*x + sin(an)*y
@@ -42,7 +38,7 @@ void varxya2abc(float var_x, float var_y, float an, s2DPUncert_internal *o){
     o->c = sa*sa/(2*var_x) + ca*ca/(2*var_y);
 }
 
-void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
+void abc2varxya(s2DPUncert_icovar *i, float *var_x, float *var_y, float *an){
 // Converts quadratic form coefficients to rotated 2D gaussian
 //   input:  f(x, y) = ax² + 2bxy + cy²
 //   output: f(x, y) = X²/(2*var_x) + Y²/(2*var_y)
@@ -72,7 +68,7 @@ void abc2varxya(s2DPUncert_internal *i, float *var_x, float *var_y, float *an){
     }
 }
 
-void gstatus2internal(sGenericPosStatus *i, s2DPUncert_internal *o){
+void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o){
     // linear position
     varxya2abc(i->pos_u.a_var, i->pos_u.b_var, i->pos_u.a_angle, o);
     o->x = i->pos.x;
@@ -83,7 +79,7 @@ void gstatus2internal(sGenericPosStatus *i, s2DPUncert_internal *o){
     o->theta = i->pos.theta;
 }
 
-void internal2gstatus(s2DPUncert_internal *i, sGenericPosStatus *o){
+void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o){
     // linear position
     abc2varxya(i, &o->pos_u.a_var, &o->pos_u.b_var, &o->pos_u.a_angle);
     o->pos.x = i->x;
@@ -113,8 +109,24 @@ void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o){
     o->pos.theta = i->theta;
 }
 
+void gstatus2covar(sGenericPosStatus *i, s2DPUncert_covar *o){
+    // linear position
+    float caa = cosf(i->pos_u.a_angle);
+    float saa = sinf(i->pos_u.a_angle);
+
+    o->a = caa*caa*i->pos_u.a_var + saa*saa*i->pos_u.b_var;
+    o->b = caa*saa*(i->pos_u.a_var - i->pos_u.b_var);
+    o->c = caa*caa*i->pos_u.b_var + saa*saa*i->pos_u.a_var;
+    o->x = i->pos.x;
+    o->y = i->pos.y;
+
+    // angular position
+    o->d = i->pos_u.theta_var;
+    o->theta = i->pos.theta;
+}
+
 void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o){
-    s2DPUncert_internal pg, mn, nw;
+    s2DPUncert_icovar pg, mn, nw;
 
     // necessary verifications
     assert(i1 && i2 && o);
@@ -123,8 +135,8 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     assert(i1->date == i2->date);
 
     // get input data
-    gstatus2internal(i1, &pg);
-    gstatus2internal(i2, &mn);
+    gstatus2icovar(i1, &pg);
+    gstatus2icovar(i2, &mn);
 
     // actual calculation (linear position)
     nw.a = pg.a + mn.a;
@@ -148,15 +160,15 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     // fill output
     o->id = i1->id;
     o->date = i1->date;
-    internal2gstatus(&nw, o);
+    icovar2gstatus(&nw, o);
     o->pos.frame = i1->pos.frame;
 }
 
 s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
     assert(i->pos.frame == p->frame);
 
-    s2DPUncert_internal ii;
-    gstatus2internal(i, &ii);
+    s2DPUncert_icovar ii;
+    gstatus2icovar(i, &ii);
 
     s2DPAProbability o;
     float dx = p->x - ii.x;

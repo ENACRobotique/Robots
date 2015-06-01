@@ -10,8 +10,6 @@
 
 #include <messages-statuses.h>
 
-#ifdef POS_UNCERTAINTY_INTERNALS
-#define HAS_POS_UNCERTAINTY_INTERNALS
 typedef struct{
     // linear position
     float a, b, c;
@@ -20,11 +18,10 @@ typedef struct{
     // angular position
     float d;
     float theta; // (rad)
-} s2DPUncert_internal;
+} s2DPUncert_icovar;
 
-void gstatus2internal(sGenericPosStatus *i, s2DPUncert_internal *o);
-void internal2gstatus(s2DPUncert_internal *i, sGenericPosStatus *o);
-#endif
+void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o);
+void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o);
 
 typedef struct{
     // linear position
@@ -37,6 +34,7 @@ typedef struct{
 } s2DPUncert_covar;
 
 void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o);
+void gstatus2covar(sGenericPosStatus *i, s2DPUncert_covar *o);
 
 typedef struct{
     float xy_probability;
@@ -48,7 +46,6 @@ typedef struct{
 #define MINVARIANCE_THETA (2e-3) // (rad²)
 #define MAXVARIANCE_THETA (7) // (rad²)
 
-void pos_uncertainty_update(sGenericPosStatus *prev, sGenericPosStatus *next);
 void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o);
 s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p);
 
