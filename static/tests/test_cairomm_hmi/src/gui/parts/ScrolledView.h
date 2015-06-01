@@ -19,8 +19,8 @@ private:
     Gtk::Widget& _schild;
 
 public:
-    ScrolledView(Gtk::Widget& child, const Glib::ustring& label) :
-            View(_swin, label), _schild(child) {
+    ScrolledView(const std::string& vid, Gtk::Widget& child, const Glib::ustring& label) :
+            View(vid, _swin, label), _schild(child) {
         _swin.add(_schild);
         _swin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
         _swin.show();

@@ -30,11 +30,11 @@ protected:
     }
 
     //Member widgets:
-    Gtk::Paned m_paned;
-    Gtk::Box m_box;
-    Gtk::Button m_button;
+    Gtk::Paned _paned;
+    Gtk::Box _box;
+    Gtk::Button _button;
 
-    Folder f;
+    Folder _f;
 };
 
 #endif // GTKMM_EXAMPLE_HELLOWORLD_H

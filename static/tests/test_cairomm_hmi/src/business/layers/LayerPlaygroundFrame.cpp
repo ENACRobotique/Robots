@@ -8,6 +8,8 @@
 #include <business/layers/LayerPlaygroundFrame.h>
 #include <algorithm>
 
+class DAPlayground;
+
 using namespace Cairo;
 using namespace std;
 
