@@ -19,8 +19,8 @@ typedef struct {
     GtkWidget *console;
 
     // test
-    sGenericStatus i1;
-    sGenericStatus i2;
+    sGenericPosStatus i1;
+    sGenericPosStatus i2;
 } sContext;
 
 #endif /* CONTEXT_H_ */
