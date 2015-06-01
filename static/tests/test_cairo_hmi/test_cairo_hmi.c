@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
     ctx.i1.pos_u.a_var = 4;
     ctx.i1.pos_u.b_var = 25;
     ctx.i1.pos.theta = 0.;
-    ctx.i1.pos_u.theta = 0.;
+    ctx.i1.pos_u.theta_var = 0.;
     ctx.i2.id = ELT_PRIMARY;
     ctx.i2.date = ctx.i1.date;
     ctx.i2.pos.frame = FRAME_PLAYGROUND;
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
     ctx.i2.pos_u.a_var = 0.5;
     ctx.i2.pos_u.b_var = 10;
     ctx.i2.pos.theta = 0.;
-    ctx.i2.pos_u.theta = 0.;
+    ctx.i2.pos_u.theta_var = 0.;
 
     gtk_init(&argc, &argv);
 
