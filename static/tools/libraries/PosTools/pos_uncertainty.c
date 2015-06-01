@@ -10,7 +10,6 @@
 #include <messages-elements.h>
 #include <messages-position.h>
 
-#define POS_UNCERTAINTY_INTERNALS
 #include "pos_uncertainty.h"
 
 #define MAX(a, b) ((a)>(b)?(a):(b))
@@ -19,90 +18,82 @@
 
 // see static/locomotion/simu for design files
 
-void varxya2abc(float var_x, float var_y, float an, s2DPUncert_icovar *o){
-// Converts rotated 2D gaussian to quadratic form coefficients
-//   input:  f(x, y) = X²/(2*var_x) + Y²/(2*var_y)
-//               where: X =  cos(an)*x + sin(an)*y
-//                      Y = -sin(an)*x + cos(an)*y
-//               where: cos(an) = ca
-//                      sin(an) = sa
-//   output: f(x, y) = ax² + 2bxy + cy²
-
-    float ca = cosf(an), sa = sinf(an);
-
-    var_x = CLAMP(MINVARIANCE_XY, var_x, MAXVARIANCE_XY);
-    var_y = CLAMP(MINVARIANCE_XY, var_y, MAXVARIANCE_XY);
-
-    o->a = ca*ca/(2*var_x) + sa*sa/(2*var_y);
-    o->b = ca*sa*(1/var_x - 1/var_y)/2;
-    o->c = sa*sa/(2*var_x) + ca*ca/(2*var_y);
-}
-
-void abc2varxya(s2DPUncert_icovar *i, float *var_x, float *var_y, float *an){
-// Converts quadratic form coefficients to rotated 2D gaussian
-//   input:  f(x, y) = ax² + 2bxy + cy²
-//   output: f(x, y) = X²/(2*var_x) + Y²/(2*var_y)
-//               where: X =  cos(an)*x + sin(an)*y
-//                      Y = -sin(an)*x + cos(an)*y
-
-    float k = 4*(i->a*i->c - i->b*i->b); // 1/(var_x*var_y)
-    float tmp_sqrt = sqrtf((i->a - i->c)*(i->a - i->c) + 4*i->b*i->b);
-    int noangle = 0;
-
-    if(i->b == 0.f || 2*i->b > tmp_sqrt || 2*i->b < -tmp_sqrt){
-        noangle = 1;
-    }
-
-    if(i->c < i->a){
-        tmp_sqrt = - tmp_sqrt;
-    }
-    *var_x = (i->a + i->c + tmp_sqrt)/k;
-    *var_y = (i->a + i->c - tmp_sqrt)/k;
-
-    if(noangle){
-        *an = 0.f;
-    }
-    else{
-        float sin_2a = 2*i->b/tmp_sqrt;
-        *an = -asinf(CLAMP(-1.f, sin_2a, 1.f))/2;
-    }
-}
-
 void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o){
     // linear position
-    varxya2abc(i->pos_u.a_var, i->pos_u.b_var, i->pos_u.a_angle, o);
+    // Converts rotated 2D gaussian to quadratic form coefficients
+    //   input:  f(x, y) = X²/var_x + Y²/var_y
+    //               where: X =  cos(an)*x + sin(an)*y
+    //                      Y = -sin(an)*x + cos(an)*y
+    //               where: cos(an) = ca
+    //                      sin(an) = sa
+    //   output: f(x, y) = ax² + 2bxy + cy² (formalized as inverse covariance: X^T * M^-1 * X)
+    float ca = cosf(i->pos_u.a_angle), sa = sinf(i->pos_u.a_angle);
+    float a_var = CLAMP(MINVARIANCE_XY, i->pos_u.a_var, MAXVARIANCE_XY);
+    float b_var = CLAMP(MINVARIANCE_XY, i->pos_u.b_var, MAXVARIANCE_XY);
+    o->a = ca*ca/a_var + sa*sa/b_var;
+    o->b = ca*sa*(1/a_var - 1/b_var);
+    o->c = sa*sa/a_var + ca*ca/b_var;
     o->x = i->pos.x;
     o->y = i->pos.y;
 
     // angular position
-    o->d = 1/(2*CLAMP(MINVARIANCE_THETA, i->pos_u.theta_var, MAXVARIANCE_THETA));
+    o->d = 1/CLAMP(MINVARIANCE_THETA, i->pos_u.theta_var, MAXVARIANCE_THETA);
     o->theta = i->pos.theta;
 }
 
 void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o){
     // linear position
-    abc2varxya(i, &o->pos_u.a_var, &o->pos_u.b_var, &o->pos_u.a_angle);
+    // Converts quadratic form coefficients to rotated 2D gaussian
+    //   input:  f(x, y) = ax² + 2bxy + cy² (formalized as inverse covariance: X^T * M^-1 * X)
+    //   output: f(x, y) = X²/var_x + Y²/var_y
+    //               where: X =  cos(an)*x + sin(an)*y
+    //                      Y = -sin(an)*x + cos(an)*y
+    float sqrt_delta = sqrtf((i->a - i->c)*(i->a - i->c) + 4*i->b*i->b);
+
+    int noangle = 0;
+    if(i->b == 0.f || fabsf(i->b) > 1e5*sqrt_delta){
+        noangle = 1;
+    }
+
+    if(i->c < i->a){
+        sqrt_delta = - sqrt_delta;
+    }
+    float trace = i->a + i->c;
+    float two_det = 2.f*(i->a*i->c - i->b*i->b);
+    o->pos_u.a_var = (trace + sqrt_delta)/two_det;
+    o->pos_u.b_var = (trace - sqrt_delta)/two_det;
+    o->pos_u.a_angle = noangle ? 0.f : -asinf(CLAMP(-1.f, 2*i->b/sqrt_delta, 1.f))/2;
     o->pos.x = i->x;
     o->pos.y = i->y;
 
     // angular position
-    o->pos_u.theta_var = 1/(2*i->d);
+    o->pos_u.theta_var = 1/i->d;
     o->pos.theta = i->theta;
 }
 
 void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o){
     // linear position
-    o->pos.x = i->x;
-    o->pos.y = i->y;
     float trace = i->a + i->c;
+#if 0
     float det = i->a*i->c - i->b*i->b;
     float sqrt_delta = sqrtf(trace*trace - 4*det);
+#else
+    float sqrt_delta = sqrtf((i->a - i->c)*(i->a - i->c) + 4*i->b*i->b);
+#endif
+
+    int noangle = 0;
+    if(i->b == 0.f || fabsf(i->b) > 1e5*sqrt_delta){
+        noangle = 1;
+    }
+
     if(i->c > i->a){
         sqrt_delta = -sqrt_delta;
     }
     o->pos_u.a_var = (trace + sqrt_delta)/2;
     o->pos_u.b_var = trace - o->pos_u.a_var;
-    o->pos_u.a_angle = asinf(CLAMP(-1.f, 2*i->b/sqrt_delta, 1.f))/2;
+    o->pos_u.a_angle = noangle ? 0.f : asinf(CLAMP(-1.f, 2*i->b/sqrt_delta, 1.f))/2;
+    o->pos.x = i->x;
+    o->pos.y = i->y;
 
     // angular position
     o->pos_u.theta_var = i->d;
@@ -177,8 +168,8 @@ s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
     while(dtheta > M_PI) dtheta -= 2*M_PI;
     while(dtheta < -M_PI) dtheta += 2*M_PI;
 
-    o.xy_probability = expf(-(ii.a*dx*dx + 2*ii.b*dx*dy + ii.c*dy*dy))/(2*M_PI*sqrtf(i->pos_u.a_var*i->pos_u.b_var));
-    o.theta_probability = expf(-ii.d*dtheta*dtheta)/sqrtf(2*M_PI*i->pos_u.theta_var);
+    o.xy_probability = expf(-(ii.a*dx*dx + 2*ii.b*dx*dy + ii.c*dy*dy)/2.f)/(2*M_PI*sqrtf(i->pos_u.a_var*i->pos_u.b_var));
+    o.theta_probability = expf(-ii.d*dtheta*dtheta/2.f)/sqrtf(2*M_PI*i->pos_u.theta_var);
 
     return o;
 }

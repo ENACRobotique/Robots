@@ -41,10 +41,10 @@ typedef struct{
     float theta_probability;
 } s2DPAProbability;
 
-#define MINVARIANCE_XY (1e-3) // (cm²)
-#define MAXVARIANCE_XY (8e3) // (cm²)
+#define MINVARIANCE_XY (5e-4) // (cm²)
+#define MAXVARIANCE_XY (2e3) // (cm²)
 #define MINVARIANCE_THETA (2e-3) // (rad²)
-#define MAXVARIANCE_THETA (7) // (rad²)
+#define MAXVARIANCE_THETA (500) // (rad²)
 
 void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o);
 s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p);

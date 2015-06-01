@@ -180,12 +180,6 @@ int main(int argc, char *argv[]){
 
             covar2gstatus(&in, &out);
 
-//            printf("###############\n");
-//            printf("  a = %.4f\n", in.a);
-//            printf("  b = %.4f\n", in.b);
-//            printf("  c = %.4f\n", in.c);
-//            printf("  theta = %.4f\n", x_angle*180.f/M_PI);
-
             EXPECT_NEAR(x, out.pos.x, THRESHOLD_XY, "x");
             EXPECT_NEAR(y, out.pos.y, THRESHOLD_XY, "y");
 
