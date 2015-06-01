@@ -240,9 +240,9 @@ void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT
     int std_spd_pod1 = ABS(spd_cmd_pods->ve[1] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[1] << (MAT_SHIFT - SHIFT - 4));
     int std_spd_pod2 = ABS(spd_cmd_pods->ve[2] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[2] << (MAT_SHIFT - SHIFT - 4));
 
-    diag_var_spds_pods.ve[0] = SQRis(std_spd_pod0, MAT_SHIFT) >> VAR_PODS_SHIFT;
-    diag_var_spds_pods.ve[1] = SQRis(std_spd_pod1, MAT_SHIFT) >> VAR_PODS_SHIFT;
-    diag_var_spds_pods.ve[2] = SQRis(std_spd_pod2, MAT_SHIFT) >> VAR_PODS_SHIFT;
+    diag_var_spds_pods.ve[0] = SQRis(std_spd_pod0, MAT_SHIFT) >> VAR_PODS_DATASHIFT;
+    diag_var_spds_pods.ve[1] = SQRis(std_spd_pod1, MAT_SHIFT) >> VAR_PODS_DATASHIFT;
+    diag_var_spds_pods.ve[2] = SQRis(std_spd_pod2, MAT_SHIFT) >> VAR_PODS_DATASHIFT;
 
     MT_MAT M_rob2pg = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
     memset(M_rob2pg.me, 0, sizeof(*M_rob2pg.me)*M_rob2pg.rows*M_rob2pg.cols);
@@ -258,7 +258,7 @@ void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT
     MT_MAT M_uncert_spds = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
     mt_mtdm_mlt(&M_pods2pg, &diag_var_spds_pods, &M_uncert_spds);
 
-    mt_m_mltshift(&M_uncert_spds, tc->M_uncert_pos.shift, VAR_PODS_SHIFT, &M_uncert_spds); // correct shift to be able to add value and shift data left by VAR_PODS_SHIFT
+    mt_m_mltshift(&M_uncert_spds, tc->M_uncert_pos.shift, VAR_PODS_DATASHIFT, &M_uncert_spds); // correct shift to be able to add value and shift data left by VAR_PODS_SHIFT
     mt_mm_add(&tc->M_uncert_pos, &M_uncert_spds, &tc->M_uncert_pos);
 
     // TODO clamp to max var

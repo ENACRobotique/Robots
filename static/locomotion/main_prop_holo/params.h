@@ -38,8 +38,8 @@
 #define dVarPosSHIFT ((double)(1 << VAR_POS_SHIFT))
 #define dRadVarPosSHIFT ((double)(1 << (RAD_SHIFT + VAR_POS_SHIFT)))
 
-#define VAR_PODS_SHIFT (12)
-#define dMoVarPodsSHIFT ((double)(1 << (MAT_SHIFT - VAR_PODS_SHIFT)))
+#define VAR_PODS_DATASHIFT (12)
+#define dMoVarPodsSHIFT ((double)(1 << (MAT_SHIFT - VAR_PODS_DATASHIFT)))
 
 // M_rob2pods produces (V1;V2;V3) in [IpP<<SHIFT x IpP<<SHIFT x IpP<<SHIFT] from (Vx;Vy;Oz) in [IpP<<SHIFT x IpP<<SHIFT x RpP<<(RAD_SHIFT+SHIFT)]
 
