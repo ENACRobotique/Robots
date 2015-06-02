@@ -22,6 +22,7 @@ typedef struct{
 
 void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o);
 void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o);
+void icovar_mix(const s2DPUncert_icovar *i1, const s2DPUncert_icovar *i2, s2DPUncert_icovar *o);
 
 typedef struct{
     // linear position

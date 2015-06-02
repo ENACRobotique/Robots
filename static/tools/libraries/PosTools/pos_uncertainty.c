@@ -71,6 +71,27 @@ void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o){
     o->pos.theta = i->theta;
 }
 
+void icovar_mix(const s2DPUncert_icovar *i1, const s2DPUncert_icovar *i2, s2DPUncert_icovar *o){
+    // actual calculation (linear position)
+    o->a = i1->a + i2->a;
+    o->b = i1->b + i2->b;
+    o->c = i1->c + i2->c;
+
+    float den = o->a*o->c - o->b*o->b;
+    float G = -(i2->a*(i2->x - i1->x) + i2->b*(i2->y - i1->y));
+    float H = -(i2->b*(i2->x - i1->x) + i2->c*(i2->y - i1->y));
+    o->x = (H*o->b - G*o->c) / den + i1->x;
+    o->y = (G*o->b - H*o->a) / den + i1->y;
+
+    // actual calculation (angular position)
+    o->d = i1->d + i2->d;
+
+    float mn_theta = i2->theta;
+    while(i1->theta - mn_theta > M_PI) mn_theta += 2*M_PI;
+    while(i1->theta - mn_theta < -M_PI) mn_theta -= 2*M_PI;
+    o->theta = (i1->d*i1->theta + i2->d*mn_theta)/o->d;
+}
+
 void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o){
     // linear position
     float trace = i->a + i->c;
@@ -129,24 +150,8 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     gstatus2icovar(i1, &pg);
     gstatus2icovar(i2, &mn);
 
-    // actual calculation (linear position)
-    nw.a = pg.a + mn.a;
-    nw.b = pg.b + mn.b;
-    nw.c = pg.c + mn.c;
-
-    float den = nw.a*nw.c - nw.b*nw.b;
-    float G = -(mn.a*(mn.x - pg.x) + mn.b*(mn.y - pg.y));
-    float H = -(mn.b*(mn.x - pg.x) + mn.c*(mn.y - pg.y));
-    nw.x = (H*nw.b - G*nw.c) / den + pg.x;
-    nw.y = (G*nw.b - H*nw.a) / den + pg.y;
-
-    // actual calculation (angular position)
-    nw.d = pg.d + mn.d;
-
-    float mn_theta = mn.theta;
-    while(pg.theta - mn_theta > M_PI) mn_theta += 2*M_PI;
-    while(pg.theta - mn_theta < -M_PI) mn_theta -= 2*M_PI;
-    nw.theta = (pg.d*pg.theta + mn.d*mn_theta)/nw.d;
+    // actual computation
+    icovar_mix(&pg, &mn, &nw);
 
     // fill output
     o->id = i1->id;
