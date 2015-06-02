@@ -20,6 +20,7 @@
 #include <sys_time.h>
 #endif
 #include "bn_intp.h"
+#include "pos_uncertainty.h"
 
 #include "params.h"
 
@@ -386,15 +387,25 @@ void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
     ps->id = ELT_PRIMARY;
     ps->date = bn_intp_micros2s(micros()); // now
 
+    // get position with uncertainty
+    s2DPUncert_covar pos;
+
     int x, y, theta;
     posctrl_get_pos(&tm->ctlr, &x, &y, &theta);
-    ps->pos.x = I2Ds(x);
-    ps->pos.y = I2Ds(y);
-    ps->pos.theta = (double) theta / dASHIFT;
+    pos.x = I2Ds(x);
+    pos.y = I2Ds(y);
+    pos.theta = (double) theta / dASHIFT;
 
-    // TODO
-//    ps->pos_u
+    int x_var, y_var, xy_var, theta_var;
+    posctrl_get_pos_u(&tm->ctlr, &x_var, &y_var, &xy_var, &theta_var);
+    pos.a = I2D(I2D((double) x_var / dVarPosSHIFT));
+    pos.b = I2D(I2D((double) xy_var / dVarPosSHIFT));
+    pos.c = I2D(I2D((double) y_var / dVarPosSHIFT));
+    pos.d = (double) theta_var / dRadSHIFT / dRadSHIFT / dVarPosSHIFT;
 
+    covar2gstatus(&pos, ps);
+
+    // get trajectory state
     switch(tm->state){
     default:
     case TM_STATE_WAIT_TRAJ:
@@ -415,6 +426,7 @@ void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
         break;
     }
 
+    // get speed
     int vx, vy, oz;
     posctrl_get_spd(&tm->ctlr, &vx, &vy, &oz);
     ps->prop_status.spd.vx = IpP2DpSs(vx);

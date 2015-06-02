@@ -56,9 +56,9 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
 
     // Position uncertainty matrix
     mt_m_init(&tc->M_uncert_pos, NB_SPDS, NB_SPDS, VAR_POS_SHIFT); // FIXME max variance on start
-    MT_M_AT(&tc->M_uncert_pos, 0, 0) = iROUND(D2I(10)*D2I(10)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
-    MT_M_AT(&tc->M_uncert_pos, 1, 1) = iROUND(D2I(10)*D2I(10)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
-    MT_M_AT(&tc->M_uncert_pos, 2, 2) = iROUND(0.7*0.7*dRadVarPosSHIFT); // (rad² << (RAD_SHIFT + VAR_POS_SHIFT))
+    MT_M_AT(&tc->M_uncert_pos, 0, 0) = iROUND(D2I(2)*D2I(2)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
+    MT_M_AT(&tc->M_uncert_pos, 1, 1) = iROUND(D2I(2)*D2I(2)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
+    MT_M_AT(&tc->M_uncert_pos, 2, 2) = iROUND(0.1*dRadSHIFT*0.1*dRadSHIFT*dVarPosSHIFT); // (rad² << (RAD_SHIFT + VAR_POS_SHIFT))
 
     // Init encoders, motors and speed controllers
     motors_init(tc->mots);
@@ -161,6 +161,13 @@ void posctrl_get_pos(position_controller_t* tc, int *x, int *y, int *theta) {
     *x = tc->x;
     *y = tc->y;
     *theta = tc->theta;
+}
+
+void posctrl_get_pos_u(position_controller_t* tc, int *x_var, int *y_var, int *xy_var, int *theta_var) {
+    *x_var = MT_M_AT(&tc->M_uncert_pos, 0, 0);
+    *xy_var = MT_M_AT(&tc->M_uncert_pos, 0, 1);
+    *y_var = MT_M_AT(&tc->M_uncert_pos, 1, 1);
+    *theta_var = MT_M_AT(&tc->M_uncert_pos, 2, 2);
 }
 
 void posctrl_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz) {

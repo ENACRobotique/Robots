@@ -43,7 +43,7 @@ class Log {
         void setVer(const eVer_t& ver);
 
         void putNewMes();
-        void putNewPos(float x, float y, float theta);
+        void putNewPos(float x, float y, float theta, float a_var, float b_var, float a_angle, float theta_var);
 
         bool term() const;
 
