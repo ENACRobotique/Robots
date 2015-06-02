@@ -84,7 +84,7 @@ int main(int argc, char *argv[]){
 #define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= fabsf(a)*(eps) || (a) < 1e-25f)
 #define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
         if(!IS_NEAR(a, b, eps)) {                                                                   \
-            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err);  \
+            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err); \
             printf("!!!! \""#a"\" evaluates to: %g\n", (a));                                        \
             printf("!!!! \""#b"\" evaluates to: %g\n", (b));                                        \
             dump_gstatus(&in, "!!!!  ");                                                            \
@@ -147,14 +147,14 @@ int main(int argc, char *argv[]){
 
     {
 #define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= (eps))
-#define EXPECT_NEAR(aa, bb, eps, err) do {                                                      \
-        if(!IS_NEAR(aa, bb, eps)) {                                                                     \
+#define EXPECT_NEAR(aa, bb, eps, err) do {                                      \
+        if(!IS_NEAR(aa, bb, eps)) {                                             \
             printf("!!!!i=%i  not near: %g, %s\n", i, fabsf((aa) - (bb)), err); \
-            printf("!!!! \""#aa"\" evaluates to: %g\n", (aa));                                          \
-            printf("!!!! \""#bb"\" evaluates to: %g\n", (bb));                                          \
-            printf("!!!! av:%.4f ; bv:%4f\n", x_var, y_var);                                            \
-            exit(1);                                                                                    \
-        }                                                                                               \
+            printf("!!!! \""#aa"\" evaluates to: %g\n", (aa));                  \
+            printf("!!!! \""#bb"\" evaluates to: %g\n", (bb));                  \
+            printf("!!!! av:%.4f ; bv:%4f\n", x_var, y_var);                    \
+            exit(1);                                                            \
+        }                                                                       \
     } while(0)
 #define THRESHOLD_VAR (1)
 #define THRESHOLD_XY (1)
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]){
 #define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= fabsf(a)*(eps) || (a) < 1e-25f)
 #define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
         if(!IS_NEAR(a, b, eps)) {                                                                   \
-            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err);  \
+            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err); \
             printf("!!!! \""#a"\" evaluates to: %g\n", (a));                                        \
             printf("!!!! \""#b"\" evaluates to: %g\n", (b));                                        \
             dump_gstatus(&in, "!!!!  ");                                                            \
@@ -286,11 +286,11 @@ int main(int argc, char *argv[]){
 #define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= fabsf(a)*(eps) || (a) < 1e-25f)
 #define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
         if(!IS_NEAR(a, b, eps)) {                                                                   \
-            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err);  \
+            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err); \
             printf("!!!! \""#a"\" evaluates to: %g\n", (a));                                        \
             printf("!!!! \""#b"\" evaluates to: %g\n", (b));                                        \
-            dump_gstatus(&out1, "!!!!1  ");                                                            \
-            dump_gstatus(&out2, "!!!!2  ");                                                            \
+            dump_gstatus(&out1, "!!!!1  ");                                                         \
+            dump_gstatus(&out2, "!!!!2  ");                                                         \
             exit(1);                                                                                \
         }                                                                                           \
     } while(0)
@@ -299,8 +299,8 @@ int main(int argc, char *argv[]){
             printf("!!!!i=%i  different: %g, %s\n", i, fabsf((a) - (b)), err);  \
             printf("!!!! \""#a"\" evaluates to: %g\n", (a));                    \
             printf("!!!! \""#b"\" evaluates to: %g\n", (b));                    \
-            dump_gstatus(&out1, "!!!!1  ");                                        \
-            dump_gstatus(&out2, "!!!!2  ");                                        \
+            dump_gstatus(&out1, "!!!!1  ");                                     \
+            dump_gstatus(&out2, "!!!!2  ");                                     \
             exit(1);                                                            \
         }                                                                       \
     } while(0)
@@ -364,6 +364,71 @@ int main(int argc, char *argv[]){
 #undef IS_NEAR
 #undef EXPECT_NEAR_PERCENT
 #undef EXPECT_EQUAL
+    }
+
+    {
+#define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= (eps))
+#define EXPECT_NEAR(aa, bb, eps, err) do {                                       \
+        if(!IS_NEAR(aa, bb, eps)) {                                              \
+            printf("!!!!i=%i  not near: %g, %s\n", i, fabsf((aa) - (bb)), err);  \
+            printf("!!!! \""#aa"\" evaluates to: %g\n", (aa));                   \
+            printf("!!!! \""#bb"\" evaluates to: %g\n", (bb));                   \
+            printf("!!!! av:%.4f ; bv:%4f\n", x_var, y_var);                     \
+            exit(1);                                                             \
+        }                                                                        \
+    } while(0)
+#define THRESHOLD_VAR (1)
+#define THRESHOLD_XY (1)
+#define THRESHOLD_THETA (1e-1)
+
+        int i;
+        for(i = 0; i < 10000; i++){
+            s2DPUncert_covar in;
+            s2DPUncert_icovar out;
+
+            float x_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            float y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            while(fabsf(y_var - x_var) < 1e-2 * x_var){
+                y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            }
+            {
+                if(x_var < y_var){
+                    float tmp = x_var;
+                    x_var = y_var;
+                    y_var = tmp;
+                }
+            }
+
+            float x = rand_uniform(0, 300);
+            float y = rand_uniform(0, 200);
+            float x_angle = rand_uniform(-M_PI, M_PI);
+            float cxa = cosf(x_angle), sxa = sinf(x_angle);
+
+            in.x = x;
+            in.y = y;
+            in.a = cxa*cxa*x_var + sxa*sxa*y_var;
+            in.b = cxa*sxa*(x_var - y_var);
+            in.c = cxa*cxa*y_var + sxa*sxa*x_var;
+
+            covar2icovar(&in, &out);
+
+            float m11 = in.a*out.a + in.b*out.b;
+            float m12 = in.a*out.b + in.b*out.c;
+            float m21 = in.b*out.a + in.c*out.b;
+            float m22 = in.b*out.b + in.c*out.c;
+
+            EXPECT_NEAR(m11, 1.f, 2e-4f, "m11");
+            EXPECT_NEAR(m12, 0.f, 2e-4f, "m12");
+            EXPECT_NEAR(m21, 0.f, 2e-4f, "m21");
+            EXPECT_NEAR(m22, 1.f, 2e-4f, "m22");
+        }
+
+        printf("OK!!!\n");
+#undef IS_NEAR
+#undef EXPECT_NEAR
+#undef THRESHOLD_THETA
+#undef THRESHOLD_XY
+#undef THRESHOLD_VAR
     }
 
     return 0;
