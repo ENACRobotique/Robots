@@ -41,42 +41,44 @@ float rand_uniform(float min, float max){
 }
 
 int main(int argc, char *argv[]){
-    sGenericPosStatus i1, i2, o;
+    {
+        sGenericPosStatus i1, i2, o;
 
-    i1.id = ELT_PRIMARY;
-    i1.date = TD_GET_LoUs(tD_newNow_Lo());
-    i1.pos.frame = FRAME_PLAYGROUND;
-    i1.pos.x = 100.;
-    i1.pos.y = 100.;
-    i1.pos.theta = 0. * M_PI / 180.;
-    i1.pos_u.a_angle = -80. * M_PI / 180.;
-    i1.pos_u.a_var = 100; // we are along a axis
-    i1.pos_u.b_var = 0;
-    i1.pos.theta = 0.;
-    i1.pos_u.theta_var = 0.;
+        i1.id = ELT_PRIMARY;
+        i1.date = TD_GET_LoUs(tD_newNow_Lo());
+        i1.pos.frame = FRAME_PLAYGROUND;
+        i1.pos.x = 100.;
+        i1.pos.y = 100.;
+        i1.pos.theta = 0. * M_PI / 180.;
+        i1.pos_u.a_angle = -80. * M_PI / 180.;
+        i1.pos_u.a_var = 100; // we are along a axis
+        i1.pos_u.b_var = 0;
+        i1.pos.theta = 0.;
+        i1.pos_u.theta_var = 0.;
 
-    printf("i1:\n");
-    dump_gstatus(&i1, "  ");
+        printf("i1:\n");
+        dump_gstatus(&i1, "  ");
 
-    i2.id = ELT_PRIMARY;
-    i2.date = i1.date;
-    i2.pos.frame = FRAME_PLAYGROUND;
-    i2.pos.x = 100.;
-    i2.pos.y = 150.;
-    i2.pos.theta = 0. * M_PI / 180.;
-    i2.pos_u.a_angle = 0. * M_PI / 180.;
-    i2.pos_u.a_var = 10;
-    i2.pos_u.b_var = 10;
-    i2.pos.theta = 0.;
-    i2.pos_u.theta_var = 0.;
+        i2.id = ELT_PRIMARY;
+        i2.date = i1.date;
+        i2.pos.frame = FRAME_PLAYGROUND;
+        i2.pos.x = 100.;
+        i2.pos.y = 150.;
+        i2.pos.theta = 0. * M_PI / 180.;
+        i2.pos_u.a_angle = 0. * M_PI / 180.;
+        i2.pos_u.a_var = 10;
+        i2.pos_u.b_var = 10;
+        i2.pos.theta = 0.;
+        i2.pos_u.theta_var = 0.;
 
-    printf("i2:\n");
-    dump_gstatus(&i2, "  ");
+        printf("i2:\n");
+        dump_gstatus(&i2, "  ");
 
-    pos_uncertainty_mix(&i1, &i2, &o);
+        pos_uncertainty_mix(&i1, &i2, &o);
 
-    printf("o:\n");
-    dump_gstatus(&o, "  ");
+        printf("o:\n");
+        dump_gstatus(&o, "  ");
+    }
 
     {
 #define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= fabsf(a)*(eps) || (a) < 1e-25f)
@@ -119,6 +121,7 @@ int main(int argc, char *argv[]){
 
             EXPECT_EQUAL(in.pos.x, out.pos.x, "pos.x");
             EXPECT_EQUAL(in.pos.y, out.pos.y, "pos.y");
+            EXPECT_EQUAL(in.pos.theta, out.pos.theta, "pos.theta");
 
             int j;
             s2DPosAtt pa;
@@ -255,6 +258,7 @@ int main(int argc, char *argv[]){
 
             EXPECT_EQUAL(in.pos.x, out.pos.x, "pos.x");
             EXPECT_EQUAL(in.pos.y, out.pos.y, "pos.y");
+            EXPECT_EQUAL(in.pos.theta, out.pos.theta, "pos.theta");
 
             int j;
             s2DPosAtt pa;
@@ -267,8 +271,92 @@ int main(int argc, char *argv[]){
                 s2DPAProbability ipap = pos_uncertainty_eval(&in, &pa);
                 s2DPAProbability opap = pos_uncertainty_eval(&out, &pa);
 
-                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 0.004f, "xy_prob");
+                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 4e-3f, "xy_prob");
                 EXPECT_EQUAL(ipap.theta_probability, opap.theta_probability, "theta_prob");
+            }
+        }
+
+        printf("OK!!!\n");
+#undef IS_NEAR
+#undef EXPECT_NEAR_PERCENT
+#undef EXPECT_EQUAL
+    }
+
+    {
+#define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= fabsf(a)*(eps) || (a) < 1e-25f)
+#define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
+        if(!IS_NEAR(a, b, eps)) {                                                                   \
+            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err);  \
+            printf("!!!! \""#a"\" evaluates to: %g\n", (a));                                        \
+            printf("!!!! \""#b"\" evaluates to: %g\n", (b));                                        \
+            dump_gstatus(&out1, "!!!!1  ");                                                            \
+            dump_gstatus(&out2, "!!!!2  ");                                                            \
+            exit(1);                                                                                \
+        }                                                                                           \
+    } while(0)
+#define EXPECT_EQUAL(a, b, err) do {                                            \
+        if((a) != (b)) {                                                        \
+            printf("!!!!i=%i  different: %g, %s\n", i, fabsf((a) - (b)), err);  \
+            printf("!!!! \""#a"\" evaluates to: %g\n", (a));                    \
+            printf("!!!! \""#b"\" evaluates to: %g\n", (b));                    \
+            dump_gstatus(&out1, "!!!!1  ");                                        \
+            dump_gstatus(&out2, "!!!!2  ");                                        \
+            exit(1);                                                            \
+        }                                                                       \
+    } while(0)
+
+        int i;
+        for(i = 0; i < 10000; i++){
+            s2DPUncert_covar in;
+            s2DPUncert_icovar tmp;
+            sGenericPosStatus out1, out2;
+
+            // setting random linear position
+            float x_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            float y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            while(fabsf(y_var - x_var) < 1e-2 * x_var){
+                y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            }
+            {
+                if(x_var < y_var){
+                    float tmp = x_var;
+                    x_var = y_var;
+                    y_var = tmp;
+                }
+            }
+            float x_angle = rand_uniform(-M_PI, M_PI);
+            float cxa = cosf(x_angle), sxa = sinf(x_angle);
+            in.a = cxa*cxa*x_var + sxa*sxa*y_var;
+            in.b = cxa*sxa*(x_var - y_var);
+            in.c = cxa*cxa*y_var + sxa*sxa*x_var;
+            in.x = rand_uniform(0, 300);
+            in.y = rand_uniform(0, 200);
+
+            // setting random angular position
+            in.d = rand_uniform(MINVARIANCE_THETA, MAXVARIANCE_THETA);
+            in.theta = rand_uniform(-M_PI, M_PI);
+
+            covar2gstatus(&in, &out1);
+            covar2icovar(&in, &tmp);
+            icovar2gstatus(&tmp, &out2);
+
+            EXPECT_EQUAL(out1.pos.x, out2.pos.x, "pos.x");
+            EXPECT_EQUAL(out1.pos.y, out2.pos.y, "pos.y");
+            EXPECT_EQUAL(out1.pos.theta, out2.pos.theta, "pos.theta");
+
+            int j;
+            s2DPosAtt pa;
+            pa.frame = FRAME_PLAYGROUND;
+            for(j = 0; j < 100; j++){
+                pa.x = rand_uniform(0, 300);
+                pa.y = rand_uniform(0, 200);
+                pa.theta = rand_uniform(-M_PI, M_PI);
+
+                s2DPAProbability ipap = pos_uncertainty_eval(&out1, &pa);
+                s2DPAProbability opap = pos_uncertainty_eval(&out2, &pa);
+
+                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 5e-2f, "xy_prob");
+                EXPECT_NEAR_PERCENT(ipap.theta_probability, opap.theta_probability, 3e-7f, "theta_prob");
             }
         }
 

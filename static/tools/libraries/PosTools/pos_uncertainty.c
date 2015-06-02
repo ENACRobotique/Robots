@@ -137,6 +137,54 @@ void gstatus2covar(sGenericPosStatus *i, s2DPUncert_covar *o){
     o->theta = i->pos.theta;
 }
 
+void covar2icovar(s2DPUncert_covar *i, s2DPUncert_icovar *o){
+    // linear position
+    float det = i->a*i->c - i->b*i->b;
+    o->a = i->c/det;
+    o->b = -i->b/det;
+    o->c = i->a/det;
+    o->x = i->x;
+    o->y = i->y;
+
+    // angular position
+    o->d = 1/i->d;
+    o->theta = i->theta;
+}
+
+void icovar2covar(s2DPUncert_icovar *i, s2DPUncert_covar *o){
+    // linear position
+    float det = i->a*i->c - i->b*i->b;
+    o->a = i->c/det;
+    o->b = -i->b/det;
+    o->c = i->a/det;
+    o->x = i->x;
+    o->y = i->y;
+
+    // angular position
+    o->d = 1/i->d;
+    o->theta = i->theta;
+}
+
+s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
+    assert(i->pos.frame == p->frame);
+
+    s2DPUncert_icovar ii;
+    gstatus2icovar(i, &ii);
+
+    s2DPAProbability o;
+    float dx = p->x - ii.x;
+    float dy = p->y - ii.y;
+    float dtheta = p->theta - ii.theta;
+
+    while(dtheta > M_PI) dtheta -= 2*M_PI;
+    while(dtheta < -M_PI) dtheta += 2*M_PI;
+
+    o.xy_probability = expf(-(ii.a*dx*dx + 2*ii.b*dx*dy + ii.c*dy*dy)/2.f)/(2*M_PI*sqrtf(i->pos_u.a_var*i->pos_u.b_var));
+    o.theta_probability = expf(-ii.d*dtheta*dtheta/2.f)/sqrtf(2*M_PI*i->pos_u.theta_var);
+
+    return o;
+}
+
 void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o){
     s2DPUncert_icovar pg, mn, nw;
 
@@ -158,23 +206,4 @@ void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericP
     o->date = i1->date;
     icovar2gstatus(&nw, o);
     o->pos.frame = i1->pos.frame;
-}
-
-s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
-    assert(i->pos.frame == p->frame);
-
-    s2DPUncert_icovar ii;
-    gstatus2icovar(i, &ii);
-
-    s2DPAProbability o;
-    float dx = p->x - ii.x;
-    float dy = p->y - ii.y;
-    float dtheta = p->theta - ii.theta;
-    while(dtheta > M_PI) dtheta -= 2*M_PI;
-    while(dtheta < -M_PI) dtheta += 2*M_PI;
-
-    o.xy_probability = expf(-(ii.a*dx*dx + 2*ii.b*dx*dy + ii.c*dy*dy)/2.f)/(2*M_PI*sqrtf(i->pos_u.a_var*i->pos_u.b_var));
-    o.theta_probability = expf(-ii.d*dtheta*dtheta/2.f)/sqrtf(2*M_PI*i->pos_u.theta_var);
-
-    return o;
 }

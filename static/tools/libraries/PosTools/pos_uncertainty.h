@@ -10,6 +10,10 @@
 
 #include <messages-statuses.h>
 
+/**
+ * Inverse of covariance matrix to generic position status
+ */
+
 typedef struct{
     // linear position
     float a, b, c;
@@ -22,7 +26,16 @@ typedef struct{
 
 void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o);
 void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o);
+
+/**
+ * Performing a mix of uncertainty at the inverse covariance matrix level
+ */
+
 void icovar_mix(const s2DPUncert_icovar *i1, const s2DPUncert_icovar *i2, s2DPUncert_icovar *o);
+
+/**
+ * Covariance matrix to generic position status
+ */
 
 typedef struct{
     // linear position
@@ -37,10 +50,27 @@ typedef struct{
 void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o);
 void gstatus2covar(sGenericPosStatus *i, s2DPUncert_covar *o);
 
+/*
+ * Performing the matrix inversion
+ */
+
+void covar2icovar(s2DPUncert_covar *i, s2DPUncert_icovar *o);
+void icovar2covar(s2DPUncert_icovar *i, s2DPUncert_covar *o);
+
+/**
+ * Evaluating the probability of a position of the robot
+ */
+
 typedef struct{
     float xy_probability;
     float theta_probability;
 } s2DPAProbability;
+
+s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p);
+
+/**
+ * Performing a high level mix of uncertainty
+ */
 
 #define MINVARIANCE_XY (5e-4) // (cm²)
 #define MAXVARIANCE_XY (2e3) // (cm²)
@@ -48,6 +78,5 @@ typedef struct{
 #define MAXVARIANCE_THETA (500) // (rad²)
 
 void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o);
-s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p);
 
 #endif /* LIB_POSTOOLS_POS_UNCERTAINTY_H_ */
