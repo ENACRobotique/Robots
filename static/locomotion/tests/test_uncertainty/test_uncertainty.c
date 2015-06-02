@@ -79,17 +79,25 @@ int main(int argc, char *argv[]){
     dump_gstatus(&o, "  ");
 
     {
-#define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= fabs(a)*(eps) || (a) < 1e-25f)
+#define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= fabsf(a)*(eps) || (a) < 1e-25f)
 #define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
         if(!IS_NEAR(a, b, eps)) {                                                                   \
-            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabs(((a) - (b))/((a)?(a):(b)))*100, err);  \
+            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err);  \
             printf("!!!! \""#a"\" evaluates to: %g\n", (a));                                        \
             printf("!!!! \""#b"\" evaluates to: %g\n", (b));                                        \
             dump_gstatus(&in, "!!!!  ");                                                            \
             exit(1);                                                                                \
         }                                                                                           \
     } while(0)
-#define THRESHOLD (0.03f/100)
+#define EXPECT_EQUAL(a, b, err) do {                                            \
+        if((a) != (b)) {                                                        \
+            printf("!!!!i=%i  different: %g, %s\n", i, fabsf((a) - (b)), err);  \
+            printf("!!!! \""#a"\" evaluates to: %g\n", (a));                    \
+            printf("!!!! \""#b"\" evaluates to: %g\n", (b));                    \
+            dump_gstatus(&in, "!!!!  ");                                        \
+            exit(1);                                                            \
+        }                                                                       \
+    } while(0)
 
         s2DPUncert_icovar tmp;
         sGenericPosStatus in = { 0 }, out = { 0 };
@@ -109,8 +117,8 @@ int main(int argc, char *argv[]){
             gstatus2icovar(&in, &tmp);
             icovar2gstatus(&tmp, &out);
 
-            EXPECT_NEAR_PERCENT(in.pos.x, out.pos.x, THRESHOLD, "pos.x");
-            EXPECT_NEAR_PERCENT(in.pos.y, out.pos.y, THRESHOLD, "pos.y");
+            EXPECT_EQUAL(in.pos.x, out.pos.x, "pos.x");
+            EXPECT_EQUAL(in.pos.y, out.pos.y, "pos.y");
 
             int j;
             s2DPosAtt pa;
@@ -123,22 +131,22 @@ int main(int argc, char *argv[]){
                 s2DPAProbability ipap = pos_uncertainty_eval(&in, &pa);
                 s2DPAProbability opap = pos_uncertainty_eval(&out, &pa);
 
-                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 0.02f, "xy_prob");
-                EXPECT_NEAR_PERCENT(ipap.theta_probability, opap.theta_probability, THRESHOLD, "theta_prob");
+                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 2e-2f, "xy_prob");
+                EXPECT_NEAR_PERCENT(ipap.theta_probability, opap.theta_probability, 2e-7f, "theta_prob");
             }
         }
 
         printf("OK!!!\n");
 #undef IS_NEAR
 #undef EXPECT_NEAR_PERCENT
-#undef THRESHOLD
+#undef EXPECT_EQUAL
     }
 
     {
-#define IS_NEAR(a, b, eps) (fabs((a) - (b)) <= (eps))
+#define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= (eps))
 #define EXPECT_NEAR(aa, bb, eps, err) do {                                                      \
         if(!IS_NEAR(aa, bb, eps)) {                                                                     \
-            printf("!!!!i=%i  not near: %g, %s\n", i, fabs((aa) - (bb)), err); \
+            printf("!!!!i=%i  not near: %g, %s\n", i, fabsf((aa) - (bb)), err); \
             printf("!!!! \""#aa"\" evaluates to: %g\n", (aa));                                          \
             printf("!!!! \""#bb"\" evaluates to: %g\n", (bb));                                          \
             printf("!!!! av:%.4f ; bv:%4f\n", x_var, y_var);                                            \
@@ -156,7 +164,7 @@ int main(int argc, char *argv[]){
 
             float x_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
             float y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
-            while(fabs(y_var - x_var) < 1e-2 * x_var){
+            while(fabsf(y_var - x_var) < 1e-2 * x_var){
                 y_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
             }
             {
@@ -204,6 +212,70 @@ int main(int argc, char *argv[]){
 #undef THRESHOLD_THETA
 #undef THRESHOLD_XY
 #undef THRESHOLD_VAR
+    }
+
+    {
+#define IS_NEAR(a, b, eps) (fabsf((a) - (b)) <= fabsf(a)*(eps) || (a) < 1e-25f)
+#define EXPECT_NEAR_PERCENT(a, b, eps, err) do {                                                    \
+        if(!IS_NEAR(a, b, eps)) {                                                                   \
+            printf("!!!!i=%i  not near: %g%%, %s\n", i, fabsf(((a) - (b))/((a)?(a):(b)))*100, err);  \
+            printf("!!!! \""#a"\" evaluates to: %g\n", (a));                                        \
+            printf("!!!! \""#b"\" evaluates to: %g\n", (b));                                        \
+            dump_gstatus(&in, "!!!!  ");                                                            \
+            exit(1);                                                                                \
+        }                                                                                           \
+    } while(0)
+#define EXPECT_EQUAL(a, b, err) do {                                            \
+        if((a) != (b)) {                                                        \
+            printf("!!!!i=%i  different: %g, %s\n", i, fabsf((a) - (b)), err);  \
+            printf("!!!! \""#a"\" evaluates to: %g\n", (a));                    \
+            printf("!!!! \""#b"\" evaluates to: %g\n", (b));                    \
+            dump_gstatus(&in, "!!!!  ");                                        \
+            exit(1);                                                            \
+        }                                                                       \
+    } while(0)
+
+        s2DPUncert_covar tmp;
+        sGenericPosStatus in = { 0 }, out = { 0 };
+        int i;
+        for(i = 0; i < 10000; i++){
+            in.id = ELT_PRIMARY;
+            in.date = TD_GET_LoUs(tD_newNow_Lo());
+            in.pos.frame = FRAME_PLAYGROUND;
+            in.pos.x = rand_uniform(0, 300);
+            in.pos.y = rand_uniform(0, 200);
+            in.pos_u.a_angle = rand_uniform(-M_PI, M_PI);
+            in.pos_u.a_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            in.pos_u.b_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
+            in.pos.theta = rand_uniform(-M_PI, M_PI);
+            in.pos_u.theta_var = rand_uniform(MINVARIANCE_THETA, MAXVARIANCE_THETA);
+
+            gstatus2covar(&in, &tmp);
+            covar2gstatus(&tmp, &out);
+
+            EXPECT_EQUAL(in.pos.x, out.pos.x, "pos.x");
+            EXPECT_EQUAL(in.pos.y, out.pos.y, "pos.y");
+
+            int j;
+            s2DPosAtt pa;
+            pa.frame = FRAME_PLAYGROUND;
+            for(j = 0; j < 100; j++){
+                pa.x = rand_uniform(0, 300);
+                pa.y = rand_uniform(0, 200);
+                pa.theta = rand_uniform(-M_PI, M_PI);
+
+                s2DPAProbability ipap = pos_uncertainty_eval(&in, &pa);
+                s2DPAProbability opap = pos_uncertainty_eval(&out, &pa);
+
+                EXPECT_NEAR_PERCENT(ipap.xy_probability, opap.xy_probability, 0.004f, "xy_prob");
+                EXPECT_EQUAL(ipap.theta_probability, opap.theta_probability, "theta_prob");
+            }
+        }
+
+        printf("OK!!!\n");
+#undef IS_NEAR
+#undef EXPECT_NEAR_PERCENT
+#undef EXPECT_EQUAL
     }
 
     return 0;
