@@ -13,6 +13,14 @@
 
 //#define AI_TOOLS
 
+enum class Axis{
+        NONE,
+        X,
+        Y,
+        Z
+};
+
+
 /*
  * Print to the screen the list of active obstacle
  */
@@ -62,7 +70,7 @@ unsigned int checkPointInLimitPlayground(const Point2D<float>& p, const float li
  */
 Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
     unsigned int n = checkPointInObs(p, obs);
-logs << WAR << "Projection function: n="<< n;
+
     if (n > 0) {
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         Point2D<float> r;
@@ -143,29 +151,128 @@ int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& 
 
     d = ptRobot.distanceTo(ptPr);
     if (d < (pos[robot].r + pos[0].r) && d) {
-        logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!";
+     //   logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 1;
     }
 
     d = ptRobot.distanceTo(ptSc);
     if (d < (pos[robot].r + pos[1].r) && d) {
-        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
+      //  logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 2;
     }
 
     d = ptRobot.distanceTo(ptAPr);
     if (d < (pos[robot].r + pos[2].r) && d) {
-        logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+     //   logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 3;
     }
 
     d = ptRobot.distanceTo(ptASc);
     if (d < (pos[robot].r + pos[3].r) && d) {
-        logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+     //   logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 4;
     }
 
     return 0;
+}
+
+Axis searchAxis(const Segment2D<float>& seg){
+    if(seg.p1.x == seg.p2.x)
+        return Axis::Y;
+    else if(seg.p1.y == seg.p2.y)
+        return Axis::X;
+
+    return Axis::NONE;
+}
+
+void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& curPt, const float& curAngle, const Point2D<float>& destPt, const float& destAngle, const vector<Segment2D<float>>& robot, const vector<Segment2D<float>>& playground){
+    float dx = -1, dy = -1, ox = 10, oy = 10;
+    int pgx = -1, rx, pgy, ry;
+
+    traj.push_back({curPt, curAngle, {0,0}, 0});
+
+    for(unsigned int i = 0 ; i < playground.size() ; i++){
+        if(searchAxis(playground[i]) == Axis::Y){
+            float d = playground[i].distance(curPt);
+            if(d < dx || dx == -1){
+                dx = d;
+                pgx = i;
+            }
+        }
+    }
+
+    for(unsigned int i = 0 ; i < robot.size() ; i++){
+        Point2D<float> pjt = robot[i].project({0, 0});
+        if(pjt != robot[i].p1 && pjt != robot[i].p2){
+            Vector2D<float> v1({0,0}, pjt);
+            Vector2D<float> v2(1, 0);
+            float o = v2.angle(v1) + curAngle;
+            if(o < ox || ox == 10 ){
+                ox = o - curAngle;
+                rx = i;
+            }
+        }
+    }
+
+    logs << WAR << pgx;
+    if(pgx == -1)
+        logs << INFO << "Can't set position in X axis";
+    else{
+        Point2D<float> dest = playground[pgx].project(curPt);
+        dest.x += SIGN(curPt.x - dest.x)*R_ROBOT;
+        float angle = ox;
+        traj.push_back({dest, angle, {0,0}, 0});
+
+        dest = playground[pgx].project(curPt);
+        dest.x += SIGN(curPt.x - dest.x)*robot[rx].distance({0,0});
+        traj.push_back({dest, angle, {dest.x, 0.}, 1});
+
+        dest = playground[pgx].project(curPt);
+        dest.x += SIGN(curPt.x - dest.x)*R_ROBOT;
+        traj.push_back({dest, angle, {0,0}, 0});
+    }
+
+    for(unsigned int i = 0 ; i < playground.size() ; i++){
+        if(searchAxis(playground[i]) == Axis::X){
+            float d = playground[i].distance(traj.back().dest);
+            if(d < dy || dy == -1){
+                dy = d;
+                pgy = i;
+            }
+        }
+    }
+
+    for(unsigned int i = 0 ; i < robot.size() ; i++){
+        Point2D<float> pjt = robot[i].project({0, 0});
+        if(pjt != robot[i].p1 && pjt != robot[i].p2){
+            Vector2D<float> v1({0, 0}, pjt), v2(1, 0);
+            float o = v2.angle(v1) + traj.back().angle;
+            if(o < oy || oy == 10 ){
+                oy = o - traj.back().angle;
+                ry = i;
+            }
+        }
+    }
+
+    if(pgy == -1)
+        logs << INFO << "Can't set position in Y axis";
+    else{
+        Point2D<float> lastPos = traj.back().dest;
+        Point2D<float> dest = playground[pgy].project(traj.back().dest);
+        dest.y += SIGN(traj.back().dest.y - dest.y)*R_ROBOT;
+        float angle = oy + SIGN(traj.back().dest.y - dest.y)*M_PI_2;
+        traj.push_back({dest, angle, {0,0}, 0});
+
+        dest = playground[pgy].project(lastPos);
+        dest.y += SIGN(lastPos.y - dest.y)*robot[ry].distance({0,0});
+        traj.push_back({dest, angle, {0., dest.y}, 2});
+
+        dest = playground[pgy].project(lastPos);
+        dest.y += SIGN(lastPos.y - dest.y)*R_ROBOT;
+        traj.push_back({dest, angle, {0,0}, 0});
+    }
+
+    traj.push_back({destPt, destAngle, {0,0}, 3});
 }
 
 /*

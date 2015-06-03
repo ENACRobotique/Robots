@@ -32,47 +32,37 @@
 		<link>
 			<name>lib/Core</name>
 			<type>2</type>
-			<locationURI>PARENT-1-copy_PARENT12/shared/Core</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/core/shared/Core</locationURI>
 		</link>
 		<link>
 			<name>lib/Timeout</name>
 			<type>2</type>
-			<locationURI>PARENT-2-copy_PARENT12/tools/libraries/Timeout</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/tools/libraries/Timeout</locationURI>
 		</link>
 		<link>
 			<name>lib/botNet</name>
 			<type>2</type>
-			<locationURI>PARENT-2-copy_PARENT12/communication/botNet</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/botNet</locationURI>
 		</link>
 		<link>
 			<name>lib/lpc2148</name>
 			<type>2</type>
-			<locationURI>PARENT-1-copy_PARENT12/lpc21xx/lpc2148</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/core/lpc21xx/lpc2148</locationURI>
 		</link>
 		<link>
 			<name>lib/lpc_lib</name>
 			<type>2</type>
-			<locationURI>PARENT-1-copy_PARENT12/lpc21xx/lpc_lib</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/core/lpc21xx/lpc_lib</locationURI>
 		</link>
 		<link>
 			<name>lib/network_config</name>
 			<type>2</type>
-			<locationURI>PARENT-3-copy_PARENT12/network_config</locationURI>
+			<locationURI>PARENT-4-PROJECT_LOC/network_config</locationURI>
 		</link>
 		<link>
 			<name>lib/network_tools</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/communication/network_tools/</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/network_tools</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-1-PROJECT_LOC%7D/static</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT12</name>
-			<value>$%7BPARENT-1-copy_PARENT%7D</value>
-		</variable>
-	</variableList>
 </projectDescription>

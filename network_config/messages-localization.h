@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#include "messages-position.h"
+
 // beacons synchronization
 
 typedef struct __attribute__((__packed__)){
@@ -42,5 +44,28 @@ typedef struct __attribute__((__packed__)){
     syncFlag_wired flag;
 } sSyncPayload_wired;
 
+// absolute position
+
+typedef struct __attribute__((__packed__)){
+    s2DPosAtt pos;
+    s2DPAUncert pos_u;
+    s2DSpeed spd;
+
+    uint32_t date; // date associated to given position, ... (in synchronized time)
+} sDoAbsPos;
+
+typedef enum{
+    ABSPOS_KO,
+    ABSPOS_OK
+} eAbsPosStatus;
+
+typedef struct __attribute__((__packed__)){
+    eAbsPosStatus status;
+
+    s2DPosAtt pos;
+    s2DPAUncert pos_u;
+
+    uint32_t date; // date associated to given position, ... (in synchronized time)
+} sDoneAbsPos;
 
 #endif /* LIB_NETWORK_CONFIG_MESSAGES_LOCALIZATION_H_ */

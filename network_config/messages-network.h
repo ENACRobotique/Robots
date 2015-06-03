@@ -23,12 +23,12 @@ typedef struct __attribute__((packed)){
 #define ROLE_UNDEFINED          (0)
 #define ROLE_DEBUG              (1)
 #define ROLE_MONITORING         (2)
-// primary roles
 #define ROLE_PRIM_AI            (3)
 #define ROLE_PRIM_PROPULSION    (4)
-// secondary roles
-#define ROLE_SEC_AI             (5)
-#define ROLE_SEC_PROPULSION     (6)
+#define ROLE_PRIM_VIDEO         (5)
+#define ROLE_SEC_AI             (6)
+#define ROLE_SEC_PROPULSION     (7)
+#define LAST_ROLE               (7) // can't be higher than 15 (4 bits)
 
 typedef struct __attribute__((packed)){ // 2bytes
     struct __attribute__((packed)){
@@ -41,11 +41,11 @@ typedef struct __attribute__((packed)){ // 2bytes
     } relayTo;
 } sRoleActions;
 
-
 typedef enum {
     ROLEMSG_DEBUG,
     ROLEMSG_PRIM_TRAJ,
     ROLEMSG_PRIM_POS,
+    ROLEMSG_PRIM_ABSPOS,
     ROLEMSG_SEC_TRAJ,
     ROLEMSG_SEC_POS,
 } eRoleMsgClass;

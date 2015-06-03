@@ -170,7 +170,7 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, sContext *ctx) {
 
     // draw test data
     {
-        sGenericStatus o;
+        sGenericPosStatus o;
 
         if (da_state_hover_moved(&ctx->da)) {
             da_state_get_hover__cm__float(&ctx->da, &ctx->i2.pos.x, &ctx->i2.pos.y);
