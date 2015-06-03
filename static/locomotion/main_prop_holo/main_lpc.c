@@ -115,7 +115,16 @@ int main() {
                 trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
             case E_GENERIC_POS_STATUS:
-                trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                switch(inMsg.payload.genericPosStatus.prop_status.action){
+                case PROP_SETPOS:
+                    trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    break;
+                case PROP_MIXPOS:
+                    trajmngr_mix_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    break;
+                default:
+                    break;
+                }
                 break;
             }
         } // End: if(ret > 0)

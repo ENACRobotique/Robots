@@ -28,13 +28,13 @@ extern "C"{
 #include "ai_tools.h"
 
 
-void bnSendBlock(sMsg& msg, string txt){
+void bnSendBlock(sMsg& msg, const string& txt){
     int ret = -1;
     int i = 0;
 
-    while(ret < 0){
-        ret = bn_send(&msg);
-        if(ret < 0){
+    do{
+        ret = bn_sendAck(&msg);
+        if(ret <= 0){
             if(!i){
                 logs << ERR << txt << "bn_send failed" << getErrorStr(-ret) << "(#" << -ret << ")";
             }
@@ -43,16 +43,16 @@ void bnSendBlock(sMsg& msg, string txt){
         else if (i){
             logs << WAR << "bn_send success after " << i << "tries";
         }
-    }
+    }while(ret <= 0);
 }
 
-void roleSendBlock(sMsg& msg, eRoleMsgClass mc, string txt){
+void roleSendBlock(sMsg& msg, eRoleMsgClass mc, const string& txt){
     int ret = -1;
     int i = 0;
 
-    while(ret < 0){
-        ret = role_send(&msg, mc);
-        if(ret < 0){
+    do{
+        ret = role_sendAck(&msg, mc);
+        if(ret <= 0){
             if(!i){
                 logs << ERR << txt << "role_send failed" << getErrorStr(-ret) << "(#" << -ret << ")";
             }
@@ -61,7 +61,7 @@ void roleSendBlock(sMsg& msg, eRoleMsgClass mc, string txt){
         else if (i){
             logs << WAR << "role_send success after " << i << "tries";
         }
-    }
+    }while(ret <= 0);
 }
 
 /*
@@ -281,7 +281,6 @@ void sendObss(vector<astar::sObs_t>& obs, vector<uint8_t>& obs_updated){
 int sendPosPrimary(Point2D<float> &p, float theta) {
     sMsg msgOut ;
     memset(&msgOut, 0, sizeof(msgOut));
-    int ret;
 
     if ((p.x < 0.) || (p.x > 300.) || (p.y < 0.) || (p.y > 200.))
         return -1;
@@ -296,11 +295,14 @@ int sendPosPrimary(Point2D<float> &p, float theta) {
     msgOut.payload.genericPosStatus.pos.x = p.x;
     msgOut.payload.genericPosStatus.pos.y = p.y;
     msgOut.payload.genericPosStatus.pos.theta = theta;
+    msgOut.payload.genericPosStatus.pos_u.a_var = 10*10;
+    msgOut.payload.genericPosStatus.pos_u.b_var = 10*10;
+    msgOut.payload.genericPosStatus.pos_u.a_angle = 0;
+    msgOut.payload.genericPosStatus.pos_u.theta_var = M_PI*M_PI/16;
+    msgOut.payload.genericPosStatus.prop_status.action = PROP_SETPOS;
 
-    if ((ret = role_sendRetry(&msgOut, ROLEMSG_PRIM_POS, MAX_RETRIES)) <= 0) {
-        logs << ERR << "bn_sendRetry(E_POS) error #" << -ret;
-        return -2;
-    }
+    roleSendBlock(msgOut, ROLEMSG_PRIM_POS, __func__);
+
     logs << MES << "[POS] Sending position to primary robot (" << msgOut.payload.genericPosStatus.pos.x << ", " << msgOut.payload.genericPosStatus.pos.y << ", " << msgOut.payload.genericPosStatus.pos.theta * 180. / M_PI << ")";
 
     statuses.posSend(ELT_PRIMARY, p);

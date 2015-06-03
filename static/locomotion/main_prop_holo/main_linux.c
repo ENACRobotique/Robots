@@ -90,7 +90,16 @@ int main() {
                 break;
             case E_GENERIC_POS_STATUS:
                 printf("got position: %.2fcm %.2fcm %.2f°\n", inMsg.payload.genericPosStatus.pos.x, inMsg.payload.genericPosStatus.pos.y, inMsg.payload.genericPosStatus.pos.theta * 180. / M_PI);
-                trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                switch(inMsg.payload.genericPosStatus.prop_status.action){
+                case PROP_SETPOS:
+                    trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    break;
+                case PROP_MIXPOS:
+                    trajmngr_mix_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    break;
+                default:
+                    break;
+                }
                 break;
             default:
                 printf("got unhandled message with type: %s (%i)\n", eType2str(inMsg.header.type), inMsg.header.type);

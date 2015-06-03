@@ -24,8 +24,8 @@ typedef struct{
     float theta; // (rad)
 } s2DPUncert_icovar;
 
-void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o);
-void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o);
+void gstatus2icovar(const sGenericPosStatus *i, s2DPUncert_icovar *o);
+void icovar2gstatus(const s2DPUncert_icovar *i, sGenericPosStatus *o);
 
 /**
  * Performing a mix of uncertainty at the inverse covariance matrix level
@@ -39,23 +39,23 @@ void icovar_mix(const s2DPUncert_icovar *i1, const s2DPUncert_icovar *i2, s2DPUn
 
 typedef struct{
     // linear position
-    float a, b, c;
+    float a, b, c; // (cm²)
     float x, y; // (cm)
 
     // angular position
-    float d;
+    float d; // (rad²)
     float theta; // (rad)
 } s2DPUncert_covar;
 
-void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o);
-void gstatus2covar(sGenericPosStatus *i, s2DPUncert_covar *o);
+void covar2gstatus(const s2DPUncert_covar *i, sGenericPosStatus *o);
+void gstatus2covar(const sGenericPosStatus *i, s2DPUncert_covar *o);
 
 /*
  * Performing the matrix inversion
  */
 
-void covar2icovar(s2DPUncert_covar *i, s2DPUncert_icovar *o);
-void icovar2covar(s2DPUncert_icovar *i, s2DPUncert_covar *o);
+void covar2icovar(const s2DPUncert_covar *i, s2DPUncert_icovar *o);
+void icovar2covar(const s2DPUncert_icovar *i, s2DPUncert_covar *o);
 
 /**
  * Evaluating the probability of a position of the robot
@@ -66,7 +66,7 @@ typedef struct{
     float theta_probability;
 } s2DPAProbability;
 
-s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p);
+s2DPAProbability pos_uncertainty_eval(const sGenericPosStatus *i, const s2DPosAtt *p);
 
 /**
  * Performing a high level mix of uncertainty
@@ -77,6 +77,6 @@ s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p);
 #define MINVARIANCE_THETA (2e-3) // (rad²)
 #define MAXVARIANCE_THETA (500) // (rad²)
 
-void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o);
+void pos_uncertainty_mix(const sGenericPosStatus *i1, const sGenericPosStatus *i2, sGenericPosStatus *o);
 
 #endif /* LIB_POSTOOLS_POS_UNCERTAINTY_H_ */

@@ -18,7 +18,7 @@
 
 // see static/locomotion/simu for design files
 
-void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o){
+void gstatus2icovar(const sGenericPosStatus *i, s2DPUncert_icovar *o){
     // linear position
     // Converts rotated 2D gaussian to quadratic form coefficients
     //   input:  f(x, y) = X²/var_x + Y²/var_y
@@ -41,7 +41,7 @@ void gstatus2icovar(sGenericPosStatus *i, s2DPUncert_icovar *o){
     o->theta = i->pos.theta;
 }
 
-void icovar2gstatus(s2DPUncert_icovar *i, sGenericPosStatus *o){
+void icovar2gstatus(const s2DPUncert_icovar *i, sGenericPosStatus *o){
     // linear position
     // Converts quadratic form coefficients to rotated 2D gaussian
     //   input:  f(x, y) = ax² + 2bxy + cy² (formalized as inverse covariance: X^T * M^-1 * X)
@@ -92,7 +92,7 @@ void icovar_mix(const s2DPUncert_icovar *i1, const s2DPUncert_icovar *i2, s2DPUn
     o->theta = (i1->d*i1->theta + i2->d*mn_theta)/o->d;
 }
 
-void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o){
+void covar2gstatus(const s2DPUncert_covar *i, sGenericPosStatus *o){
     // linear position
     float trace = i->a + i->c;
 #if 0
@@ -121,7 +121,7 @@ void covar2gstatus(s2DPUncert_covar *i, sGenericPosStatus *o){
     o->pos.theta = i->theta;
 }
 
-void gstatus2covar(sGenericPosStatus *i, s2DPUncert_covar *o){
+void gstatus2covar(const sGenericPosStatus *i, s2DPUncert_covar *o){
     // linear position
     float caa = cosf(i->pos_u.a_angle);
     float saa = sinf(i->pos_u.a_angle);
@@ -137,7 +137,7 @@ void gstatus2covar(sGenericPosStatus *i, s2DPUncert_covar *o){
     o->theta = i->pos.theta;
 }
 
-void covar2icovar(s2DPUncert_covar *i, s2DPUncert_icovar *o){
+void covar2icovar(const s2DPUncert_covar *i, s2DPUncert_icovar *o){
     // linear position
     float det = i->a*i->c - i->b*i->b;
     o->a = i->c/det;
@@ -151,7 +151,7 @@ void covar2icovar(s2DPUncert_covar *i, s2DPUncert_icovar *o){
     o->theta = i->theta;
 }
 
-void icovar2covar(s2DPUncert_icovar *i, s2DPUncert_covar *o){
+void icovar2covar(const s2DPUncert_icovar *i, s2DPUncert_covar *o){
     // linear position
     float det = i->a*i->c - i->b*i->b;
     o->a = i->c/det;
@@ -165,7 +165,7 @@ void icovar2covar(s2DPUncert_icovar *i, s2DPUncert_covar *o){
     o->theta = i->theta;
 }
 
-s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
+s2DPAProbability pos_uncertainty_eval(const sGenericPosStatus *i, const s2DPosAtt *p){
     assert(i->pos.frame == p->frame);
 
     s2DPUncert_icovar ii;
@@ -185,7 +185,7 @@ s2DPAProbability pos_uncertainty_eval(sGenericPosStatus *i, s2DPosAtt *p){
     return o;
 }
 
-void pos_uncertainty_mix(sGenericPosStatus *i1, sGenericPosStatus *i2, sGenericPosStatus *o){
+void pos_uncertainty_mix(const sGenericPosStatus *i1, const sGenericPosStatus *i2, sGenericPosStatus *o){
     s2DPUncert_icovar pg, mn, nw;
 
     // necessary verifications

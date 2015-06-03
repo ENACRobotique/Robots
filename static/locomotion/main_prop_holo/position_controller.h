@@ -72,9 +72,10 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
 void posctlr_begin_update(position_controller_t* tc);
 void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp);
 void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta);
-void posctrl_get_pos(position_controller_t* tc, int *x, int *y, int *theta);
-void posctrl_get_pos_u(position_controller_t* tc, int *x_var, int *y_var, int *xy_var, int *theta_var);
-void posctrl_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz);
+void posctlr_get_pos(position_controller_t* tc, int *x, int *y, int *theta);
+void posctlr_set_pos_u(position_controller_t* tc, int x_var, int y_var, int xy_var, int theta_var);
+void posctlr_get_pos_u(position_controller_t* tc, int *x_var, int *y_var, int *xy_var, int *theta_var);
+void posctlr_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz);
 void posctlr_reset(position_controller_t* tc);
 
 #endif /* POSITION_CONTROLLER_H_ */
