@@ -394,11 +394,13 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos) {
 void trajmngr_mix_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos) {
     // TODO use date and position history to retro-correct position
 
-    if(pos->id == ELT_PRIMARY) {
+    if(pos->id == ELT_PRIMARY && pos->prop_status.rid > tm->curr_rid) {
         int x, y, theta;
         int x_var, y_var, xy_var, theta_var;
         s2DPUncert_covar cov;
         s2DPUncert_icovar icov_ext, icov_int, icov;
+
+        tm->curr_rid++;
 
         // get current status
         posctlr_get_pos(&tm->ctlr, &x, &y, &theta);
@@ -473,6 +475,9 @@ void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
         ps->prop_status.sssid = tm->curr_element & 1;
         break;
     }
+
+    // current recalibration id
+    ps->prop_status.rid = tm->curr_rid;
 
     // get speed
     int vx, vy, oz;

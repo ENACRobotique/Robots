@@ -35,6 +35,8 @@ typedef struct __attribute__((packed)){
         struct{
             s2DSpeed spd;
 
+            uint8_t rid; // recalibration identifier
+
             uint16_t tid :12; // trajectory identifier
             uint8_t sid :4; // step identifier
             uint8_t ssid :1; // sub-step identifier (0:first element of message, 1:second element of message)

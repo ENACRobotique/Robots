@@ -30,6 +30,7 @@ typedef struct {
     uint16_t curr_tid :12;
     uint8_t next_sid :4;
     uint16_t curr_element; // slot index + sub step id
+    uint8_t curr_rid; // current recalibration id (initialized to 0)
 
     uint16_t slots_insert_idx;
     uint16_t slots_used_number;
