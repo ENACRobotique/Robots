@@ -40,6 +40,8 @@ typedef struct __attribute__((packed)){
             uint8_t ssid :1; // sub-step identifier (0:first element of message, 1:second element of message)
             uint8_t sssid :1; // sub-sub-step identifier (0:line, 1:circle)
 
+            uint8_t rid; // recalibration identifier
+
             ePropStatus status :1;
             ePropStatusAction action :1;
         } prop_status;
