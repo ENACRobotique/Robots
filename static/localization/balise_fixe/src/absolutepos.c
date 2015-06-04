@@ -216,7 +216,7 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
                     msg_out.payload.genericPosStatus.pos_u.a_var = 0.;
                     msg_out.payload.genericPosStatus.pos_u.b_var = 0.;
                     msg_out.payload.genericPosStatus.pos_u.a_angle = 0.;
-                    msg_out.payload.genericPosStatus.pos_u.theta = -1.;
+                    msg_out.payload.genericPosStatus.pos_u.theta_var = -1.;
 
                     //					bn_send(&msg_out);
 #ifdef DEBUG_POS
@@ -294,7 +294,7 @@ void absolutepos(sMeasures*buffer,int index, int taille) {
                     msg_out.payload.genericPosStatus.pos_u.a_var = 0.;
                     msg_out.payload.genericPosStatus.pos_u.b_var = 0.;
                     msg_out.payload.genericPosStatus.pos_u.a_angle = 0.;
-                    msg_out.payload.genericPosStatus.pos_u.theta = -1.;
+                    msg_out.payload.genericPosStatus.pos_u.theta_var = -1.;
 
                     //                  bn_send(&msg_out);
 #ifdef DEBUG_POS

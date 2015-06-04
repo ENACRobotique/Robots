@@ -101,7 +101,7 @@ int Statuses::receivedNewStatus(sGenericPosStatus& status){
         logs << ERR << "Position not save frame not in playground";
 
     if(status.id == ELT_PRIMARY)
-        logs.putNewPos(status.pos.x, status.pos.y, status.pos.theta);
+        logs.putNewPos(status.pos.x, status.pos.y, status.pos.theta, status.pos_u.a_var, status.pos_u.b_var, status.pos_u.a_angle, status.pos_u.theta_var);
 
     return 1;
 }
@@ -198,7 +198,6 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
 
     // create uncertainty if asked to
     if (srcUPR && srcUPG && dstUPG) {
-        dstUPG->theta = srcUPR->theta + srcUPG->theta;
         // TODO compute full uncertainty
     }
 }

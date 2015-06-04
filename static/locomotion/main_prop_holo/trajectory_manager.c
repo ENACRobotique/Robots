@@ -20,6 +20,7 @@
 #include <sys_time.h>
 #endif
 #include "bn_intp.h"
+#include "pos_uncertainty.h"
 
 #include "params.h"
 
@@ -367,12 +368,20 @@ int trajmngr_update(trajectory_manager_t* tm) {
 void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos) {
     if(pos->id == ELT_PRIMARY) { // Keep information for primary robot
         int x, y, theta;
+        int x_var, y_var, xy_var, theta_var;
+        s2DPUncert_covar cov;
 
-        x = isD2I(pos->pos.x); // (I << SHIFT)
-        y = isD2I(pos->pos.y); // (I << SHIFT)
-        theta = iROUND(dASHIFT*pos->pos.theta); // (rad << (RAD_SHIFT + SHIFT))
+        gstatus2covar(pos, &cov);
+        x = isD2I(cov.x); // (I << SHIFT)
+        y = isD2I(cov.y); // (I << SHIFT)
+        theta = iROUND(dASHIFT*cov.theta); // (rad << (RAD_SHIFT + SHIFT))
+        x_var = iROUND(D2I(D2I(cov.a))*dVarPosSHIFT);
+        y_var = iROUND(D2I(D2I(cov.c))*dVarPosSHIFT);
+        xy_var = iROUND(D2I(D2I(cov.b))*dVarPosSHIFT);
+        theta_var = iROUND(cov.d * dRadSHIFT * dRadSHIFT * dVarPosSHIFT);
 
         posctlr_set_pos(&tm->ctlr, x, y, theta);
+        posctlr_set_pos_u(&tm->ctlr, x_var, y_var, xy_var, theta_var);
 
         if(tm->state == TM_STATE_WAIT_TRAJ) {
             tm->gx = x;
@@ -382,19 +391,69 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos) {
     }
 }
 
+void trajmngr_mix_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos) {
+    // TODO use date and position history to retro-correct position
+
+    if(pos->id == ELT_PRIMARY) {
+        int x, y, theta;
+        int x_var, y_var, xy_var, theta_var;
+        s2DPUncert_covar cov;
+        s2DPUncert_icovar icov_ext, icov_int, icov;
+
+        // get current status
+        posctlr_get_pos(&tm->ctlr, &x, &y, &theta);
+        posctlr_get_pos_u(&tm->ctlr, &x_var, &y_var, &xy_var, &theta_var);
+        cov.x = I2Ds(x);
+        cov.y = I2Ds(y);
+        cov.theta = (double) theta / dASHIFT;
+        cov.a = I2D(I2D((double) x_var / dVarPosSHIFT));
+        cov.b = I2D(I2D((double) xy_var / dVarPosSHIFT));
+        cov.c = I2D(I2D((double) y_var / dVarPosSHIFT));
+        cov.d = (double) theta_var / dRadSHIFT / dRadSHIFT / dVarPosSHIFT;
+
+        // mix position
+        covar2icovar(&cov, &icov_int);
+        gstatus2icovar(pos, &icov_ext);
+        icovar_mix(&icov_ext, &icov_int, &icov);
+        icovar2covar(&icov, &cov);
+
+        // set updated position
+        x = isD2I(cov.x); // (I << SHIFT)
+        y = isD2I(cov.y); // (I << SHIFT)
+        theta = iROUND(dASHIFT*cov.theta); // (rad << (RAD_SHIFT + SHIFT))
+        x_var = iROUND(D2I(D2I(cov.a))*dVarPosSHIFT);
+        y_var = iROUND(D2I(D2I(cov.c))*dVarPosSHIFT);
+        xy_var = iROUND(D2I(D2I(cov.b))*dVarPosSHIFT);
+        theta_var = iROUND(cov.d * dRadSHIFT * dRadSHIFT * dVarPosSHIFT);
+
+        posctlr_set_pos(&tm->ctlr, x, y, theta);
+        posctlr_set_pos_u(&tm->ctlr, x_var, y_var, xy_var, theta_var);
+    }
+}
+
 void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
     ps->id = ELT_PRIMARY;
     ps->date = bn_intp_micros2s(micros()); // now
 
+    // get position with uncertainty
+    s2DPUncert_covar pos;
+
     int x, y, theta;
-    posctrl_get_pos(&tm->ctlr, &x, &y, &theta);
-    ps->pos.x = I2Ds(x);
-    ps->pos.y = I2Ds(y);
-    ps->pos.theta = (double) theta / dASHIFT;
+    posctlr_get_pos(&tm->ctlr, &x, &y, &theta);
+    pos.x = I2Ds(x);
+    pos.y = I2Ds(y);
+    pos.theta = (double) theta / dASHIFT;
 
-    // TODO
-//    ps->pos_u
+    int x_var, y_var, xy_var, theta_var;
+    posctlr_get_pos_u(&tm->ctlr, &x_var, &y_var, &xy_var, &theta_var);
+    pos.a = I2D(I2D((double) x_var / dVarPosSHIFT));
+    pos.b = I2D(I2D((double) xy_var / dVarPosSHIFT));
+    pos.c = I2D(I2D((double) y_var / dVarPosSHIFT));
+    pos.d = (double) theta_var / dRadSHIFT / dRadSHIFT / dVarPosSHIFT;
 
+    covar2gstatus(&pos, ps);
+
+    // get trajectory state
     switch(tm->state){
     default:
     case TM_STATE_WAIT_TRAJ:
@@ -415,8 +474,9 @@ void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
         break;
     }
 
+    // get speed
     int vx, vy, oz;
-    posctrl_get_spd(&tm->ctlr, &vx, &vy, &oz);
+    posctlr_get_spd(&tm->ctlr, &vx, &vy, &oz);
     ps->prop_status.spd.vx = IpP2DpSs(vx);
     ps->prop_status.spd.vy = IpP2DpSs(vy);
     ps->prop_status.spd.oz = oz / dASHIFT;

@@ -18,6 +18,11 @@ typedef enum {
     PROP_RUNNING
 } ePropStatus;
 
+typedef enum {
+    PROP_SETPOS,
+    PROP_MIXPOS
+} ePropStatusAction;
+
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
     eElement id :8;
@@ -35,6 +40,8 @@ typedef struct __attribute__((packed)){
             uint8_t sid :4; // step identifier
             uint8_t ssid :1; // sub-step identifier (0:first element of message, 1:second element of message)
             uint8_t sssid :1; // sub-sub-step identifier (0:line, 1:circle)
+
+            ePropStatusAction action;
         } prop_status;
 
         // in case of pos.id == ELT_ADV_*
