@@ -29,8 +29,6 @@
 typedef enum {E_ERR, E_WAR, E_INFO, E_MES, E_DBG,E_OTHER} eLog_t;
 typedef enum {E_V1, E_V2, E_V3} eVer_t;
 
-using namespace std;
-
 class Log {
     public:
         Log();
@@ -51,11 +49,11 @@ class Log {
         void put(T v){
             _file << v;
             if(term())
-                cout << v;
+                std::cout << v << std::flush;
         }
 
     private:
-        ofstream _file;
+        std::ofstream _file;
         eLog_t _type;
         eVer_t _ver;
         bool _pos; //true if the previous message was a position
