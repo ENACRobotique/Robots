@@ -65,7 +65,8 @@
  *
  */
 int Xbee_Tx16(XbeeAddr16_t to_h,uint8_t options, uint8_t frameID, const void* data, uint16_t dataSize){
-    spAPISpecificStruct stru={0};
+    spAPISpecificStruct stru;
+    memset(&stru, 0, sizeof(stru));
 
     //writes API cmd ID
     stru.APID=XBEE_APID_TX16;
