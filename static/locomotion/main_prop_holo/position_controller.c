@@ -163,8 +163,15 @@ void posctlr_get_pos(position_controller_t* tc, int *x, int *y, int *theta) {
 void posctlr_set_pos_u(position_controller_t* tc, int x_var, int y_var, int xy_var, int theta_var) {
     MT_M_AT(&tc->M_uncert_pos, 0, 0) = x_var;
     MT_M_AT(&tc->M_uncert_pos, 0, 1) = xy_var;
+    MT_M_AT(&tc->M_uncert_pos, 1, 0) = xy_var;
     MT_M_AT(&tc->M_uncert_pos, 1, 1) = y_var;
     MT_M_AT(&tc->M_uncert_pos, 2, 2) = theta_var;
+
+    // reset other elements
+    MT_M_AT(&tc->M_uncert_pos, 0, 2) = 0;
+    MT_M_AT(&tc->M_uncert_pos, 1, 2) = 0;
+    MT_M_AT(&tc->M_uncert_pos, 2, 0) = 0;
+    MT_M_AT(&tc->M_uncert_pos, 2, 1) = 0;
 }
 
 void posctlr_get_pos_u(position_controller_t* tc, int *x_var, int *y_var, int *xy_var, int *theta_var) {
