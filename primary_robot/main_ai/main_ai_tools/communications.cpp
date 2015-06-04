@@ -189,7 +189,13 @@ int roleSetup(bool simu_ai, bool simu_prop){
         msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
         msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
-        bnSendBlock(msg, "FAILED ROLE SETUP 4 (MAIN_IO)");
+        if(simu_prop){
+            if(bn_send(&msg) < 0)
+                logs << WAR << "FAILED ROLE SETUP 4 (MAIN_IO)";
+        }
+        else{
+            bnSendBlock(msg, "FAILED ROLE SETUP 4 (MAIN_IO)");
+        }
     }
 
     return 0;
