@@ -123,7 +123,6 @@ void mt_m_init(MT_MAT* m, uint8_t rows, uint8_t cols, uint8_t shift) {
  */
 int mt_mm_add(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
     register int i, j;
-    register int64_t sum;
 
     if (A->cols != B->cols || A->rows != B->rows || A->shift != B->shift) {
         return -1;

@@ -383,11 +383,15 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos) {
         posctlr_set_pos(&tm->ctlr, x, y, theta);
         posctlr_set_pos_u(&tm->ctlr, x_var, y_var, xy_var, theta_var);
 
+        // reset other trajmngr state information
+
         if(tm->state == TM_STATE_WAIT_TRAJ) {
             tm->gx = x;
             tm->gy = y;
             tm->gtheta = theta;
         }
+
+        tm->curr_rid = 0;
     }
 }
 
