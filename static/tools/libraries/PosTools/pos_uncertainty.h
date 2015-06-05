@@ -74,8 +74,8 @@ s2DPAProbability pos_uncertainty_eval(const sGenericPosStatus *i, const s2DPosAt
 
 #define MINVARIANCE_XY (5e-4) // (cm²)
 #define MAXVARIANCE_XY (2e3) // (cm²)
-#define MINVARIANCE_THETA (2e-3) // (rad²)
-#define MAXVARIANCE_THETA (500) // (rad²)
+#define MINVARIANCE_THETA (2e-6) // (rad²)
+#define MAXVARIANCE_THETA (1e2) // (rad²)
 
 void pos_uncertainty_mix(const sGenericPosStatus *i1, const sGenericPosStatus *i2, sGenericPosStatus *o);
 

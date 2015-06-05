@@ -6,6 +6,7 @@
  */
 
 #include <math.h>
+#include <string.h>
 #include <messages-statuses.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@
 #include <pos_uncertainty.h>
 
 void dump_gstatus(sGenericPosStatus *gs, char *prefix){
+#if 0
     s2DPUncert_icovar o;
     sGenericPosStatus oo = { 0 };
     gstatus2icovar(gs, &o);
@@ -34,6 +36,17 @@ void dump_gstatus(sGenericPosStatus *gs, char *prefix){
     printf("%s  bv:% -10.5fcm² % -10.5f\n", prefix, gs->pos_u.b_var, oo.pos_u.b_var);
     printf("%s  an:% -10.5f°   % -10.5f\n", prefix, gs->pos_u.a_angle * 180. / M_PI, oo.pos_u.a_angle * 180. / M_PI);
     printf("%s  tv:% -10.5f°²  % -10.5f\n", prefix, gs->pos_u.theta_var * powf(180. / M_PI, 2), oo.pos_u.theta_var * powf(180. / M_PI, 2));
+#else
+    printf("%spos:\n", prefix);
+    printf("%s  x:% -10.5fcm\n", prefix, gs->pos.x);
+    printf("%s  y:% -10.5fcm\n", prefix, gs->pos.y);
+    printf("%s  t:% -10.5f°\n", prefix, gs->pos.theta * 180. / M_PI);
+    printf("%spos_u:\n", prefix);
+    printf("%s  av:% -10.5fcm\n", prefix, sqrtf(gs->pos_u.a_var));
+    printf("%s  bv:% -10.5fcm\n", prefix, sqrtf(gs->pos_u.b_var));
+    printf("%s  an:% -10.5f°\n", prefix, gs->pos_u.a_angle * 180. / M_PI);
+    printf("%s  tv:% -10.5f°\n", prefix, sqrtf(gs->pos_u.theta_var) * 180. / M_PI);
+#endif
 }
 
 float rand_uniform(float min, float max){
@@ -42,6 +55,8 @@ float rand_uniform(float min, float max){
 
 int main(int argc, char *argv[]){
     {
+    	printf("%i: Starting test: \"pos_uncertainty_mix\"\n", __LINE__);
+
         sGenericPosStatus i1, i2, o;
 
         i1.id = ELT_PRIMARY;
@@ -54,7 +69,7 @@ int main(int argc, char *argv[]){
         i1.pos_u.a_var = 100; // we are along a axis
         i1.pos_u.b_var = 0;
         i1.pos.theta = 0.;
-        i1.pos_u.theta_var = 0.;
+        i1.pos_u.theta_var = powf(18.*M_PI/180., 2.);
 
         printf("i1:\n");
         dump_gstatus(&i1, "  ");
@@ -68,8 +83,8 @@ int main(int argc, char *argv[]){
         i2.pos_u.a_angle = 0. * M_PI / 180.;
         i2.pos_u.a_var = 10;
         i2.pos_u.b_var = 10;
-        i2.pos.theta = 0.;
-        i2.pos_u.theta_var = 0.;
+        i2.pos.theta = M_PI/2.;
+        i2.pos_u.theta_var = MINVARIANCE_THETA;
 
         printf("i2:\n");
         dump_gstatus(&i2, "  ");
@@ -100,6 +115,8 @@ int main(int argc, char *argv[]){
             exit(1);                                                            \
         }                                                                       \
     } while(0)
+
+    	printf("%i: Starting test: \"gstatus2icovar;icovar2gstatus\"\n", __LINE__);
 
         s2DPUncert_icovar tmp;
         sGenericPosStatus in = { 0 }, out = { 0 };
@@ -159,6 +176,8 @@ int main(int argc, char *argv[]){
 #define THRESHOLD_VAR (1)
 #define THRESHOLD_XY (1)
 #define THRESHOLD_THETA (1e-1)
+
+    	printf("%i: Starting test: \"covar2gstatus\"\n", __LINE__);
 
         int i;
         for(i = 0; i < 10000; i++){
@@ -238,6 +257,8 @@ int main(int argc, char *argv[]){
         }                                                                       \
     } while(0)
 
+    	printf("%i: Starting test: \"gstatus2covar;covar2gstatus\"\n", __LINE__);
+
         s2DPUncert_covar tmp;
         sGenericPosStatus in = { 0 }, out = { 0 };
         int i;
@@ -305,11 +326,15 @@ int main(int argc, char *argv[]){
         }                                                                       \
     } while(0)
 
+    	printf("%i: Starting test: \"covar2gstatus;covar2icovar;icovar2gstatus\"\n", __LINE__);
+
         int i;
         for(i = 0; i < 10000; i++){
             s2DPUncert_covar in;
             s2DPUncert_icovar tmp;
             sGenericPosStatus out1, out2;
+            memset(&out1, 0, sizeof(out1));
+            memset(&out2, 0, sizeof(out2));
 
             // setting random linear position
             float x_var = rand_uniform(MINVARIANCE_XY, MAXVARIANCE_XY);
@@ -381,6 +406,8 @@ int main(int argc, char *argv[]){
 #define THRESHOLD_XY (1)
 #define THRESHOLD_THETA (1e-1)
 
+    	printf("%i: Starting test: \"covar2icovar\"\n", __LINE__);
+
         int i;
         for(i = 0; i < 10000; i++){
             s2DPUncert_covar in;
@@ -409,6 +436,7 @@ int main(int argc, char *argv[]){
             in.a = cxa*cxa*x_var + sxa*sxa*y_var;
             in.b = cxa*sxa*(x_var - y_var);
             in.c = cxa*cxa*y_var + sxa*sxa*x_var;
+            in.d = 10.;
 
             covar2icovar(&in, &out);
 
@@ -416,11 +444,13 @@ int main(int argc, char *argv[]){
             float m12 = in.a*out.b + in.b*out.c;
             float m21 = in.b*out.a + in.c*out.b;
             float m22 = in.b*out.b + in.c*out.c;
+            float m33 = in.d*out.d;
 
             EXPECT_NEAR(m11, 1.f, 2e-4f, "m11");
             EXPECT_NEAR(m12, 0.f, 2e-4f, "m12");
             EXPECT_NEAR(m21, 0.f, 2e-4f, "m21");
             EXPECT_NEAR(m22, 1.f, 2e-4f, "m22");
+            EXPECT_NEAR(m33, 1.f, 1e-10f, "m33");
         }
 
         printf("OK!!!\n");
