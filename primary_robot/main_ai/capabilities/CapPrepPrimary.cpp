@@ -18,8 +18,8 @@ extern "C"{
 
 #define MINVARIANCE_XY (5e-4) // (cm²)
 #define MAXVARIANCE_XY (2e3) // (cm²)
-#define MINVARIANCE_THETA (2e-3) // (rad²)
-#define MAXVARIANCE_THETA (500) // (rad²)
+#define MINVARIANCE_THETA (2e-6) // (rad²)
+#define MAXVARIANCE_THETA (1e2) // (rad²)
 
 int CapPrepPrimary::loop(){
     CapIO* capIO = dynamic_cast<CapIO*> (robot->caps[eCap::IO]);
