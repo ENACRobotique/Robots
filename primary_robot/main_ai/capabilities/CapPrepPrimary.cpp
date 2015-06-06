@@ -21,14 +21,35 @@ extern "C"{
 #define MINVARIANCE_THETA (2e-6) // (rad²)
 #define MAXVARIANCE_THETA (1e2) // (rad²)
 
+
+typedef enum{
+        TRAJ1,
+        WAIT_TRAJ1,
+        TRAJ2,
+        WAIT_TRAJ2,
+        WAIT_STOP1,
+        WAIT_POS,
+        WAIT_TRAJ3,
+        TRAJ4,
+        TRAJ5,
+        WAIT_TRAJ5,
+        WAIT_STOP2,
+        WAIT_POS2,
+        POS_INIT,
+        WAIT_POS_INIT
+}stepInitPos;
+
 int CapPrepPrimary::loop(){
     CapIO* capIO = dynamic_cast<CapIO*> (robot->caps[eCap::IO]);
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
     static std::vector<SimpleTraj> traj;
-    static int index = 0;
-     static bool wait = false;
+  //  static int index = 0;
+    // static bool wait = false;
+    // static bool pos = false;
      static unsigned int timeSave=0;
+     static stepInitPos stepPos=TRAJ1;
+
     if(!capIO){
         logs << ERR << "Primary must be have an HMI interface real or simulate";
         exit(EXIT_FAILURE);
@@ -105,32 +126,207 @@ int CapPrepPrimary::loop(){
 
             logs << INFO << "End step wait starting cord";
             _step = Step::WAIT_INIT_POS;
+           // _step = Step::WAIT_START;
+
         }
         break;
 
     case Step::WAIT_INIT_POS:
+
+        switch(stepPos){
+            case TRAJ1:
+                logs << INFO << "TRAJ1";
+                path.go2PointOrient(traj[1].dest, robot->env->obs, traj[1].angle);
+                stepPos = WAIT_TRAJ1;
+                break;
+
+            case WAIT_TRAJ1:
+                if(capPos->getLastPosXY().distanceTo(traj[1].dest) < 0.5){
+                    logs << INFO << "WAIT_TRAJ1" << traj[1].dest;
+                    path.go2PointOrient(traj[2].dest, robot->env->obs, traj[2].angle);
+                    stepPos = TRAJ2;
+                }
+                break;
+
+            case TRAJ2:
+                if(capPos->getLastPosXY().distanceTo(traj[2].dest) < 4.){
+                    logs << INFO << "TRAJ2";
+                    timeSave = millis();
+                    stepPos = WAIT_TRAJ2;
+                }
+                break;
+
+            case WAIT_TRAJ2: //attente sure de la position
+                if(millis() - timeSave > 0){
+                    logs << INFO << "WAIT_TRAJ2";
+                    path.stopRobot(true);
+                    timeSave = millis();
+                    stepPos = WAIT_STOP1;
+                }
+
+                break;
+
+            case WAIT_STOP1:
+                if(millis() - timeSave > 1000){ //recale x
+                    logs << INFO << "WAIT_STOP1";
+                    Point2D<float> pos = capPos->getLastPosXY();
+                    pos.x = traj[2].dest.x-10.;
+
+                    sendMixPosPrimary(pos, traj[2].angle, MINVARIANCE_XY, MAXVARIANCE_XY, 0., 2*MINVARIANCE_THETA);
+
+                    stepPos = WAIT_POS;
+                }
+                break;
+
+            case WAIT_POS:
+                if(capPos->getLastPosXY().x && capPos->getLastPosXY().y){
+                    logs << INFO << "WAIT_POS" << capPos->getLastPosXY();
+                    path.go2PointOrient(traj[3].dest, robot->env->obs, traj[3].angle);
+                    stepPos = WAIT_TRAJ3;
+                }
+                break;
+
+            case WAIT_TRAJ3: //attendre revenir entrer x
+                if(capPos->getLastPosXY().distanceTo(traj[3].dest) < 0.5){
+                    logs << INFO << "WAIT_TRAJ3" << traj[3].dest;
+                    path.go2PointOrient(traj[4].dest, robot->env->obs, traj[4].angle);
+                    stepPos = TRAJ4;
+                }
+                break;
+
+            case TRAJ4: //attendre entrer y
+                if(capPos->getLastPosXY().distanceTo(traj[4].dest) < 0.5){
+                    logs << INFO << "TRAJ4";
+                    path.go2PointOrient(traj[5].dest, robot->env->obs, traj[5].angle);
+                    stepPos = TRAJ5;
+                }
+                break;
+
+            case TRAJ5:
+                if(capPos->getLastPosXY().distanceTo(traj[5].dest) < 4.){
+                    logs << INFO << "TRAJ5";
+                    timeSave = millis();
+                    stepPos = WAIT_TRAJ5;
+                }
+                break;
+
+            case WAIT_TRAJ5: //attente sure de la position
+                if(millis() - timeSave > 0){
+                    logs << INFO << "WAIT_TRAJ5";
+                    path.stopRobot(true);
+                    timeSave = millis();
+                    stepPos = WAIT_STOP2;
+                }
+
+                break;
+
+             case WAIT_STOP2:
+                 if(millis() - timeSave > 1000){ //recale y
+                     logs << INFO << "WAIT_STOP2";
+                     Point2D<float> pos = capPos->getLastPosXY();
+                     pos.y = traj[5].dest.y+10.;
+
+                     sendMixPosPrimary(pos, traj[5].angle, MAXVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
+
+                     stepPos = WAIT_POS2;
+                 }
+                 break;
+
+             case WAIT_POS2:
+                 if(capPos->getLastPosXY().x && capPos->getLastPosXY().y){
+                     logs << INFO << "WAIT_POS2" << capPos->getLastPosXY();
+                     path.go2PointOrient(traj[6].dest, robot->env->obs, traj[6].angle);
+                     stepPos = POS_INIT;
+                 }
+                 break;
+
+             case POS_INIT:
+                 if(capPos->getLastPosXY().distanceTo(traj[6].dest) < 0.5){
+                     path.go2PointOrient(traj[7].dest, robot->env->obs, traj[7].angle);
+                     stepPos = WAIT_POS_INIT;
+                 }
+                 break;
+
+             case WAIT_POS_INIT:
+                 if(capPos->getLastPosXY().distanceTo(traj[7].dest) < 0.5){
+                    _step = Step::WAIT_START;
+                 }
+                 break;
+
+            default:
+                break;
+
+        }
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if(wait){
+
             if(millis() - timeSave > 2000){
                 wait = false;
              //   logs << ERR << "getchar";
   //  getchar();
 
+//
+
+
                 if(traj[index].action == 1){
+
                     Point2D<float> pos = capPos->getLastPosXY();
-                    pos.x = traj[index].dest.x;
+                    pos.x = traj[index].dest.x-10.;
+                    path.stopRobot(true);
                     sendMixPosPrimary(pos, traj[index].angle, MINVARIANCE_XY, MAXVARIANCE_XY, 0., MINVARIANCE_THETA);
                     //recale x
                 }
                 else if(traj[index].action == 2){
+                    path.stopRobot(true);
                     Point2D<float> pos = capPos->getLastPosXY();
-                    pos.y = traj[index].dest.y;
+                    pos.y = traj[index].dest.y+10.;
+                  //  path.stopRobot(true);
                     sendMixPosPrimary(pos, traj[index].angle, MINVARIANCE_XY, MAXVARIANCE_XY, -M_PI/2, MINVARIANCE_THETA);
                     //recale y
                 }
                 //Wait new position was send
+                pos = true;
+                break;
+            }
+        }
+        else if (pos){
+            logs << INFO << "waiting..";
 
+index++;
+            if(capPos->getLastPosXY().x && capPos->getLastPosXY().y){
+
+                pos = false;
+                logs << INFO << "pos" << capPos->getLastPosXY();
+                robot->env->obs[0].c.x = capPos->getLastPosXY().x;
+                robot->env->obs[0].c.y = capPos->getLastPosXY().y;
                 path.go2PointOrient(traj[index].dest, robot->env->obs, traj[index].angle);
             }
+
         }
         else{
             if(capPos->getLastPosXY().distanceTo(traj[index].dest) < 0.5){
@@ -140,7 +336,7 @@ int CapPrepPrimary::loop(){
                     _step = Step::WAIT_START;
                     break;
                 }
-             /*   else if(traj[index].action == 1){
+                else if(traj[index].action == 1){
                     Point2D<float> pos = capPos->getLastPosXY();
                     pos.x = traj[index].dest.x;
                     sendMixPosPrimary(pos, traj[index].angle, MINVARIANCE_XY, MAXVARIANCE_XY, 0., MINVARIANCE_THETA);
@@ -151,7 +347,7 @@ int CapPrepPrimary::loop(){
                     pos.y = traj[index].dest.y;
                     sendMixPosPrimary(pos, traj[index].angle, MINVARIANCE_XY, MAXVARIANCE_XY, -M_PI/2, MINVARIANCE_THETA);
                     //recale y
-                }*/
+                }
                 else  if(traj[index].action == 5){
                     wait = true;
                     timeSave = millis();
@@ -161,8 +357,10 @@ int CapPrepPrimary::loop(){
                 //Wait new position was send
                 index++;
                 path.go2PointOrient(traj[index].dest, robot->env->obs, traj[index].angle);
+
             }
         }
+*/
         break;
 
     case Step::WAIT_START: //Wait the start (take off the starting cord)
