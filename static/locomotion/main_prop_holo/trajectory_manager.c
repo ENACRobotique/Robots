@@ -42,6 +42,7 @@ int _new_traj_slot(trajectory_manager_t* tm, uint16_t idx) {
     sTrajSlot_t* ts = &tm->slots[idx];
 
     switch(tm->state) {
+    case TM_STATE_IDLE:
     case TM_STATE_WAIT_TRAJ:
         if(ts->sid == 0) {
             tm->curr_tid = ts->tid;
@@ -49,6 +50,7 @@ int _new_traj_slot(trajectory_manager_t* tm, uint16_t idx) {
             tm->curr_element = idx << 1;
 
             tm->state = TM_STATE_WAIT_START;
+            posctlr_run(&tm->ctlr);
         }
         break;
 
@@ -66,6 +68,7 @@ int _new_traj_slot(trajectory_manager_t* tm, uint16_t idx) {
                 tm->curr_element = idx << 1;
 
                 tm->state = TM_STATE_WAIT_START;
+                posctlr_run(&tm->ctlr);
             }
         }
         break;
@@ -85,10 +88,10 @@ int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te)
     sTrajSlot_t* s1 = &tm->slots[tm->slots_insert_idx];
     sTrajSlot_t* s2 = &tm->slots[(tm->slots_insert_idx + 1) % TRAJ_MAX_SLOTS];
 
-    int s1_empty = s1->state == SLOT_EMPTY || s1->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s1->sid < tm->slots[tm->curr_element >> 1].sid);
-    int s2_empty = s2->state == SLOT_EMPTY || s2->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && s2->sid < tm->slots[tm->curr_element >> 1].sid);
+    int s1_empty = s1->state == SLOT_EMPTY || s1->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && tm->state != TM_STATE_IDLE && s1->sid < tm->slots[tm->curr_element >> 1].sid);
+    int s2_empty = s2->state == SLOT_EMPTY || s2->tid != tm->curr_tid || (tm->state != TM_STATE_WAIT_TRAJ && tm->state != TM_STATE_IDLE && s2->sid < tm->slots[tm->curr_element >> 1].sid);
 
-    if(tm->state != TM_STATE_WAIT_TRAJ && (!s1_empty || !s2_empty)) {
+    if(tm->state != TM_STATE_WAIT_TRAJ && tm->state != TM_STATE_IDLE && (!s1_empty || !s2_empty)) {
         return -1; // no more empty slots
     }
 
@@ -118,6 +121,9 @@ int trajmngr_update(trajectory_manager_t* tm) {
 
     switch(tm->state) {
     default:
+    case TM_STATE_IDLE:
+        break;
+
     case TM_STATE_WAIT_TRAJ:
         x_sp = tm->gx;
         y_sp = tm->gy;
@@ -462,8 +468,11 @@ void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
     // get trajectory state
     switch(tm->state){
     default:
-    case TM_STATE_WAIT_TRAJ:
+    case TM_STATE_IDLE:
         ps->prop_status.status = PROP_IDLE;
+        break;
+    case TM_STATE_WAIT_TRAJ:
+        ps->prop_status.status = PROP_POSHOLD;
         break;
     case TM_STATE_WAIT_START:
     case TM_STATE_FOLLOWING:
@@ -489,4 +498,10 @@ void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps) {
     ps->prop_status.spd.vx = IpP2DpSs(vx);
     ps->prop_status.spd.vy = IpP2DpSs(vy);
     ps->prop_status.spd.oz = oz / dASHIFT;
+}
+
+void trajmngr_stop(trajectory_manager_t* tm) {
+    tm->state = TM_STATE_IDLE;
+
+    posctlr_stop(&tm->ctlr);
 }

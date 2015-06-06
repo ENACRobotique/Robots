@@ -119,6 +119,7 @@ int main() {
                 switch(inMsg.payload.genericPosStatus.prop_status.action){
                 case PROP_SETPOS:
                     trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    firstPosReceived = 1;
                     break;
                 case PROP_MIXPOS:
                     trajmngr_mix_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
@@ -126,7 +127,9 @@ int main() {
                 default:
                     break;
                 }
-                firstPosReceived = 1;
+                break;
+            case E_PROP_STOP:
+                trajmngr_stop(&traj_mngr);
                 break;
             }
         } // End: if(ret > 0)

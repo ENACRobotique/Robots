@@ -56,6 +56,7 @@ typedef enum{
     E_SYNC_RESPONSE,        // @payload.syncResponse: for time synchronization
     E_DO_ABSPOS,            // @payload.doAbsPos: for asking to perform a position fix
     E_DONE_ABSPOS,          // @payload.doneAbsPos: for sending result of position fix
+    E_PROP_STOP,            //  stop the robot
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum

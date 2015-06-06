@@ -122,30 +122,41 @@ void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT
 
 void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp) {
     int i;
-    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
-    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
 
-    //(some pid... ; gives linear speed set point: Vx_cmd, Vy_cmd)
-    _linear_control(tc, x_sp, y_sp, vx_sp, vy_sp, &spd_cmd_rob);
+    switch(tc->state) {
+    case PC_STATE_IDLE:
+        for (i = 0; i < NB_PODS; i++) {
+            tc->next_spd_cmds[i] = 0;
+        }
+        break;
+    case PC_STATE_RUNNING: {
+            MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
+            MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
 
-    // (some pid as well... ; gives angular speed Oz_cmd)
-    _angular_control(tc, theta_sp, oz_sp, &spd_cmd_rob);
+            //(some pid... ; gives linear speed set point: Vx_cmd, Vy_cmd)
+            _linear_control(tc, x_sp, y_sp, vx_sp, vy_sp, &spd_cmd_rob);
 
-    // Calculate speed set points for each pod
-    // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
-    mt_mv_mlt(&tc->M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
+            // (some pid as well... ; gives angular speed Oz_cmd)
+            _angular_control(tc, theta_sp, oz_sp, &spd_cmd_rob);
 
-    // call speed controller with V1_cmd, V2_cmd, V3_cmd (in IpP<<SHIFT)
-    for (i = 0; i < NB_PODS; i++) {
-        spdctlr_update(&tc->spd_ctls[i], spd_cmd_pods.ve[i] >> SHIFT);
-        tc->next_spd_cmds[i] = spdctlr_get(&tc->spd_ctls[i]);
+            // Calculate speed set points for each pod
+            // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
+            mt_mv_mlt(&tc->M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
+
+            // call speed controller with V1_cmd, V2_cmd, V3_cmd (in IpP<<SHIFT)
+            for (i = 0; i < NB_PODS; i++) {
+                spdctlr_update(&tc->spd_ctls[i], spd_cmd_pods.ve[i] >> SHIFT);
+                tc->next_spd_cmds[i] = spdctlr_get(&tc->spd_ctls[i]);
+            }
+
+            // final step, update position uncertainty
+            MT_VEC spd_cmd_tpods = MT_V_INITS(NB_PODS, VEC_SHIFT);
+            mt_mv_mlt(&tc->M_spds_rob2tpods, &spd_cmd_rob, &spd_cmd_tpods);
+
+            _update_pos_uncertainty(tc, &spd_cmd_pods, &spd_cmd_tpods);
+        }
+        break;
     }
-
-    // final step, update position uncertainty
-    MT_VEC spd_cmd_tpods = MT_V_INITS(NB_PODS, VEC_SHIFT);
-    mt_mv_mlt(&tc->M_spds_rob2tpods, &spd_cmd_rob, &spd_cmd_tpods);
-
-    _update_pos_uncertainty(tc, &spd_cmd_pods, &spd_cmd_tpods);
 }
 
 void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta) {
@@ -297,4 +308,12 @@ void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT
 //    printf("M_uncert_pos:");
 //    mt_m_foutput(&tc->M_uncert_pos, stdout);
 #endif
+}
+
+void posctlr_stop(position_controller_t* tc) {
+    tc->state = PC_STATE_IDLE;
+}
+
+void posctlr_run(position_controller_t* tc) {
+    tc->state = PC_STATE_RUNNING;
 }
