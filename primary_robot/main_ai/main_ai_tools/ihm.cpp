@@ -33,7 +33,7 @@ sRGB ihmLedConvertEnumToRgb(eIhmLed led){
         case LED_GREEN:
             return {0, 255, 0};
         case LED_YELLOW:
-            return {255, 255, 0};
+            return {255, 170, 0};
         case LED_OFF:
             return {0, 0, 0};
     }
@@ -83,6 +83,12 @@ void Ihm::sendIhm(const eIhmElement& id, const unsigned int& state){
             msgOut.payload.ihmStatus.states[0].state.state_switch = (eIhmSwitch) state;
             break;
         case IHM_LED:
+            msgOut.payload.ihmStatus.states[0].state.color1 = ihmLedConvertEnumToRgb((eIhmLed)state);
+            msgOut.payload.ihmStatus.states[0].state.color2 = {0, 0, 0};
+            msgOut.payload.ihmStatus.states[0].state.time1 = 10;
+            msgOut.payload.ihmStatus.states[0].state.time2 = 0;
+            msgOut.payload.ihmStatus.states[0].state.nb = 0;
+            logs << WAR << "Send color";
             break;
         default:
             logs << ERR << "Unkown Ihm send";
