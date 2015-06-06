@@ -37,5 +37,6 @@ extern Ihm ihm;
 extern Net net;
 extern Log logs;
 extern Servo servo;
+extern Inbox inbox;
 
 #endif /* MAIN_AI_TOOLS_TOOLS_H_ */

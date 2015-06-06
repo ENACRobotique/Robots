@@ -30,7 +30,7 @@ Point2D<float> CapPosSimuSecondary::getLastPosXY(){
 
     if (state < trjS.size() - 1) {
         if(first) {
-            if(capTeam->getColor() == GREEN) {
+            if(capTeam->getColor() == eColor_t::GREEN) {
                 for(Point2D<float>& pt : trjS)
                     pt.x = 300. - pt.x;
             }

@@ -11,6 +11,8 @@
 #include <CapIO.h>
 #include "CapTeam.h"
 
+#include "tools.h"
+
 class CapIOSimuPrimary : public CapIO {
     public:
         CapIOSimuPrimary(Robot* robot_init) : CapIO(robot_init){};
@@ -30,9 +32,9 @@ class CapIOSimuPrimary : public CapIO {
                 case IHM_MODE_SWITCH:
                     return static_cast <unsigned int>(eIhmSwitch::SWITCH_OFF);
                 case IHM_LED:
-                    if(capTeam->getColor() == YELLOW)
+                    if(capTeam->getColor() == eColor_t::YELLOW)
                         return static_cast <unsigned int>(eIhmLed::LED_YELLOW);
-                    else if(capTeam->getColor() == GREEN)
+                    else if(capTeam->getColor() == eColor_t::GREEN)
                         return static_cast <unsigned int>(eIhmLed::LED_GREEN);
                     else
                         return static_cast <unsigned int>(eIhmLed::LED_OFF);

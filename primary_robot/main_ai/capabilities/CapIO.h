@@ -34,7 +34,7 @@ class CapIO : public Capability {
                 case 0 :
                     if(getHMI(IHM_MODE_SWITCH) == 0) {
                         state = 1;
-                        capTeam->setColor(GREEN);
+                        capTeam->setColor(eColor_t::GREEN);
                         setHMI(IHM_LED, LED_YELLOW);
                     }
                     break;
@@ -45,13 +45,13 @@ class CapIO : public Capability {
                 case 2 :
                     if(getHMI(IHM_MODE_SWITCH) == 0) {
                         state = 3;
-                        capTeam->setColor(YELLOW);
+                        capTeam->setColor(eColor_t::YELLOW);
                         setHMI(IHM_LED, LED_GREEN);
                     }
                     break;
                 case 3 :
-                if(mode_switch == 1)
-                    state = 0;
+                    if(getHMI(IHM_MODE_SWITCH) == 1)
+                        state = 0;
                 break;
             }
         }

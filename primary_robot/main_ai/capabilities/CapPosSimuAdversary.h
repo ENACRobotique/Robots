@@ -29,7 +29,7 @@ class CapPosSimuAdversary : public CapPosition{
             if(prevTime == 0){
                 CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
 
-                if(capTeam->getColor() == GREEN)
+                if(capTeam->getColor() == eColor_t::GREEN)
                     pos.x = 300 - 40;
                 else
                     pos.x = 40;
