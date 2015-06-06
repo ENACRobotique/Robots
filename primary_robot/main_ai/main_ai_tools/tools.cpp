@@ -18,3 +18,4 @@ Net net;
 Log logs;
 Servo servo;
 Inbox inbox;
+NodesNetwork nodesNet;
