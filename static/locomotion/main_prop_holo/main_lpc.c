@@ -98,6 +98,7 @@ int main() {
     unsigned int time_ms, time_us;
     int ledState = 0;
     int ret;
+    int firstPosReceived = 0;
     sMsg inMsg = { { 0 } }, outMsg = { { 0 } };
 
     // FIXME need to have a first loop here to wait for time synchronization
@@ -125,6 +126,7 @@ int main() {
                 default:
                     break;
                 }
+                firstPosReceived = 1;
                 break;
             }
         } // End: if(ret > 0)
@@ -146,7 +148,7 @@ int main() {
 
         time_ms = millis();
         // Periodic position send
-        if (time_ms - prevPos_ms >= 100) {
+        if (time_ms - prevPos_ms >= 100 && firstPosReceived) {
             prevPos_ms = time_ms;
 
             memset(&outMsg, 0, sizeof(outMsg));
