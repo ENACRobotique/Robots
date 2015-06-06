@@ -33,7 +33,7 @@ Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType
     objEP.type = E_CIRCLE;
     objEP.delta = 0;
     objEP.cir.c = {obs[_num_obs.back()].c.x, obs[_num_obs.back()].c.y};
-    objEP.cir.r = 5. + R_ROBOT;
+    objEP.cir.r = 10. + R_ROBOT;
 
     _access.push_back(objEP);
 
@@ -56,7 +56,7 @@ int Cup::loopObj(paramObj par){
             break;
         case CUP_TRAJ1:
             {
-                Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 10);
+                Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 25.4);
                 Point2D<float> dest;
 
                 destPoint = cir.project(par.posRobot);

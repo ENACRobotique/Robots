@@ -24,8 +24,8 @@ class CapActuator : public Capability{
 
         void setup(){
             Actuator spot, cup, popCornLoader, camera;
-            float spotAngle[2] = {M_PI/2, -M_PI/2};
-            float cupAngle[3] = {0, 2*M_PI/3, 4*M_PI/3};
+            float spotAngle[2] = {58.16*M_PI/180., -181.84*M_PI/180};
+            float cupAngle[3] = {345.74*M_PI/180, 114.59*M_PI/180, -123.6*M_PI/180};
             float popCornLoaderAngle[] = {M_PI/2, 3*M_PI/2};
 
             Point2D<float> cupPos[3];

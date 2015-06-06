@@ -52,7 +52,7 @@ int Spot::loopObj(paramObj par){
     switch(stepLoc){
         case SPOT_TRAJ1:
             {
-                Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 5);
+                Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 10 /*13.3*/);
                 destPoint = cir.project(par.posRobot);
                 path.go2PointOrient(destPoint, par.obs, _access_select_angle);
                 stepLoc = SPOT_WAIT_TRAJ1;
