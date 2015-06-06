@@ -187,7 +187,7 @@ Axis searchAxis(const Segment2D<float>& seg){
 
 void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& curPt, const float& curAngle, const Point2D<float>& destPt, const float& destAngle, const vector<Segment2D<float>>& robot, const vector<Segment2D<float>>& playground){
     float dx = -1, dy = -1, ox = 10, oy = 10;
-    int pgx = -1, pgy;
+    int pgx = -1, pgy = -1;
 
 
     float dist_robot = 11.262;
