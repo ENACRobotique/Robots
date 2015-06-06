@@ -28,7 +28,7 @@ Spot::Spot(unsigned int num, eColor_t color, vector<astar::sObs_t>& obs) : Obj(E
         logs << ERR << "Num too big";
     }
 
-    if(_color == GREEN)
+    if(_color == eColor_t::GREEN)
         _num_obs.push_back(START_STAND + num + 8);
     else
         _num_obs.push_back(START_STAND + num);

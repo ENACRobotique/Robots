@@ -25,7 +25,7 @@ class Spot3 : public Obj{
             sObjEntry_t objEP;
             unsigned int num_obs = START_STAND3;
 
-            if(color == GREEN){
+            if(color == eColor_t::GREEN){
                 EP.x = 300. - EP.x;
                 num_obs += 8;
             }

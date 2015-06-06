@@ -25,9 +25,9 @@ typedef enum {
     E_AI_SLAVE, E_AI_PROG, E_AI_AUTO
 } eAIState_t;
 
-typedef enum {
+enum class eColor_t{
     YELLOW, GREEN, NONE
-} eColor_t;
+};
 
 extern int verbose;
 extern int mode_switch;

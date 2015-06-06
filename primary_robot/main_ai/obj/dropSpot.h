@@ -28,7 +28,7 @@ class DropSpot : public Obj{
 
             objEP.type = E_CIRCLE;
             objEP.delta = 0;
-            if(color == GREEN)
+            if(color == eColor_t::GREEN)
                 listEP[num].x = 300 - listEP[num].x;
 
             objEP.cir.c = listEP[num];
