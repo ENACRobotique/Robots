@@ -100,8 +100,8 @@ typedef enum{
 }eSyncStatus;
 
 typedef struct __attribute__((packed)){
-    uint8_t nb; // must be <= 18
-    struct __attribute__((packed)){ // 3bytes
+    uint8_t nb; // must be <= 13
+    struct __attribute__((packed)){ // 4bytes
         eSyncType type :8;
         union{
             bn_Address addr;
