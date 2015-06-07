@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cstring>
 
+#include "communications.h"
 extern "C"{
 #include <unistd.h>
 #include "roles.h"
@@ -169,7 +170,7 @@ void Net::sendPathToNet(){
  */
 void Net::sendPathOrientToNet(){
     sMsg outMsg;
-    int ret;
+
     memset(&outMsg, 0, sizeof(outMsg));
 
     if(!_trajOrientEl.empty()){
@@ -218,10 +219,9 @@ void Net::sendPathOrientToNet(){
         outMsg.payload.trajOrientEl.tid = _tid;
         outMsg.payload.trajOrientEl.sid = _sid;
 
-        if ((ret = role_sendRetry(&outMsg, ROLEMSG_PRIM_TRAJ, MAX_RETRIES)) <= 0)
-            logs << ERR << "role_sendRetry(E_TRAJ_ORIENT_EL) failed " << getErrorStr(-ret) << " (#" << -ret << ")";
-        else
-            logs << INFO << "A new path orient has been sent: tid=" << _tid << " and sid=" << _sid;
+       roleSendBlock(outMsg, ROLEMSG_PRIM_TRAJ, "traj Orient");
+
+       logs << INFO << "A new path orient has been sent: tid=" << _tid << " and sid=" << _sid;
 
         _sid++;
 
