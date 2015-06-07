@@ -134,7 +134,21 @@ void Path::sendRobot(bool holo, float thetaEnd) {
 /*
  * Stop the robot
  */
-void Path::stopRobot(bool holo) {
+void Path::stopRobot(bool /*holo*/) {
+    sMsg msg;
+
+    memset(&msg, 0, sizeof(msg));
+
+    msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
+    msg.header.type = E_PROP_STOP;
+    msg.header.size = 0;
+
+    logs << WAR << "Stop robot";
+
+    bnSendBlock(msg, "stop robot");
+
+
+    /*
     Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
     float theta = statuses.getLastOrient(ELT_PRIMARY);
     sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
