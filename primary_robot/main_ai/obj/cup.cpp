@@ -22,7 +22,7 @@ extern "C"{
 
 
 
-Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType::CUP, true), _num(num), _time(0), stepLoc(CUP_OPEN_PINCE){
+Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType::CUP, true), _num(num), _time(0), stepLoc(CUP_DOWN_PINCE){
 
     if(num > 4)
         logs << ERR << "Num too big";
@@ -33,7 +33,7 @@ Cup::Cup(unsigned int num, vector<astar::sObs_t>& obs) : Obj(E_CUP, ActuatorType
     objEP.type = E_CIRCLE;
     objEP.delta = 0;
     objEP.cir.c = {obs[_num_obs.back()].c.x, obs[_num_obs.back()].c.y};
-    objEP.cir.r = 10. + R_ROBOT;
+    objEP.cir.r = 20. + R_ROBOT;
 
     _access.push_back(objEP);
 
@@ -50,13 +50,21 @@ void Cup::initObj(paramObj){
 int Cup::loopObj(paramObj par){
 
     switch(stepLoc){
+        case CUP_DOWN_PINCE:
+            servo.downPince(_actuator_select);
+            _time = millis();
+            stepLoc = CUP_OPEN_PINCE;
+            break;
         case CUP_OPEN_PINCE :
-            servo.unlockPince(par.act[_actuator_select].id);
-            stepLoc = CUP_TRAJ1;
+            if(millis() - _time > 500){
+                servo.unlockPince(_actuator_select);
+                _time = millis();
+                stepLoc = CUP_TRAJ1;
+            }
             break;
         case CUP_TRAJ1:
-            {
-                Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 25.4);
+            if(millis() - _time > 500){
+                Circle2D<float> cir(par.obs[_num_obs[0]].c.x, par.obs[_num_obs[0]].c.y, 25.4+2.);
                 Point2D<float> dest;
 
                 destPoint = cir.project(par.posRobot);
@@ -68,20 +76,20 @@ int Cup::loopObj(paramObj par){
             break;
 
         case CUP_WAIT_TRAJ1:
-            if(par.posRobot.distanceTo(destPoint)){
+            if(par.posRobot.distanceTo(destPoint) < 0.5){
                 stepLoc = CUP_CLOSE;
             }
             break;
 
         case CUP_CLOSE:
-            servo.inPince(par.act[_actuator_select].id);
+            servo.lockPince(_actuator_select);
             _time = millis();
             stepLoc = CUP_UP;
             break;
 
         case CUP_UP:
             if(millis() - _time > 500){
-                servo.upPince(par.act[_actuator_select].id);
+                servo.interPince(_actuator_select);
                 _time = millis();
                 stepLoc = CUP_END;
             }

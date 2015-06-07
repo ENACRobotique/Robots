@@ -18,6 +18,7 @@
 using namespace std;
 
 typedef enum{
+    CUP_DOWN_PINCE,
     CUP_OPEN_PINCE,
     CUP_TRAJ1,
     CUP_WAIT_TRAJ1,

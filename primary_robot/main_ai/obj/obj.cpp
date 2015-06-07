@@ -292,11 +292,9 @@ float Obj::getYield(const unsigned int start_time){
             logs << WAR << "ratio="<< ratio;
             break;
         case E_CUP:
-            logs << ERR << millis();
-            logs << ERR << start_time;
             ratio = 1/_dist * 10000 - ((int)millis() - (int)start_time)/1000;
             ratio = ratio>0?ratio:1;
-            logs << ERR << "ratio_cup="<< ratio;
+            logs << INFO << "ratio_cup="<< ratio;
             break;
         case E_CLAP:
         case E_SPOT:

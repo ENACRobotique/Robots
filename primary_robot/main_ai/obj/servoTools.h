@@ -11,6 +11,7 @@
 extern int getStand(unsigned int id);
 extern int dropCup(unsigned int id);
 extern int rangePince(unsigned int id);
+extern int dropStand(unsigned int id);
 
 
 

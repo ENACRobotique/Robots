@@ -22,6 +22,7 @@ typedef enum {
 }stepGetStand;
 
 typedef enum {
+    DROP_CUP_INIT,
     DROP_CUP_DOWN,
     DROP_CUP_UNLOCK,
     DROP_CUP_END
@@ -33,6 +34,13 @@ typedef enum {
     CUP_END
 }stepRangePince;
 
+typedef enum {
+    DROP_STAND_DOWN_ELEVATOR,
+    DROP_STAND_UNLOCK,
+    DROP_STAND_OPEN_DOOR,
+    DROP_STAND_END,
+}stepdropStand;
+
 
 int getStand(unsigned int id){
     static stepGetStand step = GET_STAND_ENTRY;
@@ -40,7 +48,7 @@ int getStand(unsigned int id){
 
     switch(step){
         case GET_STAND_ENTRY:
-            //TODO detection new stand
+            //TODO detection new stand (ya pas!!!)
             step = GET_STAND_OPEN;
             break;
 
@@ -52,7 +60,7 @@ int getStand(unsigned int id){
             break;
 
         case GET_STAND_DOWN:
-            if(millis() - timePrev > 500){
+            if(millis() - timePrev > 1000){
                 servo.downElevator(id);
                 timePrev = millis();
                 step = GET_STAND_LOCK;
@@ -60,7 +68,7 @@ int getStand(unsigned int id){
             break;
 
         case GET_STAND_LOCK:
-            if(millis() - timePrev > 500){
+            if(millis() - timePrev > 1000){
                 servo.lockElevator(id);
                 servo.closeDoorElevator(id);
                 timePrev = millis();
@@ -69,7 +77,7 @@ int getStand(unsigned int id){
             break;
 
         case GET_STAND_UP:
-            if(millis() - timePrev > 500){
+            if(millis() - timePrev > 1500){
                 servo.upElevator(id);
                 timePrev = 0;
                 step = GET_STAND_ENTRY;
@@ -82,25 +90,35 @@ int getStand(unsigned int id){
 }
 
 int dropCup(unsigned int id){
-    static stepDropCup step;
+    static stepDropCup step = DROP_CUP_INIT;
     static unsigned int timePrev = 0;
 
     switch(step){
-        case DROP_CUP_DOWN:
-            servo.downPince(id);
+        case DROP_CUP_INIT:
             timePrev = millis();
+            step = DROP_CUP_DOWN;
+            break;
+
+        case DROP_CUP_DOWN:
+            if(millis() - timePrev > 1000){
+                servo.downPince(id);
+                timePrev = millis();
+                //step = DROP_CUP_UNLOCK;
+                step = DROP_CUP_END;
+            }
             break;
 
         case DROP_CUP_UNLOCK:
-            if(millis() - timePrev > 500){
+            if(millis() - timePrev > 1000){
                 servo.unlockPince(id);
                 timePrev = millis();
+                step = DROP_CUP_END;
             }
             break;
 
         case DROP_CUP_END:
-            if(millis() - timePrev > 500){
-                step = DROP_CUP_DOWN;
+            if(millis() - timePrev > 1000){
+                step = DROP_CUP_INIT;
                 timePrev = 0;
                 return 1;
             }
@@ -132,6 +150,45 @@ int rangePince(unsigned int id){
         case CUP_END:
             if(millis() - timePrev > 500){
                 step = CUP_CLOSE;
+                timePrev = 0;
+                return 1;
+            }
+            break;
+    }
+    return 0;
+}
+
+
+int dropStand(unsigned int id){
+    static stepdropStand step = DROP_STAND_DOWN_ELEVATOR;
+    static unsigned int timePrev = 0;
+
+    switch(step){
+        case DROP_STAND_DOWN_ELEVATOR:
+            servo.downElevator(id);
+            timePrev = millis();
+            step = DROP_STAND_UNLOCK;
+            break;
+
+        case DROP_STAND_UNLOCK:
+            if(millis() - timePrev > 1000){
+                servo.unlockElevator(id);
+                timePrev = millis();
+                step = DROP_STAND_OPEN_DOOR;
+            }
+            break;
+
+        case DROP_STAND_OPEN_DOOR:
+            if(millis() - timePrev > 500){
+                servo.openDoorElevator(id);
+                timePrev = millis();
+                step = DROP_STAND_END;
+            }
+            break;
+
+        case DROP_STAND_END:
+            if(millis() - timePrev > 1000){
+                step = DROP_STAND_DOWN_ELEVATOR;
                 timePrev = 0;
                 return 1;
             }

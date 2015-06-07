@@ -47,7 +47,7 @@ typedef enum {
 
 class Spot4 : public Obj{
     public:
-        Spot4(paramObj par) : Obj(E_SPOT2, ActuatorType::ELEVATOR, true), color(par.color),angleSelect(0), rotAngle(0), _state_loc(SPOT4_TRAJ1), actClap(0){
+        Spot4(paramObj par) : Obj(E_SPOT4, ActuatorType::ELEVATOR, true), color(par.color),angleSelect(0), rotAngle(0), _state_loc(SPOT4_TRAJ1), actClap(0){
             sObjEntry_t objEP;
             Point2D<float> EP(DELTA_X, SPOT4_POINT_ENTRY);
 

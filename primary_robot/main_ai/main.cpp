@@ -246,6 +246,13 @@ int main(int argc, char **argv) {
 
 
         ihm.sendIhm(IHM_LED, LED_GREEN);
+
+    while(1){
+        if(servo.initServo() == 1)
+            break;
+
+        sleep(1);
+        }
     // loop
     while (1){
 
