@@ -168,12 +168,12 @@ int CapAI::loop(){
 void CapAI::initObjective(){
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
-    CapActuator* capActuator = dynamic_cast<CapActuator*> (robot->caps[eCap::ACTUATOR]);
+   // CapActuator* capActuator = dynamic_cast<CapActuator*> (robot->caps[eCap::ACTUATOR]);
 
-    float angleRobot = capPos->getLastTheta();
+   // float angleRobot = capPos->getLastTheta();
     Point2D<float> posRobot = capPos->getLastPosXY();
-    eColor_t color = capTeam->getColor();
-
+   // eColor_t color = capTeam->getColor();
+/*
     paramObj par = {posRobot,
             angleRobot,
             color,
@@ -181,9 +181,9 @@ void CapAI::initObjective(){
             robot->env->obs_updated,
             listObj,
             capActuator->_act};
-
+*/
     logs << INFO << "InitOjective for AI";
-
+/*
     if(capTeam->getColor() == eColor_t::YELLOW){
         listObj.push_back(new Clap(0));
         listObj.push_back(new Clap(2));
@@ -198,6 +198,7 @@ void CapAI::initObjective(){
         logs << ERR << "Color ???";
         exit(EXIT_FAILURE);
     }
+    */
 /*
     if(color == YELLOW)
         listObj.push_back(new Cup(1, robot->env->obs));
@@ -213,20 +214,21 @@ void CapAI::initObjective(){
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
 
 
-    listObj.push_back(new Spot2(0, capTeam->getColor()));
+   // listObj.push_back(new Spot2(0, capTeam->getColor()));
 
-    listObj.push_back(new Spot3(robot->env->obs, capTeam->getColor()));
+  //  listObj.push_back(new Spot3(robot->env->obs, capTeam->getColor()));
 
-    listObj.push_back(new Spot4(par));
-/*
+   // listObj.push_back(new Spot4(par));
+
+
     for(unsigned int i = 0 ; i < 2 ; i++)
         listObj.push_back(new DropSpot(i, capTeam->getColor()));
-*/
+
    // listObj.push_back(new Light(capTeam->getColor()));
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));
 
-    for(unsigned int i = 1 ; i < 3 ; i++)
+    for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new DropCup(i, capTeam->getColor()));
 
 
