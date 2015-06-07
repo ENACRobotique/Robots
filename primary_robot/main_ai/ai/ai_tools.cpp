@@ -271,6 +271,7 @@ void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& cur
         dest = playground[pgx].project(curPt);
         dest.x += SIGN(curPt.x - dest.x)*dist_robot;
         //dest.x += SIGN(curPt.x - dest.x)*robot[0].distance({0,0});
+        dest.x += 10.;
         traj.push_back({dest, angle, {dest.x, 0.}, 1});
 
         dest = playground[pgx].project(curPt);
@@ -320,6 +321,7 @@ void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& cur
 
         dest = playground[pgy].project(lastPos);
         dest.y += SIGN(lastPos.y - dest.y)*dist_robot;
+        dest.y -= 10.;
         traj.push_back({dest, angle, {0., dest.y}, 2});
 
         dest = playground[pgy].project(lastPos);

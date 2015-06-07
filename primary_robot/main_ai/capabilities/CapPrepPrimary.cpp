@@ -47,8 +47,9 @@ int CapPrepPrimary::loop(){
   //  static int index = 0;
     // static bool wait = false;
     // static bool pos = false;
-     static unsigned int timeSave=0;
-     static stepInitPos stepPos=TRAJ1;
+    // static unsigned int timeSave=0;
+   //  static stepInitPos stepPos=TRAJ1;
+    //static int ind=10;
 
     if(!capIO){
         logs << ERR << "Primary must be have an HMI interface real or simulate";
@@ -62,25 +63,25 @@ int CapPrepPrimary::loop(){
         if(capIO->getHMI(IHM_STARTING_CORD) == CORD_IN) {
           //  getchar();
             //logs << INFO << "getchar";
-            float theta_robot;
+         //   float theta_robot;
             Point2D<float> pos_robot;
 
             if (capTeam->getColor() == eColor_t::YELLOW) {
                 logs << INFO << "Color selected is YELLOW";
                 pos_robot = {INIT_POS_YELLOW_X, INIT_POS_YELLOW_Y};
-                theta_robot = INIT_ANGLE_YELLOW;
+         //       theta_robot = INIT_ANGLE_YELLOW;
             }
             else if (capTeam->getColor() == eColor_t::GREEN) {
                 logs << INFO << "Color selected is GREEN";
                 pos_robot = {INIT_POS_GREEN_X, INIT_POS_GREEN_Y};
-                theta_robot = INIT_ANGLE_GREEN;
+             //   theta_robot = INIT_ANGLE_GREEN;
             }
             else {
                 logs << ERR << "Error selection color";
                 return -1;
             }
-            theta_robot = 0;
-            sendSetPosPrimary(pos_robot, theta_robot, 10.*10., 10.*10., 0., M_PI*M_PI/(10.*10.));            // Sending approximate initial position to the propulsion
+           // theta_robot = 0;
+            //sendSetPosPrimary(pos_robot, theta_robot, 10.*10., 10.*10., 0., M_PI*M_PI/(10.*10.));            // Sending approximate initial position to the propulsion
 
             //TODO procedure de mise en place
             std::vector<Segment2D<float>> robotSeg;
@@ -99,7 +100,7 @@ int CapPrepPrimary::loop(){
             playgroundSeg.push_back(pg1);
             playgroundSeg.push_back(pg2);
 
-            setStartingPosition(traj, pos_robot, theta_robot, pos_robot /*destPt*/, theta_robot /*destAngle*/, robotSeg, playgroundSeg);
+         //   setStartingPosition(traj, pos_robot, theta_robot, pos_robot /*destPt*/, theta_robot /*destAngle*/, robotSeg, playgroundSeg);
 
             logs << INFO << "\n";
             for(SimpleTraj i : traj){
@@ -107,7 +108,8 @@ int CapPrepPrimary::loop(){
             }
 
             logs << INFO << "End step color selection";
-            _step = Step::WAIT_POS_PROP;
+            _step = Step::WAIT_STARTING_CORD;
+           // _step = Step::WAIT_POS_PROP;
         }
         break;
 
@@ -132,7 +134,63 @@ int CapPrepPrimary::loop(){
         break;
 
     case Step::WAIT_INIT_POS:
+    {
+       // Point2D<float> pos_robot(300.-11.2, 80.-2.2-17.5);
+       // float theta_robot = 48.37*M_PI/180.;
 
+    //    Point2D<float> pos_robot(300.-7.-17.5, 80.+11.2);
+     //   float theta_robot = -(90-48.37)*M_PI/180.;
+
+      //  Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
+     //   float theta_robot = (180.)*M_PI/180.;
+
+        Point2D<float> pos_robot(300.-7.-11.2, 80.+2.7+17.5);
+        float theta_robot = (-191.6)*M_PI/180.;
+
+        sendSetPosPrimary(pos_robot, theta_robot, MINVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
+
+        path.stopRobot(true);
+
+        _step = Step::WAIT_START;
+    }
+/*
+
+        switch(ind){
+            case 10:
+                sendSetPosPrimary(pos_robot, theta_robot, MINVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
+
+                path.stopRobot(true);
+                ind=0;
+                break;
+            case 0:
+                if(capPos->getLastPosXY().x && capPos->getLastPosXY().y){
+                    path.go2PointOrient({INIT_POS_YELLOW_X, INIT_POS_YELLOW_Y}, robot->env->obs, 0.);
+                    ind = 1;
+                }
+                break;
+            case 1:
+                if(capPos->getLastPosXY().distanceTo({INIT_POS_YELLOW_X, INIT_POS_YELLOW_Y}) < 1.){
+                    _step = Step::WAIT_START;
+                }
+                break;
+        }
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+        /*
         switch(stepPos){
             case TRAJ1:
                 logs << INFO << "TRAJ1";
@@ -258,6 +316,7 @@ int CapPrepPrimary::loop(){
 
         }
 
+*/
 /*
 
 
