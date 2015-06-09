@@ -172,6 +172,7 @@ int main() {
 #elif TUNING == 1
     position_controller_t pc;
     posctlr_init(&pc, mat_rob2pods);
+    posctlr_run(&pc);
     int x_sp = 0, y_sp = 0, theta_sp = 0;
 
     int sps[3] = {0, 0, 0};

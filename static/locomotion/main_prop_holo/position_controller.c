@@ -74,7 +74,7 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
 //    pid_init(&tc->pid_ytraj, iROUND(0.125 * dPSHIFT), iROUND(0.977e-3 * dPSHIFT), iROUND(15.6e-3 * dPSHIFT), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
 //    pid_init(&tc->pid_orien, iROUND(0.125 * dPSHIFT), iROUND(0.977e-3 * dPSHIFT), iROUND(15.6e-3 * dPSHIFT), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
 
-    double mul = 0.4;
+    double mul = 0.3;
     int KP = iROUND(mul*dPSHIFT*    0.125);
     int KI = iROUND(mul*dPSHIFT*    0.977e-3);
     int KD = iROUND(mul*dPSHIFT*    0);
@@ -83,9 +83,9 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
     pid_init(&tc->pid_ytraj, KP, KI, KD, 200 << SHIFT_PID_POS, SHIFT_PID_POS);
     pid_init(&tc->pid_orien, KP, KI, KD, 200 << SHIFT_PID_POS, SHIFT_PID_POS);
 
-    mf_init(&tc->mf_xtraj, 10);
-    mf_init(&tc->mf_ytraj, 10);
-    mf_init(&tc->mf_orien, 10);
+    mf_init(&tc->mf_xtraj, 8);
+    mf_init(&tc->mf_ytraj, 8);
+    mf_init(&tc->mf_orien, 8);
 }
 
 void _update_pos_spd(position_controller_t* tc, MT_VEC *spd_pv_rob);
