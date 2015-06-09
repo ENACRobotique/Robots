@@ -8,7 +8,7 @@
 #ifndef AI_SERVO_H_
 #define AI_SERVO_H_
 
-#define MAX_RETRIES_SERVO 2
+#define MAX_RETRIES_SERVO 5
 
 #include <map>
 #include <vector>
@@ -16,10 +16,12 @@ extern "C"{
 #include "messages-interactions.h"
 }
 
+#define ANGLE_ELEVATOR_INIT1        70.
 #define ANGLE_ELEVATOR_LOCK1        90.
 #define ANGLE_ELEVATOR_UNLOCK1      0.
 #define ANGLE_ELEVATOR_UP1          90.
 #define ANGLE_ELEVATOR_DOWN1        0.
+#define ANGLE_ELEVATOR_DOWN_ESTRADE1 0.
 #define ANGLE_ELEVATOR_OPEN1        90.
 #define ANGLE_ELEVATOR_MIDDLE1      45.
 #define ANGLE_ELEVATOR_CLOSE1       0.
@@ -28,6 +30,7 @@ extern "C"{
 #define ANGLE_ELEVATOR_UNLOCK2      90.
 #define ANGLE_ELEVATOR_UP2          175.
 #define ANGLE_ELEVATOR_DOWN2        3.
+#define ANGLE_ELEVATOR_DOWN_ESTRADE2 70.
 #define ANGLE_ELEVATOR_DOOR_OPEN2   0.
 #define ANGLE_ELEVATOR_DOOR_MIDDLE2 80.
 #define ANGLE_ELEVATOR_DOOR_CLOSE2  103.
@@ -91,8 +94,8 @@ typedef enum {
 class Servo {
     public:
         Servo(){
-          /*  tabServo.insert(std::make_pair(ELEVATOR_UP_DOWN1       , servoId{ 0, 0}));
-            tabServo.insert(std::make_pair(ELEVATOR_DOOR1          , servoId{ 0, 0}));
+            tabServo.insert(std::make_pair(ELEVATOR_UP_DOWN1       , servoId{ 2, 8}));
+          /*  tabServo.insert(std::make_pair(ELEVATOR_DOOR1          , servoId{ 0, 0}));
             tabServo.insert(std::make_pair(ELEVATOR_UNLOCK_LOCK1   , servoId{ 0, 0}));*/
             tabServo.insert(std::make_pair(ELEVATOR_UP_DOWN2       , servoId{ 1, 6}));
             tabServo.insert(std::make_pair(ELEVATOR_DOOR2          , servoId{ 9, 0}));
@@ -146,6 +149,9 @@ class Servo {
                     name.push_back(PINCE_UP_DOWN3);
                     angle.push_back(ANGLE_PINCE_UP3);
 
+                    name.push_back(ELEVATOR_UP_DOWN1);
+                    angle.push_back(ANGLE_ELEVATOR_INIT1);
+
                     sendMultiPosServo(name, angle);
                     step = STEP3;
                     break;
@@ -177,6 +183,10 @@ class Servo {
         void downElevator(int num){
             sendPosServo(num==0?ELEVATOR_UP_DOWN1:ELEVATOR_UP_DOWN2,
                     num==0?ANGLE_ELEVATOR_DOWN1:ANGLE_ELEVATOR_DOWN2);
+        }
+        void downEstradeElevator(int num){
+            sendPosServo(num==0?ELEVATOR_UP_DOWN1:ELEVATOR_UP_DOWN2,
+                    num==0?ANGLE_ELEVATOR_DOWN_ESTRADE1:ANGLE_ELEVATOR_DOWN_ESTRADE2);
         }
         void openDoorElevator(int num){
             switch(num){
