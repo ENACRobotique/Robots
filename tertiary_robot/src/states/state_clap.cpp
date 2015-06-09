@@ -74,7 +74,6 @@ sState *testClap1_YELLOW()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-		    static unsigned long sharptime = 0;
 			if(periodicProgTraj(Clap1_YELLOW_traj,&st_saveTime,&i,&prev_millis))
 			 	{
 				return &sTrajBetweenClaps_YELLOW;
@@ -85,21 +84,6 @@ sState *testClap1_YELLOW()
 				 return &sDead;
 			 }
 
-			 if (sharpIntrusion()){
-					if(sharptime == 0){
-						sharptime = millis();
-					}
-					else{
-						if( (millis() - sharptime) > TIME_SHARP ){
-							sharptime = 0;
-							return &sPause;
-							}
-					}
-
-				}
-				else{
-					sharptime = 0;
-				}
 	    return 0;
 	}
 
@@ -158,7 +142,6 @@ sState *testClap1_GREEN()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-		    static unsigned long sharptime = 0;
 			if(periodicProgTraj(Clap1_YELLOW_traj,&st_saveTime,&i,&prev_millis))
 			 	{
 				emergencyStop();
@@ -169,21 +152,6 @@ sState *testClap1_GREEN()
 				 return &sTrajBetweenClaps_GREEN;
 			 }
 
-			 if (sharpIntrusion()){
-			 			 		    	    	if(sharptime == 0){
-			 			 		    	    		sharptime = millis();
-			 			 		    	    	}
-			 			 		    	    	else{
-			 			 		    	    		if( (millis() - sharptime) > TIME_SHARP ){
-			 			 		    	    			sharptime = 0;
-			 			 		    					return &sPause;
-			 			 		    					}
-			 			 		    	    	}
-
-			 			 		    	    }
-			 			 		    	    else{
-			 			 		    	    	sharptime = 0;
-			 			 		    	    }
 	    return 0;
 	}
 
@@ -243,7 +211,6 @@ sState *testClap2_YELLOW()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-		    static unsigned long sharptime = 0;
 			if(periodicProgTraj(TrajClap2_YELLOW,&st_saveTime,&i,&prev_millis)){
 				emergencyStop();
 				return &sDead;
@@ -252,20 +219,6 @@ sState *testClap2_YELLOW()
 				emergencyStop();
 				return &sDead;
 			 }
-			 if (sharpIntrusion()){
-				if(sharptime == 0){
-					sharptime = millis();
-			 	}
-				else{
-					if( (millis() - sharptime) > TIME_SHARP ){
-						sharptime = 0;
-						return &sPause;
-					}
-				}
-			 }
-			 else{
-			sharptime = 0;
-		}
 	    return 0;
 	}
 
@@ -325,7 +278,6 @@ sState *testClap2_GREEN()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-		    static unsigned long sharptime = 0;
 			if(periodicProgTraj(TrajClap2_YELLOW,&st_saveTime,&i,&prev_millis)){
 				emergencyStop();
 				return &sDead;
@@ -334,20 +286,6 @@ sState *testClap2_GREEN()
 				emergencyStop();
 				return &sDead;
 			 }
-			 if (sharpIntrusion()){
-				if(sharptime == 0){
-					sharptime = millis();
-			 	}
-				else{
-					if( (millis() - sharptime) > TIME_SHARP ){
-						sharptime = 0;
-						return &sPause;
-					}
-				}
-			 }
-			 else{
-			sharptime = 0;
-		}
 	    return 0;
 	}
 

@@ -68,7 +68,6 @@ trajElem TrajStart_GREEN[]={
 
 sState *testTrajStart_GREEN()
 	{
-		static unsigned long sharptime = 0;
 		static int i=0;
 	    static unsigned long prev_millis=0;
 
@@ -82,21 +81,6 @@ sState *testTrajStart_GREEN()
 			 return &sDead;
 		 }
 
-	    if (sharpIntrusion()){
-	    	if(sharptime == 0){
-	    		sharptime = millis();
-	    	}
-	    	else{
-	    		if( (millis() - sharptime) > TIME_SHARP){
-	    			sharptime = 0;
-					return &sPause;
-					}
-	    	}
-
-	    }
-	    else{
-	    	sharptime = 0;
-	    }
 	    return 0;
 	}
 
@@ -147,28 +131,12 @@ trajElem TrajStart_YELLOW[]={ //A MODIFIER
 };
 sState *testTrajStart_YELLOW()
 	{
-	static unsigned long sharptime = 0;
 	static int i=0;
 		    static unsigned long prev_millis=0;
 		    if(periodicProgTraj(TrajStart_YELLOW,&st_saveTime,&i,&prev_millis))
 		   	    {
 		    	return &sTrajToClaps_YELLOW;
 		   	    }
-		    if (sharpIntrusion()){
-		    	    	if(sharptime == 0){
-		    	    		sharptime = millis();
-		    	    	}
-		    	    	else{
-		    	    		if( (millis() - sharptime) > TIME_SHARP ){
-		    	    			sharptime = 0;
-		    					return &sPause;
-		    					}
-		    	    	}
-
-		    	    }
-		    	    else{
-		    	    	sharptime = 0;
-		    	    }
 		 if (millis() - _matchStart >= TIME_MATCH_STOP){
 			 emergencyStop();
 			 return &sDead;
@@ -228,7 +196,6 @@ sState *testTrajToClaps_YELLOW()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-		    static unsigned long sharptime = 0;
 
 			if(periodicProgTraj(yellowFinal,&st_saveTime,&i,&prev_millis))
 			 	{
@@ -241,21 +208,6 @@ sState *testTrajToClaps_YELLOW()
 				 return &sDead;
 			 }
 
-			 if (sharpIntrusion()){
-			 		    	    	if(sharptime == 0){
-			 		    	    		sharptime = millis();
-			 		    	    	}
-			 		    	    	else{
-			 		    	    		if( (millis() - sharptime) > TIME_SHARP ){
-			 		    	    			sharptime = 0;
-			 		    					return &sPause;
-			 		    					}
-			 		    	    	}
-
-			 		    	    }
-			 		    	    else{
-			 		    	    	sharptime = 0;
-			 		    	    }
 	    return 0;
 	}
 
@@ -311,7 +263,6 @@ sState *testTrajToClaps_GREEN()
 	{
 		static int i=0;
 	    static unsigned long prev_millis=0;
-	    static unsigned long sharptime = 0;
 	    if(periodicProgTraj(TrajToClaps_GREEN,&st_saveTime,&i,&prev_millis))
 		{
 	    	return &sClap1_GREEN;
@@ -322,21 +273,6 @@ sState *testTrajToClaps_GREEN()
 			 emergencyStop();
 			 return &sDead;
 		 }
-		 if (sharpIntrusion()){
-		 			 		    	    	if(sharptime == 0){
-		 			 		    	    		sharptime = millis();
-		 			 		    	    	}
-		 			 		    	    	else{
-		 			 		    	    		if( (millis() - sharptime) > TIME_SHARP ){
-		 			 		    	    			sharptime = 0;
-		 			 		    					return &sPause;
-		 			 		    					}
-		 			 		    	    	}
-
-		 			 		    	    }
-		 			 		    	    else{
-		 			 		    	    	sharptime = 0;
-		 			 		    	    }
 	 	    return 0;
 	}
 
@@ -388,7 +324,6 @@ sState *testTrajBetweenClaps_YELLOW()
 	{
 		static int i=0;
 	    static unsigned long prev_millis=0;
-	    static unsigned long sharptime = 0;
 	    if(periodicProgTraj(TrajBetweenClaps_YELLOW,&st_saveTime,&i,&prev_millis))
 		{
 	    	return &sClap2_YELLOW;
@@ -399,21 +334,6 @@ sState *testTrajBetweenClaps_YELLOW()
 			 emergencyStop();
 			 return &sDead;
 		 }
-		 if (sharpIntrusion()){
-		 					if(sharptime == 0){
-		 						sharptime = millis();
-		 					}
-		 					else{
-		 						if( (millis() - sharptime) > TIME_SHARP ){
-		 							sharptime = 0;
-		 							return &sPause;
-		 							}
-		 					}
-
-		 				}
-		 				else{
-		 					sharptime = 0;
-		 				}
 	 	    return 0;
 	}
 
@@ -465,7 +385,6 @@ sState *testTrajBetweenClaps_GREEN()
 	{
 		static int i=0;
 	    static unsigned long prev_millis=0;
-	    static unsigned long sharptime = 0;
 	    if(periodicProgTraj(TrajBetweenClaps_YELLOW,&st_saveTime,&i,&prev_millis))
 		{
 	    	return &sClap2_GREEN;
@@ -477,22 +396,6 @@ sState *testTrajBetweenClaps_GREEN()
 			 return &sDead;
 		 }
 
-
-		 if (sharpIntrusion()){
-		 		 					if(sharptime == 0){
-		 		 						sharptime = millis();
-		 		 					}
-		 		 					else{
-		 		 						if( (millis() - sharptime) > TIME_SHARP ){
-		 		 							sharptime = 0;
-		 		 							return &sPause;
-		 		 							}
-		 		 					}
-
-		 		 				}
-		 		 				else{
-		 		 					sharptime = 0;
-		 		 				}
 	 	    return 0;
 	}
 
