@@ -21,6 +21,8 @@ using namespace std;
 typedef enum{
     DROP_SPOT_INIT_WAIT,
     DROP_SPOT_INIT,
+    DROP_SPOT_WAIT_ROT,
+    DROP_SPOT_WAIT_CONTACT,
     DROP_SPOT_BACK,
     DROP_SPOT_UP_AND_CLOSE_DOOR,
     DROP_SPOT_END
@@ -29,7 +31,7 @@ typedef enum{
 class DropSpot : public Obj{
     public:
         DropSpot(int num, eColor_t color) : Obj(E_DROP_SPOT, ActuatorType::CUP, false), EP_selected(-1), step(DROP_SPOT_INIT_WAIT){
-            vector<Point2D<float>> listEP{{20, 100}, {115, 25}}; //Yellow
+            vector<Point2D<float>> listEP{{160, 40}, {160, 40}}; //Yellow
             sObjEntry_t objEP;
 
             _state = WAIT_MES;
@@ -40,7 +42,7 @@ class DropSpot : public Obj{
                 listEP[num].x = 300 - listEP[num].x;
 
             objEP.cir.c = listEP[num];
-            objEP.cir.r = 10.;
+            objEP.cir.r = 2.;
             _access.push_back(objEP);
         }
         virtual ~DropSpot(){}
@@ -66,7 +68,7 @@ class DropSpot : public Obj{
 
             for(i = 0 ; i < par.act.size() ; i++){ //TODO optimize for the moment the first find is used
                 if( par.act[i].type == _typeAct){
-                    if((!par.act[i].cupActuator.full))
+                    if((!par.act[i].elevator.full))
                         break;
                 }
             }
@@ -83,30 +85,47 @@ class DropSpot : public Obj{
         }
 
         int loopObj(paramObj par) override{
-
+            _actuator_select=1;
             switch(step){
                 case DROP_SPOT_INIT_WAIT:
-                    logs << ERR << "stop getchar";
-                    getchar();
                     _time = millis();
                     step = DROP_SPOT_INIT;
 
                     break;
 
                 case DROP_SPOT_INIT:
-                    if(millis() - _time > 5){
-                        if(dropStand(_actuator_select)){
-                            step = DROP_SPOT_BACK;
-                        }
+                    if(millis() - _time > 1000){
+                        destPoint.x = par.posRobot.x;
+                        destPoint.y = 35.;
+                        _access_select_angle = -(90.-48.)*M_PI/180;
+                        path.go2PointOrient(destPoint, par.obs, _access_select_angle);
+                        step = DROP_SPOT_WAIT_ROT;
+                    }
+                    break;
+
+                case DROP_SPOT_WAIT_ROT:
+                    if(destPoint.distanceTo(par.posRobot) < 0.2){
+                        destPoint.x = par.posRobot.x;
+                        destPoint.y = 15.;
+                        path.go2PointOrient(destPoint, par.obs, _access_select_angle);
+                        step = DROP_SPOT_WAIT_CONTACT;
+                    }
+                    break;
+
+                case DROP_SPOT_WAIT_CONTACT:
+                    if(destPoint.distanceTo(par.posRobot) < 1.){
+                        Point2D<float> pos(par.posRobot);
+                        pos.y = 10+11.2;
+                        path.stopRobot(true);
+                        sendMixPosPrimary(pos, _access_select_angle, MAXVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
+                        step = DROP_SPOT_BACK;
                     }
                     break;
 
                 case DROP_SPOT_BACK:
-                    {
-                        Point2D<float> posSpot(_access[0].cir.c);
-                        Circle2D<float> c(posSpot, 30);
-                        logs << ERR << _access_select;
-                        destPoint = c.project(par.posRobot);
+                    if(dropStand(_actuator_select)){
+                        destPoint.x = par.posRobot.x;
+                        destPoint.y = 40.;
                         path.go2PointOrient(destPoint, par.obs, _access_select_angle);
                         step = DROP_SPOT_UP_AND_CLOSE_DOOR;
                     }
@@ -138,7 +157,7 @@ class DropSpot : public Obj{
                        for(i = START_STAND ; i < START_STAND + 16 ; i++){
                            if(!par.obs[i].active){
                                par.obs[i].active = 1;
-                               par.obs[i].c = {_access[0].cir.c.x, _access[0].cir.c.y};
+                               par.obs[i].c = {destPoint.x, 10};
                                par.obs[i].r = 10 + R_ROBOT;
                                par.obsUpdated[i]++;
                                break;
