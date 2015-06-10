@@ -15,7 +15,7 @@
 
 extern sState sTrajStart_GREEN;
 extern sState sTrajStart_YELLOW;
-extern sState sTrajGreenFinal;
+extern sState sTrajToClaps_GREEN;
 extern sState sTrajToClaps_YELLOW;
 
 extern sState sTrajBetweenClaps_YELLOW;

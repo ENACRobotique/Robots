@@ -73,7 +73,7 @@ sState *testTrajStart_GREEN()
 
 	    if(periodicProgTraj(TrajStart_GREEN,&st_saveTime,&i,&prev_millis))
 	    {
-	    	 return &sTrajGreenFinal;
+	    	 return &sTrajToClaps_GREEN;
 	    }
 
 		 if (millis() - _matchStart >= TIME_MATCH_STOP){
@@ -185,7 +185,7 @@ void deinitTrajToClaps_YELLOW(sState *next)
 		    	}
 }
 
-trajElem yellowFinal[]={
+trajElem TrajToClaps_YELLOW[]={
 		{-400,40,3300},
 		{-500,-7,700},
 		{500,-7,6200},
@@ -197,7 +197,7 @@ sState *testTrajToClaps_YELLOW()
 	static int i=0;
 		    static unsigned long prev_millis=0;
 
-			if(periodicProgTraj(yellowFinal,&st_saveTime,&i,&prev_millis))
+			if(periodicProgTraj(TrajToClaps_YELLOW,&st_saveTime,&i,&prev_millis))
 			 	{
 				return &sClap1_YELLOW;
 			 	}
@@ -276,7 +276,7 @@ sState *testTrajToClaps_GREEN()
 	 	    return 0;
 	}
 
-sState sTrajGreenFinal={
+sState sTrajToClaps_GREEN={
         BIT(E_MOTOR)|BIT(E_RADAR),
         &initTrajToClaps_GREEN,
         &deinitTrajToClaps_GREEN,

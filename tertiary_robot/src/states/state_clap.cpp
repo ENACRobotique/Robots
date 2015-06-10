@@ -65,7 +65,7 @@ void deinitClap1_YELLOW(sState *next)
 		    	}
 }
 
-trajElem Clap1_YELLOW_traj[]={
+trajElem TrajClap1_YELLOW[]={
 	{-500,-7,3000},
 	{0,0,0}
 };
@@ -74,7 +74,7 @@ sState *testClap1_YELLOW()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-			if(periodicProgTraj(Clap1_YELLOW_traj,&st_saveTime,&i,&prev_millis))
+			if(periodicProgTraj(TrajClap1_YELLOW,&st_saveTime,&i,&prev_millis))
 			 	{
 				return &sTrajBetweenClaps_YELLOW;
 			 	}
@@ -133,7 +133,7 @@ void deinitClap1_GREEN(sState *next)
 		    	}
 }
 
-trajElem Clap1_GREEN_traj[]={
+trajElem TrajClap1_GREEN[]={
 	{-500,7,3000},
 	{0,0,0}
 };
@@ -142,7 +142,7 @@ sState *testClap1_GREEN()
 	{
 	static int i=0;
 		    static unsigned long prev_millis=0;
-			if(periodicProgTraj(Clap1_YELLOW_traj,&st_saveTime,&i,&prev_millis))
+			if(periodicProgTraj(TrajClap1_YELLOW,&st_saveTime,&i,&prev_millis))
 			 	{
 				emergencyStop();
 				return &sDead;
