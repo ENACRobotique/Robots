@@ -8,11 +8,7 @@
 #ifndef STATE_SERVO_selecter2_H_
 #define STATE_SERVO_selecter2_H_
 
-
-
 extern sState sservo_deg_tps_reel;
-
-void servo_selecter2();
 
 //void afficher(const char* chaine);
 

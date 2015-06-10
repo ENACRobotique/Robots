@@ -1,5 +1,5 @@
 /*
- * state_Menu_servo.cpp
+ * state_mode_servo.cpp
  *
  *  Created on: 2015
  *      Author: Fab
@@ -11,27 +11,29 @@
 #include "state_types.h"
 
 #include "state_Menu_principal.h"
-#include "state_Menu_servo.h"
+#include "state_mode_servo.h"
+#include "state_choice_servo.h"
 #include "lib_IHM.h"
-#include "state_servo_deg_validation.h"
-#include "state_servo_deg_tps_reel.h"
-#include "state_servo_micros.h"
 
-Servo servotest;
+#define TPS_REEL 1
+#define VALID 2
+#define MICROS 3
 
-#define NB_menu_servo 3
-const char *menu_servo[] = {
+int mode_servo=0;
+
+#define NB_mode_servo 3
+const char *menu_mode[] = {
 	  "ANGLE tps reel",
 	  "ANGLE validation",
 	  "MICROSECONDES",
 	};
 
-sState* testMenu_servo(){
+sState* testmode_servo(){
 		static int memPosition;
-		int Position = (myEnc.read()/2)%NB_menu_servo;    //position du selecteur
+		int Position = (myEnc.read()/2)%NB_mode_servo;    //position du selecteur
 		   if(Position != memPosition)  //on affiche que si on change de position
 		   {
-		      afficher(menu_servo[Position]);
+		      afficher(menu_mode[Position]);
 		      memPosition=Position;
 		   }
 
@@ -40,11 +42,12 @@ sState* testMenu_servo(){
 			while(!digitalRead(SELECT));
 		    switch (Position)
 		    {
-		        case 0:{ return(&sservo_deg_tps_reel); break; }
-		        case 1:{ return(&sservo_deg_validation); break; }
-		        case 2:{ return(&sservo_micros); break; }
+		        case 0:{ mode_servo = TPS_REEL; break; }
+		        case 1:{ mode_servo = VALID; break; }
+		        case 2:{ mode_servo = MICROS; break; }
 		        //default:
 		     }
+		    return &sChoice_servo;
 		  }
 
 		  if(!digitalRead(RETOUR))
@@ -54,21 +57,19 @@ sState* testMenu_servo(){
 			  return(&sMenu_principal);
 		  }
 
-
     return NULL;
 }
-void initMenu_servo(sState *prev){
+void initmode_servo(sState *prev){
 			myEnc.write(0);
-			afficher(menu_servo[0]);
+			afficher(menu_mode[0]);
 }
-void deinitMenu_servo(sState *next){
+void deinitmode_servo(sState *next){
 
 }
 
-
-sState sMenu_servo={
+sState smode_servo={
     0,
-    &initMenu_servo,
-    &deinitMenu_servo,
-    &testMenu_servo
+    &initmode_servo,
+    &deinitmode_servo,
+    &testmode_servo
 };

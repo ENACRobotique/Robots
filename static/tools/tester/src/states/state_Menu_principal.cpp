@@ -9,7 +9,7 @@
 #include <Encoder.h>
 #include <params.h>
 #include <lib_IHM.h>
-#include <state_Menu_servo.h>
+#include <state_mode_servo.h>
 #include <state_Menu_pwm.h>
 #include <state_types.h>
 #include <stddef.h>
@@ -17,12 +17,13 @@
 
 #include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
 
-#define NB_menu_principal 4
+#define NB_menu_principal 5
 const char *menu_principal[] = {
 		  "SERVOS",
 		  "PWM",
 		  "I2C",
-		  "UART",
+		  "CODEUR",
+		  "Analog Read"
 		};
 
 sState* testMenu_principal(){
@@ -45,14 +46,14 @@ sState* testMenu_principal(){
 
 		    switch (Position)		//et on va dans le bon état
 		    {
-		        case 0:{ return(&sMenu_servo); break; }
+		        case 0:{ return(&smode_servo); break; }
 		        case 1:{ return(&sMenu_pwm); break; }
 	//	        case 2:{ i2c(); break; }
 	//	        case 3:{ liaison_serie(); break; }
+	//	        case 4:{ analogread(); break;}
 		        //default:
 		     }
 		  }
-
 
     return NULL;
 }
@@ -64,7 +65,6 @@ void initMenu_principal(sState *prev){
 }
 
 void deinitMenu_principal(sState *next){
-
 }
 
 

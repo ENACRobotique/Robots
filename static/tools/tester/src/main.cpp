@@ -11,7 +11,7 @@
 #include "states/state_hardinit.h"
 #include "libs/lib_IHM.h"
 #include "states/state_Menu_principal.h"
-#include "states/state_Menu_servo.h"
+#include "states/state_mode_servo.h"
 #include "states/state_Menu_pwm.h"
 #include "Arduino.h"
 #include "Encoder.h"

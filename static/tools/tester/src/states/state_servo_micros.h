@@ -8,11 +8,7 @@
 #ifndef STATE_SERVO_micros_H_
 #define STATE_SERVO_micros_H_
 
-
-
 extern sState sservo_micros;
-
-void servo_micros();
 
 //void afficher(const char* chaine);
 
