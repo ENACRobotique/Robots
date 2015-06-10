@@ -188,7 +188,7 @@ void deinitTrajToClaps_YELLOW(sState *next)
 trajElem yellowFinal[]={
 		{-400,40,3300},
 		{-500,-7,700},
-		{500,-5,5700},
+		{500,-7,6200},
 		{0,0,0}
 };
 
@@ -255,7 +255,7 @@ void deinitTrajToClaps_GREEN(sState *next)
 trajElem TrajToClaps_GREEN[]={
 		{-400,-40,4100},
 		{-500,7,700},
-		{500,7,5800},
+		{500,7,6200},
 		{0,0,0}
        };
 
@@ -317,7 +317,8 @@ void deinitTrajBetweenClaps_YELLOW(sState *next)
 }
 
 trajElem TrajBetweenClaps_YELLOW[]={
-        {-500,-5,1000},
+        {-400,-7,3000},
+        {0,0,0}
        };
 
 sState *testTrajBetweenClaps_YELLOW()
@@ -378,7 +379,8 @@ void deinitTrajBetweenClaps_GREEN(sState *next)
 }
 
 trajElem TrajBetweenClaps_GREEN[]={
-        {-500,5,1000},
+        {-400,7,3000},
+        {0,0,0}
        };
 
 sState *testTrajBetweenClaps_GREEN()

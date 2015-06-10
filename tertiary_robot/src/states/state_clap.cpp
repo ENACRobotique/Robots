@@ -66,7 +66,7 @@ void deinitClap1_YELLOW(sState *next)
 }
 
 trajElem Clap1_YELLOW_traj[]={
-	{-500,-5,3000},
+	{-500,-7,3000},
 	{0,0,0}
 };
 
@@ -134,7 +134,7 @@ void deinitClap1_GREEN(sState *next)
 }
 
 trajElem Clap1_GREEN_traj[]={
-	{-500,5,3000},
+	{-500,7,3000},
 	{0,0,0}
 };
 
@@ -203,7 +203,7 @@ void deinitClap2_YELLOW(sState *next)
 }
 
 trajElem TrajClap2_YELLOW[]={
-	{-500,-5,3000},
+	{-500,-7,3000},
 	{0,0,0}
 };
 
@@ -270,7 +270,7 @@ void deinitClap2_GREEN(sState *next)
 }
 
 trajElem TrajClap2_GREEN[]={
-	{-500,5,3000},
+	{-500,7,3000},
 	{0,0,0}
 };
 
