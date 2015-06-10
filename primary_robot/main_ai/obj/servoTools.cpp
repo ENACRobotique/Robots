@@ -162,7 +162,6 @@ int rangePince(unsigned int id){
 int dropStand(unsigned int id){
     static stepdropStand step = DROP_STAND_DOWN_ELEVATOR;
     static unsigned int timePrev = 0;
-logs << ERR << "Actuator select .....:" <<id;
 
     switch(step){
         case DROP_STAND_DOWN_ELEVATOR:
