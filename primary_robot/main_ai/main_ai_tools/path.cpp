@@ -134,7 +134,7 @@ void Path::sendRobot(bool holo, float thetaEnd) {
 }
 
 /*
- * Stop the robot
+ * Stop the primary robot
  */
 void Path::stopRobot(bool holo) {
     sMsg msg;

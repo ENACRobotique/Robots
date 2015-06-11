@@ -16,11 +16,6 @@ extern "C"{
 #include "millis.h"
 }
 
-#define MINVARIANCE_XY (5e-4) // (cm²)
-#define MAXVARIANCE_XY (2e3) // (cm²)
-#define MINVARIANCE_THETA (2e-6) // (rad²)
-#define MAXVARIANCE_THETA (1e2) // (rad²)
-
 
 typedef enum{
         TRAJ1,

@@ -221,7 +221,7 @@ void CapAI::initObjective(){
    // listObj.push_back(new Spot4(par));
 
 
-    for(unsigned int i = 0 ; i < 2 ; i++)
+    for(unsigned int i = 0 ; i < 1 ; i++)
         listObj.push_back(new DropSpot(i, capTeam->getColor()));
 
    // listObj.push_back(new Light(capTeam->getColor()));

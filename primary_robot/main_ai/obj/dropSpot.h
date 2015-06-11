@@ -104,7 +104,7 @@ class DropSpot : public Obj{
                     break;
 
                 case DROP_SPOT_WAIT_ROT:
-                    if(destPoint.distanceTo(par.posRobot) < 0.2){
+                    if(destPoint.distanceTo(par.posRobot) < 1. && abs(_access_select_angle - par.angleRobot) < 5*M_PI/180){ //TODO angle
                         destPoint.x = par.posRobot.x;
                         destPoint.y = 15.;
                         path.go2PointOrient(destPoint, par.obs, _access_select_angle);
@@ -115,7 +115,7 @@ class DropSpot : public Obj{
                 case DROP_SPOT_WAIT_CONTACT:
                     if(destPoint.distanceTo(par.posRobot) < 1.){
                         Point2D<float> pos(par.posRobot);
-                        pos.y = 10+11.2;
+                        pos.y = 1.;
                         path.stopRobot(true);
                         sendMixPosPrimary(pos, _access_select_angle, MAXVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
                         step = DROP_SPOT_BACK;
