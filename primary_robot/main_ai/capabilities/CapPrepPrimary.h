@@ -18,7 +18,7 @@
 #define INIT_ANGLE_GREEN  M_PI
 
 typedef enum {
-    COLOR_SELECTION, WAIT_STARTING_CORD, WAIT_START, GAME
+    COLOR_SELECTION, WAIT_POS_PROP, WAIT_STARTING_CORD, WAIT_INIT_POS, WAIT_START, GAME
 } Step;
 
 class CapPrepPrimary: public CapPreparation {

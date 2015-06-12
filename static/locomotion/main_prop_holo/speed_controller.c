@@ -35,12 +35,12 @@ void spdctlr_init(speed_controller_t* sc, encoder_t* enc) {
 }
 
 // computes an estimation of the motor command (with static friction in the middle):
-//    (3/4*abs(setpoint) + 26) * sign(setpoint)
+//    (3/4*abs(setpoint) + 40) * sign(setpoint)
 int sp2cmd(int setpoint) {
     int64_t absSP = ABS(setpoint);
 
     int64_t cmd = (3ll * absSP) >> 2; // 0.75*setpoint
-    return ((int32_t)cmd + 26) * SIGN0(setpoint);
+    return ((int32_t)cmd + 40) * SIGN0(setpoint);
 }
 
 // computes a weighting factor for the pid part of the resulting cmd

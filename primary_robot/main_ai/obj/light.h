@@ -24,7 +24,7 @@ class Light : public Obj{
             Point2D<float> EP(55, 100); //Yellow
             sObjEntry_t objEP;
 
-            if(color == GREEN)
+            if(color == eColor_t::GREEN)
                 EP.x = 300 - EP.x;
 
             _state = ACTIVE;
@@ -34,7 +34,7 @@ class Light : public Obj{
             objEP.delta = 0;
 
             objEP.pt.p = EP;
-            if(color == GREEN)
+            if(color == eColor_t::GREEN)
                 objEP.pt.angle = M_PI;
             else
                 objEP.pt.angle = 0;
@@ -45,7 +45,7 @@ class Light : public Obj{
 
         void initObj(paramObj par)  {
             destSelect = {8 + R_ROBOT, 100}; //3.5
-            if(par.color == GREEN)
+            if(par.color == eColor_t::GREEN)
                 destSelect.x = 300. - destSelect.x;
 
             path.go2PointOrient(destSelect, par.obs, _access_select_angle);
@@ -64,7 +64,7 @@ class Light : public Obj{
                     break;
                 case lightStep::BACK:
                     destSelect = {30, 100};
-                    if(par.color == GREEN)
+                    if(par.color == eColor_t::GREEN)
                         destSelect.x = 300. - destSelect.x;
 
                     path.go2PointOrient(destSelect, par.obs, _access_select_angle);

@@ -40,6 +40,12 @@ typedef struct {
 
     MT_MAT M_spds_rob2tpods; // transverse pods
 
+    // position control status
+    enum {
+        PC_STATE_IDLE, // no control loop on position
+        PC_STATE_RUNNING // control loop activated
+    } state; // state of the trajectory follow
+
     // Last known status
     int x, y; // (in I << SHIFT)
     int theta; // (in R << (RAD_SHIFT + SHIFT))
@@ -77,5 +83,8 @@ void posctlr_set_pos_u(position_controller_t* tc, int x_var, int y_var, int xy_v
 void posctlr_get_pos_u(position_controller_t* tc, int *x_var, int *y_var, int *xy_var, int *theta_var);
 void posctlr_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz);
 void posctlr_reset(position_controller_t* tc);
+
+void posctlr_stop(position_controller_t* tc);
+void posctlr_run(position_controller_t* tc);
 
 #endif /* POSITION_CONTROLLER_H_ */

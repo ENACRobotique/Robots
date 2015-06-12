@@ -17,7 +17,7 @@ extern "C"{
 }
 
 
-Statuses::Statuses() {
+Statuses::Statuses() : addrProp(0){
     for(unsigned int i = 0 ; i < NUM_E_ELEMENT; i++)
         reset[i] = false;
 
@@ -106,7 +106,7 @@ int Statuses::receivedNewStatus(sGenericPosStatus& status){
     return 1;
 }
 
-void Statuses::posSend(eElement el, Point2D<float>& p){
+void Statuses::posSend(const eElement el, const Point2D<float>& p){
     reset[el] = true;
     pt[el] = p;
 }

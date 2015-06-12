@@ -15,6 +15,7 @@
 
 typedef enum {
     PROP_IDLE,
+    PROP_POSHOLD,
     PROP_RUNNING
 } ePropStatus;
 
@@ -42,7 +43,7 @@ typedef struct __attribute__((packed)){
             uint8_t ssid :1; // sub-step identifier (0:first element of message, 1:second element of message)
             uint8_t sssid :1; // sub-sub-step identifier (0:line, 1:circle)
 
-            ePropStatus status :1;
+            ePropStatus status :2;
             ePropStatusAction action :1;
         } prop_status;
 
@@ -100,8 +101,8 @@ typedef enum{
 }eSyncStatus;
 
 typedef struct __attribute__((packed)){
-    uint8_t nb; // must be <= 18
-    struct __attribute__((packed)){ // 3bytes
+    uint8_t nb; // must be <= 13
+    struct __attribute__((packed)){ // 4bytes
         eSyncType type :8;
         union{
             bn_Address addr;

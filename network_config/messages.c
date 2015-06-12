@@ -38,6 +38,7 @@ const char *eType2str(E_TYPE elem){
     case E_SYNC_RESPONSE :          return "SYNC_RESPONSE" ;
     case E_DO_ABSPOS :              return "DO_ABSPOS" ;
     case E_DONE_ABSPOS :            return "DONE_ABSPOS" ;
+    case E_PROP_STOP :              return "PROP_STOP" ;
     /************************ user types stop ************************/
 
     default :

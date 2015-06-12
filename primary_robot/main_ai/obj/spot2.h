@@ -51,7 +51,7 @@ class Spot2 : public Obj{
             Point2D<float> accessPoint[] = {{75, 160},{22., 45}};
 
 
-            if(color == GREEN){
+            if(color == eColor_t::GREEN){
                 accessPoint[0].x = 300. - accessPoint[0].x;
                 accessPoint[1].x = 300. - accessPoint[1].x;
                 _posSpot[0].x =  300. - _posSpot[0].x;

@@ -22,6 +22,7 @@ typedef struct {
     position_controller_t ctlr;
 
     enum {
+        TM_STATE_IDLE, // no control loop on position
         TM_STATE_WAIT_TRAJ, // no action asked (we are stopped)
         TM_STATE_WAIT_START, // new trajectory received, waiting for the right time to start
         TM_STATE_FOLLOWING // we are following a trajectory
@@ -71,5 +72,6 @@ void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos);
 void trajmngr_mix_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos);
 void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps);
 int trajmngr_update(trajectory_manager_t* tm);
+void trajmngr_stop(trajectory_manager_t* tm);
 
 #endif /* TRAJECTORY_MANAGER_H_ */

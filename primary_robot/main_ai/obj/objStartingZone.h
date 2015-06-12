@@ -79,7 +79,7 @@ class ObjStartingZone : public Obj{
             objEP.type = E_POINT;
             objEP.radius = 15.;
             objEP.delta = M_PI;
-            if(color == GREEN){
+            if(color == eColor_t::GREEN){
                 EP.x = 300. - EP.x;
                 objEP.pt.angle = M_PI;  //TODO dépend de la position de la caméra
             }
@@ -342,7 +342,7 @@ class ObjStartingZone : public Obj{
 
     private:
         void setDestPointX(float x){
-            destPoint.x = color==YELLOW?x:300-x;
+            destPoint.x = color==eColor_t::YELLOW?x:300-x;
         }
 
         void setAngleSelect(std::vector<Actuator>& act, ActuatorType type, bool par){ //if elevator par=ball, if cupActuator par=full
@@ -374,7 +374,7 @@ class ObjStartingZone : public Obj{
             _actuator_select = i;
 
             angleSelect = M_PI + angleAct;
-            angleSelect += color == GREEN?M_PI:0;
+            angleSelect += color == eColor_t::GREEN?M_PI:0;
 
         }
 

@@ -187,8 +187,45 @@ Axis searchAxis(const Segment2D<float>& seg){
 
 void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& curPt, const float& curAngle, const Point2D<float>& destPt, const float& destAngle, const vector<Segment2D<float>>& robot, const vector<Segment2D<float>>& playground){
     float dx = -1, dy = -1, ox = 10, oy = 10;
-    int pgx = -1, rx = -1, pgy = -1, ry = -1;
+    int pgx = -1, pgy = -1;
 
+
+    float dist_robot = 11.262;
+//    float sdr = R_ROBOT; //security distance robot
+    float theta_robot[2] = {
+            191.63*M_PI/180.,
+            191.63*M_PI/180. + 2*M_PI/3
+    };
+/*
+    //TODO Find the best pair for the resetting the position
+    std::vector<std::pair<unsigned int, unsigned int>> c;
+    //x:0 , y:1
+    c.push_back({0,1});
+
+
+    float t  = 0;      //time
+    float ls = 10;      //linear speed in cm/s
+    float as = ls/14;   //angular speed in rad/s
+
+    for(unsigned int i = 0 ; i < c.size() ; i ++){
+        float tt = 0; //temporary time
+        Point2D<float> dest = playground[c[i].first].project(curPt);
+        Vector2D<float> vref(1,0);
+        Vector2D<float> vseg(playground[c[i].first].p1, playground[c[i].first].p2);
+        float oseg = fmod(vref.angle(vseg), M_PI);
+
+        dest.x += SIGN(curPt.x - dest.x)*sdr*sin(1);
+        dest.y += SIGN(curPt.y - dest.y)*sdr*cos(1);
+        tt += curPt.distanceTo(dest)*ls;
+    }
+
+
+
+*/
+
+
+
+    /******/
     traj.push_back({curPt, curAngle, {0,0}, 0});
 
     for(unsigned int i = 0 ; i < playground.size() ; i++){
@@ -201,16 +238,24 @@ void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& cur
         }
     }
 
-    for(unsigned int i = 0 ; i < robot.size() ; i++){
-        Point2D<float> pjt = robot[i].project({0, 0});
-        if(pjt != robot[i].p1 && pjt != robot[i].p2){
-            Vector2D<float> v1({0,0}, pjt);
-            Vector2D<float> v2(1, 0);
-            float o = v2.angle(v1) + curAngle;
-            if(o < ox || ox == 10 ){
-                ox = o - curAngle;
-                rx = i;
+    if(pgx != -1){
+        for(unsigned int i = 0 ; i < 2 ; i++){
+           /* Point2D<float> pjt = robot[i].project({0, 0});
+            if(pjt != robot[i].p1 && pjt != robot[i].p2){
+                Vector2D<float> v1({0,0}, pjt);
+                Vector2D<float> v2(1, 0);
+                float o = v2.angle(v1) + curAngle;
+                if(o < ox || ox == 10 ){
+                    ox = o - curAngle;
+                    rx = i;
+                }
+            }*/
+            float o = fmod(fabs(curAngle + (2*M_PI-theta_robot[i])), 2*M_PI);
+            if(o < ox){
+                ox = 2*M_PI-theta_robot[i];
+                cout << "x=" << i << "o=" << ox*180/M_PI;
             }
+
         }
     }
 
@@ -221,10 +266,12 @@ void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& cur
         Point2D<float> dest = playground[pgx].project(curPt);
         dest.x += SIGN(curPt.x - dest.x)*R_ROBOT;
         float angle = ox;
-        traj.push_back({dest, angle, {0,0}, 0});
+        traj.push_back({dest, angle, {0,0}, 5});
 
         dest = playground[pgx].project(curPt);
-        dest.x += SIGN(curPt.x - dest.x)*robot[rx].distance({0,0});
+        dest.x += SIGN(curPt.x - dest.x)*dist_robot;
+        //dest.x += SIGN(curPt.x - dest.x)*robot[0].distance({0,0});
+        dest.x += 10.;
         traj.push_back({dest, angle, {dest.x, 0.}, 1});
 
         dest = playground[pgx].project(curPt);
@@ -243,6 +290,7 @@ void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& cur
     }
 
     for(unsigned int i = 0 ; i < robot.size() ; i++){
+        /*
         Point2D<float> pjt = robot[i].project({0, 0});
         if(pjt != robot[i].p1 && pjt != robot[i].p2){
             Vector2D<float> v1({0, 0}, pjt), v2(1, 0);
@@ -252,6 +300,13 @@ void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& cur
                 ry = i;
             }
         }
+        */
+
+        float o = fmod(fabs(curAngle + (2*M_PI-theta_robot[i]-M_PI_2)), 2*M_PI);
+        if(o < oy){
+            oy = 2*M_PI-theta_robot[i]-M_PI_2;
+            cout << "x=" << i << "o=" << ox*180/M_PI;
+        }
     }
 
     if(pgy == -1)
@@ -260,11 +315,13 @@ void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& cur
         Point2D<float> lastPos = traj.back().dest;
         Point2D<float> dest = playground[pgy].project(traj.back().dest);
         dest.y += SIGN(traj.back().dest.y - dest.y)*R_ROBOT;
-        float angle = oy + SIGN(traj.back().dest.y - dest.y)*M_PI_2;
-        traj.push_back({dest, angle, {0,0}, 0});
+        //float angle = oy + SIGN(traj.back().dest.y - dest.y)*M_PI_2;
+        float angle = oy;
+        traj.push_back({dest, angle, {0,0}, 5});
 
         dest = playground[pgy].project(lastPos);
-        dest.y += SIGN(lastPos.y - dest.y)*robot[ry].distance({0,0});
+        dest.y += SIGN(lastPos.y - dest.y)*dist_robot;
+        dest.y -= 10.;
         traj.push_back({dest, angle, {0., dest.y}, 2});
 
         dest = playground[pgy].project(lastPos);

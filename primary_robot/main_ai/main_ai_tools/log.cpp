@@ -82,6 +82,8 @@ void Log::putNewPos(float x, float y, float theta, float a_var, float b_var, flo
     auto flags = cout.flags();
     cout << fixed << setprecision(2) << "\x1b[K\x1b[s" << "pos: " << x << "cm, " << y << "cm, " << theta * 180. / M_PI << "°, un: " << sqrt(a_var) << "cm, " << sqrt(b_var) << "cm, " << a_angle * 180. / M_PI << "°, " << sqrt(theta_var) * 180. / M_PI << "°" << "\x1b[u" << flush;
     cout.flags(flags);
+
+    _file << "pos: " << x << "cm, " << y << "cm, " << theta * 180. / M_PI << "°, un: " << sqrt(a_var) << "cm, " << sqrt(b_var) << "cm, " << a_angle * 180. / M_PI << "°, " << sqrt(theta_var) * 180. / M_PI << "°";
 }
 
 /*
