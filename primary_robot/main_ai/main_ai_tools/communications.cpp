@@ -405,6 +405,8 @@ int sendSetPosPrimary(
     }*/
     logs << MES << fixed << setprecision(2) << "[POS] Sending position to primary robot (" << msgOut.payload.genericPosStatus.pos.x << ", " << msgOut.payload.genericPosStatus.pos.y << ", " << msgOut.payload.genericPosStatus.pos.theta * 180. / M_PI << ")";
 
+    statuses.index = 0;
+
     statuses.posSend(ELT_PRIMARY, p);
     return 1;
 }
@@ -415,14 +417,13 @@ int sendSetPosPrimary(
 int sendMixPosPrimary(
         const Point2D<float> &p, const float theta, // position
         const float p_a_var, const float p_b_var, const float p_a_angle, const float theta_var) { // position uncertainty
-    static int index = 1;
     sMsg msgOut ;
     memset(&msgOut, 0, sizeof(msgOut));
    // int ret;
 
     if ((p.x < 0.) || (p.x > 300.) || (p.y < 0.) || (p.y > 200.))
         return -1;
-
+    statuses.index++;
     msgOut.header.type = E_GENERIC_POS_STATUS;
     msgOut.header.size = sizeof(msgOut.payload.genericPosStatus);
 
@@ -439,7 +440,7 @@ int sendMixPosPrimary(
     msgOut.payload.genericPosStatus.pos_u.a_angle = p_a_angle;
     msgOut.payload.genericPosStatus.pos_u.theta_var = theta_var;
     msgOut.payload.genericPosStatus.prop_status.action = PROP_MIXPOS;
-    msgOut.payload.genericPosStatus.prop_status.rid = index;
+    msgOut.payload.genericPosStatus.prop_status.rid = statuses.index;
 
     roleSendBlock(msgOut, ROLEMSG_PRIM_POS, "Send position");
   /*  if ((ret = role_sendRetry(&msgOut, ROLEMSG_PRIM_POS, MAX_RETRIES)) <= 0) {
@@ -449,7 +450,7 @@ int sendMixPosPrimary(
     logs << MES << fixed << setprecision(2) << "[POS] Sending position to primary robot (" << msgOut.payload.genericPosStatus.pos.x << ", " << msgOut.payload.genericPosStatus.pos.y << ", " << msgOut.payload.genericPosStatus.pos.theta * 180. / M_PI << ")";
 
     statuses.posSend(ELT_PRIMARY, p);
-    index++;
+
     return 1;
 }
 

@@ -2,31 +2,34 @@
  * path.cpp
  *
  *  Created on: 18 févr. 2015
- *      Author: seb
+ *      Author: Sebastien Malissard
  */
 
-#include <a_star_tools.h>
+
 #include "path.h"
 
-#include <main_ai_tools/path.h>
-#include <main_ai_tools/statuses.h>
-#include <tools.h>
 #include <cmath>
 #include <iostream>
-#include <string.h>
+#include <cstring>
+#include "GeometryTools.h"
+
+#include "bn_intp.h"
+#include "messages-statuses.h"
+#include "messages-locomotion.h"
+
+#include "a_star_tools.h"
 #include "a_star.h"
-#include "time_tools.h"
-#include "tools.h"
 #include "ai_tools.h"
 #include "obj_tools.h"
-#include "GeometryTools.h"
+#include "time_tools.h"
+#include "tools.h"
+#include "statuses.h"
 #include "communications.h"
 
 extern "C"{
-#include "roles.h"
 #include "millis.h"
+#include "roles.h"
 #include <unistd.h>
-#include "bn_intp.h"
 }
 
 
@@ -331,6 +334,46 @@ void Path::computePathHolonomic(float theta_end_obj){
     }else{
         logs << ERR << "Strange trajectory : angle doesn't computed";
     }
+
+}
+
+PointOrient2D<float> Path::getPosOrient(uint32_t _time_us /*synchronize time*/) { // Be careful, return an ideal the position orient
+    PointOrient2D<float> po;
+
+    if (!_lastTrajPosSpd.empty()) {
+        if ((long) _time_us - (long) _lastTrajPosSpd.front().t < 0) {
+            return { {nanf(""), nanf("")}, nanf("")};
+        }
+
+        for (auto i = _lastTrajPosSpd.begin(); i != _lastTrajPosSpd.end() - 1; ++i) {
+            if (i->t >= _time_us && (i+1)->t < _time_us) {
+                float d = 1/2*((i+1)->v - i->v)/((i+1)->t - i->t)*(_time_us - i->t)*(_time_us - i->t) + i->v*(_time_us - i->t);
+                float theta = 1/2*((i+1)->theta - i->theta)/((i+1)->t - i->t)*(_time_us - i->t)*(_time_us - i->t) + i->theta*(_time_us - i->t);
+
+                switch (i->type_e) {
+                case TRAJSTEP_LINE: {
+                    Vector2D<float> v1(1, 0), v2(i->p, (i+1)->p);
+                    float o = v1.angle(v2);
+                    return { {i->p.x + d*cosf(o), i->p.y + d*sinf(o)}, theta};
+                }
+
+                case TRAJSTEP_ARC: {
+                    Vector2D<float> v1(1, 0), v2({i->type.arc.c.c.x, i->type.arc.c.c.y}, (i+1)->p);
+                    float o = v1.angle(v2) + d/i->type.arc.c.r;
+                    return { {i->type.arc.c.c.x + abs(i->type.arc.c.r)*cosf(o), i->type.arc.c.c.y + abs(i->type.arc.c.r)*sinf(o)}, theta};
+                }
+
+                default:
+                    logs << ERR << "Unknown type of trajectory element";
+                }
+            }
+        }
+
+
+        return {_lastTrajPosSpd.back().p, _lastTrajPosSpd.back().theta};
+    }
+
+    return { {nanf(""), nanf("")}, nanf("")};
 
 }
 

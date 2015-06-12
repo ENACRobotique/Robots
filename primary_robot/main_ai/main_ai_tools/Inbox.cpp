@@ -59,7 +59,7 @@ void Inbox::checkInbox(){
                 addrProp = msgIn.header.srcAddr;
             else if(msgIn.header.srcAddr != addrProp){
                 logs << ERR << "Receives a new generic pos status of an other source : " << msgIn.header.srcAddr;
-                //TODO Stop the robot
+                path.stopRobot(true);
                 exit(EXIT_FAILURE);
             }
             statuses.receivedNewStatus(msgIn.payload.genericPosStatus);
