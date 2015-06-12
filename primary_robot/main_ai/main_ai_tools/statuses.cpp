@@ -17,7 +17,7 @@ extern "C"{
 }
 
 
-Statuses::Statuses() : addrProp(0){
+Statuses::Statuses() : index(-1),  addrProp(0), _propStatus(PROP_IDLE){
     for(unsigned int i = 0 ; i < NUM_E_ELEMENT; i++)
         reset[i] = false;
 
@@ -111,23 +111,23 @@ void Statuses::posSend(const eElement el, const Point2D<float>& p){
     pt[el] = p;
 }
 
+void Statuses::setPropStatus(ePropStatus &propStatus) {
+    _propStatus = propStatus;
+}
+
 sGenericPosStatus& Statuses::getLastStatus(eElement el, frame_t fr){
     static sGenericPosStatus status;
     status.id = el;
     status.date = 0;
 
     if(!_list[el].empty()){
-        if(reset[el]){
-            logs << WAR << "Waiting positing for this element : " << el;
+        if(index == _list[el].back().prop_status.rid){
             Point2D<float> pos(_list[el].back().pos.x, _list[el].back().pos.y);
-            if(pt[el].distanceTo(pos) < 3.){
-                reset[el] = false;
-            }
-            else{
-                return status;
-            }
-
         }
+        else{
+            return status;
+        }
+
         if(_list[el].back().pos.frame == fr){
             return _list[el].back();
         }
@@ -178,6 +178,10 @@ float Statuses::getLastSpeed(eElement el){
     }
 
     return 0;
+}
+
+ePropStatus Statuses::getPropStatus() {
+    return _propStatus;
 }
 
 
