@@ -57,6 +57,7 @@ typedef enum{
     E_DO_ABSPOS,            // @payload.doAbsPos: for asking to perform a position fix
     E_DONE_ABSPOS,          // @payload.doneAbsPos: for sending result of position fix
     E_PROP_STOP,            //  stop the robot
+    E_TRAJ_POS_SPD_EL,      // @payload.trajPosSpdEl: complex trajectory element (position + speed wrt time)
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -123,7 +124,8 @@ typedef union{
     sSpeedSetPoint speedSetPoint;       // E_SPEED_SETPOINT
     sTrajElRaw_t traj;                  // E_TRAJ (deprecated use trajOrientEl instead)
     sAsservStats asservStats;           // E_ASSERV_STATS
-    sTrajOrientElRaw_t trajOrientEl;    // E_TRAJ_ORIENT_EL
+    sTrajOrientElRaw_t trajOrientEl;    // E_TRAJ_ORIENT_EL (deprecated use trajPosSpdEl instead)
+    sTrajPosSpdElRaw_t trajPosSpdEl;    // E_TRAJ_POS_SPD_EL
 
 // LOCALIZATION (cf messages-localization.h)
     sMobileReportPayload mobileReport;  // E_MEASURE
