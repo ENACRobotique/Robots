@@ -194,8 +194,8 @@ int syncSetup(bool turet){
         bnSendBlock(queryMsg, "sync turret");
 
         eSyncStatus device[queryMsg.payload.syncQuery.nb];
-        for(eSyncStatus& d : device){
-            d = SYNCSTATUS_TODO;
+        for(int i = 0; i < queryMsg.payload.syncQuery.nb; i++){
+        	device[i] = SYNCSTATUS_TODO;
         }
 
         sMsg msgIn;
@@ -273,8 +273,8 @@ int syncSetup(bool turet){
                 }
 
                 bool ok = true;
-                for(eSyncStatus const& d : device){
-                    ok = ok && (d == SYNCSTATUS_OK);
+                for(int i = 0; i < queryMsg.payload.syncQuery.nb; i++){
+                    ok = ok && (device[i] == SYNCSTATUS_OK);
                 }
                 if(ok)
                     break;

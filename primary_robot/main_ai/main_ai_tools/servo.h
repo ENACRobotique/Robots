@@ -12,6 +12,7 @@
 
 #include <map>
 #include <vector>
+#include <cstdio>
 extern "C"{
 #include "messages-interactions.h"
 }
