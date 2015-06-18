@@ -11,5 +11,5 @@
 #include <state_types.h>
 
 extern sState sMenu_pwm;
-
+extern int mode_pwm;
 #endif /* STATE_MENU_PWM_H_ */

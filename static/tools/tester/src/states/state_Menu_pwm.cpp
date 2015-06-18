@@ -14,14 +14,13 @@
 #include "state_Menu_pwm.h"
 #include "lib_IHM.h"
 #include "state_pwm_0_255.h"
-#include "state_pwm_pc.h"
-#include "state_pwm_0_5.h"
-#define NB_menu_pwm 3
 
+#define NB_menu_pwm 3
+int mode_pwm = 0;
 const char *menu_pwm[] = {
 		  "  0 - 255",
-		  " 0 - 100 %",
-		  "  0 - 15 V",
+		  "  0 - 100 %",
+		  "  0 - 5 V",
 		};
 
 sState* testMenu_pwm(){
@@ -42,11 +41,12 @@ sState* testMenu_pwm(){
 
 		switch (Position)		//et on va dans le bon état
 		{
-			case 0:{ return(&spwm_0_255); break; }
-			case 1:{ return(&spwm_pc); break; }
-			case 2:{ return(&spwm_0_5); break; }
-		  }
-	  }
+			case 0:{ mode_pwm = PWM_255; break; }
+			case 1:{ mode_pwm = PWM_PC; break; }
+			case 2:{ mode_pwm = PWM_5V; break; }
+		}
+		return &spwm_0_255;
+	}
 
 	if(!digitalRead(RETOUR)){
 		delay(DELAY_BOUNCE);	//anti rebond
