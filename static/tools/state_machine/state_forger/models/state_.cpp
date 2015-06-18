@@ -11,19 +11,16 @@
 %INCLUDES%
 
 
-sState* test%STATENAME%()
-    {
+sState* test%STATENAME%(){
         // Your code here !
         return NULL;
     }
 
-void init%STATENAME%(sState *prev)
-    {
+void init%STATENAME%(sState *prev){
         // Your code here !
     }
 
-void deinit%STATENAME%(sState *next)
-    {
+void deinit%STATENAME%(sState *next){
         // Your code here !
     }
 
