@@ -15,47 +15,39 @@
 
 
 sState* testservo_micros(){
-	static int memMicros=500;
 	static long temps_enc=0;
-	static int pos_enc_old=0;
+	static int pos_enc_old=myEnc.read();
 
-	int pos_enc=abs(myEnc.read())/2;
+	int pos_enc = myEnc.read();
 
-	if(pos_enc!=pos_enc_old)
-	{
-		long deltat=millis()-temps_enc;
-		if(deltat<DUREE_BIG_STEPS)
-		{
-			pos_enc = pos_enc_old + 10 * (pos_enc - pos_enc_old);
-			myEnc.write(pos_enc);
+	if(pos_enc!=pos_enc_old){
+		if(millis()-temps_enc < DUREE_BIG_STEPS){
+			pos_enc = pos_enc_old + 20 * (pos_enc - pos_enc_old);
 		}
+		else{
+			pos_enc = pos_enc_old + 5 * (pos_enc - pos_enc_old);
+		}
+		pos_enc = CLAMP(500, pos_enc, 3000);
 		temps_enc=millis();
-	}
-	int Micros = CLAMP(500, memMicros+PRECISION_MICROS*(pos_enc-pos_enc_old) ,3000);
-	pos_enc_old=pos_enc;
-	servo_choosen->writeMicroseconds(Micros);
 
-	if(Micros!=memMicros)
-	{
-//		char affich[16];
-//		snprintf(affich,17,"delay= %dus",Micros);
-//		afficher(affich);
-		memMicros=Micros;
-		afficher("delay= %dus",Micros);
+		servo_choosen->writeMicroseconds(pos_enc);
+		afficher("Micros= %d us", pos_enc);
+		myEnc.write(pos_enc);
+		pos_enc_old=pos_enc;
 	}
 
-	if(!digitalRead(RETOUR))
-	{
+	if(!digitalRead(RETOUR)){
 		delay(DELAY_BOUNCE);	//anti rebond
 		while(!digitalRead(RETOUR));	//attente du relachement du bouton
 		return(&sChoice_servo);
 	}
     return NULL;
 }
+
 void initservo_micros(sState *prev){
 	int micros=servo_choosen->readMicroseconds();
-	int value_enc=abs(micros-500)*2/PRECISION_MICROS;
-	myEnc.write(value_enc);
+	myEnc.write(micros);
+	afficher("Micros= %d us", micros);
 }
 void deinitservo_micros(sState *next){
 }
@@ -66,5 +58,3 @@ sState sservo_micros={
     &deinitservo_micros,
     &testservo_micros
 };
-
-
