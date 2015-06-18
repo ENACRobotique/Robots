@@ -21,6 +21,12 @@ typedef enum {
     SM_MICROS
 }servosModes;
 
+typedef enum{
+	PWM_255,
+	PWM_5V,
+	PWM_PC
+}pwmModes;
+
 //pointeur de fonction
 typedef int(*pfi)();
 typedef void(*pfvps)(struct sState*);

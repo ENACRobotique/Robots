@@ -12,8 +12,6 @@
 
 extern sState spwm_0_255;
 
-void pwm_0_255();
-
-//void afficher(const char* chaine);
+void display(int enc);
 
 #endif /* STATE_pwm_0_255_H_ */
