@@ -10,6 +10,7 @@
 
 #include <state_types.h>
 #include "Encoder.h"
+#include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
 
 extern Encoder myEnc;
 
