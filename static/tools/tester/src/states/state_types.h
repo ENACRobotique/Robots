@@ -14,6 +14,13 @@ typedef enum {
     E_MENU_PRINCIPAL
 }eBlocks;
 
+typedef enum {
+    SM_NO_MODE,
+    SM_TPS_REEL,
+    SM_VALID,
+    SM_MICROS
+}servosModes;
+
 //pointeur de fonction
 typedef int(*pfi)();
 typedef void(*pfvps)(struct sState*);
