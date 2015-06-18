@@ -15,11 +15,7 @@
 #include "state_choice_servo.h"
 #include "lib_IHM.h"
 
-#define TPS_REEL 1
-#define VALID 2
-#define MICROS 3
-
-int mode_servo=0;
+int mode_servo=SM_NO_MODE;
 
 #define NB_mode_servo 3
 const char *menu_mode[] = {
@@ -29,42 +25,43 @@ const char *menu_mode[] = {
 	};
 
 sState* testmode_servo(){
-		static int memPosition;
-		int Position = (myEnc.read()/2)%NB_mode_servo;    //position du selecteur
-		   if(Position != memPosition)  //on affiche que si on change de position
-		   {
-		      afficher(menu_mode[Position]);
-		      memPosition=Position;
-		   }
+	static int memPosition;
+	int Position = myEnc.read();    //position du selecteur
 
-		  if(!digitalRead(SELECT))
-		  {
-			while(!digitalRead(SELECT));
-		    switch (Position)
-		    {
-		        case 0:{ mode_servo = TPS_REEL; break; }
-		        case 1:{ mode_servo = VALID; break; }
-		        case 2:{ mode_servo = MICROS; break; }
-		        //default:
-		     }
-		    return &sChoice_servo;
-		  }
+	if(Position != memPosition){  //on affiche que si on change de position
+		if (Position != CLAMP(0,Position,NB_mode_servo)){		//on ne descend pas dans les négatifs
+			Position = CLAMP(0,Position,NB_mode_servo);
+			myEnc.write(Position);
+		}
+		afficher(menu_mode[Position]);
+		memPosition=Position;
+	}
 
-		  if(!digitalRead(RETOUR))
-		  {
-			  delay(DELAY_BOUNCE);	//anti rebond
-			  while(!digitalRead(RETOUR));	//attente du relachement du bouton
-			  return(&sMenu_principal);
-		  }
+	if(!digitalRead(SELECT)){
+		while(!digitalRead(SELECT));
+		switch (Position)
+		{
+			case 0:{ mode_servo = SM_TPS_REEL; break; }
+			case 1:{ mode_servo = SM_VALID; break; }
+			case 2:{ mode_servo = SM_MICROS; break; }
+		}
+		return &sChoice_servo;
+	}
+
+	if(!digitalRead(RETOUR)){
+		delay(DELAY_BOUNCE);	//anti rebond
+		while(!digitalRead(RETOUR));	//attente du relachement du bouton
+		return(&sMenu_principal);
+	}
 
     return NULL;
 }
+
 void initmode_servo(sState *prev){
 			myEnc.write(0);
 			afficher(menu_mode[0]);
 }
 void deinitmode_servo(sState *next){
-
 }
 
 sState smode_servo={
