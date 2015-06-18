@@ -6,12 +6,11 @@
  */
 
 #include "Arduino.h"
-#include "../params.h"
-#include "../tools.h"
+#include "params.h"
+#include "tools.h"
 #include "state_types.h"
-
-#include "state_mode_servo.h"
 #include "lib_IHM.h"
+#include "state_mode_servo.h"
 #include "state_servo_deg_validation.h"
 #include "state_servo_deg_tps_reel.h"
 #include "state_servo_micros.h"
@@ -21,7 +20,6 @@ Servo * servo_choosen;
 Servo servo1;
 Servo servo2;
 Servo servo3;
-
 
 #define NB_Choice_servo 3
 const char *Choice_servo[] = {

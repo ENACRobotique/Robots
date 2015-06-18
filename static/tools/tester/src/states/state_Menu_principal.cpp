@@ -6,16 +6,14 @@
  */
 
 #include <Arduino.h>
-#include <Encoder.h>
 #include <params.h>
+#include <tools.h>
 #include <lib_IHM.h>
 #include <state_mode_servo.h>
 #include <state_Menu_pwm.h>
 #include <state_types.h>
 #include <stddef.h>
 #include "state_Menu_principal.h"
-
-#include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
 
 #define NB_menu_principal 5
 const char *menu_principal[] = {

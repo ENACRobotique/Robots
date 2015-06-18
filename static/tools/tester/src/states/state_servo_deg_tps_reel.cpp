@@ -6,8 +6,8 @@
  */
 
 #include "Arduino.h"
-#include "../params.h"
-#include "../tools.h"
+#include "params.h"
+#include "tools.h"
 #include "state_types.h"
 
 #include "state_choice_servo.h"

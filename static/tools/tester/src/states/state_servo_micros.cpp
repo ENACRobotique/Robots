@@ -6,11 +6,9 @@
  */
 
 #include "Arduino.h"
-#include "../params.h"
-#include "../tools.h"
+#include "params.h"
+#include "tools.h"
 #include "state_types.h"
-
-#include "state_Menu_principal.h"
 #include "state_choice_servo.h"
 #include "state_servo_micros.h"
 #include "lib_IHM.h"
