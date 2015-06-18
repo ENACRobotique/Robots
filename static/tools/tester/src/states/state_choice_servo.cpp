@@ -29,51 +29,48 @@ const char *Choice_servo[] = {
 	};
 
 sState* testChoice_servo(){
-		static int memPosition;
-		int Position = (myEnc.read()/2)%NB_Choice_servo;    //position du selecteur
-		   if(Position != memPosition)  //on affiche que si on change de position
-		   {
-		      afficher(Choice_servo[Position]);
-		      memPosition=Position;
-		   }
+	static int memPosition;
+	int Position = myEnc.read();    //position du selecteur
 
-		  if(!digitalRead(SELECT))
-		  {
-			while(!digitalRead(SELECT));
+	if(Position != memPosition){  //on affiche que si on change de position
+		if (Position != CLAMP(0,Position,NB_Choice_servo)){		//on ne descend pas dans les négatifs
+			Position = CLAMP(0,Position,NB_Choice_servo);
+			myEnc.write(Position);
+		}
+		afficher(Choice_servo[Position]);
+		memPosition=Position;
+	}
 
-			switch (Position)
-			{
-				case 0:{ servo_choosen = &servo1; break; }
-				case 1:{ servo_choosen = &servo2; break; }
-				case 2:{ servo_choosen = &servo3; break; }
-				//default:
-			 }
+	if(!digitalRead(SELECT)){
+		while(!digitalRead(SELECT));
+		switch (Position)
+		{
+			case 0:{ servo_choosen = &servo1; break; }
+			case 1:{ servo_choosen = &servo2; break; }
+			case 2:{ servo_choosen = &servo3; break; }
+		 }
 
-		    switch (mode_servo)
-		    {
-		        case 0:{ return(&sservo_deg_tps_reel); break; }
-		        case 1:{ return(&sservo_deg_validation); break; }
-		        case 2:{ return(&sservo_micros); break; }
-		        //default:
-		     }
-		  }
+		switch (mode_servo)
+		{
+			case SM_TPS_REEL:{ return(&sservo_deg_tps_reel); break; }
+			case SM_VALID:{ return(&sservo_deg_validation); break; }
+			case SM_MICROS:{ return(&sservo_micros); break; }
+		}
+	}
 
-		  if(!digitalRead(RETOUR))
-		  {
-			  delay(DELAY_BOUNCE);	//anti rebond
-			  while(!digitalRead(RETOUR));	//attente du relachement du bouton
-			  return(&smode_servo);
-		  }
-
-
+	if(!digitalRead(RETOUR)){
+		delay(DELAY_BOUNCE);	//anti rebond
+		while(!digitalRead(RETOUR));	//attente du relachement du bouton
+		return(&smode_servo);
+	}
     return NULL;
 }
 void initChoice_servo(sState *prev){
 			myEnc.write(0);
 			afficher(Choice_servo[0]);
 }
-void deinitChoice_servo(sState *next){
 
+void deinitChoice_servo(sState *next){
 	if(!servo_choosen->attached()){
 		if(servo_choosen == &servo1){
 			servo_choosen->attach(SERVO1);
