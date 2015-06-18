@@ -26,31 +26,28 @@ const char *menu_principal[] = {
 
 sState* testMenu_principal(){
 		static int memPosition;
-		int Position = (myEnc.read()/2)%NB_menu_principal;    //position du selecteur modulo le nombre de choix possible
-		if (Position < 0){		//on ne descend pas dans les négatifs
-			Position=0;
-			myEnc.write(0);
+		int Position = myEnc.read();    //position du selecteur modulo le nombre de choix possible
+
+		if(Position != memPosition){  //on affiche que si on change de position
+			if (Position != CLAMP(0,Position,NB_menu_principal)){		//on ne descend pas dans les négatifs
+				Position = CLAMP(0,Position,NB_menu_principal);
+				myEnc.write(Position);
+			}
+			afficher(menu_principal[Position]);
+		    memPosition=Position;
 		}
 
-		   if(Position != memPosition)  //on affiche que si on change de position
-		   {
-		      afficher(menu_principal[Position]);
-		      memPosition=Position;
-		   }
+		if(!digitalRead(SELECT)){	//si on appui sur select:
+			while(!digitalRead(SELECT));		//on attend qu'on relache
 
-		  if(!digitalRead(SELECT))	//si on appui sur select:
-		  {
-			  while(!digitalRead(SELECT));		//on attend qu'on relache
-
-		    switch (Position)		//et on va dans le bon état
-		    {
-		        case 0:{ return(&smode_servo); break; }
-		        case 1:{ return(&sMenu_pwm); break; }
-	//	        case 2:{ i2c(); break; }
-	//	        case 3:{ liaison_serie(); break; }
-	//	        case 4:{ analogread(); break;}
-		        //default:
-		     }
+			switch (Position)		//et on va dans le bon état
+			{
+				case 0:{ return(&smode_servo); break; }
+				case 1:{ return(&sMenu_pwm); break; }
+		//	    case 2:{ i2c(); break; }
+		//	    case 3:{ liaison_serie(); break; }
+		//	    case 4:{ analogread(); break;}
+			  }
 		  }
 
     return NULL;
@@ -59,7 +56,6 @@ sState* testMenu_principal(){
 void initMenu_principal(sState *prev){
 	myEnc.write(0);
 	afficher(menu_principal[0]);
-
 }
 
 void deinitMenu_principal(sState *next){
