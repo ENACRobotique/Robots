@@ -14,5 +14,6 @@
 extern sState sChoice_servo;
 
 extern Servo * servo_choosen;
+extern Servo servo3;
 
 #endif /* STATE_CHOICE_SERVO_H_ */
