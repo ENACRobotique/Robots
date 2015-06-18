@@ -6,77 +6,41 @@
  */
 
 #include "Arduino.h"
-#include "../params.h"
-#include "../tools.h"
+#include "params.h"
+#include "tools.h"
 #include "state_types.h"
 
-#include "state_Menu_principal.h"
 #include "state_Menu_pwm.h"
 #include "state_pwm_pc.h"
 #include "lib_IHM.h"
+#include "state_choice_servo.h"
 
 
 sState* testpwm_pc(){
-/*	static int memPosition=0;
-	int Position = (myEnc.read()/2*5)%101;
-		if (Position<0)
-		{
-			Position=0;
-			myEnc.write(0);
-		}
-	if(!digitalRead(SELECT))	//nécessite de valider
-	{
-		while(!digitalRead(SELECT));	//attente du relachement du bouton
-		analogWrite(PIN_PWM_SERVO,Position*255/100);
-	}
-
-	if(Position!=memPosition)
-	{
-		char affich[16];
-		snprintf(affich,17,"Pos= %d %%",Position);
-		afficher(affich);
-		memPosition=Position;
-	}*/
-	static int memValue=0;
 	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();
 
-	int pos_enc=myEnc.read()/2;
-	if (pos_enc < 0)
-	{
-		pos_enc=0;
-		myEnc.write(0);
-	}
-	int delta=1;
+	int pos_enc = myEnc.read();
 
-	if(pos_enc!=pos_enc_old)
-	{
-		long deltat=millis()-temps_enc;
-		if(deltat<DUREE_BIG_STEPS)
+	if(pos_enc!=pos_enc_old){
+		if(millis()-temps_enc < DUREE_BIG_STEPS)
 		{
-			delta=10;
+			pos_enc = pos_enc_old + 10 * (pos_enc - pos_enc_old);
 		}
+		pos_enc = CLAMP(0, pos_enc, 255);
 		temps_enc=millis();
-	}
-	int Value = max((memValue+delta*(pos_enc-pos_enc_old)),0);
-	Value=min(Value,100);
-	pos_enc_old=pos_enc;
-
-	if(!digitalRead(SELECT))	//nécessite de valider avant que le servo ne se déplace
-	{
-		analogWrite(PIN_PWM_SERVO,Value*255/100);
+		int pc = (100*pos_enc)/255;
+		afficher("D.C. = %d %%", pc);
+		myEnc.write(pos_enc);
+		pos_enc_old=pos_enc;
 	}
 
-	if(Value!=memValue)
-	{
-		char affich[16];
-		snprintf(affich,17,"Pos= %d %%",Value);
-		afficher(affich);
-		memValue=Value;
+	if(!digitalRead(SELECT)){	//nécessite de valider avant que le servo ne se déplace
+		while(!digitalRead(SELECT));
+		analogWrite(PIN_PWM_SERVO,pos_enc);
 	}
 
-	if(!digitalRead(RETOUR))
-	{
+	if(!digitalRead(RETOUR)){
 		delay(DELAY_BOUNCE);	//anti rebond
 		while(!digitalRead(RETOUR));	//attente du relachement du bouton
 		return(&sMenu_pwm);
@@ -84,20 +48,17 @@ sState* testpwm_pc(){
     return NULL;
 }
 void initpwm_pc(sState *prev){
+	if(servo3.attached()){
+		servo3.detach();
+	}
 	pinMode(PIN_PWM_SERVO,OUTPUT);
 	myEnc.write(0);
 	analogWrite(PIN_PWM_SERVO,0);
-	char affich[16];
-	snprintf(affich,17,"Pos= 0 %%");
-	afficher(affich);
+	afficher("D.C. = 0 %%");
 }
 void deinitpwm_pc(sState *next){
 
 }
-
-//void pwm_pc(){
-
-//}
 
 sState spwm_pc={
     0,
@@ -105,5 +66,3 @@ sState spwm_pc={
     &deinitpwm_pc,
     &testpwm_pc
 };
-
-
