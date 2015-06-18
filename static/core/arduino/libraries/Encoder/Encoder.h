@@ -108,13 +108,13 @@ public:
 		} else {
 			noInterrupts();
 		}
-		int32_t ret = encoder.position;
+		int32_t ret = encoder.position/2;		//division par 2 rajoutée par sieur bonneval. (pas taper)
 		interrupts();
 		return ret;
 	}
 	inline void write(int32_t p) {
 		noInterrupts();
-		encoder.position = p;
+		encoder.position = p*2;					//multiplication par 2 rajoutée par sieur bonneval. (pas taper)
 		interrupts();
 	}
 #else
