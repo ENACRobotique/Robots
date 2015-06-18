@@ -33,8 +33,8 @@ sState* testChoice_servo(){
 	int Position = myEnc.read();    //position du selecteur
 
 	if(Position != memPosition){  //on affiche que si on change de position
-		if (Position != CLAMP(0,Position,NB_Choice_servo)){		//on ne descend pas dans les négatifs
-			Position = CLAMP(0,Position,NB_Choice_servo);
+		if (Position != CLAMP(0,Position,NB_Choice_servo-1)){		//on ne descend pas dans les négatifs
+			Position = CLAMP(0,Position,NB_Choice_servo-1);
 			myEnc.write(Position);
 		}
 		afficher(Choice_servo[Position]);

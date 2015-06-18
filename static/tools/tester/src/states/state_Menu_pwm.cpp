@@ -29,8 +29,8 @@ sState* testMenu_pwm(){
 	int Position = myEnc.read();    //position du selecteur modulo le nombre de choix possible
 
 	if(Position != memPosition){  //on affiche que si on change de position
-		if (Position != CLAMP(0,Position,NB_menu_pwm)){		//on ne descend pas dans les négatifs
-			Position = CLAMP(0,Position,NB_menu_pwm);
+		if (Position != CLAMP(0,Position,NB_menu_pwm-1)){		//on ne descend pas dans les négatifs
+			Position = CLAMP(0,Position,NB_menu_pwm-1);
 			myEnc.write(Position);
 		}
 		afficher(menu_pwm[Position]);
