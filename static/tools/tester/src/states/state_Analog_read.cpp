@@ -14,9 +14,23 @@
 #include "state_Menu_principal.h"
 #include "lib_IHM.h"
 
-
 sState* testAnalog_read(){
-        // Your code here !
+        static unsigned long last_time = millis();
+
+        if(millis() - last_time > 200){		//Il ne sert a rien de rafraichir trop souvent.
+        	int value = analogRead(AREAD);
+        	int result = map(value,0,1023,0,1540);		//le pont diviseur divise ~ par 3, et la ref est à 5V.
+        	int ent = result/100;
+        	int dec = result - 100*ent;
+        	afficher("U = %d,%d V",ent,dec);
+        	last_time = millis();
+        }
+
+        if(!digitalRead(RETOUR)){
+			delay(DELAY_BOUNCE);	//anti rebond
+			while(!digitalRead(RETOUR));	//attente du relachement du bouton
+			return(&sMenu_principal);
+		}
         return NULL;
     }
 
@@ -34,4 +48,3 @@ sState sAnalog_read={
         &deinitAnalog_read,
         &testAnalog_read
 };
-
