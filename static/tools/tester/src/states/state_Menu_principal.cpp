@@ -14,14 +14,15 @@
 #include <state_types.h>
 #include <stddef.h>
 #include "state_Menu_principal.h"
+#include "state_Analog_read.h"
 
 #define NB_menu_principal 5
 const char *menu_principal[] = {
 		  "SERVOS",
 		  "PWM",
-		  "I2C",
 		  "CODEUR",
-		  "Analog Read"
+		  "Analog Read",
+		  "I2C"
 		};
 
 sState* testMenu_principal(){
@@ -44,9 +45,8 @@ sState* testMenu_principal(){
 			{
 				case 0:{ return(&smode_servo); break; }
 				case 1:{ return(&sMenu_pwm); break; }
-		//	    case 2:{ i2c(); break; }
-		//	    case 3:{ liaison_serie(); break; }
-		//	    case 4:{ analogread(); break;}
+		//	    case 2:{ coder(); break; }
+			    case 3:{ return(&sAnalog_read); break;}
 			  }
 		  }
 
