@@ -26,12 +26,10 @@
 #define CODERINT 2
 #define CODERSTATE 3
 
-#define AREAD A0
-
 #define ENCODER1 4
 #define ENCODER2 5
 #define SELECT 6
-#define RETOUR A3
+#define RETOUR A2
 
 #define LCD1 7
 #define LCD2 8
@@ -40,8 +38,9 @@
 #define LCD5 12
 #define LCD6 13
 
-#define LED1 A1
-#define LED2 A2
+#define AREAD A5
+#define LED1 A3
+#define LED2 A4
 
 
 #define DUREE_BIG_STEPS 20
