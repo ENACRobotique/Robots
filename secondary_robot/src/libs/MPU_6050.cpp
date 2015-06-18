@@ -1,11 +1,11 @@
 
 #include "MPU_6050.h"
 #include "lib_attitude.h"
-#include "../params.h"
+#include "params.h"
 #include "Arduino.h"
 #include "Wire.h"
 
-# define DEBUG_INERTIAL
+#define DEBUG_INERTIAL
 
   unsigned long last_read_time;
   float         last_x_angle;  // These are the filtered angles
@@ -207,6 +207,7 @@ void initInertial()
 
   // Clear the 'sleep' bit to start the sensor.
   MPU6050_write_reg (MPU6050_PWR_MGMT_1, 0);
+  delay(50);
 
   //Initialize the angles
   calibrate_sensors();
@@ -270,8 +271,8 @@ int readInertial(int value)
   float alpha = 0.96;
   float angle_x = alpha*gyro_angle_x + (1.0 - alpha)*accel_angle_x;
   float angle_y = alpha*gyro_angle_y + (1.0 - alpha)*accel_angle_y;
-  float angle_z = alpha*gyro_angle_z + (1.0 - alpha)*accel_angle_z;  //Accelerometer doesn't give z-angle
-
+  //float angle_z = alpha*gyro_angle_z + (1.0 - alpha)*accel_angle_z;  //Accelerometer doesn't give z-angle
+  float angle_z = gyro_angle_z;
   // Update the saved data with the latest values
   set_last_read_angle_data(t_now, angle_x, angle_y, angle_z, unfiltered_gyro_angle_x, unfiltered_gyro_angle_y, unfiltered_gyro_angle_z);
   switch(value){

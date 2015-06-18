@@ -70,6 +70,49 @@ typedef struct {
 	} elts[2]; // 22x2 bytes
 } sTrajOrientElRaw_t; // exactly 56 bytes
 
+typedef enum {
+    TRAJSTEP_LINE,
+    TRAJSTEP_ARC
+} eTrajStepType;
+
+typedef struct {
+    uint16_t tid :12; // trajectory identifier (4096 trajectory id-s)
+    uint16_t sid :4; // step identifier (may loop)
+
+    uint32_t t :22;   // t:                    time at elts[0].p1 (synchronized time in ms)
+
+    struct __attribute__((packed)) {
+        uint16_t dt :15; // (in ms)
+
+        uint8_t spd_xy; // (cm/s << 1)
+        int16_t spd_theta :9; // (rad/s << 5)
+
+        int16_t is_last_element :1; // 1 if is last element
+
+        int16_t theta1 :13; // orientation at p1 (rad<<10)
+        // segment
+        int16_t p1_x :14; // start point line x coordinate in playground reference frame (cm<<5)
+        int16_t p1_y :14; // start point line y coordinate in playground reference frame (cm<<5)
+
+        int16_t len :15; // segment length (cm<<5)
+
+        eTrajStepType type :1;
+
+        union {
+            struct {
+
+            } line;
+            struct {
+                // circle arc
+                int16_t c_x :15; // circle x coordinate in playground reference frame (cm<<5)
+                int16_t c_y :15; // circle y coordinate in playground reference frame (cm<<5)
+                int16_t c_r :15; // circle radius (cm<<5 ; >0 CW | <0 CCW)
+            } arc;
+        };
+    } elts[];
+} sTrajPosSpdElRaw_t; // exactly 56 bytes
+
+
 #define NB_ASSERV_STEPS_PER_MSG (4)
 typedef struct __attribute__((packed)){
     uint16_t nb_seq;

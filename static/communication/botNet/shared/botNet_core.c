@@ -39,7 +39,7 @@
 #include <stdio.h>
 
 //local message to "transmit" via bn_receive()
-sMsg localMsg={{0}};
+sMsg localMsg;
 int localReceived=0; //indicates whether a message is available for local or not
 
 //sequence number counter;
@@ -56,7 +56,7 @@ uint8_t seqNum=0;
  *  <0 if error
  */
 int bn_init(){
-#if MYADDRX!=0 || (MYADDRU!=0 && (defined(ARCH_X86_LINUX) || defined(ARCH_328P_ARDUINO))) || MYADDRD!=0
+#if MYADDRX!=0 || (MYADDRU!=0 && (defined(ARCH_X86_LINUX) || defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX))) || MYADDRD!=0
     int ret=0;
 #endif
 
@@ -68,16 +68,18 @@ int bn_init(){
 #if MYADDRI!=0
 #   if defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX)
     I2C_init(400000UL);
+#   else
+#       error "You can't use I²C without an I²C driver!"
 #   endif
 #endif
 
 #if MYADDRU!=0
-#   ifdef ARCH_X86_LINUX
+#   if defined(ARCH_X86_LINUX)
     if ( (ret=UART_init(BN_UART_PATH,E_115200_8N1|E_FRAMEBASED))<0 ) return ret;
-#   endif
-
-#   ifdef ARCH_328P_ARDUINO
+#   elif defined(ARCH_328P_ARDUINO) || defined(ARCH_LPC21XX)
     if ( (ret=UART_init(NULL,115200))<0 ) return ret;
+#   else
+#       error "You can't use UART without an UART driver!"
 #   endif
 #endif
 
@@ -173,8 +175,10 @@ int bn_genericSend(sMsg *msg){
  */
 int bn_sendAck(sMsg *msg){
     uint32_t sw=0;  // stopwatch memory
-    sMsg msgIn={{0}}; //incoming message (may be our ack)
+    sMsg msgIn; //incoming message (may be our ack)
     int ret=0;
+
+    memset(&msgIn, 0, sizeof(msgIn));
 
     bn_Address tmpAddr=msg->header.destAddr;
     uint8_t tmpSeqNum=seqNum;
@@ -221,9 +225,11 @@ int bn_sendAck(sMsg *msg){
  *
  */
 int bn_routine(){
-    sMsgIf temp={{{0}}};
+    sMsgIf temp;
     sMsgIf *pTmp=NULL;
     int count=0,ret=0; //count : indicator, used for debug purposes
+
+    memset(&temp, 0, sizeof(temp));
 
 #if (MYADDRX)!=0
     if ( (ret=Xbee_receive(&temp.msg)) > 0 ) {

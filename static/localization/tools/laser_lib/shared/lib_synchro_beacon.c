@@ -17,35 +17,11 @@
 #include "params.h"
 
 
-syncStruc syncParam={0,0,0};    // Synchronization parameters
-int32_t _offset=0;              // value to add to time to correct drift in microsecond (updated by updateSync)
-
-
 // Iterative sums for least-square computation (sum_bb=sum(for i=0..N, b_i*b_i)...)
-int64_t sum_OO=0,sum_D=0,sum_O=0,sum_OD=0,sum_ones=0;
+static int64_t sum_OO=0,sum_D=0,sum_O=0,sum_OD=0,sum_ones=0;
 
-sSyncPayload firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
+sSyncPayload_wireless firstRxSyncData={0,0,-2},lastRxSyncData={0,0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
 syncMesStruc firstLaserMeasure={0,-2},lastLaserMeasure={0,-2};   // Assumption : index is INCREASED (not necessarily by 1) every time the value is updated)
-
-/* micros2s : local to synchronized time (microsecond).
- * Argument :
- *  local : local date in microsecond.
- * Return value :
- *  Synchronized date (expressed in microsecond)
- */
-uint32_t micros2s(uint32_t local){
-    return local-_offset;
-}
-
-/* millis2s : local to synchronized time (millisecond).
- * Argument :
- *  local : local date in millisecond.
- * Return value :
- *  Synchronized date (expressed in millisecond)
- */
-uint32_t millis2s(uint32_t local){
-    return local-(_offset/1000);
-}
 
 /* Return rank of highest bit, or -1 if val==0
  */
@@ -58,29 +34,11 @@ int hbit(uint64_t val){
     return i-1;
 }
 
-/* updateSync : Updates the correction done by millis2s and micros2s
- */
-void updateSync(){
-    static uint32_t lastUpdate=0;
-    uint32_t timeMicros=micros();
-
-    if (!lastUpdate && !_offset && (syncParam.initialDelay || syncParam.driftUpdatePeriod)){      //only in the first call after successful synchronization
-        _offset=syncParam.initialDelay;
-        lastUpdate=timeMicros;
-    }
-    else if(syncParam.driftUpdatePeriod) {
-        if ((timeMicros-lastUpdate)>syncParam.driftUpdatePeriod){
-            _offset+=syncParam.inc;
-            lastUpdate+=syncParam.driftUpdatePeriod;
-        }
-    }
-}
-
 /* SyncComputationMsg : Stores last received values and eventually computes the synchronization parameters.
  * Usage : feed syncComputationMsg with data broadcasted by the turret, including the first message stating "begin measure (i.e. index=0)" until it returns SYNCED. After that updatesync, millis2s and micros2s can be used.
  *         /!\ feed also syncComputationLaser with laser data
  */
-void syncComputationMsg(sSyncPayload *pload){
+void syncComputationMsg(sSyncPayload_wireless *pload){
 
     // if no update, return
     if (pload->lastTurnDate==lastRxSyncData.lastTurnDate) return;
@@ -171,7 +129,7 @@ void syncIntermediateCompute(uint32_t t_local, uint32_t t_turret, uint32_t perio
 /* SyncComputationFinal : Computes the sync parameters based on all the values recorded (least square method).
  * Usage : feed syncComputationLaser and syncComputationMsg for long enough then call syncComputationFinal.
  */
-void syncComputationFinal(sSyncPayload *pload){
+void syncComputationFinal(sSyncPayload_wireless *pload){
     int64_t det=0;
 
     syncComputationMsg(pload);
@@ -182,9 +140,9 @@ void syncComputationFinal(sSyncPayload *pload){
     if (det!=0){ //todo : handle det==0
         sum_OO>>=EVIL_SHIFT;
         sum_OD>>=EVIL_SHIFT;
-        syncParam.initialDelay=(sum_OO*sum_D-sum_O*sum_OD)/det;
-        syncParam.driftUpdatePeriod=HARDUPDATEPERIOD;
-        syncParam.inc=HARDUPDATESIGN;
+        syncStruc tmpStruc = getSyncParam();
+        tmpStruc.initialDelay=(sum_OO*sum_D-sum_O*sum_OD)/det;
+        setSyncParam(tmpStruc);
 #ifdef DEBUG_SYNC
         sum_O>>=EVIL_SHIFT;
         int64_t beta=(sum_ones*sum_OD-sum_D*sum_O)*1000/det;

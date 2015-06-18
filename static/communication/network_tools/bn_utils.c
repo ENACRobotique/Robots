@@ -5,6 +5,8 @@
  *      Author: quentin
  */
 
+#include <string.h>
+
 #include "bn_utils.h"
 #include "../../tools/libraries/Timeout/timeout.h"
 
@@ -17,9 +19,12 @@
  *  <0 on error (host unreacheable or else, see error codes)
  */
 int bn_ping(bn_Address dest){
-    sMsg msg={{0}};
+    sMsg msg;
     int ret;
     uint32_t sw=0;
+
+    memset(&msg, 0, sizeof(msg));
+
     msg.header.type=E_PING;
     msg.header.size=0;
     msg.header.destAddr=dest;
@@ -42,11 +47,11 @@ int bn_ping(bn_Address dest){
  * WARNING : traceroute must not be used in game, only for developpment and test purposes
  */
 int bn_traceroute(bn_Address dest, sTraceInfo *retVals,int maxDpth, uint32_t timeout){
-    sMsg msg={{0}};
+    sMsg msg;
     uint32_t sw=0,to=0;
     int i=0,ret=0;
 
-
+    memset(&msg, 0, sizeof(msg));
 
     //prepare  the message
     msg.header.type=E_TRACEROUTE_REQUEST;

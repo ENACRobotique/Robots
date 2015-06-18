@@ -166,4 +166,57 @@ disp(['Cam2 vers table']);
 syms u2 v2;
 Px2_I=[u2; v2; 1];
 V44_PxC2_R = mat_Pss_C2_R * [(K_I_C2 * Px2_I); 1] - Oc_R;
-V_Px3_R = Oc_R + (0-Oc_R(3))/V44_PxC2_R(3)*V44_PxC2_R
+V_Px3_R = Oc_R + (25-Oc_R(3))/V44_PxC2_R(3)*V44_PxC2_R
+
+%%
+Px2_I=[0; 0; 1];
+V44_PxC2_R = mat_Pss_C2_R * [(K_I_C2 * Px2_I); 1]
+%V_Px3_R = Oc_R + (25-Oc_R(3))/V44_PxC2_R(3)*V44_PxC2_R
+
+%% Robot to Table
+
+clc 
+
+syms alpha;
+syms x_R;
+syms y_R;
+syms z_R;
+
+% alpha = 90 *pi/180;
+% x_R = 150
+% y_R = 100
+% z_R = 0
+
+syms x_obj_R;
+syms y_obj_R;
+syms z_obj_R;
+
+% x_obj_R = 10;
+% y_obj_R = 10;
+% z_obj_R = 0;
+
+% Matrice de rotation Table --> Robot
+Rot_T_R = [cos(alpha) sin(alpha) 0; -sin(alpha) cos(alpha) 0; 0 0 1];
+
+% Matrice de rotation Robot --> Table
+Rot_R_T = inv(Rot_T_R);
+
+% Matrice de translation Robot --> Table
+Trans_R_T = [x_R; y_R; z_R];
+
+
+% Matrice de passage Robot --> Table
+Pass_R_T = [Rot_R_T Trans_R_T; 0 0 0 1]
+
+% Matrice de passage Table --> Robot
+Pass_T_R = inv(Pass_R_T);
+
+
+% Position d'un objet sur la table
+Pos_obj_R = [x_obj_R; y_obj_R; z_obj_R; 1];
+
+Pos_obj_T = Pass_R_T * Pos_obj_R
+
+Pos_obj_R = Pass_T_R * Pos_obj_T;
+
+

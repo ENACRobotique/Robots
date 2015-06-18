@@ -11,6 +11,7 @@
 #include "messages.h"
 
 typedef enum{
+    S_CHECKREMOTE,
     S_CHANNEL,
     S_SYNC_ELECTION,
     S_SYNC_MEASURE,
@@ -47,23 +48,48 @@ typedef struct{
 #define ELECTION_TIME       2000000  // in µs, duration during which the beacon choose their laser interruption
 #define SYNCRONIZATION_TIME 10000000 // in µs
 
-#define ANGLE_ZERO      3.63028415//3.97935 //value (in rad) to substract from the angle measured to match with this year robot's geometry (2014 : 228°)
+#define ANGLE_ZERO      (1.665044107) //value (in rad) to substract from the angle measured to match with this year robot's geometry (2014 : 228°)
 // fixme : we can not determine yet if the rotation is clockwise or anticlockwise. The above value is valid only for clockwise
 
 #define PIN_RST_XBEE    5
+#define PIN_SYNC        7
 #define PIN_DBG_LED     13
 
 #define ROT_PERIOD_BCAST 500 //in ms
 
 //#define DEBUG
 //#define DEBUG_SYNC
+//#define DEBUG_SYNC_WIRE
+//#define DEBUG_SYNC_VALUES
+//#define DEBUG_GLOBAL_SYNC
 //#define DEBUG_LOC
 //#define DEBUG_CALIBRATION
+//#define DEBUG_CALIBRATION_SPEED
+//#define DEBUG_SYNC_WIRE_EVAL
+//#define DEBUG_PRINT
 
 #define BLINK_1S    //blink every second (incompatible with other blink)
 //#define BLINK_1TR   //blink every turn (incompatible with other blink)
 
+//#define SYNC_GLOBAL
+#define SYNC_LOCAL
+#define SYNC_WIRED
+//#define SYNC_WIRELESS
 
-//#define DEBUG_PRINT
+
+
+// protections
+#if defined(SYNC_LOCAL) && defined(SYNC_GLOBAL)
+#error "please define only one sync range"
+#elif !defined(SYNC_LOCAL) && !defined(SYNC_GLOBAL)
+#error "please define at least one sync range"
+#endif
+
+#if defined(SYNC_WIRED) && defined(SYNC_WIRELESS)
+#error "please define only one sync method"
+#elif !defined(SYNC_WIRED) && !defined(SYNC_WIRELESS)
+#error "please define at least one sync method"
+#endif
+
 
 #endif /* PARAMS_H_ */

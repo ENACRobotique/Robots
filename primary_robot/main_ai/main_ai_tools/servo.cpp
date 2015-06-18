@@ -5,62 +5,74 @@
  *      Author: seb
  */
 
-#include <main_ai_tools/servo.h>
-#include "math_types.h"
-#include "math_ops.h"
+#include "servo.h"
 
+#include <cmath>
 extern "C"{
+#include <string.h>
 #include "network_cfg.h"
 #include "botNet_core.h"
 }
+#include "tools.h"
+#include "communications.h"
 
-Servo::Servo() {
-    // TODO Auto-generated constructor stub
+int Servo::sendPosServo(const servoName name, const float angle) {
+    sMsg msg;
 
-}
+    memset(&msg, 0, sizeof(msg));
 
-Servo::~Servo() {
-    // TODO Auto-generated destructor stub
-}
+    logs << INFO << "Send servo position simple:" << name;
 
-
-int Servo::sendPosServo(eServos s, int16_t us, int16_t a) { // us or a = -1 if no use
-    sMsg msg = { { 0 } };
-    sPt_t p1, p2;
-    sLin_t l;
-    int i = 0;
-
-    if (((us == -1) && (a == -1)) || ((us != -1) && (a != -1))) {
+    if(angle < 0)
         return -1;
-    }
 
-    if (a != -1) {
-        i = 0;
-        while (s != _servo.id) {
-            i++;
-          //  if (i > sizeof(_servo) / sizeof(*_servo)) //FIXME
-                break;
-        }
-        p1.x = _servo.a1;
-        p1.y = _servo.u1;
-        p2.x = _servo.a2;
-        p2.y = _servo.u2;
-        convPts2Line(&p1, &p2, 0, &l);
-
-        if (l.b == 0)
-            return -1;
-
-        us = -(l.a * a + l.c) / l.b;
-    }
-
-    msg.header.destAddr = ADDRI1_MAIN_IO;
+    msg.header.destAddr = ADDRI_MAIN_IO;
     msg.header.type = E_SERVOS;
-    msg.header.size = 2 + 3;
-    msg.payload.servos.nb_servos = 1;
-    msg.payload.servos.servos[0].id = s;
-    msg.payload.servos.servos[0].us = us;
+    msg.header.size = 2 + 1 * sizeof(msg.payload.servos.servos[0]);
 
-    bn_sendRetry(&msg, MAX_RETRIES_SERVO);
+    msg.payload.servos.nb_servos = 1;
+    msg.payload.servos.servos[0].club_id = tabServo[name].club_id;
+    msg.payload.servos.servos[0].hw_id = tabServo[name].hw_id;
+    msg.payload.servos.servos[0].angle = angle;
+
+    bnSendBlock(msg, "servo simple");
+
+    logs << INFO << "Send servo position id_club:" << unsigned(tabServo[name].club_id) << "ang:" << angle;
 
     return 1;
 }
+
+int Servo::sendMultiPosServo(const std::vector<servoName> name, const std::vector<float> angle){
+    sMsg msg;
+
+    memset(&msg, 0, sizeof(msg));
+
+    if(name.size() != angle.size()){
+        logs << ERR << "Different size servo";
+        return -1;
+    }
+
+    if(name.size() > 6){
+        logs << ERR << "maximum servo number";
+        return -2;
+    }
+
+
+    msg.header.destAddr = ADDRI_MAIN_IO;
+    msg.header.type = E_SERVOS;
+    msg.header.size = 2 + name.size()*sizeof(msg.payload.servos.servos[0]);
+
+    msg.payload.servos.nb_servos = name.size();
+    for(unsigned int i = 0 ; i < name.size() ; i++){
+        msg.payload.servos.servos[i].club_id = tabServo[name[i]].club_id;
+        msg.payload.servos.servos[i].hw_id = tabServo[name[i]].hw_id;
+        msg.payload.servos.servos[i].angle = angle[i];
+    }
+
+    bnSendBlock(msg, "servo multi");
+
+    logs << INFO << "Send servo postion multi";
+
+    return 1;
+}
+

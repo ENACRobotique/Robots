@@ -44,6 +44,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/MemoryFree}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/laser_lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Timeout}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/network_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/network_tools}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/botNet/}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.325683192" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-ffunction-sections -fdata-sections" valueType="string"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.2003967830" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="false" valueType="boolean"/>
@@ -67,6 +71,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/MemoryFree}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/laser_lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/Timeout}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/network_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/network_tools}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/balise_mobile/lib/botNet/}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.786092589" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.shortenums.1605089648" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.shortenums" value="false" valueType="boolean"/>
@@ -103,9 +111,18 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.1578098470" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.1249768886" name="lib_synchro_beacon.c" rcbsApplicability="disable" resourcePath="lib/laser_lib/shared/lib_synchro_beacon.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.27818288.616226482">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.27818288.616226482" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.27818288"/>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1417899811" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1976536829" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1817145842" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="arduinolib|lib|message_shared|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry excluding="superBus_arduino/I2C|superBus_arduino/UART" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib"/>
+						<entry excluding="laser_lib/shared/lib_synchro_beacon.c|laser_lib/shared/lib_synchro_laser_turret.cpp|superBus_arduino/I2C|superBus_arduino/UART" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>

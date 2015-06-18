@@ -12,7 +12,7 @@
 
 #ifdef ARCH_LPC21XX
 #define MYADDRX 0
-#define MYADDRI ADDRI1_MAIN_PROP
+#define MYADDRI ADDRI_MAIN_PROP
 #define MYADDRU ADDRU2_MAIN_PROP
 #define MYADDRD 0
 #elif defined(ARCH_X86_LINUX)
@@ -23,7 +23,7 @@
 #endif
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
-#define MYROLE ROLE_PROPULSION
+#define MYROLE ROLE_PRIM_PROPULSION
 // MYROLE must be equal to role_get_role(MYADDR)
 
 #define BN_INC_MSG_BUF_SIZE 4

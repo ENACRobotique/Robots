@@ -318,11 +318,11 @@ int new_speed_setpoint(float speed){
     return 0;
 }
 
-int new_pos(sPosPayload *pos){
+int new_pos(sGenericPosStatus *pos){
     if(pos->id == 0) { // prim robot
-        x = isD2I(pos->x); // (I<<SHIFT)
-        y = isD2I(pos->y); // (I<<SHIFT)
-        theta = isROUND( D2I(RDIAM)*pos->theta ); // (rad.I<<SHIFT)
+        x = isD2I(pos->pos.x); // (I<<SHIFT)
+        y = isD2I(pos->pos.y); // (I<<SHIFT)
+        theta = isROUND( D2I(RDIAM)*pos->pos.theta ); // (rad.I<<SHIFT)
 
         if(state == S_WAIT){
             gx = x;
@@ -338,22 +338,23 @@ int send_pos(){
     sMsg msg = {{0}};
 
 //    msg.header.destAddr = ADDRD_MONITORING; this is a role_send => the destination address is ignored
-    msg.header.type = E_POS;
-    msg.header.size = sizeof(msg.payload.pos);
-    msg.payload.pos.id = 0; // main robot
-    msg.payload.pos.x = I2Ds(x);
-    msg.payload.pos.y = I2Ds(y);
-    msg.payload.pos.theta = RI2Rs(theta);
+    msg.header.type = E_GENERIC_POS_STATUS;
+    msg.header.size = sizeof(msg.payload.genericPosStatus);
+    msg.payload.genericPosStatus.id = ELT_PRIMARY;
+    msg.payload.genericPosStatus.pos.x = I2Ds(x);
+    msg.payload.genericPosStatus.pos.y = I2Ds(y);
+    msg.payload.genericPosStatus.pos.theta = RI2Rs(theta);
     if(state == S_RUN_TRAJ){
-        msg.payload.pos.tid = curr_tid;
-        msg.payload.pos.sid = curr_traj_step>>1;
-        msg.payload.pos.ssid = curr_traj_step&1;
+        msg.payload.genericPosStatus.prop_status.status = PROP_RUNNING;
+        msg.payload.genericPosStatus.prop_status.tid = curr_tid;
+        msg.payload.genericPosStatus.prop_status.sid = curr_traj_step>>1;
+        msg.payload.genericPosStatus.prop_status.ssid = curr_traj_step&1;
     }
     else{
-        msg.payload.pos.tid = msg.payload.pos.sid = -1;
+        msg.payload.genericPosStatus.prop_status.status = PROP_IDLE;
     }
 
-    return role_send(&msg);
+    return role_send(&msg, ROLEMSG_PRIM_POS);
 }
 
 void get_pos(s2DPosAtt *p, s2DPAUncert *p_u, unsigned int *p_t){

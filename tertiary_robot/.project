@@ -42,6 +42,11 @@
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/static/core/arduino/libraries/Wire</locationURI>
 		</link>
+		<link>
+			<name>src/libs</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/secondary_robot/src/libs</locationURI>
+		</link>
 	</linkedResources>
 	<variableList>
 		<variable>

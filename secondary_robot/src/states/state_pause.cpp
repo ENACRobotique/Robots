@@ -15,9 +15,6 @@ sState* testPause(){
     if(radarIntrusion()) lastSeen=millis();
     if( (millis()-lastSeen)>= RADAR_SAFETY_TIME ) return pausePrevState;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
-    if ((millis()-_matchStart) > TIME_MATCH_LAUN ) {
-	launcherServoUp.write(10);
-	}
     return 0;
 }
 
@@ -38,7 +35,7 @@ void deinitPause(sState *next){
 }
 
 sState sPause={
-    BIT(E_MOTOR) | BIT(E_RADAR),
+    BIT(E_MOTOR) | BIT(E_RADAR)|BIT(E_ATTITUDE),
     &initPause,
     &deinitPause,
     &testPause

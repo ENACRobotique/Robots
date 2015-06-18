@@ -8,23 +8,26 @@
 #ifndef AI_PATH_H_
 #define AI_PATH_H_
 
-#include <a_star_tools.h>
 #include <vector>
 #include <deque>
 
-#define MAX_RETRIES 1 //FIXME bug with simulation
+#include "GeometryTools.h"
+#include "messages-locomotion.h"
 
+#include <a_star_tools.h>
+#include "a_star.h"
 
-using namespace std;
+#define MAX_RETRIES 5
+
 
 typedef struct{
-    float t1;   // in us (synchronized time):
-    float t2;
+    uint32_t t1;   // in us (synchronized time):
+    uint32_t t2;
 
-    sPt_t p1;
-    sPt_t p2;
+    Point2D<float> p1;
+    Point2D<float> p2;
 
-    sObs_t obs;//TODO change in circle type with the new math tools
+    astar::sObs_t obs;
 
     float theta1;
     float theta2;
@@ -36,68 +39,82 @@ typedef struct{
     bool rot2_dir;
 }sTrajOrientEl_t;
 
-typedef struct {
-    sPt_t p1;
-    sPt_t p2;
-    sObs_t obs;
+template <typename T>
+class TrajPosSpdEl {
+public:
+    uint32_t t;    // in us (synchronized time):
 
-    sNum_t arc_len;
-    sNum_t seg_len;
+    Point2D<T> p;
+    T v;            // unsigned
 
-    unsigned short sid;
-} sTrajEl_t;
+    T theta;
+    T v_theta;      // signed
 
-typedef struct {
-    sNum_t dist;
-    unsigned short tid;
+    T len;
 
-    unsigned int path_len;
-    sTrajEl_t *path;
-} sPath_t;
+    eTrajStepType type_e;
+
+    union type {
+        ~type() {};
+
+        struct {
+        } line;
+
+        struct  {
+            Circle2D<float> c;
+        } arc;
+    } type;
+};
 
 
 class Path {
     public:
         Path();
-        Path(vector <sTrajEl_t*> list);
-        Path(vector <sTrajOrientEl_t*> list);
+        Path(std::vector <sTrajEl_t*> list);
+        Path(std::vector <sTrajOrientEl_t*> list);
         ~Path();
         void clear();
         void maintenace();
 
-        //Send methods
-        void sendRobot();
-        void stopRobot();
-        void go2Point(const sPt_t &dest, const bool f); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
-        void followPath(vector <sObs_t> &_obs, vector <iABObs_t> &l);
-        void convPathToPathOrient();
-        void computeOrientPathForHolonomic(float theta_end_obj);
-        void computeTimePathForHolonomic();
+        // Send methods
+        void sendRobot(bool holo, float thetaEnd);
+        void stopRobot(bool holo);
+        void go2PointOrient(const Point2D<float> &dest, std::vector<astar::sObs_t>& obs, float angle);
+        void go2Point(const Point2D<float> &dest, const bool f, std::vector<astar::sObs_t>& obs, bool holo); //TODO "f" to force the robot to go, even if the destination point is in obstacle.
+        void followPath(std::vector <astar::sObs_t>& obs, std::vector <astar::iABObs_t> &l, bool holo);
+        void convPathToPathOrient(float thetaEnd);
+        void computePathHolonomic(float theta_end_obj);
 
-        //Get methods
+        // Get methods
+        PointOrient2D<float> getPosOrient(uint32_t _time_us /*synchronize time*/);
+
+        // Print
         void print() const; //TODO Idee : reutiliser le parseur yaml
         void printElTraj(const unsigned int num) const;
         void printElTrajOrient(const unsigned int num) const;
         void printPath() const;
 
-        //Set methods
+        // Set methods
         sNum_t length();
-        void addPath(vector <sTrajEl_t*> list);
+        void addPath(std::vector <sTrajEl_t*> list);
         void addPath2(sPath_t path);
-
 
     private:
         void setPathLength();
-        bool checkSameObs(sObs_t& obs1, sObs_t& obs2);
+        bool checkSameObs(astar::sObs_t& obs1, astar::sObs_t& obs2);
         bool checkSamePath(sPath_t& path);
-        bool checkSamePath2(deque<sTrajEl_t>& path);
+        bool checkSamePath2(std::deque<sTrajEl_t>& path);
+        bool checkSamePathOrient(std::deque<sTrajOrientEl_t>& path);
         int checkRobotBlock();
-        void updateNoHaftTurn() ;
+        void updateNoHaftTurn(std::vector<astar::sObs_t>& obs, std::vector<uint8_t> obs_updated); //TODO in other class
 
-        sNum_t _dist;               //Computed sends
-        unsigned int _path_len;     //Computed sends
-        deque <sTrajEl_t> _path;
-        deque <sTrajOrientEl_t> _path_orient;
+        float                               _dist;               //Computed sends
+        unsigned int                        _path_len;     //Computed sends
+        std::deque <sTrajEl_t>              _path;
+        std::deque <sTrajOrientEl_t>        _path_orient;
+        std::deque <sTrajEl_t>              _lastPathSent;
+        std::deque <sTrajOrientEl_t>        _lastPathOrientSent;
+        std::deque <TrajPosSpdEl<float>>    _lastTrajPosSpd;
 };
 
 

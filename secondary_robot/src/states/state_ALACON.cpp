@@ -34,8 +34,6 @@ void initAlacon(sState *prev)
 
 void deinitAlacon(sState *next)
 	{
-    _matchStart=millis();
-
 	#ifdef DEBUG
 		Serial.println("fin A LA CON");
 	#endif

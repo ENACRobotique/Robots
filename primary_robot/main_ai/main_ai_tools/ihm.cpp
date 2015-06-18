@@ -8,58 +8,93 @@
 #include <ihm.h>
 
 #include <iostream>
+#include <cstring>
+#include <cmath>
 
-Ihm::Ihm(): _starting_cord(UNKNOWN_INOUT), _switch_color(UNKNOWN_SWITCH), _led(UNKNOWN_LED) {
-    //TODO send message to get ihm status
+#include "tools.h"
+#include "network_cfg.h"
+#include "botNet_core.h"
 
+eIhmLed ihmLedConvertRGBToEnum(sRGB rgb){
+    if(rgb.red < 64 && rgb.green > 127 && rgb.blue < 64)
+        return eIhmLed::LED_GREEN;
+    if(rgb.red > 127 && rgb.green > 127 && rgb.blue < 64)
+       return eIhmLed::LED_YELLOW;
+    if(rgb.red < 64 && rgb.green < 64 && rgb.blue < 64)
+       return eIhmLed::LED_OFF;
+
+    logs << ERR << "Unkowned color";
+
+    return eIhmLed::LED_OFF;
 }
 
-Ihm::~Ihm() {
-    // TODO Auto-generated destructor stub
+sRGB ihmLedConvertEnumToRgb(eIhmLed led){
+    switch(led){
+        case LED_GREEN:
+            return {0, 255, 0};
+        case LED_YELLOW:
+            return {255, 170, 0};
+        case LED_OFF:
+            return {0, 0, 0};
+    }
+
+    logs << ERR << "Unkowned color";
+
+    return {0, 0, 0};
 }
 
 void Ihm::receivedNewIhm(sIhmStatus &ihm){ //TODO check all value with arduino_io
     for(int i = 0 ; i < (int) ihm.nb_states ; i++){
         switch(ihm.states[i].id){
             case IHM_STARTING_CORD:
-                if(ihm.states[i].state == 0) //TODO check
-                    _starting_cord = OUT;
-                else
-                    _starting_cord = IN;
-                cout << "[INFO] [IHM] ## scord: " << _starting_cord << endl;
+                list[eIhmElement::IHM_STARTING_CORD] = ihm.states[i].state.state_cord;
+                logs << MES << "[IHM] ## scord: " << list[eIhmElement::IHM_STARTING_CORD];
                 break;
-            case IHM_MODE_SWICTH:
-                if(ihm.states[i].state == 1)
-                    _switch_color = ON;
-                else
-                    _switch_color = OFF;
-                cout << "[INFO] [IHM] ## smode: " << _switch_color << endl;
+            case IHM_MODE_SWITCH:
+                list[eIhmElement::IHM_MODE_SWITCH] = ihm.states[i].state.state_switch;
+                logs << MES << "[IHM] ## smode: " << list[eIhmElement::IHM_MODE_SWITCH];
                 break;
             case IHM_LED:
-                if(ihm.states[i].state == 0)
-                    _led = LED_RED;
-                else if(ihm.states[i].state == 1)
-                    _led = LED_YELLOW;
-                else
-                    _led = LED_OFF;
-
-                cout << "[INFO] [IHM] ## sled:" << endl;
+                list[eIhmElement::IHM_LED] = ihmLedConvertRGBToEnum(ihm.states[i].state.color1);
+                logs << MES << "[IHM] ## sled: " << list[eIhmElement::IHM_LED];
                 break;
             default:
-                cout << "[WARNING] id not define or doesn't exist" << endl;
+                logs << WAR << "id not define or doesn't exist";
             break;
          }
      }
 }
 
-eInOut_t Ihm::getStartingCord(){
-    return _starting_cord;
-}
+void Ihm::sendIhm(const eIhmElement& id, const unsigned int& state){
+    sMsg msgOut ;
+    memset(&msgOut, 0, sizeof(msgOut));
 
-eSwitch_t Ihm::getSwitchColr(){
-    return _switch_color;
-}
+    msgOut.header.destAddr = ADDRI_MAIN_IO;
+    msgOut.header.type = E_IHM_STATUS;
+    msgOut.header.size = 2 + 1*sizeof(*msgOut.payload.ihmStatus.states);
 
-eLed_t Ihm::getLed(){
-    return _led;
+    msgOut.payload.ihmStatus.nb_states = 1;
+    msgOut.payload.ihmStatus.states[0].id = id;
+    switch(id){
+        case IHM_STARTING_CORD:
+            msgOut.payload.ihmStatus.states[0].state.state_cord = (eIhmCord)state;
+            break;
+        case IHM_MODE_SWITCH:
+            msgOut.payload.ihmStatus.states[0].state.state_switch = (eIhmSwitch) state;
+            break;
+        case IHM_LED:
+            msgOut.payload.ihmStatus.states[0].state.color1 = ihmLedConvertEnumToRgb((eIhmLed)state);
+            msgOut.payload.ihmStatus.states[0].state.color2 = {0, 0, 0};
+            msgOut.payload.ihmStatus.states[0].state.time1 = 10;
+            msgOut.payload.ihmStatus.states[0].state.time2 = 0;
+            msgOut.payload.ihmStatus.states[0].state.nb = 0;
+            logs << WAR << "Send color";
+            break;
+        default:
+            logs << ERR << "Unkown Ihm send";
+            break;
+    }
+
+    bn_sendRetry(&msgOut, MAX_RETRIES);
+    logs << MES << "[IHM] Sending new status id=" << id << ", state=" << state;
 }

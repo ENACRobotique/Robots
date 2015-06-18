@@ -9,6 +9,7 @@
 #define MAIN_AI_TOOLS_LOG_H_
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 
 #define ERR_V(a)  E_ERR  << a << "[ERROR]   " << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -28,39 +29,42 @@
 typedef enum {E_ERR, E_WAR, E_INFO, E_MES, E_DBG,E_OTHER} eLog_t;
 typedef enum {E_V1, E_V2, E_V3} eVer_t;
 
-using namespace std;
-
 class Log {
     public:
         Log();
         Log(char* file);
         ~Log();
 
+       // void setOption(eLog_t op){};
         void changeFile(const char* file);
         void setType(const eLog_t& log);
         void setVer(const eVer_t& ver);
 
         void putNewMes();
-        void putNewPos(float x, float y, float theta);
-
-        void putText(const char* text);
-        void putNum(const float& num);
+        void putNewPos(float x, float y, float theta, float a_var, float b_var, float a_angle, float theta_var);
 
         bool term() const;
 
+        template<typename T>
+        void put(T v){
+            _file << v;
+            if(term())
+                std::cout << v << std::flush;
+        }
+
     private:
-        ofstream _file;
+        std::ofstream _file;
         eLog_t _type;
         eVer_t _ver;
         bool _pos; //true if the previous message was a position
-
 };
 
-extern Log& operator<<(Log& log, const char*text);
-extern Log& operator<<(Log& log, const int num);
-extern Log& operator<<(Log& log, const float num);
-extern Log& operator<<(Log& log, const double num);
-extern Log& operator<<(Log& log, const uint32_t num);
+template<typename T>
+Log& operator<<(Log& log, T v){
+    log.put(v);
+    return log;
+}
+
 extern Log& operator<<(Log& log, eLog_t type);
 extern Log& operator<<(Log& log, eVer_t ver);
 
