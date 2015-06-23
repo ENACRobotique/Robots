@@ -33,11 +33,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>arduinolib/Encoder</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/Encoder</locationURI>
-		</link>
-		<link>
 			<name>arduinolib/LiquidCrystal</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/core/arduino/libraries/LiquidCrystal</locationURI>
