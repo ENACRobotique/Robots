@@ -8,15 +8,21 @@
 #include "lib_move.h"
 #include "state_tirette.h"
 #include "state_dead.h"
+#include "sharp_2d120x.h"
 
 sState *pausePrevState;
 sState* testPause(){
     static unsigned long lastSeen;
+#ifndef SHARP_ONLY
     if(radarIntrusion()) lastSeen=millis();
+#else
+    if(sharpIntrusion()) lastSeen=millis();
+#endif
     if( (millis()-lastSeen)>= RADAR_SAFETY_TIME ) return pausePrevState;
-    if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
-    if ((millis()-_matchStart) > TIME_MATCH_LAUN ) {
-	launcherServoUp.write(10);}
+    if ((millis()-_matchStart) > TIME_MATCH_STOP ) {
+    	emergencyStop();
+    	return &sDead;
+    }
     return 0;
 }
 

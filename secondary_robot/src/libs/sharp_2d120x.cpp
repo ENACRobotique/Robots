@@ -1,4 +1,8 @@
 #include "sharp_2d120x.h"
+#include "Arduino.h"
+
+int C_sharp_limit[ NB_SHARP ];
+int pin_sharp[NB_SHARP];
 
 unsigned int _raw2dist120x[] = {    // sizeof(unsigned int)==2 => 65535 max
 //  _raw2dist120x[raw>>3] is in centimers<<4 when raw is from 0 to 1023
@@ -23,3 +27,37 @@ int raw2dist120x(int m) {    // returns centimeters<<4
     return ( _raw2dist120x[m>>3]*(8-(m&7)) + _raw2dist120x[(m>>3)+1]*(m&7) )>>3;
 }
 
+int sharpRead(int pin_sharp){
+	int read = analogRead(pin_sharp);
+	int distance = raw2dist120x(read) >> 4;
+	return distance;
+}
+
+int sharpIntrusion(){
+  int nb=0;
+  int i;
+  for (i=0;i<NB_SHARP ;i++){
+    if(sharpRead(pin_sharp[i])<C_sharp_limit[i] && sharpRead(pin_sharp[i])) nb++;
+#ifdef DEBUG_SHARP
+    Serial.print("sharp: ");
+    Serial.print(sharpRead(pin_sharp[i]));
+    Serial.print(" | ");
+#endif
+  }
+#ifdef DEBUG_SHARP
+  Serial.println(" ");
+#endif
+  return nb;
+}
+
+void sharpSetLim(int limits[NB_SHARP]){
+    memcpy(C_sharp_limit,limits,sizeof(uint16_t)*NB_SHARP);
+}
+
+void setSharpPin(int pinSharp[])
+{
+	int i;
+	for(i=0;i<NB_SHARP;i++){
+		pin_sharp[i] = pinSharp[i];
+	}
+}
