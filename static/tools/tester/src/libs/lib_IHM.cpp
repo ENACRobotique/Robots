@@ -14,10 +14,12 @@
 #include "lib_IHM.h"
 
 #ifndef NOLCD
-LiquidCrystal lcd(LCD1,LCD2,LCD3,LCD4,LCD5,LCD6); //pins a vérifier
+LiquidCrystal lcd(LCD1,LCD2,LCD3,LCD4,LCD5,LCD6);
 #endif
 
-Encoder myEnc(ENCODER1, ENCODER2);
+//Encoder myEnc(ENCODER1, ENCODER2);
+Encoder2 myEnc(ENCODER1, ENCODER2);
+
 
 void afficher(const char * format...)
 {
