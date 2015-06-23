@@ -15,9 +15,13 @@
 #include "lib_IHM.h"
 #include "lib_odo.h"
 #include "state_Codeur_nb_inc_choice.h"
+extern "C" {
+#include "median_filter.h"
+}
 
 #define NB_VISU 3
 int inc_t = 3200;
+median_t mf;
 
 sState* testCodeur(){
 	static unsigned long prev_time = millis();
@@ -33,8 +37,8 @@ sState* testCodeur(){
 		    memPosition=Position;
 		}
 		////////////////////////////////
-
-		int nbInc = odoRead();
+		mf_update(&mf, odoRead());
+		int nbInc = mf_get(&mf);
 		//rajouter un median filter pour lisser les valeurs!
 		switch (Position)		//et on va dans le bon état
 		{
@@ -81,6 +85,7 @@ sState* testCodeur(){
 void initCodeur(sState *prev){
 	odoInitHard(CODERINT,CODERSTATE);
 	myEnc.write(0);
+	mf_init(&mf, 15, 0);
 }
 
 void deinitCodeur(sState *next){
