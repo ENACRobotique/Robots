@@ -16,29 +16,16 @@
 #include "state_choice_servo.h"
 
 sState* testpwm_0_255(){
-	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();
 
 	int pos_enc = myEnc.read();
 
 	if(pos_enc!=pos_enc_old){
-		if(millis()-temps_enc < DUREE_BIG_STEPS)
-		{
-			pos_enc = pos_enc_old + 10 * (pos_enc - pos_enc_old);
-		}
-		pos_enc = CLAMP(0, pos_enc, 255);
-		temps_enc=millis();
-
 		display(pos_enc);
 		myEnc.write(pos_enc);
 		pos_enc_old=pos_enc;
 		analogWrite(PIN_PWM_SERVO,pos_enc);
 	}
-
-//	if(!digitalRead(SELECT)){	//nécessite de valider avant que le servo ne se déplace
-//		while(!digitalRead(SELECT));
-//		analogWrite(PIN_PWM_SERVO,pos_enc);
-//	}
 
 	if(!digitalRead(RETOUR)){
 		delay(DELAY_BOUNCE);	//anti rebond
@@ -53,7 +40,9 @@ void initpwm_0_255(sState *prev){
 		servo3.detach();
 	}
 	pinMode(PIN_PWM_SERVO,OUTPUT);
+	myEnc.setLimits(0,255);
 	myEnc.write(0);
+	myEnc.setMultiplicators(1,1);
 	analogWrite(PIN_PWM_SERVO,0);
 	display(0);
 }

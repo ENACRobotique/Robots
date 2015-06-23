@@ -29,10 +29,6 @@ sState* testmode_servo(){
 	int Position = myEnc.read();    //position du selecteur
 
 	if(Position != memPosition){  //on affiche que si on change de position
-		if (Position != CLAMP(0,Position,NB_mode_servo-1)){		//on ne descend pas dans les négatifs
-			Position = CLAMP(0,Position,NB_mode_servo-1);
-			myEnc.write(Position);
-		}
 		afficher(menu_mode[Position]);
 		memPosition=Position;
 	}
@@ -58,7 +54,9 @@ sState* testmode_servo(){
 }
 
 void initmode_servo(sState *prev){
+			myEnc.setLimits(0,NB_mode_servo-1);
 			myEnc.write(0);
+			myEnc.setMultiplicators(1,1);
 			afficher(menu_mode[0]);
 }
 void deinitmode_servo(sState *next){

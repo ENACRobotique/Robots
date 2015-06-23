@@ -18,23 +18,12 @@
 #define MIN_INC_BY_TURN 800
 
 sState* testCodeur_nb_inc_choice(){
-	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();
 
 	int pos_enc = myEnc.read();
 
 	if(pos_enc!=pos_enc_old){
-		if(millis()-temps_enc < DUREE_BIG_STEPS){
-			pos_enc = pos_enc_old + 50 * (pos_enc - pos_enc_old);
-		}
-		else{
-			pos_enc = pos_enc_old + 5 * (pos_enc - pos_enc_old);
-		}
-		pos_enc = CLAMP(MIN_INC_BY_TURN, pos_enc, MAX_INC_BY_TURN);
-		temps_enc=millis();
-
 		afficher("Nb inc: %d", pos_enc);
-		myEnc.write(pos_enc);
 		pos_enc_old=pos_enc;
 	}
 
@@ -54,7 +43,9 @@ sState* testCodeur_nb_inc_choice(){
 }
 
 void initCodeur_nb_inc_choice(sState *prev){
+	myEnc.setLimits(MIN_INC_BY_TURN,MAX_INC_BY_TURN);
 	myEnc.write(inc_t);
+	myEnc.setMultiplicators(5,50);
 	afficher("Nb inc: %d", inc_t);
 }
 

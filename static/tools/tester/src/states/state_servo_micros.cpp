@@ -15,21 +15,11 @@
 
 
 sState* testservo_micros(){
-	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();
 
 	int pos_enc = myEnc.read();
 
 	if(pos_enc!=pos_enc_old){
-		if(millis()-temps_enc < DUREE_BIG_STEPS){
-			pos_enc = pos_enc_old + 20 * (pos_enc - pos_enc_old);
-		}
-		else{
-			pos_enc = pos_enc_old + 5 * (pos_enc - pos_enc_old);
-		}
-		pos_enc = CLAMP(500, pos_enc, 3000);
-		temps_enc=millis();
-
 		servo_choosen->writeMicroseconds(pos_enc);
 		afficher("Micros= %d us", pos_enc);
 		myEnc.write(pos_enc);
@@ -46,7 +36,9 @@ sState* testservo_micros(){
 
 void initservo_micros(sState *prev){
 	int micros=servo_choosen->readMicroseconds();
+	myEnc.setLimits(500,3000);
 	myEnc.write(micros);
+	myEnc.setMultiplicators(5,100);
 	afficher("Micros= %d us", micros);
 }
 void deinitservo_micros(sState *next){

@@ -19,23 +19,15 @@ extern "C" {
 #include "median_filter.h"
 }
 
-#define NB_VISU 3
+#define NB_VISU 4
 int inc_t = 3200;
 median_t mf;
 
 sState* testCodeur(){
 	static unsigned long prev_time = millis();
-	static int memPosition;
-	int Position = myEnc.read();
 	if(millis()-prev_time > 499){
 		//////////////////////////////// lecture de l'encodeur pour choisir le mode de visualisation
-		if(Position != memPosition){
-			if (Position != CLAMP(0,Position,NB_VISU)){
-				Position = CLAMP(0,Position,NB_VISU);
-				myEnc.write(Position);
-			}
-		    memPosition=Position;
-		}
+		int Position = myEnc.read();
 		////////////////////////////////
 		mf_update(&mf, odoRead());
 		int nbInc = mf_get(&mf);
@@ -84,7 +76,9 @@ sState* testCodeur(){
 
 void initCodeur(sState *prev){
 	odoInitHard(CODERINT,CODERSTATE);
+	myEnc.setLimits(0,NB_VISU-1);
 	myEnc.write(0);
+	myEnc.setMultiplicators(1,1);
 	mf_init(&mf, 15, 0);
 }
 

@@ -16,19 +16,11 @@
 
 
 sState* testservo_deg_validation(){
-	static long temps_enc=0;
 	static int pos_enc_old=myEnc.read();
 
 	int pos_enc = myEnc.read();
 
 	if(pos_enc!=pos_enc_old){
-		if(millis()-temps_enc < DUREE_BIG_STEPS)
-		{
-			pos_enc = pos_enc_old + 10 * (pos_enc - pos_enc_old);
-		}
-		pos_enc = CLAMP(0, pos_enc, 180);
-		temps_enc=millis();
-
 		afficher("Angle= %d", pos_enc);
 		myEnc.write(pos_enc);
 		pos_enc_old=pos_enc;
@@ -48,7 +40,9 @@ sState* testservo_deg_validation(){
 }
 void initservo_deg_validation(sState *prev){
 	int angle=servo_choosen->read();		//work only if the servo was already attach and used.
+	myEnc.setLimits(0,180);
 	myEnc.write(angle);
+	myEnc.setMultiplicators(1,10);
 	afficher("Angle= %d", angle);
 }
 
