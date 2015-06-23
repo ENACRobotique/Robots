@@ -24,9 +24,9 @@
 #define PIN_PWM_SERVO 11
 
 #define CODERINT 2
-#define CODERSTATE 3
+#define CODERSTATE 4
 
-#define ENCODER1 4
+#define ENCODER1 3
 #define ENCODER2 5
 #define SELECT 6
 #define RETOUR A2
