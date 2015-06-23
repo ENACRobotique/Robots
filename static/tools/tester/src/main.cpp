@@ -14,7 +14,6 @@
 #include "states/state_mode_servo.h"
 #include "states/state_Menu_pwm.h"
 #include "Arduino.h"
-#include "Encoder.h"
 #include "Servo.h"
 
 #define NB_menu_servo 3

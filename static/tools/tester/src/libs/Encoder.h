@@ -10,11 +10,11 @@
 
 #define CLAMP(m, n, M) min(max((m), (n)), (M))
 
-class Encoder2
+class Encoder
 {
     public:
 
-	Encoder2(int p1, int p2);
+	Encoder(int p1, int p2);
 
     int read();
 
