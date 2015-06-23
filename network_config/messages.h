@@ -52,9 +52,12 @@ typedef enum{
     E_GENERIC_POS_STATUS,   // @payload.genericPosStatus: generic position and status of an element
     E_POS_STATS,            // @payload.posStats: position statistics (packed)
     E_TRAJ_ORIENT_EL,       // @payload.trajOrientEl: complex trajectory element (position + orientation wrt time)
-    E_POS_CAM,              // @payload.posCam: For position computed from CAM
     E_SYNC_QUERY,           // @payload.syncQuery: for time synchronization
     E_SYNC_RESPONSE,        // @payload.syncResponse: for time synchronization
+    E_DO_ABSPOS,            // @payload.doAbsPos: for asking to perform a position fix
+    E_DONE_ABSPOS,          // @payload.doneAbsPos: for sending result of position fix
+    E_PROP_STOP,            //  stop the robot
+    E_TRAJ_POS_SPD_EL,      // @payload.trajPosSpdEl: complex trajectory element (position + speed wrt time)
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -91,7 +94,6 @@ const char *eType2str(E_TYPE elem);
 #include "messages-localization.h"
 #include "messages-interactions.h"
 #include "messages-statuses.h"
-#include "messages-image-processing.h"
 
 /************************ user payload definition stop ************************/
 
@@ -122,14 +124,17 @@ typedef union{
     sSpeedSetPoint speedSetPoint;       // E_SPEED_SETPOINT
     sTrajElRaw_t traj;                  // E_TRAJ (deprecated use trajOrientEl instead)
     sAsservStats asservStats;           // E_ASSERV_STATS
-    sTrajOrientElRaw_t trajOrientEl;    // E_TRAJ_ORIENT_EL
+    sTrajOrientElRaw_t trajOrientEl;    // E_TRAJ_ORIENT_EL (deprecated use trajPosSpdEl instead)
+    sTrajPosSpdElRaw_t trajPosSpdEl;    // E_TRAJ_POS_SPD_EL
 
 // LOCALIZATION (cf messages-localization.h)
     sMobileReportPayload mobileReport;  // E_MEASURE
     sSyncPayload_wireless syncWireless; // E_SYNC_DATA
     sSyncPayload_wired syncWired;       // E_SYNC_STATUS
     uint8_t channel;                    // E_
-    uint32_t period;                    // E_E_PERIOD
+    uint32_t period;                    // E_PERIOD
+    sDoAbsPos doAbsPos;                 // E_DO_ABSPOS
+    sDoneAbsPos doneAbsPos;             // E_DONE_ABSPOS
 
 // INTERACTIONS (cf messages-interactions.h)
     sServos servos;                     // E_SERVOS
@@ -141,9 +146,6 @@ typedef union{
     sGenericPosStatus genericPosStatus; // E_GENERIC_POS_STATUS
     sSyncQuery syncQuery;               // E_SYNC_QUERY
     sSyncResponse syncResponse;         // E_SYNC_RESPONSE
-
-// IMAGE PROCESSING (cf messages-image-processing.h)
-    sPosCam posCam;                     // E_POS_CAM
 /************************ user payload stop ************************/
 
 }uPayload;

@@ -11,6 +11,8 @@
 #include "stddef.h"
 #include "roles.h"
 #include "string.h"
+#include "params.h"
+#include "bn_debug.h"
 
 typedef struct{
     bn_Address queryOrigin;
@@ -19,7 +21,7 @@ typedef struct{
         bn_Address addr;
         uint8_t role;
     };
-    eSyncStatus status;
+    eSyncStatus status :8;
 }syncQueryStatus;
 
 syncQueryStatus queryArray[SYNC_ARRAY_SIZE];    // circular buffer
@@ -33,6 +35,9 @@ void gs_receiveQuery(sMsg *msg){
     int i=0;
 
     if (msg->header.type == E_SYNC_QUERY){
+#ifdef DEBUG_GLOBAL_SYNC
+        bn_printfDbg("squery received from %hx, %d elem\n", msg->header.srcAddr,msg->payload.syncQuery.nb);
+#endif
         while (i<msg->payload.syncQuery.nb && gs_size<SYNC_ARRAY_SIZE){
             queryArray[gs_wIndex].queryOrigin = msg->header.srcAddr;
             queryArray[gs_wIndex].type = msg->payload.syncQuery.cfgs[i].type;
@@ -58,9 +63,9 @@ void gs_receiveQuery(sMsg *msg){
             sMsg reply;
             reply.header.destAddr = msg->header.srcAddr;
             reply.header.type = E_SYNC_RESPONSE;
-            reply.header.size = sizeof(reply.payload.syncResponse.cfgs[0]) * (msg->payload.syncQuery.nb-i);
+            reply.header.size = sizeof(reply.payload.syncResponse.nb) + sizeof(reply.payload.syncResponse.cfgs[0]) * (msg->payload.syncQuery.nb-i);
             int k=0;
-            while (i<msg->payload.syncQuery.nb && k<18){
+            while (i<msg->payload.syncQuery.nb && k<13){
                 reply.payload.syncResponse.cfgs[k].type = msg->payload.syncQuery.cfgs[i].type;
                 if (reply.payload.syncResponse.cfgs[k].type == SYNCTYPE_ADDRESS){
                     reply.payload.syncResponse.cfgs[k].addr = msg->payload.syncQuery.cfgs[i].addr;
@@ -71,6 +76,7 @@ void gs_receiveQuery(sMsg *msg){
                 k++;
                 i++;
             }
+            reply.payload.syncResponse.nb = k;
             bn_send(&reply);
         }
     }
@@ -105,7 +111,7 @@ int gs_testOne(){
         }
         gs_rIndex = (gs_rIndex+1)%SYNC_ARRAY_SIZE;
     }
-    if (ret<0 || gs_rIndex==gs_wIndex){
+    if (ret<0 || (gs_rIndex==gs_wIndex && gs_size)){
         // sent result on first error or if everything has been tested
         sMsg msg;
         msg.header.destAddr = queryArray[gs_oIndex].queryOrigin;
@@ -113,6 +119,7 @@ int gs_testOne(){
         msg.payload.syncResponse.nb = 0;
         while (queryArray[gs_oIndex].queryOrigin == msg.header.destAddr  && gs_oIndex < gs_rIndex){
             msg.payload.syncResponse.cfgs[msg.payload.syncResponse.nb].type = queryArray[gs_oIndex].type;
+            msg.payload.syncResponse.cfgs[msg.payload.syncResponse.nb].status = queryArray[gs_oIndex].status;
             if (queryArray[gs_oIndex].type == SYNCTYPE_ADDRESS) {
                 msg.payload.syncResponse.cfgs[msg.payload.syncResponse.nb].addr = queryArray[gs_oIndex].addr;
             }
@@ -121,9 +128,16 @@ int gs_testOne(){
             }
             gs_oIndex = (gs_oIndex+1)%SYNC_ARRAY_SIZE;
             gs_size--;
+            msg.payload.syncResponse.nb++;
         }
-        msg.header.size = msg.payload.syncResponse.nb*sizeof(msg.payload.syncResponse.cfgs[0]);
+        msg.header.size = sizeof(msg.payload.syncResponse.nb) + msg.payload.syncResponse.nb*sizeof(msg.payload.syncResponse.cfgs[0]);
+#ifndef DEBUG_GLOBAL_SYNC
         while (bn_sendAck(&msg)<0); // critical, Infinite loop
+#else
+        int nbtries = 0;
+        while (bn_sendAck(&msg)<0) nbtries++; // critical, Infinite loop
+        bn_printfDbg("tried to send %d times\n",nbtries);
+#endif
     }
     return 0;
 }
@@ -134,7 +148,7 @@ void gs_beaconStatus(eSyncStatus status){
     if (queryBeacons.queryOrigin!=0){
         msg.header.destAddr = queryBeacons.queryOrigin;
         msg.header.type = E_SYNC_RESPONSE;
-        msg.header.size = sizeof(msg.payload.syncResponse.cfgs[0]);
+        msg.header.size = sizeof(msg.payload.syncResponse.nb) + sizeof(msg.payload.syncResponse.cfgs[0]);
         msg.payload.syncResponse.nb = 1;
         msg.payload.syncResponse.cfgs[0].type = SYNCTYPE_BEACONS;
         msg.payload.syncResponse.cfgs[0].status = status;

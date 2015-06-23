@@ -2,29 +2,34 @@
  * path.cpp
  *
  *  Created on: 18 févr. 2015
- *      Author: seb
+ *      Author: Sebastien Malissard
  */
 
-#include <a_star_tools.h>
+
 #include "path.h"
 
-#include <main_ai_tools/path.h>
-#include <main_ai_tools/statuses.h>
-#include <tools.h>
 #include <cmath>
 #include <iostream>
-#include "a_star.h"
-#include "time_tools.h"
-#include "tools.h"
-#include "ai_tools.h"
-#include "obj_tools.h"
+#include <cstring>
 #include "GeometryTools.h"
 
-extern "C"{
-#include "roles.h"
-#include "millis.h"
-#include <unistd.h>
 #include "bn_intp.h"
+#include "messages-statuses.h"
+#include "messages-locomotion.h"
+
+#include "a_star_tools.h"
+#include "a_star.h"
+#include "ai_tools.h"
+#include "obj_tools.h"
+#include "time_tools.h"
+#include "tools.h"
+#include "statuses.h"
+#include "communications.h"
+
+extern "C"{
+#include "millis.h"
+#include "roles.h"
+#include <unistd.h>
 }
 
 
@@ -132,28 +137,41 @@ void Path::sendRobot(bool holo, float thetaEnd) {
 }
 
 /*
- * Stop the robot
+ * Stop the primary robot
  */
 void Path::stopRobot(bool holo) {
-    Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
-    float theta = statuses.getLastOrient(ELT_PRIMARY);
-    sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
+    sMsg msg;
 
-    logs << INFO << "Stop Robot";
+    memset(&msg, 0, sizeof(msg));
 
-    clear();
+    logs << WAR << "Stop robot";
 
-    _path.push_back(traj);
+    if (holo) {
+        msg.header.destAddr = role_get_addr(ROLE_PRIM_PROPULSION);
+        msg.header.type = E_PROP_STOP;
+        msg.header.size = 0;
 
-    sendRobot(holo, theta);
+        bnSendBlock(msg, "stop robot");
+    }
+    else { // for backward compatibility
+        Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);
+        float theta = statuses.getLastOrient(ELT_PRIMARY);
+        sTrajEl_t traj = sTrajEl_t{posRobot, posRobot, {{posRobot.x, posRobot.y}, 0, 0, 1, 0}, 0, 0, 0 };
+
+        clear();
+        _path.push_back(traj);
+
+        sendRobot(holo, theta);
+    }
 }
 
 
-void Path::go2PointOrient(const Point2D<float> &dest, vector<astar::sObs_t>& obs, float angle){
-    Point2D<float> posRobot(obs[0].c.x, obs[0].c.y);
+void Path::go2PointOrient(const Point2D<float> &dest, vector<astar::sObs_t>& /*obs*/, float angle){
+    Point2D<float> posRobot = statuses.getLastPosXY(ELT_PRIMARY);//posRobot(obs[0].c.x, obs[0].c.y);
 
     clear();
-    sTrajEl_t traj = sTrajEl_t{{obs[0].c.x, obs[0].c.y}, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
+    logs << INFO << "gottoPoint" << posRobot.x << " " << posRobot.y;
+    sTrajEl_t traj = sTrajEl_t{{posRobot.x, posRobot.y}, dest, {{dest.x, dest.y}, 0., 0, 1, 0}, 0, 0, 0 };
 
     _path.push_back(traj);
     sendRobot(true, angle);
@@ -319,6 +337,46 @@ void Path::computePathHolonomic(float theta_end_obj){
 
 }
 
+PointOrient2D<float> Path::getPosOrient(uint32_t _time_us /*synchronize time*/) { // Be careful, return an ideal the position orient
+    PointOrient2D<float> po;
+
+    if (!_lastTrajPosSpd.empty()) {
+        if ((long) _time_us - (long) _lastTrajPosSpd.front().t < 0) {
+            return { {nanf(""), nanf("")}, nanf("")};
+        }
+
+        for (auto i = _lastTrajPosSpd.begin(); i != _lastTrajPosSpd.end() - 1; ++i) {
+            if (i->t >= _time_us && (i+1)->t < _time_us) {
+                float d = 1/2*((i+1)->v - i->v)/((i+1)->t - i->t)*(_time_us - i->t)*(_time_us - i->t) + i->v*(_time_us - i->t);
+                float theta = 1/2*((i+1)->theta - i->theta)/((i+1)->t - i->t)*(_time_us - i->t)*(_time_us - i->t) + i->theta*(_time_us - i->t);
+
+                switch (i->type_e) {
+                case TRAJSTEP_LINE: {
+                    Vector2D<float> v1(1, 0), v2(i->p, (i+1)->p);
+                    float o = v1.angle(v2);
+                    return { {i->p.x + d*cosf(o), i->p.y + d*sinf(o)}, theta};
+                }
+
+                case TRAJSTEP_ARC: {
+                    Vector2D<float> v1(1, 0), v2({i->type.arc.c.c.x, i->type.arc.c.c.y}, (i+1)->p);
+                    float o = v1.angle(v2) + d/i->type.arc.c.r;
+                    return { {i->type.arc.c.c.x + abs(i->type.arc.c.r)*cosf(o), i->type.arc.c.c.y + abs(i->type.arc.c.r)*sinf(o)}, theta};
+                }
+
+                default:
+                    logs << ERR << "Unknown type of trajectory element";
+                }
+            }
+        }
+
+
+        return {_lastTrajPosSpd.back().p, _lastTrajPosSpd.back().theta};
+    }
+
+    return { {nanf(""), nanf("")}, nanf("")};
+
+}
+
 /*
  * Print the trajectory element choose.
  */
@@ -423,7 +481,7 @@ void Path::setPathLength() {
  * Return true(1) if the 2 obs are identical else false(0)
  */
 bool Path::checkSameObs(astar::sObs_t& obs1, astar::sObs_t& obs2){
-    return ( obs1.r == obs2.r && obs1.c.x == obs2.c.x && obs1.c.y == obs2.c.y);
+    return abs(obs1.r - obs2.r) < 1.f && abs(obs1.c.x - obs2.c.x) < 1.f && abs(obs1.c.y - obs2.c.y) < 1.f;
     }
 
 /*
@@ -433,67 +491,25 @@ bool Path::checkSamePath(sPath_t &path){
     unsigned int t1_ind = path.path_len;
     unsigned int t2_ind = _path_len;
 
-    logs << INFO << "Check if the same path";
-
     if(path.path_len==0 || _path.size()==0)
         return false;
-    logs << DEBUG << "same_t 1.0";
 
     while ((int)t1_ind > 0 &&  (int)t2_ind > 0) { //pb si un step est terminé
-        logs << DEBUG << "same_t 2.0";
         if (checkSameObs((path.path[t1_ind-1].obs), (_path[t2_ind-1].obs)) ){
           t1_ind--;
            t2_ind--;
            }
-       else return 0;
+       else return false;
     }
-    logs << DEBUG << "same_t 3.0";
-    if (!(checkSameObs((path.path[t1_ind].obs), (_path[t2_ind].obs))))
-        return 0;
 
-    if ( (fabs(path.path[t1_ind].p2.x - _path[t2_ind].p2.x ) > 2.) && (fabs(path.path[t1_ind].p2.y - _path[t2_ind].p2.y) > 2.) )
-        return 0;
-    else
-        logs << DEBUG << "same_t 4.0";
-
-    logs << INFO << "Same path";
-    return 1 ;
-}
-
-/*
- * Return 1 if the same path else 0.
- */
-bool Path::checkSamePath2(deque<sTrajEl_t>& path){
-    int i = path.size(), j = _path.size();
-
-    if(i != j)
-        return false;
-
-    while (i >= 0 && j >= 0) {
-        if(checkSameObs(path[i].obs, _path[j].obs)){
-            i--;
-            j--;
-        }else
-            return false;
-    }
     return true;
 }
 
 /*
- * Return 1 if the same path else 0.
+ * Return 'true' if the same path else 'false'.
  */
 bool Path::checkSamePathOrient(deque<sTrajOrientEl_t>& path){
     int i = path.size() - 1, j = _path_orient.size() - 1;
-
-    if(i == 0 && j == 0){//rotation
-        if(path[0].theta2 == _path_orient[0].theta2 && path[0].p2 == _path_orient[0].p2)
-            return true;
-        else
-            return false;
-    }
-
-    if(i != j)
-        return false;
 
     while (i >= 0 && j >= 0) {
         if(checkSameObs(path[i].obs, _path_orient[j].obs)){
@@ -502,7 +518,11 @@ bool Path::checkSamePathOrient(deque<sTrajOrientEl_t>& path){
         }else
             return false;
     }
-    return true;
+
+    if (abs(path[i+1].theta2 - _path_orient[j+1].theta2) < M_PI/180.f && (path[i+1].p2 - _path_orient[j+1].p2).normSq() < 1.f)
+        return true;
+    else
+        return false;
 }
 
 /*

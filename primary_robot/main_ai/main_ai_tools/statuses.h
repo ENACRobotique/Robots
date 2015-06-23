@@ -32,7 +32,8 @@ class Statuses {
 
 
         int receivedNewStatus(sGenericPosStatus& status);
-        void posSend(eElement el, Point2D<float>& p);
+        void posSend(const eElement el, const Point2D<float>& p);
+        void setPropStatus(ePropStatus &propStatus);
 
         sGenericPosStatus& getLastStatus(eElement el, frame_t fr = FRAME_PLAYGROUND);
 
@@ -40,6 +41,9 @@ class Statuses {
         Point2D<float> getLastPosXY(eElement el);
         float getLastOrient(eElement el);
         float getLastSpeed(eElement el);
+        ePropStatus getPropStatus();
+
+        int index;
 
     private:
         void fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *srcPAPG, s2DPAUncert *srcUPG, s2DPosAtt *dstPAPG, s2DPAUncert *dstUPG);
@@ -48,6 +52,8 @@ class Statuses {
         array <statusConfig_t, NUM_E_ELEMENT> _config;
         bool reset[NUM_E_ELEMENT];
         Point2D<float> pt[NUM_E_ELEMENT];
+        bn_Address addrProp;
+        ePropStatus       _propStatus;
 
 };
 

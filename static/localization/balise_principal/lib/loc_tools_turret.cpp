@@ -115,7 +115,7 @@ int handleMeasurePayload(sMobileReportPayload *pLoad, bn_Address origin){
     msg.payload.genericPosStatus.pos_u.a_angle=-1;
     msg.payload.genericPosStatus.pos_u.a_var=-1;
     msg.payload.genericPosStatus.pos_u.b_var=-1;
-    msg.payload.genericPosStatus.pos_u.theta=-1;
+    msg.payload.genericPosStatus.pos_u.theta_var=-1;
 
     bn_send(&msg);
 #ifdef DEBUG_CALIBRATION

@@ -168,12 +168,12 @@ int CapAI::loop(){
 void CapAI::initObjective(){
     CapTeam* capTeam = dynamic_cast<CapTeam*> (robot->caps[eCap::TEAM]);
     CapPosition* capPos = dynamic_cast<CapPosition*> (robot->caps[eCap::POS]);
-    CapActuator* capActuator = dynamic_cast<CapActuator*> (robot->caps[eCap::ACTUATOR]);
+   // CapActuator* capActuator = dynamic_cast<CapActuator*> (robot->caps[eCap::ACTUATOR]);
 
-    float angleRobot = capPos->getLastTheta();
+   // float angleRobot = capPos->getLastTheta();
     Point2D<float> posRobot = capPos->getLastPosXY();
-    eColor_t color = capTeam->getColor();
-
+   // eColor_t color = capTeam->getColor();
+/*
     paramObj par = {posRobot,
             angleRobot,
             color,
@@ -181,15 +181,15 @@ void CapAI::initObjective(){
             robot->env->obs_updated,
             listObj,
             capActuator->_act};
-
+*/
     logs << INFO << "InitOjective for AI";
-
-    if(capTeam->getColor() == YELLOW){
+/*
+    if(capTeam->getColor() == eColor_t::YELLOW){
         listObj.push_back(new Clap(0));
         listObj.push_back(new Clap(2));
         listObj.push_back(new Clap(4));
     }
-    else if(capTeam->getColor() == GREEN){
+    else if(capTeam->getColor() == eColor_t::GREEN){
         listObj.push_back(new Clap(1));
         listObj.push_back(new Clap(3));
         listObj.push_back(new Clap(5));
@@ -198,24 +198,33 @@ void CapAI::initObjective(){
         logs << ERR << "Color ???";
         exit(EXIT_FAILURE);
     }
+    */
+/*
+    if(color == YELLOW)
+        listObj.push_back(new Cup(1, robot->env->obs));
+    else
+        listObj.push_back(new Cup(4, robot->env->obs));
+
+    listObj.push_back(new DropCup(0, capTeam->getColor()));
+*/
+
     listObj.push_back(new ObjStartingZone(capTeam->getColor()));
 
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
 
 
-    listObj.push_back(new Spot2(0, capTeam->getColor()));
+   // listObj.push_back(new Spot2(0, capTeam->getColor()));
 
-    listObj.push_back(new Spot3(robot->env->obs, capTeam->getColor()));
+  //  listObj.push_back(new Spot3(robot->env->obs, capTeam->getColor()));
 
-    listObj.push_back(new Spot4(par));
-/*
-    for(unsigned int i = 0 ; i < 2 ; i++)
+   // listObj.push_back(new Spot4(par));
+
+
+    for(unsigned int i = 0 ; i < 1 ; i++)
         listObj.push_back(new DropSpot(i, capTeam->getColor()));
-*/
-/*
-    listObj.push_back(new Light(capTeam->getColor()));
-*/
+
+   // listObj.push_back(new Light(capTeam->getColor()));
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));
 
@@ -225,20 +234,20 @@ void CapAI::initObjective(){
 
 
 
-    if(capTeam->getColor() == YELLOW){
+    if(capTeam->getColor() == eColor_t::YELLOW){
         for(unsigned int i = 12 ; i < 20 ; i++){
             robot->env->obs[i].active = 0;
             robot->env->obs_updated[i]++;
         }
     }
-    else if(capTeam->getColor() == GREEN){
+    else if(capTeam->getColor() == eColor_t::GREEN){
         for(unsigned int i = 4 ; i < 12 ; i++){
             robot->env->obs[i].active = 0;
             robot->env->obs_updated[i]++;
         }
     }
 
-    if(capTeam->getColor() == GREEN)
+    if(capTeam->getColor() == eColor_t::GREEN)
         robot->env->obs[BLOCK_START_ZONE].c = {45, 100};
     else
         robot->env->obs[BLOCK_START_ZONE].c = {300-45, 100};

@@ -30,9 +30,11 @@ typedef enum {
     GET_POS,
     TRAJ1,
     WAIT_TRAJ1,
+    UNLOCK_STAND1,
     DROP_STAND1,
     TRAJ2,
     WAIT_TRAJ2,
+    UNLOCK_STAND2,
     DROP_STAND2,
     TRAJ3,
     WAIT_TRAJ3,
@@ -68,7 +70,7 @@ typedef enum {
 class ObjStartingZone : public Obj{
     public:
         ObjStartingZone(eColor_t _color) : Obj(E_OBJ_STARTING_ZONE, ActuatorType::CAMERA, false),
-                stateLoc(GET_POS), destPoint(0, 100), angleSelect(0),  color(_color){
+                stateLoc(GET_POS), destPoint(0, 100), angleSelect(0),  color(_color), timePrev(0){
             Point2D<float> EP{50, 100}; //Yellow
             sObjEntry_t objEP;
 
@@ -77,7 +79,7 @@ class ObjStartingZone : public Obj{
             objEP.type = E_POINT;
             objEP.radius = 15.;
             objEP.delta = M_PI;
-            if(color == GREEN){
+            if(color == eColor_t::GREEN){
                 EP.x = 300. - EP.x;
                 objEP.pt.angle = M_PI;  //TODO dépend de la position de la caméra
             }
@@ -107,23 +109,46 @@ class ObjStartingZone : public Obj{
 
                 case WAIT_TRAJ1:
                     if(par.posRobot.distanceTo(destPoint) < RESOLUTION_POS){
+                        servo.downElevator(_actuator_select);
+                        timePrev = millis();
+                        stateLoc = UNLOCK_STAND1;
+                    }
+                    break;
+
+                case UNLOCK_STAND1:
+                    if(millis() - timePrev){
+                        servo.unlockElevator(_actuator_select);
+                        timePrev = millis();
                         stateLoc = DROP_STAND1;
                     }
                     break;
 
                 case DROP_STAND1:
-                    stateLoc = TRAJ2;
+                    if(millis() - timePrev){
+                        servo.upElevator(_actuator_select);
+                        timePrev = millis();
+                        stateLoc = TRAJ2;
+                    }
                     break;
 
                 case TRAJ2:
-                    logs << WAR << "Start TRAJ2";
-                    setDestPointX(POINT_DROP_SECOND_STAND);
-                    path.go2PointOrient(destPoint, par.obs, angleSelect);
-                    stateLoc = WAIT_TRAJ2;
+                    if(millis() - timePrev){
+                        setDestPointX(POINT_DROP_SECOND_STAND);
+                        path.go2PointOrient(destPoint, par.obs, angleSelect);
+                        stateLoc = WAIT_TRAJ2;
+                    }
                     break;
 
                 case WAIT_TRAJ2:
                     if(par.posRobot.distanceTo(destPoint) < RESOLUTION_POS){
+                        servo.downElevator(_actuator_select);
+                        timePrev = millis();
+                        stateLoc = UNLOCK_STAND2;
+                    }
+                    break;
+
+                case UNLOCK_STAND2:
+                    if(millis() - timePrev > 500.){
                         stateLoc = DROP_STAND2;
                     }
                     break;
@@ -317,7 +342,7 @@ class ObjStartingZone : public Obj{
 
     private:
         void setDestPointX(float x){
-            destPoint.x = color==YELLOW?x:300-x;
+            destPoint.x = color==eColor_t::YELLOW?x:300-x;
         }
 
         void setAngleSelect(std::vector<Actuator>& act, ActuatorType type, bool par){ //if elevator par=ball, if cupActuator par=full
@@ -346,8 +371,10 @@ class ObjStartingZone : public Obj{
                 return;
             }
 
+            _actuator_select = i;
+
             angleSelect = M_PI + angleAct;
-            angleSelect += color == GREEN?M_PI:0;
+            angleSelect += color == eColor_t::GREEN?M_PI:0;
 
         }
 
@@ -364,6 +391,7 @@ class ObjStartingZone : public Obj{
         Point2D<float> destPoint;
         float angleSelect;
         eColor_t color;
+        unsigned int timePrev;
 
 
 

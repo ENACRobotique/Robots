@@ -17,6 +17,9 @@
 #include "state_stairs.h"
 #include "lib_move.h"
 #include "sharp_2d120x.h"
+#include "state_Prestairs.h"
+#include "../libs/lib_attitude.h"
+#include "../libs/MPU_6050.h"
 
 /* State : tirette, first state of all, waits until the tirette is pulled
  *
@@ -26,15 +29,17 @@
 
 sState* testTirette()
 	{
+	_matchStart=millis();
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
     static unsigned long timepull=0;
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
     	{
+		initInertial();
     		if(timepull==0){timepull = millis();}
 			if(millis() - timepull > TIME_BEFORE_START){
-				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajGreenInit;
-				else /*return &sAlacon*/return &sTrajYellowInit;
+				if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenInit;
+				else return &sTrajYellowInit;
 			}
     	}
     return 0;

@@ -15,8 +15,14 @@
 
 typedef enum {
     PROP_IDLE,
+    PROP_POSHOLD,
     PROP_RUNNING
 } ePropStatus;
+
+typedef enum {
+    PROP_SETPOS,
+    PROP_MIXPOS
+} ePropStatusAction;
 
 typedef struct __attribute__((packed)){
     uint32_t date;      // synchronized date (µs)
@@ -30,11 +36,15 @@ typedef struct __attribute__((packed)){
         struct{
             s2DSpeed spd;
 
-            ePropStatus status;
+            uint8_t rid; // recalibration identifier
+
             uint16_t tid :12; // trajectory identifier
             uint8_t sid :4; // step identifier
             uint8_t ssid :1; // sub-step identifier (0:first element of message, 1:second element of message)
             uint8_t sssid :1; // sub-sub-step identifier (0:line, 1:circle)
+
+            ePropStatus status :2;
+            ePropStatusAction action :1;
         } prop_status;
 
         // in case of pos.id == ELT_ADV_*
@@ -91,14 +101,14 @@ typedef enum{
 }eSyncStatus;
 
 typedef struct __attribute__((packed)){
-    uint8_t nb; // must be <= 18
-    struct __attribute__((packed)){ // 3bytes
+    uint8_t nb; // must be <= 13
+    struct __attribute__((packed)){ // 4bytes
         eSyncType type :8;
         union{
             bn_Address addr;
             uint8_t role;
         };
-        eSyncStatus status;
+        eSyncStatus status :8;
     } cfgs[];
 } sSyncResponse;
 

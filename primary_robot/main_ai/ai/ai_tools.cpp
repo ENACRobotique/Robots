@@ -13,6 +13,14 @@
 
 //#define AI_TOOLS
 
+enum class Axis{
+        NONE,
+        X,
+        Y,
+        Z
+};
+
+
 /*
  * Print to the screen the list of active obstacle
  */
@@ -62,7 +70,7 @@ unsigned int checkPointInLimitPlayground(const Point2D<float>& p, const float li
  */
 Point2D<float> projectPointInObs(const Point2D<float>& p, vector<astar::sObs_t>& obs){
     unsigned int n = checkPointInObs(p, obs);
-logs << WAR << "Projection function: n="<< n;
+
     if (n > 0) {
         Circle2D<float> c(obs[n].c.x, obs[n].c.y, obs[n].r);
         Point2D<float> r;
@@ -143,29 +151,185 @@ int colissionDetection(const eElement& robot, const std::vector<astar::sObs_t>& 
 
     d = ptRobot.distanceTo(ptPr);
     if (d < (pos[robot].r + pos[0].r) && d) {
-        logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!";
+     //   logs << INFO << "CONTACT PRIM!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 1;
     }
 
     d = ptRobot.distanceTo(ptSc);
     if (d < (pos[robot].r + pos[1].r) && d) {
-        logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
+      //  logs << INFO << "CONTACT SEC!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 2;
     }
 
     d = ptRobot.distanceTo(ptAPr);
     if (d < (pos[robot].r + pos[2].r) && d) {
-        logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+     //   logs << INFO << "CONTACT PRIM ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 3;
     }
 
     d = ptRobot.distanceTo(ptASc);
     if (d < (pos[robot].r + pos[3].r) && d) {
-        logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
+     //   logs << INFO << "CONTACT SEC ADV!!!!!!!!!!!!!!!!!!!!!!!!!";
         return 4;
     }
 
     return 0;
+}
+
+Axis searchAxis(const Segment2D<float>& seg){
+    if(seg.p1.x == seg.p2.x)
+        return Axis::Y;
+    else if(seg.p1.y == seg.p2.y)
+        return Axis::X;
+
+    return Axis::NONE;
+}
+
+void setStartingPosition(std::vector<SimpleTraj>& traj,const Point2D<float>& curPt, const float& curAngle, const Point2D<float>& destPt, const float& destAngle, const vector<Segment2D<float>>& robot, const vector<Segment2D<float>>& playground){
+    float dx = -1, dy = -1, ox = 10, oy = 10;
+    int pgx = -1, pgy = -1;
+
+
+    float dist_robot = 11.262;
+//    float sdr = R_ROBOT; //security distance robot
+    float theta_robot[2] = {
+            191.63*M_PI/180.,
+            191.63*M_PI/180. + 2*M_PI/3
+    };
+/*
+    //TODO Find the best pair for the resetting the position
+    std::vector<std::pair<unsigned int, unsigned int>> c;
+    //x:0 , y:1
+    c.push_back({0,1});
+
+
+    float t  = 0;      //time
+    float ls = 10;      //linear speed in cm/s
+    float as = ls/14;   //angular speed in rad/s
+
+    for(unsigned int i = 0 ; i < c.size() ; i ++){
+        float tt = 0; //temporary time
+        Point2D<float> dest = playground[c[i].first].project(curPt);
+        Vector2D<float> vref(1,0);
+        Vector2D<float> vseg(playground[c[i].first].p1, playground[c[i].first].p2);
+        float oseg = fmod(vref.angle(vseg), M_PI);
+
+        dest.x += SIGN(curPt.x - dest.x)*sdr*sin(1);
+        dest.y += SIGN(curPt.y - dest.y)*sdr*cos(1);
+        tt += curPt.distanceTo(dest)*ls;
+    }
+
+
+
+*/
+
+
+
+    /******/
+    traj.push_back({curPt, curAngle, {0,0}, 0});
+
+    for(unsigned int i = 0 ; i < playground.size() ; i++){
+        if(searchAxis(playground[i]) == Axis::Y){
+            float d = playground[i].distance(curPt);
+            if(d < dx || dx == -1){
+                dx = d;
+                pgx = i;
+            }
+        }
+    }
+
+    if(pgx != -1){
+        for(unsigned int i = 0 ; i < 2 ; i++){
+           /* Point2D<float> pjt = robot[i].project({0, 0});
+            if(pjt != robot[i].p1 && pjt != robot[i].p2){
+                Vector2D<float> v1({0,0}, pjt);
+                Vector2D<float> v2(1, 0);
+                float o = v2.angle(v1) + curAngle;
+                if(o < ox || ox == 10 ){
+                    ox = o - curAngle;
+                    rx = i;
+                }
+            }*/
+            float o = fmod(fabs(curAngle + (2*M_PI-theta_robot[i])), 2*M_PI);
+            if(o < ox){
+                ox = 2*M_PI-theta_robot[i];
+                cout << "x=" << i << "o=" << ox*180/M_PI;
+            }
+
+        }
+    }
+
+    logs << WAR << pgx;
+    if(pgx == -1)
+        logs << INFO << "Can't set position in X axis";
+    else{
+        Point2D<float> dest = playground[pgx].project(curPt);
+        dest.x += SIGN(curPt.x - dest.x)*R_ROBOT;
+        float angle = ox;
+        traj.push_back({dest, angle, {0,0}, 5});
+
+        dest = playground[pgx].project(curPt);
+        dest.x += SIGN(curPt.x - dest.x)*dist_robot;
+        //dest.x += SIGN(curPt.x - dest.x)*robot[0].distance({0,0});
+        dest.x += 10.;
+        traj.push_back({dest, angle, {dest.x, 0.}, 1});
+
+        dest = playground[pgx].project(curPt);
+        dest.x += SIGN(curPt.x - dest.x)*R_ROBOT;
+        traj.push_back({dest, angle, {0,0}, 0});
+    }
+
+    for(unsigned int i = 0 ; i < playground.size() ; i++){
+        if(searchAxis(playground[i]) == Axis::X){
+            float d = playground[i].distance(traj.back().dest);
+            if(d < dy || dy == -1){
+                dy = d;
+                pgy = i;
+            }
+        }
+    }
+
+    for(unsigned int i = 0 ; i < robot.size() ; i++){
+        /*
+        Point2D<float> pjt = robot[i].project({0, 0});
+        if(pjt != robot[i].p1 && pjt != robot[i].p2){
+            Vector2D<float> v1({0, 0}, pjt), v2(1, 0);
+            float o = v2.angle(v1) + traj.back().angle;
+            if(o < oy || oy == 10 ){
+                oy = o - traj.back().angle;
+                ry = i;
+            }
+        }
+        */
+
+        float o = fmod(fabs(curAngle + (2*M_PI-theta_robot[i]-M_PI_2)), 2*M_PI);
+        if(o < oy){
+            oy = 2*M_PI-theta_robot[i]-M_PI_2;
+            cout << "x=" << i << "o=" << ox*180/M_PI;
+        }
+    }
+
+    if(pgy == -1)
+        logs << INFO << "Can't set position in Y axis";
+    else{
+        Point2D<float> lastPos = traj.back().dest;
+        Point2D<float> dest = playground[pgy].project(traj.back().dest);
+        dest.y += SIGN(traj.back().dest.y - dest.y)*R_ROBOT;
+        //float angle = oy + SIGN(traj.back().dest.y - dest.y)*M_PI_2;
+        float angle = oy;
+        traj.push_back({dest, angle, {0,0}, 5});
+
+        dest = playground[pgy].project(lastPos);
+        dest.y += SIGN(lastPos.y - dest.y)*dist_robot;
+        dest.y -= 10.;
+        traj.push_back({dest, angle, {0., dest.y}, 2});
+
+        dest = playground[pgy].project(lastPos);
+        dest.y += SIGN(lastPos.y - dest.y)*R_ROBOT;
+        traj.push_back({dest, angle, {0,0}, 0});
+    }
+
+    traj.push_back({destPt, destAngle, {0,0}, 3});
 }
 
 /*

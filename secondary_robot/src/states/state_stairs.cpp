@@ -14,16 +14,19 @@
 #include "../tools.h"
 #include "../params.h"
 #include "state_traj.h"
+#include "state_wait.h"
+#include "lib_radar.h"
+#include "state_pause.h"
 
 #define ANGLE_STAIRS_STARTED 11
-#define ANGLE_CMD_STOP 10
+#define ANGLE_CMD_STOP 5
 #define TIME_RAG_RLSD 8000       //time to release carpet after stair climb begin(in ms)
-#define TIME_STOP 3000           //time for stop after stairs climbed (in ms)
+#define TIME_STOP 1500           //time for stop after stairs climbed (in ms)
 #define ANGLE_CARPET_HOLD 120
 #define ANGLE_CARPET_RELEASE 40
-
+#define FILTER_SHIFT 4
 #define TIME_RAG_RLSD_NO_ATTITUDE 6000
-#define ANGLE_ON_FLOOR 126
+#define ANGLE_ON_FLOOR 123
 
 int attitudeCmdStartStairs;
 unsigned long timeStairsStarted = 0;
@@ -37,6 +40,8 @@ void initHardStairs(int pin_servo){
 
 sState *testStairs()
 	{
+	static int attitudeCmdStairs_reg;
+	static int nb_vals=0;
 #ifdef ATTITUDE
 	static unsigned long timeStopSoon = 0;
 	int attitudeCmdStairs = servoAttitude.read();
@@ -45,6 +50,8 @@ sState *testStairs()
 #ifndef NO_ATTITUDE_BEFORE_STAIRS
 	if (abs(attitudeCmdStairs-attitudeCmdStartStairs) > ANGLE_STAIRS_STARTED && timeStairsStarted == 0 ){
 		timeStairsStarted = millis();
+		sStairs.flag &= ~E_RADAR;	//désactivation des radars
+		fanSetCon(FAN_SPEED);	//démarrage du ventilateur
 		Serial.println("Début montée");
 	}
 #endif
@@ -54,19 +61,29 @@ sState *testStairs()
 						servoCarpet.write(ANGLE_CARPET_RELEASE);
 						Serial.println("Relachement tapis");
 				}
+		nb_vals ++;
+		int attitudeCmdStairs_filtered;
+		attitudeCmdStairs_reg = attitudeCmdStairs_reg - (attitudeCmdStairs_reg >> FILTER_SHIFT) + attitudeCmdStairs;
+		attitudeCmdStairs_filtered = attitudeCmdStairs_reg >> FILTER_SHIFT;
 		//quand on revient a l'angle de  départ +/- ANGLE_CMD_STOP on déclanche le timer pour l'arret
-		if (abs(attitudeCmdStairs-attitudeCmdStartStairs) < ANGLE_CMD_STOP && timeStopSoon==0){
+		if (abs(attitudeCmdStairs_filtered-attitudeCmdStartStairs) < ANGLE_CMD_STOP && timeStopSoon==0 && nb_vals > 50){
 			timeStopSoon = millis();
+#ifdef DEBUG_ATTITUDE
 			Serial.println("Stop soon");
+#endif
 		}
 	}
 
 	//arret TIME_STOP après
 	if(timeStopSoon!=0 && millis() - timeStopSoon > TIME_STOP){
 		Serial.println("STOP !!!");
-		if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajEndStairsGreen;
-		else return &sTrajEndStairsYellow;
+		return &sWait;
 	}
+
+	if(timeStairsStarted==0){
+		if (radarIntrusion()) return &sPause;
+	}
+
 	return 0;
 #else
 	static unsigned long timestart = millis();
@@ -76,16 +93,15 @@ sState *testStairs()
 	}
 
 	if(millis()-timestart > 14000){
-		if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajEndStairsGreen;
-				else return &sTrajEndStairsYellow;
+		return &sWait;
 	}
 	return 0;
 #endif
+
 }
 
 void initStairs(sState *prev)
 	{
-	fanSetCon(FAN_SPEED);
 	attitudeCmdStartStairs = servoAttitude.read();
 #ifdef NO_ATTITUDE_BEFORE_STAIRS
 	attitudeCmdStartStairs = ANGLE_ON_FLOOR;
@@ -98,6 +114,9 @@ void initStairs(sState *prev)
 	#ifdef DEBUG
 		Serial.println("Starting stairs");
 	#endif
+
+	uint16_t limits[RAD_NB_PTS]={30,30};
+	radarSetLim(limits);
 
 }
 
@@ -112,7 +131,7 @@ void deinitStairs(sState *next)
 }
 
 sState sStairs={
-		BIT(E_MOTOR) |BIT(E_ATTITUDE),
+		BIT(E_MOTOR) |BIT(E_ATTITUDE)|BIT(E_RADAR),
 		&initStairs,
 		&deinitStairs,
 		&testStairs

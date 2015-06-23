@@ -7,8 +7,8 @@
  *   		By: Seb
  */
 
-#ifndef STATE_TRAJECTORY_H_
-#define STATE_TRAJECTORY_H_
+#ifndef LIB_TRAJECTORY_H_
+#define LIB_TRAJECTORY_H_
 
 #include "state_types.h"
 

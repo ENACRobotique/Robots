@@ -29,17 +29,16 @@ extern "C"{
 #include "GeometryTools.h"
 #include "init_robots.h"
 #include "environment.h"
+#include "MainAITypes.h"
+#include "Nodes.h"
 
-//#define SYNC_PROP_IA    // sync is done by IA, and only between IA and prop
-#define SYNC_TURRET     // sync is done by turret
+#define OPT_PRIMARY_MAIN_AI         1000
+#define OPT_PRIMARY_ARDUINO_IO      1001
+#define OPT_PRIMARY_TURRET          1002
+#define OPT_PRIMARY_HMI             1003
+#define OPT_PRIMARY_PROP            1004
+#define OPT_PRIMARY_DEBUB_BRIDGE    1005
 
-#ifdef CTRLC_MENU
-static int menu = 0;
-
-void intHandler(int dummy) {
-    menu = 1;
-}
-#endif
 
 void exitAI(int status){
     cout << "\033[0m";
@@ -50,11 +49,52 @@ void usage(char *cl) {
     printf("main ia\n");
     printf("Usage:\n\t%s [options]\n", cl);
     printf("Options:\n");
-    printf("\t--mode,     -m        AI mode (slave | auto | prog)\n");
+    printf("\t--mode,     -m        AI mode {slave | auto | prog}\n");
     printf("\t--log-file, -f        output log file of received messages (overwritten)\n");
     printf("\t--verbose,  -v        increases verbosity\n");
     printf("\t--quiet,    -q        not verbose\n");
+    printf("\t--info,     -i        print the current configuration\n");
     printf("\t--help,     -h, -?    prints this help\n");
+    printf("\t--primary-mainAI      {real | simu | none}\n");
+    printf("\t--primary-arduinoIO   {real | simu | none}\n");
+    printf("\t--primary-beacon      {real | simu | none}\n");
+    printf("\t--primary-hmi         {real | simu | none}\n");
+    printf("\t--primary-prop        {real | simu | none}\n");
+    printf("\t--primary-debugBridge {real | simu | none}\n");
+
+}
+
+ostream& operator<<(ostream& os, eSyncType st){
+    switch(st){
+        case SYNCTYPE_ADDRESS:
+            os << "ADDRESS";
+            break;
+        case SYNCTYPE_BEACONS:
+            os << "BEACONS";
+            break;
+        case SYNCTYPE_ROLE:
+            os << "ROLE";
+            break;
+        default:
+            os << "UNKNOWN";
+            break;
+    }
+    return os;
+}
+
+envNode getEnvNode(char *optarg){
+    if (!strcasecmp(optarg, "real")) {
+        return envNode::REAL;
+    }
+    else if (!strcasecmp(optarg, "simu")) {
+        return envNode::SIMU;
+    }
+    else if (!strcasecmp(optarg, "none")) {
+        return envNode::NONE;
+    }
+
+    logs << ERR << "Invalid argument";
+    return envNode::NONE;
 }
 
 int main(int argc, char **argv) {
@@ -63,20 +103,39 @@ int main(int argc, char **argv) {
     bool simu_primary = true;
     bool holo_primary = true;
     bool hmi_simu_primary = true;
-    eColor_t color_primary = GREEN;
+    eColor_t color_primary = eColor_t::GREEN;
+    Nodes nodes;
 
-
-#ifdef CTRLC_MENU
-    char cmd;
-    bn_Address destAd;
-    int quit=0,quitMenu=0;
-#endif
+    //default configuration
+    nodesNet.addNodes(nameNode::MAIN_AI    , nodes.getCfg(nameNode::MAIN_AI   , envNode::SIMU));
+    nodesNet.addNodes(nameNode::HMI        , {envNode::SIMU, 0, ROLE_UNDEFINED});
+    nodesNet.addNodes(nameNode::PROP       , nodes.getCfg(nameNode::PROP      , envNode::SIMU));
+    nodesNet.addNodes(nameNode::MONITORING , nodes.getCfg(nameNode::MONITORING, envNode::SIMU));
 
     // arguments parsing
     while (1) {
-        static struct option long_options[] = { { "mode", required_argument, NULL, 'm' }, { "log-file", required_argument, NULL, 'f' }, { "primary", required_argument, NULL, 'p' }, { "secondary", required_argument, NULL, 's' }, { "adv-primary", required_argument, NULL, 'a' }, { "adv-secondary", required_argument, NULL, 'b' }, { "verbose", no_argument, NULL, 'v' }, { "quiet", no_argument, NULL, 'q' }, { "help", no_argument, NULL, 'h' }, { NULL, 0, NULL, 0 } };
+        static struct option long_options[] = {
+                { "mode"                , required_argument, NULL, 'm'                      },
+                { "log-file"            , required_argument, NULL, 'f'                      },
+                { "quiet"               , no_argument      , NULL, 'q'                      },
+                { "help"                , no_argument      , NULL, 'h'                      },
+                { "verbose"             , no_argument      , NULL, 'v'                      },
+                { "info"                , no_argument      , NULL, 'i'                      },
+                { "primary-mainAI"      , required_argument, NULL, OPT_PRIMARY_MAIN_AI      },
+                { "primary-arduinoIO"   , required_argument, NULL, OPT_PRIMARY_ARDUINO_IO   },
+                { "primary-beacon"      , required_argument, NULL, OPT_PRIMARY_TURRET       },
+                { "primary-hmi"         , required_argument, NULL, OPT_PRIMARY_HMI          },
+                { "primary-prop"        , required_argument, NULL, OPT_PRIMARY_PROP         },
+                { "primary-debugBridge" , required_argument, NULL, OPT_PRIMARY_DEBUB_BRIDGE },
+                { "color"               , required_argument, NULL, 'c'                      },
+                { "secondary"           , required_argument, NULL, 's'                      },
+                { "adv-primary"         , required_argument, NULL, 'a'                      },
+                { "adv-secondary"       , required_argument, NULL, 'b'                      },
+                { NULL, 0, NULL, 0 }
+        };
 
-        int c = getopt_long(argc, argv, "m:f:p:s:a:b:vqh?", long_options, NULL);
+
+        int c = getopt_long(argc, argv, "m:f:p:s:a:b:ivqh?", long_options, NULL);
         if (c == -1)
             break;
         switch (c) {
@@ -94,21 +153,13 @@ int main(int argc, char **argv) {
             case 'f':
                 logs.changeFile(optarg);
                 break;
-            case 'p':
-                if(strstr(optarg, "real")){
-                    simu_primary = false;
-                    hmi_simu_primary = false;
+            case 'c':
+                if (!strcasecmp(optarg, "green")) {
+                    color_primary = eColor_t::GREEN;
                 }
-                else if(strstr(optarg, "simu"))
-                    simu_primary = true;
-                if(strstr(optarg, "axle"))
-                    holo_primary = false;
-                else if(strstr(optarg, "holo"))
-                    holo_primary = true;
-                if(strstr(optarg, "green"))
-                    color_primary = GREEN;
-                else if(strstr(optarg, "yellow"))
-                    color_primary = YELLOW;
+                else if (!strcasecmp(optarg, "yellow")) {
+                    color_primary = eColor_t::YELLOW;
+                }
                 break;
             case 's':
                 break;
@@ -122,63 +173,69 @@ int main(int argc, char **argv) {
             case 'q':
                 verbose = 0;
                 break;
-
+            case 'i':
+                nodesNet.print();
+                logs << "\nPress a key to continue...";
+                getchar();
+                break;
+            case OPT_PRIMARY_MAIN_AI:
+                nodesNet.addNodes(nameNode::MAIN_AI, nodes.getCfg(nameNode::MAIN_AI, getEnvNode(optarg)));
+                break;
+            case OPT_PRIMARY_ARDUINO_IO:
+                nodesNet.addNodes(nameNode::ARDUINO_IO, nodes.getCfg(nameNode::ARDUINO_IO, getEnvNode(optarg)));
+                break;
+            case OPT_PRIMARY_TURRET:
+                nodesNet.addNodes(nameNode::TURRET, nodes.getCfg(nameNode::TURRET, getEnvNode(optarg)));
+                break;
+            case OPT_PRIMARY_HMI:
+                if(getEnvNode(optarg) == envNode::SIMU)
+                    nodesNet.addNodes(nameNode::HMI, {envNode::SIMU, 0, ROLE_UNDEFINED});
+                else if(getEnvNode(optarg) == envNode::REAL)
+                    nodesNet.addNodes(nameNode::HMI, {envNode::REAL, 0, ROLE_UNDEFINED});
+                break;
+            case OPT_PRIMARY_PROP:
+                nodesNet.addNodes(nameNode::PROP, nodes.getCfg(nameNode::PROP, getEnvNode(optarg)));
+                simu_primary=false;
+                hmi_simu_primary=false;
+                //role_set_addr(ROLE_PRIM_PROPULSION, ADDRU2_MAIN_PROP);
+                break;
+            case OPT_PRIMARY_DEBUB_BRIDGE:
+                nodesNet.addNodes(nameNode::DEBUG_BRIDGE, nodes.getCfg(nameNode::DEBUG_BRIDGE, getEnvNode(optarg)));
+                break;
             default:
                 logs << ERR << "?? getopt returned character code 0" << c << "??";
                 /* no break */
             case 'h':
             case '?':
                 usage(argv[0]);
-                exit(EXIT_FAILURE);
+                exitAI(EXIT_FAILURE);
                 break;
         }
     }
 
     // network initialization
-    if ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0){
+    while ((ret = bn_attach(E_ROLE_SETUP, role_setup)) < 0)
         logs << ERR << "bn_attach() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
-        exitAI(EXIT_FAILURE);
+    /*
+    if(/nodes._nodes[nameNode::TURRET].env==envNode::REAL/ 1){
+       while((ret = bn_intp_install()) < 0)
+            logs << ERR << "bn_intp_install() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
     }
-
-    if ((ret = bn_init()) < 0) {
+*/
+    while((ret = bn_init()) < 0)
         logs << ERR << "bn_init() error : " << getErrorStr(-ret) << "(#" << -ret << ")\n";
+
+
+    //sendPing(nodes);
+
+    if(roleSetup(true, simu_primary, true) < 0)
         exitAI(EXIT_FAILURE);
-    }
 
-
-    if(roleSetup(true, simu_primary) < 0)
+   // if(syncSetup(nodes.nodes[nameNode::TURRET].env==envNode::REAL?true:false) < 0)
+    if(syncSetup(false) < 0)
         exitAI(EXIT_FAILURE);
 
-#ifdef SYNC_PROP_IA
-    if((ret = bn_intp_sync(role_get_addr(ROLE_PRIM_PROPULSION), 50)) < 0){
-        logs << ERR << "FAILED SYNC: " << getErrorStr(-ret) << "(#" << -ret << ")\n";
-        exitAI(EXIT_FAILURE);
-    }
-#endif
-#ifdef SYNC_TURRET
-    sMsg queryMsg;
-    queryMsg.header.destAddr = ADDRI_MAIN_TURRET;
-    queryMsg.header.type = E_SYNC_QUERY;
-    // beacons
-    queryMsg.payload.syncQuery.cfgs[0].type = SYNCTYPE_BEACONS;
-    // main AI
-    queryMsg.payload.syncQuery.cfgs[1].type = SYNCTYPE_ROLE;
-    queryMsg.payload.syncQuery.cfgs[1].role = ROLE_PRIM_AI;
-    // prop
-    queryMsg.payload.syncQuery.cfgs[2].type = SYNCTYPE_ROLE;
-    queryMsg.payload.syncQuery.cfgs[2].role = ROLE_PRIM_PROPULSION;
-    // arduino IO
-    queryMsg.payload.syncQuery.cfgs[3].type = SYNCTYPE_ADDRESS;
-    queryMsg.payload.syncQuery.cfgs[3].addr = ADDRI_MAIN_IO;
-    // set sizes
-    queryMsg.payload.syncQuery.nb = 4;
-    queryMsg.header.size = queryMsg.payload.syncQuery.nb * sizeof(queryMsg.payload.syncQuery.cfgs[0]);
-    while (bn_sendAck(&queryMsg)<0);
-#endif
-
-
-    sendPing();
-
+    logs << INFO << "Fin synchro";
     Env2015::setup();
 
     setupRobots(simu_primary, holo_primary, hmi_simu_primary, color_primary, eAIState);
@@ -187,21 +244,22 @@ int main(int argc, char **argv) {
 
     logs << INFO << "Initialization is finished";
 
-#ifdef CTRLC_MENU
-    signal(SIGINT, intHandler);
-    printf("listening, CTRL+C  for menu\n");
 
-    while (!quit){
-        int nbTraces,f; //for traceroute display
-#else
+        ihm.sendIhm(IHM_LED, LED_GREEN);
 
+    while(1){
+        if(servo.initServo() == 1)
+            break;
+
+        sleep(1);
+        }
     // loop
     while (1){
-#endif
+
         usleep(500);
 
         // check if receiving new messages
-        checkInbox(verbose);
+        inbox.checkInbox();
 
         // calls loop functions
         Env2015::loop();
@@ -214,146 +272,9 @@ int main(int argc, char **argv) {
         net.maintenace();
 
         // menu
-#ifdef CTRLC_MENU
-        if (menu) {
-            quitMenu=0;
-            while (!quitMenu) {
-                printf("\ndebug reader menu\n");
-                printf("s : send debugger address\n");
-                printf("p : ping\n");
-                printf("t : traceroute\n");
-                printf("i : info about this node\n");
-                printf("l : add/remove line return to debug strings if missing\n");
-                printf("v : increase verbosity\n");
-                printf("V : decrease verbosity\n");
-                printf("r : return\n");
-                printf("q : quit\n");
 
-                while(isspace(cmd=getchar()));
-
-                switch (cmd) {
-                    case 'd':
-                    {
-                        sMsg msg;
-                        msg.header.type = E_ROLE_SETUP;
-                        msg.header.destAddr = ADDRD_MAIN_PROP_SIMU;
-                        msg.header.size = 2 + 4;
-                        msg.payload.roleSetup.nb_steps = 1;
-                        // step #0
-                        msg.payload.roleSetup.steps[0].step = UPDATE_ACTIONS;
-                        msg.payload.roleSetup.steps[0].type = E_DEBUG;
-                        msg.payload.roleSetup.steps[0].actions.sendTo.first = ROLE_DEBUG;
-                        msg.payload.roleSetup.steps[0].actions.sendTo.second = ROLE_MONITORING;
-                        msg.payload.roleSetup.steps[0].actions.relayTo.n1 = 0;
-                        msg.payload.roleSetup.steps[0].actions.relayTo.n2 = 0;
-
-                        ret = bn_send(&msg);
-                        if(ret < 0) {
-                            printf("bn_send(E_ROLE_SETUP) error #%i\n", -ret);
-                        }
-                    }
-                    break;
-                    case 's' :  //sends debug address to distant node
-                    do {
-                        printf("enter destination address\n");
-                        ret = scanf("%hx",&destAd);
-                        if (ret != 1) {
-                            printf("error getting destination address\n");
-                        }
-                    }while(ret != 1);
-                    if ( (ret=bn_debugSendAddr(destAd)) > 0) {
-                        printf("signalling send\n");
-                        quitMenu=1;
-                    }
-                    else {
-                        printf("error while sending : %d\n", ret);
-
-                    }
-                    break;
-                    case 'p' :
-                    do {
-                        printf("enter destination address\n");
-                        ret = scanf("%hx",&destAd);
-                        if (ret != 1) {
-                            printf("error getting destination address\n");
-                        }
-                    }while(ret != 1);
-                    printf("ping %hx : %d ms\n",destAd,bn_ping(destAd));
-                    break;
-                    case 't' :
-                    {
-                        sTraceInfo *trInfo=NULL;
-                        int depth;
-                        do {
-                            printf("enter destination address\n");
-                            ret = scanf("%hx",&destAd);
-                            if (ret != 1) {
-                                printf("error getting destination address\n");
-                            }
-                        }while(ret != 1);
-                        do {
-                            printf("enter depth\n");
-                            ret = scanf("%i",&depth);
-                            if (ret != 1 || depth <= 0) {
-                                printf("error getting depth\n");
-                            }
-                        }while(ret != 1 || depth <= 0);
-                        trInfo = (sTraceInfo *)malloc(depth * sizeof(sTraceInfo));
-                        nbTraces=bn_traceroute(destAd,trInfo,depth,1000);
-                        for (f=0;f<nbTraces;f++) {
-                            printf("%hx in %d ms\n",trInfo[f].addr,trInfo[f].ping);
-                        }
-                    }
-                    break;
-                    case 'i' :  //displays info about current node
-#if MYADDRX
-                    printf("xBee address:\n");
-                    printf("  total : %4hx\n",MYADDRX);
-                    printf("  local : %4hx\n",MYADDRX&DEVICEX_MASK);
-                    printf("  subnet: %4hx\n",MYADDRX&SUBNET_MASK);
-#endif
-#if MYADDRI
-                    printf("I²C address:\n");
-                    printf("  total : %4hx\n",MYADDRI);
-                    printf("  local : %4hx\n",MYADDRI&DEVICEI_MASK);
-                    printf("  subnet: %4hx\n",MYADDRI&SUBNET_MASK);
-#endif
-#if MYADDRU
-                    printf("UART address:\n");
-                    printf("  total : %4hx\n",MYADDRU);
-                    printf("  local : %4hx\n",MYADDRU&DEVICEU_MASK);
-                    printf("  subnet: %4hx\n",MYADDRU&SUBNET_MASK);
-#endif
-#if MYADDRD
-                    printf("UDP address:\n");
-                    printf("  total : %4hx\n",MYADDRD);
-                    printf("  local : %4hx\n",MYADDRD&DEVICED_MASK);
-                    printf("  subnet: %4hx\n",MYADDRD&SUBNET_MASK);
-#endif
-
-                    printf("\n");
-                    break;
-                    case 'l' :
-                    oLF^=1;
-                    if (oLF) printf("new line will be added if missing");
-                    else printf("new line won't be added if missing");
-                    break;
-                    case 'c' :
-                    verbose^=1;
-                    if (verbose) printf("message info won't be displayed");
-                    else printf("message info will be displayed");
-                    break;
-                    case 'r' : quitMenu=1; printf("back to listening, CTRL+C for menu\n\n"); break;
-                    case 'q' : quitMenu=1; quit=1; break;
-                    default : break;
-                }
-            }
-
-            menu=0;
-        }
-#endif
     }
-
+//TODO Stop robot
     logs << INFO << "bye bye ... \n";
 
     return EXIT_SUCCESS;

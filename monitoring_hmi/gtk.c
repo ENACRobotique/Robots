@@ -321,6 +321,21 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         video_draw_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, r, 174, 136, 86, 255);
         video_draw_arrow(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x, y, dx, dy, 10, BLACK(), 255);
 
+        //draw resetting position
+        x1 = X_CM2PX(curr_x);
+        y1 = Y_CM2PX(curr_y);
+        x2 = X_CM2PX(curr_x+11.2*cos(curr_theta+191.63*M_PI/180.));
+        y2 = Y_CM2PX(curr_y+11.2*sin(curr_theta+191.63*M_PI/180.));
+
+        video_draw_line(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x1, y1, x2, y2, WHITE(), 255);
+
+        x1 = X_CM2PX(curr_x);
+        y1 = Y_CM2PX(curr_y);
+        x2 = X_CM2PX(curr_x+11.2*cos(curr_theta+191.63*M_PI/180.+2*M_PI/3));
+        y2 = Y_CM2PX(curr_y+11.2*sin(curr_theta+191.63*M_PI/180.+2*M_PI/3));
+
+        video_draw_line(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), x1, y1, x2, y2, WHITE(), 255);
+
         // draw active obstacles
         for(i = 0; obss && i < nb_obss; i++){
             if(obss[i].active){

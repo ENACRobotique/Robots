@@ -16,14 +16,6 @@
 #include <iostream>
 #include <vector>
 
-// For communications
-//#include "../../network_config/messages.h"
-//#include "../../network_config/messages-elements.h"
-//#include "node_cfg.h"
-//#include "../../static/communication/botNet/shared/botNet_core.h"
-//#include "../../static/communication/botNet/shared/message_header.h"
-//#include "../../network_config/roles.h"  // FIXME: ??? Is it relevant ???
-
 using namespace cv;
 using namespace std;
 
@@ -35,12 +27,6 @@ using namespace std;
 #include "performance.hpp"
 #include "save.hpp"
 #include "sourceVid.hpp"
-
-//##### TODO ####
-
-//##### Information ##
-// To param cam manually:
-// In terminal -> $ locate svv;  $ cd ->svv;  $ ./svv /dev/video1
 
 //##### Main #####
 int main(int argc, char* argv[]) {
@@ -137,4 +123,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-

@@ -9,6 +9,7 @@
 #define GEOMETRYTOOLS_GEOMETRYTOOLS_H_
 
 #include "Point2D.h"
+#include "PointOrient2D.h"
 #include "Vector2D.h"
 #include "Line2D.h"
 #include "Segment2D.h"

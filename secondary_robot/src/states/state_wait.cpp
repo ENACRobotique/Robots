@@ -16,7 +16,7 @@
 
 void initWait(sState *prev)
 	{
-    move(0,0);
+    emergencyStop();
 		#ifdef DEBUG
 			Serial.println("start wait");
 		#endif

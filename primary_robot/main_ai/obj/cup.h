@@ -17,6 +17,16 @@
 
 using namespace std;
 
+typedef enum{
+    CUP_DOWN_PINCE,
+    CUP_OPEN_PINCE,
+    CUP_TRAJ1,
+    CUP_WAIT_TRAJ1,
+    CUP_CLOSE,
+    CUP_UP,
+    CUP_END
+}stepCup;
+
 class Cup : public Obj{
     public:
         Cup(const unsigned int num, vector<astar::sObs_t>& obs);
@@ -53,6 +63,8 @@ class Cup : public Obj{
     private :
         unsigned int _num;
         unsigned int _time;
+        stepCup stepLoc;
+        Point2D<float> destPoint;
 };
 
 

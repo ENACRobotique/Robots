@@ -22,6 +22,7 @@ typedef struct {
     position_controller_t ctlr;
 
     enum {
+        TM_STATE_IDLE, // no control loop on position
         TM_STATE_WAIT_TRAJ, // no action asked (we are stopped)
         TM_STATE_WAIT_START, // new trajectory received, waiting for the right time to start
         TM_STATE_FOLLOWING // we are following a trajectory
@@ -30,6 +31,7 @@ typedef struct {
     uint16_t curr_tid :12;
     uint8_t next_sid :4;
     uint16_t curr_element; // slot index + sub step id
+    uint8_t curr_rid; // current recalibration id (initialized to 0)
 
     uint16_t slots_insert_idx;
     uint16_t slots_used_number;
@@ -67,7 +69,9 @@ void trajmngr_init(trajectory_manager_t* tm, const int32_t mat_rob2pods[NB_PODS]
 void trajmngr_reset(trajectory_manager_t* tm);
 int trajmngr_new_traj_el(trajectory_manager_t* tm, const sTrajOrientElRaw_t *te);
 void trajmngr_set_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos);
+void trajmngr_mix_pos(trajectory_manager_t* tm, const sGenericPosStatus *pos);
 void trajmngr_get_pos_status(trajectory_manager_t* tm, sGenericPosStatus *ps);
 int trajmngr_update(trajectory_manager_t* tm);
+void trajmngr_stop(trajectory_manager_t* tm);
 
 #endif /* TRAJECTORY_MANAGER_H_ */

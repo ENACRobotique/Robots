@@ -17,7 +17,7 @@ extern "C"{
 }
 
 
-Statuses::Statuses() {
+Statuses::Statuses() : index(-1),  addrProp(0), _propStatus(PROP_IDLE){
     for(unsigned int i = 0 ; i < NUM_E_ELEMENT; i++)
         reset[i] = false;
 
@@ -101,14 +101,18 @@ int Statuses::receivedNewStatus(sGenericPosStatus& status){
         logs << ERR << "Position not save frame not in playground";
 
     if(status.id == ELT_PRIMARY)
-        logs.putNewPos(status.pos.x, status.pos.y, status.pos.theta);
+        logs.putNewPos(status.pos.x, status.pos.y, status.pos.theta, status.pos_u.a_var, status.pos_u.b_var, status.pos_u.a_angle, status.pos_u.theta_var);
 
     return 1;
 }
 
-void Statuses::posSend(eElement el, Point2D<float>& p){
+void Statuses::posSend(const eElement el, const Point2D<float>& p){
     reset[el] = true;
     pt[el] = p;
+}
+
+void Statuses::setPropStatus(ePropStatus &propStatus) {
+    _propStatus = propStatus;
 }
 
 sGenericPosStatus& Statuses::getLastStatus(eElement el, frame_t fr){
@@ -117,17 +121,13 @@ sGenericPosStatus& Statuses::getLastStatus(eElement el, frame_t fr){
     status.date = 0;
 
     if(!_list[el].empty()){
-        if(reset[el]){
-            logs << WAR << "Waiting positing for this element : " << el;
+        if(index == _list[el].back().prop_status.rid){
             Point2D<float> pos(_list[el].back().pos.x, _list[el].back().pos.y);
-            if(pt[el].distanceTo(pos) < 3.){
-                reset[el] = false;
-            }
-            else{
-                return status;
-            }
-
         }
+        else{
+            return status;
+        }
+
         if(_list[el].back().pos.frame == fr){
             return _list[el].back();
         }
@@ -180,6 +180,10 @@ float Statuses::getLastSpeed(eElement el){
     return 0;
 }
 
+ePropStatus Statuses::getPropStatus() {
+    return _propStatus;
+}
+
 
 /*
  * Convert a position define to a frame in an other frame
@@ -198,7 +202,6 @@ void Statuses::fromPRPG2PG(s2DPosAtt *srcPAPR, s2DPAUncert *srcUPR, s2DPosAtt *s
 
     // create uncertainty if asked to
     if (srcUPR && srcUPG && dstUPG) {
-        dstUPG->theta = srcUPR->theta + srcUPG->theta;
         // TODO compute full uncertainty
     }
 }

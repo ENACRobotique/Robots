@@ -11,6 +11,8 @@
 #include <types.h>
 #include "obj.h"
 #include "tools.h"
+#include "servoTools.h"
+
 
 #define START_STAND4 6 //number of the first stand element in obs[]
 
@@ -45,7 +47,7 @@ typedef enum {
 
 class Spot4 : public Obj{
     public:
-        Spot4(paramObj par) : Obj(E_SPOT2, ActuatorType::ELEVATOR, true), color(par.color),angleSelect(0), rotAngle(0), _state_loc(SPOT4_TRAJ1){
+        Spot4(paramObj par) : Obj(E_SPOT4, ActuatorType::ELEVATOR, true), color(par.color),angleSelect(0), rotAngle(0), _state_loc(SPOT4_TRAJ1), actClap(0){
             sObjEntry_t objEP;
             Point2D<float> EP(DELTA_X, SPOT4_POINT_ENTRY);
 
@@ -54,7 +56,7 @@ class Spot4 : public Obj{
             _num_obs_loc[0] = START_STAND4;
             _num_obs_loc[1] = START_STAND4+1;
 
-            if(color == GREEN){
+            if(color == eColor_t::GREEN){
                 _num_obs_loc[0] += 8;
                 _num_obs_loc[1] += 8;
                 EP.x = 300. - EP.x;
@@ -65,7 +67,7 @@ class Spot4 : public Obj{
             objEP.pt.p = EP;
             updateDestPointOrient(par);
 
-            Point2D<float> p1(color==YELLOW?DELTA_X:300.-DELTA_X, SPOT4_POINT_ENTRY),
+            Point2D<float> p1(color==eColor_t::YELLOW?DELTA_X:300.-DELTA_X, SPOT4_POINT_ENTRY),
                     p2(par.obs[_num_obs_loc[0]].c.x, par.obs[_num_obs_loc[0]].c.y);
             Vector2D<float> v1(p2, p1), v2(0, 1);
 
@@ -98,7 +100,9 @@ class Spot4 : public Obj{
                     break;
 
                 case SPOT4_GET_STAND1:
-                    _state_loc = SPOT4_ROT1;
+                    if(getStand(par.act[_actuator_select].id)){
+                        _state_loc = SPOT4_ROT1;
+                    }
                     break;
 
                 case SPOT4_ROT1:
@@ -121,13 +125,14 @@ class Spot4 : public Obj{
                     break;
                 case SPOT4_WAIT_TRAJ2:
                     if(par.posRobot.distanceTo(destPoint) < 1.){
-                        //TODO servo elevator
                         _state_loc = SPOT4_GET_STAND2;
                     }
                     break;
 
                 case SPOT4_GET_STAND2:
-                    _state_loc = SPOT4_TRAJ3;
+                    if(getStand(par.act[_actuator_select].id)){
+                        _state_loc = SPOT4_TRAJ3;
+                    }
                     break;
 
                 case SPOT4_TRAJ3:
@@ -138,13 +143,17 @@ class Spot4 : public Obj{
                         }
                     }
 
+                    actClap = i;
+
                     angleSelect = M_PI  + par.act[i].angle;
-                    angleSelect += color==YELLOW?M_PI:0;
-                    angleSelect += color==YELLOW?-M_PI/2:M_PI/2; //delta
+                    angleSelect += color==eColor_t::YELLOW?M_PI:0;
+                    angleSelect += color==eColor_t::YELLOW?-M_PI/2:M_PI/2; //delta
 
                     setDestPoint(SPOT4_POINT_CLAP);
                     path.go2PointOrient(destPoint, par.obs, angleSelect);
                     _state_loc = SPOT4_WAIT_TRAJ3;
+
+                    servo.openPopcornLoader(actClap);
                     break;
 
                 case SPOT4_WAIT_TRAJ3:
@@ -154,7 +163,7 @@ class Spot4 : public Obj{
                     break;
 
                 case SPOT4_TRAJ4:
-                    destPoint.x = color==YELLOW?SPOT4_POINT_END:300.-SPOT4_POINT_END;
+                    destPoint.x = color==eColor_t::YELLOW?SPOT4_POINT_END:300.-SPOT4_POINT_END;
                     destPoint.y = SPOT4_POINT_CLAP;
                     path.go2PointOrient(destPoint, par.obs, angleSelect);
                     _state_loc = SPOT4_WAIT_TRAJ4;
@@ -162,6 +171,7 @@ class Spot4 : public Obj{
 
                 case SPOT4_WAIT_TRAJ4:
                     if(par.posRobot.distanceTo(destPoint) < 1.){
+                        servo.closePopcornLoader(actClap);
                         _state_loc = SPOT4_END;
                     }
                     break;
@@ -218,7 +228,7 @@ class Spot4 : public Obj{
         }
 
         void computeAngleSelect(float yi, unsigned int numObs, paramObj& par){
-            Point2D<float> p1(color==YELLOW?DELTA_X:300.-DELTA_X, yi),
+            Point2D<float> p1(color==eColor_t::YELLOW?DELTA_X:300.-DELTA_X, yi),
                     p2(par.obs[_num_obs_loc[numObs]].c.x, par.obs[_num_obs_loc[numObs]].c.y);
             Vector2D<float> v1(p2, p1), v2(0, 1);
 
@@ -226,7 +236,7 @@ class Spot4 : public Obj{
         }
 
         void setDestPoint(float y){
-            destPoint.x = color==YELLOW?DELTA_X:300.-DELTA_X;
+            destPoint.x = color==eColor_t::YELLOW?DELTA_X:300.-DELTA_X;
             destPoint.y = y;
         }
 
@@ -245,6 +255,7 @@ class Spot4 : public Obj{
         float rotAngle;
         stepSpot4 _state_loc;
         unsigned int _num_obs_loc[2];
+        unsigned int actClap;
         Point2D<float> destPoint;
         Point2D<float> _posSpot[2];
         Point2D<float> _posRobotSpot[2]; //position of the robot to get the spot

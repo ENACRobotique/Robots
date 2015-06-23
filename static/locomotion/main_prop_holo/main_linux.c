@@ -45,6 +45,7 @@ const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
 
 int main() {
     int ret;
+    int firstPosReceived = 0;
 
     // Debug
     debug_leds_init();
@@ -90,7 +91,21 @@ int main() {
                 break;
             case E_GENERIC_POS_STATUS:
                 printf("got position: %.2fcm %.2fcm %.2f°\n", inMsg.payload.genericPosStatus.pos.x, inMsg.payload.genericPosStatus.pos.y, inMsg.payload.genericPosStatus.pos.theta * 180. / M_PI);
-                trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                switch(inMsg.payload.genericPosStatus.prop_status.action){
+                case PROP_SETPOS:
+                    trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    firstPosReceived = 1;
+                    break;
+                case PROP_MIXPOS:
+                    trajmngr_mix_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    break;
+                default:
+                    break;
+                }
+                break;
+            case E_PROP_STOP:
+                printf("got prop stop\n");
+                trajmngr_stop(&traj_mngr);
                 break;
             default:
                 printf("got unhandled message with type: %s (%i)\n", eType2str(inMsg.header.type), inMsg.header.type);
@@ -112,7 +127,7 @@ int main() {
         }
 
         // Periodic position send
-        if (millis() - prevPos_ms >= 100) {
+        if (millis() - prevPos_ms >= 100 && firstPosReceived) {
             prevPos_ms = millis();
 
             memset(&outMsg, 0, sizeof(outMsg));

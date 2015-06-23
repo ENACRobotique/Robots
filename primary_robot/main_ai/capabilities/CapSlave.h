@@ -28,13 +28,13 @@ class CapSlave: public Capability {
         }
         void setup(){
             Point2D<float> pt = {INIT_POS_SLAVE_X, INIT_POS_SLAVE_Y};
-            sendPosPrimary(pt, INIT_ANGLE_SLAVE);
+            sendSetPosPrimary(pt, INIT_ANGLE_SLAVE, 10.*10., 10.*10., 0., M_PI*M_PI/(10.*10.));
         }
 
         int loop(){
             Point2D<float> goal;
             CapPropulsion* capProp = dynamic_cast<CapPropulsion*> (robot->caps[eCap::PROP]);
-            if (lastGoal(goal, true)) {
+            if (inbox.lastGoal(goal)) {
                 logs << INFO << "New goal available";
                 path.go2Point(goal, false, robot->env->obs, capProp->getPropType()==HOLO?true:false);
             }

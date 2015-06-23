@@ -12,7 +12,7 @@
 #include <cmath>
 #include <iomanip>
 
-
+using namespace std;
 
 Log::Log(): _file("log.log"), _type(E_OTHER), _ver(E_V2), _pos(false){
 }
@@ -73,15 +73,17 @@ void Log::putNewMes(){
     }
 }
 
-void Log::putNewPos(float x, float y, float theta){
+void Log::putNewPos(float x, float y, float theta, float a_var, float b_var, float a_angle, float theta_var){
     if(!_pos)
         cout << endl;
 
     _pos = true;
 
     auto flags = cout.flags();
-    cout << fixed << setprecision(2) << "\x1b[K\x1b[s" << "pos : " << x << "cm, " << y << "cm, " << theta * 180. / M_PI << "°" << "\x1b[u" << flush;
+    cout << fixed << setprecision(2) << "\x1b[K\x1b[s" << "pos: " << x << "cm, " << y << "cm, " << theta * 180. / M_PI << "°, un: " << sqrt(a_var) << "cm, " << sqrt(b_var) << "cm, " << a_angle * 180. / M_PI << "°, " << sqrt(theta_var) * 180. / M_PI << "°" << "\x1b[u" << flush;
     cout.flags(flags);
+
+    _file << "pos: " << x << "cm, " << y << "cm, " << theta * 180. / M_PI << "°, un: " << sqrt(a_var) << "cm, " << sqrt(b_var) << "cm, " << a_angle * 180. / M_PI << "°, " << sqrt(theta_var) * 180. / M_PI << "°";
 }
 
 /*

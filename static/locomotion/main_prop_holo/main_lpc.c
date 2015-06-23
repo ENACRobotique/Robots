@@ -98,6 +98,7 @@ int main() {
     unsigned int time_ms, time_us;
     int ledState = 0;
     int ret;
+    int firstPosReceived = 0;
     sMsg inMsg = { { 0 } }, outMsg = { { 0 } };
 
     // FIXME need to have a first loop here to wait for time synchronization
@@ -115,7 +116,20 @@ int main() {
                 trajmngr_new_traj_el(&traj_mngr, &inMsg.payload.trajOrientEl);
                 break;
             case E_GENERIC_POS_STATUS:
-                trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                switch(inMsg.payload.genericPosStatus.prop_status.action){
+                case PROP_SETPOS:
+                    trajmngr_set_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    firstPosReceived = 1;
+                    break;
+                case PROP_MIXPOS:
+                    trajmngr_mix_pos(&traj_mngr, &inMsg.payload.genericPosStatus);
+                    break;
+                default:
+                    break;
+                }
+                break;
+            case E_PROP_STOP:
+                trajmngr_stop(&traj_mngr);
                 break;
             }
         } // End: if(ret > 0)
@@ -137,7 +151,7 @@ int main() {
 
         time_ms = millis();
         // Periodic position send
-        if (time_ms - prevPos_ms >= 100) {
+        if (time_ms - prevPos_ms >= 100 && firstPosReceived) {
             prevPos_ms = time_ms;
 
             memset(&outMsg, 0, sizeof(outMsg));

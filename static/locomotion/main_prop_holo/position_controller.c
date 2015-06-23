@@ -6,6 +6,9 @@
  */
 
 #include <mt_mat.h>
+#ifdef ARCH_X86_LINUX
+#   include <mt_io.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -31,12 +34,31 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
             MT_M_AT(&tc->M_spds_rob2pods, i, j)= mat_rob2pods[i][j];
         }
     }
+    mt_m_init(&tc->M_spds_rob2tpods, NB_PODS, NB_SPDS, MAT_SHIFT);
+    for (i = 0; i < NB_PODS; i++) {
+        MT_M_AT(&tc->M_spds_rob2tpods, i, 0)=  MT_M_AT(&tc->M_spds_rob2pods, i, 1);
+        MT_M_AT(&tc->M_spds_rob2tpods, i, 1)= -MT_M_AT(&tc->M_spds_rob2pods, i, 0);
+        MT_M_AT(&tc->M_spds_rob2tpods, i, 2)=  MT_M_AT(&tc->M_spds_rob2pods, i, 2);
+    }
 
 #if NB_PODS == NB_SPDS
     mt_m_inv(&tc->M_spds_rob2pods, &tc->M_spds_pods2rob);
 #else
 #error "Case where NB_PODS != NB_SPDS is not yet implemented"
 #endif
+
+#ifdef ARCH_X86_LINUX
+    printf("rob2pods:");
+    mt_m_foutput(&tc->M_spds_rob2pods, stdout);
+    printf("pods2rob:");
+    mt_m_foutput(&tc->M_spds_pods2rob, stdout);
+#endif
+
+    // Position uncertainty matrix
+    mt_m_init(&tc->M_uncert_pos, NB_SPDS, NB_SPDS, VAR_POS_SHIFT); // FIXME max variance on start
+    MT_M_AT(&tc->M_uncert_pos, 0, 0) = iROUND(D2I(2)*D2I(2)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
+    MT_M_AT(&tc->M_uncert_pos, 1, 1) = iROUND(D2I(2)*D2I(2)*dVarPosSHIFT); // (I² << VAR_POS_SHIFT)
+    MT_M_AT(&tc->M_uncert_pos, 2, 2) = iROUND(0.1*dRadSHIFT*0.1*dRadSHIFT*dVarPosSHIFT); // ((rad << RAD_SHIFT)² << VAR_POS_SHIFT)
 
     // Init encoders, motors and speed controllers
     motors_init(tc->mots);
@@ -52,7 +74,7 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
 //    pid_init(&tc->pid_ytraj, iROUND(0.125 * dPSHIFT), iROUND(0.977e-3 * dPSHIFT), iROUND(15.6e-3 * dPSHIFT), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
 //    pid_init(&tc->pid_orien, iROUND(0.125 * dPSHIFT), iROUND(0.977e-3 * dPSHIFT), iROUND(15.6e-3 * dPSHIFT), 50 << SHIFT_PID_POS, SHIFT_PID_POS);
 
-    double mul = 0.4;
+    double mul = 0.3;
     int KP = iROUND(mul*dPSHIFT*    0.125);
     int KI = iROUND(mul*dPSHIFT*    0.977e-3);
     int KD = iROUND(mul*dPSHIFT*    0);
@@ -61,9 +83,9 @@ void posctlr_init(position_controller_t* tc, const int32_t mat_rob2pods[NB_PODS]
     pid_init(&tc->pid_ytraj, KP, KI, KD, 200 << SHIFT_PID_POS, SHIFT_PID_POS);
     pid_init(&tc->pid_orien, KP, KI, KD, 200 << SHIFT_PID_POS, SHIFT_PID_POS);
 
-    mf_init(&tc->mf_xtraj, 10);
-    mf_init(&tc->mf_ytraj, 10);
-    mf_init(&tc->mf_orien, 10);
+    mf_init(&tc->mf_xtraj, 8);
+    mf_init(&tc->mf_ytraj, 8);
+    mf_init(&tc->mf_orien, 8);
 }
 
 void _update_pos_spd(position_controller_t* tc, MT_VEC *spd_pv_rob);
@@ -96,26 +118,44 @@ void posctlr_begin_update(position_controller_t* tc) {
 
 void _linear_control(position_controller_t* tc, int x_sp, int y_sp, int vx_sp, int vy_sp, MT_VEC* spd_cmd_rob);
 void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC* spd_cmd_rob);
+void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT_VEC* spd_cmd_tpods);
 
 void posctlr_end_update(position_controller_t* tc, int x_sp, int y_sp, int theta_sp, int vx_sp, int vy_sp, int oz_sp) {
     int i;
-    MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
-    MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
 
-    //(some pid... ; gives linear speed set point: Vx_cmd, Vy_cmd)
-    _linear_control(tc, x_sp, y_sp, vx_sp, vy_sp, &spd_cmd_rob);
+    switch(tc->state) {
+    case PC_STATE_IDLE:
+        for (i = 0; i < NB_PODS; i++) {
+            tc->next_spd_cmds[i] = 0;
+        }
+        break;
+    case PC_STATE_RUNNING: {
+            MT_VEC spd_cmd_rob = MT_V_INITS(NB_SPDS, VEC_SHIFT); // (Vx_cmd, Vy_cmd, Oz_pv) (in [IpP<<SHIFT]x[IpP<<SHIFT]x[radpP<<(RAD_SHIFT+SHIFT)])
+            MT_VEC spd_cmd_pods = MT_V_INITS(NB_PODS, VEC_SHIFT); // (V1_cmd, V2_cmd, V3_cmd) (in IpP << SHIFT)
 
-    // (some pid as well... ; gives angular speed Oz_cmd)
-    _angular_control(tc, theta_sp, oz_sp, &spd_cmd_rob);
+            //(some pid... ; gives linear speed set point: Vx_cmd, Vy_cmd)
+            _linear_control(tc, x_sp, y_sp, vx_sp, vy_sp, &spd_cmd_rob);
 
-    // Calculate speed set points for each pod
-    // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
-    mt_mv_mlt(&tc->M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
+            // (some pid as well... ; gives angular speed Oz_cmd)
+            _angular_control(tc, theta_sp, oz_sp, &spd_cmd_rob);
 
-    // call speed controller with V1_cmd, V2_cmd, V3_cmd (in IpP<<SHIFT)
-    for (i = 0; i < NB_PODS; i++) {
-        spdctlr_update(&tc->spd_ctls[i], spd_cmd_pods.ve[i] >> SHIFT);
-        tc->next_spd_cmds[i] = spdctlr_get(&tc->spd_ctls[i]);
+            // Calculate speed set points for each pod
+            // (Vx_cmd, Vy_cmd and Oz_cmd) => (V1_cmd, V2_cmd, V3_cmd)
+            mt_mv_mlt(&tc->M_spds_rob2pods, &spd_cmd_rob, &spd_cmd_pods);
+
+            // call speed controller with V1_cmd, V2_cmd, V3_cmd (in IpP<<SHIFT)
+            for (i = 0; i < NB_PODS; i++) {
+                spdctlr_update(&tc->spd_ctls[i], spd_cmd_pods.ve[i] >> SHIFT);
+                tc->next_spd_cmds[i] = spdctlr_get(&tc->spd_ctls[i]);
+            }
+
+            // final step, update position uncertainty
+            MT_VEC spd_cmd_tpods = MT_V_INITS(NB_PODS, VEC_SHIFT);
+            mt_mv_mlt(&tc->M_spds_rob2tpods, &spd_cmd_rob, &spd_cmd_tpods);
+
+            _update_pos_uncertainty(tc, &spd_cmd_pods, &spd_cmd_tpods);
+        }
+        break;
     }
 }
 
@@ -123,18 +163,36 @@ void posctlr_set_pos(position_controller_t* tc, int x, int y, int theta) {
     tc->x = x;
     tc->y = y;
     tc->theta = theta;
-    tc->vx = 0;
-    tc->vy = 0;
-    tc->oz = 0;
 }
 
-void posctrl_get_pos(position_controller_t* tc, int *x, int *y, int *theta) {
+void posctlr_get_pos(position_controller_t* tc, int *x, int *y, int *theta) {
     *x = tc->x;
     *y = tc->y;
     *theta = tc->theta;
 }
 
-void posctrl_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz) {
+void posctlr_set_pos_u(position_controller_t* tc, int x_var, int y_var, int xy_var, int theta_var) {
+    MT_M_AT(&tc->M_uncert_pos, 0, 0) = x_var;
+    MT_M_AT(&tc->M_uncert_pos, 0, 1) = xy_var;
+    MT_M_AT(&tc->M_uncert_pos, 1, 0) = xy_var;
+    MT_M_AT(&tc->M_uncert_pos, 1, 1) = y_var;
+    MT_M_AT(&tc->M_uncert_pos, 2, 2) = theta_var;
+
+    // reset other elements
+    MT_M_AT(&tc->M_uncert_pos, 0, 2) = 0;
+    MT_M_AT(&tc->M_uncert_pos, 1, 2) = 0;
+    MT_M_AT(&tc->M_uncert_pos, 2, 0) = 0;
+    MT_M_AT(&tc->M_uncert_pos, 2, 1) = 0;
+}
+
+void posctlr_get_pos_u(position_controller_t* tc, int *x_var, int *y_var, int *xy_var, int *theta_var) {
+    *x_var = MT_M_AT(&tc->M_uncert_pos, 0, 0);
+    *xy_var = MT_M_AT(&tc->M_uncert_pos, 0, 1);
+    *y_var = MT_M_AT(&tc->M_uncert_pos, 1, 1);
+    *theta_var = MT_M_AT(&tc->M_uncert_pos, 2, 2);
+}
+
+void posctlr_get_spd(position_controller_t* tc, int *vx, int *vy, int *oz) {
     *vx = tc->vx;
     *vy = tc->vy;
     *oz = tc->oz;
@@ -201,4 +259,61 @@ void _angular_control(position_controller_t* tc, int theta_sp, int oz_sp, MT_VEC
     // Compute the angular speed command Omega_cmd with pre-added estimated speed (feed forward)
     mf_update(&tc->mf_orien, pid_update(&tc->pid_orien, theta_sp >> SHIFT, tc->theta >> SHIFT) << SHIFT);
     spd_cmd_rob->ve[2] = oz_sp + mf_get(&tc->mf_orien); // do not right shift inputs of RAD_SHIFT, keep resolution
+}
+
+void _update_pos_uncertainty(position_controller_t* tc, MT_VEC* spd_cmd_pods, MT_VEC* spd_cmd_tpods) {
+    MT_VEC diag_var_spds_pods = MT_V_INITS(NB_PODS, MAT_SHIFT);
+
+    // TODO add some error if the sign of the setpoint changed (backlash)
+    int std_spd_pod0 = ABS(spd_cmd_pods->ve[0] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[0] << (MAT_SHIFT - SHIFT - 4));
+    int std_spd_pod1 = ABS(spd_cmd_pods->ve[1] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[1] << (MAT_SHIFT - SHIFT - 4));
+    int std_spd_pod2 = ABS(spd_cmd_pods->ve[2] << (MAT_SHIFT - SHIFT - 6)) + ABS(spd_cmd_tpods->ve[2] << (MAT_SHIFT - SHIFT - 4));
+
+    diag_var_spds_pods.ve[0] = SQRis(std_spd_pod0, MAT_SHIFT) >> VAR_PODS_DATASHIFT;
+    diag_var_spds_pods.ve[1] = SQRis(std_spd_pod1, MAT_SHIFT) >> VAR_PODS_DATASHIFT;
+    diag_var_spds_pods.ve[2] = SQRis(std_spd_pod2, MAT_SHIFT) >> VAR_PODS_DATASHIFT;
+
+    MT_MAT M_rob2pg = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
+    memset(M_rob2pg.me, 0, sizeof(*M_rob2pg.me)*M_rob2pg.rows*M_rob2pg.cols);
+    MT_M_AT(&M_rob2pg, 0, 0) =  tc->cos_theta << (MAT_SHIFT - SHIFT); // FIXME calculate the full cos_theta and sin_theta, we have a loss of precision here
+    MT_M_AT(&M_rob2pg, 0, 1) = -tc->sin_theta << (MAT_SHIFT - SHIFT);
+    MT_M_AT(&M_rob2pg, 1, 0) =  tc->sin_theta << (MAT_SHIFT - SHIFT);
+    MT_M_AT(&M_rob2pg, 1, 1) =  tc->cos_theta << (MAT_SHIFT - SHIFT);
+    MT_M_AT(&M_rob2pg, 2, 2) =  1 << MAT_SHIFT;
+
+    MT_MAT M_pods2pg = MT_M_INITS(NB_SPDS, NB_PODS, MAT_SHIFT);
+    mt_mm_mlt(&M_rob2pg, &tc->M_spds_pods2rob, &M_pods2pg);
+
+    MT_MAT M_uncert_spds = MT_M_INITS(NB_SPDS, NB_SPDS, MAT_SHIFT);
+    mt_mtdm_mlt(&M_pods2pg, &diag_var_spds_pods, &M_uncert_spds);
+
+    mt_m_mltshift(&M_uncert_spds, tc->M_uncert_pos.shift, VAR_PODS_DATASHIFT, &M_uncert_spds); // correct shift to be able to add value and shift data left by VAR_PODS_SHIFT
+    mt_mm_add(&tc->M_uncert_pos, &M_uncert_spds, &tc->M_uncert_pos);
+
+    // TODO clamp to max var
+
+#ifdef ARCH_X86_LINUX
+//    printf("spd_cmd_pods:");
+//    mt_v_foutput(spd_cmd_pods, stdout);
+//
+//    printf("diag_var_spds_pods:");
+//    mt_v_foutput(&diag_var_spds_pods, stdout);
+//
+//    printf("M_pods2pg:");
+//    mt_m_foutput(&M_pods2pg, stdout);
+//
+//    printf("M_uncert_spds:");
+//    mt_m_foutput(&M_uncert_spds, stdout);
+//
+//    printf("M_uncert_pos:");
+//    mt_m_foutput(&tc->M_uncert_pos, stdout);
+#endif
+}
+
+void posctlr_stop(position_controller_t* tc) {
+    tc->state = PC_STATE_IDLE;
+}
+
+void posctlr_run(position_controller_t* tc) {
+    tc->state = PC_STATE_RUNNING;
 }

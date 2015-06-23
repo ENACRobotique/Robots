@@ -16,7 +16,7 @@
 #define HEADING
 #define ATTITUDE
 
-#define NO_ATTITUDE_BEFORE_STAIRS
+//#define NO_ATTITUDE_BEFORE_STAIRS
 
 #define TIME_BEFORE_START 1000
 /* Defines ************************************************/
@@ -45,9 +45,7 @@
 //#define PIN_SHARP_BACK_LEFT A3
 
 //times
-#define TIME_MATCH_STOP 90000   //in ms
-#define TIME_FUNNY_STOP 95000
-#define TIME_MATCH_LAUN 85000
+#define TIME_MATCH_STOP 88000   //in ms  en théorie 90s mais on prend un peu de marge
 
 //tirette related infos
 #define TIRETTE_IN HIGH

@@ -9,18 +9,19 @@
 #define NODE_CFG_H_
 
 #include "network_cfg.h"
+#include "messages-network.h"
 
 #define MYADDRX 0
 #define MYADDRI 0
 #define MYADDRU 0
-#if 1
+#if 0
 #   define MYADDRD ADDRD1_MAIN_VIDEO_SIMU
 #else
 #   define MYADDRD ADDRD2_MAIN_VIDEO
 #endif
 #define MYADDR (MYADDRX?:MYADDRI?:MYADDRU?:MYADDRD)
 
-#define MYROLE 0
+#define MYROLE ROLE_PRIM_VIDEO
 // MYROLE must be equal to role_get_role(MYADDR)
 
 #define BN_INC_MSG_BUF_SIZE 4

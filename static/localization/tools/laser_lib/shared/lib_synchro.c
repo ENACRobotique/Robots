@@ -44,8 +44,12 @@ uint32_t micros2sl(uint32_t local){
  *  local date (expressed in microsecond)
  */
 uint32_t sl2micros(uint32_t syncronized){
-    int64_t ret = (syncronized - syncParam.initialDelay)*syncParam.invDelta;
-    ret /= (1+syncParam.invDelta);
+    int64_t ret;
+    if (syncParam.invDelta) {
+        ret = (syncronized - syncParam.initialDelay)*syncParam.invDelta;
+        ret /= (1+syncParam.invDelta);
+    }
+    else ret = syncronized - syncParam.initialDelay;
     return ret;
 }
 
@@ -67,8 +71,12 @@ uint32_t millis2sl(uint32_t local){
  *  local date (expressed in millisecond)
  */
 uint32_t sl2millis(uint32_t syncronized){
-    int64_t ret = (syncronized - syncParam.initialDelay/1000)*syncParam.invDelta/1000;
-    ret /= (1+syncParam.invDelta/1000);
+    int64_t ret;
+    if (syncParam.invDelta) {
+        ret= (syncronized - syncParam.initialDelay/1000)*syncParam.invDelta/1000;
+        ret /= (1+syncParam.invDelta/1000);
+    }
+    else ret = syncronized - syncParam.initialDelay;
     return ret;
 }
 

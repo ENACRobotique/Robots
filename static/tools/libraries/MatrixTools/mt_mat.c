@@ -6,24 +6,30 @@
  */
 
 #ifdef ARCH_X86_LINUX
-#define PERFORM_OVERFLOW_TESTS
+#   define PERFORM_OVERFLOW_TESTS
 #endif
 
 #include <stdint.h>
 #include <stdlib.h>
-#ifdef PERFORM_OVERFLOW_TESTS
+#   ifdef PERFORM_OVERFLOW_TESTS
 #include <assert.h>
 #endif
 
 #include "mt_mat.h"
 
+/*
+ * TODO check if an element has incorrectly been used as input and output
+ */
+
 #define MRC(m, r, c) (m)->me[(r)*(m)->cols + (c)]
 #define M64(m, r, c) (int64_t)(MRC(m, r, c))
+#define VEL(v, e) (v)->ve[(e)]
+#define V64(v, e) (int64_t)(VEL(v, e))
 
 #ifdef PERFORM_OVERFLOW_TESTS
 
 #ifndef ABS
-#define ABS(v) ((v)<0ll ? -(v) : (v))
+#   define ABS(v) ((v)<0ll ? -(v) : (v))
 #endif
 // 2-steps shift, 1 doesn't work here (x86)
 #define MASK_32S(s) ((~((1ull<<(s))-1))<<32)
@@ -106,6 +112,106 @@ void mt_m_init(MT_MAT* m, uint8_t rows, uint8_t cols, uint8_t shift) {
     assert(!SUB64_OK(1, -1, -2));
     assert(!SUB64_OK(-1, 1, 2));
 #endif
+}
+
+/**
+ * Matrix-Matrix addition
+ * OUT = A + B
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_mm_add(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
+    register int i, j;
+
+    if (A->cols != B->cols || A->rows != B->rows || A->shift != B->shift) {
+        return -1;
+    }
+
+    if (OUT->cols != A->cols || OUT->rows != A->rows) {
+        return -2;
+    }
+
+    OUT->shift = A->shift;
+
+    for (i = 0; i < OUT->rows; i++) {
+        for (j = 0; j < OUT->cols; j++) {
+            CHECKED_SUM32(MRC(A, i, j), MRC(B, i, j), MRC(OUT, i, j));
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Matrix shift change
+ * OUT = A (shift changed)
+ * returns  0 in case of success
+ *         -2 if bad output
+ */
+int mt_m_shift(const MT_MAT* A, const uint8_t new_shift, MT_MAT* OUT) {
+    register int i, j;
+
+    if (OUT->cols != A->cols || OUT->rows != A->rows) {
+        return -2;
+    }
+
+    if(A->shift > new_shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) >> (A->shift - new_shift);
+            }
+        }
+    }
+    else if(new_shift > A->shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) << (new_shift - A->shift);
+            }
+        }
+    }
+
+    OUT->shift = new_shift;
+
+    return 0;
+}
+
+/**
+ * Matrix multiply by a constant (being a power of 2) and shift to new base
+ * OUT = A (shift changed) << data_shift
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_m_mltshift(const MT_MAT* A, const uint8_t new_shift, const int8_t data_shift, MT_MAT* OUT) {
+    register int i, j;
+
+    if((int8_t)new_shift + data_shift < 0) {
+        return -1;
+    }
+
+    if (OUT->cols != A->cols || OUT->rows != A->rows) {
+        return -2;
+    }
+
+    if(A->shift > new_shift + data_shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) >> (A->shift - (new_shift + data_shift));
+            }
+        }
+    }
+    else if(new_shift + data_shift > A->shift) {
+        for (i = 0; i < OUT->rows; i++) {
+            for (j = 0; j < OUT->cols; j++) {
+                MRC(OUT, i, j) = MRC(A, i, j) << ((new_shift + data_shift) - A->shift);
+            }
+        }
+    }
+
+    OUT->shift = new_shift;
+
+    return 0;
 }
 
 /**
@@ -228,6 +334,39 @@ int mt_mm_mlt(const MT_MAT* A, const MT_MAT* B, MT_MAT* OUT) {
     }
 
     return 0;
+}
+
+/**
+ * MatrixTransposed-DiagMatrix-Matrix multiplication
+ * OUT = A^T*diag(d)*A
+ * returns  0 in case of success
+ *         -1 if bad input
+ *         -2 if bad output
+ */
+int mt_mtdm_mlt(const MT_MAT* A, const MT_VEC* d, MT_MAT* OUT) {
+    register int i, j;
+    register int64_t sum;
+    MT_MAT Atd = MT_M_INITS(A->cols, A->rows, A->shift);
+
+    if (A->rows != d->elts || A->shift != d->shift) {
+        return -1;
+    }
+
+    // compute A^T*diag(d)
+    for (i = 0; i < Atd.rows; i++) {
+        for (j = 0; j < Atd.cols; j++) {
+            sum = M64(A, j, i) * V64(d, j);
+
+#ifdef PERFORM_OVERFLOW_TESTS
+            assert(RSHIFT_C32_OK(sum, A->shift));
+#endif
+
+            MRC(&Atd, i, j)= sum >> A->shift;
+        }
+    }
+
+    // compute Atd*A
+    return mt_mm_mlt(&Atd, A, OUT);
 }
 
 /**

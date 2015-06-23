@@ -19,25 +19,30 @@
 
 unsigned long timeStartPreStairs;
 #ifdef ATTITUDE
-	#define TIME_PRESTAIRS 4000
+	#define TIME_PRESTAIRS 2000
 #else
 	#define TIME_PRESTAIRS 2000
 #endif
 #define ANGLE_TO_READ 1
 #define ATTITUDE_STAIRS_STARTED 10
+#define  ANGLE_INCREMENT 19
 
 sState* testPrestairs()
     {
-	static int touchStairs = 0;
-	static int servoOk = 0;
-	static unsigned long timetouchStairs = 0;
-	static unsigned long timeServo = 0;
+
 #ifndef NO_ATTITUDE_BEFORE_STAIRS
         if (millis()-timeStartPreStairs > TIME_PRESTAIRS){
         	return &sStairs;
         }
        return NULL;
 #else
+        static int nb_coups=0;
+		static int angle_cmd = 160;
+		static int touchStairs = 0;
+		static unsigned long timetouchStairs = 0;
+		static int lasttimeincr;
+		static unsigned long timeServo = 0;
+
        int angle = readInertial(ANGLE_TO_READ);
        Serial.print("Angle:    ");
        Serial.println(angle);
@@ -49,11 +54,18 @@ sState* testPrestairs()
        if(touchStairs)
        {
     	   move(0,0);
-    	   servoAttitude.write(126);
     	   if(timetouchStairs == 0){
-    		   timetouchStairs = millis();
+    	       		   timetouchStairs = millis();
+    	       		   lasttimeincr = timetouchStairs;
     	   }
-    	   if(millis()-timetouchStairs > 500)
+    	   if(millis()-lasttimeincr > 1000  && nb_coups < 3){
+    		   lasttimeincr = millis();
+    		   angle_cmd -= ANGLE_INCREMENT;
+    		   nb_coups ++;
+    		   servoAttitude.write(angle_cmd);
+    	   }
+
+    	   if(/*millis()-timetouchStairs > 500  && */nb_coups >= 3)
     	   {
     		   Serial.println("Attitude Activated");
 			   if(timeServo == 0){
@@ -80,12 +92,12 @@ void initPrestairs(sState *prev)
 #else
         move(0,0);
 #endif
+        Serial.print("PRESTAIRS Start");
     }
 
 void deinitPrestairs(sState *next)
     {
-		Serial.print("valeur servo:    ");
-		Serial.println(servoAttitude.read());
+		Serial.print("PRESTAIRS end");
     }
 
 sState sPrestairs={
