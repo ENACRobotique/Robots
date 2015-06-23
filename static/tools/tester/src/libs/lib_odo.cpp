@@ -9,8 +9,8 @@ int _pinIntOdo,_pinSenOdo;  //interruption pin, sense pin
 volatile int _nbIncOdo=0;   //number of increments (signed)
 
 
-void odoIsr1(){
-    if (!digitalRead(_pinIntOdo)) _nbIncOdo += (digitalRead(_pinSenOdo)<<1) -1;
+void odoIsr(){
+    if (digitalRead(_pinIntOdo)) _nbIncOdo += (digitalRead(_pinSenOdo)<<1) -1;
     else _nbIncOdo -= (digitalRead(_pinSenOdo)<<1) -1;
 }
 
@@ -22,7 +22,7 @@ void odoInitHard(int pinInt, int pinSen){
 	pinMode(_pinIntOdo,INPUT);
 	pinMode(_pinSenOdo,INPUT);
 
-    attachInterrupt(pinInt-2, odoIsr1 , CHANGE); //particular case for arduino uno, cf reference
+    attachInterrupt(pinInt-2, odoIsr , CHANGE); //particular case for arduino uno, cf reference
 }
 
 
