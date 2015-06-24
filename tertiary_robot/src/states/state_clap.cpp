@@ -81,7 +81,7 @@ sState *testClap1_YELLOW()
 }
 
 sState sClap1_YELLOW={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initClap1_YELLOW,
 	&deinitClap1_YELLOW,
 	&testClap1_YELLOW
@@ -144,7 +144,7 @@ sState *testClap1_GREEN()
 }
 
 sState sClap1_GREEN={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initClap1_GREEN,
 	&deinitClap1_GREEN,
 	&testClap1_GREEN
@@ -210,7 +210,7 @@ sState *testClap2_YELLOW()
 }
 
 sState sClap2_YELLOW={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initClap2_YELLOW,
 	&deinitClap2_YELLOW,
 	&testClap2_YELLOW
@@ -276,7 +276,7 @@ sState *testClap2_GREEN()
 }
 
 sState sClap2_GREEN={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initClap2_GREEN,
 	&deinitClap2_GREEN,
 	&testClap2_GREEN

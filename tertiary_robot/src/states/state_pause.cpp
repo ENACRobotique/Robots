@@ -43,7 +43,7 @@ void deinitPause(sState *next){
 }
 
 sState sPause={
-    BIT(E_MOTOR) | BIT(E_RADAR),
+    BIT(E_MOTOR) | BIT(E_SHARP),
     &initPause,
     &deinitPause,
     &testPause

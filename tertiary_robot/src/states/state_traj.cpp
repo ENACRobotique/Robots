@@ -81,7 +81,7 @@ sState *testTrajStart_GREEN()
 }
 
 sState sTrajStart_GREEN={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initTrajStart_GREEN,
 	&deinitTrajStart_GREEN,
 	&testTrajStart_GREEN
@@ -140,7 +140,7 @@ sState *testTrajStart_YELLOW()
 	return 0;
 }
 sState sTrajStart_YELLOW={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initTrajStart_YELLOW,
 	&deinitTrajStart_YELLOW,
 	&testTrajStart_YELLOW
@@ -204,7 +204,7 @@ sState *testTrajToClaps_YELLOW()
 }
 
 sState sTrajToClaps_YELLOW={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initTrajToClaps_YELLOW,
 	&deinitTrajToClaps_YELLOW,
 	&testTrajToClaps_YELLOW
@@ -267,7 +267,7 @@ sState *testTrajToClaps_GREEN()
 }
 
 sState sTrajToClaps_GREEN={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initTrajToClaps_GREEN,
 	&deinitTrajToClaps_GREEN,
 	&testTrajToClaps_GREEN
@@ -326,7 +326,7 @@ sState *testTrajBetweenClaps_YELLOW()
 }
 
 sState sTrajBetweenClaps_YELLOW={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initTrajBetweenClaps_YELLOW,
 	&deinitTrajBetweenClaps_YELLOW,
 	&testTrajBetweenClaps_YELLOW
@@ -385,7 +385,7 @@ sState *testTrajBetweenClaps_GREEN()
 }
 
 sState sTrajBetweenClaps_GREEN={
-	BIT(E_MOTOR)|BIT(E_RADAR),
+	BIT(E_MOTOR)|BIT(E_SHARP),
 	&initTrajBetweenClaps_GREEN,
 	&deinitTrajBetweenClaps_GREEN,
 	&testTrajBetweenClaps_GREEN
