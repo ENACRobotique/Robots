@@ -4,9 +4,12 @@ extern "C" {
 #include "median_filter.h"
 }
 #include "lib_attitude.h"
+
+#define PERIOD_UPDATE 40
+
 int C_sharp_limit[ NB_SHARP ];
 int pin_sharp[NB_SHARP];
-median_t * mf_dist[NB_SHARP];
+median_t mf_dist[NB_SHARP];
 
 unsigned int _raw2dist120x[] = {    // sizeof(unsigned int)==2 => 65535 max
 //  _raw2dist120x[raw>>3] is in centimers<<4 when raw is from 0 to 1023
@@ -35,18 +38,8 @@ int sharpIntrusion(){
   int nb=0;
   int i;
   for (i=0;i<NB_SHARP ;i++){
-    if(mf_get(mf_dist[i])<C_sharp_limit[i] && mf_get(mf_dist[i])) nb++;
+    if(mf_get(&mf_dist[i])<C_sharp_limit[i] && mf_get(&mf_dist[i])) nb++;
   }
-#ifdef DEBUG_SHARP
-for (i=0;i<NB_SHARP ;i++){
-	Serial.print("sharp  ");
-	Serial.print(i);
-	Serial.print(" : ");
-	Serial.print(mf_get(mf_dist[i]));
-	Serial.print("  |  ");
-}
-Serial.println("");
-#endif
   return nb;
 }
 
@@ -58,17 +51,34 @@ void initSharp(int pinSharp[])
 {
 	int i;
 	for(i=0;i<NB_SHARP;i++){
-		mf_init(mf_dist[i], 8, 40);
+		mf_init(&mf_dist[i], 8, 0);
 		pin_sharp[i] = pinSharp[i];
 	}
 }
 
 void sharpUpdate()
 {
-	int i;
-	for(i=0;i<NB_SHARP;i++){
-		int read = analogRead(i);
-		int distance = raw2dist120x(read) >> 4;
-		mf_update(mf_dist[i], distance);
+	static unsigned long prev_time = millis();
+	if(millis() - prev_time > PERIOD_UPDATE)
+	{
+		int i;
+		for(i=0;i<NB_SHARP;i++){
+			int read = analogRead(pin_sharp[i]);
+			int distance = raw2dist120x(read) >> 4;
+			mf_update(&mf_dist[i], distance);
+		}
+
+#ifdef DEBUG_SHARP
+		Serial.print("sharp dist :  ");
+		for(i=0;i<NB_SHARP;i++){
+			Serial.print("mf");
+			Serial.print(i);
+			Serial.print(": ");
+			Serial.print(mf_get(&mf_dist[i]));
+			Serial.print("\t");
+		}
+		Serial.println("");
+#endif
+
 	}
 }
