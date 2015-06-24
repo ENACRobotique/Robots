@@ -37,7 +37,7 @@ void initHard(sState *prev){
     //radar
     //Wire.begin();
     int pin_sharp[]={PIN_SHARP1,PIN_SHARP2};
-    setSharpPin(pin_sharp);
+    initSharp(pin_sharp);
     //line following/detector
     //Wire.begin(); already done
 

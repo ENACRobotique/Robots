@@ -16,6 +16,7 @@
 #include "lib_motor.h"
 #include "lib_wall.h"
 #include "lib_line.h"
+#include "sharp_2d120x.h"
 
 
 
@@ -61,6 +62,7 @@ void loop(){
     if (current->flag & BIT(E_RADAR) ) radarRefresh();
     if (current->flag & BIT(E_MOTOR) ) motAsser();
     if (current->flag & BIT(E_LINE) )  asserLine();
+    if (current->flag & BIT(E_SHARP) )  sharpUpdate();
 
     sState *next;
     if (current->testFunction){
