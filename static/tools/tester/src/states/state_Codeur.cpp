@@ -16,7 +16,7 @@
 #include "lib_odo.h"
 #include "state_Codeur_nb_inc_choice.h"
 
-#define FILTER_SHIFT 2
+#define FILTER_SHIFT 2	//puissance du filtre avec a = 1 / 2^FILTER_SHIFT.   l'augmenter filtre plus, mais induit une inertie.
 
 #define NB_VISU 4
 int inc_t = 3200;
