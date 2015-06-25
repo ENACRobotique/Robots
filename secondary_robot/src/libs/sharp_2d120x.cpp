@@ -51,7 +51,7 @@ void initSharp(int pinSharp[])
 {
 	int i;
 	for(i=0;i<NB_SHARP;i++){
-		mf_init(&mf_dist[i], 8, 0);
+		mf_init(&mf_dist[i], 5, 0);
 		pin_sharp[i] = pinSharp[i];
 	}
 }
