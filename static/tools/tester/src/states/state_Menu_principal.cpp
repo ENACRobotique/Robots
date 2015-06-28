@@ -17,6 +17,7 @@
 #include "state_Analog_read.h"
 #include "state_Codeur.h"
 
+int memEncoder=0;
 #define NB_menu_principal 5
 const char *menu_principal[] = {
 		  "SERVOS",
@@ -52,12 +53,13 @@ sState* testMenu_principal(){
 
 void initMenu_principal(sState *prev){
 	myEnc.setLimits(0,NB_menu_principal-1);
-	myEnc.write(0);
+	myEnc.write(memEncoder);
 	myEnc.setMultiplicators(1,1);
-	afficher(menu_principal[0]);
+	afficher(menu_principal[memEncoder]);
 }
 
 void deinitMenu_principal(sState *next){
+	memEncoder = myEnc.read();
 }
 
 
