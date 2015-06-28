@@ -22,7 +22,7 @@ sState* testservo_deg_tps_reel(){
 
 	if(pos_enc!=pos_enc_old){
 		servo_choosen->write(pos_enc);
-		afficher("Angle= %d", pos_enc);
+		afficher(0,1,"Angle= %d", pos_enc);
 		myEnc.write(pos_enc);
 		pos_enc_old=pos_enc;
 	}
@@ -40,7 +40,7 @@ void initservo_deg_tps_reel(sState *prev){
 	myEnc.setLimits(0,180);
 	myEnc.write(angle);
 	myEnc.setMultiplicators(1,10);
-	afficher("Angle= %d", angle);
+	afficher(0,1,"Angle= %d", angle);
 }
 
 void deinitservo_deg_tps_reel(sState *next){

@@ -21,7 +21,7 @@ sState* testservo_micros(){
 
 	if(pos_enc!=pos_enc_old){
 		servo_choosen->writeMicroseconds(pos_enc);
-		afficher("Micros= %d us", pos_enc);
+		afficher(0,1,"Micros= %d us", pos_enc);
 		myEnc.write(pos_enc);
 		pos_enc_old=pos_enc;
 	}
@@ -39,7 +39,7 @@ void initservo_micros(sState *prev){
 	myEnc.setLimits(500,3000);
 	myEnc.write(micros);
 	myEnc.setMultiplicators(5,100);
-	afficher("Micros= %d us", micros);
+	afficher(0,1,"Micros= %d us", micros);
 }
 void deinitservo_micros(sState *next){
 }

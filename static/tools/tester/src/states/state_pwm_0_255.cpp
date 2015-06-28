@@ -42,7 +42,7 @@ void initpwm_0_255(sState *prev){
 	pinMode(PIN_PWM_SERVO,OUTPUT);
 	myEnc.setLimits(0,255);
 	myEnc.write(0);
-	myEnc.setMultiplicators(1,1);
+	myEnc.setMultiplicators(1,10);
 	analogWrite(PIN_PWM_SERVO,0);
 	display(0);
 }
@@ -52,18 +52,18 @@ void deinitpwm_0_255(sState *next){
 
 void display(int enc){
 	if(mode_pwm == PWM_255){
-		afficher("D.C.= %d /255", enc);
+		afficher(0,1,"D.C.= %d /255", enc);
 	}
 
 	if(mode_pwm == PWM_5V){
 		int unit = (5*enc)/255;
 		int dec = (50*enc)/255 - 10 * unit;
-		afficher("U = %d,%d / 5 V", unit,dec);
+		afficher(0,1,"U = %d,%d / 5 V", unit,dec);
 	}
 
 	if(mode_pwm == PWM_PC){
 		int pc = (100*enc)/255;
-		afficher("D.C. = %d %%", pc);
+		afficher(0,1,"D.C. = %d %%", pc);
 	}
 }
 

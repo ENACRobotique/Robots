@@ -23,7 +23,7 @@ sState* testCodeur_nb_inc_choice(){
 	int pos_enc = myEnc.read();
 
 	if(pos_enc!=pos_enc_old){
-		afficher("Nb inc /t: %d", pos_enc);
+		afficher(0,1,"Nb inc /t: %d", pos_enc);
 		pos_enc_old=pos_enc;
 	}
 
@@ -46,7 +46,7 @@ void initCodeur_nb_inc_choice(sState *prev){
 	myEnc.setLimits(MIN_INC_BY_TURN,MAX_INC_BY_TURN);
 	myEnc.write(inc_t);
 	myEnc.setMultiplicators(5,50);
-	afficher("Nb inc /t: %d", inc_t);
+	afficher(0,1,"Nb inc /t: %d", inc_t);
 }
 
 void deinitCodeur_nb_inc_choice(sState *next){

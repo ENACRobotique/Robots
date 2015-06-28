@@ -22,7 +22,7 @@ sState* testAnalog_read(){
         	int result = map(value,0,1023,0,1540);		//le pont diviseur divise ~ par 3, et la ref est à 5V.
         	int ent = result/100;
         	int dec = result - 100*ent;
-        	afficher("U = %d,%d V",ent,dec);
+        	afficher(0,1,"U = %d,%d V",ent,dec);
         	last_time = millis();
         }
 

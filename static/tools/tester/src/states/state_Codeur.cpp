@@ -40,21 +40,21 @@ sState* testCodeur(){
 				int dec = abs(N_ts - 100*ent);
 				char sign = ' ';
 				if(N_ts >> 15) sign = '-';
-				afficher("N(t/s)= %c%d,%d",sign,ent,dec);
+				afficher(0,1,"N(t/s)= %c%d,%d",sign,ent,dec);
 				break; }
 			case 1:{		//en rd/s
 				int W_rs = (800.0*nbInc_now*TWO_PI)/inc_t;	//800 = 100 * (1000/250) * 2(int sur voie A seulement)
 				int ent = W_rs / 100;
 				int dec = abs(W_rs - 100*ent);
-				afficher("W(r/s)= %d,%d",ent,dec);
+				afficher(0,1,"W(r/s)= %d,%d",ent,dec);
 				break; }
 			case 2:{
 				int N_ds = (2880.0*nbInc_now)/inc_t;		//2880 = 360° * (1000/250) * 2(int sur voie A seulement)
-				afficher("N(d/s)= %d",N_ds);
+				afficher(0,1,"N(d/s)= %d",N_ds);
 				break; }
 			case 3:{
 				int N_is = nbInc_now*8;						//8 = (1000/250) * 2(int sur voie A seulement)
-				afficher("nb_inc/s= %d",N_is);
+				afficher(0,1,"nb_inc/s= %d",N_is);
 				break; }
 		}
 		prev_time = millis();

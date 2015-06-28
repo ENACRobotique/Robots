@@ -29,7 +29,7 @@ sState* testmode_servo(){
 	int Position = myEnc.read();    //position du selecteur
 
 	if(Position != memPosition){  //on affiche que si on change de position
-		afficher(menu_mode[Position]);
+		afficher(0,1,menu_mode[Position]);
 		memPosition=Position;
 	}
 
@@ -57,7 +57,8 @@ void initmode_servo(sState *prev){
 			myEnc.setLimits(0,NB_mode_servo-1);
 			myEnc.write(0);
 			myEnc.setMultiplicators(1,1);
-			afficher(menu_mode[0]);
+			afficher("SERVOS");
+			afficher(0,1,menu_mode[0]);
 }
 void deinitmode_servo(sState *next){
 }
