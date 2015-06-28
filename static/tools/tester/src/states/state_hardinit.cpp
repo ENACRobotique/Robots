@@ -18,6 +18,7 @@ void update_encoder(){
 
 void initHard(sState *prev){
 
+	startLcd();
 	attachInterrupt(1,update_encoder,CHANGE);
 #ifdef DEBUG
     Serial.println("debut init matérielles");
