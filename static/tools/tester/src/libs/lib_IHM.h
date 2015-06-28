@@ -1,21 +1,23 @@
 /*
- * state_blink.h
+ * lib_IHM.h
  *
- *  Created on: 15 mai 2013
- *      Author: quentin
+ *  Created on: 2015
+ *      Author: Fab
  */
 
-#ifndef STATE_BLINK_H_
-#define STATE_BLINK_H_
+#ifndef LIB_IHM_H_
+#define LIB_IHM_H_
 
-#include <state_types.h>
+//#include <state_types.h>
 #include "Encoder.h"
 #include "../../../../core/arduino/libraries/LiquidCrystal/LiquidCrystal.h"
 
 extern Encoder myEnc;
 
+void afficher(int col, int row, const char * format...) __attribute__((format (printf, 3, 4)));
 void afficher(const char * format...) __attribute__((format (printf, 1, 2)));
+void eraseLine(int row);
+void clearLcd();
+void startLcd();
 
-void ret();
-
-#endif /* STATE_BLINK_H_ */
+#endif /* LIB_IHM_H_ */
