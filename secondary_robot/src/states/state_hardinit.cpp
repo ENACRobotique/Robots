@@ -7,9 +7,7 @@
 
 #include "state_dead.h"
 #include "state_stairs.h"
-#include "state_ALACON.h"
 #include "state_traj.h"
-#include "state_Manualdrive.h"
 #include "state_tirette.h"
 
 #include "../libs/lib_attitude.h"
