@@ -213,6 +213,8 @@ void initInertial()
   calibrate_sensors();
   set_last_read_angle_data(millis(), 0, 0, 0, 0, 0, 0);
 #ifdef DEBUG_INERTIAL
+	if(error)
+		Serial.println("error inertial");
 	Serial.println("end init inertial");
 #endif
 }
@@ -295,7 +297,7 @@ int readInertial(int value)
     case Z_ANGLE_ACCEL:
 	    return(accel_angle_z);
     default:
-	    return(0);
+	    return(error);
   }
 
 
