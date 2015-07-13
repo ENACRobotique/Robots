@@ -19,7 +19,7 @@
 int mode_pwm = 0;
 const char *menu_pwm[] = {
 		  "  0 - 255",
-		  "  0 - 100 %",
+		  "  0 - 100 %%",
 		  "  0 - 5 V",
 		};
 
