@@ -21,13 +21,10 @@ sState *current = &sInitHard;
 unsigned long _matchStart;
 
 void setup() {
-#ifdef DEBUG
+#ifdef NOLCD
 	Serial.begin(115200);
 	Serial.println("start");
 #endif
-
-	digitalWrite(2, HIGH);
-
 
 	if (current->init) {
 
