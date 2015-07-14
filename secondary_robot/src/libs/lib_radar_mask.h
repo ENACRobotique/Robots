@@ -14,7 +14,7 @@
 typedef struct {
     int limit_start;      // in cm
     int limit_end;        //in cm
-    long duration;   //in ms
+    unsigned long duration;   //in ms
 }radarElem;
 
 

@@ -4,14 +4,13 @@ this library contains the different functions useful for the motor and its contr
 
 #include "lib_attitude.h"
 #include "MPU_6050.h"
-
+#include "state_types.h"
 extern "C" {
 #include "median_filter.h"
 }
 
 //defines
 #define ATTITUDE_ASSER_PERIOD 40 // milliseconds
-#define ANGLE_TO_ASSERV X_ANGLE
 #define MAX_ANGLE 15
 #define MIN_ANGLE 176
 #ifndef CLAMP
@@ -56,7 +55,7 @@ void attitudeAsser(){
 		if ( (time-time_prev_asser) < ATTITUDE_ASSER_PERIOD+ATTITUDE_ASSER_PERIOD/2 ){
 			time_prev_asser = time_prev_asser + ATTITUDE_ASSER_PERIOD;
 			//compute error (epsilon)
-			int read= -readInertial(ANGLE_TO_ASSERV);
+			int read= -readInertial(X_ANGLE);
 			eps = _attitudeCon - read;
 			int correct = CORR1 + CORR2 * _attitudeCon;
 
@@ -100,7 +99,7 @@ Serial.println();
 			  time_prev_asser=millis();
 			  intEps=0;//<=>resets the integral term
 			  servoAttitude.write(CLAMP(MAX_ANGLE,_attitudeCmd,MIN_ANGLE));
-			  readInertial(ANGLE_TO_ASSERV);
+			  readInertial(X_ANGLE);
 			}
 	}
 }

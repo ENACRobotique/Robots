@@ -19,273 +19,374 @@
 #include "params.h"
 #include "state_traj.h"
 #include "state_pause.h"
+#include "state_clap.h"
 #include "state_wall.h"
 #include "state_wait.h"
 #include "state_dead.h"
+#include "sharp_2d120x.h"
 
-unsigned long st_saveTime=0,st_prevSaveTime=0,TimeToLauncher=0;
+static unsigned long st_saveTime=0,st_prevSaveTime=0;
 
-void initTrajRed(sState *prev)
-	{
+void initTrajStart_GREEN(sState *prev)
+{
+#ifdef DEBUG
+	Serial.println("debut traj rouge");
+#endif
+
+	if (prev==&sPause)
+		{
 		#ifdef DEBUG
-			Serial.println("debut traj rouge");
+			Serial.println("\tback from pause");
 		#endif
-
-	    if (prev==&sPause)
-	    	{
-			#ifdef DEBUG
-				Serial.println("\tback from pause");
-			#endif
-	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-	    	}
-	    uint16_t limits[RAD_NB_PTS]={3,40};
-	   	    		radarSetLim(limits);
-	}
-
-void deinitTrajRed(sState *next)
-	{
-	    if (next==&sPause)
-	    	{
-	        st_prevSaveTime=st_saveTime;
-	        st_saveTime=millis();
-	    	}
-	    else
-	    	{
-	        st_saveTime=0;
-	        st_prevSaveTime=0;
-	    	}
+		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		_backFromPause=1;
+		}
+	int limits[RAD_NB_PTS]={0,15};
+	sharpSetLim(limits);
 }
 
-trajElem start_red[]={
-	{0,-15,200}, //to wait until the servo is in the good position
-	{-100,-15,3000},
-	{-100,20,3000},
-	{-100,0,1000},
-	{0,0,1000},
-	{100,0,1000},
-	{0,0,0},
+void deinitTrajStart_GREEN(sState *next)
+{
+	if (next==&sPause){
+		st_prevSaveTime=st_saveTime;
+		st_saveTime=millis();
+	}
+	else{
+		st_saveTime=0;
+		st_prevSaveTime=0;
+	}
+}
+
+trajElem TrajStart_GREEN[]={
+	{-700,0,4400},
+	{0,0,0}
 };
 
-sState *testTrajRed()
-	{
-		static int i=0;
-	    static unsigned long prev_millis=0;
+sState *testTrajStart_GREEN()
+{
+	static int i=0;
+	static unsigned long prev_millis=0;
 
-	    if(periodicProgTraj(start_red,&st_saveTime,&i,&prev_millis))
-	    {
-
-	    	launcherServoDown.write(120);
-	    	launcherServoUp.write(10);
-
-	    	 return &sTrajRedFinal;
-	    }
-
-	    if (radarIntrusion()) return &sPause;
-	    return 0;
+	if(periodicProgTraj(TrajStart_GREEN,&st_saveTime,&i,&prev_millis)){
+		 return &sTrajToClaps_GREEN;
 	}
 
-sState sTrajRed={
-        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-        &initTrajRed,
-        &deinitTrajRed,
-        &testTrajRed
+	 if (millis() - _matchStart >= TIME_MATCH_STOP){
+		 emergencyStop();
+		 return &sDead;
+	 }
+
+	 if (sharpIntrusion()) return &sPause;
+	return 0;
+}
+
+sState sTrajStart_GREEN={
+	BIT(E_MOTOR)|BIT(E_SHARP),
+	&initTrajStart_GREEN,
+	&deinitTrajStart_GREEN,
+	&testTrajStart_GREEN
 };
 //*****************************************************************************************************************
 
 
-void initTrajYellow(sState *prev)
+void initTrajStart_YELLOW(sState *prev)
+{
+#ifdef DEBUG
+	Serial.println("debut traj jaune");
+#endif
+
+	if (prev==&sPause)
 	{
-		    #ifdef DEBUG
-				Serial.println("debut traj jaune");
-			#endif
-
-		    if (prev==&sPause)
-		    	{
-				#ifdef DEBUG
-					Serial.println("\tback from pause");
-				#endif
-		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-		    	}
-		    uint16_t limits[RAD_NB_PTS]={40,3};
-		        radarSetLim(limits);
-	}
-
-void deinitTrajYellow(sState *next)
-	{
-		    if (next==&sPause)
-		    	{
-		        st_prevSaveTime=st_saveTime;
-		        st_saveTime=millis();
-		    	}
-		    else
-		    	{
-		        st_saveTime=0;
-		        st_prevSaveTime=0;
-		    	}
-}
-
-trajElem start_yellow[]={ //A MODIFIER
-	    {0,0,0},
-		};
-sState *testTrajYellow()
-	{
-	static int i=0;
-		    static unsigned long prev_millis=0;
-		    if(periodicProgTraj(start_yellow,&st_saveTime,&i,&prev_millis))
-		   	    {
-		    	launcherServoDown.write(120);
-		    	launcherServoUp.write(10);
-		    	return &sTrajYellowFinal;
-		   	    }
-		 if (radarIntrusion()) return &sPause;
-	    return 0;
-	}
-sState sTrajYellow={
-		BIT(E_MOTOR) /*|BIT(E_RADAR)*/,
-        &initTrajYellow,
-        &deinitTrajYellow,
-        &testTrajYellow
-};
-
-
-//******************************************************************************************************************
-void initTrajYellowFinal(sState *prev)
-	{
-
-			#ifdef DEBUG
-				Serial.println("debut traj jaune");
-			#endif
-		    if (prev==&sPause)
-		    	{
-				#ifdef DEBUG
-					Serial.println("\tback from pause");
-				#endif
-		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-		    	}
-		    	else{TimeToLauncher = millis() ;}
-		    uint16_t limits[RAD_NB_PTS]={30,3};
-		    	radarSetLim(limits);
-	}
-
-void deinitTrajYellowFinal(sState *next)
-	{
-		    if (next==&sPause)
-		    	{
-		        st_prevSaveTime=st_saveTime;
-		        st_saveTime=millis();
-		    	}
-		    else
-		    	{
-		        st_saveTime=0;
-		        st_prevSaveTime=0;
-		    	}
-}
-
-trajElem Final_yellow[]={
-		        {0,0,0},
-		};
-
-sState *testTrajYellowFinal()
-	{
-	static int i=0;
-		    static unsigned long prev_millis=0;
-
-			if(periodicProgTraj(Final_yellow,&st_saveTime,&i,&prev_millis))
-			 	{
-				return &sDead;
-			 	}
-
-
-			if((millis()-st_saveTime)-TimeToLauncher > 1500 && TimeToLauncher!=0 ){
-				    	 	 launcherServoDown.write(15);
-				    	 	TimeToLauncher=0;
-				    	 	 }
-
-
-			if((millis()-st_saveTime)-TimeToLauncher > 3000 ){
-				    	 uint16_t limits[RAD_NB_PTS]={3,40};
-				    		    		radarSetLim(limits);
-				   	     	}
-
-		if (radarIntrusion()) return &sPause;
-	    return 0;
-	}
-
-sState sTrajYellowFinal={
-        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-        &initTrajYellowFinal,
-        &deinitTrajYellowFinal,
-        &testTrajYellowFinal
-};
-
-
-//******************************************************************************************************************
-void initTrajRedFinal(sState *prev)
-	{
-	  	#ifdef DEBUG
-			Serial.println("debut traj rouge");
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
 		#endif
-
-	    if (prev==&sPause)
-	    	{
-			#ifdef DEBUG
-				Serial.println("\tback from pause");
-			#endif
-	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-	    	}
-	    else{TimeToLauncher = millis() ;}
-
-	    uint16_t limits[RAD_NB_PTS]={3,40};
-	    		radarSetLim(limits);
+		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		_backFromPause=1;
 	}
-
-void deinitTrajRedFinal(sState *next)
-	{
-	    if (next==&sPause)
-	    	{
-	        st_prevSaveTime=st_saveTime;
-	        st_saveTime=millis();
-	    	}
-	    else
-	    	{
-	        st_saveTime=0;
-	        st_prevSaveTime=0;
-	    	}
+	int limits[RAD_NB_PTS]={0,15};
+	sharpSetLim(limits);
 }
 
-trajElem Final_red[]={
-        {0,0,0},
-       };
+void deinitTrajStart_YELLOW(sState *next)
+{
+	if (next==&sPause){
+		st_prevSaveTime=st_saveTime;
+		st_saveTime=millis();
+	}
+	else{
+		st_saveTime=0;
+		st_prevSaveTime=0;
+	}
+}
 
-sState *testTrajRedFinal()
-	{
-		static int i=0;
-	    static unsigned long prev_millis=0;
-
-	    if(periodicProgTraj(Final_red,&st_saveTime,&i,&prev_millis))
-		{
-	    	return &sDead;
-		}
-
-
-	    if((millis()-st_saveTime)-TimeToLauncher > 1500 && TimeToLauncher!=0 ){
-	    	launcherServoDown.write(15);
-	    	TimeToLauncher=0;
-		}
-
-
-	     if((millis()-st_saveTime)-TimeToLauncher > 3100 ){
-	    	 uint16_t limits[RAD_NB_PTS]={40,3};
-	    		    		radarSetLim(limits);
-	     	     				    	 	 }
-
-	if (radarIntrusion()) return &sPause;
-	 	    return 0;
+trajElem TrajStart_YELLOW[]={ //A MODIFIER
+	{-700,0,4800},
+	{0,0,0}
+};
+sState *testTrajStart_YELLOW()
+{
+	static int i=0;
+	static unsigned long prev_millis=0;
+	if(periodicProgTraj(TrajStart_YELLOW,&st_saveTime,&i,&prev_millis)){
+		return &sTrajToClaps_YELLOW;
+	}
+	if (millis() - _matchStart >= TIME_MATCH_STOP){
+	 emergencyStop();
+	 return &sDead;
 	}
 
-sState sTrajRedFinal={
-        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-        &initTrajRedFinal,
-        &deinitTrajRedFinal,
-        &testTrajRedFinal
+	if (sharpIntrusion()) return &sPause;
+
+	return 0;
+}
+sState sTrajStart_YELLOW={
+	BIT(E_MOTOR)|BIT(E_SHARP),
+	&initTrajStart_YELLOW,
+	&deinitTrajStart_YELLOW,
+	&testTrajStart_YELLOW
+};
+
+
+//******************************************************************************************************************
+void initTrajToClaps_YELLOW(sState *prev)
+{
+#ifdef DEBUG
+	Serial.println("debut traj jaune final");
+#endif
+	if (prev==&sPause)
+	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
+		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		_backFromPause=1;
+	}
+	int limits[RAD_NB_PTS]={0,15};
+	sharpSetLim(limits);
+}
+
+void deinitTrajToClaps_YELLOW(sState *next)
+{
+	if (next==&sPause){
+		st_prevSaveTime=st_saveTime;
+		st_saveTime=millis();
+	}
+	else{
+		st_saveTime=0;
+		st_prevSaveTime=0;
+	}
+}
+
+trajElem TrajToClaps_YELLOW[]={
+	{-400,40,3300},
+	{-500,-7,700},
+	{500,-7,6200},
+	{0,0,0}
+};
+
+sState *testTrajToClaps_YELLOW()
+{
+	static int i=0;
+	static unsigned long prev_millis=0;
+
+	if(periodicProgTraj(TrajToClaps_YELLOW,&st_saveTime,&i,&prev_millis)){
+		return &sClap1_YELLOW;
+	}
+
+	if (millis() - _matchStart >= TIME_MATCH_STOP){
+		emergencyStop();
+		return &sDead;
+	}
+
+	 if (sharpIntrusion()) return &sPause;
+
+	 return 0;
+}
+
+sState sTrajToClaps_YELLOW={
+	BIT(E_MOTOR)|BIT(E_SHARP),
+	&initTrajToClaps_YELLOW,
+	&deinitTrajToClaps_YELLOW,
+	&testTrajToClaps_YELLOW
+};
+
+
+//******************************************************************************************************************
+void initTrajToClaps_GREEN(sState *prev)
+{
+#ifdef DEBUG
+	Serial.println("debut traj rouge");
+#endif
+
+	if (prev==&sPause)
+	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
+		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		_backFromPause=1;
+	}
+	int limits[RAD_NB_PTS]={0,15};
+	sharpSetLim(limits);
+}
+
+void deinitTrajToClaps_GREEN(sState *next)
+{
+	if (next==&sPause){
+		st_prevSaveTime=st_saveTime;
+		st_saveTime=millis();
+	}
+	else{
+		st_saveTime=0;
+		st_prevSaveTime=0;
+	}
+}
+
+trajElem TrajToClaps_GREEN[]={
+	{-400,-40,4100},
+	{-500,7,700},
+	{500,7,6200},
+	{0,0,0}
+};
+
+sState *testTrajToClaps_GREEN()
+{
+	static int i=0;
+	static unsigned long prev_millis=0;
+	if(periodicProgTraj(TrajToClaps_GREEN,&st_saveTime,&i,&prev_millis)){
+		return &sClap1_GREEN;
+	}
+
+	if (millis() - _matchStart >= TIME_MATCH_STOP){
+		emergencyStop();
+		return &sDead;
+	}
+
+	if (sharpIntrusion()) return &sPause;
+	return 0;
+}
+
+sState sTrajToClaps_GREEN={
+	BIT(E_MOTOR)|BIT(E_SHARP),
+	&initTrajToClaps_GREEN,
+	&deinitTrajToClaps_GREEN,
+	&testTrajToClaps_GREEN
+};
+
+//********************************************************************************
+void initTrajBetweenClaps_YELLOW(sState *prev)
+{
+#ifdef DEBUG
+	Serial.println("debut traj rouge");
+#endif
+
+	if (prev==&sPause)
+	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
+		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		_backFromPause=1;
+	}
+	int limits[RAD_NB_PTS]={0,15};
+	sharpSetLim(limits);
+}
+
+void deinitTrajBetweenClaps_YELLOW(sState *next)
+{
+	if (next==&sPause){
+		st_prevSaveTime=st_saveTime;
+		st_saveTime=millis();
+	}
+	else{
+		st_saveTime=0;
+		st_prevSaveTime=0;
+	}
+}
+
+trajElem TrajBetweenClaps_YELLOW[]={
+	{-400,-7,3000},
+	{0,0,0}
+};
+
+sState *testTrajBetweenClaps_YELLOW()
+{
+	static int i=0;
+	static unsigned long prev_millis=0;
+	if(periodicProgTraj(TrajBetweenClaps_YELLOW,&st_saveTime,&i,&prev_millis)){
+		return &sClap2_YELLOW;
+	}
+
+	if (millis() - _matchStart >= TIME_MATCH_STOP){
+		emergencyStop();
+		return &sDead;
+	}
+	if (sharpIntrusion()) return &sPause;
+	return 0;
+}
+
+sState sTrajBetweenClaps_YELLOW={
+	BIT(E_MOTOR)|BIT(E_SHARP),
+	&initTrajBetweenClaps_YELLOW,
+	&deinitTrajBetweenClaps_YELLOW,
+	&testTrajBetweenClaps_YELLOW
+};
+
+
+void initTrajBetweenClaps_GREEN(sState *prev)
+{
+#ifdef DEBUG
+	Serial.println("debut traj rouge");
+#endif
+
+	if (prev==&sPause)
+	{
+		#ifdef DEBUG
+			Serial.println("\tback from pause");
+		#endif
+		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		_backFromPause=1;
+	}
+	int limits[RAD_NB_PTS]={0,15};
+	sharpSetLim(limits);
+}
+
+void deinitTrajBetweenClaps_GREEN(sState *next)
+{
+	if (next==&sPause){
+		st_prevSaveTime=st_saveTime;
+		st_saveTime=millis();
+	}
+	else{
+		st_saveTime=0;
+		st_prevSaveTime=0;
+	}
+}
+
+trajElem TrajBetweenClaps_GREEN[]={
+	{-400,7,3000},
+	{0,0,0}
+};
+
+sState *testTrajBetweenClaps_GREEN()
+{
+	static int i=0;
+	static unsigned long prev_millis=0;
+	if(periodicProgTraj(TrajBetweenClaps_YELLOW,&st_saveTime,&i,&prev_millis)){
+		return &sClap2_GREEN;
+	}
+
+	if (millis() - _matchStart >= TIME_MATCH_STOP){
+		emergencyStop();
+		return &sDead;
+	}
+	if (sharpIntrusion()) return &sPause;
+	return 0;
+}
+
+sState sTrajBetweenClaps_GREEN={
+	BIT(E_MOTOR)|BIT(E_SHARP),
+	&initTrajBetweenClaps_GREEN,
+	&deinitTrajBetweenClaps_GREEN,
+	&testTrajBetweenClaps_GREEN
 };

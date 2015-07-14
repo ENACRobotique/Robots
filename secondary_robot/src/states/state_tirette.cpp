@@ -13,7 +13,6 @@
 #include "lib_line.h"
 #include "../params.h"
 #include "../tools.h"
-#include "state_ALACON.h"
 #include "state_stairs.h"
 #include "lib_move.h"
 #include "sharp_2d120x.h"
