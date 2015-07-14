@@ -38,9 +38,9 @@
 #define LCD5 12
 #define LCD6 13
 
-#define AREAD A5
-#define LED1 A3
-#define LED2 A4
+#define AREAD A0
+#define LED1 A1
+#define LED2 A3
 
 
 #define DUREE_BIG_STEPS 20
