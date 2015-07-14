@@ -16,6 +16,7 @@
 #include "state_Menu_principal.h"
 #include "state_Analog_read.h"
 #include "state_Codeur.h"
+#include "state_Scan_i2c.h"
 
 int memEncoder=0;
 #define NB_menu_principal 5
@@ -45,6 +46,7 @@ sState* testMenu_principal(){
 				case 1:{ return(&sMenu_pwm); break; }
 			    case 2:{ return(&sCodeur); break; }
 			    case 3:{ return(&sAnalog_read); break;}
+			    case 4:{ return(&sScan_i2c); break;}
 			  }
 		  }
 
