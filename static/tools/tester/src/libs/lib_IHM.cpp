@@ -42,7 +42,21 @@ void afficher(int col, int row, const char * format...)
 void afficher(const char * format...)
 {
 	lcd.clear();
-	afficher(0,0,format);
+	//afficher(0,0,format);
+	char buffer[17];
+
+	va_list ap;
+	va_start(ap, format);
+	vsnprintf(buffer, sizeof(buffer), format, ap);
+	va_end(ap);
+
+#ifndef NOLCD
+	lcd.home();
+	lcd.write(buffer);
+#endif
+#ifdef NOLCD
+		Serial.println(buffer);
+#endif
 }
 
 void eraseLine(int row)	//erase the line you specify (0 or 1 in two line display)
