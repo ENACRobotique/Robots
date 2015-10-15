@@ -245,18 +245,15 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
             }
         }
 
-        //yellow starting
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(80.), X_CM2PX(45.), Y_CM2PX(120.), YELLOW(255), 255);
-        video_draw_filled_circle(ctx->pos_data[ctx->pos_cur]   , WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(45.), Y_CM2PX(100.), CM2PX(20.), YELLOW(255), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 0.), Y_CM2PX( 40.), X_CM2PX(40.), Y_CM2PX(80.), GREEN(200), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 0.), Y_CM2PX(120.), X_CM2PX(40.), Y_CM2PX(160.), GREEN(200), 255);
+        //Purple Start
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(90.), X_CM2PX(30.), Y_CM2PX(140.), PURPLE(255), 255);
 
-        //green starting
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 300-0.), Y_CM2PX(80.), X_CM2PX(300-45.), Y_CM2PX(120.), GREEN(200), 255);
-        video_draw_filled_circle(ctx->pos_data[ctx->pos_cur]   , WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(300-45.), Y_CM2PX(100.), CM2PX(20.), GREEN(200), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 300-0.), Y_CM2PX( 40.), X_CM2PX(300-40.), Y_CM2PX(80.), YELLOW(255), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 300-0.), Y_CM2PX(120.), X_CM2PX(300-40.), Y_CM2PX(160.), YELLOW(255), 255);
+        //Green Starting
+        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX( 300-0.), Y_CM2PX(90.), X_CM2PX(300-30.), Y_CM2PX(140.), GREEN(255), 255);
 
+        //Building Area
+        video_draw_quarter_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(150.), Y_CM2PX(125.), CM2PX(60.), BOTTOM_RIGHT, GREEN(255), 255);
+        video_draw_quarter_filled_circle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(150.), Y_CM2PX(125.), CM2PX(60.), BOTTOM_LEFT, PURPLE(255), 255);
 
         // draw inactive obstacles
         for(i = 0; obss && i < nb_obss; i++){
@@ -284,8 +281,8 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(0.), Y_CM2PX(y_max), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy), RED(255), 150);
         video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(x_max), Y_CM2PX(0.+x_min), X_CM2PX(ctx->pos_maxx), Y_CM2PX(ctx->pos_maxy-x_min), RED(255), 150);
 
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(96.7-x_min), Y_CM2PX(142.-x_min), X_CM2PX(203.3+x_min), Y_CM2PX(200.-x_min), RED(255), 150);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(120.-x_min), Y_CM2PX(0.+x_min), X_CM2PX(180.+x_min), Y_CM2PX(10.+x_min), RED(255), 150);
+        //video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(96.7-x_min), Y_CM2PX(142.-x_min), X_CM2PX(203.3+x_min), Y_CM2PX(200.-x_min), RED(255), 150);
+        //video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(120.-x_min), Y_CM2PX(0.+x_min), X_CM2PX(180.+x_min), Y_CM2PX(10.+x_min), RED(255), 150);
 
         // draw active obstacles
         for(i = 0; obss && i < nb_obss; i++){
@@ -358,9 +355,9 @@ int handle(GIOChannel *source, GIOCondition condition, context_t *ctx) {
         }
 
         // draw fixed elements
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(96.7), Y_CM2PX(142.), X_CM2PX(150.), Y_CM2PX(200.), YELLOW(255), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(150.), Y_CM2PX(142.), X_CM2PX(203.3), Y_CM2PX(200.), GREEN(200), 255);
-        video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(120.), Y_CM2PX(0.), X_CM2PX(180.), Y_CM2PX(10.), RED(255), 255);
+        //video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(96.7), Y_CM2PX(142.), X_CM2PX(150.), Y_CM2PX(200.), YELLOW(255), 255);
+        //video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(150.), Y_CM2PX(142.), X_CM2PX(203.3), Y_CM2PX(200.), GREEN(200), 255);
+        //video_draw_filled_rectangle(ctx->pos_data[ctx->pos_cur], WIDTH(), HEIGHT(), ROWSTRIDE(), X_CM2PX(120.), Y_CM2PX(0.), X_CM2PX(180.), Y_CM2PX(10.), RED(255), 255);
 
         // draw obstacles' label
         for(i = 0; obss && i < nb_obss; i++){
