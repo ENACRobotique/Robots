@@ -234,7 +234,7 @@ void CapAI::initObjective(){
 
 
 
-    if(capTeam->getColor() == eColor_t::YELLOW){
+    if(capTeam->getColor() == eColor_t::PURPLE){
         for(unsigned int i = 12 ; i < 20 ; i++){
             robot->env->obs[i].active = 0;
             robot->env->obs_updated[i]++;

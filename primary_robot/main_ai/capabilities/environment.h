@@ -16,7 +16,7 @@
 
 #define BLOCK_START_ZONE    42
 
-namespace Env2015{
+namespace Env2016{
     extern Environment env;
 
     void setup();
