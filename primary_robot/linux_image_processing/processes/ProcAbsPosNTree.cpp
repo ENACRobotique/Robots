@@ -39,7 +39,7 @@ void ProcAbsPosNTree::process(const std::vector<Acq*>& acqList, const Pos& pos, 
     ProjAcq pAcq = acq->projectOnPlane(pl);
     handleStart(pAcq, pos);
 
-    cout << "  begpos: " << pos.x() << ", " << pos.y() << ", " << pos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, pos) << endl;
+    cout << "  begpos: " << pos.x() << ", " << pos.y() << ", " << pos.theta() * 180. / M_PI << ", E=" <<getEnergy(pAcq, pos) << endl;
 
     const Vector2D<float> camDir_rob(pAcq.cam2plane(acq->getCam()->getCenter()));
 
@@ -55,14 +55,11 @@ void ProcAbsPosNTree::process(const std::vector<Acq*>& acqList, const Pos& pos, 
     AbsPos2D<float> endPos = n_tree<float, AbsPos2D<float>, 3>(pos, 0.f, 6, 4,
             [this, &pAcq, &fout_trials](AbsPos2D<float> const& pt) {
                 float ret = this->getEnergy(pAcq, pt);
-
                 fout_trials << pt.x() << "," << pt.y() << "," << pt.theta() << "," << ret << endl;
-
                 return ret;
             },
             [&vecX, &vecY, &vecT](AbsPos2D<float> const& pt, int iter) {
                 const float fact = pow(2, -(iter + 1));
-
                 return std::array<AbsPos2D<float>, 8>{
                     pt + vecX * fact + vecY * fact - vecT * fact,
                     pt + vecX * fact + vecY * fact + vecT * fact,
@@ -75,12 +72,12 @@ void ProcAbsPosNTree::process(const std::vector<Acq*>& acqList, const Pos& pos, 
                 };
             });
 
+
     perf.endOfStep("ProcAbsPosNTree::optim");
 
     fout_trials.close();
 
     cout << "  endpos: " << endPos.x() << ", " << endPos.y() << ", " << endPos.theta() * 180. / M_PI << ", E=" << getEnergy(pAcq, endPos) << endl;
-
 
     handleEnd(pAcq, endPos);
 }

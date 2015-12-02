@@ -26,11 +26,15 @@
 using namespace std;
 using namespace cv;
 
-ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
-        {
+ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile){
     camList.push_back(c);
 
     ifstream infile(staticTestPointFile);
+    if( !infile ) {
+        cout << "Can't open file " << staticTestPointFile << endl;
+        std::exit( -1 );
+    }
+
     string line;
     while (getline(infile, line)) {
         istringstream s(line);
@@ -54,7 +58,10 @@ ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile)
     cout << "Read " << staticTP.size() << " testpoints from file \"" << staticTestPointFile << "\"" << endl;
 
     // get default images
-    pg = imread("simu/src_colors.png");
+    pg = imread("../simu/src_colors.png");
+    if(pg.empty()){
+        cout<<"Cannot read image: ../simu/src_colors.png\n";
+    }
 }
 
 vector<TestPoint> ProcAbsPos::getPosDependentTP(const Pos& robPos) {
@@ -296,8 +303,7 @@ Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
 Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2pg) const {
     // simulate acquisition
     Mat im3 = pAcq.getAcq()->getMat(BGR).clone();
-    for (Mat_<Vec3b>::iterator it = im3.begin<Vec3b>(); it != im3.end<Vec3b>();
-            it++) {
+    for (Mat_<Vec3b>::iterator it = im3.begin<Vec3b>(); it != im3.end<Vec3b>(); it++) {
         Point2i pos_pg = getInPGIm(tr_rob2pg.transformLinPos(pAcq.cam2plane(it.pos())));
         if (pos_pg.y < 0 || pos_pg.y >= pg.size[0] || pos_pg.x < 0 || pos_pg.x >= pg.size[1]) {
             (*it) = Vec3b(0, 0, 0);
@@ -385,8 +391,7 @@ Mat ProcAbsPos::getPgWithSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
 
     Transform2D<float> tr_pg2rob = robPos.getTransform();
 
-    for (Mat_<Vec3b>::iterator it = pg_fov.begin<Vec3b>();
-            it != pg_fov.end<Vec3b>(); it++) {
+    for (Mat_<Vec3b>::iterator it = pg_fov.begin<Vec3b>(); it != pg_fov.end<Vec3b>(); it++) {
         Point2f p_rob = tr_pg2rob.transformLinPos(getFromPgIm(it.pos()));
         Mat p_cam = pAcq.plane2cam((Mat_<float>(3, 1) << p_rob.x, p_rob.y));
 
@@ -403,7 +408,7 @@ Mat ProcAbsPos::getPgWithSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
 }
 
 float ProcAbsPos::getEnergy(ProjAcq& pAcq, const Pos& robPos) {
-    vector<TestPoint> posDependentTP = getPosDependentTP(robPos);
+//    vector<TestPoint> posDependentTP = getPosDependentTP(robPos);
 
     float E = 0;
 
