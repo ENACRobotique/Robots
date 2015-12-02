@@ -9,8 +9,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <performance.hpp>
-#include <processes/ProcAbsPos.h>
-#include <processes/ProcAbsPosBF.h>
+#include "ProcAbsPos.h"
+#include "ProcAbsPosBF.h"
 #include <Plane3D.h>
 #include <tools/AbsPos2D.h>
 #include <tools/Acq.h>

@@ -8,7 +8,7 @@
 #ifndef PROCESSES_PROCABSPOSNTREE_H_
 #define PROCESSES_PROCABSPOSNTREE_H_
 
-#include <processes/ProcAbsPos.h>
+#include "ProcAbsPos.h"
 
 class ProcAbsPosNTree: public ProcAbsPos {
 public:

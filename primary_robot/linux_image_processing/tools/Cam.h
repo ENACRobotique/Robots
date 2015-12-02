@@ -36,13 +36,13 @@ public:
                 2. * atan2f(size.width / 2, f),
                 2. * atan2f(size.height / 2, f));
 
-        // Construct transition matrix from image to camera
+        // Construct the transition matrix from camera to image
         matK_C2I = (cv::Mat_<float>(3, 3) <<
                 f, 0, (size.width - 1.f) / 2.f,
                 0, f, (size.height - 1.f) / 2.f,
                 0, 0, 1);
 
-        // Construct the transition matrix from camera to image
+        // Construct transition matrix from image to camera
         matK_I2C = matK_C2I.inv();
 
         // 3D transformation from robot reference frame to cam one

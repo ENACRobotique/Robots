@@ -9,7 +9,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <performance.hpp>
-#include <processes/ProcAbsPos.h>
+#include "ProcAbsPos.h"
 #include <Plane3D.h>
 #include <Point2D.h>
 #include <tools/Cam.h>

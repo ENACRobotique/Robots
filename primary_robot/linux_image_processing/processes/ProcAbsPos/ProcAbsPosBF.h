@@ -8,7 +8,7 @@
 #ifndef PROCESSES_PROCABSPOSBF_H_
 #define PROCESSES_PROCABSPOSBF_H_
 
-#include <processes/ProcAbsPos.h>
+#include "ProcAbsPos.h"
 
 class ProcAbsPosBF: public ProcAbsPos {
 public:

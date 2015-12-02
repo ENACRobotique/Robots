@@ -6,8 +6,9 @@
  */
 
 #include <opencv2/core/core.hpp>
-#include <processes/ProcAbsPosNTree.h>
-#include <processes/ProcAbsPos.h>
+#include <processes/ProcAbsPos/ProcAbsPosNTree.h>
+#include <processes/ProcAbsPos/ProcAbsPos.h>
+#include <processes/ProcIDObj/ProcIDObj.h>
 #include <processes/Process.h>
 #include <tools/AbsPos2D.h>
 #include <tools/Acq.h>
@@ -39,15 +40,13 @@ int main(int argc, char* argv[]) {
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(0)));
-//            new VideoCapture("Images/captures/guvcview_image-25.jpg"))); // coin avec 2 pieds
-//            new VideoCapture("Images/captures/1-955-743.jpg"))); // zone de départ jaune
             new VideoCapture("../Images/captures/z1.png"))); // "Robomovie"
-//            new VideoCapture("z1.png"))); // "Robomovie"
 
 
     // Initialize processes
     vector<Process*> processList;
     processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv"));
+    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../playgroundObj/listObj.csv"));
 
     // Initialize botnet
     bn_init();
@@ -92,8 +91,6 @@ int main(int argc, char* argv[]) {
 
             perf.endOfStep("acquisitions");
 
-//            p->process(acqList, AbsPos2D<float>(45, 65, 130. * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 39.58, 59.58, 134.99
-//            p->process(acqList, AbsPos2D<float>(100, 62, 60 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 93.58, 73.58, 64
             p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
 
             cout<<"Mk2: process done\n";
@@ -114,8 +111,6 @@ int main(int argc, char* argv[]) {
 //        }
 
         perf.endFrame();
-
-
 
         quit = 1;
 //

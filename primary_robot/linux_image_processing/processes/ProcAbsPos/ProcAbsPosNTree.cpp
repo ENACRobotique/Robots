@@ -6,7 +6,7 @@
  */
 
 #include <performance.hpp>
-#include <processes/ProcAbsPosNTree.h>
+#include "ProcAbsPosNTree.h"
 #include <Plane3D.h>
 #include <tools/AbsPos2D.h>
 #include <tools/Acq.h>
