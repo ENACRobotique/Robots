@@ -10,11 +10,11 @@
 
 #include "CapPreparation.h"
 
-#define INIT_POS_YELLOW_X 45
-#define INIT_POS_YELLOW_Y 100
-#define INIT_POS_GREEN_X  (300 - INIT_POS_YELLOW_X)
-#define INIT_POS_GREEN_Y  INIT_POS_YELLOW_Y
-#define INIT_ANGLE_YELLOW 0
+#define INIT_POS_PURPLE_X 45
+#define INIT_POS_PURPLE_Y 100
+#define INIT_POS_GREEN_X  (300 - INIT_POS_PURPLE_X)
+#define INIT_POS_GREEN_Y  INIT_POS_PURPLE_Y
+#define INIT_ANGLE_PURPLE 0
 #define INIT_ANGLE_GREEN  M_PI
 
 typedef enum {

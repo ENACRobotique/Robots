@@ -35,7 +35,7 @@ int Servo::sendPosServo(const servoName name, const float angle) {
     msg.payload.servos.servos[0].hw_id = tabServo[name].hw_id;
     msg.payload.servos.servos[0].angle = angle;
 
-    bnSendBlock(msg, "servo simple");
+    //bnSendBlock(msg, "servo simple");
 
     logs << INFO << "Send servo position id_club:" << unsigned(tabServo[name].club_id) << "ang:" << angle;
 
@@ -69,7 +69,7 @@ int Servo::sendMultiPosServo(const std::vector<servoName> name, const std::vecto
         msg.payload.servos.servos[i].angle = angle[i];
     }
 
-    bnSendBlock(msg, "servo multi");
+    //bnSendBlock(msg, "servo multi");
 
     logs << INFO << "Send servo postion multi";
 

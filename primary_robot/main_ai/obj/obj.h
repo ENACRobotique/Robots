@@ -21,17 +21,16 @@
 using namespace std;
 
 typedef enum{
-    SPOT,
-    CLAP,
-    POP_CORN
+    SAND,
+	SHELL
 }objective;
 
 typedef enum {
-    E_NULL, E_CLAP, E_SPOT, E_SPOT2, E_SPOT3, E_SPOT4, E_DROP_SPOT, E_LIGHT, E_CUP, E_DROP_CUP, E_OBJ_STARTING_ZONE, E_RECALAGE
+    E_NULL, E_SANDHEAP, E_SANDHEAPDUNE, E_DUNE, E_SANDDROP, E_SHELL, E_SHELL_ROCK, E_SHELLDROP, E_OBJ_STARTING_ZONE, E_RECALAGE
 } eObj_t;
 
 typedef enum {
-    ANY, CUP, ELEVATOR, POP_CORN_LOADER, CAMERA
+    ANY, SANDDOOR, SANDGRIP, CAMERA
 }ActuatorType;
 
 typedef struct {
@@ -143,22 +142,18 @@ class Obj {
 
         string objType(){
             switch(_type){
-                case E_CLAP:
-                    return "CLAP";
-                case E_SPOT:
-                    return "SPOT";
-                case E_SPOT2:
-                    return "SPOT2";
-                case E_SPOT3:
-                    return "SPOT3";
-                case E_DROP_SPOT:
-                    return "DROP_SPOT";
-                case E_LIGHT:
-                    return "LIGHT";
-                case E_CUP:
-                    return "CUP ";
-                case E_DROP_CUP:
-                    return "DROP_CUP";
+                case E_SANDHEAP:
+                    return "SANDHEAP";
+                case E_SANDHEAPDUNE:
+                    return "SANDHEAPDUNE";
+                case E_SANDDROP:
+                    return "SANDDROP";
+                case E_SHELL:
+                    return "SHELL";
+                case E_SHELL_ROCK:
+                	return "SHELL_ROCK";
+                case E_SHELLDROP:
+                    return "SHELLDROP";
                 case E_OBJ_STARTING_ZONE:
                     return "OBJ_STARTING_ZONE";
                 default:

@@ -89,7 +89,7 @@ void Inbox::checkInbox(){
  * get == false -> set
  */
 bool Inbox::lastGoal(Point2D<float>& goal){
-    if(!posGoal.x && posGoal.y)
+    if(!posGoal.x && !posGoal.y)
         return false;
 
     goal = posGoal;

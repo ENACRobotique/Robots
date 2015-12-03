@@ -282,22 +282,21 @@ float Obj::getYield(const unsigned int start_time){
         case E_OBJ_STARTING_ZONE:
             ratio = 10000000000;
             break;
-        case E_SPOT3:
-        case E_SPOT2:
+        case E_SANDHEAP:
+        case E_SANDHEAPDUNE:
             ratio = 1/_dist * 10000 ;
             logs << WAR << "ratio="<< ratio;
             break;
-        case E_LIGHT:
+        case E_DUNE:
             ratio = 1/_dist * 10000 ;
             logs << WAR << "ratio="<< ratio;
             break;
-        case E_CUP:
+        case E_SHELL:
             ratio = 1/_dist * 10000 - ((int)millis() - (int)start_time)/1000;
             ratio = ratio>0?ratio:1;
             logs << INFO << "ratio_cup="<< ratio;
             break;
-        case E_CLAP:
-        case E_SPOT:
+        case E_SHELL_ROCK:
         default:
             ratio = 1/_dist * 10000; //TODO
             logs << WAR << "ratio="<< ratio;
