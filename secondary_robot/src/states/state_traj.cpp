@@ -112,7 +112,7 @@ sState *testTrajGreenInit()
 	}
 
 sState sTrajGreenInit={
-        BIT(E_MOTOR)|BIT(E_RADAR)|BIT(E_HEADING),
+        BIT(E_MOTOR)/*|BIT(E_RADAR)|BIT(E_HEADING)*/,
         &initTrajGreenInit,
         &deinitTrajGreenInit,
         &testTrajGreenInit
@@ -201,7 +201,7 @@ sState *testTrajYellowInit()
 	    return 0;
 	}
 sState sTrajYellowInit={
-		BIT(E_MOTOR)|BIT(E_RADAR)|BIT(E_HEADING),
+		BIT(E_MOTOR)/*|BIT(E_RADAR)|BIT(E_HEADING)*/,
         &initTrajYellowInit,
         &deinitTrajYellowInit,
         &testTrajYellowInit
@@ -266,7 +266,7 @@ sState *testTrajEndStairsYellow()
 	}
 
 sState sTrajEndStairsYellow={
-        BIT(E_MOTOR)|BIT(E_ATTITUDE),
+        BIT(E_MOTOR)/*|BIT(E_ATTITUDE)*/,
         &initTrajEndStairsYellow,
         &deinitTrajEndStairsYellow,
         &testTrajEndStairsYellow
@@ -331,7 +331,7 @@ sState *testTrajEndStairsGreen()
 	}
 
 sState sTrajEndStairsGreen={
-        BIT(E_MOTOR)|BIT(E_ATTITUDE),
+        BIT(E_MOTOR)/*|BIT(E_ATTITUDE)*/,
         &initTrajEndStairsGreen,
         &deinitTrajEndStairsGreen,
         &testTrajEndStairsGreen
