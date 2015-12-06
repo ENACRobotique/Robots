@@ -45,8 +45,8 @@ int main(int argc, char* argv[]) {
 
     // Initialize processes
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv"));
-    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../playgroundObj/listObj.csv"));
+//    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv"));
+    processList.push_back(new ProcIDObj(camList.begin()->first, "../2016/listObj.csv"));
 
     // Initialize botnet
     bn_init();
@@ -126,8 +126,8 @@ int main(int argc, char* argv[]) {
     } while (!quit);  // End while
 
     // Test
-    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-    imshow( "Display window", frameRaw );                   // Show our image inside it.
+//    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+//    imshow( "Display window", frameRaw );                   // Show our image inside it.
     waitKey(0);
 
     printf("End prog\n");

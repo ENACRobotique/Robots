@@ -1,0 +1,12 @@
+#type,dim1,...,dim_n,R_color,G_color,B_color
+#parallelepipede : x, y, z
+#cylindre : h, r
+#cone : h, r
+#Notes: Dimensions in mm
+
+Parallelepiped,58,58,58,232,140,0
+Cylinder,58,29,232,140,0
+Cone,60,29,232,140,0
+Cylinder,25,38.1,54,103,53
+Cylinder,25,38.1,132,76,130
+Cylinder,25,38.1,255,255,255
