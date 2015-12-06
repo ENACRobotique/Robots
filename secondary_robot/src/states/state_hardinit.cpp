@@ -31,24 +31,18 @@ void initHard(sState *prev){
     int pin_motors_pwm[NB_MOTORS];
     pin_motors_dir[0]=PIN_MOTOR1_DIR;
     pin_motors_pwm[0]=PIN_MOTOR1_PWM;
-    pin_motors_dir[1]=PIN_MOTOR2_DIR;
-    pin_motors_pwm[1]=PIN_MOTOR2_PWM;
     motorInitHard(pin_motors_dir,pin_motors_pwm);
-    int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT,PIN_ODO2_INT};
-    int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN,PIN_ODO2_SEN};
+    int pin_odo_int[NB_MOTORS]={PIN_ODO1_INT};
+    int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN};
     odoInitHard(pin_odo_int,pin_odo_sen);
-
+    moveInitHard(PIN_SERVO_DIR,ANGLE_ZERO,0);
     //radar
     Wire.begin();
-    servoInitHard(PIN_SERVO_ATTITUDE);
 #ifdef ATTITUDE
     delay(1000); // waiting for servo to reach its initial position an to stand still
 #endif
     //line following/detector
     //Wire.begin(); already done
-    //fan
-    fanInitHard(PIN_VENTILO);
-    initHardStairs(PIN_SERVO_CARPET);
 
     //tirette
     pinMode( PIN_TIRETTE,INPUT_PULLUP);
