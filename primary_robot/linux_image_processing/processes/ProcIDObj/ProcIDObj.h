@@ -24,6 +24,9 @@ public:
 
     void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;
 
+private:
+    int loadListObj(const std::string& objPlgrdFile);
+
 protected:
     std::vector<Play_Obj*> _objList;
 };

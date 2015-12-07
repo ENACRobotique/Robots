@@ -35,7 +35,7 @@ void Play_Obj::print(){
         cout<<"Unknown type of playground object"<<endl;
     }
 
-    cout<<"dim = ";
+    cout<<"\t dim = ";
     for(int i=0; i<(int)_dim.size(); i++){
         cout<< _dim.at(i);
         if(i < (int)_dim.size()-1)
@@ -44,7 +44,7 @@ void Play_Obj::print(){
             cout<<endl;
     }
 
-    cout<<"color = ";
+    cout<<"\t color = ";
     for(int i=0; i<(int)_RGB_color.size(); i++){
         cout<< _RGB_color.at(i);
         if(i < (int)_RGB_color.size()-1)
