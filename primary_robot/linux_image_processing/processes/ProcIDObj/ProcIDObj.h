@@ -23,6 +23,7 @@ public:
     virtual ~ProcIDObj();
 
     void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;
+    void printObjList();
 
 private:
     int loadListObj(const std::string& objPlgrdFile);
