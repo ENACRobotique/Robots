@@ -39,7 +39,7 @@ class DropCup : public Obj{
 
             objEP.type = E_CIRCLE;
             objEP.delta = 0;
-            if(color == eColor_t::YELLOW)
+            if(color == eColor_t::PURPLE)
                 objEP.cir.c = {listEP[num].x, listEP[num].y};
             else
                 objEP.cir.c = {300 - listEP[num].x, listEP[num].y};

@@ -342,7 +342,7 @@ class ObjStartingZone : public Obj{
 
     private:
         void setDestPointX(float x){
-            destPoint.x = color==eColor_t::YELLOW?x:300-x;
+            destPoint.x = color==eColor_t::PURPLE?x:300-x;
         }
 
         void setAngleSelect(std::vector<Actuator>& act, ActuatorType type, bool par){ //if elevator par=ball, if cupActuator par=full

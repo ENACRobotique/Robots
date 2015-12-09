@@ -61,7 +61,7 @@ int CapPrepPrimary::loop(){
          //   float theta_robot;
             Point2D<float> pos_robot;
 
-            if (capTeam->getColor() == eColor_t::YELLOW) {
+            if (capTeam->getColor() == eColor_t::PURPLE) {
                 logs << INFO << "Color selected is YELLOW";
                 pos_robot = {INIT_POS_YELLOW_X, INIT_POS_YELLOW_Y};
          //       theta_robot = INIT_ANGLE_YELLOW;

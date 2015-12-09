@@ -131,6 +131,56 @@ void video_draw_filled_circle(unsigned char *rgb, unsigned int w, unsigned int h
     }
 }
 
+//TODO : Make that function general for all parts of circle (e.g. draw the circle between theta1 and theta2)
+//instead of having it only for TOP_RIGHT, TOP_LEFT, BOTTOM_LEFT and BOTTOM_RIGHT parts.
+void video_draw_quarter_filled_circle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int xc, int yc, unsigned int ray, int quarter, unsigned char r, unsigned char g, unsigned char b, unsigned char a){
+    // Original code for empty circle from http://willperone.net/Code/codecircle.php
+    // + modifications to draw it filled and draw each pixel exactly once by L. Lacoste <ludovic.lacoste@gmail.com>
+    int x = ray, y = 0;//local coords
+    int cd2 = 0;    //current distance squared - radius squared
+
+    switch (quarter){
+    case 0:;
+    case 3: video_draw_line(rgb, w, h, rowstride, xc, yc, xc + x, yc, r, g, b, a); break;
+    case 1:;
+    case 2: video_draw_line(rgb, w, h, rowstride, xc, yc, xc - x, yc, r, g, b, a);break;
+    default:break;
+    }
+
+    while(x > y+1){    //only formulate 1/8 of circle
+        cd2 -= (--x) - (++y);
+        if(cd2 < 0) cd2 += x++;
+        else{
+        	switch (quarter){
+        	case 0: video_draw_line(rgb, w, h, rowstride, xc, yc - (x+1), xc + (y-1), yc - (x+1), r, g, b, a);break;
+        	case 1: video_draw_line(rgb, w, h, rowstride, xc, yc - (x+1), xc - (y-1), yc - (x+1), r, g, b, a);break;
+        	case 2: video_draw_line(rgb, w, h, rowstride, xc, yc + (x+1), xc - (y-1), yc + (x+1), r, g, b, a);break;
+        	case 3: video_draw_line(rgb, w, h, rowstride, xc, yc + (x+1), xc + (y-1), yc + (x+1), r, g, b, a);break;
+
+        	}
+        }
+
+        switch (quarter){
+        case 0: video_draw_line(rgb, w, h, rowstride, xc, yc - y, xc + x, yc - y, r, g, b, a);break;
+        case 1: video_draw_line(rgb, w, h, rowstride, xc, yc - y, xc - x, yc - y, r, g, b, a);break;
+        case 2: video_draw_line(rgb, w, h, rowstride, xc, yc + y, xc - x, yc + y, r, g, b, a);break;
+        case 3: video_draw_line(rgb, w, h, rowstride, xc, yc + y, xc + x, yc + y, r, g, b, a);break;
+        }
+    }
+
+    cd2 -= (--x) - (++y);
+    if(cd2 < 0) cd2 += x++;
+
+    if(x == y - 1){
+    	switch (quarter){
+    	case 0: video_draw_line(rgb, w, h, rowstride, xc, yc - y, xc + x, yc - y, r, g, b, a);break;
+    	case 1: video_draw_line(rgb, w, h, rowstride, xc, yc - y, xc - x, yc - y, r, g, b, a);break;
+    	case 2: video_draw_line(rgb, w, h, rowstride, xc, yc + y, xc - x, yc + y, r, g, b, a);break;
+    	case 3: video_draw_line(rgb, w, h, rowstride, xc, yc + y, xc + x, yc + y, r, g, b, a);break;
+    	}
+    }
+}
+
 void video_draw_arc(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int xc, int yc, unsigned int ray, int x1, int y1, int x2, int y2, unsigned char r, unsigned char g, unsigned char b, unsigned char a){
     // Original code from http://willperone.net/Code/codecircle.php
     // + modifications to draw only an arc and draw each pixel exactly once by L. Lacoste <ludovic.lacoste@gmail.com>

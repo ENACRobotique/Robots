@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
                     color_primary = eColor_t::GREEN;
                 }
                 else if (!strcasecmp(optarg, "yellow")) {
-                    color_primary = eColor_t::YELLOW;
+                    color_primary = eColor_t::PURPLE;
                 }
                 break;
             case 's':
@@ -236,7 +236,7 @@ int main(int argc, char **argv) {
         exitAI(EXIT_FAILURE);
 
     logs << INFO << "Fin synchro";
-    Env2015::setup();
+    Env2016::setup();
 
     setupRobots(simu_primary, holo_primary, hmi_simu_primary, color_primary, eAIState);
 
@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
         inbox.checkInbox();
 
         // calls loop functions
-        Env2015::loop();
+        Env2016::loop();
         if (!loopRobots())
             break;
 
