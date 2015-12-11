@@ -1,6 +1,6 @@
 /*
-  main.cpp - Main loop for Arduino sketches
-  Copyright (c) 2005-2013 Arduino Team.  All right reserved.
+  Printable.h - Interface class that allows printing of complex types
+  Copyright (c) 2011 Adrian McEwen.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,33 +17,24 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <Arduino.h>
+#ifndef Printable_h
+#define Printable_h
 
-// Declared weak in Arduino.h to allow user redefinitions.
-int atexit(void (* /*func*/ )()) { return 0; }
+#include <stdlib.h>
 
-// Weak empty variant initialization function.
-// May be redefined by variant files.
-void initVariant() __attribute__((weak));
-void initVariant() { }
+class Print;
 
-int main(void)
+/** The Printable class provides a way for new classes to allow themselves to be printed.
+    By deriving from Printable and implementing the printTo method, it will then be possible
+    for users to print out instances of this class by passing them into the usual
+    Print::print and Print::println methods.
+*/
+
+class Printable
 {
-	init();
+  public:
+    virtual size_t printTo(Print& p) const = 0;
+};
 
-	initVariant();
-
-#if defined(USBCON)
-	USBDevice.attach();
 #endif
-	
-	setup();
-    
-	for (;;) {
-		loop();
-		if (serialEventRun) serialEventRun();
-	}
-        
-	return 0;
-}
 
