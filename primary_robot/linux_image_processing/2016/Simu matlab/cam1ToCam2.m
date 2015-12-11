@@ -40,6 +40,12 @@ ah_h = aperAngle1(1)/2;
 av_h = aperAngle1(2)/2;
 theta = theta_deg/180*pi;
 
+% Matrixes I C
+K1_C2I = [f1 0 w1/2-1;
+          0 f1 h1/2-1;
+          0 0  1]
+K1_I2C = inv(K1_C2I)
+
 % Transition matrixes
 T_c1ToR = [1 0           0          x1;
            0 cos(-RxC1_R) sin(-RxC1_R) y1;
@@ -96,17 +102,17 @@ w2 = 2*f2*tan(a2h_h)
 
 l1 = sqrt(f1^2 + (h1/2)^2 + (w1/2)^2);
 d2 = sqrt(f2^2 + h2b^2);
+d1 = sqrt(f1^2 + (h1/2)^2);
 ad = asin(w1/(2*l1));
 ad_deg = ad/pi*180;
-l2b = d2/(cos(ad));
-w2b = w1*l2b/l1
+l2 = d2/(cos(ad));
+w2b = w1*l2/l1
+w2b_2 = w1*d2/d1
 
-ap = atan(w2b/(2*f2));
-ap =  31.1076*2/180*pi;
+
+
 
           
-
-
 
 % Drawing
 figure
@@ -166,14 +172,35 @@ w2_1 = length2/length1
 
 w2222 = w1*w2_1
 
-
 for i=1:4
    cornersUseFocPlane_Pg(i,:) = T_c2To_Pg*cornersUseFocPlane(i,:)';
 end
 fill3(cornersUseFocPlane_Pg(:, 1), cornersUseFocPlane_Pg(:, 2), cornersUseFocPlane_Pg(:, 3), 'k');
 
+% Drawing pixels
+K2_C2I = [f2 0 round(w2b/2)-1;
+          0 f2 round(h2b/1)-1;
+          0 0  1];
+K2_I2C = inv(K2_C2I)
+
+'--------I1->I2----------'
+p_I1 = [640 480]
+p_C1 = K1_I2C*[p_I1 1]'
+p_C2 = T_c1Toc2*[p_C1;1]
+p_I2 = round(K2_C2I*(p_C2(1:3, 1)./p_C2(3)))
+p_R = T_c2ToR*p_C2
+p_Pg = T_RToPg*p_R
+plot3(p_Pg(1), p_Pg(2), p_Pg(3), 'rx');
+
+'--------I2->I1-----------'
+p_I2 = [832 899]
+p_C2 = K2_I2C*[p_I2 1]'
+p_C1 = inv(T_c1Toc2)*[p_C2; 1]
+P_I1 = round(K1_C2I*(p_C1(1:3,1)./p_C1(3)))
+p_R = T_c1ToR*p_C1
+
 % Drawing test
-plot3(ptTest(1), ptTest(2), ptTest(3), 'ro');
+% plot3(ptTest(1), ptTest(2), ptTest(3), 'ro');
 
 grid on
 xlabel('x'); ylabel('y'); zlabel('z')
