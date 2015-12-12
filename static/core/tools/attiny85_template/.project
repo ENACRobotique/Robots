@@ -26,4 +26,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>de.innot.avreclipse.core.avrnature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>attiny85lib</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>attiny85lib/SoftwareServo</name>
+			<type>2</type>
+			<location>/home/fabien/Documents/Club_Robotique/Robots-master/static/core/arduino/libraries/SoftwareServo</location>
+		</link>
+	</linkedResources>
 </projectDescription>
