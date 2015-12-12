@@ -1,4 +1,4 @@
-function [  ] = drawFoV( T_2Pg, aper, n_plane, pt_plane, color )
+function [  ] = drawFoV( T_2Pg, f, size, n_plane, pt_plane, color )
 %drawFoV Draw the pyramidal shape of the field of view of the camera
 %   Inputs:
 %       _ T_2Pg: transition matrix from cam to playground
@@ -10,8 +10,7 @@ function [  ] = drawFoV( T_2Pg, aper, n_plane, pt_plane, color )
 %       
     ptOc_C = [0 0 0];
     ptOc_Pg = T_2Pg*[ptOc_C 1]';
-    ptC = [0 0 100];
-    ptCorner0 = rot(aper(2)/2, aper(1)/2, 0)*ptC';
+    ptCorner0 = [size(1)/2; size(2)/2; f];
     ptCorner1 = [ptCorner0(1); -ptCorner0(2); ptCorner0(3)];
     ptCorner2 = [-ptCorner0(1); -ptCorner0(2); ptCorner0(3)];
     ptCorner3 = [-ptCorner0(1); ptCorner0(2); ptCorner0(3)];
@@ -25,15 +24,16 @@ function [  ] = drawFoV( T_2Pg, aper, n_plane, pt_plane, color )
                ptCorner1_Pg';
                ptCorner2_Pg';
                ptCorner3_Pg'];
+    resCorners_Pg = zeros(4,4);
     for i=1:4
-        [Corners_Pg(i, 1:3) check] = plane_line_intersect(n_plane', pt_plane', ptOc_Pg(1:3, 1), Corners_Pg(i, 1:3)');
+        [resCorners_Pg(i, 1:3) check] = plane_line_intersect(n_plane', pt_plane', ptOc_Pg(1:3, 1), Corners_Pg(i, 1:3)');
         if check == 1 ||  check == 3
-           line = [ptOc_Pg(1:3, 1)';  Corners_Pg(i, 1:3)] ;
+           line = [ptOc_Pg(1:3, 1)';  resCorners_Pg(i, 1:3)] ;
            plot3(line(:, 1), line(:, 2), line(:, 3), color);
         end
     end
     
-    Corners_Pg = [Corners_Pg; Corners_Pg(1, :)];
-    plot3(Corners_Pg(:, 1), Corners_Pg(:, 2), Corners_Pg(:, 3), color);
+    resCorners_Pg = [resCorners_Pg; resCorners_Pg(1, :)];
+    plot3(resCorners_Pg(:, 1), resCorners_Pg(:, 2), resCorners_Pg(:, 3), color);
 end
 

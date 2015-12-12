@@ -1,11 +1,9 @@
-function [ Corners ] = drawFocalPlane( T_2Pg, aper, n_plane_C, pt_plane_C, color )
+function [ Corners ] = drawFocalPlane( T_2Pg, f, size, n_plane_C, pt_plane_C, color )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
     ptOc_C = [0 0 0];
-    ptOc_Pg = T_2Pg*[ptOc_C 1]';
-    ptC = [0 0 100];
-    ptCorner0 = rot(aper(2)/2, aper(1)/2, 0)*ptC';
+    ptCorner0 = [size(1)/2; size(2)/2; f];
     ptCorner1 = [ptCorner0(1); -ptCorner0(2); ptCorner0(3)];
     ptCorner2 = [-ptCorner0(1); -ptCorner0(2); ptCorner0(3)];
     ptCorner3 = [-ptCorner0(1); ptCorner0(2); ptCorner0(3)];

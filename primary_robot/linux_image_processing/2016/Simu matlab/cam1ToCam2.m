@@ -2,18 +2,22 @@ clear all
 close all
 clc
 % _______ Data _______
+% Cam1 intrinsic parameters
 f1 = 516.3;
 w1 = 640;
 h1 = 480;
-RxC1_R_deg = 226;
+% Cam1 extrinsic parameters
+x1 = 0;
+y1 = 12.7;
+z1 = 26.7;
+RxC1_R_deg = 226; % 226
+% Cam2 extrinsic parameters
 RxC2_R_deg = 180;
+% Robot extrinsic parameters
 xr = 50;
 yr = 30;
 zr = 0;
 Rz_R_deg = 0;
-x1 = 0;
-y1 = 12.7;
-z1 = 26.7;
 
 % Display
 sFrame = 10; %cm
@@ -32,7 +36,9 @@ RxC2_R = RxC2_R_deg/180*pi;
 
 Rz_R = Rz_R_deg/180*pi;
 aperAngle1 = [2*atan(w1/(2*f1));
-              2*atan(h1/(2*f1))]
+              2*atan(h1/(2*f1))];
+aperAngle1_deg = [aperAngle1(1)/pi*180; 
+                  aperAngle1(2)/pi*180]
 
 cornPg = [c0' c1' c2' c3'];
 
@@ -82,36 +88,14 @@ ptOC_Pg = T_c1To_Pg*[ptOC_C 1]';
 f2 = f1*cos(theta)
 h2b = f2*tan(theta + av_h)
 h2s = f2*tan(theta - av_h);
-h2 = h2b - h2s;
+h2 = h2b - h2s
 
-% Comput the horizontal aperture angle of the cam2
-Corner1_C1 = [w1/2 h1/2 f1];
-Corner1_C2 = T_c1Toc2*[Corner1_C1 1]';
-V1_C2 = [Corner1_C2(1) Corner1_C2(3)];
-pt1 = [Corner1_C2(1) Corner1_C2(2) Corner1_C2(3)];
-[pt2_C2 check] = plane_line_intersect([0 0 1], [0 0 f2], [0 0 0], pt1);
-Vz2_C2 = [0 0 1];
-pt2_onPlaneC2 = [pt2_C2(1) 0 pt2_C2(3)];
-a2h_h = acos(dot(Vz2_C2, pt2_onPlaneC2)/norm(pt2_onPlaneC2));
-a2h_h_deg = acos(dot(Vz2_C2, pt2_onPlaneC2)/norm(pt2_onPlaneC2))/pi*180
-
-% Set the aperture angles of cam2
-aperAngle2 = [a2h_h*2; 2*atan(h2b/(1*f2))]
-
-w2 = 2*f2*tan(a2h_h)
-
-l1 = sqrt(f1^2 + (h1/2)^2 + (w1/2)^2);
+% Compute w2b the width of the useful part of the projected image
 d2 = sqrt(f2^2 + h2b^2);
 d1 = sqrt(f1^2 + (h1/2)^2);
-ad = asin(w1/(2*l1));
-ad_deg = ad/pi*180;
-l2 = d2/(cos(ad));
-w2b = w1*l2/l1
-w2b_2 = w1*d2/d1
-
-
-
-
+w2b = w1*d2/d1
+aperAngle2 = [2*atan(w2b/(2*f2)); 2*atan(h2b/f2)];
+aperAngle2_deg = aperAngle2./pi*180
           
 
 % Drawing
@@ -140,8 +124,8 @@ py_c1_Pg = T_c1To_Pg*[py 1]';
 pz_c1_Pg = T_c1To_Pg*[pz 1]';
 drawFrame(ptOC_Pg(1:3, :), px_c1_Pg(1:3, :), py_c1_Pg(1:3, :), pz_c1_Pg(1:3, :), ...
     'Cam1');
-drawFoV(T_c1To_Pg, aperAngle1, [0 0 1], [0 0 0], 'b');
-corners1_C1 = drawFocalPlane(T_c1To_Pg, aperAngle1, [0 0 1], [0 0 f1/100], 'b');
+drawFoV(T_c1To_Pg, f1, [w1, h1], [0 0 1], [0 0 0], 'b');
+corners1_C1 = drawFocalPlane(T_c1To_Pg, f1, [w1, h1], [0 0 1], [0 0 f1/100], 'b');
 
 % Drawing cam2
 px_c2_Pg = T_c2To_Pg*[px 1]';
@@ -149,28 +133,21 @@ py_c2_Pg = T_c2To_Pg*[py 1]';
 pz_c2_Pg = T_c2To_Pg*[pz 1]';
 drawFrame(ptOC_Pg(1:3, :), px_c2_Pg(1:3, :), py_c2_Pg(1:3, :), pz_c2_Pg(1:3, :), ...
     'Cam2');
-drawFoV(T_c2To_Pg, aperAngle2, [0 0 1], [0 0 0], 'r');
-corners2_C2 = drawFocalPlane(T_c2To_Pg, aperAngle2, [0 0 1], [0 0 f2/100], 'r');
+drawFoV(T_c2To_Pg, f2, [w2b h2b*2], [0 0 1], [0 0 0], 'r');
+corners2_C2 = drawFocalPlane(T_c2To_Pg, f2, [w2b h2b*2], [0 0 1], [0 0 f2/100], 'r');
 
 % Draw the useful part of the image in the focal plane of cam2
 cornersUseFocPlane = ones(4,4);
 cornersUseFocPlane_Pg = ones(4,4);
-[corners1_C1(1,:) 1]';
-cornersUseFocPlane(1,:) = T_c1Toc2*[corners1_C1(2,:) 1]';
-cornersUseFocPlane(2,:) = T_c1Toc2*[corners1_C1(3,:) 1]';
+cornersUseFocPlane(1,:) = T_c1Toc2*[corners1_C1(1,:) 1]';
+cornersUseFocPlane(2,:) = T_c1Toc2*[corners1_C1(4,:) 1]';
 cornersUseFocPlane(1, 1:3);
 ptTest = T_c2To_Pg*cornersUseFocPlane;
 [cornersUseFocPlane(1, 1:3) check] = plane_line_intersect([0 0 1]', [0 0 f2/100]', [0 0 0]', cornersUseFocPlane(1, 1:3)');
 [cornersUseFocPlane(2, 1:3) check] = plane_line_intersect([0 0 1]', [0 0 f2/100]', [0 0 0]', cornersUseFocPlane(2, 1:3)');
 plane_line_intersect([0 0 1]', [0 0 f2/100]', [0 0 0]', cornersUseFocPlane(2, 1:3)');
-cornersUseFocPlane(3,:) = [corners2_C2(4,:) 1]';
-cornersUseFocPlane(4,:) = [corners2_C2(1,:) 1]';
-
-length1 = norm(corners1_C1(2,:) - corners1_C1(3,:))
-length2 = norm(cornersUseFocPlane(4,1:3) - cornersUseFocPlane(3,1:3))
-w2_1 = length2/length1
-
-w2222 = w1*w2_1
+cornersUseFocPlane(3,:) = [corners2_C2(3,:) 1]';
+cornersUseFocPlane(4,:) = [corners2_C2(2,:) 1]';
 
 for i=1:4
    cornersUseFocPlane_Pg(i,:) = T_c2To_Pg*cornersUseFocPlane(i,:)';
@@ -209,3 +186,54 @@ alpha(0.3)
 z = linspace(0,35);
 hold off
 
+
+% Test to straigthen up the image
+% I = imread('../Captures/1cube.jpg');
+I = imread('/home/yoyo/Robots/primary_robot/linux_image_processing/2016/Captures/1cube.jpg');
+figure;imshow(I);title('raw image');
+
+size(I)
+j_max = h2
+i_max = w2b
+
+J = uint8(zeros(size(I)));
+
+Jidx = zeros(i_max, j_max, 2);
+
+
+matK2_I2C = eye(4,4)
+matK2_I2C(1:3,1:3) = K2_I2C
+
+matK1_C2I = eye(4,4)
+matK1_C2I(1:3,1:3) = K1_C2I
+
+mat_I2ToI1 = matK1_C2I*inv(T_c1Toc2)*matK2_I2C
+for j=1:j_max
+    j
+    for i=1:i_max
+        P_I1 = mat_I2ToI1*[i j 1 1]';
+        P_I1 = round(P_I1./P_I1(3));
+        u = P_I1(1);
+        v = P_I1(2);
+        
+        if u>0 && u<w1 && v>0 && v<h1
+            Jidx(i,j,1) = v;
+            Jidx(i,j,2) = u;
+%             J(j,i,:) = I(v,u,:);
+        else
+            Jidx(i,j,1) = -1;
+            Jidx(i,j,2) = -1;
+        end
+    end
+end
+
+for j=1:j_max
+    j0=j
+    for i=1:i_max
+        if Jidx(i,j,1) >0 && Jidx(i,j,2) >0
+            J(j,i,:) = I(Jidx(i,j,1), Jidx(i,j,2),:);
+        end
+    end
+end
+'end'
+figure;imshow(J);title('processed image');
