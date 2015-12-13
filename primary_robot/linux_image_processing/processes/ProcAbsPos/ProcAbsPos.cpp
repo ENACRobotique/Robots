@@ -388,21 +388,30 @@ Mat ProcAbsPos::getTestPointsAt(ProjAcq& pAcq, const Transform2D<float>& tr_rob2
 Mat ProcAbsPos::getPgWithSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
     Mat pg_fov = pg.clone();
     Mat im = pAcq.getAcq()->getMat(BGR);
+    Mat imR = pg.clone();
+    Mat_<Vec3b>::iterator it_imR = imR.begin<Vec3b>();
 
     Transform2D<float> tr_pg2rob = robPos.getTransform();
 
-    for (Mat_<Vec3b>::iterator it = pg_fov.begin<Vec3b>(); it != pg_fov.end<Vec3b>(); it++) {
+    for (Mat_<Vec3b>::iterator it = pg_fov.begin<Vec3b>(); it != pg_fov.end<Vec3b>(); it++, it_imR++) {
         Point2f p_rob = tr_pg2rob.transformLinPos(getFromPgIm(it.pos()));
         Mat p_cam = pAcq.plane2cam((Mat_<float>(3, 1) << p_rob.x, p_rob.y));
 
         Point2i c(int(round(p_cam.at<float>(0))), int(round(p_cam.at<float>(1))));
 
-        if(c.x < 0 || c.y < 0 || c.x >= pAcq.getAcq()->getCam()->getSize().width || c.y >= pAcq.getAcq()->getCam()->getSize().height){
+        if(c.x < 0 || c.y < 0 ||
+           c.x >= pAcq.getAcq()->getCam()->getSize().width ||
+           c.y >= pAcq.getAcq()->getCam()->getSize().height){
+            (*it_imR) = Vec3b(0, 0, 0);
             continue;
         }
 
         (*it) = im.at<Vec3b>(c);
+        (*it_imR) = im.at<Vec3b>(c);
     }
+
+    imwrite("test.png", imR);
+    imwrite("test1.png", im);
 
     return pg_fov;
 }

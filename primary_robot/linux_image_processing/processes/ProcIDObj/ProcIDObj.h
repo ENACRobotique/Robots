@@ -9,6 +9,7 @@
 #define PROCIDOBJ_H_
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include "../Process.h"
 #include "../../Playground objects/PlayObj.h"
 #include <tools/AbsPos2D.h>

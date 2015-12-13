@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 
+
 ProcIDObj::ProcIDObj(Cam* c, const std::string& objPlgrdFile){
     camList.push_back(c);
 
@@ -24,6 +25,20 @@ ProcIDObj::~ProcIDObj(){
 
 void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU){
     std::cout<<"Process ProcIObj: start"<<std::endl;
+    cout<<"acqList.size() = "<<acqList.size()<<endl;
+
+    for(std::vector<Acq*>::const_iterator itAcq = acqList.begin(); itAcq != acqList.end(); ++itAcq){
+        cv::Mat hsv = (*itAcq)->getMat(HSV);
+        cv::imwrite("hsv.png", hsv);
+
+        static Plane3D<float> pl( { 0, 0, 0 }, { 0, 0, 1 }); // build a plane with a point and a normal
+        ProjAcq pAcq = (*itAcq)->projectOnPlane(pl);
+        cv::Mat im_pAcq = pAcq.getMat(BGR);
+
+        cv::imwrite("im_pAcq.png", im_pAcq);
+    }
+
+
     std::cout<<"Process ProcIObj: end"<<std::endl;
 }
 
