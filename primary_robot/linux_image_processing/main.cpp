@@ -37,10 +37,11 @@ int main(int argc, char* argv[]) {
     // Initialize cameras
     map<Cam*, VideoCapture*> camList;
     camList.insert(make_pair(
-            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
+//            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
+            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 220. * M_PI / 180., 0, 0)),
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(0)));
-            new VideoCapture("../Images/captures/z1.png"))); // "Robomovie"
+            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
 
 
     // Initialize processes
