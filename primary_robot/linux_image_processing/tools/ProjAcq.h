@@ -15,6 +15,7 @@
 #include <tools/Image.h>
 #include <Vector2D.h>
 #include <Vector3D.h>
+#include "Cam.h"
 
 class Acq;
 
@@ -30,6 +31,9 @@ protected:
     float _distPlaneCam;
     cv::Mat _rot_cam1TOcam2;
     cv::Mat _rot_cam2TOcam1;
+
+    Cam const* _CamProj;
+    cv::Mat _idxImgProjInImg1;
 
 public:
     ProjAcq(cv::Size const& size, Acq* const acq, Plane3D<float> const& plane);
@@ -65,6 +69,8 @@ public:
         return Pt2D(plane2cam(pt_cm.toCv()));
     }
     cv::Mat plane2cam(cv::Mat pt_cm);
+    cv::Mat imProj2Plane(cv::Mat pt_px);
+
 };
 
 #endif /* TOOLS_PROJACQ_H_ */

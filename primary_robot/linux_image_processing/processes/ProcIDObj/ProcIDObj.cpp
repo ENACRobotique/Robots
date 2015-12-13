@@ -36,6 +36,12 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
         cv::Mat im_pAcq = pAcq.getMat(BGR);
 
         cv::imwrite("im_pAcq.png", im_pAcq);
+
+        cv::Mat pt_px = (cv::Mat_<float>(3, 1) << 200., 200., 1.);
+        cv::Mat pt_cm;
+        cout<<"pt_px = "<<pt_px<<endl;
+        pt_cm = pAcq.imProj2Plane(pt_px);
+        cout<<"pt_cm_R = "<<pt_cm<<endl;
     }
 
 

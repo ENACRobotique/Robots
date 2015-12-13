@@ -173,3 +173,18 @@ Mat ProjAcq::plane2cam(Mat pt_cm) {
 
     return vec;
 }
+
+Mat ProjAcq::imProj2Plane(Mat pt_px){
+    // TODO pre-compute affine transformation coefficients
+    if (pt_px.size[0] == 2) {
+        pt_px.push_back(1.f);
+    }
+    Mat vec = _CamProj->getMatI2C()*pt_px;
+    vec *= (_distPlaneCam / vec.at<float>(2, 0)); // put the point on the plane
+    vec.push_back(1.f);
+    vec = _CamProj->getMatC2R() * vec;
+    vec.pop_back(1);
+
+    return vec;
+}
+
