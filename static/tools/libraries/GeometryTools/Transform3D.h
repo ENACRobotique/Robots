@@ -25,6 +25,8 @@ private:
             mat(cv::Mat_<T>::eye(4, 4)) {
     }
 
+    T _rx, _ry, _rz;
+
 protected:
     cv::Mat mat; // transform points expressed in A reference frame to B one
 
@@ -47,6 +49,8 @@ public:
     Transform3D(const T x, const T y, const T z,
             const T rx, const T ry, const T rz) :
             mat(cv::Mat_<T>::eye(4, 4)) {
+
+        _rx = rx, _ry = ry, _rz = rz;
 
         // copy rotation part
         T crx = std::cos(rx);
@@ -128,6 +132,18 @@ public:
         lastRow.copyTo(mat(cv::Rect(0, 3, 4, 1)));
 
         return trsfBA;
+    }
+
+    T getRx(){
+        return _rx;
+    }
+
+    T getRy(){
+        return _ry;
+    }
+
+    T getRz(){
+        return _rz;
     }
 };
 #endif
