@@ -35,9 +35,16 @@ private:
     void recogObj(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape);
     Play_Obj *recogObj(vector<cv::Mat>& ctr, eObjCol col);
     vector<float> getPosOfShape(vector<cv::Mat>& ctr, eObjShape t);
+    void setDim(std::vector<float>& dim, string& s, int n);
+    void setColors(eObjCol c, string& s);
+    bool isColObjExist(const eObjCol c);
 
 protected:
-    std::vector<Play_Obj*> _objList;
+    std::vector<Play_Obj*> _listObj;
+    std::vector<Play_Obj*> _listRefObj;
+    std::vector<std::tuple<eObjCol, cv::Scalar, cv::Scalar>> _listColObj;
+    vector<Play_Obj*> getSameInListRefObj(eObjCol col = objColMax, eObjShape shape = objShapeMax,
+            vector<float> dim = vector<float>(0), eObjType type = objTypeMax, float epsDim = 0.05) const;
 };
 
 #endif /* PROCIDOBJ_H_ */

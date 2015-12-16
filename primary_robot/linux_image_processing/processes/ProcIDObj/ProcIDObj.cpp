@@ -8,23 +8,28 @@
 #include "ProcIDObj.h"
 #include <fstream>
 #include <iostream>
+#include "Vector3D.h"
 
+#include <opencv2/imgproc/imgproc.hpp>
 
 ProcIDObj::ProcIDObj(Cam* c, const std::string& objPlgrdFile){
+    cout<<"_______ProcIDOj(): start init__________\n";
     camList.push_back(c);
 
     // Load the template objects
-    if( loadListObj(objPlgrdFile) < 0  ||  (int)_objList.size() <= 0)
+    if( loadListObj(objPlgrdFile) < 0  ||  (int)_listRefObj.size() <= 0){
         cout << "Could'nt load template objects from file \"" << objPlgrdFile << "\"" << endl;
+        exit(0);
+    }
 //    printObjList();
 
+    cout<<"_______ProcIDOj(): end init__________\n";
 }
 
 ProcIDObj::~ProcIDObj(){
 }
 
 void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU){
-    std::cout<<"Process ProcIObj: start"<<std::endl;
     std::cout<<"___________Process ProcIObj: start__________"<<std::endl;
     cout<<"acqList.size() = "<<acqList.size()<<endl;
     _listObj.clear();
@@ -103,124 +108,171 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
 }
 
 int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
+    // TODO: process color rom the file
     std::ifstream infile(objPlgrdFile);
-        if(!infile){
-            std::cout << "Can't open file " << objPlgrdFile << std::endl;
-            std::exit( -1 );
+    if(!infile){
+        std::cout << "Can't open file " << objPlgrdFile << std::endl;
+        std::exit( -1 );
+    }
+    std::string line;
+    int nbPara =0, nbCone = 0, nbCylinder = 0;
+    while (getline(infile, line)) {
+        std::istringstream s(line);
+        string obj;
+        string charComment("#");
+        std::vector<float> dim;
+        eObjType objType = objTypeMax;
+        eColObj ObjCol;
+        std::string w;
+
+        s >> obj;
+
+        if(obj.compare(0, string("#").length(), "#") == 0)
+            continue;
+        if(obj.compare(0,string("sandCube").length(), "sandCube") == 0)
+            objType = sandCube;
+        if(obj.compare(0,string("sandCone").length(), "sandCone") == 0)
+            objType = sandCone;
+        if(obj.compare(0, string("sandCyl").length(), "sandCyl") == 0)
+            objType = sandCyl;
+        if(obj.compare(0, string("shellGreen").length(), "shellGreen") == 0)
+            objType = shellGreen;
+        if(obj.compare(0, string("shellViolet").length(), "shellViolet") == 0)
+            objType = shellViolet;
+        if(obj.compare(0, string("shellWhite").length(), "shellWhite") == 0)
+            objType = shellWhite;
+
+        switch(objType){
+        case sandCube:
+            nbPara++;
+            obj = obj.substr(string("sandCube").length()+1);
+            setDim(dim, obj, 3);
+            setColors(ObjCol, obj);
+
+            _listRefObj.push_back(new Play_Obj(sandCube, parallelepiped, dim, ObjCol));
+            break;
+        case sandCone:
+            nbPara++;
+            obj = obj.substr(string("sandCone").length()+1);
+            setDim(dim, obj, 2);
+            setColors(ObjCol, obj);
+
+            _listRefObj.push_back(new Play_Obj(sandCone, parallelepiped, dim, ObjCol));
+            break;
+        case sandCyl:
+            nbCylinder++;
+            obj = obj.substr(string("sandCyl").length()+1);
+
+            setDim(dim, obj, 2);
+            setColors(ObjCol, obj);
+
+            _listRefObj.push_back(new Play_Obj(sandCyl, cylinder, dim, ObjCol));
+            break;
+        case shellGreen:
+            nbCylinder++;
+            obj = obj.substr(string("shellGreen").length()+1);
+
+            setDim(dim, obj, 2);
+            setColors(ObjCol, obj);
+
+            _listRefObj.push_back(new Play_Obj(shellGreen, cylinder, dim, ObjCol));
+            break;
+        case shellViolet:
+            nbCylinder++;
+            obj = obj.substr(string("shellViolet").length()+1);
+
+            setDim(dim, obj, 2);
+            setColors(ObjCol, obj);
+
+            _listRefObj.push_back(new Play_Obj(shellViolet, cylinder, dim, ObjCol));
+            break;
+        case shellWhite:
+            nbCylinder++;
+            obj = obj.substr(string("shellWhite").length()+1);
+
+            setDim(dim, obj, 2);
+            setColors(ObjCol, obj);
+
+            _listRefObj.push_back(new Play_Obj(shellWhite, cylinder, dim, ObjCol));
+            break;
+        case objTypeMax:
+            break;
+        default:
+            std::cout<<"Unknown type of object:"<<obj<<std::endl;
+            return -1;
         }
-        std::string line;
-        int nbPara =0, nbCone = 0, nbCylinder = 0;
-        while (getline(infile, line)) {
-            std::istringstream s(line);
-            string obj;
-            string charComment("#");
-            std::vector<double> dim;
-            std::vector<int> RGB_color;
-            eObjType objType = ObjTypeMax;
-            std::string w;
-            std::size_t posComma;
+    }
+    infile.close();
 
-            s >> obj;
+    cout << "Read " << _listRefObj.size() << " template objects from file \"" << objPlgrdFile << "\"" <<
+            nbPara << " Parallelepiped(s), "<< nbCylinder <<" Cylinder(s), " << nbCone << " Cone(s)"<<endl;
 
-            if(obj.compare(0, string("#").length(), "#") == 0)
-                continue;
-            if(obj.compare(0,string("Parallelepiped").length(), "Parallelepiped") == 0)
-                objType = Parallelepiped;
-            if(obj.compare(0,string("Cylinder").length(), "Cylinder") == 0)
-                objType = Cylinder;
-            if(obj.compare(0, string("Cone").length(), "Cone") == 0)
-                objType = Cone;
-
-            switch(objType){
-            case Parallelepiped:
-                nbPara++;
-                obj = obj.substr(string("Parallelepiped").length()+1);
-                dim.clear();
-                RGB_color.clear();
-
-                for(int i=0; i<3; i++){
-                    posComma = obj.find(',');
-                    w = obj.substr(0, posComma);
-                    dim.push_back(stod(w));
-                    assert(dim.at(i) >= 0 && dim.at(i) <= 1000);
-                    obj = obj.substr(posComma+1);
-                }
-                for(int i=0; i<3; i++){
-                    posComma = obj.find(',');
-                    w = obj.substr(0, posComma);
-                    RGB_color.push_back(stod(w));
-                    assert(RGB_color.at(i) >= 0 && RGB_color.at(i) <= 255);
-                    obj = obj.substr(posComma+1);
-                }
-
-                _objList.push_back(new Play_Obj(Parallelepiped, dim, RGB_color));
-                break;
-            case Cone:
-                nbCone++;
-                obj = obj.substr(string("Cone").length()+1);
-                dim.clear();
-                RGB_color.clear();
-
-                for(int i=0; i<2; i++){
-                    posComma = obj.find(',');
-                    w = obj.substr(0, posComma);
-                    dim.push_back(stod(w));
-                    assert(dim.at(i) >= 0 && dim.at(i) <= 1000);
-                    obj = obj.substr(posComma+1);
-                }
-                for(int i=0; i<3; i++){
-                    posComma = obj.find(',');
-                    w = obj.substr(0, posComma);
-                    RGB_color.push_back(stod(w));
-                    assert(RGB_color.at(i) >= 0 && RGB_color.at(i) <= 255);
-                    obj = obj.substr(posComma+1);
-                }
-
-                _objList.push_back(new Play_Obj(Cone, dim, RGB_color));
-                break;
-            case Cylinder:
-                nbCylinder++;
-                obj = obj.substr(string("Cylinder").length()+1);
-                dim.clear();
-                RGB_color.clear();
-
-                for(int i=0; i<2; i++){
-                    posComma = obj.find(',');
-                    w = obj.substr(0, posComma);
-                    dim.push_back(stod(w));
-                    assert(dim.at(i) >= 0 && dim.at(i) <= 1000);
-                    obj = obj.substr(posComma+1);
-                }
-                for(int i=0; i<3; i++){
-                    posComma = obj.find(',');
-                    w = obj.substr(0, posComma);
-                    RGB_color.push_back(stod(w));
-                    assert(RGB_color.at(i) >= 0 && RGB_color.at(i) <= 255);
-                    obj = obj.substr(posComma+1);
-                }
-
-                _objList.push_back(new Play_Obj(Cylinder, dim, RGB_color));
-                break;
-            case ObjTypeMax:
-                break;
-            default:
-                std::cout<<"Unknown type of object:"<<obj<<std::endl;
-                return -1;
-            }
-        }
-        infile.close();
-
-        cout << "Read " << _objList.size() << " template objects from file \"" << objPlgrdFile << "\"" <<
-                nbPara << " Parallelepiped(s), "<< nbCylinder <<" Cylinder(s), " << nbCone << " Cone(s)"<<endl;
     return 0;
+}
+
+void ProcIDObj::setColors(eObjCol c, string& s){
+    std::string w;
+    std::size_t posComma;
+
+    // Get type of color
+    posComma = s.find(',');
+    w = s.substr(0, posComma);
+    c = (eObjCol)stoi(w);
+    assert(c >= 0 && c <= objColMax);
+    s = s.substr(posComma+1);
+
+    // Get the value of the color
+    // TODO: Generalize: take into account BGR not only HSV
+    cv::Scalar hsv_min, hsv_max;
+    for(int i=0; i<3; i++){  // To set hsv_min values
+        posComma = s.find(',');
+        w = s.substr(0, posComma);
+        hsv_min.val[i] = stod(w);
+        assert(hsv_min[i] >= 0 && hsv_min[i] <= 256);
+        s = s.substr(posComma+1);
+    }
+    for(int i=0; i<3; i++){  // To set hsv_max values
+        posComma = s.find(',');
+        w = s.substr(0, posComma);
+        hsv_max.val[i] = stod(w);
+        assert(hsv_max[i] >= 0 && hsv_max[i] <= 256);
+        s = s.substr(posComma+1);
+    }
+
+    if(! isColObjExist(c))
+        _listColObj.push_back(std::make_tuple(c, hsv_min, hsv_max));
+}
+
+void ProcIDObj::setDim(std::vector<float>& dim, string& s, int n){
+    std::string w;
+    std::size_t posComma;
+    dim.clear();
+    for(int i=0; i<n; i++){
+        posComma = s.find(',');
+        w = s.substr(0, posComma);
+        dim.push_back(stod(w));
+        assert(dim.at(i) >= 0 && dim.at(i) <= 1000);
+        s = s.substr(posComma+1);
+    }
 }
 
 void ProcIDObj::printObjList(){
     cout<<"_____objList loaded_____"<<endl;
-    for(int i=0; i<(int)_objList.size(); i++){
-        _objList.at(i)->print();
+    for(int i=0; i<(int)_listRefObj.size(); i++){
+        _listRefObj.at(i)->print();
     }
     cout<<"________________________"<<endl;
+}
+
+bool ProcIDObj::isColObjExist(const eObjCol c){
+    std::vector<std::tuple<eObjCol, cv::Scalar, cv::Scalar>>::iterator it = _listColObj.begin();
+
+    for(; it != _listColObj.end(); ++it){
+        if(get<0>(*it)  == c)
+            return true;
+    }
+
+    return false;
 }
 
 cv::Mat ProcIDObj::getBinaryImage(cv::Mat m, int col){
