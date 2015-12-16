@@ -188,3 +188,21 @@ Mat ProjAcq::imProj2Plane(Mat pt_px){
     return vec;
 }
 
+Mat ProjAcq::imProj2PlaneAtDistFromCam(Mat pt_px, float d){
+    // TODO pre-compute affine transformation coefficients
+    if (pt_px.size[0] == 2) {
+        pt_px.push_back(1.f);
+    }
+    Mat vec = _CamProj->getMatI2C()*pt_px;
+    vec *= (d / vec.at<float>(2, 0)); // put the point on the plane
+    vec.push_back(1.f);
+    vec = _CamProj->getMatC2R() * vec;
+    vec.pop_back(1);
+
+    return vec;
+}
+
+float ProjAcq::getDistPlane2Cam(){
+    return _distPlaneCam;
+}
+

@@ -58,6 +58,7 @@ public:
     Pt3D cam2plane(Pt2D const& pt_pix) {
         return Pt3D(cam2plane(pt_pix.toCv()));
     }
+    float getDistPlane2Cam();
     template<typename T>
     cv::Point3_<float> cam2plane(cv::Point_<T> const& pt_pix) {
         cv::Mat p = cam2plane((cv::Mat_<float>(2, 1) << pt_pix.x, pt_pix.y));
@@ -70,6 +71,7 @@ public:
     }
     cv::Mat plane2cam(cv::Mat pt_cm);
     cv::Mat imProj2Plane(cv::Mat pt_px);
+    cv::Mat imProj2PlaneAtDistFromCam(cv::Mat pt_px, float d);
 
 };
 
