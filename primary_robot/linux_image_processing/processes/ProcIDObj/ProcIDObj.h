@@ -28,6 +28,13 @@ public:
 
 private:
     int loadListObj(const std::string& objPlgrdFile);
+    cv::Mat getBinaryImage(cv::Mat m, int col);
+    void compContrs(const cv::Mat m, vector<vector<cv::Point>>& listCtrs);
+    void compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& approxCtr);
+    eObjShape recogShape(const vector<cv::Mat>& vertexes, vector<Vector3D<float>>& edges);
+    void recogObj(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape);
+    Play_Obj *recogObj(vector<cv::Mat>& ctr, eObjCol col);
+    vector<float> getPosOfShape(vector<cv::Mat>& ctr, eObjShape t);
 
 protected:
     std::vector<Play_Obj*> _objList;

@@ -1,12 +1,12 @@
-#type,dim1,...,dim_n,R_color,G_color,B_color
+#type,dim1,...,dim_n,typeColor,R_color,G_color,B_color,Hmin_color,Smin_color,Vmin_color,Hmax_color,Smax_color,Vmax_color
 #parallelepipede : x, y, z
 #cylindre : h, r
 #cone : h, r
 #Notes: Dimensions in mm
 
-Parallelepiped,58,58,58,232,140,0
-Cylinder,58,29,232,140,0
-Cone,60,29,232,140,0
-Cylinder,25,38.1,54,103,53
-Cylinder,25,38.1,132,76,130
-Cylinder,25,38.1,255,255,255
+sandCube,58,58,58,0,16,187,116,23,256,256
+sandCyl,58,29,0,16,187,116,23,256,256
+sandCone,60,29,0,16,187,116,23,256,256
+shellGreen,25,38.1,2,0,0,0,0,0,0
+shellViolet,25,38.1,3,0,0,0,0,0,0
+shellWhite,25,38.1,1,0,0,0,0,0,0 
