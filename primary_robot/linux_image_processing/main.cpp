@@ -29,16 +29,47 @@ using namespace std;
 #include "save.hpp"
 #include "sourceVid.hpp"
 
+//#define CALIB_HSV
+
+#ifdef CALIB_HSV
+// To remove
+#include "opencv2/highgui/highgui.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
+Scalar hsvT_min,hsvT_max;
+/// Global Variables
+const int hT_slider_max = 180, svT_slider_max = 256;
+int hminT_slider=16, hmaxT_slider=23,
+    sminT_slider=187, smaxT_slider=256,
+    vminT_slider=116, vmaxT_slider=256;
+
+void on_Ttrackbar(int, void*){
+    hsvT_min = Scalar(hminT_slider, sminT_slider, vminT_slider);
+    hsvT_max = Scalar(hmaxT_slider, smaxT_slider, vmaxT_slider);
+}
+#endif
+
+
 //##### Main #####
 int main(int argc, char* argv[]) {
     Perf& perf = Perf::getPerf();  //& ?
     Mat frameRaw;
 
+#ifdef CALIB_HSV
+    cv::namedWindow("RGL_HSV");
+    cv::createTrackbar("H min", "RGL_HSV", &hminT_slider, hT_slider_max, on_Ttrackbar );
+    cv::createTrackbar("H max", "RGL_HSV", &hmaxT_slider, hT_slider_max, on_Ttrackbar );
+    cv::createTrackbar("S min", "RGL_HSV", &sminT_slider, svT_slider_max, on_Ttrackbar );
+    cv::createTrackbar("S max", "RGL_HSV", &smaxT_slider, svT_slider_max, on_Ttrackbar );
+    cv::createTrackbar("V min", "RGL_HSV", &vminT_slider, svT_slider_max, on_Ttrackbar );
+    cv::createTrackbar("V max", "RGL_HSV", &vmaxT_slider, svT_slider_max, on_Ttrackbar );
+    on_Ttrackbar(0,NULL);
+#endif
+
     // Initialize cameras
     map<Cam*, VideoCapture*> camList;
     camList.insert(make_pair(
 //            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
-            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 220. * M_PI / 180., 0, 0)),
+            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0)),
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(0)));
             new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
@@ -94,6 +125,15 @@ int main(int argc, char* argv[]) {
 
             p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
 
+#ifdef CALIB_HSV
+            // Test HSV
+            cv::Mat im_hsv = acqList.front()->getMat(HSV);
+            cv::Mat im_range;
+            cv::inRange(im_hsv, hsvT_min, hsvT_max, im_range);
+            cout<<"hsvT_min = "<<hsvT_min<<", hsvT_max = "<<hsvT_max<<endl;
+//            cv::imwrite("im_hsv.png", im_range);
+            imshow( "RGL_HSV", im_range );
+#endif
             cout<<"Mk2: process done\n";
             for (Acq* a : acqList) {
                 delete a;
@@ -101,16 +141,16 @@ int main(int argc, char* argv[]) {
 
             perf.endOfStep("process");
         }
-
-//        switch(waitKey(1000./10)){
-//        case 0x110001B:
-//        case 27:
-//            quit = true;
-//            break;
-//        default:
-//            break;
-//        }
-
+#ifdef CALIB_HSV
+        switch(waitKey(1000./10)){
+        case 0x110001B:
+        case 27:
+            quit = true;
+            break;
+        default:
+            break;
+        }
+#endif
         perf.endFrame();
 
         quit = 1;
@@ -123,7 +163,6 @@ int main(int argc, char* argv[]) {
 //                bn_printfDbg("got unhandled msg: type%hhu sz%hhu", inMsg.header.type, inMsg.header.size);
 //                break;
 //		}  // End switch
-
     } while (!quit);  // End while
 
     // Test
