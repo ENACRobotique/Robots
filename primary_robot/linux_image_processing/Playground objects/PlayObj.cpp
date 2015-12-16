@@ -7,32 +7,58 @@
 
 #include "PlayObj.h"
 
-Play_Obj::Play_Obj(eObjType type, vector<double>& dim, vector<int>& RGB_color){
-    assert(type == Parallelepiped || type == Cone || type == Cylinder);
+Play_Obj::Play_Obj(eObjType type, eObjShape shape, vector<float>& dim, eObjCol color){
+    assert(type == sandCube || type == sandCone || type == sandCyl ||
+           type == shellGreen  ||  type == shellViolet  ||  type == shellWhite);
+    assert(shape == parallelepiped || shape == cone || shape == cylinder);
     _type = type;
+    _shape = shape;
     _dim = dim;
-    _RGB_color = RGB_color;
+    _col = color;
 }
 
 Play_Obj::~Play_Obj(){}
 
-void Play_Obj::setConf(AbsPos2D<double> conf){
+void Play_Obj::setConf(AbsPos2D<float> conf){
     _conf = conf;
 }
 
 void Play_Obj::print(){
     switch(_type){
-    case Parallelepiped:
-        cout<<"Parallelepiped :"<<endl;
+    case sandCube:
+        cout<<"sandCube :"<<endl;
         break;
-    case Cone:
-        cout<<"Cone :"<<endl;
+    case sandCone:
+        cout<<"sandCone :"<<endl;
         break;
-    case Cylinder:
-        cout<<"Cylinder :"<<endl;
+    case sandCyl:
+        cout<<"sandCyl :"<<endl;
         break;
+    case shellGreen:
+        cout<<"shellGreen :"<<endl;
+        break;
+    case shellViolet:
+            cout<<"shellViolet :"<<endl;
+            break;
+    case shellWhite:
+            cout<<"shellWhite :"<<endl;
+            break;
     default:
         cout<<"Unknown type of playground object"<<endl;
+    }
+
+    switch(_shape){
+    case parallelepiped:
+        cout<<"parallelepiped :"<<endl;
+        break;
+    case cone:
+        cout<<"cone :"<<endl;
+        break;
+    case cylinder:
+        cout<<"cylinder :"<<endl;
+        break;
+    default:
+        cout<<"Unknown shape of playground object"<<endl;
     }
 
     cout<<"\t dim = ";
@@ -45,11 +71,48 @@ void Play_Obj::print(){
     }
 
     cout<<"\t color = ";
-    for(int i=0; i<(int)_RGB_color.size(); i++){
-        cout<< _RGB_color.at(i);
-        if(i < (int)_RGB_color.size()-1)
-            cout<<", ";
-        else
-            cout<<endl;
+    switch(_col){
+    case yellowDaffodil:
+        cout<<"yellowDaffodil\n";
+        break;
+    case whiteTraffic:
+        cout<<"whiteTraffic\n";
+        break;
+    case greenEmerald:
+        cout<<"greenEmerald\n";
+        break;
+    case violetSignal:
+        cout<<"violetSignal\n";
+        break;
+    default:
+        cout<<"Unknown color = "<<_col<<endl;
     }
+}
+
+eObjType Play_Obj::getType() const{
+    return _type;
+}
+
+eObjShape Play_Obj::getShape()const{
+    return _shape;
+}
+
+eObjCol Play_Obj::getCol()const{
+    return _col;
+}
+
+std::vector<float> Play_Obj::getDim() const{
+    return _dim;
+}
+
+bool Play_Obj::isDimEqual(std::vector<float> dim, float eps){
+    if(_dim.size() != dim.size())
+        return false;
+
+    for(int i=0; i<(int)_dim.size(); i++){
+        if( !(dim[i] < (_dim[i] + eps)  &&  dim[i] > (_dim[i] - eps) ))
+            return false;
+    }
+
+    return true;
 }

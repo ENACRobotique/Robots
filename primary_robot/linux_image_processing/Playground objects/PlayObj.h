@@ -16,17 +16,23 @@ using namespace std;
 
 class Play_Obj {
 public:
-    Play_Obj(eObjType type, vector<double>& dim, vector<int>& RGB_color);
+    Play_Obj(eObjType type, eObjShape shape, vector<float>& dim, eObjCol color);
     virtual ~Play_Obj();
 
-    void setConf(AbsPos2D<double> conf);
+    void setConf(AbsPos2D<float> conf);
+    bool isDimEqual(std::vector<float> dim, float eps);
+    eObjType getType() const;
+    eObjShape getShape()const;
+    eObjCol getCol()const;
+    std::vector<float> getDim() const;
     void print();
 
 private:
     eObjType _type;
-    vector<double> _dim;
-    vector<int> _RGB_color;
-    AbsPos2D<double> _conf;
+    eObjShape _shape;
+    eObjCol _col;
+    vector<float> _dim;
+    AbsPos2D<float> _conf;
 };
 
 #endif /* PLAYOBJ_H_ */
