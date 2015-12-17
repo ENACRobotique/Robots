@@ -85,7 +85,7 @@ void Play_Obj::print(){
         cout<<"violetSignal\n";
         break;
     default:
-        cout<<"Unknown color = "<<_col<<endl;
+        cout<<"Unknown = "<<_col<<endl;
     }
 }
 
