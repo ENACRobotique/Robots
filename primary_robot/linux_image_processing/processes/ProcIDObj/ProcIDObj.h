@@ -32,11 +32,11 @@ private:
     void compContrs(const cv::Mat m, vector<vector<cv::Point>>& listCtrs);
     void compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& approxCtr);
     eObjShape recogShape(const vector<cv::Mat>& vertexes, vector<Vector3D<float>>& edges);
-    void recogObj(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape);
+    eObjType recogObjType(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape);
     Play_Obj *recogObj(vector<cv::Mat>& ctr, eObjCol col);
     vector<float> getPosOfShape(vector<cv::Mat>& ctr, eObjShape t);
     void setDim(std::vector<float>& dim, string& s, int n);
-    void setColors(eObjCol c, string& s);
+    void setColors(eObjCol& c, string& s);
     bool isColObjExist(const eObjCol c);
 
 protected:

@@ -21,7 +21,7 @@ ProcIDObj::ProcIDObj(Cam* c, const std::string& objPlgrdFile){
         cout << "Could'nt load template objects from file \"" << objPlgrdFile << "\"" << endl;
         exit(0);
     }
-//    printObjList();
+    printObjList();
 
     cout<<"_______ProcIDOj(): end init__________\n";
 }
@@ -83,6 +83,7 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
                 cv::drawContours(im_pAcq, listApproxCtrs, idx, col_ctr,4);
                 cv::imwrite("imCtr1_pAcq.png", im_pAcq);
 
+                // Process each approximated contour
                 int m = (int)approxCtr.size();
                 vector<cv::Mat> vertexesPl0;
                 for(int i=0; i<m; i++){
@@ -157,7 +158,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             setDim(dim, obj, 2);
             setColors(ObjCol, obj);
 
-            _listRefObj.push_back(new Play_Obj(sandCone, parallelepiped, dim, ObjCol));
+            _listRefObj.push_back(new Play_Obj(sandCone, cone, dim, ObjCol));
             break;
         case sandCyl:
             nbCylinder++;
@@ -210,7 +211,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
     return 0;
 }
 
-void ProcIDObj::setColors(eObjCol c, string& s){
+void ProcIDObj::setColors(eObjCol& c, string& s){
     std::string w;
     std::size_t posComma;
 
@@ -352,14 +353,13 @@ Play_Obj *ProcIDObj::recogObj(vector<cv::Mat>& vertexes, eObjCol col){
     eObjShape shape = recogShape(vertexes, edges);
 
     std::vector<float> dim;
-    recogObj(vertexes, col, shape);
-
-    eObjType objType;
+    eObjType objType = recogObjType(vertexes, col, shape);
 
     return new Play_Obj(objType, shape, dim, col);
 }
 
-void ProcIDObj::recogObj(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape){
+eObjType ProcIDObj::recogObjType(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape){
+    eObjType type = shellWhite;
     vector<Play_Obj*> listObj(getSameInListRefObj(col, shape));
 
     cout<<"recoObj(3p): listObj.size() = "<<listObj.size()<<endl;
@@ -367,7 +367,7 @@ void ProcIDObj::recogObj(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape
         listObj[i]->print();
     }
 
-//    return new Play_Obj(sandCube, parallelepiped, vector<float>, col);
+    return type;
 }
 
 vector<float> ProcIDObj::getPosOfShape(vector<cv::Mat>& ctr, eObjShape t){
@@ -404,6 +404,7 @@ vector<Play_Obj*> ProcIDObj::getSameInListRefObj(eObjCol col, eObjShape shape,
     }
 
     if(dim.size() != 0){
+        cout<<"dim\n";
         for(it = _listRefObj.begin(); it != _listRefObj.end(); ++it){
             if((*it)->isDimEqual(dim, epsDim))
                 listObj.push_back(*it);
@@ -411,7 +412,11 @@ vector<Play_Obj*> ProcIDObj::getSameInListRefObj(eObjCol col, eObjShape shape,
     }
 
     if(shape != objShapeMax){
-        std::vector<Play_Obj*> listObjTemp(listObj);
+        std::vector<Play_Obj*> listObjTemp;
+        if((int)listObj.size() != 0)
+            listObjTemp = listObj;
+        else
+            listObjTemp = _listRefObj;
         listObj.clear();
         for(it = listObjTemp.begin(); it != listObjTemp.end(); ++it){
             if((*it)->getShape() == shape)
