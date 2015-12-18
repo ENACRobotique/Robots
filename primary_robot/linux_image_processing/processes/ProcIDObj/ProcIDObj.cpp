@@ -38,6 +38,9 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
         cv::Mat hsv = (*itAcq)->getMat(HSV);
         cv::imwrite("hsv.png", hsv);
 
+        cv::Mat bgr = (*itAcq)->getMat(BGR);
+        cv::imwrite("bgr.png", bgr);
+
         static Plane3D<float> pl( { 0, 0, 0 }, { 0, 0, 1 }); // build a plane with a point and a normal
         ProjAcq pAcq = (*itAcq)->projectOnPlane(pl);
         cv::Mat im_pAcq = pAcq.getMat(HSV);
@@ -69,7 +72,7 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
 
             // Process each contour
             for (size_t idx = 0; idx < listCtrs.size(); idx++) { // for each contour
-                cout << "Countours #" << idx << "/ " << listCtrs.size() <<endl;
+                cout << "Countours #" << idx << "/ " << listCtrs.size() - 1<<endl;
 
                 col_ctr = cv::Scalar((idx*30)%256, (idx*30)%256, (idx*30)%256);
                 cv::drawContours(imCtrs, listCtrs, idx, col_ctr,4);
@@ -82,6 +85,7 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
                 cout<<"nbVertCtr = "<<listCtrs[idx].size()<<", nbVertApproxCtr = "<<listApproxCtrs[idx].size()<<endl;
                 cv::drawContours(im_pAcq, listApproxCtrs, idx, col_ctr,4);
                 cv::imwrite("imCtr1_pAcq.png", im_pAcq);
+                cv::imshow("HSV", im_pAcq);
 
                 // Process each approximated contour
                 int m = (int)approxCtr.size();
@@ -153,7 +157,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             _listRefObj.push_back(new Play_Obj(sandCube, parallelepiped, dim, ObjCol));
             break;
         case sandCone:
-            nbPara++;
+            nbCone++;
             obj = obj.substr(string("sandCone").length()+1);
             setDim(dim, obj, 2);
             setColors(ObjCol, obj);
@@ -305,7 +309,7 @@ void ProcIDObj::compContrs(const cv::Mat m, vector<vector<cv::Point>>& listCtrs)
 }
 
 void ProcIDObj::compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& approxCtr){
-    approxPolyDP(cv::Mat(ctr), approxCtr, arcLength(cv::Mat(ctr), true) * 0.02, true);
+    approxPolyDP(cv::Mat(ctr), approxCtr, arcLength(cv::Mat(ctr), true) * 0.01, true);
 }
 
 /**
@@ -326,10 +330,10 @@ eObjShape ProcIDObj::recogShape(const vector<cv::Mat>& vertexes, vector<Vector3D
         for(int i=0; i<s; i++){
             edges.push_back(Vector3D<float>(cv::Mat(vertexes[i] - vertexes[(i+1)%s])));
             if(i>0){
-                cout<<"edges["<<i<<"] = "<<edges[i]<<endl;
-                cout<<"edges["<<(i+1)%s<<"] = "<<edges[(i+1)%s]<<endl;
+//                cout<<"edges[b"<<i<<"] = "<<edges[i]<<endl;
+//                cout<<"edges["<<(i+1)%s<<"] = "<<edges[(i+1)%s]<<endl;
                 angles += edges[i].angle(edges[(i-1)%s]);
-                cout<<"angles = "<<angles<<endl;
+//                cout<<"angles = "<<angles<<endl;
             }
         }
         cout<<"angles = "<<angles<<endl;
@@ -352,14 +356,17 @@ Play_Obj *ProcIDObj::recogObj(vector<cv::Mat>& vertexes, eObjCol col){
 
     eObjShape shape = recogShape(vertexes, edges);
 
-    std::vector<float> dim;
     eObjType objType = recogObjType(vertexes, col, shape);
+
+
+    std::vector<float> dim;
+    // TODO: Add functions to recognize dim
 
     return new Play_Obj(objType, shape, dim, col);
 }
 
 eObjType ProcIDObj::recogObjType(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape){
-    eObjType type = shellWhite;
+    eObjType type = objTypeMax;
     vector<Play_Obj*> listObj(getSameInListRefObj(col, shape));
 
     cout<<"recoObj(3p): listObj.size() = "<<listObj.size()<<endl;
@@ -367,20 +374,21 @@ eObjType ProcIDObj::recogObjType(vector<cv::Mat>& vertexes, eObjCol col, eObjSha
         listObj[i]->print();
     }
 
+    if(listObj.size() == 1)
+        type  = listObj[0]->getType();
     return type;
 }
 
-vector<float> ProcIDObj::getPosOfShape(vector<cv::Mat>& ctr, eObjShape t){
+vector<float> ProcIDObj::getPosOfObj(const eObjType t, const vector<cv::Mat>& vertexes, const vector<Vector3D<float>>& edges){
     vector<float> pos;
     switch(t){
-    case parallelepiped:
-        Play_Obj obj();
+    case sandCube:
 
         break;
-    case cone:
+    case sandCone:
 
         break;
-    case cylinder:
+    case sandCyl:
 
         break;
     default:

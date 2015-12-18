@@ -54,6 +54,8 @@ int main(int argc, char* argv[]) {
     Perf& perf = Perf::getPerf();  //& ?
     Mat frameRaw;
 
+    cv::namedWindow("HSV");
+
 #ifdef CALIB_HSV
     cv::namedWindow("RGL_HSV");
     cv::createTrackbar("H min", "RGL_HSV", &hminT_slider, hT_slider_max, on_Ttrackbar );
@@ -71,8 +73,10 @@ int main(int argc, char* argv[]) {
 //            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0)),
             //            new VideoCapture("MyVideo.avi")));
-//            new VideoCapture(0)));
-            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
+//            new VideoCapture(1)));
+//            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
+//            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
+            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
 
 
     // Initialize processes
@@ -105,7 +109,7 @@ int main(int argc, char* argv[]) {
             for (Cam* c : p->getCamList()) {
                 map<Cam*, VideoCapture*>::iterator it = camList.find(c);
 
-                // Read a new frame from the video source
+//                // Read a new frame from the video source
 //                if (!it->second->read(frameRaw)) {  //if not success, break loop
 //                    cout << "Cannot read the frame from source video file" << endl;
 //                    continue;
@@ -153,7 +157,7 @@ int main(int argc, char* argv[]) {
 #endif
         perf.endFrame();
 
-        quit = 1;
+//        quit = 1;
 //
 //                break;
 //            case E_DATA:
@@ -167,7 +171,7 @@ int main(int argc, char* argv[]) {
 
     // Test
 //    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-//    imshow( "Display window", frameRaw );                   // Show our image inside it.
+    imshow( "Display window", frameRaw );                   // Show our image inside it.
     waitKey(0);
 
     printf("End prog\n");

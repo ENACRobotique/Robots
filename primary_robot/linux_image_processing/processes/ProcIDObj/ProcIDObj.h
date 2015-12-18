@@ -38,6 +38,7 @@ private:
     void setDim(std::vector<float>& dim, string& s, int n);
     void setColors(eObjCol& c, string& s);
     bool isColObjExist(const eObjCol c);
+    vector<float> getPosOfObj(const eObjType t, const vector<cv::Mat>& vertexes, const vector<Vector3D<float>>& edges);
 
 protected:
     std::vector<Play_Obj*> _listObj;
