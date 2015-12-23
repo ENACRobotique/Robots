@@ -23,6 +23,7 @@ protected:
     Transform3D<float> rob2cam;
     cv::Size2f aperAngle;
     cv::Size size;
+    int _id;
 
 public:
     /**
@@ -30,8 +31,9 @@ public:
      * size (in pixels)
      */
     // Constructor
-    Cam(float f, cv::Size size, const Transform3D<float>& rob2cam) :
+    Cam(float f, cv::Size size, const Transform3D<float>& rob2cam, int id = -1) :
             rob2cam(rob2cam), size(size) {
+        _id = id;
         aperAngle = cv::Size2f(
                 2. * atan2f(size.width / 2, f),
                 2. * atan2f(size.height / 2, f));
@@ -94,6 +96,9 @@ public:
     }
     cv::Mat getCenter() const {
         return (cv::Mat_<float>(2, 1) << (size.width - 1.f) / 2.f, (size.height - 1.f) / 2.f);
+    }
+    int getIdCam() const{
+        return _id;
     }
 };
 
