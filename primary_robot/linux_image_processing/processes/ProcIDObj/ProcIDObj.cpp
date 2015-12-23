@@ -15,6 +15,7 @@
 ProcIDObj::ProcIDObj(Cam* c, const std::string& objPlgrdFile){
     cout<<"_______ProcIDOj(): start init__________\n";
     camList.push_back(c);
+    _stateCalib = notDone;
 
     // Load the template objects
     if( loadListObj(objPlgrdFile) < 0  ||  (int)_listRefObj.size() <= 0){
@@ -29,12 +30,107 @@ ProcIDObj::ProcIDObj(Cam* c, const std::string& objPlgrdFile){
 ProcIDObj::~ProcIDObj(){
 }
 
+void ProcIDObj::CalibHSV(const std::vector<Acq*>& acqList){
+    cout<<"_____ CalibHSV(): START _____\n";
+    map<int, vector<pair<int, int>>> listCalibArea;
+    loadCalibCam("../2016/listCalibCams.csv", listCalibArea);
+
+    for(std::vector<Acq*>::const_iterator itAcq = acqList.begin(); itAcq != acqList.end(); ++itAcq){
+        cv::Mat hsv = (*itAcq)->getMat(HSV);
+        const int idCam = (*itAcq)->getCam()->getIdCam();
+        cout<<"IdCam = "<<idCam<<endl;
+        if(listCalibArea.find(idCam) == listCalibArea.end()){
+            cout<<"Skip calib cam n°"<<idCam<<endl;
+            continue;
+        }
+
+        mapCol_T::iterator it = _listAcqColObj[idCam].begin();
+        cout<<"_listAcqColObj[idCam].size() = "<<_listAcqColObj[idCam].size()<<endl;
+        for(; it!=_listAcqColObj[idCam].end(); ++it){  // For each color
+            eObjCol col = static_cast<eObjCol>(it->first);
+            cout<<"col = "<<(int)col<<endl;
+            cv::Mat im_bin = getBinaryImage(hsv, col, idCam);
+            cv::imwrite("im_binCalib.png", im_bin);
+            std::vector<std::vector<cv::Point> > listCtrs;
+            compContrs(im_bin, listCtrs);
+            cout<<"nbContour = "<<listCtrs.size()<<endl;
+            float area = cv::contourArea(listCtrs[0]);  // FIXME: only one contour
+            cout<<"area = "<<area<<" px²"<<endl;
+            // TODO: Tuning of HSV
+        }
+    }
+
+    _stateCalib = fail;
+    cout<<"_____ CalibHSV(): END _____\n";
+}
+
+int ProcIDObj::loadCalibCam(const std::string& calibCamFile, map<int, vector<pair<int, int>>>& listCalibArea){
+    std::ifstream infile(calibCamFile);
+    if(!infile){
+        std::cout << "Can't open file " << calibCamFile << std::endl;
+        std::exit( -1 );
+    }
+    std::string line;
+    while (getline(infile, line)) {
+        std::istringstream s(line);
+        string obj;
+        eColObj col;
+        std::string w;
+        std::size_t posComma;
+        vector<pair<int, int>> listColArea;
+
+        s >> obj;
+
+        if(obj.compare(0, string("#").length(), "#") == 0 || obj.length() == 0)
+            continue;
+
+        posComma = obj.find(',');
+        w = obj.substr(0, posComma);
+        int idCam = stoi(w);
+        assert(idCam >= 0 && idCam <= 5);
+        obj = obj.substr(posComma + 1);
+        while(obj.length() > 0){
+            cout<<"-----"<<endl;
+            posComma = obj.find(',');
+            w = obj.substr(0, posComma);
+            col = static_cast<eColObj>(stoi(w));
+            obj = obj.substr(posComma + 1);
+            posComma = obj.find(',');
+            int area;
+            if((int)posComma == -1){
+                area = stoi(obj);
+                obj.clear();
+            }
+            else{
+                w = obj.substr(0, posComma);
+                area = stoi(w);
+                obj = obj.substr(posComma + 1);
+            }
+            listColArea.push_back(make_pair((int)col, area));
+        }
+        listCalibArea[idCam] = listColArea;
+        cout<<"cam: "<<idCam<<", (col, area) = (" << listCalibArea[idCam][0].first<< ", " <<
+                listCalibArea[idCam][0].second << ")" << endl;
+    }
+    infile.close();
+
+    cout << "Load " << listCalibArea.size() << " calibrations for cameras from \"" << calibCamFile <<endl;
+
+    return 0;
+}
+
 void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU){
     std::cout<<"___________Process ProcIObj: start__________"<<std::endl;
     cout<<"acqList.size() = "<<acqList.size()<<endl;
     _listObj.clear();
 
+//    if(_stateCalib == notDone  ||  _stateCalib == fail){
+//        CalibHSV(acqList);
+//        return;
+//    }
+
     for(std::vector<Acq*>::const_iterator itAcq = acqList.begin(); itAcq != acqList.end(); ++itAcq){
+        int idCam = (*itAcq)->getCam()->getIdCam();
         cv::Mat hsv = (*itAcq)->getMat(HSV);
         cv::imwrite("hsv.png", hsv);
 
@@ -43,22 +139,16 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
 
         static Plane3D<float> pl( { 0, 0, 0 }, { 0, 0, 1 }); // build a plane with a point and a normal
         ProjAcq pAcq = (*itAcq)->projectOnPlane(pl);
-        cv::Mat im_pAcq = pAcq.getMat(HSV);
+        cv::Mat im_pAcq = pAcq.getMat(HSV);  // FIXME: Initialize before process for game
 
         cv::imwrite("im_pAcq.png", im_pAcq);
 
-        // Test projection to plane
-//        cv::Mat pt_px = (cv::Mat_<float>(3, 1) << 200., 200., 1.);
-//        cv::Mat pt_cm;
-//        cout<<"pt_px = "<<pt_px<<endl;
-//        pt_cm = pAcq.imProj2Plane(pt_px);
-//        cout<<"pt_cm_R = "<<pt_cm<<endl;
-
         // Process the image following each color filter (HSV)
-        for(int col=0; col<1/*(int)objColMax*/; col++){
-            cout<<"Process color: col = "<<col<<endl;
+        for(int colInt=0; colInt<1/*(int)objColMax*/; colInt++){
+            cout<<"Process color: col = "<<colInt<<endl;
 
-            cv::Mat im_bin = getBinaryImage(im_pAcq, col);
+            eObjCol col = static_cast<eObjCol>(colInt);
+            cv::Mat im_bin = getBinaryImage(im_pAcq, col, idCam);
             cv::imwrite("im_bin.png", im_bin);
             cout<<"M1\n";
 
@@ -92,18 +182,15 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
                 vector<cv::Mat> vertexesPl0;
                 for(int i=0; i<m; i++){
                     cout<<"____ vert"<<i<<" = "<<approxCtr[i]<<endl;
-//                    cout<<"dist_px("<<i<<", "<<(i+1)%m<<") = "<<norm(approxCtr[i] - approxCtr[(i+1)%m])<<endl;
                     cv::Mat pt_px = (cv::Mat_<float>(3, 1) << approxCtr[i].x, approxCtr[i].y, 1.);
                     cv::circle(imCtrs, cv::Point(approxCtr[i].x, approxCtr[i].y), 2, cv::Scalar(10, 10, 200), 2);
-//                    float distPl12Cam = pAcq.getDistPlane2Cam() - (float)5.8;
-//                    cout<<"distPl12Cam = "<<distPl12Cam<<endl;
                     vertexesPl0.push_back(pAcq.imProj2Plane(pt_px));
                     cout<<"\t"<<vertexesPl0[i]<<endl;
                 }
 
                 cv::imwrite("imCtrs.png", imCtrs);
 
-                _listObj.push_back(recogObj(vertexesPl0, (eObjCol)col));
+                recogObj(vertexesPl0, (eObjCol)col);
             }
         }
     }
@@ -113,7 +200,7 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
 }
 
 int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
-    // TODO: process color rom the file
+    // TODO: process color from the file
     std::ifstream infile(objPlgrdFile);
     if(!infile){
         std::cout << "Can't open file " << objPlgrdFile << std::endl;
@@ -152,7 +239,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             nbPara++;
             obj = obj.substr(string("sandCube").length()+1);
             setDim(dim, obj, 3);
-            setColors(ObjCol, obj);
+            setColors(ObjCol, obj, 0);
 
             _listRefObj.push_back(new Play_Obj(sandCube, parallelepiped, dim, ObjCol));
             break;
@@ -160,7 +247,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             nbCone++;
             obj = obj.substr(string("sandCone").length()+1);
             setDim(dim, obj, 2);
-            setColors(ObjCol, obj);
+            setColors(ObjCol, obj, 0);
 
             _listRefObj.push_back(new Play_Obj(sandCone, cone, dim, ObjCol));
             break;
@@ -169,7 +256,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             obj = obj.substr(string("sandCyl").length()+1);
 
             setDim(dim, obj, 2);
-            setColors(ObjCol, obj);
+            setColors(ObjCol, obj, 0);
 
             _listRefObj.push_back(new Play_Obj(sandCyl, cylinder, dim, ObjCol));
             break;
@@ -178,7 +265,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             obj = obj.substr(string("shellGreen").length()+1);
 
             setDim(dim, obj, 2);
-            setColors(ObjCol, obj);
+            setColors(ObjCol, obj, 0);
 
             _listRefObj.push_back(new Play_Obj(shellGreen, cylinder, dim, ObjCol));
             break;
@@ -187,7 +274,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             obj = obj.substr(string("shellViolet").length()+1);
 
             setDim(dim, obj, 2);
-            setColors(ObjCol, obj);
+            setColors(ObjCol, obj, 0);
 
             _listRefObj.push_back(new Play_Obj(shellViolet, cylinder, dim, ObjCol));
             break;
@@ -196,7 +283,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             obj = obj.substr(string("shellWhite").length()+1);
 
             setDim(dim, obj, 2);
-            setColors(ObjCol, obj);
+            setColors(ObjCol, obj, 0);
 
             _listRefObj.push_back(new Play_Obj(shellWhite, cylinder, dim, ObjCol));
             break;
@@ -215,7 +302,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
     return 0;
 }
 
-void ProcIDObj::setColors(eObjCol& c, string& s){
+void ProcIDObj::setColors(eObjCol& c, string& s, const int idCam){
     std::string w;
     std::size_t posComma;
 
@@ -244,8 +331,16 @@ void ProcIDObj::setColors(eObjCol& c, string& s){
         s = s.substr(posComma+1);
     }
 
-    if(! isColObjExist(c))
-        _listColObj.push_back(std::make_tuple(c, hsv_min, hsv_max));
+    mapCol_T m;
+    if(_listAcqColObj.find(idCam) == _listAcqColObj.end()){ // new acq to add in _listAcqColObj
+        m[c] = make_pair(hsv_min, hsv_max);
+        _listAcqColObj[idCam] = m;
+    }
+    else{
+        if(_listAcqColObj[idCam].find(c) == _listAcqColObj[idCam].end() ){
+            _listAcqColObj[idCam][c] = make_pair(hsv_min, hsv_max);
+        }
+    }
 }
 
 void ProcIDObj::setDim(std::vector<float>& dim, string& s, int n){
@@ -269,21 +364,35 @@ void ProcIDObj::printObjList(){
     cout<<"________________________"<<endl;
 }
 
-bool ProcIDObj::isColObjExist(const eObjCol c){
-    std::vector<std::tuple<eObjCol, cv::Scalar, cv::Scalar>>::iterator it = _listColObj.begin();
 
-    for(; it != _listColObj.end(); ++it){
-        if(get<0>(*it)  == c)
-            return true;
-    }
+//std::pair<cv::Scalar, cv::Scalar> ProcIDObj::getHSVForCam(const int idCam, const eObjCol col){
+//    std::pair<cv::Scalar, cv::Scalar> ret = _listAcqColObj[idCam][col];
+//
+//    mapsMapCol_T::iterator it_p = _listAcqColObj.begin();
+//    for(; it_p != _listAcqColObj.end(); ++it_p){
+//        if((*it_p).first == idCam){
+//            mapCol_T::iterator it_t = (*it_p).begin();
+//            for(; it_t != (*it_p).second.end(); ++it_t){
+//                if(get<0>(*it_t) == col){
+//                    ret.push_back(get<1>(*it_t));
+//                    ret.push_back(get<2>(*it_t));
+//                }
+//            }
+//
+//            break;
+//        }
+//    }
+//    if(!ret.size()){
+//        cout<<"Error in ProcIDObj::getHSVForCam(): HSVs not found for: idCam = "<<idCam<<", col = "<<col<<endl;
+//    }
+//
+//    return ret;
+//}
 
-    return false;
-}
-
-cv::Mat ProcIDObj::getBinaryImage(cv::Mat m, int col){
+cv::Mat ProcIDObj::getBinaryImage(cv::Mat m, eObjCol col, const int idCam){
     cv::Mat ret;
-    cv::Scalar hsv_min = cv::Scalar(get<1>(_listColObj[col]));
-    cv::Scalar hsv_max = cv::Scalar(get<2>(_listColObj[col]));
+    cv::Scalar hsv_min = cv::Scalar(_listAcqColObj[idCam][col].first);
+    cv::Scalar hsv_max = cv::Scalar(_listAcqColObj[idCam][col].second);
     cout<<"hsv_min = "<<hsv_min<<endl<<"hsv_max = "<<hsv_max<<endl;
     cv::inRange(m, hsv_min, hsv_max, ret);
     cv::imwrite("im_pAcq.png", m);
