@@ -70,13 +70,13 @@ int main(int argc, char* argv[]) {
     // Initialize cameras
     map<Cam*, VideoCapture*> camList;
     camList.insert(make_pair(
-//            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
-            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0)),
+//            new Cam(0, 516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
+            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0), 0),
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(1)));
-//            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
+            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
-            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
+//            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
 
 
     // Initialize processes
@@ -157,7 +157,7 @@ int main(int argc, char* argv[]) {
 #endif
         perf.endFrame();
 
-//        quit = 1;
+        quit = 1;
 //
 //                break;
 //            case E_DATA:

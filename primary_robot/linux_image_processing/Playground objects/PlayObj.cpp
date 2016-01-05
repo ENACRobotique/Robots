@@ -8,9 +8,9 @@
 #include "PlayObj.h"
 
 Play_Obj::Play_Obj(eObjType type, eObjShape shape, vector<float>& dim, eObjCol color){
-    assert(type == sandCube || type == sandCone || type == sandCyl ||
-           type == shellGreen  ||  type == shellViolet  ||  type == shellWhite);
-    assert(shape == parallelepiped || shape == cone || shape == cylinder);
+//    assert(type == sandCube || type == sandCone || type == sandCyl ||
+//           type == shellGreen  ||  type == shellViolet  ||  type == shellWhite); // FIXME: enable
+//    assert(shape == parallelepiped || shape == cone || shape == cylinder);  // FIXME: enable
     _type = type;
     _shape = shape;
     _dim = dim;
