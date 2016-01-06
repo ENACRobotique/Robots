@@ -19,15 +19,8 @@
 extern "C"{
 #include "millis.h"
 }
-#include "clap.h"
-#include "spot.h"
-#include "spot2.h"
-#include "spot3.h"
-#include "spot4.h"
-#include "dropSpot.h"
-#include "cup.h"
-#include "dropCup.h"
-#include "light.h"
+#include "sand_heap.h"
+//#include "light.h"
 #include "objStartingZone.h"
 #include "environment.h"
 
@@ -41,7 +34,7 @@ void CapAI::updateWaitObj(paramObj& par){
                     {
                         int perform = 0;
                         for(Actuator& j : par.act){
-                            if(j.type == ActuatorType::ELEVATOR){
+                            if(j.type == ActuatorType::SANDDOOR){
                                 if(j.elevator.ball && j.elevator.number == 3){
                                     j.elevator.full = 1;
                                     perform++;

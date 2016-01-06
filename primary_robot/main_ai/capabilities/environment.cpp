@@ -26,12 +26,16 @@ std::vector<astar::sObs_t> obs= {
    {{150., 95.}, 2.+R_ROBOT, 0, 1, 1},
 
    //Walls in Dune
-   {{80., 180.}, 2.+R_ROBOT, 0, 1, 1},
+   {{80., 180.}, 2.+R_ROBOT, 0, 1, 1}, //11
    {{220., 180.}, 2.+R_ROBOT, 0, 1, 1},
 
    //Rocks in corner
-   {{0., 0.}, 25.+R_ROBOT, 0, 1, 1},
+   {{0., 0.}, 25.+R_ROBOT, 0, 1, 1}, //13
    {{300., 0.}, 25.+R_ROBOT, 0, 1, 1},
+
+   //Sand heaps (in front of the starting zone)
+   {{65., 110.}, 8.+R_ROBOT, 1, 1, 1},//15
+   {{235., 110.}, 8.+R_ROBOT, 1, 1, 1},
 
    //Yellow spots //if moved change START_STAND
 //   {{85. ,180.}, 3. + R_ROBOT, 1, 1, 1}, //4

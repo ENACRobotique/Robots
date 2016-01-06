@@ -37,6 +37,7 @@ int Servo::sendPosServo(const servoName name, const float angle) {
 
     //bnSendBlock(msg, "servo simple");
 
+
     logs << INFO << "Send servo position id_club:" << unsigned(tabServo[name].club_id) << "ang:" << angle;
 
     return 1;

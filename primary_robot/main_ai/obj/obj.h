@@ -40,20 +40,16 @@ typedef struct {
         Point2D<float> pos;
 
         struct{
-            bool full;
-            bool empty;
-            unsigned int number;
-            bool ball;
-        }elevator;
+            unsigned int cone_number;
+            unsigned int cube_number;
+            unsigned int cylinder_number;
+        }doors;
 
         struct{
-            bool full;
-            bool distributor; //true if the cup was fill by a distributor
-        }cupActuator;
+        	bool full;
 
-        struct{
-            bool direction; //direction of the opening servo
-        }popCornLoader;
+        }grip;
+
 
 } Actuator;
 

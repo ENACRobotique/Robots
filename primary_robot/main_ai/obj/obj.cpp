@@ -294,7 +294,7 @@ float Obj::getYield(const unsigned int start_time){
         case E_SHELL:
             ratio = 1/_dist * 10000 - ((int)millis() - (int)start_time)/1000;
             ratio = ratio>0?ratio:1;
-            logs << INFO << "ratio_cup="<< ratio;
+            logs << INFO << "ratio_shell="<< ratio;
             break;
         case E_SHELL_ROCK:
         default:
