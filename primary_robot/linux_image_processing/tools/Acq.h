@@ -36,6 +36,7 @@ public:
     ProjAcq projectOnPlane(const Plane3D<float>& plan, cv::Size size = cv::Size()) {
         return ProjAcq(size, this, plan);
     }
+
 };
 
 #endif /* TOOLS_ACQ_H_ */
