@@ -67,7 +67,7 @@ class Spot4 : public Obj{
             objEP.pt.p = EP;
             updateDestPointOrient(par);
 
-            Point2D<float> p1(color==eColor_t::YELLOW?DELTA_X:300.-DELTA_X, SPOT4_POINT_ENTRY),
+            Point2D<float> p1(color==eColor_t::PURPLE?DELTA_X:300.-DELTA_X, SPOT4_POINT_ENTRY),
                     p2(par.obs[_num_obs_loc[0]].c.x, par.obs[_num_obs_loc[0]].c.y);
             Vector2D<float> v1(p2, p1), v2(0, 1);
 
@@ -146,8 +146,8 @@ class Spot4 : public Obj{
                     actClap = i;
 
                     angleSelect = M_PI  + par.act[i].angle;
-                    angleSelect += color==eColor_t::YELLOW?M_PI:0;
-                    angleSelect += color==eColor_t::YELLOW?-M_PI/2:M_PI/2; //delta
+                    angleSelect += color==eColor_t::PURPLE?M_PI:0;
+                    angleSelect += color==eColor_t::PURPLE?-M_PI/2:M_PI/2; //delta
 
                     setDestPoint(SPOT4_POINT_CLAP);
                     path.go2PointOrient(destPoint, par.obs, angleSelect);
@@ -163,7 +163,7 @@ class Spot4 : public Obj{
                     break;
 
                 case SPOT4_TRAJ4:
-                    destPoint.x = color==eColor_t::YELLOW?SPOT4_POINT_END:300.-SPOT4_POINT_END;
+                    destPoint.x = color==eColor_t::PURPLE?SPOT4_POINT_END:300.-SPOT4_POINT_END;
                     destPoint.y = SPOT4_POINT_CLAP;
                     path.go2PointOrient(destPoint, par.obs, angleSelect);
                     _state_loc = SPOT4_WAIT_TRAJ4;
@@ -228,7 +228,7 @@ class Spot4 : public Obj{
         }
 
         void computeAngleSelect(float yi, unsigned int numObs, paramObj& par){
-            Point2D<float> p1(color==eColor_t::YELLOW?DELTA_X:300.-DELTA_X, yi),
+            Point2D<float> p1(color==eColor_t::PURPLE?DELTA_X:300.-DELTA_X, yi),
                     p2(par.obs[_num_obs_loc[numObs]].c.x, par.obs[_num_obs_loc[numObs]].c.y);
             Vector2D<float> v1(p2, p1), v2(0, 1);
 
@@ -236,7 +236,7 @@ class Spot4 : public Obj{
         }
 
         void setDestPoint(float y){
-            destPoint.x = color==eColor_t::YELLOW?DELTA_X:300.-DELTA_X;
+            destPoint.x = color==eColor_t::PURPLE?DELTA_X:300.-DELTA_X;
             destPoint.y = y;
         }
 

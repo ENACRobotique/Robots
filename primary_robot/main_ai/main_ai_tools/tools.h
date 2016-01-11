@@ -32,7 +32,7 @@ typedef enum {
 } eAIState_t;
 
 enum class eColor_t{
-    YELLOW, GREEN, NONE
+    PURPLE, GREEN, NONE
 };
 
 extern int verbose;
