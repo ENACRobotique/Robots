@@ -74,8 +74,9 @@ int main(int argc, char* argv[]) {
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0), 0),
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(1)));
-            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
+//            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
+    new VideoCapture("../2016/Captures/cubesFace.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
 
 

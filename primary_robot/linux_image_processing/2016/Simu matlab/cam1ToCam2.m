@@ -187,7 +187,7 @@ z = linspace(0,35);
 hold off
 
 
-% Test to straigthen up the image
+%% Test to straigthen up the image
 % I = imread('../Captures/1cube.jpg');
 I = imread('/home/yoyo/Robots/primary_robot/linux_image_processing/2016/Captures/1cube.jpg');
 figure;imshow(I);title('raw image');
