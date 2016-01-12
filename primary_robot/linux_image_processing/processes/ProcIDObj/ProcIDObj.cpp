@@ -428,33 +428,13 @@ void ProcIDObj::compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& a
  * @note: For now only recognize a quadrilateral
  */
 eObjShape ProcIDObj::recogShape(const vector<cv::Mat>& vertexes, vector<Vector3D<float>>& edges){
+    std::vector<Play_Obj*> ObjectFound;
     eObjShape t = objShapeMax;
     edges.clear();
     int s = (int)vertexes.size();
 
-    if(s == 4){  // Recognition of a quadrilateral
-        float epsAngl = 0.05; // 0.05% <=> a margin of 16.5°/360°
-        // Compute the sum of the three first angles
-        float angles = 0.;
-        for(int i=0; i<s; i++){
-            edges.push_back(Vector3D<float>(cv::Mat(vertexes[i] - vertexes[(i+1)%s])));
-            if(i>0){
-//                cout<<"edges[b"<<i<<"] = "<<edges[i]<<endl;
-//                cout<<"edges["<<(i+1)%s<<"] = "<<edges[(i+1)%s]<<endl;
-                angles += edges[i].angle(edges[(i-1)%s]);
-//                cout<<"angles = "<<angles<<endl;
-            }
-        }
-        cout<<"angles = "<<angles<<endl;
-        if(fabsf(angles) < (2*M_PI-M_PI_2 + epsAngl)  &&  fabsf(angles) > (2*M_PI-M_PI_2 - epsAngl)){
-            cout<<"Found quadrilateral\n";
-            t = parallelepiped;
-        }
-
-        // TODO: Add test to distinguish the quadrilateral: square, rectangle, ...
-    }
-    else{
-        cout<<"Shape not reconized\n";
+    if (s == 6) {
+        ObjectFound = recoCubeAside(vertexes);
     }
 
     return t;
@@ -553,4 +533,80 @@ vector<Play_Obj*> ProcIDObj::getSameInListRefObj(eObjCol col, eObjShape shape,
     return listObj;
 }
 
+vector<Play_Obj*> ProcIDObj::recoCubeAside(const vector<cv::Mat>& vertexes){
 
+    vector<Play_Obj*> Objets_found;
+    std::cout << "Start shape analyse..." << endl;
+    cv::vector<cv::Mat> mxt;
+    cv::Mat pt_temp, barycentre = vertexes[0];
+    float temp = 0;
+
+
+    for(int i=1;i < (int)vertexes.size();i++){
+        cout << "Point : " << i << ", x:" << vertexes[i].at<float>(0) << ", y:" << vertexes[i].at<float>(1) << endl;
+        barycentre += vertexes[i];
+    }
+    cout<< "barycentre : " << barycentre << endl;
+    barycentre /= 6;
+    cv::Mat ref = barycentre;
+    ref.at<float>(0)-=1;
+    cout<< "ref : " << ref << endl;
+//    Vector3D<float>(cv::Mat(vertexes[i] - vertexes[(i+1)%s]))
+//    Vector3D<float>drt_ref=(cv::Mat(barycentre - ref));
+    temp = Vector3D<float>(ref - barycentre).angle(Vector3D<float>(vertexes[0] - barycentre));
+    cout << "droite" << Vector3D<float>(ref) << endl;
+    cout << "droite" << Vector3D<float>(vertexes[0]) - Vector3D<float>(barycentre) << endl;
+    cout << "droite" << (vertexes[0]) << endl;
+    cout << "droite" << (barycentre) << endl;
+    cout << "droite" << temp << endl;
+    for(int i=0;i < (int)vertexes.size();i++){
+
+    }
+
+//
+    for(int i = 0;i < (int)vertexes.size();i++){
+        if (vertexes[i].at<float>(1)>= temp) {
+            vertexes[2] = vertexes[1];
+            vertexes[1] = vertexes[0];
+            vertexes[0] = vertexes[i];
+            cout << i << "haut" << endl;
+        }
+    }
+//        else{
+//            vertexes[5] = vertexes[4];
+//            vertexes[4] = vertexes[3];
+//            vertexes[3] = vertexes[i];
+//            cout << i << "bas" << endl;
+//        }
+//
+//    }
+
+    for(int i = 0; i < (int)vertexes.size(); i++){
+        cout << "Point : " << i << ", x:" << vertexes[i].at<float>(0) << ", y:" << vertexes[i].at<float>(1) << endl;
+    }
+
+
+
+//    nb_deep = roundf(d56/DIM);
+//    nb_horiz = roundf(d45/DIM);
+//    nb_vert = roundf(H0*d34/(d3*DIM));
+
+
+    /*
+    float alpha = angle(ref / pt4-pt5)
+    float X = DIM*(cos(alpha) + cos(alpha + 90);
+    float Y = DIM*(sin(alpha) + sin(alpha + 90);
+
+    for(int i = 0; i < nb_H; i++){
+        for(int j = 0; j < nb_D; j++){
+            for(int k = 0; k < nb_V; k++){
+                Objects_found(i*nb_D*nb_V + j*nb_V + k).at<float>(0) = x0 + X(i + 1/2);
+                Objects_found(i*nb_D*nb_V + j*nb_V + k).at<float>(1) = y0 + Y(j + 1/2);
+                Objects_found(i*nb_D*nb_V + j*nb_V + k).at<float>(2) = DIM(k + 1/2);
+            }
+        }
+    }
+
+*/
+    return Objets_found;
+}

@@ -50,6 +50,7 @@ private:
     void setColors(eObjCol& c, string& s, const int idCam);
     vector<float> getPosOfObj(const eObjType t, const vector<cv::Mat>& vertexes, const vector<Vector3D<float>>& edges);
     void CalibHSV(const std::vector<Acq*>& acqList);
+    vector<Play_Obj*> recoCubeAside(const vector<cv::Mat>& vertexes);
 
 protected:
     int _stateCalib;
