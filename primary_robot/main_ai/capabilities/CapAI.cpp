@@ -20,7 +20,6 @@ extern "C"{
 #include "millis.h"
 }
 #include "sand_heap.h"
-//#include "light.h"
 #include "objStartingZone.h"
 #include "environment.h"
 
@@ -28,7 +27,7 @@ extern "C"{
 void CapAI::updateWaitObj(paramObj& par){
 
     for (unsigned int i = 0 ; i < par.obj.size() ; i++){
-        if(par.obj[i]->state() == WAIT_MES){
+        if(par.obj[i]->state() == WAIT_MES){/*
             switch(par.obj[i]->type()){
                 case E_OBJ_STARTING_ZONE:
                     {
@@ -63,7 +62,7 @@ void CapAI::updateWaitObj(paramObj& par){
                     break;
                 default:
                     logs << ERR << "No action define in WAIT_MES for this objective";
-            }
+            }*/
 
         }
 
@@ -202,10 +201,12 @@ void CapAI::initObjective(){
 */
 
     listObj.push_back(new ObjStartingZone(capTeam->getColor()));
-
+    listObj.push_back(new SandHeap(0));
+    listObj.push_back(new SandHeap(1));
+/******
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
-
+*/
 
    // listObj.push_back(new Spot2(0, capTeam->getColor()));
 
@@ -213,18 +214,20 @@ void CapAI::initObjective(){
 
    // listObj.push_back(new Spot4(par));
 
-
+/******
     for(unsigned int i = 0 ; i < 1 ; i++)
         listObj.push_back(new DropSpot(i, capTeam->getColor()));
-
+*/
    // listObj.push_back(new Light(capTeam->getColor()));
+
+/******
     for(unsigned int i = 0 ; i < 5 ; i++)
         listObj.push_back(new Cup(i, robot->env->obs));
 
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new DropCup(i, capTeam->getColor()));
 
-
+*/
 
 
     if(capTeam->getColor() == eColor_t::PURPLE){
