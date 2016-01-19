@@ -22,8 +22,9 @@
 template<typename T>
 class AbsPos3D;
 
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const Pos3D<T>& p);
+//template<typename T>
+//std::ostream& operator<<(std::ostream& out, const Pos3D<T>& p);
+
 
 template<typename T>
 class Pos3D {
@@ -31,7 +32,7 @@ class Pos3D {
     T _rx; // (rad)
     T _ry; // (rad)
     T _rz; // (rad)
-    Vector3D<T> _camDir;
+    Vector3D<T> _dir;
 
 public:
     Pos3D() :
@@ -46,6 +47,10 @@ public:
      */
     Pos3D(T x, T y, T z, T rx, T ry, T rz) :
             _p(x, y, z), _rx(rx), _ry(ry), _rz(rz) {
+    }
+
+    Pos3D(T x, T y, T z, T rx) :
+            _p(x, y, z), _rx(rx), _ry((T)0), _rz((T)0) {
     }
 
 //    /**
@@ -72,6 +77,10 @@ public:
      */
     Pos3D(Point3D<T> p, T rx, T ry, T rz) :
             _p(p), _rx(rx), _ry(ry), _rz(rz) {
+    }
+
+    Pos3D(Vector3D<T> v, T rx, T ry, T rz) :
+            _p(v), _rx(rx), _ry(ry), _rz(rz) {
     }
 
     Pos3D(cv::Mat p, T rx, T ry, T rz) :
@@ -111,18 +120,24 @@ public:
 
 
     Pos3D operator*(const T& r) const {
-        return {Point3D<T>(_p.x*r, _p.y*r, _p.z*r), _rx*r, _ry*r, _rz*r, _camDir};
+        return {Point3D<T>(_p.x*r, _p.y*r, _p.z*r), _rx*r, _ry*r, _rz*r, _dir};
     }
     Pos3D operator+(const Pos3D& v) const {
         return {Point3D<T>(_p.x + v._p.x, _p.y + v._p.y, _p.z + v._p.z)
-            ,_rx + v._rx, _ry + v._ry, _rz + v._rz, v._camDir};
-
+            ,_rx + v._rx, _ry + v._ry, _rz + v._rz, v._dir};
     }
 
-    Pos3D& operator+=(const AbsPos2D& v) {
+    Pos3D& operator+=(const Pos3D& v) {
         return *this = *this + v;
     }
 
+    Point3D<T> getPt3D(){
+        return _p;
+    }
+
+    Vector3D<T> getRxyz(){
+        return Vector3D<T>(_rx, _ry, _rz);
+    }
 
 //    AbsPos2D operator+(const RelPos2D<T>& v) const {
 ////        Vector2D<T> const* camDir = &_camDir;
