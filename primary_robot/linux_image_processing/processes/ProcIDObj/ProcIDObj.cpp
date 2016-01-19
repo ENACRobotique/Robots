@@ -200,7 +200,6 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
         }
     }
 
-
     std::cout<<"_________Process ProcIObj: end____________"<<std::endl;
 }
 
@@ -432,17 +431,23 @@ void ProcIDObj::compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& a
  *      otherwise "t" is equal to the possible maximum number of type of object.
  * @note: For now only recognize a quadrilateral
  */
-eObjShape ProcIDObj::recogShape(const vector<cv::Mat>& vertexes, vector<Vector3D<float>>& edges){
-    std::vector<Play_Obj*> ObjectFound;
-    eObjShape t = objShapeMax;
-    edges.clear();
-    int s = (int)vertexes.size();
+vector<pair<eObjShape, Pos3D<float>>> ProcIDObj::recogShape(const cv::Mat C2R,const vector<cv::Mat>& vertexes){
+    vector<Pos3D<float>> shapeFound;  // Contains the configuration of the shapes found
+    vector<pair<eObjShape, Pos3D<float>>> shapes;
 
+    int s = (int)vertexes.size();
     if (s == 6) {
-        ObjectFound = recoCubeAside(vertexes);
+        cout<<"s = 6\n";
+        shapeFound = recoCubeAside(C2R, vertexes);
+        for(int i=0; i<(int)shapeFound.size(); i++){
+            shapes.push_back(std::make_pair(parallelepiped, shapeFound[i]));
+        }
+    }
+    else{
+        cout<<"Shape not processed yet: s = "<<s<<endl;
     }
 
-    return t;
+    return shapes;
 }
 
 vector<Play_Obj*>ProcIDObj::recogObj(cv::Mat C2R, vector<cv::Mat>& vertexes, eObjCol col){

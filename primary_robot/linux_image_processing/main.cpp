@@ -75,8 +75,8 @@ int main(int argc, char* argv[]) {
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(1)));
 //            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
-//            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
-    new VideoCapture("../2016/Captures/cubesFace.jpg"))); // "Robomovie"
+            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
+//            new VideoCapture("../2016/Captures/cubesFace.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
 
 
