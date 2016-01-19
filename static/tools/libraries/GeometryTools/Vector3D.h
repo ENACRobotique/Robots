@@ -107,6 +107,16 @@ public:
         return !(*this == v);
     }
 
+    T operator[](const int i) const{
+        if(i == 0) return _x;
+        if(i == 1) return _y;
+        if(i == 2) return _z;
+        else{
+            std::cout<<"Vector3D: argument "<< i << " for operator [] is not in [0,2]\n";
+            return (T)10e6;
+        }
+    }
+
     T norm() const {
         return _norm ? T(1) : std::sqrt(_x * _x + _y * _y + _z * _z);
     }
@@ -123,8 +133,35 @@ public:
         _norm = true;
         return *this;
     }
-//    void rotate(const T& theta) {  // TODO
-//    }
+
+    const Vector3D<T> rotate(const T& theta, const Vector3D& axis_origin, const Vector3D& axis_edge) {
+        Vector3D<float> axis = Vector3D<float>(axis_edge - axis_origin).normalize();
+        const float a = axis_origin.x(), b = axis_origin.y(), c = axis_origin.z();
+        const float u = axis.x(), v = axis.y(), w = axis.z(),
+                    uSq = u*u, vSq = v*v, wSq = w*w;
+        const float cT = cos(theta), sT = sin(theta);
+        const float x = this->_x, y = this->_y, z = this->_z;
+
+        // Terms of a rotation matrix around a 3D vector (source Wilkipedia)
+//        float r11 = uSq + (vSq + wSq)*cT;
+//        float r12 = u*v*(1 - cT) - w*sT;
+//        float r13 = u*w*(1 - cT) + v*sT;
+//        float r14 = (a*(vSq + wSq) - u*(b*v + c*w))*(1 - cT) + (b*w - c*v)*sT;
+//        float r21 = r12;
+//        float r22 = vSq + (uSq + wSq)*cT;
+//        float r23 = v*w*(1 - cT) - u*sT;
+//        float r24 = (b*(uSq + wSq) - v*(a*u + c*w))*(1 - cT) + (c*u - a*w)*sT;
+//        float r31 = r13;
+//        float r32 = r23;
+//        float r33 = wSq + (uSq + vSq)*cT;
+//        float r34 = (c*(uSq + vSq) - w*(a*u + b*v))*(1 - cT) + (a*v + b*u)*sT;
+
+        T x_ret = (T)((a*(vSq + wSq) - u*(b*v + c*w - u*x - v*y - w*z))*(1 - cT) + x*cT + (b*w - c*v - w*y + v*z)*sT);
+        T y_ret = (T)((b*(uSq + wSq) - v*(a*u + c*w - u*x - v*y - w*z))*(1 - cT) + y*cT + (c*u - a*w + w*x - u*z)*sT);
+        T z_ret = (T)((c*(uSq + vSq) - w*(a*u + b*v - u*x - v*y - w*z))*(1 - cT) + z*cT + (a*v - b*u - v*x + u*y)*sT);
+        return Vector3D<T>(x_ret, y_ret, z_ret);
+    }
+
     T angle(const Vector3D& v) {
         return std::acos(*this * v / std::sqrt(normSq() * v.normSq()));
     }
