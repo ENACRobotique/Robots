@@ -20,6 +20,7 @@
 using namespace cv;  // Check if it is relevant to declare this here
 using namespace std;  // Same remark
 
+
 //##############################
 //####  General conversions ####
 //##############################
@@ -31,12 +32,12 @@ cv::Point2f I2R(Point2f pt_I);
 Point2f R2I(Point2f pt_R);
 Point2f Px2mm(Point2f pt_px);
 Point2f Mm2px(Point2f pt_mm);
-void Init_Info_Feux();
 // Convert point cam to table
 // Convert table to cam
 // Convert pixel to mm
 // Convert mm to pixel
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
+int getNearestPtTo(const vector<cv::Mat>& pts, const Mat pt);
 
 /**
  * \brief Give information to know if a special key "key" (decimal value of the ASCII table)
@@ -47,6 +48,8 @@ bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
  * \return int
  */
 int getKey(int key, int delay_us = 30);
+
+void translateValVector(vector<cv::Mat>& v, int o);
 
 
 #endif /* TOOLS_HPP_ */

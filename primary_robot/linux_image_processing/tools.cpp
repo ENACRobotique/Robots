@@ -56,6 +56,7 @@ Point2f Mm2px(Point2f pt_mm){
 	return pt_mm;
 }
 
+// ___________ START geometric tools___________________
 /**
  * \brief Finds the intersection of two lines, otherwise returns false.
  *        The lines are defined by (o1, p1) and (o2, p2).
@@ -82,8 +83,29 @@ bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r)
 }
 
 /**
+ * Return the index of the nearest point in the vector of points "pts" to the point "pt"
+ */
+int getNearestPtTo(const vector<cv::Mat>& pts, const Mat pt){
+    float dist = 10e6;
+    int index = 0;
+
+    for(int i=0; i<(int)pts.size();i++){
+        if(cv::norm(pt, pts[i], NORM_L2) < dist){
+            index = i;
+            dist = cv::norm(pt, pts[i], NORM_L2);
+        }
+    }
+
+    return index;
+}
+
+// ___________ END geometric tools___________________
+
+
+// ___________ START actions on object of C++ _______
+/**
  * \brief Give information to know if a special key "key" (decimal value of the ASCII table)
- * 		has been pressed during the delay "dalay_us" in microsecond.
+ * 		has been pressed during the delay "delay_us" in microsecond.
  * 		Return 1 if the specified key is pressed, 0 otherwise
  * \param int key
  * \param int delay_us
@@ -96,3 +118,15 @@ int getKey(int key, int delay_us){
 	}
 	return 0;
 }
+
+void translateValVector(vector<cv::Mat>& v, int o){
+    cv::Mat t;
+    int s = (int) v.size();
+    for(int i=0; i<o; i++){
+        t = v[i];
+        v[i] = v[(i + o)%s];
+        v[(i + o)%s] = t;
+    }
+}
+
+// ___________ END actions on object of C++ _______
