@@ -192,7 +192,10 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
 
                 cv::imwrite("imCtrs.png", imCtrs);
 
-                recogObj(vertexesPl0, (eObjCol)col);
+                vector<Play_Obj*> ObjsFound = recogObj(pAcq.getAcq()->getCam()->getMatC2R(), vertexesPl0, (eObjCol)col);
+                cout<<"Objects found: "<<ObjsFound.size()<<endl;
+                for(int i=0; i<(int)ObjsFound.size(); i++)
+                    ObjsFound[i]->print(true);
             }
         }
     }
@@ -442,21 +445,27 @@ eObjShape ProcIDObj::recogShape(const vector<cv::Mat>& vertexes, vector<Vector3D
     return t;
 }
 
-Play_Obj *ProcIDObj::recogObj(vector<cv::Mat>& vertexes, eObjCol col){
-    vector<Vector3D<float>> edges;
+vector<Play_Obj*>ProcIDObj::recogObj(cv::Mat C2R, vector<cv::Mat>& vertexes, eObjCol col){
+    vector<Play_Obj*> objectsFound;
 
-    eObjShape shape = recogShape(vertexes, edges);
+    // Find the nearest pt "pt0" to the robot and arrange "vertexes" such that vextexes[0] is pt0. (trigonometric direction)
+    int indexPt0 = getNearestPtTo(vertexes, (cv::Mat_<float>(3,1)<< 0.,0.,0.));
+    translateValVector(vertexes, indexPt0);
 
-    eObjType objType = recogObjType(vertexes, col, shape);
+    vector<pair<eObjShape, Pos3D<float>>> vShape = recogShape(C2R, vertexes);
 
+    for(int i=0; i<(int)vShape.size(); i++){
+        vector<Play_Obj*> vObj = getSameInListRefObj(col, vShape[i].first);
+        if((int)vObj.size() == 1)
+            objectsFound.push_back(new Play_Obj(*(getSameInListRefObj(col, vShape[i].first)[0]), vShape[i].second));
+        else
+            cout<<"recoObj(): Can't recognize object: too many solution ("<<vObj.size()<<")\n";
+    }
 
-    std::vector<float> dim;
-    // TODO: Add functions to recognize dim
-
-    return new Play_Obj(objType, shape, dim, col);
+    return objectsFound;
 }
 
-eObjType ProcIDObj::recogObjType(vector<cv::Mat>& vertexes, eObjCol col, eObjShape shape){
+eObjType ProcIDObj::recogObjType(eObjCol col, eObjShape shape){
     eObjType type = objTypeMax;
     vector<Play_Obj*> listObj(getSameInListRefObj(col, shape));
 
