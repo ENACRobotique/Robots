@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include "Vector3D.h"
+#include "tools/Pos3D.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -186,6 +187,7 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
                     cv::circle(imCtrs, cv::Point(approxCtr[i].x, approxCtr[i].y), 2, cv::Scalar(10, 10, 200), 2);
                     vertexesPl0.push_back(pAcq.imProj2Plane(pt_px));
                     cout<<"\t"<<vertexesPl0[i]<<endl;
+
                 }
 
                 cv::imwrite("imCtrs.png", imCtrs);
@@ -533,80 +535,103 @@ vector<Play_Obj*> ProcIDObj::getSameInListRefObj(eObjCol col, eObjShape shape,
     return listObj;
 }
 
-vector<Play_Obj*> ProcIDObj::recoCubeAside(const vector<cv::Mat>& vertexes){
+/**
+ * Description: Detect and compute a vector of configuration (x, y, theta) for each cubes in the global shape
+ * Note: Consider that the whole shape contains sand cubes with the same arbitrary orientation (angle between the y axis of the robot and the face of the cube between points 0 and 1)
+ */
+vector<Pos3D<float>> ProcIDObj::recoCubeAside(const cv::Mat C2R, const vector<cv::Mat>& vertexes){
+    vector<Pos3D<float>> cubesFound;
+    const eObjType objType = sandCube;
+    std::cout << "recoCubeAside(): Start shape analyse..." << endl;
 
-    vector<Play_Obj*> Objets_found;
-    std::cout << "Start shape analyse..." << endl;
-    cv::vector<cv::Mat> mxt;
-    cv::Mat pt_temp, barycentre = vertexes[0];
-    float temp = 0;
+    // Compute the number of objects following the two direction in the plane of the table
+    int nbCubeH05 = compNbIdenticObjH(objType, vertexes[0], vertexes[5]);
+    int nbCubeH01 = compNbIdenticObjH(objType, vertexes[0], vertexes[1]);
 
+    // Compute the number of object following the vertical direction
+    cv::Mat ptCam_R = C2R(Rect(3,0,1,3));
+    int nbCubeV = compNbIdenticObjV(objType, ptCam_R, vertexes[1], vertexes[2]);
+    cout<<"nbCubeH05 = "<<nbCubeH05<<", nbCubeH01 = "<<nbCubeH01<<", nbCubeV = "<<nbCubeV<<endl;
 
-    for(int i=1;i < (int)vertexes.size();i++){
-        cout << "Point : " << i << ", x:" << vertexes[i].at<float>(0) << ", y:" << vertexes[i].at<float>(1) << endl;
-        barycentre += vertexes[i];
-    }
-    cout<< "barycentre : " << barycentre << endl;
-    barycentre /= 6;
-    cv::Mat ref = barycentre;
-    ref.at<float>(0)-=1;
-    cout<< "ref : " << ref << endl;
-//    Vector3D<float>(cv::Mat(vertexes[i] - vertexes[(i+1)%s]))
-//    Vector3D<float>drt_ref=(cv::Mat(barycentre - ref));
-    temp = Vector3D<float>(ref - barycentre).angle(Vector3D<float>(vertexes[0] - barycentre));
-    cout << "droite" << Vector3D<float>(ref) << endl;
-    cout << "droite" << Vector3D<float>(vertexes[0]) - Vector3D<float>(barycentre) << endl;
-    cout << "droite" << (vertexes[0]) << endl;
-    cout << "droite" << (barycentre) << endl;
-    cout << "droite" << temp << endl;
-    for(int i=0;i < (int)vertexes.size();i++){
+    // Compute the direction of the faces 0-1 and 0-5
+    Vector3D<float> dirFace01 = Vector3D<float>(vertexes[1] - vertexes[0]).normalize();
+    dirFace01 = dirFace01.rotate(-M_PI_2l, Vector3D<float>(0., 0., 0.), Vector3D<float>(0., 0., 1.));
 
-    }
+    const Vector3D<float> dirFace05 = Vector3D<float>(vertexes[5] - vertexes[0]).normalize().rotate(M_PI_2, Vector3D<float>(0., 0., 0.), Vector3D<float>(0., 0., 1.));
+    const float theta = Vector3D<float>(0., 1.,0.).angle(dirFace01);  // Arbitrary direction of the face 0-1
+    cout<<"dirFace01 = "<<dirFace01<<endl;
+    cout<<"dirFace05 = "<<dirFace05<<endl;
+    cout<<"theta = "<<theta*180/M_PIl<<" deg"<<endl;
 
-//
-    for(int i = 0;i < (int)vertexes.size();i++){
-        if (vertexes[i].at<float>(1)>= temp) {
-            vertexes[2] = vertexes[1];
-            vertexes[1] = vertexes[0];
-            vertexes[0] = vertexes[i];
-            cout << i << "haut" << endl;
-        }
-    }
-//        else{
-//            vertexes[5] = vertexes[4];
-//            vertexes[4] = vertexes[3];
-//            vertexes[3] = vertexes[i];
-//            cout << i << "bas" << endl;
-//        }
-//
-//    }
-
-    for(int i = 0; i < (int)vertexes.size(); i++){
-        cout << "Point : " << i << ", x:" << vertexes[i].at<float>(0) << ", y:" << vertexes[i].at<float>(1) << endl;
-    }
-
-
-
-//    nb_deep = roundf(d56/DIM);
-//    nb_horiz = roundf(d45/DIM);
-//    nb_vert = roundf(H0*d34/(d3*DIM));
-
-
-    /*
-    float alpha = angle(ref / pt4-pt5)
-    float X = DIM*(cos(alpha) + cos(alpha + 90);
-    float Y = DIM*(sin(alpha) + sin(alpha + 90);
-
-    for(int i = 0; i < nb_H; i++){
-        for(int j = 0; j < nb_D; j++){
-            for(int k = 0; k < nb_V; k++){
-                Objects_found(i*nb_D*nb_V + j*nb_V + k).at<float>(0) = x0 + X(i + 1/2);
-                Objects_found(i*nb_D*nb_V + j*nb_V + k).at<float>(1) = y0 + Y(j + 1/2);
-                Objects_found(i*nb_D*nb_V + j*nb_V + k).at<float>(2) = DIM(k + 1/2);
+    // Create the list of configuration of the centers of each cube
+    float dim = getObjInListRef(sandCube)->getDim()[0]/10.;
+    Vector3D<float> c0 = Vector3D<float>(vertexes[0]) - Vector3D<float>(dim/2*(dirFace01 + dirFace05 - Vector3D<float>::zAxis)).toCv();
+    cout<<"c0 = "<<c0<<endl;
+    for(int h05=0; h05<nbCubeH05; h05++){
+        for(int h01=0; h01<nbCubeH05; h01++){
+            for(int v=0; v<nbCubeV; v++){
+                Vector3D<float> vect = Vector3D<float>::zAxis*v - dirFace01*h01 - dirFace05*h05;
+                cubesFound.push_back(Pos3D<float>(c0 + dim*(vect), 0., 0., theta));
             }
         }
     }
 
-*/
-    return Objets_found;
+    return cubesFound;
+}
+
+Play_Obj* ProcIDObj::getObjInListRef(eObjType objType){
+    for(int i=0; i<(int)_listRefObj.size(); i++){
+        if(_listRefObj[i]->getType() == objType)
+            return _listRefObj[i];
+    }
+
+    // Unknown type
+    cout<<"getObjInListRef(): "<< objType <<"unknown type of obj\n";
+    return nullptr;
+}
+
+int ProcIDObj::compNbIdenticObjH(const eObjType objType, const cv::Mat& pt1, const cv::Mat& pt2, const float err){
+    // TODO: use err
+    float dim;
+    switch(objType){
+    case sandCube:
+        dim = getObjInListRef(sandCube)->getDim()[0];
+        break;
+    default:
+        cout<<"compNbIdenticObjH(): objType not processed yet\n";
+    }
+    float nbCubeH = 0;
+    try {
+        cout<<"dist = "<<cv::norm(pt1, pt2, cv::NORM_L2)*10<<endl;
+        nbCubeH = (cv::norm(pt1, pt2, cv::NORM_L2)*10/dim + 0.5);
+    } catch (Exception& e) {
+        cout<<e.what()<<endl;
+    }
+
+    return (int)nbCubeH;
+}
+
+int ProcIDObj::compNbIdenticObjV(const eObjType objType, const cv::Mat& ptCam_R, const cv::Mat& ptTable, const cv::Mat& ptProj, const float err){
+    // TODO: use err
+    float dPRoj_R = cv::norm(ptProj, cv::NORM_L2);
+    float dTable_R = cv::norm(ptTable, cv::NORM_L2);
+    float z = ptCam_R.at<float>(2)*(dPRoj_R - dTable_R)/(dPRoj_R - ptCam_R.at<float>(1))*10; // From mm to cm
+
+    float dim;
+    float nbCubeV = 0;
+    switch(objType){
+    case sandCube:
+        dim = getObjInListRef(sandCube)->getDim()[0];
+        break;
+    default:
+        cout<<"compNbIdenticObjH(): objType not processed yet\n";
+    }
+
+    try {
+        nbCubeV = (z/dim + 0.5);
+    } catch (Exception& e) {
+        cout<<e.what()<<endl;
+    }
+
+    return (int)nbCubeV;
 }
