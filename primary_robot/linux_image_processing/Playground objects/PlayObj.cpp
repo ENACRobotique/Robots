@@ -17,13 +17,21 @@ Play_Obj::Play_Obj(eObjType type, eObjShape shape, vector<float>& dim, eObjCol c
     _col = color;
 }
 
-Play_Obj::~Play_Obj(){}
-
-void Play_Obj::setConf(AbsPos2D<float> conf){
+Play_Obj::Play_Obj(Play_Obj playObj, Pos3D<float> conf){
+    _type = playObj.getType();
+    _shape = playObj.getShape();
+    _dim = playObj.getDim();
+    _col = playObj.getCol();
     _conf = conf;
 }
 
-void Play_Obj::print(){
+Play_Obj::~Play_Obj(){}
+
+void Play_Obj::setConf(Pos3D<float> conf){
+    _conf = conf;
+}
+
+void Play_Obj::print(bool dispConf){
     switch(_type){
     case sandCube:
         cout<<"sandCube :"<<endl;
@@ -49,19 +57,19 @@ void Play_Obj::print(){
 
     switch(_shape){
     case parallelepiped:
-        cout<<"parallelepiped :"<<endl;
+        cout<<"\t parallelepiped: ";
         break;
     case cone:
-        cout<<"cone :"<<endl;
+        cout<<"\t cone: ";
         break;
     case cylinder:
-        cout<<"cylinder :"<<endl;
+        cout<<"\t cylinder: ";
         break;
     default:
         cout<<"Unknown shape of playground object"<<endl;
     }
 
-    cout<<"\t dim = ";
+    cout<<" dim = ";
     for(int i=0; i<(int)_dim.size(); i++){
         cout<< _dim.at(i);
         if(i < (int)_dim.size()-1)
@@ -86,6 +94,25 @@ void Play_Obj::print(){
         break;
     default:
         cout<<"Unknown = "<<_col<<endl;
+    }
+
+    if(dispConf){
+        cout<<"\t Pos3D = ";
+        for(int i=0; i<3; i++){
+            cout<< _conf.getPt3D()[i];
+            if(i < 2)
+                cout<<", ";
+            else
+                cout<<endl;
+        }
+        cout<<"\t Rxyz = ";
+        for(int i=0; i<3; i++){
+            cout<< _conf.getRxyz()[i];
+            if(i < 2)
+                cout<<", ";
+            else
+                cout<<endl;
+        }
     }
 }
 
