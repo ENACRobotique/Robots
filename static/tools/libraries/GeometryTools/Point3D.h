@@ -27,7 +27,10 @@ public:
     Point3D(T x, T y, T z) :
             _x(x), _y(y), _z(z) {
     }
-#ifdef USE_OPENCV
+    Point3D(Vector3D<T> v) :_x(v.x()), _y(v.y()), _z(v.z()){
+    }
+
+    #ifdef USE_OPENCV
     Point3D(const cv::Mat& m) :
             _x(m.at<T>(0)), _y(m.at<T>(1)), _z(m.at<T>(2)) {
     }
@@ -60,6 +63,15 @@ public:
     }
     Vector3D<T> operator-(const Point3D& p) const {
         return {_x - p._x, _y - p._y, _z - p._z};
+    }
+    T operator[](const int i) const{
+        if(i == 0) return _x;
+        if(i == 1) return _y;
+        if(i == 2) return _z;
+        else{
+            std::cout<<"Point3D: argument "<< i << " for operator [] is not in [0,2]\n";
+            return (T)10e6;
+        }
     }
 
 #ifdef USE_OPENCV
