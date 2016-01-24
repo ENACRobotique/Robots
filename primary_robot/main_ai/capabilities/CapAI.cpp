@@ -231,22 +231,18 @@ void CapAI::initObjective(){
 
 
     if(capTeam->getColor() == eColor_t::PURPLE){
-        for(unsigned int i = 12 ; i < 20 ; i++){
-            robot->env->obs[i].active = 0;
-            robot->env->obs_updated[i]++;
-        }
+            robot->env->obs[16].active = 0;
+            robot->env->obs_updated[16]++;
     }
     else if(capTeam->getColor() == eColor_t::GREEN){
-        for(unsigned int i = 4 ; i < 12 ; i++){
-            robot->env->obs[i].active = 0;
-            robot->env->obs_updated[i]++;
-        }
+            robot->env->obs[15].active = 0;
+            robot->env->obs_updated[15]++;
     }
 
     if(capTeam->getColor() == eColor_t::GREEN)
-        robot->env->obs[BLOCK_START_ZONE].c = {45, 100};
+        robot->env->obs[BLOCK_START_ZONE].c = {15, 115};
     else
-        robot->env->obs[BLOCK_START_ZONE].c = {300-45, 100};
+        robot->env->obs[BLOCK_START_ZONE].c = {300-15, 115};
 
     robot->env->obs[BLOCK_START_ZONE].active = 1;
     robot->env->obs[BLOCK_START_ZONE].r = 24. + R_ROBOT;
