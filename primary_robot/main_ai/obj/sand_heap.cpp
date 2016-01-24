@@ -19,8 +19,8 @@ extern "C"{
 }
 
 Point2D<float> obsClap[2]={
-        { 65., 90.},
-        { 235., 90.}
+        { 35., 110.},
+        { 265., 110.}
         };
 
 
@@ -54,17 +54,20 @@ void SandHeap::initObj(paramObj){
 int SandHeap::loopObj(paramObj par){
 
     switch(stepLoc){
-        case SAND_HEAP_PUSH:/*
-            servo.downPince(_actuator_select);*/
+        case SAND_HEAP_PUSH:
+        	servo.closeDoor(0);
+        	servo.closeDoor(1);
             _time = millis();
             stepLoc = SAND_HEAP_BACK;
             break;
-        case SAND_HEAP_BACK:/*
+        case SAND_HEAP_BACK:
             if(millis() - _time > 500){
-                servo.unlockPince(_actuator_select);*/
                 _time = millis();
+                Circle2D<float> cir(170., 110., 5.);
+                destPoint = cir.project(par.posRobot);
+                path.go2PointOrient(destPoint, par.obs, _access_select_angle);
                 stepLoc = SAND_HEAP_END;
-            //}
+            }
             break;
 
         case SAND_HEAP_END:/*
