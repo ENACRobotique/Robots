@@ -94,6 +94,7 @@ class ObjStartingZone : public Obj{
         void initObj(paramObj) override {}
 
         int loopObj(paramObj par) override{
+        	/*
             switch(stateLoc){
                 case GET_POS:
                     stateLoc = TRAJ1;
@@ -331,7 +332,7 @@ class ObjStartingZone : public Obj{
                     }
                     _state = FINISH;
                     return 0;
-                }
+                }*/
 
             return 1;
         }
@@ -349,6 +350,7 @@ class ObjStartingZone : public Obj{
             unsigned int i;
             float angleAct = 0;
 
+            /*
             for(i = 0 ; i < act.size(); i++){
                 if(act[i].type == type){
                     if(act[i].type == ELEVATOR){
@@ -375,7 +377,7 @@ class ObjStartingZone : public Obj{
 
             angleSelect = M_PI + angleAct;
             angleSelect += color == eColor_t::GREEN?M_PI:0;
-
+			*/
         }
 
         bool distTheta(float angleRobot){
