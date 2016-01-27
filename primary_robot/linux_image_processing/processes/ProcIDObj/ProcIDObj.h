@@ -45,9 +45,9 @@ private:
     cv::Mat getBinaryImage(cv::Mat m, eObjCol col, const int idCam);
     void compContrs(const cv::Mat m, vector<vector<cv::Point>>& listCtrs);
     void compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& approxCtr);
-    vector<pair<eObjShape, Pos3D<float>>> recogShape(const cv::Mat C2R, const vector<cv::Mat>& vertexes);
+    vector<pair<eObjShape, Pos3D<float>>> recogShape(const Acq& acq, const vector<cv::Mat>& vertexes);
     eObjType recogObjType(eObjCol col, eObjShape shape);
-    vector<Play_Obj*> recogObj(cv::Mat C2R, vector<cv::Mat>& ctr, eObjCol col);
+    vector<Play_Obj*> recogObj(const Acq& acq, vector<cv::Mat>& ctr, eObjCol col);
     vector<float> getPosOfShape(vector<cv::Mat>& ctr, eObjShape t);
     void setDim(std::vector<float>& dim, string& s, int n);
     void setColors(eObjCol& c, string& s, const int idCam);
@@ -56,6 +56,7 @@ private:
     vector<Pos3D<float>> recoCubeAside(const cv::Mat C2R, const vector<cv::Mat>& vertexes);
     int compNbIdenticObjH(const eObjType objType, const cv::Mat& pt1, const cv::Mat& pt2, const float err = 0.1);
     int compNbIdenticObjV(const eObjType objType, const cv::Mat& ptCam_R, const cv::Mat& ptTable, const cv::Mat& ptProj, const float err = 0.1);
+    bool isThereCube(const vector<cv::Mat>& vertexes, const Acq& acq);
 
 protected:
     int _stateCalib;

@@ -184,7 +184,8 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
                 for(int i=0; i<m; i++){
                     cout<<"____ vert"<<i<<" = "<<approxCtr[i]<<endl;
                     cv::Mat pt_px = (cv::Mat_<float>(3, 1) << approxCtr[i].x, approxCtr[i].y, 1.);
-                    cv::circle(imCtrs, cv::Point(approxCtr[i].x, approxCtr[i].y), 2, cv::Scalar(10, 10, 200), 2);
+                    cv::circle(imCtrs, cv::Point(approxCtr[i].x, approxCtr[i].y), 2, cv::Scalar(10, 10, 200), 3);
+                    cv::putText(imCtrs, to_string(i), cv::Point(approxCtr[i].x, approxCtr[i].y), 2, 1, cv::Scalar(10, 10, 200), 2);
                     vertexesPl0.push_back(pAcq.imProj2Plane(pt_px));
                     cout<<"\t"<<vertexesPl0[i]<<endl;
 
@@ -192,8 +193,8 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
 
                 cv::imwrite("imCtrs.png", imCtrs);
 
-                vector<Play_Obj*> ObjsFound = recogObj(pAcq.getAcq()->getCam()->getMatC2R(), vertexesPl0, (eObjCol)col);
-                cout<<"Objects found: "<<ObjsFound.size()<<endl;
+                vector<Play_Obj*> ObjsFound = recogObj(*(pAcq.getAcq()), vertexesPl0, (eObjCol)col);
+                cout<<"Total objects found: "<<ObjsFound.size()<<endl;
                 for(int i=0; i<(int)ObjsFound.size(); i++)
                     ObjsFound[i]->print(true);
             }
@@ -403,14 +404,16 @@ cv::Mat ProcIDObj::getBinaryImage(cv::Mat m, eObjCol col, const int idCam){
     cv::imwrite("im_yD0.png", ret);
 
     // Remove small smudges
-    int sElt = 8;
+    int sElt = 10;
     cv::Mat elt_erode = cv::getStructuringElement(cv::MORPH_ELLIPSE,
-            cv::Size( sElt, sElt ), cv::Point( 0, 0 ) );
+            cv::Size(sElt, sElt), cv::Point( 0, 0 ) );
     cv::Mat elt_dilate = cv::getStructuringElement( cv::MORPH_ELLIPSE,
-            cv::Size( sElt, sElt ), cv::Point( 0, 0 ) );
+            cv::Size(sElt, sElt), cv::Point( 0, 0 ) );
 
     cv::erode( ret, ret, elt_erode );
     cv::dilate( ret, ret, elt_dilate );
+    cv::dilate( ret, ret, elt_dilate );
+    cv::erode( ret, ret, elt_erode );
     cv::imwrite("im_yD1.png", ret);
 
     return ret;
@@ -422,7 +425,7 @@ void ProcIDObj::compContrs(const cv::Mat m, vector<vector<cv::Point>>& listCtrs)
 }
 
 void ProcIDObj::compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& approxCtr){
-    approxPolyDP(cv::Mat(ctr), approxCtr, arcLength(cv::Mat(ctr), true) * 0.01, true);
+    approxPolyDP(cv::Mat(ctr), approxCtr, arcLength(cv::Mat(ctr), true) * 0.02, true);
 }
 
 /**
@@ -431,14 +434,14 @@ void ProcIDObj::compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& a
  *      otherwise "t" is equal to the possible maximum number of type of object.
  * @note: For now only recognize a quadrilateral
  */
-vector<pair<eObjShape, Pos3D<float>>> ProcIDObj::recogShape(const cv::Mat C2R,const vector<cv::Mat>& vertexes){
+vector<pair<eObjShape, Pos3D<float>>> ProcIDObj::recogShape(const Acq& acq, const vector<cv::Mat>& vertexes){
     vector<Pos3D<float>> shapeFound;  // Contains the configuration of the shapes found
     vector<pair<eObjShape, Pos3D<float>>> shapes;
 
     int s = (int)vertexes.size();
-    if (s == 6) {
+    if(isThereCube(vertexes, acq)  &&  s==6) { // TODO: do not depend of s == 6
         cout<<"s = 6\n";
-        shapeFound = recoCubeAside(C2R, vertexes);
+        shapeFound = recoCubeAside(acq.getCam()->getMatC2R(), vertexes);
         for(int i=0; i<(int)shapeFound.size(); i++){
             shapes.push_back(std::make_pair(parallelepiped, shapeFound[i]));
         }
@@ -450,14 +453,51 @@ vector<pair<eObjShape, Pos3D<float>>> ProcIDObj::recogShape(const cv::Mat C2R,co
     return shapes;
 }
 
-vector<Play_Obj*>ProcIDObj::recogObj(cv::Mat C2R, vector<cv::Mat>& vertexes, eObjCol col){
+bool ProcIDObj::isThereCube(const vector<cv::Mat>& vertexes, const Acq& acq){
+    // Find right angle
+    float m = 0.2;
+    Vector3D<float> vp, vn;
+    int s = (int)vertexes.size();
+    for(int i=-1; i<=1; i++){ // Just check if a cube is the nearest object to the robot
+        vp = Vector3D<float>(vertexes[(s - 1 + i)%s] - vertexes[(s + i)%s]);  // [(s - 1 - i)%s] <=> ptp (previous point from the right angle pt)
+        vn = Vector3D<float>(vertexes[(s + i)%s] - vertexes[(s + i + 1)%s]);  // [(s + 1 - i)%s] <=> ptp (next point from the right angle pt)
+        float angle = vp.angle(vn);
+        cout<<"angle("<<i<<") = "<<angle<<endl;
+        if(fabs(angle) < M_PI_2l*(1 + m)  &&  fabs(angle) > M_PI_2l*(1 - m)){
+            cout<<"right angle found: vertex "<<i<<"; "<<M_PI_2l*(1 - m)<<" < "<<fabs(angle)<<" < "<<M_PI_2l*(1 + m)<<endl;
+//            float lvp = vp.norm(),
+//                  lvn = vn.norm();
+//            float dimCube = getObjInListRef(sandCube)->getDim()[0]/10;
+//            cout<<"lvp = "<<lvp<<", lvn = "<<lvn<<", dimCube = "<<dimCube<< endl;
+//
+//            Vector3D<float> oCam_R = acq.getCam()->getOrigCamVect3D_R();
+//            cout<<"oCam_R = "<<oCam_R<<endl;
+//            Vector3D<float> vC2Ptc = Vector3D<float>(vertexes[(s + i)%s]) - oCam_R;
+//            cout<<"vC2Ptc = "<<vC2Ptc<<endl;
+//            Vector3D<float> vC2Ptn = Vector3D<float>(vertexes[(s + 1 + i)%s]) - oCam_R;
+//            Vector3D<float> vC2Ptp = Vector3D<float>(vertexes[(s - 1 + i)%s]) - oCam_R;
+//            Vector3D<float> ptcp_R = dimCube/lvp*vC2Ptc + oCam_R;
+//            Vector3D<float> ptcn_R = dimCube/lvn*vC2Ptc + oCam_R;
+//            cout<<"ptcp_R = "<<ptcp_R<<endl;
+//            cout<<"ptcn_R = "<<ptcn_R<<endl;
+//            Vector3D<float> ptp_R = lvp/dimCube*vC2Ptp + oCam_R;
+//            Vector3D<float> ptn_R = lvn/dimCube*vC2Ptn + oCam_R;
+//
+//            cout<<"ptcp_R.z = "<<ptcp_R.z()<<", ptcn_R.z = "<<ptcn_R.z()<<", ptp_R.z = "<<ptp_R.z()<<", ptn_R.z = "<<ptn_R.z()<<endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+vector<Play_Obj*>ProcIDObj::recogObj(const Acq& acq, vector<cv::Mat>& vertexes, eObjCol col){
     vector<Play_Obj*> objectsFound;
 
-    // Find the nearest pt "pt0" to the robot and arrange "vertexes" such that vextexes[0] is pt0. (trigonometric direction)
+    // Find the nearest pt "pt0" to the robot and arrange "vertexes" such that vertexes[0] is pt0. (trigonometric direction)
     int indexPt0 = getNearestPtTo(vertexes, (cv::Mat_<float>(3,1)<< 0.,0.,0.));
     translateValVector(vertexes, indexPt0);
 
-    vector<pair<eObjShape, Pos3D<float>>> vShape = recogShape(C2R, vertexes);
+    vector<pair<eObjShape, Pos3D<float>>> vShape = recogShape(acq, vertexes);
 
     for(int i=0; i<(int)vShape.size(); i++){
         vector<Play_Obj*> vObj = getSameInListRefObj(col, vShape[i].first);

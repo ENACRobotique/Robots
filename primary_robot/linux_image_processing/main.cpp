@@ -38,9 +38,9 @@ using namespace std;
 Scalar hsvT_min,hsvT_max;
 /// Global Variables
 const int hT_slider_max = 180, svT_slider_max = 256;
-int hminT_slider=16, hmaxT_slider=23,
-    sminT_slider=187, smaxT_slider=256,
-    vminT_slider=116, vmaxT_slider=256;
+int hminT_slider=10, hmaxT_slider=21,
+    sminT_slider=150, smaxT_slider=256,
+    vminT_slider=50, vmaxT_slider=256;
 
 void on_Ttrackbar(int, void*){
     hsvT_min = Scalar(hminT_slider, sminT_slider, vminT_slider);
@@ -52,7 +52,6 @@ void on_Ttrackbar(int, void*){
 //##### Main #####
 int main(int argc, char* argv[]) {
     Perf& perf = Perf::getPerf();  //& ?
-    Mat frameRaw;
 
     cv::namedWindow("HSV");
 
@@ -73,9 +72,10 @@ int main(int argc, char* argv[]) {
 //            new Cam(0, 516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0), 0),
             //            new VideoCapture("MyVideo.avi")));
-//            new VideoCapture(1)));
+//            new VideoCapture(0)));
 //            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
-            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
+//            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
+            new VideoCapture("../2016/Captures/cubes4x4x4.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubesFace.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
 
@@ -88,6 +88,7 @@ int main(int argc, char* argv[]) {
     // Initialize botnet
     bn_init();
 
+    Mat frameRaw;
     if (!camList.begin()->second->read(frameRaw)) { //if not success, break loop
         cout << "Cannot read the frame from source video file" << endl;
         return -1;
@@ -110,19 +111,19 @@ int main(int argc, char* argv[]) {
             for (Cam* c : p->getCamList()) {
                 map<Cam*, VideoCapture*>::iterator it = camList.find(c);
 
-//                // Read a new frame from the video source
+                // Read a new frame from the video source
+//                *(it->second) >> frameRaw; // Need to read 5 times to get the last frame
+//                *(it->second) >> frameRaw;
+//                *(it->second) >> frameRaw;
+//                *(it->second) >> frameRaw;
 //                if (!it->second->read(frameRaw)) {  //if not success, break loop
-//                    cout << "Cannot read the frame from source video file" << endl;
+//                    cout << "Cannot read the frame from source video file." << endl;
 //                    continue;
 //                }
-
                 if (frameRaw.size() != c->getSize()) {
                     cout<< "skip cam c <- (frameRaw.size() = "<<frameRaw.size()<<") != (c->getSize() = "<<c->getSize()<<")\n";
                     continue;
                 }
-
-//                imshow("rgb", frameRaw);
-
                 acqList.push_back(new Acq(frameRaw, BGR, c));
             }
 
@@ -145,6 +146,11 @@ int main(int argc, char* argv[]) {
             }
 
             perf.endOfStep("process");
+
+            imshow( "Display window", frameRaw );
+#ifndef CALIB_HSV
+            waitKey(0);
+#endif
         }
 #ifdef CALIB_HSV
         switch(waitKey(1000./10)){
@@ -158,7 +164,7 @@ int main(int argc, char* argv[]) {
 #endif
         perf.endFrame();
 
-        quit = 1;
+//        quit = 1;
 //
 //                break;
 //            case E_DATA:
@@ -172,7 +178,7 @@ int main(int argc, char* argv[]) {
 
     // Test
 //    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-    imshow( "Display window", frameRaw );                   // Show our image inside it.
+//    imshow( "Display window", frameRaw);                   // Show our image inside it.
     waitKey(0);
 
     printf("End prog\n");
