@@ -13,6 +13,7 @@
 #include <Point2D.h>
 #include <Transform3D.h>
 #include <cmath>
+#include <Vector3D.h>
 
 class Cam {
 protected:
@@ -99,6 +100,12 @@ public:
     }
     int getIdCam() const{
         return _id;
+    }
+    const Vector3D<float> getOrigCamVect3D_R() const{
+        return Vector3D<float>(matTransi_C2R(cv::Rect(3,0,1,3)));
+    }
+    const cv::Mat getOrigCamMat_R() const{
+        return matTransi_C2R(cv::Rect(3,0,1,3));
     }
 };
 
