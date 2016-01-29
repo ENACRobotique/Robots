@@ -70,17 +70,26 @@ trajElem start_green[]={
 				{0,0,0},
 #else
 				//Début trajectoire vers cabines de plage
-				{-800,0,1750},
-				{-800,-25,2000},
+				{-800,0,1650},
+				{-800,-28,2000},
 				{-800,8,0500},
-				{-800,3,2000},
-				//Portes Fermées -> Retour en arrière
-				{800,-4,1500},
-				{800,0,1000},
-				{800,-25,1800},
-				{1200,0,3600},//Passage dans la zone de départ
-				{800,-16,2500},
-				{800,-5,2000},
+				{-800,4,700},//Première porte
+				{-800,6,1300},//Portes Fermées
+				{800,-7,1500}, //Debut demi-tour
+				{800,0,1200},
+				{800,90,1300},//Fin demi-tour
+				{0,0,100},//Debut calage 1
+				{-800,-45,1300},
+				{-800,0,200},
+				{-800,45,950},
+				{0,0,100},
+				{800,-2,2200},
+				{200,-1,1500},//Fin calage 2
+				{0,0,1000},
+				{-1200,-1,3000},//Passage dans la zone de départ
+				{-1200,0,500},
+				{-800,8,300},//Début contournement rocher
+				{-800,50,1500},
 				{0,0,100},//mini pause ->éviter les sursauts
 				{-800,13,1600},
 				{-800,-18,500},//petit recallage avant la pêche
