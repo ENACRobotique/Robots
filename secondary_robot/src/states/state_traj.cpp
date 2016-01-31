@@ -69,6 +69,7 @@ trajElem start_green[]={
 				{10,-90,3000},
 				{0,0,0},
 #else
+				//*
 				//Début trajectoire vers cabines de plage
 				{-800,0,1650},
 				{-800,-28,2000},
