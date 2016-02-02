@@ -69,23 +69,21 @@ trajElem start_green[]={
 				{10,-90,3000},
 				{0,0,0},
 #else
-				//*
 				//Début trajectoire vers cabines de plage
-
-				{-800,0,1700},
-				{-800,-28,1865},
-				{-800,2,0600},
-				{-800,3,700},//Première porte
-				{-800,4,1300},//Portes Fermées
-				{800,-7,1500}, //Debut demi-tour
-				{800,0,1300},
-				{800,90,1300},//Fin demi-tour
-				{0,0,100},//Debut calage mur
-				{-800,-45,1200},
-				{-800,0,150},
-				{-800,45,1050},
-				{0,0,100},//fin calage mur début calage coin
-				{800,-2,2350},
+				{-800,-1,2000},
+				{-800,0,1500},//Premiere porte fermee
+				{0,0,100},
+				{800,-40,1700},
+				{800,0,800},
+				{650,90,1500},//Allignee deuxieme porte
+				{0,0,100},
+				{-600,0,3000},//Deuxieme porte fermee
+				{0,0,100},
+				{800,0,500},
+				{650,-90,1500},
+				{-800,0,2000},
+				{0,0, 10000},
+				/*
 				{200,-1,1000},//Fin calage coin
 				{0,0,1500},
 				{-1200,-1,3000},//Passage dans la zone de départ
@@ -106,7 +104,7 @@ trajElem start_green[]={
 				{0,0,100},
 				{400,-1,200},
 				//Pêche
-				/*{800,2,1600},
+				{800,2,1600},
 				{800,-25,750},//début évitement
 				{800,25,750},
 				{800,0,400},
@@ -251,7 +249,7 @@ trajElem start_yellow[]={
 						{0,0,100},
 						{400,+1,200},
 						//Pêche
-						/*{800,2,1600},
+						{800,2,1600},
 						{800,-25,750},//début évitement
 						{800,25,750},
 						{800,0,400},
@@ -267,7 +265,7 @@ trajElem start_yellow[]={
 						{-800,25,800},
 						{-800,-22,700},
 						{-800,0,1500},
-						{800,3,900},//retour au point de départ*/
+						{800,3,900},//retour au point de départ
 #endif
 						{0,0,0},
 				};
