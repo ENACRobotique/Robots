@@ -43,7 +43,9 @@
 //#define PIN_SHARP_FRONT_RIGHT A0
 //#define PIN_SHARP_FRONT_LEFT A1
 //#define PIN_SHARP_BACK_RIGHT A2
-//#define PIN_SHARP_BACK_LEFT A3
+#define PIN_SWITCH_LEFT A3
+#define PIN_SWITCH_RIGHT A2
+
 
 //times
 #define TIME_MATCH_STOP 90000   //in ms  en théorie 90s mais on prend un peu de marge
@@ -67,7 +69,8 @@
 #define TIME_READY_LAUNCHER 500 //in ms
 
 
-//#define DEBUG 1
+
+//#define DEBUG
 
 /* endDefines *********************************************/
 
