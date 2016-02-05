@@ -12,7 +12,7 @@
 #include "../params.h"
 #include "state_traj.h"
 #include "state_pause.h"
-#include "state_Prestairs.h"
+#include "state_Recalage.h"
 #include "state_wait.h"
 #include "state_lineMonit.h"
 #include "lib_radar_mask.h"
@@ -70,19 +70,24 @@ trajElem start_green[]={
 				{0,0,0},
 #else
 				//Début trajectoire vers cabines de plage
-				{-800,-1,2000},
-				{-800,0,1500},//Premiere porte fermee
+				{-800,-1,2500},
+				{-400,0,1700},//Premiere porte fermee
 				{0,0,100},
 				{800,-40,1700},
 				{800,0,800},
+				{0,90,300},
 				{650,90,1500},//Allignee deuxieme porte
 				{0,0,100},
-				{-600,0,3000},//Deuxieme porte fermee
+				{-400,0,3000},//Deuxieme porte fermee
 				{0,0,100},
-				{800,0,500},
-				{650,-90,1500},
-				{-800,0,2000},
-				{0,0, 10000},
+				{800,0,1000},
+				{0,-90,300}, //
+				{650,-90,1700},
+				{-800,0,2900},
+				{-400,0,5000},
+//				{-800,0,3000},
+//				{-400,0,1500},
+//				{0,0, 10000},
 				/*
 				{200,-1,1000},//Fin calage coin
 				{0,0,1500},
@@ -148,9 +153,13 @@ sState *testTrajGreenInit()
 				Serial.println("\tTrajet 1 fini !");
 			#endif
 
-	    	 return &sPrestairs;
+	    	 return &sRecalage;
 	    }
-
+	    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT))
+	    	{
+	    		move(0,0);
+	    		return &sRecalage;
+	    	}
 	    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
 			#ifdef DEBUG
 				Serial.println("\tFin radar 1 !");
@@ -215,57 +224,63 @@ trajElem start_yellow[]={
 #else
 		//Début trajectoire vers cabines de plage
 
-						{-800,0,1700},
-						{-800,28,1865},
-						{-800,-2,0600},
-						{-800,-3,700},//Première porte
-						{-800,-4,1300},//Portes Fermées
-						{800,+7,1500}, //Debut demi-tour
-						{800,0,1300},
-						{800,-90,1300},//Fin demi-tour
-						{0,0,100},//Debut calage mur
-						{-800,+45,1200},
-						{-800,0,150},
-						{-800,-45,1050},
-						{0,0,100},//fin calage mur début calage coin
-						{800,+2,2350},
-						{200,+1,1000},//Fin calage coin
-						{0,0,1500},
-						{-1200,+1,3000},//Passage dans la zone de départ
-						{-1200,0,900},
-						{0,0,2000},
-						{-800,-4,400},//Début contournement rocher
-						{-800,-10,600},
-						{-800,-30,1300},//presque tangent au rocher
-						{-800,-4,800},
-						{-800,0,1300},
-						{-1200,-30,1800},//dégagement du palet si besion
-						{0,0,200},
-						{800,+45,1300},
-						{0,0,200},
-						{-1000,-15,1300},
-						{-1000,+15,1200},
-						{-500,0,800},
+						{800,0,500},
+						{0,-90,300},
+						{650,-90,1300},
 						{0,0,100},
-						{400,+1,200},
-						//Pêche
-						{800,2,1600},
-						{800,-25,750},//début évitement
-						{800,25,750},
-						{800,0,400},
-						{800,24,760},
-						{800,-22,1200},
-						{0,0,100},//fin évitement
-						{-800,10,300},//recalage
-						{-800,-5,900},
-						{0,0,1000},//pause avant marche arrière
-						{-800,-25,700},
-						{-800,25,700},
-						{-800,0,600},
-						{-800,25,800},
-						{-800,-22,700},
-						{-800,0,1500},
-						{800,3,900},//retour au point de départ
+						{-1200,0,6000},
+
+//						{-800,0,1700},
+//						{-800,28,1865},
+//						{-800,-2,0600},
+//						{-800,-3,700},//Première porte
+//						{-800,-4,1300},//Portes Fermées
+//						{800,+7,1500}, //Debut demi-tour
+//						{800,0,1300},
+//						{800,-90,1300},//Fin demi-tour
+//						{0,0,100},//Debut calage mur
+//						{-800,+45,1200},
+//						{-800,0,150},
+//						{-800,-45,1050},
+//						{0,0,100},//fin calage mur début calage coin
+//						{800,+2,2350},
+//						{200,+1,1000},//Fin calage coin
+//						{0,0,1500},
+//						{-1200,+1,3000},//Passage dans la zone de départ
+//						{-1200,0,900},
+//						{0,0,2000},
+//						{-800,-4,400},//Début contournement rocher
+//						{-800,-10,600},
+//						{-800,-30,1300},//presque tangent au rocher
+//						{-800,-4,800},
+//						{-800,0,1300},
+//						{-1200,-30,1800},//dégagement du palet si besion
+//						{0,0,200},
+//						{800,+45,1300},
+//						{0,0,200},
+//						{-1000,-15,1300},
+//						{-1000,+15,1200},
+//						{-500,0,800},
+//						{0,0,100},
+//						{400,+1,200},
+//						//Pêche
+//						{800,2,1600},
+//						{800,-25,750},//début évitement
+//						{800,25,750},
+//						{800,0,400},
+//						{800,24,760},
+//						{800,-22,1200},
+//						{0,0,100},//fin évitement
+//						{-800,10,300},//recalage
+//						{-800,-5,900},
+//						{0,0,1000},//pause avant marche arrière
+//						{-800,-25,700},
+//						{-800,25,700},
+//						{-800,0,600},
+//						{-800,25,800},
+//						{-800,-22,700},
+//						{-800,0,1500},
+//						{800,3,900},//retour au point de départ
 #endif
 						{0,0,0},
 				};
@@ -288,7 +303,7 @@ sState *testTrajYellowInit()
 				#ifdef DEBUG
 					Serial.println("\tTrajet 1 fini !");
 				#endif
-		    	return &sPrestairs;
+		    	return &sRecalage;
 		   	    }
 
 		    if(periodicProgRadarLimit(start_yellow_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
