@@ -83,8 +83,8 @@ trajElem start_green[]={
 				{800,0,1000},
 				{0,-90,300}, //
 				{650,-90,1700},
-				{-800,0,2900},
-				{-400,0,5000},
+				{-800,0,2500},
+				{-400,0,2000},
 //				{-800,0,3000},
 //				{-400,0,1500},
 //				{0,0, 10000},
@@ -155,11 +155,11 @@ sState *testTrajGreenInit()
 
 	    	 return &sRecalage;
 	    }
-	    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT))
-	    	{
-	    		move(0,0);
-	    		return &sRecalage;
-	    	}
+//	    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT))
+//	    	{
+//	    		move(0,0);
+//	    		return &sRecalage;
+//	    	}
 	    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
 			#ifdef DEBUG
 				Serial.println("\tFin radar 1 !");

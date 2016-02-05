@@ -23,6 +23,8 @@
 #include "state_wait.h"
 #include "state_lineMonit.h"
 #include "lib_radar_mask.h"
+#include "state_Peche.h"
+
 
 sState* testRecalage(){
         trajElem calage_longueur[] = {
@@ -30,7 +32,7 @@ sState* testRecalage(){
 				{0,-90,300},
 				{650,-90,1300},
 				{0,0,100},
-				{-800,0,6000},
+				{-800,0,15000},
 				{0,0,0}
         };
         static unsigned long st_saveTime=0;
@@ -39,14 +41,17 @@ sState* testRecalage(){
 		static unsigned long prev_millis=0;
 		static unsigned long prev_millis_radar=0;
 		if(periodicProgTraj(calage_longueur,&st_saveTime,&i,&prev_millis))
-		{
-		    return NULL;
-		}
+			{
+				return NULL;
+			}
+//		if(digitalRead(PIN_SWITCH_RIGHT) && (prev_millis>4000))
+//			{
+//				return &sPeche;
+//			}
 
 	}
 
 void initRecalage(sState *prev){
-        // Your code here !
     }
 
 void deinitRecalage(sState *next){
