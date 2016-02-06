@@ -26,22 +26,43 @@
 
 
 sState* testPeche(){
-        // Your code here !
-        return NULL;
-    }
+	trajElem go_river[] = {
+			{400,0,500},
+			{600,5,1800},
+			{0,0,200},
+			{-800,33,1300},
+			{-800,5,1900},
+			{-800,40,800},
+			{-800,3,3000},
+			{0,0,100},
+			{800,0,1500},
+			{0,90,300},
+			{650,90,1400},
+			{0,0,100},
+			{-500,0,4000},
+			{0,0,100},
+			{800,0,300},
+			{0,90,300},
+			{650,90,1000},
+			{0,0,100},
+			{-800,0,2000},
+			{-400,0,3000},
+			{0,0,10000},
+			{0,0,0}
+	};
+	static unsigned long st_saveTime=0;
+	static int i=0;
+	static int i_radar=0;
+	static unsigned long prev_millis=0;
+	static unsigned long prev_millis_radar=0;
+	if(periodicProgTraj(go_river,&st_saveTime,&i,&prev_millis))
+	{
+		return NULL;
+	}
+}
 
 void initPeche(sState *prev){
-	trajElem go_river[] = {
-					{800,0,2000},
-					{0,0,10000},
-					{0,0,0}
-	        };
-	        static unsigned long st_saveTime=0;
-	        static int i=0;
-			static int i_radar=0;
-			static unsigned long prev_millis=0;
-			static unsigned long prev_millis_radar=0;
-			periodicProgTraj(go_river,&st_saveTime,&i,&prev_millis);
+
 
     }
 

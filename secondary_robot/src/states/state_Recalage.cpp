@@ -27,12 +27,13 @@
 
 
 sState* testRecalage(){
-        trajElem calage_longueur[] = {
+        trajElem calage_largeur[] = {
 				{800,0,500},
 				{0,-90,300},
-				{650,-90,1300},
+				{650,-90,1200},
 				{0,0,100},
-				{-800,0,15000},
+				{-800,0,7000},
+				{-400,0,15000},
 				{0,0,0}
         };
         static unsigned long st_saveTime=0;
@@ -40,18 +41,20 @@ sState* testRecalage(){
 		static int i_radar=0;
 		static unsigned long prev_millis=0;
 		static unsigned long prev_millis_radar=0;
-		if(periodicProgTraj(calage_longueur,&st_saveTime,&i,&prev_millis))
+		if(periodicProgTraj(calage_largeur,&st_saveTime,&i,&prev_millis))
 			{
 				return NULL;
 			}
-//		if(digitalRead(PIN_SWITCH_RIGHT) && (prev_millis>4000))
-//			{
-//				return &sPeche;
-//			}
+		if(digitalRead(PIN_SWITCH_RIGHT) && (i>=1))
+			{
+				move(0,0);
+				return &sPeche;
+			}
 
 	}
 
 void initRecalage(sState *prev){
+
     }
 
 void deinitRecalage(sState *next){

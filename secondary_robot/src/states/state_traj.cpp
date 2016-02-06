@@ -71,7 +71,7 @@ trajElem start_green[]={
 #else
 				//Début trajectoire vers cabines de plage
 				{-800,-1,2500},
-				{-400,0,1700},//Premiere porte fermee
+				{-400,0,1900},//Premiere porte fermee
 				{0,0,100},
 				{800,-40,1700},
 				{800,0,800},
@@ -84,7 +84,7 @@ trajElem start_green[]={
 				{0,-90,300}, //
 				{650,-90,1700},
 				{-800,0,2500},
-				{-400,0,2000},
+				{-400,0,4000},
 //				{-800,0,3000},
 //				{-400,0,1500},
 //				{0,0, 10000},
@@ -155,11 +155,11 @@ sState *testTrajGreenInit()
 
 	    	 return &sRecalage;
 	    }
-//	    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT))
-//	    	{
-//	    		move(0,0);
-//	    		return &sRecalage;
-//	    	}
+	    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT))
+	    	{
+	    		move(0,0);
+	    		return &sRecalage;
+	    	}
 	    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
 			#ifdef DEBUG
 				Serial.println("\tFin radar 1 !");
@@ -224,11 +224,27 @@ trajElem start_yellow[]={
 #else
 		//Début trajectoire vers cabines de plage
 
-						{800,0,500},
-						{0,-90,300},
-						{650,-90,1300},
+						{400,0,500},
+						{600,5,1800},
+						{0,0,200},
+						{-800,33,1300},
+						{-800,5,1900},
+						{-800,40,800},
+						{-800,3,3000},
 						{0,0,100},
-						{-1200,0,6000},
+						{800,0,1500},
+						{0,90,300},
+						{650,90,1400},
+						{0,0,100},
+						{-500,0,4000},
+						{0,0,100},
+						{800,0,300},
+						{0,90,300},
+						{650,90,1000},
+						{0,0,100},
+						{-800,0,2000},
+						{-400,0,3000},
+						{0,0,10000},
 
 //						{-800,0,1700},
 //						{-800,28,1865},
