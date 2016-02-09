@@ -33,8 +33,8 @@ void motorInitHard(int pinDir[],int pinPWM[]){
 
 }
 #if NB_MOTORS == 1
-int Kp[NB_MOTORS] ={1}; // >>2
-int Ki[NB_MOTORS] = {0}; // >>2
+int Kp[NB_MOTORS] ={12};
+int Ki[NB_MOTORS] = {30}; // >>2
 #elif NB_MOTORS == 2
 int Kp[NB_MOTORS] ={18,18}; // >>2
 int Ki[NB_MOTORS] = {5,5}; // >>2
@@ -63,7 +63,7 @@ void motAsser(){
 				_motCmd[i]=0;
 				}
 				else{
-					_motCmd[i]=  ((Kp[i]*eps)>>2) + ((Ki[i]*intEps[i])>>2);
+					_motCmd[i]=  ((Kp[i]*eps)) + ((Ki[i]*intEps[i])>>2);
 				}
 
 	#ifdef DEBUG_MOTOR

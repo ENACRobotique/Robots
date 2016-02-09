@@ -13,12 +13,7 @@
 #include "lib_line.h"
 #include "../params.h"
 #include "../tools.h"
-#include "state_stairs.h"
 #include "lib_move.h"
-#include "sharp_2d120x.h"
-#include "state_Prestairs.h"
-#include "../libs/lib_attitude.h"
-#include "../libs/MPU_6050.h"
 
 /* State : tirette, first state of all, waits until the tirette is pulled
  *

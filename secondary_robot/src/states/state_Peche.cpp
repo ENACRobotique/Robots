@@ -52,13 +52,12 @@ sState* testPeche(){
 	};
 	static unsigned long st_saveTime=0;
 	static int i=0;
-	static int i_radar=0;
 	static unsigned long prev_millis=0;
-	static unsigned long prev_millis_radar=0;
 	if(periodicProgTraj(go_river,&st_saveTime,&i,&prev_millis))
 	{
-		return NULL;
+		return &sWait;
 	}
+	return NULL;
 }
 
 void initPeche(sState *prev){

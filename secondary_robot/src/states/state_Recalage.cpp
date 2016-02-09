@@ -38,19 +38,17 @@ sState* testRecalage(){
         };
         static unsigned long st_saveTime=0;
         static int i=0;
-		static int i_radar=0;
 		static unsigned long prev_millis=0;
-		static unsigned long prev_millis_radar=0;
 		if(periodicProgTraj(calage_largeur,&st_saveTime,&i,&prev_millis))
 			{
-				return NULL;
+				return &sWait;
 			}
 		if(digitalRead(PIN_SWITCH_RIGHT) && (i>=1))
 			{
 				move(0,0);
 				return &sPeche;
 			}
-
+		return NULL;
 	}
 
 void initRecalage(sState *prev){

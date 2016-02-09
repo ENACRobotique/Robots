@@ -6,7 +6,6 @@
 #include "Wire.h"
 
 #include "state_dead.h"
-#include "state_stairs.h"
 #include "state_traj.h"
 #include "state_tirette.h"
 
