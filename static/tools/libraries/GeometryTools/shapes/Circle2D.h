@@ -128,8 +128,10 @@ class Circle2D/*: public Ellipse2D<T>*/ {
                 return 0;
 
             Vector2D<T> v1(c, p1), v2(c, p2);
-            T d = v1.angle(v2) / (2 * M_PI);
-            d *= perimeter();
+            T d = v1.angle(v2) ;
+            if (d < 0)
+                d = d + 2 * M_PI;
+            d *= perimeter() / (2 * M_PI);
 
             return d < 0 ? -d : d;
         }

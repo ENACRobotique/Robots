@@ -96,7 +96,7 @@ public:
     }
 
     T norm() const {
-        return std::hypot(x, y);
+        return hypot(x, y);
     }
     T normSq() const {
         return x * x + y * y;
