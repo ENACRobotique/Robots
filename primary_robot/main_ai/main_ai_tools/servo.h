@@ -16,10 +16,10 @@ extern "C"{
 #include "messages-interactions.h"
 }
 
-#define ANGLE_DOOR_OPEN1 180.
-#define ANGLE_DOOR_CLOSE1 0.
-#define ANGLE_DOOR_OPEN2 180.
-#define ANGLE_DOOR_CLOSE2 0.
+#define ANGLE_DOOR_OPEN1L 36.
+#define ANGLE_DOOR_CLOSE1L 150.
+#define ANGLE_DOOR_OPEN1R 175.
+#define ANGLE_DOOR_CLOSE1R 85.
 
 
 
@@ -36,16 +36,16 @@ typedef struct{
 } servoId;
 
 typedef enum {
-    DOOR_1,
-	DOOR_2
+    DOOR_1_L,
+	DOOR_1_R
 }servoName;
 
 
 class Servo {
     public:
         Servo(){
-            tabServo.insert(std::make_pair(DOOR_1       , servoId{ 2, 8}));
-            tabServo.insert(std::make_pair(DOOR_2       , servoId{ 1, 6}));
+            tabServo.insert(std::make_pair(DOOR_1_L      , servoId{ 12, 1}));
+            tabServo.insert(std::make_pair(DOOR_1_R       , servoId{ 2, 2}));
 
 
         }
@@ -58,11 +58,11 @@ class Servo {
 
             switch(step){
                 case STEP1:
-                    name.push_back(DOOR_1);
-                    angle.push_back(ANGLE_DOOR_CLOSE1);
+                    name.push_back(DOOR_1_L);
+                    angle.push_back(ANGLE_DOOR_CLOSE1L);
 
-                    name.push_back(DOOR_2);
-                    angle.push_back(ANGLE_DOOR_CLOSE2);
+                    name.push_back(DOOR_1_R);
+                    angle.push_back(ANGLE_DOOR_CLOSE1R);
 
                     sendMultiPosServo(name, angle);
                     step = STEP2;
@@ -83,20 +83,20 @@ class Servo {
         void openDoor(int num){
             switch(num){
                 case 0 :
-                    sendPosServo(DOOR_1, ANGLE_DOOR_OPEN1);
+                    sendPosServo(DOOR_1_L, ANGLE_DOOR_OPEN1L);
                     break;
                 case 1 :
-                	sendPosServo(DOOR_2, ANGLE_DOOR_OPEN2);
+                	sendPosServo(DOOR_1_R, ANGLE_DOOR_OPEN1R);
             }
         }
 
         void closeDoor(int num){
             switch(num){
                 case 0 :
-                    sendPosServo(DOOR_1, ANGLE_DOOR_CLOSE1);
+                    sendPosServo(DOOR_1_L, ANGLE_DOOR_CLOSE1L);
                     break;
                 case 1 :
-                	sendPosServo(DOOR_2, ANGLE_DOOR_CLOSE2);
+                	sendPosServo(DOOR_1_R, ANGLE_DOOR_CLOSE1R);
             }
         }
     private:

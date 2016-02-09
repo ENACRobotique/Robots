@@ -18,8 +18,9 @@
 using namespace std;
 
 typedef enum{
+    SAND_HEAP_PREP,
     SAND_HEAP_PUSH,
-    SAND_HEAP_BACK,
+	SAND_HEAP_BACK,
     SAND_HEAP_END
 }stepSandHeap;
 
@@ -49,6 +50,7 @@ class SandHeap : public Obj{
         unsigned int _time;
         stepSandHeap stepLoc;
         Point2D<float> destPoint;
+        Circle2D<float> pointPutHeap;
 };
 
 

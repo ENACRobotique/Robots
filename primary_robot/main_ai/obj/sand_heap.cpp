@@ -18,9 +18,9 @@ extern "C"{
 #include "millis.h"
 }
 
-Point2D<float> obsClap[2]={
-        { 35., 110.},
-        { 265., 110.}
+Point2D<float> obsSandHeap[2]={
+        { 35., 90.},
+        { 265., 90.}
         };
 
 
@@ -33,11 +33,20 @@ SandHeap::SandHeap(unsigned int num) : Obj(E_SANDHEAP, ActuatorType::SANDDOOR, t
 
     _num_obs.push_back(START_CUP + num);
 
+    if (num == 0){
+    	pointPutHeap.c = {130., 90.};
+    }
+    else {
+    	pointPutHeap.c = {170., 90.};
+    }
+
+    	pointPutHeap.r = 5.;
+
     sObjEntry_t objEP;
     objEP.type = E_POINT;
     objEP.delta = 0;
-    objEP.pt.p = obsClap[num];
-    objEP.pt.angle = M_PI;
+    objEP.pt.p = obsSandHeap[num];
+    objEP.pt.angle = M_PI/3;
 
     _access.push_back(objEP);
 
@@ -53,21 +62,30 @@ void SandHeap::initObj(paramObj){
 
 int SandHeap::loopObj(paramObj par){
 
+	Circle2D<float> backDest;
     switch(stepLoc){
-        case SAND_HEAP_PUSH:
+        case SAND_HEAP_PREP:
         	servo.closeDoor(0);
-        	servo.closeDoor(1);
+        	servo.openDoor(1);
             _time = millis();
-            stepLoc = SAND_HEAP_BACK;
+            stepLoc = SAND_HEAP_PUSH;
             break;
-        case SAND_HEAP_BACK:
+        case SAND_HEAP_PUSH:
             if(millis() - _time > 500){
                 _time = millis();
-                Circle2D<float> cir(170., 110., 5.);
-                destPoint = cir.project(par.posRobot);
+                destPoint = pointPutHeap.project(par.posRobot);
                 path.go2PointOrient(destPoint, par.obs, _access_select_angle);
+                //stepLoc = SAND_HEAP_BACK;
                 stepLoc = SAND_HEAP_END;
             }
+            break;
+        case SAND_HEAP_BACK:
+
+        	backDest.c = {180., 90.};
+        	backDest.r = 5.;
+            destPoint = backDest.project(par.posRobot);
+            path.go2PointOrient(destPoint, par.obs, _access_select_angle);
+            stepLoc = SAND_HEAP_END;
             break;
 
         case SAND_HEAP_END:/*
