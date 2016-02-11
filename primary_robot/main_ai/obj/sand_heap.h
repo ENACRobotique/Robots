@@ -33,7 +33,7 @@ class SandHeap : public Obj{
         int loopObj(paramObj) override;
         eObj_t type() const override {return E_SANDHEAP;};
 
-        int updateDestPointOrient(paramObj par){
+        /*int updateDestPointOrient(paramObj par){
             unsigned int i;
 
             if(par.act.empty())
@@ -43,7 +43,7 @@ class SandHeap : public Obj{
              _actuator_select = par.act[i].id;
 
             return 0;
-        }
+        }*/
 
     private :
         unsigned int _num;

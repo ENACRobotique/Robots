@@ -26,7 +26,7 @@ Point2D<float> obsSandHeap[2]={
 
 
 
-SandHeap::SandHeap(unsigned int num) : Obj(E_SANDHEAP, ActuatorType::SANDDOOR, true), _num(num), _time(0), stepLoc(SAND_HEAP_PUSH){
+SandHeap::SandHeap(unsigned int num) : Obj(E_SANDHEAP, ActuatorType::SANDDOOR, true), _num(num), _time(0), stepLoc(SAND_HEAP_PREP){
 
     if(num > 2)
         logs << ERR << "Num too big";
@@ -46,7 +46,7 @@ SandHeap::SandHeap(unsigned int num) : Obj(E_SANDHEAP, ActuatorType::SANDDOOR, t
     objEP.type = E_POINT;
     objEP.delta = 0;
     objEP.pt.p = obsSandHeap[num];
-    objEP.pt.angle = M_PI/3;
+    objEP.pt.angle = M_PI/6;
 
     _access.push_back(objEP);
 
@@ -80,8 +80,7 @@ int SandHeap::loopObj(paramObj par){
             }
             break;
         case SAND_HEAP_BACK:
-
-        	backDest.c = {180., 90.};
+        	backDest.c = {265., 90.};
         	backDest.r = 5.;
             destPoint = backDest.project(par.posRobot);
             path.go2PointOrient(destPoint, par.obs, _access_select_angle);
