@@ -17,6 +17,7 @@
 void motorInitHard(int pinDir[],int pinPWM[]);
 void motAsser();
 void motAsserTemp();
+void motGetCon(int *rc);
 
 extern int _motPinPWM[NB_MOTORS];
 extern int _motCon[NB_MOTORS];
