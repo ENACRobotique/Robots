@@ -72,10 +72,11 @@ int main(int argc, char* argv[]) {
 //            new Cam(0, 516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0), 0),
             //            new VideoCapture("MyVideo.avi")));
-//            new VideoCapture(0)));
+            new VideoCapture(0)));
 //            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
-            new VideoCapture("../2016/Captures/cubes4x4x4.jpg"))); // "Robomovie"
+//            new VideoCapture("../2016/Captures/cubes4x4x4.jpg"))); // "Robomovie"
+//            new VideoCapture("../2016/Captures/violetShell.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubesFace.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
 
