@@ -50,6 +50,7 @@ class SandHeap : public Obj{
         unsigned int _time;
         stepSandHeap stepLoc;
         Point2D<float> destPoint;
+        Circle2D<float> backPoint;
         Circle2D<float> pointPutHeap;
 };
 

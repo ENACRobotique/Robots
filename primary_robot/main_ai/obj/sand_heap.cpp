@@ -35,18 +35,22 @@ SandHeap::SandHeap(unsigned int num) : Obj(E_SANDHEAP, ActuatorType::SANDDOOR, t
 
     if (num == 0){
     	pointPutHeap.c = {130., 90.};
+    	backPoint.c = {35., 90.};
+
     }
     else {
     	pointPutHeap.c = {170., 90.};
+    	backPoint.c = {265., 90.};
     }
 
-    	pointPutHeap.r = 5.;
+    backPoint.r = 5.;
+    pointPutHeap.r = 5.;
 
     sObjEntry_t objEP;
     objEP.type = E_POINT;
     objEP.delta = 0;
     objEP.pt.p = obsSandHeap[num];
-    objEP.pt.angle = M_PI/6;
+    objEP.pt.angle = M_PI;
 
     _access.push_back(objEP);
 
@@ -61,12 +65,12 @@ void SandHeap::initObj(paramObj){
 }
 
 int SandHeap::loopObj(paramObj par){
-
-	Circle2D<float> backDest;
+	Circle2D<float> test;
     switch(stepLoc){
         case SAND_HEAP_PREP:
         	servo.closeDoor(0);
         	servo.openDoor(1);
+
             _time = millis();
             stepLoc = SAND_HEAP_PUSH;
             break;
@@ -75,29 +79,24 @@ int SandHeap::loopObj(paramObj par){
                 _time = millis();
                 destPoint = pointPutHeap.project(par.posRobot);
                 path.go2PointOrient(destPoint, par.obs, _access_select_angle);
-                //stepLoc = SAND_HEAP_BACK;
-                stepLoc = SAND_HEAP_END;
+                stepLoc = SAND_HEAP_BACK;
             }
             break;
         case SAND_HEAP_BACK:
-        	backDest.c = {265., 90.};
-        	backDest.r = 5.;
-            destPoint = backDest.project(par.posRobot);
-            path.go2PointOrient(destPoint, par.obs, _access_select_angle);
-            stepLoc = SAND_HEAP_END;
+        	if (destPoint.distanceTo(par.posRobot) <= 5.){
+        		destPoint = backPoint.project(par.posRobot);
+        		path.go2PointOrient(destPoint, par.obs, _access_select_angle);
+                _time = millis();
+        		stepLoc = SAND_HEAP_END;
+        	}
             break;
 
-        case SAND_HEAP_END:/*
+        case SAND_HEAP_END:
             if(millis() - _time > 500){
-                for(Actuator& i : par.act){
-                    if(i.type == ActuatorType::CUP && i.id == _actuator_select){
-                        i.cupActuator.full = true;
-                        i.cupActuator.distributor = false; //to be sure
-                    }
-                }*/
+            	servo.closeDoor(1);
                 _state = FINISH;
                 return 0;
-            //}
+            }
             break;
     }
 
