@@ -36,13 +36,6 @@
 #define PIN_TIRETTE 10
 //#define PIN_LED 13
 #define PIN_COLOR 12
-//#define PIN_SERVO_ATTITUDE 10
-//#define PIN_SERVO_CARPET 9
-//#define PIN_VENTILO 11
-//analog in
-//#define PIN_SHARP_FRONT_RIGHT A0
-//#define PIN_SHARP_FRONT_LEFT A1
-//#define PIN_SHARP_BACK_RIGHT A2
 #define PIN_SWITCH_LEFT A3
 #define PIN_SWITCH_RIGHT A2
 
@@ -60,8 +53,8 @@
 #define WALL_DST 15 //in cm<<1
 #define WALL_SPEED 80
 
-#define COLOR_RED HIGH
-#define COLOR_YELLOW LOW
+#define COLOR_GREEN HIGH
+#define COLOR_PURPLE LOW
 
 
 #define RADAR_SAFETY_DST 30 //in cm
