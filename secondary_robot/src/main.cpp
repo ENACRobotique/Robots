@@ -19,6 +19,7 @@
 #include "lib_attitude.h"
 #include "lib_heading.h"
 #include "state_wait.h"
+#include "state_dead.h"
 #include "state_funny_action.h"
 
 sState *current=&sInitHard;
@@ -75,14 +76,15 @@ void loop(){
             if (next->init) next->init(current); //we call init of the next state with the pointer of current state
             current=next; //we set the new state
         }
-        if((millis() - _matchStart) > TIME_MATCH_STOP){
+        unsigned int time = millis() - _matchStart;
+        if(time > TIME_MATCH_STOP && current!=&sDead){
         	next = &sWait;	//stop the match
         	if (current->deinit) current->deinit(next); //we call deinit of the current state with the pointer to next state
         	if (next->init) next->init(current); //we call init of the next state with the pointer of current state
         	current=next; //we set the new state
         }
 #ifdef TIME_FOR_FUNNY_ACTION
-        if((millis() - _matchStart) > TIME_FOR_FUNNY_ACTION){
+        if(time > TIME_FOR_FUNNY_ACTION && time < TIME_MATCH_STOP && current!=&sFunnyAction){
 			next = &sFunnyAction;	//stop the match
 			if (current->deinit) current->deinit(next); //we call deinit of the current state with the pointer to next state
 			if (next->init) next->init(current); //we call init of the next state with the pointer of current state

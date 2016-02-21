@@ -16,17 +16,19 @@
 #include "state_wait.h"
 #include "lib_radar_mask.h"
 #include "state_Peche.h"
-#include "state_dead.h"
+
+Servo parasol_servo;
 
 sState *TestFunnyAction(){
 	// do the funny action
-	// faire tourner le servo moteur du parasol
-	if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
+	if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sWait;
 	return 0;
 }
 
 void initFunnyAction(sState *prev){
 	move(0,0);
+	parasol_servo.attach(PIN_PARASOL);
+	parasol_servo.write(170);
 #ifdef DEBUG
 	Serial.println("Je fais la funny action!");
 #endif
