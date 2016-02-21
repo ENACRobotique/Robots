@@ -106,11 +106,8 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.1714616835" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.debug.1005143944.1057370492.728409193.786103265" name="lib_fan.cpp" rcbsApplicability="disable" resourcePath="src/libs/lib_fan.cpp" toolsToInvoke="de.innot.avreclipse.tool.cppcompiler.app.debug.1133817417.1094938021">
-						<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.1133817417.1094938021" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug.1133817417"/>
-					</fileInfo>
 					<sourceEntries>
-						<entry excluding="src/libs/lib_radar2.cpp|arduinolib/Servo/examples|arduinolib/Wire/examples|src/libs/Servo/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/libs/sharp_2d120x.cpp|src/libs/MPU_6050.cpp|src/libs/lib_radar2.cpp|arduinolib/Servo/examples|arduinolib/Wire/examples|src/libs/Servo/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
