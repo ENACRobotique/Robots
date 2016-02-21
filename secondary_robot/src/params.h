@@ -69,7 +69,9 @@
 
 #define TIME_READY_LAUNCHER 500 //in ms
 
-
+#define PIN_PARASOL 8
+#define PIN_CANNE_A_PECHE 4
+#define PIN_CREMA 3
 
 #define DEBUG
 
