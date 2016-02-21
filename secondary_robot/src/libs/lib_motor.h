@@ -12,7 +12,7 @@
 #include "lib_odo.h"
 #include "params.h"
 
-#define DEBUG_MOTOR
+//#define DEBUG_MOTOR
 
 void motorInitHard(int pinDir[],int pinPWM[]);
 void motAsser();

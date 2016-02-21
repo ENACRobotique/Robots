@@ -21,11 +21,15 @@
 #include "state_traj.h"
 #include "state_pause.h"
 #include "state_wait.h"
-#include "state_lineMonit.h"
 #include "lib_radar_mask.h"
-
+#include "state_funny_action.h"
 
 sState* testPeche(){
+
+#ifdef TIME_FOR_FUNNY_ACTION
+	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
+#endif
+
 	trajElem go_river[] = {
 			{400,0,500},
 			{600,5,1800},

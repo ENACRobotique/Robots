@@ -21,12 +21,16 @@
 #include "state_traj.h"
 #include "state_pause.h"
 #include "state_wait.h"
-#include "state_lineMonit.h"
 #include "lib_radar_mask.h"
 #include "state_Peche.h"
-
+#include "state_funny_action.h"
 
 sState* testRecalage(){
+
+#ifdef TIME_FOR_FUNNY_ACTION
+	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
+#endif
+
         trajElem calage_largeur[] = {
 				{800,0,500},
 				{0,-90,300},
