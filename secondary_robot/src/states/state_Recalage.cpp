@@ -25,31 +25,50 @@
 #include "state_Peche.h"
 #include "state_funny_action.h"
 
+int purple=0;
+
 sState* testRecalage(){
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
+	trajElem calage_largeur_purple[] = {
+					{0,60,300},
+					{250,60,1650},
+					{0,0,100},
+					{0,0,0}
+				};
 
-        trajElem calage_largeur[] = {
-        		{0,60,300},
-				{250,60,1650},
-				{0,0,100},
-				{0,0,0}
-        };
+	trajElem calage_largeur_green[] = {
+						{0,-60,300},
+						{250,-60,1650},
+						{0,0,100},
+						{0,0,0}
+				};
+
+	trajElem* calage=calage_largeur_green;
+
+		if(purple)
+		{
+			calage = calage_largeur_purple;
+		}
         static unsigned long st_saveTime=0;
         static int i=0;
 		static unsigned long prev_millis=0;
 		static int flag_end = 0;
 		if(!flag_end){
-			if(periodicProgTraj(calage_largeur,&st_saveTime,&i,&prev_millis))
+			if(periodicProgTraj(calage,&st_saveTime,&i,&prev_millis))
 				{
 					flag_end = 1;
 				}
 		}
 		else{
+			int pin=PIN_SWITCH_RIGHT;
+			if(purple){
+				pin = PIN_SWITCH_LEFT;
+			}
 			move(-300,0);
-			if(digitalRead(PIN_SWITCH_LEFT))
+			if(digitalRead(pin))
 				{
 					move(0,0);
 					return &sPeche;
@@ -58,9 +77,16 @@ sState* testRecalage(){
 		return NULL;
 	}
 
-void initRecalage(sState *prev){
 
-    }
+
+void initRecalage(sState *prev){
+	if (digitalRead(PIN_COLOR)==COLOR_GREEN){
+		purple=0;
+	}
+	else{
+		purple=1;
+	}
+}
 
 void deinitRecalage(sState *next){
         // Your code here !

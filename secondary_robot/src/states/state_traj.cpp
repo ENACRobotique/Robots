@@ -61,58 +61,54 @@ void deinitTrajGreenInit(sState *next)
 	}
 
 trajElem start_green[]={
-#ifdef HEADING
-				{30,0,5500},
-				{0,-90,9000},
-				{0,-90,2000},
-				{10,-90,3000},
-				{0,0,0},
-#else
-				//Début trajectoire vers cabines de plage
-				{0,60,300},
-				{250,60,1600},
-				{0,0,100},
-				{-300,0,4000},
-				{0,0,0},
-#endif
-				};
-
-radarElem start_green_radar[]={
-				{40,25,5500},
-				{0,0,9000},
-				{0,0,2000},
-				{30,30,3000},
-				{0,0,0},
-				};
+	//Début trajectoire vers cabines de plage
+	{-300,-11,1100},
+	{-400,0,1200},
+	{-300,11,1100},
+	{-200,0,1000},
+	{0,0,100},//1ere porte fermée
+	{300,0,1300},
+	{0,-90,400},
+	{300,-90,1300},
+	{0,0,400},
+	{300,0,1700},
+	{0,90,400},
+	{300,90,1200},
+	{0,0,400},
+	{-300,0,1000},
+	{-200,0,1400},
+	{0,0,100},//2eme porte fermée
+	{300,0,1300},
+	{0,-90,400},
+	{300,-90,1400},
+	{0,0,300},
+	{-300,0,4000},
+	{0,0,0},
+};
 
 sState *testTrajGreenInit()
 	{
-		static int i=0;
-		static int i_radar=0;
-	    static unsigned long prev_millis=0;
-	    static unsigned long prev_millis_radar=0;
 
-	    if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis))
-	    {
+	static int i=0;
+    static unsigned long prev_millis=0;
+    static int flag_end = 0;
+    	if(!flag_end){
+		    if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis)){
+				#ifdef DEBUG
+					Serial.println("\tTrajet 1 fini !");
+				#endif
+		    	flag_end = 1;
+		    }
+    	}
+    	else{
+    		move(-200,0);
+		    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
+				move(0,0);
+				return &sRecalage;
+			}
+    	}
 
-			#ifdef DEBUG
-				Serial.println("\tTrajet 1 fini !");
-			#endif
-
-	    	 return &sRecalage;
-	    }
-	    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT))
-	    	{
-	    		move(0,0);
-	    		return &sRecalage;
-	    	}
-	    if(periodicProgRadarLimit(start_green_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
-			#ifdef DEBUG
-				Serial.println("\tFin radar 1 !");
-			#endif
-		}
-
-	    if (radarIntrusion()) return &sPause;
+		 if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
 
@@ -128,7 +124,7 @@ sState sTrajGreenInit={
 void initTrajPurple(sState *prev)
 	{
 		    #ifdef DEBUG
-				Serial.println("debut traj jaune");
+				Serial.println("debut traj violet");
 			#endif
 
 		    if (prev==&sPause)
@@ -160,14 +156,7 @@ void deinitTrajYellowInit(sState *next)
 		    	}
 }
 
-trajElem start_yellow[]={
-#ifdef HEADING
-		{30,0,5500},
-		{0,90,9000},
-		{0,90,2000},
-		{10,90,2000},
-		{0,0,0},
-#else
+trajElem start_purple[]={
 		//Début trajectoire vers cabines de plage
 
 						{-300,15,1100},
@@ -191,24 +180,16 @@ trajElem start_yellow[]={
 						{300,90,1200},
 						{0,0,300},
 						{-300,0,4000},
-#endif
 						{0,0,0},
 				};
 
-radarElem start_yellow_radar[]={
-				{40,25,5500},
-				{0,0,9000},
-				{0,0,2000},
-				{30,30,3000},
-				{0,0,0},
-				};
 sState *testTrajPurple()
 	{
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
     	if(!flag_end){
-		    if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis)){
+		    if(periodicFunction(start_purple,&st_saveTime,&i,&prev_millis)){
 				#ifdef DEBUG
 					Serial.println("\tTrajet 1 fini !");
 				#endif
@@ -226,7 +207,7 @@ sState *testTrajPurple()
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
-sState sTrajYellowInit={
+sState sTrajPurpleInit={
 		BIT(E_MOTOR)/*|BIT(E_RADAR)|BIT(E_HEADING)*/,
         &initTrajPurple,
         &deinitTrajYellowInit,
