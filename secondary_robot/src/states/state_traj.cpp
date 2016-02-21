@@ -14,7 +14,6 @@
 #include "state_pause.h"
 #include "state_Recalage.h"
 #include "state_wait.h"
-#include "state_lineMonit.h"
 #include "lib_radar_mask.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
@@ -70,23 +69,11 @@ trajElem start_green[]={
 				{0,0,0},
 #else
 				//Début trajectoire vers cabines de plage
-				{300,0,10000},
-				{0,0,20000},
-				{-800,-1,2500},
-				{-400,0,1900},//Premiere porte fermee
+				{0,60,300},
+				{250,60,1600},
 				{0,0,100},
-				{800,-40,1700},
-				{800,0,800},
-				{0,90,300},
-				{650,90,1500},//Allignee deuxieme porte
-				{0,0,100},
-				{-400,0,3000},//Deuxieme porte fermee
-				{0,0,100},
-				{800,0,1000},
-				{0,-90,300}, //
-				{650,-90,1700},
-				{-800,0,2500},
-				{-400,0,4000},
+				{-300,0,4000},
+				{0,0,100000},
 //				{-800,0,3000},
 //				{-400,0,1500},
 //				{0,0, 10000},
@@ -226,29 +213,28 @@ trajElem start_yellow[]={
 #else
 		//Début trajectoire vers cabines de plage
 
-						{400,0,500},
-						{600,5,1800},
-						{0,0,200},
-						{-800,33,1300},
-						{-800,5,1900},
-						{-800,40,800},
-						{-800,3,3000},
-						{0,0,100},
-						{800,0,1500},
-						{0,90,300},
-						{650,90,1400},
-						{0,0,100},
-						{-500,0,4000},
-						{0,0,100},
-						{800,0,300},
-						{0,90,300},
-						{650,90,1000},
-						{0,0,100},
-						{-800,0,2000},
-						{-400,0,3000},
-						{0,0,10000},
+						{-300,15,1100},
+						{-400,0,1200},
+						{-300,-15,1100},
+						{-200,0,1000},
+						{0,0,100},//1ere porte fermée
+						{300,0,1300},
+						{0,90,400},
+						{300,90,1200},
+						{0,0,400},
+						{300,0,1900},
+						{0,-90,400},
+						{300,-90,1300},
+						{0,0,400},
+						{-300,0,1000},
+						{-200,0,1400},
+						{0,0,100},//2eme porte fermée
+						{300,0,1300},
+						{0,90,400},
+						{300,90,1200},
+						{0,0,300},
+						{-300,0,4000},
 
-//						{-800,0,1700},
 //						{-800,28,1865},
 //						{-800,-2,0600},
 //						{-800,-3,700},//Première porte
@@ -316,19 +302,22 @@ sState *testTrajYellowInit()
 	static int i_radar=0;
     static unsigned long prev_millis=0;
     static unsigned long prev_millis_radar=0;
-		    if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
-		   	    {
+    static int flag_end = 0;
+    	if(!flag_end){
+		    if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis)){
 				#ifdef DEBUG
 					Serial.println("\tTrajet 1 fini !");
 				#endif
-		    	return &sRecalage;
-		   	    }
-
-		    if(periodicProgRadarLimit(start_yellow_radar,&st_saveTime_radar,&i_radar,&prev_millis_radar)){
-		    			#ifdef DEBUG
-		    				Serial.println("\tFin radar 1 !");
-		    			#endif
-		    		}
+		    	flag_end = 1;
+		    }
+    	}
+    	else{
+    		move(-200,0);
+		    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
+				move(0,0);
+				return &sRecalage;
+			}
+    	}
 
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
