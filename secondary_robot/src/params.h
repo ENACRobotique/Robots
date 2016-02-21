@@ -73,7 +73,7 @@
 #define PIN_CANNE_A_PECHE 4
 #define PIN_CREMA 3
 
-#define DEBUG
+//#define DEBUG
 
 /* endDefines *********************************************/
 

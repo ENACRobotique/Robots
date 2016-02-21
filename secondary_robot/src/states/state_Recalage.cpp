@@ -32,26 +32,29 @@ sState* testRecalage(){
 #endif
 
         trajElem calage_largeur[] = {
-				{800,0,500},
-				{0,-90,300},
-				{650,-90,1200},
+        		{0,60,300},
+				{250,60,1650},
 				{0,0,100},
-				{-800,0,7000},
-				{-400,0,15000},
 				{0,0,0}
         };
         static unsigned long st_saveTime=0;
         static int i=0;
 		static unsigned long prev_millis=0;
-		if(periodicProgTraj(calage_largeur,&st_saveTime,&i,&prev_millis))
-			{
-				return &sWait;
-			}
-		if(digitalRead(PIN_SWITCH_RIGHT) && (i>=1))
-			{
-				move(0,0);
-				return &sPeche;
-			}
+		static int flag_end = 0;
+		if(!flag_end){
+			if(periodicProgTraj(calage_largeur,&st_saveTime,&i,&prev_millis))
+				{
+					flag_end = 1;
+				}
+		}
+		else{
+			move(-300,0);
+			if(digitalRead(PIN_SWITCH_LEFT))
+				{
+					move(0,0);
+					return &sPeche;
+				}
+		}
 		return NULL;
 	}
 
