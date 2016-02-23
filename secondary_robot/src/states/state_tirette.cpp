@@ -10,7 +10,6 @@
 #include "state_tirette.h"
 #include "state_traj.h"
 #include "lib_radar.h"
-#include "lib_line.h"
 #include "../params.h"
 #include "../tools.h"
 #include "lib_move.h"
