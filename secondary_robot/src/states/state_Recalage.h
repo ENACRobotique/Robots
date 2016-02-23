@@ -11,5 +11,6 @@
 #include "state_types.h"
 
 extern sState sRecalage;
+extern int purple;
 
 #endif /* STATE_RECALAGE_ */

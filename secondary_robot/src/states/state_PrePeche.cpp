@@ -1,12 +1,14 @@
 /*
- * state_Recalage.cpp
+ * state_PrePeche.cpp
  *
- *  Created on: 2016 février 05
- *      Author: Darian
+ *  Created on: 23 févr. 2016
+ *      Author: liehn
  */
 
 
+
 #include "Arduino.h"
+#include "state_PrePeche.h"
 #include "state_Recalage.h"
 #include "state_types.h"
 #include "lib_move.h"
@@ -16,28 +18,27 @@
 #include "../params.h"
 #include "state_wait.h"
 #include "lib_radar_mask.h"
-#include "state_PrePeche.h"
+#include "state_Peche.h"
 #include "state_funny_action.h"
 
-int purple=0;
 
-sState* testRecalage(){
+sState* testPrePeche(){
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
 	trajElem calage_largeur_purple[] = {
-					{0,60,300},
-					{250,60,1650},
-					{0,0,100},
-					{0,0,0}
+					{0,-10,300},
+					{-200,-10,500},
+					{0,-10,20000},
+					//trajectoire prépeche
 				};
 
 	trajElem calage_largeur_green[] = {
-						{0,-60,300},
-						{250,-60,1650},
-						{0,0,100},
-						{0,0,0}
+						{0,10,300},
+						{-200,10,500},
+						{0,10,20000},
+						//trajectoire prépeche
 				};
 
 	trajElem* calage=calage_largeur_green;
@@ -65,7 +66,7 @@ sState* testRecalage(){
 			if(digitalRead(pin))
 				{
 					move(0,0);
-					return &sPrePeche;
+					return &sPeche;
 				}
 		}
 		return NULL;
@@ -73,7 +74,7 @@ sState* testRecalage(){
 
 
 
-void initRecalage(sState *prev){
+void initPrePeche(sState *prev){
 	if (digitalRead(PIN_COLOR)==COLOR_GREEN){
 		purple=0;
 	}
@@ -82,14 +83,16 @@ void initRecalage(sState *prev){
 	}
 }
 
-void deinitRecalage(sState *next){
+void deinitPrePeche(sState *next){
         // Your code here !
     }
 
-sState sRecalage={
+sState sPrePeche={
 	BIT(E_MOTOR),
-    &initRecalage,
-    &deinitRecalage,
-    &testRecalage
+    &initPrePeche,
+    &deinitPrePeche,
+    &testPrePeche
 };
+
+
 
