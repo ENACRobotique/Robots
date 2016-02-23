@@ -13,6 +13,7 @@
 #include "../params.h"
 #include "../tools.h"
 #include "lib_move.h"
+#include "state_PrePeche.h"
 
 /* State : tirette, first state of all, waits until the tirette is pulled
  *
@@ -33,7 +34,7 @@ sState* testTirette()
     		if(timepull==0){timepull = millis();}
 			if(millis() - timepull > TIME_BEFORE_START){
 				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajGreenInit;
-				else return &sTrajPurpleInit;
+				else return &sPrePeche;
 			}
     	}
     return 0;

@@ -18,6 +18,7 @@
 #include "lib_radar_mask.h"
 #include "state_PrePeche.h"
 #include "state_funny_action.h"
+#include "state_pause.h"
 
 int purple=0;
 
@@ -68,6 +69,7 @@ sState* testRecalage(){
 					return &sPrePeche;
 				}
 		}
+		if (radarIntrusion()) return &sPause;
 		return NULL;
 	}
 
