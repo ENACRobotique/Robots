@@ -74,10 +74,6 @@ sState* testPrePeche(){
 				}
 		}
 		else{
-			int pin=PIN_SWITCH_RIGHT;
-			if(purple){
-				pin = PIN_SWITCH_LEFT;
-			}
 			move(-300,0);
 			if(digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 				move(0,0);
