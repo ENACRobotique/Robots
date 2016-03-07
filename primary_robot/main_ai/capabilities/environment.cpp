@@ -37,6 +37,10 @@ std::vector<astar::sObs_t> obs= {
    {{65., 110.}, 8.+R_ROBOT, 1, 1, 1},//15
    {{235., 110.}, 8.+R_ROBOT, 1, 1, 1},
 
+   //Dune heaps (heaps on the sides of the dune)
+   {{210., 194.}, 8.+R_ROBOT, 1, 1, 1},//17
+   {{90., 194.}, 8.+R_ROBOT, 1, 1, 1},
+
    //Yellow spots //if moved change START_STAND
 //   {{85. ,180.}, 3. + R_ROBOT, 1, 1, 1}, //4
 //   {{85. ,190.}, 3. + R_ROBOT, 1, 1, 1},
@@ -90,20 +94,20 @@ std::vector<astar::sObs_t> obs= {
 //   {{300 - 15.,121.}, 2. + R_ROBOT+ .5, 0, 1, 1},
 //
    //Block adversary zone
-   {{0., 0.}, 0., 1, 1, 1}, //17
+   {{0., 0.}, 0., 1, 1, 1}, //19
 //
    //Cercles du robot anti-demi-tour
-   {{0., 0. }, 0, 0, 0, 1}, //18
+   {{0., 0. }, 0, 0, 0, 1}, //20
    {{0., 0. }, 0, 0, 0, 1},
    {{0., 0. }, 0, 0, 0, 1},
 
    //Cercles d'approches
-   {{0., 0. }, 0, 0, 0, 1},//21
+   {{0., 0. }, 0, 0, 0, 1},//23
    {{0., 0. }, 0, 0, 0, 1},
    {{0., 0. }, 0, 0, 0, 1},
 
    // arrivée
-   {{0. , 0.}, 0, 0, 1, 1} //24
+   {{0. , 0.}, 0, 0, 1, 1} //25
 };
 
 std::vector<uint8_t> obsUpdated(obs.size());
