@@ -139,8 +139,8 @@ int CapPrepPrimary::loop(){
       //  Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
      //   float theta_robot = (180.)*M_PI/180.;
 
-        Point2D<float> pos_robot(300.-7.-11.2, 80.+2.7+17.5);
-        float theta_robot = (-191.6)*M_PI/180.;
+        Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
+        float theta_robot = INIT_ANGLE_GREEN;
 
         sendSetPosPrimary(pos_robot, theta_robot, MINVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
 
