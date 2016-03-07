@@ -43,9 +43,25 @@ class Ihm {
         eIhmLed getLed(){
             return static_cast <eIhmLed>(list[eIhmElement::IHM_LED]);
         }
+        eIhmPresence getPresence1(){
+        	return static_cast <eIhmPresence>(list[eIhmElement::IHM_PRESENCE_1]);
+        }
+        eIhmPresence getPresence2(){
+        	return static_cast <eIhmPresence>(list[eIhmElement::IHM_PRESENCE_2]);
+        }
+        eIhmPresence getPresence3(){
+        	return static_cast <eIhmPresence>(list[eIhmElement::IHM_PRESENCE_3]);
+        }
+        eIhmPresence getPresence4(){
+        	return static_cast <eIhmPresence>(list[eIhmElement::IHM_PRESENCE_4]);
+        }
+        eIhmPresence getPresence5(){
+        	return static_cast <eIhmPresence>(list[eIhmElement::IHM_PRESENCE_5]);
+        }
         unsigned int getValue(const eIhmElement& id){
             return list[id];
         }
+
 
     private:
         map <eIhmElement, unsigned int> list;

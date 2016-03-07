@@ -58,8 +58,28 @@ void Ihm::receivedNewIhm(sIhmStatus &ihm){ //TODO check all value with arduino_i
                 list[eIhmElement::IHM_LED] = ihmLedConvertRGBToEnum(ihm.states[i].state.color1);
                 logs << MES << "[IHM] ## sled: " << list[eIhmElement::IHM_LED];
                 break;
+            case IHM_PRESENCE_1:
+            	list[eIhmElement::IHM_PRESENCE_1] = ihm.states[i].state.state_presence;
+            	logs << MES << "[IHM] ## spresence1 : "<< list[eIhmElement::IHM_PRESENCE_1];
+            	break;
+            case IHM_PRESENCE_2:
+            	list[eIhmElement::IHM_PRESENCE_2] = ihm.states[i].state.state_presence;
+            	logs << MES << "[IHM] ## spresence2 : "<< list[eIhmElement::IHM_PRESENCE_2];
+            	break;
+            case IHM_PRESENCE_3:
+            	list[eIhmElement::IHM_PRESENCE_3] = ihm.states[i].state.state_presence;
+            	logs << MES << "[IHM] ## spresence3 : "<< list[eIhmElement::IHM_PRESENCE_3];
+            	break;
+            case IHM_PRESENCE_4:
+            	list[eIhmElement::IHM_PRESENCE_4] = ihm.states[i].state.state_presence;
+            	logs << MES << "[IHM] ## spresence4 : "<< list[eIhmElement::IHM_PRESENCE_4];
+            	break;
+            case IHM_PRESENCE_5:
+            	list[eIhmElement::IHM_PRESENCE_5] = ihm.states[i].state.state_presence;
+            	logs << MES << "[IHM] ## spresence5 : "<< list[eIhmElement::IHM_PRESENCE_5];
+            	break;
             default:
-                logs << WAR << "id not define or doesn't exist";
+                logs << WAR << "[IHM] id not define or doesn't exist";
             break;
          }
      }
@@ -90,6 +110,13 @@ void Ihm::sendIhm(const eIhmElement& id, const unsigned int& state){
             msgOut.payload.ihmStatus.states[0].state.nb = 0;
             logs << WAR << "Send color";
             break;
+        case IHM_PRESENCE_1:
+        case IHM_PRESENCE_2:
+        case IHM_PRESENCE_3:
+        case IHM_PRESENCE_4:
+        case IHM_PRESENCE_5:
+        	msgOut.payload.ihmStatus.states[0].state.state_presence = (eIhmPresence) state;
+        	break;
         default:
             logs << ERR << "Unkown Ihm send";
             break;
