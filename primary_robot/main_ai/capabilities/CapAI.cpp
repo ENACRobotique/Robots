@@ -20,6 +20,7 @@ extern "C"{
 #include "millis.h"
 }
 #include "sand_heap.h"
+#include "duneheap.h"
 #include "objStartingZone.h"
 #include "environment.h"
 
@@ -208,6 +209,9 @@ void CapAI::initObjective(){
     }else{
     	listObj.push_back(new SandHeap(1));
     }
+
+    listObj.push_back(new DuneHeap(0));
+    listObj.push_back(new DuneHeap(1));
 /******
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
