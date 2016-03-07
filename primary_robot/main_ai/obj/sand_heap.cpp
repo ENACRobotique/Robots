@@ -31,7 +31,7 @@ SandHeap::SandHeap(unsigned int num) : Obj(E_SANDHEAP, ActuatorType::SANDDOOR, t
     if(num > 2)
         logs << ERR << "Num too big";
 
-    _num_obs.push_back(START_CUP + num);
+    _num_obs.push_back(START_HEAP + num);
 
     if (num == 0){
     	pointPutHeap.c = {130., 90.};
@@ -65,11 +65,10 @@ void SandHeap::initObj(paramObj){
 }
 
 int SandHeap::loopObj(paramObj par){
-	Circle2D<float> test;
     switch(stepLoc){
         case SAND_HEAP_PREP:
-        	servo.closeDoor(0);
-        	servo.openDoor(1);
+        	servo.closeDoor(DOOR_1_L);
+        	servo.openDoor(DOOR_1_R);
 
             _time = millis();
             stepLoc = SAND_HEAP_PUSH;
@@ -93,7 +92,7 @@ int SandHeap::loopObj(paramObj par){
 
         case SAND_HEAP_END:
             if(millis() - _time > 500){
-            	servo.closeDoor(1);
+            	servo.closeDoor(DOOR_1_R);
                 _state = FINISH;
                 return 0;
             }
