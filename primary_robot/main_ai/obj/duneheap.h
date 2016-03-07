@@ -15,17 +15,39 @@
 
 using namespace std;
 
-class Dune_heap : public Obj{
+#define START_DUNEHEAP 17 //position of the obstacle associated in obs list (environment.cpp)
+
+typedef enum {
+	DUNEHEAP_PREP,
+	DUNEHEAP_CONTACT,
+	DUNEHEAP_SCRAPE,
+	DUNEHEAP_CAPTURE,
+	DUNEHEAP_PREEND,
+	DUNEHEAP_END
+}stepDuneHeap;
+
+class DuneHeap : public Obj{
 public:
-	Dune_heap(unsigned int num);
-	virtual ~Dune_heap();
+	DuneHeap(unsigned int num);
+	virtual ~DuneHeap();
 
     void initObj(paramObj) override;
     int loopObj(paramObj) override;
     eObj_t type() const override {return E_DUNEHEAP;};
 
 private:
-    unsigned int num;
+    unsigned int _num;
+    unsigned int _time;
+
+    stepDuneHeap stepLoc;
+    Point2D<float> scratchPoint;
+    float scratchAngle;
+
+    Point2D<float> swallowPoint;
+    float swallowAngle;
+
+    Point2D<float> capturePoint;
+    float captureAngle;
 };
 
 #endif /* OBJ_DUNEHEAP_H_ */
