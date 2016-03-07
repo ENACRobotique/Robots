@@ -17,9 +17,14 @@ extern "C"{
 }
 
 #define ANGLE_DOOR_OPEN1L 36.
-#define ANGLE_DOOR_CLOSE1L 150.
+#define ANGLE_DOOR_CLOSE1L 140.
 #define ANGLE_DOOR_OPEN1R 175.
 #define ANGLE_DOOR_CLOSE1R 85.
+#define ANGLE_DOOR_SEMICLOSE1L 110.
+#define ANGLE_DOOR_SEMICLOSE1R 110.
+
+#define ANGLE_DOOR_GRAB1L 90.
+#define ANGLE_DOOR_GRAB1R 130.
 
 
 
@@ -80,25 +85,56 @@ class Servo {
         int sendPosServo(const servoName name, const float angle /* deg */);
         int sendMultiPosServo(const std::vector<servoName> name, const std::vector<float> angle);
 
-        void openDoor(int num){
+        void openDoor(servoName num){
             switch(num){
                 case 0 :
                     sendPosServo(DOOR_1_L, ANGLE_DOOR_OPEN1L);
                     break;
                 case 1 :
                 	sendPosServo(DOOR_1_R, ANGLE_DOOR_OPEN1R);
+                	break;
             }
         }
 
-        void closeDoor(int num){
+        void closeDoor(servoName num){
             switch(num){
                 case 0 :
                     sendPosServo(DOOR_1_L, ANGLE_DOOR_CLOSE1L);
                     break;
                 case 1 :
                 	sendPosServo(DOOR_1_R, ANGLE_DOOR_CLOSE1R);
+                	break;
             }
         }
+
+        void semicloseDoor(servoName num){
+        	switch(num){
+        	case 0 :
+        		sendPosServo(DOOR_1_L, ANGLE_DOOR_SEMICLOSE1L);
+        		break;
+        	case 1 :
+        		sendPosServo(DOOR_1_R, ANGLE_DOOR_SEMICLOSE1R);
+        		break;
+        	}
+        }
+
+        void grab4CubesDoor(int num){
+        	std::vector<servoName> namesToSend;
+        	std::vector<float> anglesToSend;
+
+        	if (num==0){
+        		namesToSend.push_back(DOOR_1_L);
+        		anglesToSend.push_back(ANGLE_DOOR_GRAB1L);
+
+        		namesToSend.push_back(DOOR_1_R);
+        		anglesToSend.push_back(ANGLE_DOOR_GRAB1R);
+
+        		sendMultiPosServo(namesToSend, anglesToSend);
+        	}
+
+
+        }
+
     private:
         std::map<servoName, servoId> tabServo;
 
