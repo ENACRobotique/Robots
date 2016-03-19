@@ -92,8 +92,7 @@ int AcqLidar::updateData() {
  * @return vector<PtLidar>
  */
 vector<PtLidar> AcqLidar::getData() {
-	vector<PtLidar> vdata;
-
+	vector<PtLidar> vdata(buffData, buffData + NB_PTS);
     return vdata;
 }
 
