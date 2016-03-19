@@ -38,9 +38,11 @@ int main()
 	PointOrient2D<int> lastPos;
 
 	while(true) {
+		acqlidar.updateData();
 		if(millis() - time_prev > COMPUTE_PERIOD) {
 			vector<PtLidar> data = acqlidar.getData();
-			processor.process(data,lastPos);
+			processor.makeGroups(data);
+			//processor.process(data,lastPos);
 		}
 	}
 
