@@ -1,8 +1,14 @@
-/*
- * main.c
- *
- *  Created on: 10 févr. 2016
- *      Author: fabien
+/**
+ \file    main.cpp
+ \brief   Positioning on the table using a LIDAR.
+ \author  {Fabien, Yoan}
+ \date    19 mars 2016
+
+This software is used for positioning a robot on a table using an ultra low-cost LIDAR.
+It use the kwown fixed object of its environment to determine his position and orientation.
+
+
+This is a licence-free software, it can be used by anyone who try to build a better world.
  */
 
 #include <stdio.h>
@@ -16,9 +22,12 @@ extern"C"{
 #include "millis.h"
 }
 
+/**  Minimum time between two computing of the position. */
 #define COMPUTE_PERIOD 200
 
-
+/**
+ * Entry point of the program.
+ */
 int main()
 {
 	printf("début\n");
@@ -40,3 +49,20 @@ int main()
 	std::cout << "Fin du prgm !" <<std::endl;
 }
 
+
+
+/*!
+
+  \brief Positioning on the table using a LIDAR.
+  	  \mainpage main.cpp
+
+    This software is used for positioning a robot on a table using an ultra low-cost LIDAR.
+	It use the kwown fixed object of its environment to determine his position and orientation.
+
+
+  \author   Fabien, Yoan
+  \date     19 mars 2016
+
+
+This is a licence-free software, it can be used by anyone who try to build a better world.
+*/

@@ -1,5 +1,5 @@
 /**
- * Project Untitled
+ * Class header file for Group
  */
 
 

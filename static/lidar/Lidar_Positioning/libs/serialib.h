@@ -161,7 +161,6 @@ private:
 
 
 /*!
-  \mainpage serialib class
 
   \brief
        \htmlonly
