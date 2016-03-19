@@ -6,22 +6,30 @@
 #ifndef _PROCESSLIDARDATA_H
 #define _PROCESSLIDARDATA_H
 
+#include <vector>
+#include "PointOrient2D.h"
+#include "PtLidar.h"
+#include "Group.h"
+#include "ObjectRef.h"
+
+using namespace std;
+
 class ProcessLidarData {
 public: 
     
     /**
-     * @param points
      * @param lastPos
+     * @param points
      */
-    void process(vector<PtLidar> points, <Pos2D> lastPos);
+    void process(vector<PtLidar> points, PointOrient2D<int> lastPos);
     
-    Pos2D getPos();
+    PointOrient2D<int> getPos();
     
-    vector<Pos2D> getAdversaires();
+    vector< PointOrient2D<int> > getAdversaires();
 private: 
     vector<Group> groups;
-    vector<Object*> objects;
-    Pos2D position;
+    vector<ObjectRef *> objects;
+    PointOrient2D<int> position;
 };
 
 #endif //_PROCESSLIDARDATA_H

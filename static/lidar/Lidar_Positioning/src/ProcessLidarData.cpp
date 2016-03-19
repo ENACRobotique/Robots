@@ -14,20 +14,23 @@
  * @param points
  * @param lastPos
  */
-void ProcessLidarData::process(vector<PtLidar> points, <Pos2D> lastPos) {
+void ProcessLidarData::process(vector<PtLidar> points, PointOrient2D<int> lastPos) {
 
 }
 
 /**
  * @return Pos2D
  */
-Pos2D ProcessLidarData::getPos() {
-    return null;
+PointOrient2D<int> ProcessLidarData::getPos() {
+	PointOrient2D<int> pos;
+	return pos;
 }
 
 /**
  * @return vector<Pos2D>
  */
-vector<Pos2D> ProcessLidarData::getAdversaires() {
-    return null;
+vector<PointOrient2D<int> > ProcessLidarData::getAdversaires() {
+	vector<PointOrient2D<int> > posAdversaires;
+
+	return posAdversaires;
 }

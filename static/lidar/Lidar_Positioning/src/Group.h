@@ -8,8 +8,12 @@
 
 #include <vector>
 #include <ostream>
+#include "PtLidar.h"
+#include "math.h"
 
 using namespace std;
+
+#define DEG_TO_RAD (M_PI/180.)
 
 class Group {
 public: 
@@ -18,7 +22,7 @@ public:
      * @param dist
      * @param azimut
      */
-    int appendPoint(int dist, int azimut);
+    void appendPoint(PtLidar * pt);
     
     int computeParameters();
     
@@ -40,14 +44,16 @@ public:
     /**
      * @param ostream &flux
      */
-    void afficher(ostream &flux);
+    void afficher(ostream &flux) const;
+
+    friend ostream &operator<<( ostream &flux, const Group& grp);
 private: 
     int azimut;
     int sizeMin;
     int sizeMax;
     int distance;
-    vector<*PtLidar> points;
-    void nbPoints;
+    vector<PtLidar *> points;
+    int nbPoints;
 };
 
 #endif //_GROUP_H
