@@ -112,7 +112,7 @@ int Group::getNbPoints() {
  * @return void
  */
 void Group::afficher(ostream &flux) const {
-	flux << "azimut : " << azimut << ", " << sizeMin << " < Size < " << sizeMax;
+	flux << "azimut : " << azimut << "°\t" << sizeMin << " < Size < " << sizeMax << "\tdistance : " << distance;
     return;
 }
 
