@@ -4,7 +4,7 @@
 
 
 #include "ProcessLidarData.h"
-
+#include <ostream>
 /**
  * ProcessLidarData implementation
  */
@@ -33,4 +33,26 @@ vector<PointOrient2D<int> > ProcessLidarData::getAdversaires() {
 	vector<PointOrient2D<int> > posAdversaires;
 
 	return posAdversaires;
+}
+
+void ProcessLidarData::makeGroups(vector<PtLidar> points) {
+	int start=0;
+	for(int i = 1; i < 360; i++){
+		if(points[i].distance - points[i-1].distance > DIST_GROUP){
+			start = i;
+			break;
+		}
+	}
+
+	Group current_group = Group();
+
+	for(int i=start; i<360+start;i++){
+		if( abs(points[i%360].distance - points[(i-1)%360].distance) > DIST_GROUP){
+			current_group.computeParameters();
+			groups.push_back(current_group);
+		cout << current_group << endl;
+			current_group = Group();
+		}
+		current_group.appendPoint(&points[i%360]);
+	}
 }

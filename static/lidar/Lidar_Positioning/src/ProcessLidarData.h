@@ -12,6 +12,8 @@
 #include "Group.h"
 #include "ObjectRef.h"
 
+#define DIST_GROUP 100
+
 using namespace std;
 
 class ProcessLidarData {
@@ -26,6 +28,7 @@ public:
     PointOrient2D<int> getPos();
     
     vector< PointOrient2D<int> > getAdversaires();
+    void makeGroups(vector<PtLidar> points);
 private: 
     vector<Group> groups;
     vector<ObjectRef *> objects;
