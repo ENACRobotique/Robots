@@ -26,7 +26,7 @@ typedef enum{
 }objective;
 
 typedef enum {
-    E_NULL, E_SANDHEAP, E_SANDHEAPDUNE, E_DUNE, E_SANDDROP, E_SHELL, E_SHELL_ROCK, E_SHELLDROP, E_OBJ_STARTING_ZONE, E_RECALAGE
+    E_NULL, E_SANDHEAP, E_DUNEHEAP, E_DUNE, E_SANDDROP, E_SHELL, E_SHELL_ROCK, E_SHELLDROP, E_OBJ_STARTING_ZONE, E_RECALAGE
 } eObj_t;
 
 typedef enum {
@@ -140,8 +140,8 @@ class Obj {
             switch(_type){
                 case E_SANDHEAP:
                     return "SANDHEAP";
-                case E_SANDHEAPDUNE:
-                    return "SANDHEAPDUNE";
+                case E_DUNEHEAP:
+                    return "DUNEHEAP";
                 case E_SANDDROP:
                     return "SANDDROP";
                 case E_SHELL:

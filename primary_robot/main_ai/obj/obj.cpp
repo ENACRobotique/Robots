@@ -283,7 +283,7 @@ float Obj::getYield(const unsigned int start_time){
             ratio = 10000000000;
             break;
         case E_SANDHEAP:
-        case E_SANDHEAPDUNE:
+        case E_DUNEHEAP:
             ratio = 1/_dist * 10000 ;
             logs << WAR << "ratio="<< ratio;
             break;

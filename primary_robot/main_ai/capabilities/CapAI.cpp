@@ -20,6 +20,7 @@ extern "C"{
 #include "millis.h"
 }
 #include "sand_heap.h"
+#include "duneheap.h"
 #include "objStartingZone.h"
 #include "environment.h"
 
@@ -201,8 +202,16 @@ void CapAI::initObjective(){
 */
 
     listObj.push_back(new ObjStartingZone(capTeam->getColor()));
-    listObj.push_back(new SandHeap(0));
-    listObj.push_back(new SandHeap(1));
+
+
+    if (capTeam->getColor() == eColor_t::PURPLE){
+    	listObj.push_back(new SandHeap(0));
+    }else{
+    	listObj.push_back(new SandHeap(1));
+    }
+
+    listObj.push_back(new DuneHeap(0));
+    listObj.push_back(new DuneHeap(1));
 /******
     for(unsigned int i = 0 ; i < 3 ; i++)
         listObj.push_back(new Spot(i, capTeam->getColor(), robot->env->obs));
@@ -228,16 +237,6 @@ void CapAI::initObjective(){
         listObj.push_back(new DropCup(i, capTeam->getColor()));
 
 */
-
-
-    if(capTeam->getColor() == eColor_t::PURPLE){
-            robot->env->obs[16].active = 0;
-            robot->env->obs_updated[16]++;
-    }
-    else if(capTeam->getColor() == eColor_t::GREEN){
-            robot->env->obs[15].active = 0;
-            robot->env->obs_updated[15]++;
-    }
 
     if(capTeam->getColor() == eColor_t::GREEN)
         robot->env->obs[BLOCK_START_ZONE].c = {15, 115};

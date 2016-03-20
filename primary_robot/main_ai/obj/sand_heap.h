@@ -13,7 +13,7 @@
 #include "tools.h"
 #include "GeometryTools.h"
 
-#define START_CUP   15 //number of the first stand element in obs[] (defined in environnement.cpp)
+#define START_HEAP   15 //number of the first stand element in obs[] (defined in environnement.cpp)
 
 using namespace std;
 
@@ -50,6 +50,7 @@ class SandHeap : public Obj{
         unsigned int _time;
         stepSandHeap stepLoc;
         Point2D<float> destPoint;
+        Circle2D<float> backPoint;
         Circle2D<float> pointPutHeap;
 };
 
