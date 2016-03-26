@@ -27,8 +27,8 @@
 #define O_S APERTURE_ANGLE/2
 #define D_S 30
 
-typedef std::pair<int, int> PoseSonar_t;
-typedef std::map<unsigned char, PoseSonar_t> listPoseSonars_t;
+
+typedef std::map<uint8_t, PoseSonar_t> listPoseSonars_t;
 
 // Eurobot 2016
 const listPoseSonars_t listPoseSonar1 = {
@@ -41,22 +41,26 @@ const listPoseSonars_t listPoseSonar1 = {
 
 class SonarBelt {
 public:
-	SonarBelt(int idI2C, const listPoseSonars_t listPoseSonars);
-	int getSonarInfo(unsigned char idSonar, int typeInfo);
-	int getSonarDist_cm(unsigned char idSonar);
-	int getSonarDist_inch(unsigned char idSonar);
-	int getSonarDist_ms(unsigned char idSonar);
-	int getSonarFakeDist_cm(unsigned char idSonar);
-	int getSonarFakeDist_inch(unsigned char idSonar);
-	int getSonarFakeDist_ms(unsigned char idSonar);
+	SonarBelt(uint8_t idI2C, const listPoseSonars_t listPoseSonars);
+	int getSonarInfo(uint8_t idSonar, eSRF02_Info typeInfo);
+	int getSonarDist_cm(uint8_t idSonar);
+	int getSonarDist_inch(uint8_t idSonar);
+	int getSonarDist_ms(uint8_t idSonar);
+	int getSonarFakeDist_cm(uint8_t idSonar);
+	int getSonarFakeDist_inch(uint8_t idSonar);
+	int getSonarFakeDist_ms(uint8_t idSonar);
 
 private:
-	int _nbSonars;
-	int _idI2C;
+	uint8_t _nbSonars;
+	uint8_t _idI2C;
+	uint8_t _addrCurSonar;
 	std::string _fileName;
 	int _file;
-	std::vector<SRF02> _sonars;
+	std::map<uint8_t,SRF02> _sonars;
 	std::vector<float> _lastDistances;
+
+	int readRegister(int reg);
+	bool startComWithSonar(uint8_t idSonar);
 };
 
 #endif /* SONARBELT_H_ */

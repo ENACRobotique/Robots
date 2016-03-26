@@ -9,9 +9,17 @@
 #define SRF02_H_
 
 #include <millis.h>
+#include <utility> // pair
+#include <cstdint>
+
+#define DBG_SRF02
+
+#ifdef DBG_SRF02
+#include <stdio.h>
+#endif
 
 #define APERTURE_ANGLE 30  // Aperture angle of the detection cone in degrees
-#define DELTA (65)  // Amount of time in milliseconds to process the measures
+#define DELTA 65  // Amount of time in milliseconds to process the measures
 
 // Registers
 #define REG_CMD 0
@@ -20,6 +28,7 @@
 #define REG_RANGE_L 3
 #define REG_AUTOTUNE_MIN_H 4
 #define REG_AUTOTUNE_MIN_L 5
+
 
 //// Commands
 // Ranging modes
@@ -40,6 +49,28 @@
 #define CMD_CHG_ADD_3 (0xAA)
 
 
+typedef std::pair<int, int> PoseSonar_t;
+
+typedef enum eSRF02_Info{
+	srf02_range,
+	srf02_version,
+	srf02_autotuneMin,
+	eSRF02_TypeInfoMax
+}eSRF02_Info;
+
+typedef enum eSRF02_Cmd{
+	srf02_mes_inch,
+	srf02_mes_cm,
+	srf02_mes_ms,
+	srf02_fakeMes_inch,
+	srf02_fakeMes_cm,
+	srf02_fakeMes_ms,
+	srf02_burst,
+	srf02_autotuneCmd,
+	srf02_chgAddr,
+	eSRF02_CMD_Max
+}eSRF02_Cmd;
+
 
 class SRF02 {
 public:
@@ -49,13 +80,15 @@ public:
 	 * @param ard I2C Device address
 	 * @param mode ranging mode
 	 */
-	SRF02(unsigned int addr);
-	unsigned int getAddr();
+	SRF02(uint8_t addr, PoseSonar_t p);
+	uint8_t getAddr();
 
 	private:
-		unsigned int _addr;		// address of the sensor
+		uint8_t _addr;		// address of the sensor
 		unsigned long _startTime;	// start time of a ranging, needed
 									// to proceed with correct sensor values
+		PoseSonar_t _pose;  // circular coordinates: range, azimuth
+
 };
 
 
