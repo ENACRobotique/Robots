@@ -28,7 +28,7 @@
 #define D_S 30
 
 
-typedef std::map<uint8_t, PoseSonar_t> listPoseSonars_t;
+using listPoseSonars_t = std::map<uint8_t, PoseSonar_t>;
 
 // Eurobot 2016
 const listPoseSonars_t listPoseSonar1 = {

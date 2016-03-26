@@ -24,10 +24,11 @@ SonarBelt::SonarBelt(uint8_t idI2C, const listPoseSonars_t listPoseSonars) {
 	}
 
 	// Initialize the sonars
-//	for(int i=0; i<_nbSonars; i++){
-//		_sonars.insert(std::pair<unsigned char,SRF02>(it->first, SRF02(it->first),
-//				SRF02(it->second)));
-//	}
+	listPoseSonars_t::const_iterator it;
+	for(it = listPoseSonars.begin(); it!= listPoseSonars.end(); ++it){
+		_sonars.insert(std::pair<unsigned char,SRF02>(it->first, SRF02(it->first),
+				SRF02(it->second)));
+	}
 
 	// Test connections with the sonars
 //#ifdef DBG
