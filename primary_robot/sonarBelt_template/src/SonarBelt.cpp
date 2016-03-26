@@ -56,7 +56,7 @@ SonarBelt::SonarBelt(uint8_t idI2C, const listPoseSonars_t listPoseSonars) {
 	//
 }
 
-int SonarBelt::getSonarInfo(unsigned char idSonar, eSRF02_Info typeInfo){
+int SonarBelt::getSonarInfo(uint8_t idSonar, eSRF02_Info typeInfo){
 	int res = -1;
 	int addr = _sonars.find(idSonar)->second.getAddr();
 
@@ -82,6 +82,12 @@ int SonarBelt::getSonarInfo(unsigned char idSonar, eSRF02_Info typeInfo){
 	}
 
 	return res;
+}
+
+int SonarBelt::getSonarInfo(eIdSonar id, eSRF02_Info typeInfo){
+	uint8_t idSonar = -1;
+	// TODO: continue
+	return getSonarInfo(idSonar, typeInfo);
 }
 
 int SonarBelt::readRegister(int reg){
