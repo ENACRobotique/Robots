@@ -58,9 +58,11 @@ class SonarBelt {
 public:
 	SonarBelt(uint8_t idI2C, const listSonar_t listPoseSonars);
 	int readSonarInfo(eIdSonar id, eSRF02_Info typeInfo);
+	void writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd, uint8_t val);
 	int readSonarVers(eIdSonar id);
 	int readSonarDist(eIdSonar id);
 	int readSonarAutotuneMin(eIdSonar id);
+	void launchBurst(eIdSonar id);
 
 private:
 	uint8_t _nbSonars;
@@ -72,6 +74,7 @@ private:
 	std::vector<float> _lastDistances;
 
 	int readRegister(int reg);
+	void writeRegister(int reg, int val);
 	bool startComWithSonar(uint8_t idSonar);
 };
 

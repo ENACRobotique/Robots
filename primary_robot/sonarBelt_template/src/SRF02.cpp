@@ -17,6 +17,7 @@ SRF02::SRF02(uint8_t addr, PoseSonar_t p) {
 	_addr = addr;
 	_startTime = 0;
 	_pose = p;
+	_unit = cm;
 
 #ifdef DBG_SRF02
 	printf("Created SRF02 sonar: addr = %d, pose = (%d, %d)\n",
@@ -34,4 +35,8 @@ PoseSonar_t SRF02::getPose(){
 
 eSRF02_unit SRF02::getUnit(){
 	return _unit;
+}
+
+int getMeasDelay_ms(){
+	return DELTA;
 }

@@ -80,6 +80,44 @@ int SonarBelt::readSonarInfo(eIdSonar id, eSRF02_Info typeInfo){
 	return res;
 }
 
+void SonarBelt::writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd, uint8_t val){
+	if(!startComWithSonar(_listSonars.find(id)->first))
+			return;
+
+	switch(typeCmd){
+	case srf02_mes_inch:
+		writeRegister(REG_CMD, CMD_MES_INCH);
+		break;
+	case srf02_mes_cm:
+		writeRegister(REG_CMD, CMD_MES_CM);
+		break;
+	case srf02_mes_ms:
+		writeRegister(REG_CMD, CMD_MES_MS);
+		break;
+	case srf02_fakeMes_inch:
+		writeRegister(REG_CMD, CMD_FAKE_MES_INCH);
+		break;
+	case srf02_fakeMes_cm:
+		writeRegister(REG_CMD, CMD_FAKE_MES_CM);
+		break;
+	case srf02_fakeMes_ms:
+		writeRegister(REG_CMD, CMD_FAKE_MES_MS);
+		break;
+	case srf02_autotuneCmd:
+		writeRegister(REG_CMD, CMD_AUTOTUNE);
+		break;
+	case srf02_chgAddr:
+		writeRegister(REG_CMD, CMD_CHG_ADD_1);  // Check the procedure
+		writeRegister(REG_CMD, CMD_CHG_ADD_2);
+		writeRegister(REG_CMD, CMD_CHG_ADD_3);
+		break;
+	default:
+#ifdef DBG
+		std::cout<<"Unknown sonar type cmd: "<<typeCmd<<std::endl;
+#endif
+	}
+}
+
 int SonarBelt::readSonarVers(eIdSonar id){
 	return readSonarInfo(id, srf02_version);
 }
@@ -103,6 +141,15 @@ int SonarBelt::readRegister(int reg){
 	return res;
 }
 
+void SonarBelt::writeRegister(int reg, int val){
+	if(i2c_smbus_write_word_data(_file, reg, val) < 0){
+#ifdef DBG
+		std::cout<<"Cannot write value = "<<val<<" to the file "<<_file<<
+				" and register "<<reg<<std::endl;
+#endif
+	}
+}
+
 bool SonarBelt::startComWithSonar(uint8_t idSonar){
 	if(idSonar != _addrCurSonar){
 		if(ioctl(_file, I2C_SLAVE, idSonar) < 0){
@@ -114,4 +161,8 @@ bool SonarBelt::startComWithSonar(uint8_t idSonar){
 	}
 
 	return true;
+}
+
+void launchBurst(eIdSonar id){
+
 }

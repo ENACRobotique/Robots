@@ -90,6 +90,7 @@ public:
 	uint8_t getAddr();
 	PoseSonar_t getPose();
 	eSRF02_unit getUnit();
+	int getMeasDelay_ms();
 
 	private:
 		uint8_t _addr;		// address of the sensor
