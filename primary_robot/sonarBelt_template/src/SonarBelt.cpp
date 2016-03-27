@@ -8,8 +8,8 @@
 #include "SonarBelt.h"
 
 
-SonarBelt::SonarBelt(uint8_t idI2C, const listPoseSonars_t listPoseSonars) {
-	_nbSonars = (int) listPoseSonars.size();
+SonarBelt::SonarBelt(uint8_t idI2C, const listSonar_t initListSonars) {
+	_nbSonars = (int) initListSonars.size();
 	_addrCurSonar = 0x00;
 
 	// Initialize and open I2C
@@ -24,11 +24,7 @@ SonarBelt::SonarBelt(uint8_t idI2C, const listPoseSonars_t listPoseSonars) {
 	}
 
 	// Initialize the sonars
-	listPoseSonars_t::const_iterator it;
-	for(it = listPoseSonars.begin(); it!= listPoseSonars.end(); ++it){
-		_sonars.insert(std::pair<unsigned char,SRF02>(it->first, SRF02(it->first),
-				SRF02(it->second)));
-	}
+	_listSonars = initListSonars;
 
 	// Test connections with the sonars
 //#ifdef DBG
@@ -56,9 +52,9 @@ SonarBelt::SonarBelt(uint8_t idI2C, const listPoseSonars_t listPoseSonars) {
 	//
 }
 
-int SonarBelt::getSonarInfo(uint8_t idSonar, eSRF02_Info typeInfo){
+int SonarBelt::readSonarInfo(eIdSonar id, eSRF02_Info typeInfo){
 	int res = -1;
-	int addr = _sonars.find(idSonar)->second.getAddr();
+	int addr = _listSonars.find(id)->first;
 
 	if(!startComWithSonar(addr))
 		return res;
@@ -84,10 +80,16 @@ int SonarBelt::getSonarInfo(uint8_t idSonar, eSRF02_Info typeInfo){
 	return res;
 }
 
-int SonarBelt::getSonarInfo(eIdSonar id, eSRF02_Info typeInfo){
-	uint8_t idSonar = -1;
-	// TODO: continue
-	return getSonarInfo(idSonar, typeInfo);
+int SonarBelt::readSonarVers(eIdSonar id){
+	return readSonarInfo(id, srf02_version);
+}
+
+int SonarBelt::readSonarDist(eIdSonar id){
+	return readSonarInfo(id, srf02_range);
+}
+
+int SonarBelt::readSonarAutotuneMin(eIdSonar id){
+	return readSonarInfo(id, srf02_autotuneMin);  //FIXME: not guarantee to have ms
 }
 
 int SonarBelt::readRegister(int reg){
