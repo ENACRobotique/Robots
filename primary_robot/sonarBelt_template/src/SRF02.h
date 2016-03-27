@@ -58,6 +58,12 @@ typedef enum eSRF02_Info{
 	eSRF02_TypeInfoMax
 }eSRF02_Info;
 
+typedef enum eSRF02_unit{
+	cm,
+	inch,
+	ms
+}eSRF02_unit;
+
 typedef enum eSRF02_Cmd{
 	srf02_mes_inch,
 	srf02_mes_cm,
@@ -82,13 +88,15 @@ public:
 	 */
 	SRF02(uint8_t addr, PoseSonar_t p);
 	uint8_t getAddr();
+	PoseSonar_t getPose();
+	eSRF02_unit getUnit();
 
 	private:
 		uint8_t _addr;		// address of the sensor
 		unsigned long _startTime;	// start time of a ranging, needed
 									// to proceed with correct sensor values
 		PoseSonar_t _pose;  // circular coordinates: range, azimuth
-
+		eSRF02_unit _unit;
 };
 
 

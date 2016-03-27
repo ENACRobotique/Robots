@@ -27,3 +27,11 @@ SRF02::SRF02(uint8_t addr, PoseSonar_t p) {
 uint8_t SRF02::getAddr(){
 	return _addr;
 }
+
+PoseSonar_t SRF02::getPose(){
+	return _pose;
+}
+
+eSRF02_unit SRF02::getUnit(){
+	return _unit;
+}
