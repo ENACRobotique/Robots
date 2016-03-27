@@ -8,48 +8,35 @@
 #include "SonarBelt.h"
 
 
-SonarBelt::SonarBelt(uint8_t idI2C, const listSonar_t initListSonars) {
+SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, bool openI2C,
+		int file) {
 	_nbSonars = (int) initListSonars.size();
 	_addrCurSonar = 0x00;
+	_nbRevolu = 0;
 
 	// Initialize and open I2C
 	_idI2C = idI2C;
-	_fileName = std::string("/dev/i2c-");
-	_fileName.append(std::to_string(_idI2C).c_str());
-	if((_file = open(_fileName.c_str(), O_RDWR)) < 0){ // TODO close in destructor
-#ifdef DBG
-		std::cout<<_fileName<<" opening: failed\n";
-#endif
-		exit(1);
+	if(openI2C){
+		_fileName = std::string("/dev/i2c-");
+		_fileName.append(std::to_string(_idI2C).c_str());
+		if((_file = open(_fileName.c_str(), O_RDWR)) < 0){ // TODO close in destructor
+	#ifdef DBG
+			std::cout<<_fileName<<" opening: failed\n";
+	#endif
+			exit(1);
+		}
+	}else{
+		_file = file;
 	}
 
 	// Initialize the sonars
 	_listSonars = initListSonars;
 
 	// Test connections with the sonars
-//#ifdef DBG
-//	int addr;
-//	for(int i=0; i<_nbSonars; i++){
-//		addr = _sonars[i].getAddr();
-//		if(ioctl(_file, I2C_SLAVE, addr) < 0){
-//#ifdef DBG
-//			std::cout<<"Cannot access to sonar "<<addr<<std::endl;
-//#endif
-//			exit(1);
-//		}
-//		int reg = 0x00;
-//		int res;
-//		if((res = i2c_smbus_read_word_data(_file, reg)) < 0){
-//#ifdef DBG
-//			std::cout<<"Cannot access to the file "<<_file<<" and register "<<reg<<std::endl;
-//#endif
-//			exit(1);
-//		}
-//	}
-//#endif
-
-
-	//
+	listSonar_t::iterator it = _listSonars.begin();
+	for(int i=0; it<_listSonars.end(); i++, ++it){
+		std::cout<<"s"<<i+1<<": vers = "<<readSonarVers(it->first)<<std::endl;
+	}
 }
 
 int SonarBelt::readSonarInfo(eIdSonar id, eSRF02_Info typeInfo){

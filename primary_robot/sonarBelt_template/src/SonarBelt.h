@@ -56,7 +56,8 @@ const listSonar_t initListSonars1 = {
 
 class SonarBelt {
 public:
-	SonarBelt(uint8_t idI2C, const listSonar_t listPoseSonars);
+	SonarBelt(int idI2C, const listSonar_t listPoseSonars, bool openI2C = false,
+			int file = 0);
 	int readSonarInfo(eIdSonar id, eSRF02_Info typeInfo);
 	void writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd, uint8_t val);
 	int readSonarVers(eIdSonar id);
@@ -64,14 +65,16 @@ public:
 	int readSonarAutotuneMin(eIdSonar id);
 	void launchBurst(eIdSonar id);
 
+
 private:
 	uint8_t _nbSonars;
-	uint8_t _idI2C;
+	int _idI2C;
 	uint8_t _addrCurSonar;
 	std::string _fileName;
 	int _file;
 	listSonar_t _listSonars;
 	std::vector<float> _lastDistances;
+	int _nbRevolu;
 
 	int readRegister(int reg);
 	void writeRegister(int reg, int val);
