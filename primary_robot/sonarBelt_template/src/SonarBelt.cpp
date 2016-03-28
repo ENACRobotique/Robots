@@ -13,6 +13,7 @@ SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, bool openI2C,
 	_nbSonars = (int) initListSonars.size();
 	_addrCurSonar = 0x00;
 	_nbRevolu = 0;
+	_stateThreadMeas = notLaunched;
 
 	// Initialize and open I2C
 	_idI2C = idI2C;
@@ -34,14 +35,81 @@ SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, bool openI2C,
 
 	// Test connections with the sonars
 	listSonar_t::iterator it = _listSonars.begin();
-	for(int i=0; it<_listSonars.end(); i++, ++it){
+	for(int i=0; it!=_listSonars.end(); i++, ++it){
 		std::cout<<"s"<<i+1<<": vers = "<<readSonarVers(it->first)<<std::endl;
 	}
+
+	// Initialize thread for permanent measures
+	try{
+		this->startThreadMeasure();
+	}catch (std::exception &e) {
+		std::cout<<e.what()<<std::endl;
+	}
+}
+
+void SonarBelt::startThreadMeasure(){
+	_thMeasure = new std::thread(&SonarBelt::threadMeasure, this);
+}
+
+void SonarBelt::threadMeasure(){
+	while(1){
+		std::cout<<"threadMeasures "<<_thMeasure->get_id()<<" launched: state = wait\n";
+		// Wait until auto-measure is true
+		std::unique_lock<std::mutex> lk(_m);
+		while(!_autoMeasure){
+			if(_stateThreadMeas != waiting)
+				_stateThreadMeas = waiting;
+			_cv.wait(lk);
+		}
+
+		// Now it is locked and ready
+		_stateThreadMeas = processing;
+		std::cout<<"threadMeasures(): state = processing, _count = "<<_nbRevolu<<std::endl;
+		// TODO! process
+		std::this_thread::sleep_for (std::chrono::milliseconds(500));
+		_nbRevolu++;
+
+	    // Manual unlocking is done before notifying, to avoid waking up
+	    // the waiting thread only to block again (see notify_one for details)
+		lk.unlock();
+		_cv.notify_one();
+	}
+}
+
+void SonarBelt::playAutoMeasure(){
+	if(_stateThreadMeas != notLaunched){
+		std::lock_guard<std::mutex> lk(_m);
+		_autoMeasure = true;
+		std::cout << "_autoMeasure = true\n";
+		_cv.notify_one();
+	}
+}
+
+void SonarBelt::pauseAutoMeasure(){
+	if(_stateThreadMeas != notLaunched){
+		std::lock_guard<std::mutex> lk(_m);
+		_autoMeasure = false;
+		std::cout << "_autoMeasure = false\n";
+		_cv.notify_one();
+	}
+}
+
+int SonarBelt::getNbRevo(){
+	std::unique_lock<std::mutex> lk(_m);
+	int nb = _nbRevolu;
+	lk.unlock();
+	return nb;
 }
 
 int SonarBelt::readSonarInfo(eIdSonar id, eSRF02_Info typeInfo){
 	int res = -1;
 	int addr = _listSonars.find(id)->first;
+
+	// Check if i2c is not use by thread measure
+	pauseAutoMeasure();
+	std::unique_lock<std::mutex> lk(_m);
+	while(_stateThreadMeas != waiting)
+			_cv.wait(lk);
 
 	if(!startComWithSonar(addr))
 		return res;
@@ -64,10 +132,19 @@ int SonarBelt::readSonarInfo(eIdSonar id, eSRF02_Info typeInfo){
 #endif
 	}
 
+	// Continue the auto-measure
+	playAutoMeasure();
+
 	return res;
 }
 
-void SonarBelt::writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd, uint8_t val){
+void SonarBelt::writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd){
+	// Check if i2c is not use by thread measure
+	pauseAutoMeasure();
+	std::unique_lock<std::mutex> lk(_m);
+	while(_stateThreadMeas != waiting)
+			_cv.wait(lk);
+
 	if(!startComWithSonar(_listSonars.find(id)->first))
 			return;
 
@@ -90,6 +167,9 @@ void SonarBelt::writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd, uint8_t val){
 	case srf02_fakeMes_ms:
 		writeRegister(REG_CMD, CMD_FAKE_MES_MS);
 		break;
+	case srf02_burst:
+		writeRegister(REG_CMD, CMD_BURST);
+		break;
 	case srf02_autotuneCmd:
 		writeRegister(REG_CMD, CMD_AUTOTUNE);
 		break;
@@ -103,6 +183,9 @@ void SonarBelt::writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd, uint8_t val){
 		std::cout<<"Unknown sonar type cmd: "<<typeCmd<<std::endl;
 #endif
 	}
+
+	// Continue the auto-measure
+	playAutoMeasure();
 }
 
 int SonarBelt::readSonarVers(eIdSonar id){
@@ -150,6 +233,6 @@ bool SonarBelt::startComWithSonar(uint8_t idSonar){
 	return true;
 }
 
-void launchBurst(eIdSonar id){
-
+void SonarBelt::launchBurst(eIdSonar id){
+	writeSonarCmd(id, srf02_burst);
 }

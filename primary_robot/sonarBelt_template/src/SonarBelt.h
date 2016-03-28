@@ -17,6 +17,11 @@
 #include <iostream>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
+#include <exception>
 
 #define DBG
 
@@ -53,17 +58,28 @@ const listSonar_t initListSonars1 = {
 	    {s12, {0xF6, {O_S+D_S*11, 100}}}
 };
 
+typedef enum eStateThread{
+	notLaunched,
+	processing,
+	waiting,
+	eStateThread_Max
+}eStateThread;
 
 class SonarBelt {
 public:
 	SonarBelt(int idI2C, const listSonar_t listPoseSonars, bool openI2C = false,
 			int file = 0);
 	int readSonarInfo(eIdSonar id, eSRF02_Info typeInfo);
-	void writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd, uint8_t val);
+	void writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd);
 	int readSonarVers(eIdSonar id);
 	int readSonarDist(eIdSonar id);
 	int readSonarAutotuneMin(eIdSonar id);
 	void launchBurst(eIdSonar id);
+	int getNbRevo();
+	bool getAutoMeasure() const {return _autoMeasure;};
+	// Thread
+	void playAutoMeasure();
+	void pauseAutoMeasure();
 
 
 private:
@@ -73,12 +89,20 @@ private:
 	std::string _fileName;
 	int _file;
 	listSonar_t _listSonars;
-	std::vector<float> _lastDistances;
-	int _nbRevolu;
+	std::vector<float> _lastDistances;  // Concurrent access
+	int _nbRevolu;  // Concurrent access
+	bool _autoMeasure;
+	std::mutex _m;
+	std::condition_variable _cv;
+	std::thread* _thMeasure;
+	eStateThread _stateThreadMeas;
+
 
 	int readRegister(int reg);
 	void writeRegister(int reg, int val);
 	bool startComWithSonar(uint8_t idSonar);
+	void threadMeasure();
+	void startThreadMeasure();
 };
 
 #endif /* SONARBELT_H_ */
