@@ -7,7 +7,6 @@
 
 #include "SRF02.h"
 
-
 /**
  * @brief SRF02 CTor, initializing SRF02 with address and mode
  * @param ard I2C Device address
@@ -38,5 +37,5 @@ eSRF02_unit SRF02::getUnit(){
 }
 
 int getMeasDelay_ms(){
-	return DELTA;
+	return SRF02_MEAS_PERIOD;
 }

@@ -22,6 +22,8 @@
 #include <condition_variable>
 #include <chrono>
 #include <exception>
+//#include <millis.h>
+
 
 #define DBG
 
@@ -29,19 +31,29 @@
 #include <stdio.h>
 #endif
 
-#define O_S APERTURE_ANGLE/2
+#define O_S SRF02_APERT_ANGLE/2
 #define D_S 30
 
 typedef enum eIdSonar{
 	s1, s2, s3,
 	s4, s5, s6,
 	s7, s8, s9,
-	s10, s11, s12
+	s10, s11, s12,
+	eIdSonar_Max
 }eIdSonar;
 using listAddrPoseSonars_t = std::pair<uint8_t, PoseSonar_t>;
 using listSonar_t = std::map<eIdSonar, listAddrPoseSonars_t>;
+using orderToProcess_t = std::vector<std::vector<eIdSonar>>;
+using sonarsDist_t = std::map<eIdSonar, int>;
 
-// Eurobot 2016
+typedef enum eStateThread{
+	notLaunched,
+	processing,
+	waiting,
+	eStateThread_Max
+}eStateThread;
+
+// _________________ Eurobot 2016 _________________________
 const listSonar_t initListSonars1 = {
 	 // {id, {addr, {alpha, r}}}
 		{s1, {0xE0, {O_S, 100}}},
@@ -57,18 +69,23 @@ const listSonar_t initListSonars1 = {
 	    {s11, {0xF4, {O_S+D_S*10, 100}}},
 	    {s12, {0xF6, {O_S+D_S*11, 100}}}
 };
-
-typedef enum eStateThread{
-	notLaunched,
-	processing,
-	waiting,
-	eStateThread_Max
-}eStateThread;
+orderToProcess_t orderToProcess_3PerRev = {
+		{s1, s5, s9},  // First revo
+		{s2, s6, s10},  // 2nd revo
+		{s3, s7, s11},
+		{s4, s8,s12}
+};
+orderToProcess_t orderToProcess_4PerRev = {
+		{s1, s4, s7, s10},  // First rev
+		{s2, s5, s8, s11},
+		{s3, s6, s9, s12}  // 3rd revo
+};
+// ________________________________________________________
 
 class SonarBelt {
 public:
-	SonarBelt(int idI2C, const listSonar_t listPoseSonars, bool openI2C = false,
-			int file = 0);
+	SonarBelt(int idI2C, const listSonar_t listPoseSonars, const orderToProcess_t order,
+			bool openI2C = false, int file = 0);
 	int readSonarInfo(eIdSonar id, eSRF02_Info typeInfo);
 	void writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd);
 	int readSonarVers(eIdSonar id);
@@ -77,6 +94,7 @@ public:
 	void launchBurst(eIdSonar id);
 	int getNbRevo();
 	bool getAutoMeasure() const {return _autoMeasure;};
+	void doMeasure_revol();
 	// Thread
 	void playAutoMeasure();
 	void pauseAutoMeasure();
@@ -89,7 +107,8 @@ private:
 	std::string _fileName;
 	int _file;
 	listSonar_t _listSonars;
-	std::vector<float> _lastDistances;  // Concurrent access
+	orderToProcess_t _orderToProccess;
+	sonarsDist_t _lastDistances;  // Concurrent access
 	int _nbRevolu;  // Concurrent access
 	bool _autoMeasure;
 	std::mutex _m;

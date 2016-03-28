@@ -8,12 +8,13 @@
 #include "SonarBelt.h"
 
 
-SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, bool openI2C,
-		int file) {
+SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, const orderToProcess_t order,
+		bool openI2C, int file) {
 	_nbSonars = (int) initListSonars.size();
 	_addrCurSonar = 0x00;
 	_nbRevolu = 0;
 	_stateThreadMeas = notLaunched;
+	_orderToProccess = order;
 
 	// Initialize and open I2C
 	_idI2C = idI2C;
@@ -236,3 +237,39 @@ bool SonarBelt::startComWithSonar(uint8_t idSonar){
 void SonarBelt::launchBurst(eIdSonar id){
 	writeSonarCmd(id, srf02_burst);
 }
+
+void SonarBelt::doMeasure_revol(){
+	unsigned int startTimeRev;
+	unsigned int  dur;
+
+	// Sent the command to start the measures for all the sonars
+	for(int i=0; i<(int)_orderToProccess.size(); i++){  // for a revolution
+		for(int j=0; j<(int)_orderToProccess[0].size(); j++){  // for a sonar on a revo
+			eIdSonar id = _orderToProccess[i][j];
+			writeSonarCmd(id, srf02_mes_cm);
+
+			if(j==0)
+				startTimeRev = millis();
+		}
+	}
+	dur = millis() - startTimeRev;
+
+	// Wait the specific time and read the distance for each sonar
+	while(dur < SRF02_MEAS_PERIOD){
+		std::cout<<"Unvalid dur = "<<dur<<" ms\n";  // Just to evaluate the method
+		dur = millis() - startTimeRev;
+	}
+	sonarsDist_t::iterator it;
+	for(int i=0; i<(int)_orderToProccess.size(); i++){  // for a revolution
+		for(int j=0; j<(int)_orderToProccess[0].size(); j++){  // for a sonar on a revo
+			eIdSonar id = _orderToProccess[i][j];
+			it = _lastDistances.find(id);
+
+			std::unique_lock<std::mutex> lk(_m);
+			it->second = readSonarDist(id);
+			lk.unlock();
+		}
+	}
+}
+
+
