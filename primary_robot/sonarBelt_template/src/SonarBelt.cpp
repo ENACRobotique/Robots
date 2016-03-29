@@ -239,8 +239,9 @@ void SonarBelt::launchBurst(eIdSonar id){
 }
 
 void SonarBelt::doMeasure_revol(){
-	unsigned int startTimeRev;
-	unsigned int  dur;
+	std::chrono::high_resolution_clock::time_point startTimeRev;
+	std::chrono::duration<float> dur_s;
+	std::chrono::milliseconds dur_ms;
 
 	// Sent the command to start the measures for all the sonars
 	for(int i=0; i<(int)_orderToProccess.size(); i++){  // for a revolution
@@ -249,15 +250,17 @@ void SonarBelt::doMeasure_revol(){
 			writeSonarCmd(id, srf02_mes_cm);
 
 			if(j==0)
-				startTimeRev = millis();
+				startTimeRev = std::chrono::high_resolution_clock::now();
 		}
 	}
-	dur = millis() - startTimeRev;
+	dur_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::high_resolution_clock::now() - startTimeRev);
 
 	// Wait the specific time and read the distance for each sonar
-	while(dur < SRF02_MEAS_PERIOD){
-		std::cout<<"Unvalid dur = "<<dur<<" ms\n";  // Just to evaluate the method
-		dur = millis() - startTimeRev;
+	while(dur_ms.count() < SRF02_MEAS_PERIOD){
+		std::cout<<"Unvalid dur = "<<dur_ms.count()<<" ms\n";  // Just to evaluate the method
+		dur_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::high_resolution_clock::now() - startTimeRev);
 	}
 	sonarsDist_t::iterator it;
 	for(int i=0; i<(int)_orderToProccess.size(); i++){  // for a revolution

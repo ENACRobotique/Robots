@@ -8,7 +8,7 @@
 #ifndef SRF02_H_
 #define SRF02_H_
 
-#include <millis.h>
+#include <chrono>
 #include <utility> // pair
 #include <cstdint>
 
