@@ -1,13 +1,21 @@
-/*
- * SonarBelt.cpp
- *
- *  Created on: Mar 26, 2016
- *      Author: yoyo
+/*!
+ * @file SonarBelt.cpp
+ * @brief Object with manage the belt of sonars and provide
+ * information to the user like the distances measured by each sonar
+ * @date Mar 26, 2016
+ * @author yoann.solana@gmail.com
  */
 
 #include "SonarBelt.h"
 
-
+/**
+ *
+ * @param idI2C int value which describe the i2c interface (i2c-0; i2c-1)
+ * @param initListSonars
+ * @param order
+ * @param openI2C
+ * @param file
+ */
 SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, const orderToProcess_t order,
 		bool openI2C, int file) {
 	_nbSonars = (int) initListSonars.size();
