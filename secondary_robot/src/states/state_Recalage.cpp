@@ -19,6 +19,7 @@
 #include "state_PrePeche.h"
 #include "state_funny_action.h"
 #include "state_pause.h"
+#include "state_Peche.h"
 
 int purple=0;
 
@@ -28,10 +29,14 @@ sState* testRecalage(){
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
 	trajElem calage_largeur_purple[] = {
-					{0,60,300},
-					{250,60,1650},
-					{0,0,100},
-					{0,0,0}
+					{300,0,1400},
+					{0,-45,200},
+					{-200,-45,2500},
+//old recalage		{0,60,300},
+//					{250,60,1650},
+//					{0,0,100},
+//					{0,0,0}
+					{0,0,0},
 				};
 
 	trajElem calage_largeur_green[] = {
@@ -51,6 +56,7 @@ sState* testRecalage(){
         static int i=0;
 		static unsigned long prev_millis=0;
 		static int flag_end = 0;
+		static int call_number = 1;
 		if(!flag_end){
 			if(periodicProgTraj(calage,&st_saveTime,&i,&prev_millis))
 				{
@@ -66,7 +72,16 @@ sState* testRecalage(){
 			if(digitalRead(pin))
 				{
 					move(0,0);
-					return &sPrePeche;
+					st_saveTime = 0;
+					i = 0;
+					flag_end = 0;
+					if (not call_number) {
+						call_number += 1;
+						return &sPrePeche;
+					}
+					else{
+						return &sPeche;
+					}
 				}
 		}
 		if (radarIntrusion()) return &sPause;

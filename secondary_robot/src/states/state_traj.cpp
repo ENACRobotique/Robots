@@ -123,6 +123,7 @@ void initTrajPurple(sState *prev)
 				Serial.println("debut traj violet");
 			#endif
 
+
 		    if (prev==&sPause)
 		    	{
 				#ifdef DEBUG
@@ -154,28 +155,27 @@ void deinitTrajYellowInit(sState *next)
 
 trajElem start_purple[]={
 		//Début trajectoire vers cabines de plage
-
 						{-300,15,1100},
-						{-400,0,1200},
-						{-300,-15,1100},
-						{-200,0,1000},
+						{-400,0,1500},
+						{-300,-15,900},
+						{-200,0,900},
 						{0,0,100},//1ere porte fermée
 						{300,0,1300},
 						{0,90,400},
 						{300,90,1200},
 						{0,0,400},
-						{300,0,1900},
+						{300,0,1700},
 						{0,-90,400},
 						{300,-90,1300},
 						{0,0,400},
 						{-300,0,1000},
-						{-200,0,1400},
+						{-200,0,1500},
 						{0,0,100},//2eme porte fermée
-						{300,0,1300},
+						{300,0,1400},
 						{0,90,400},
-						{300,90,1200},
-						{0,0,300},
-						{-300,0,4000},
+						{300,90,1300},
+						{0,-35,300},
+						{-300,-35,2350},
 						{0,0,0},
 				};
 
@@ -193,7 +193,7 @@ sState *testTrajPurple()
 		    }
     	}
     	else{
-    		move(-200,0);
+    		move(-300,0);
 		    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 				move(0,0);
 				return &sRecalage;

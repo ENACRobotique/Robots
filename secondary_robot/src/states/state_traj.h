@@ -13,6 +13,7 @@
 #include "state_types.h"
 #include "lib_trajectory.h"
 
+
 //pointeur de fonction
 typedef int(*periodicTraj)(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
@@ -26,6 +27,7 @@ extern sState sTrajEndStairsYellow;
 
 extern sState sTrajGreenInit;
 extern sState sTrajPurpleInit;
+
 
 
 #endif /* STATE_TRAJ_H_ */
