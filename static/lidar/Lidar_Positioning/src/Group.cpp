@@ -97,7 +97,16 @@ int Group::getMaxSize() {
  * @return int
  */
 int Group::getDistOtherGroup(Group other) {
-    return 0;
+	int a2 = other.getAzimut();
+	int d2 = other.getDist();
+
+	double x1 = distance*cos(azimut*DEG_TO_RAD);
+	double y1 = distance*sin(azimut*DEG_TO_RAD);
+	double x2 = d2*cos(a2*DEG_TO_RAD);
+	double y2 = d2*sin(a2*DEG_TO_RAD);
+	int dist = (int) sqrt(pow((x2-x1),2) + pow((y2-y1),2));
+
+	return dist;
 }
 
 /**
