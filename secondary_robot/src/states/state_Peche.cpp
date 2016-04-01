@@ -16,9 +16,7 @@
 #include "state_wait.h"
 #include "lib_radar_mask.h"
 #include "state_funny_action.h"
-
-Servo canne_servo;
-Servo crema_servo;
+#include "state_tirette.h"
 
 sState* testPeche(){
 
@@ -29,29 +27,38 @@ sState* testPeche(){
 
 	trajElem purple_fishing[] = {
 			{200,0,1300},
-			{100,0,7800},
-			{0,0,100},
+			{90,0,8900},
+			{0,0,100},//Fish taken
 			{-300,-2,2300},
 			{-300,0,1500},
-			{-300,8,1150},
+			{-300,8,2000},
 			{0,0,500},
+			{0,0,50000},//Fish drop
+			{300,2,2000},
+			{90,0,8900},
 			{0,0,100000},
 	};
 	static unsigned long st_saveTime=0;
 	static int i=0;
 	static unsigned long prev_millis=0;
-	if (i==1){
-		canne_servo.write(CANNE_DOWN);
-	}
-	if (i==3) {
-		canne_servo.write(CANNE_UP);
-	}
-	if (i==6) {
-		canne_servo.write(CANNE_DOWN);
-
-	}
-	if (i==7) {
-		crema_servo.write(CREMA_IN);
+	static int pos_servo = CANNE_VERTICAL;
+	switch (i) {
+		case 1:
+			canne_servo.write(CANNE_DOWN);
+			pos_servo = CANNE_DOWN;
+			break;
+		case 3:
+			if ((millis()-prev_millis)>300 and pos_servo>CANNE_UP){
+				pos_servo = max(pos_servo - 5, CANNE_UP);
+				canne_servo.write(pos_servo);
+			}
+			break;
+		case 6:
+			canne_servo.write(CANNE_DOWN);
+			break;
+		case 7:
+			crema_servo.write(CREMA_IN);
+			break;
 	}
 	if(periodicProgTraj(purple_fishing,&st_saveTime,&i,&prev_millis))
 	{
@@ -64,10 +71,8 @@ sState* testPeche(){
 void initPeche(sState *prev){
 	move(0,0);
 
-	canne_servo.attach(PIN_CANNE_A_PECHE);
 	canne_servo.write(CANNE_UP);
 
-	crema_servo.attach(PIN_CREMA);
 	crema_servo.write(CREMA_OUT);
     }
 

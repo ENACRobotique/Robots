@@ -14,12 +14,17 @@
 #include "../tools.h"
 #include "lib_move.h"
 #include "state_PrePeche.h"
+#include "state_Peche.h"
+#include "state_Recalage.h"
 
 /* State : tirette, first state of all, waits until the tirette is pulled
  *
  * tirette pulled -> next state, according to the "start side swich"
  *
  */
+
+Servo canne_servo;
+Servo crema_servo;
 
 sState* testTirette()
 	{
@@ -33,7 +38,7 @@ sState* testTirette()
     	{
     		if(timepull==0){timepull = millis();}
 			if(millis() - timepull > TIME_BEFORE_START){
-				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajGreenInit;
+				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sPeche;
 				else return &sTrajPurpleInit;
 			}
     	}
@@ -43,6 +48,11 @@ sState* testTirette()
 void initTirette(sState *prev)
 	{
     move(0,0);
+    crema_servo.attach(PIN_CREMA);
+	crema_servo.write(CREMA_VERTICAL);
+
+	canne_servo.attach(PIN_CANNE_A_PECHE);
+	canne_servo.write(CANNE_VERTICAL);
 #ifdef DEBUG
     Serial.println("j'entre en tirette");
 #endif
