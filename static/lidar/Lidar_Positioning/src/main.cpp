@@ -34,7 +34,10 @@ int main()
 	unsigned int time_prev = millis();
 	AcqLidar acqlidar = AcqLidar();
 	ProcessLidarData processor = ProcessLidarData();
-	acqlidar.init();
+	if(acqlidar.init()) {
+		perror("[LIDAR] Can't open serial.");
+		return 1;
+	}
 	PointOrient2D<int> lastPos;
 
 	while(true) {
