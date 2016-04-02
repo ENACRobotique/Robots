@@ -32,11 +32,11 @@ sState* testPeche(){
 			{-300,-2,2300},
 			{-300,0,1500},
 			{-300,8,2000},
-			{0,0,500},
-			{0,0,50000},//Fish drop
-			{300,2,2000},
-			{90,0,8900},
-			{0,0,100000},
+			{0,0,500},//Fish drop
+			{300,8,2000},
+			{-300,0,1500},
+			{-300,-2,2300},
+			{300,0,50000},
 	};
 	static unsigned long st_saveTime=0;
 	static int i=0;
@@ -59,6 +59,7 @@ sState* testPeche(){
 		case 7:
 			crema_servo.write(CREMA_IN);
 			break;
+
 	}
 	if(periodicProgTraj(purple_fishing,&st_saveTime,&i,&prev_millis))
 	{
