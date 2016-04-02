@@ -11,14 +11,16 @@
 #define STATE_TRAJ_H_
 
 #include "state_types.h"
+#include "lib_trajectory.h"
+
+//pointeur de fonction
+typedef int(*periodicTraj)(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
+
+int progTraj(trajElem tab[]);
 
 
-extern sState sTrajStart_GREEN;
-extern sState sTrajStart_YELLOW;
-extern sState sTrajToClaps_GREEN;
-extern sState sTrajToClaps_YELLOW;
+extern sState sTrajGreenStart;
+extern sState sTrajPurpleStart;
 
-extern sState sTrajBetweenClaps_YELLOW;
-extern sState sTrajBetweenClaps_GREEN;
 
 #endif /* STATE_TRAJ_H_ */
