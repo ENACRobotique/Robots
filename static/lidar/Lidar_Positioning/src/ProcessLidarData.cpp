@@ -47,10 +47,12 @@ void ProcessLidarData::makeGroups(vector<PtLidar> points) {
 	Group current_group = Group();
 
 	for(int i=start; i<360+start;i++){
-		if( abs(points[i%360].distance - points[(i-1)%360].distance) > DIST_GROUP || points[i%360].valid){
+		if( abs(points[i%360].distance - points[(i-1)%360].distance) > DIST_GROUP || !points[i%360].valid){
 			current_group.computeParameters();
-			groups.push_back(current_group);
-			cout << current_group << endl;
+			if(current_group.getNbPoints() > 0) {
+				groups.push_back(current_group);
+				cout << current_group << endl;
+			}
 			current_group = Group();
 		}
 		if(points[i%360].valid) {
