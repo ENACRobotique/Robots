@@ -38,7 +38,7 @@ vector<PointOrient2D<int> > ProcessLidarData::getAdversaires() {
 void ProcessLidarData::makeGroups(vector<PtLidar> points) {
 	int start=0;
 	for(int i = 1; i < 360; i++){
-		if(points[i].distance - points[i-1].distance > DIST_GROUP){
+		if(points[i].valid && (points[i].distance - points[i-1].distance) > DIST_GROUP) {
 			start = i;
 			break;
 		}
@@ -47,12 +47,14 @@ void ProcessLidarData::makeGroups(vector<PtLidar> points) {
 	Group current_group = Group();
 
 	for(int i=start; i<360+start;i++){
-		if( abs(points[i%360].distance - points[(i-1)%360].distance) > DIST_GROUP){
+		if( abs(points[i%360].distance - points[(i-1)%360].distance) > DIST_GROUP || points[i%360].valid){
 			current_group.computeParameters();
 			groups.push_back(current_group);
-		cout << current_group << endl;
+			cout << current_group << endl;
 			current_group = Group();
 		}
-		current_group.appendPoint(&points[i%360]);
+		if(points[i%360].valid) {
+			current_group.appendPoint(&points[i%360]);
+		}
 	}
 }

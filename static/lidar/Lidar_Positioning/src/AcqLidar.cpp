@@ -12,11 +12,20 @@
  */
 
 AcqLidar::AcqLidar() {
+	for (int i = 0; i < NB_PTS; ++i) {
+		buffData[i].azimut = 0;
+		buffData[i].distance = 0;
+		buffData[i].quality = 0;
+		buffData[i].updTour = 0;
+		buffData[i].valid = 0;
+		buffData[i].warning = 0;
+	}
 	nbRevo = 0;
 }
 
 /**
- * @return int
+ * Read LIDAR data from serial, and call #updateBuff for each measures.
+ * @return
  */
 int AcqLidar::updateData() {
 	static int init_level = 0;
@@ -116,7 +125,9 @@ void AcqLidar::close() {
 }
 
 /**
- * @return int
+ *
+ * @param angle
+ * @param data
  */
 void AcqLidar::updateBuff(int angle, unsigned char * data) {
 	unsigned char x = data[0];
