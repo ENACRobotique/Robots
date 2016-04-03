@@ -34,7 +34,7 @@ void initTrajGreenInit(sState *prev)
 	        st_saveTime_radar=millis()-st_saveTime_radar+st_prevSaveTime_radar;
 	        _backFromPause = 1;
 	    	}
-	    uint16_t limits[RAD_NB_PTS]={40,40};
+	    uint16_t limits[RAD_NB_PTS]={40};
 	   	    		radarSetLim(limits);
 	}
 
@@ -132,7 +132,7 @@ void initTrajPurple(sState *prev)
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 		        _backFromPause = 1;
 		    	}
-		    uint16_t limits[RAD_NB_PTS]={40,40};
+		    uint16_t limits[RAD_NB_PTS]={40};
 		        radarSetLim(limits);
 	}
 

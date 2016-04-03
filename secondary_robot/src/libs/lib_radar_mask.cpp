@@ -25,7 +25,7 @@ int periodicProgRadarLimit(radarElem tab[], unsigned long *pausetime, int *i, un
 	long dt = millis() - *prev_millis -*pausetime;    //time since start of the current traj element
 	long duration = long(tab[*i].duration);
 	uint16_t limit = ((tab[*i].limit_end-tab[*i].limit_start)*dt)/duration + tab[*i].limit_start;
-	uint16_t limits[RAD_NB_PTS]={limit,limit};
+	uint16_t limits[RAD_NB_PTS]={limit};
 	radarSetLim(limits);
 
 

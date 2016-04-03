@@ -15,7 +15,7 @@
 #ifndef US_LOWEST_ADDR
 #define US_LOWEST_ADDR 	0xE0  //lowest address of the sensors
 #endif
-#define US_NB_DEVICES  0
+#define US_NB_DEVICES  1
 
 // functions to range using I²C ultrasons
 // needs a Wire.begin() in setup()
