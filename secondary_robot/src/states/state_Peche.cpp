@@ -27,16 +27,19 @@ sState* testPeche(){
 
 	trajElem purple_fishing[] = {
 			{200,0,1300},
-			{90,0,8900},
-			{0,0,100},//Fish taken
-			{-300,-2,2300},
+			{90,0,8700},//canne down
+			{0,0,100},
+			{-300,-2,2300},//canne up
 			{-300,0,1500},
 			{-300,8,2000},
-			{0,0,500},//Fish drop
-			{300,8,2000},
-			{-300,0,1500},
-			{-300,-2,2300},
-			{300,0,50000},
+			{0,0,500},//canne down
+			{0,0,1000},//crema in
+			{0,0,200},//canne up
+			{0,0,100},//crema out
+			{300,8,3000},
+			{200,-8,1000},
+			{200,0,5000},
+			{0,0,50000},
 	};
 	static unsigned long st_saveTime=0;
 	static int i=0;
@@ -58,6 +61,12 @@ sState* testPeche(){
 			break;
 		case 7:
 			crema_servo.write(CREMA_IN);
+			break;
+		case 8:
+			canne_servo.write(CANNE_UP);
+			break;
+		case 9:
+			crema_servo.write(CREMA_OUT);
 			break;
 
 	}
