@@ -28,13 +28,13 @@ void initPause(sState *prev){
     pausePrevState=prev;
     move(0,0);
 #ifdef DEBUG
-    Serial.println("debut pause");
+    Serial.println(F("debut pause"));
 #endif
 }
 
 void deinitPause(sState *next){
 #ifdef DEBUG
-    Serial.println("fin pause");
+    Serial.println(F("fin pause"));
 #endif
 }
 

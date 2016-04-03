@@ -19,14 +19,14 @@ void initFunnyAction(sState *prev){
 	parasol_servo.attach(PIN_PARASOL);
 	parasol_servo.write(170);
 #ifdef DEBUG
-	Serial.println("Je fais la funny action!");
+	Serial.println(F("Je fais la funny action!"));
 #endif
 }
 
 
 void deinitFunnyAction(sState *next){
 #ifdef DEBUG
-    Serial.println("Fin funny action");
+    Serial.println(F("Fin funny action"));
 #endif
 }
 

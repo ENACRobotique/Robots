@@ -10,7 +10,7 @@
 
 /* includes ************************************************/
 #include "Servo.h"
-
+#include <avr/pgmspace.h>
 /* endincludes *********************************************/
 
 //#define HEADING
