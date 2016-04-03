@@ -18,6 +18,7 @@
 #include "state_funny_action.h"
 #include "state_tirette.h"
 
+
 sState* testPeche(){
 
 
@@ -26,23 +27,34 @@ sState* testPeche(){
 #endif
 
 	trajElem purple_fishing[] = {
-			{0,0,400},
+			{0,0,400},//				0
 			{60,0,6450},//canne down
-			{0,0,1000},
+			{0,0,1000},//				2
 			{-200,-12,500},//canne up
 			{-200,-20,1500},
 			{-200,35,2000},
 			{-200,-15,2000},
-			{0,0,500},//canne down
-			{0,0,1000},//crema in
-			{0,0,200},//canne up
-			{0,0,100},//crema out
+			{0,0,500},//canne down		7
+			{0,0,1000},//crema in		8
+			{0,0,200},//canne up		9
+			{0,0,100},//crema out		10
 			{200,-15,2100},
 			{200,35,1500},
 			{200,-15,1000},
-			{200,0,1000},//canne down
+			{200,0,1000},//canne down	14
 			{60,0,6000},
+			{0,0,1000},//canne up		16
+			{-200,0,800},
+			{-200,-12,500},
+			{-200,-20,1500},
+			{-200,35,2000},
+			{-200,-15,2000},
+			{0,0,500},//canne down		22
+			{0,0,1000},//crema in		23
+			{0,0,200},//canne up		24
+			{0,0,100},//crema out		25
 			{0,0,50000},
+			{0,0,0},
 	};
 	static unsigned long st_saveTime=0;
 	static int i=0;
@@ -73,6 +85,25 @@ sState* testPeche(){
 			break;
 		case 14:
 			canne_servo.write(CANNE_DOWN);
+			pos_servo = CANNE_DOWN;
+			break;
+		case 16:
+			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
+				pos_servo = max(pos_servo - 5, CANNE_UP);
+				canne_servo.write(pos_servo);
+			}
+			break;
+		case 22:
+			canne_servo.write(CANNE_DOWN);
+			break;
+		case 23:
+			crema_servo.write(CREMA_IN);
+			break;
+		case 24:
+			canne_servo.write(CANNE_UP);
+			break;
+		case 25:
+			crema_servo.write(CREMA_OUT);
 			break;
 
 	}
