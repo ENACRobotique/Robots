@@ -16,7 +16,7 @@
 typedef struct {
     int speed;      // speed/1.77 = real_speed in cm/s
     int teta;      //in ° (degrees)
-    unsigned long duration;   //in ms
+    unsigned int duration;   //in ms <60s
 }trajElem;
 
 
