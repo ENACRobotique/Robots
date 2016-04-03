@@ -5,6 +5,7 @@
 #include "../tools.h"
 #include "../params.h"
 #include "state_wait.h"
+#include "state_funny_action.h"
 
 Servo parasol_servo;
 
@@ -16,8 +17,7 @@ sState *TestFunnyAction(){
 
 void initFunnyAction(sState *prev){
 	move(0,0);
-	parasol_servo.attach(PIN_PARASOL);
-	parasol_servo.write(170);
+	parasol_servo.write(174);
 #ifdef DEBUG
 	Serial.println(F("Je fais la funny action!"));
 #endif

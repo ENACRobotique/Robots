@@ -11,5 +11,6 @@
 #include "state_types.h"
 
 extern  sState sFunnyAction;
+extern Servo parasol_servo;
 
 #endif /* SRC_STATES_STATE_FUNNY_ACTION_H_ */

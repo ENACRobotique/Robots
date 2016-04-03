@@ -14,7 +14,7 @@
 #include "../libs/lib_move.h"
 #include "../libs/lib_motor.h"
 #include "../libs/lib_radar.h"
-#include "../libs/lib_fan.h"
+#include "state_funny_action.h"
 #include "lib_wall.h"
 
 sState* reTirette(){
@@ -53,6 +53,8 @@ void initHard(sState *prev){
     pinMode(PIN_SWITCH_LEFT, INPUT_PULLUP);
     pinMode(PIN_SWITCH_RIGHT, INPUT_PULLUP);
 
+    parasol_servo.attach(PIN_PARASOL);
+    parasol_servo.write(2);
 
 #ifdef DEBUG
     Serial.println("fin init matérielles");
