@@ -26,19 +26,22 @@ sState* testPeche(){
 #endif
 
 	trajElem purple_fishing[] = {
-			{200,0,1300},
-			{90,0,8700},//canne down
-			{0,0,100},
-			{-300,-2,2300},//canne up
-			{-300,0,1500},
-			{-300,8,2000},
+			{0,0,400},
+			{60,0,6450},//canne down
+			{0,0,1000},
+			{-200,-12,500},//canne up
+			{-200,-20,1500},
+			{-200,35,2000},
+			{-200,-15,2000},
 			{0,0,500},//canne down
 			{0,0,1000},//crema in
 			{0,0,200},//canne up
 			{0,0,100},//crema out
-			{300,8,3000},
-			{200,-8,1000},
-			{200,0,5000},
+			{200,-15,2100},
+			{200,35,1500},
+			{200,-15,1000},
+			{200,0,1000},//canne down
+			{60,0,6000},
 			{0,0,50000},
 	};
 	static unsigned long st_saveTime=0;
@@ -50,23 +53,26 @@ sState* testPeche(){
 			canne_servo.write(CANNE_DOWN);
 			pos_servo = CANNE_DOWN;
 			break;
-		case 3:
-			if ((millis()-prev_millis)>300 and pos_servo>CANNE_UP){
+		case 2:
+			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
 				pos_servo = max(pos_servo - 5, CANNE_UP);
 				canne_servo.write(pos_servo);
 			}
 			break;
-		case 6:
+		case 7:
 			canne_servo.write(CANNE_DOWN);
 			break;
-		case 7:
+		case 8:
 			crema_servo.write(CREMA_IN);
 			break;
-		case 8:
+		case 9:
 			canne_servo.write(CANNE_UP);
 			break;
-		case 9:
+		case 10:
 			crema_servo.write(CREMA_OUT);
+			break;
+		case 14:
+			canne_servo.write(CANNE_DOWN);
 			break;
 
 	}
