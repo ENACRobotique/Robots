@@ -20,7 +20,6 @@ sState* testPause(){
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-
     return 0;
 }
 
@@ -28,7 +27,6 @@ sState* testPause(){
 void initPause(sState *prev){
     pausePrevState=prev;
     move(0,0);
-    Serial.println("je suis en pause");
 #ifdef DEBUG
     Serial.println("debut pause");
 #endif
@@ -41,7 +39,7 @@ void deinitPause(sState *next){
 }
 
 sState sPause={
-    BIT(E_MOTOR) | BIT(E_RADAR)|BIT(E_ATTITUDE),
+    BIT(E_MOTOR) /*| BIT(E_RADAR)*/,
     &initPause,
     &deinitPause,
     &testPause

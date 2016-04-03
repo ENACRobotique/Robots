@@ -30,6 +30,7 @@ int periodicProgRadarLimit(radarElem tab[], unsigned long *pausetime, int *i, un
 
 
 	if(limit != limit_mem){
+#ifdef DEBUG_RADAR
 		Serial.print("start: ");
 		Serial.print(tab[*i].limit_start);
 		Serial.print("   end: ");
@@ -38,6 +39,7 @@ int periodicProgRadarLimit(radarElem tab[], unsigned long *pausetime, int *i, un
 		Serial.print(limit);
 		Serial.print("   time:  ");
 		Serial.println(dt);
+#endif
 		limit_mem = limit;
 	}
 

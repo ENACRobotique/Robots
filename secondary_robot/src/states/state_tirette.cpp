@@ -28,6 +28,7 @@ Servo crema_servo;
 
 sState* testTirette()
 	{
+
 	_matchStart=millis();
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
     static unsigned long timepull=0;
@@ -43,6 +44,9 @@ sState* testTirette()
 			}
     	}
     return 0;
+#ifdef DEBUG
+	Serial.println("je suis en tirette");
+#endif
 	}
 
 void initTirette(sState *prev)

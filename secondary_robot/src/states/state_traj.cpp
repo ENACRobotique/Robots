@@ -109,7 +109,7 @@ sState *testTrajGreenInit()
 	}
 
 sState sTrajGreenInit={
-        BIT(E_MOTOR)/*|BIT(E_RADAR)|BIT(E_HEADING)*/,
+        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
         &initTrajGreenInit,
         &deinitTrajGreenInit,
         &testTrajGreenInit
@@ -204,7 +204,7 @@ sState *testTrajPurple()
 	    return 0;
 	}
 sState sTrajPurpleInit={
-		BIT(E_MOTOR)/*|BIT(E_RADAR)|BIT(E_HEADING)*/,
+		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
         &initTrajPurple,
         &deinitTrajYellowInit,
         &testTrajPurple

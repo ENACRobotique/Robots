@@ -91,7 +91,7 @@ void deinitPeche(sState *next){
     }
 
 sState sPeche={
-	BIT(E_MOTOR),
+		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
         &initPeche,
         &deinitPeche,
         &testPeche

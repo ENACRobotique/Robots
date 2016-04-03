@@ -104,7 +104,7 @@ void deinitRecalage(sState *next){
     }
 
 sState sRecalage={
-	BIT(E_MOTOR),
+	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
     &initRecalage,
     &deinitRecalage,
     &testRecalage
