@@ -39,13 +39,13 @@ sState* testTirette()
     	{
     		if(timepull==0){timepull = millis();}
 			if(millis() - timepull > TIME_BEFORE_START){
-				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sPeche;
+				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajGreenInit;
 				else return &sTrajPurpleInit;
 			}
     	}
     return 0;
 #ifdef DEBUG
-	Serial.println("je suis en tirette");
+	Serial.println(F("je suis en tirette"));
 #endif
 	}
 
@@ -58,7 +58,7 @@ void initTirette(sState *prev)
 	canne_servo.attach(PIN_CANNE_A_PECHE);
 	canne_servo.write(CANNE_VERTICAL);
 #ifdef DEBUG
-    Serial.println("j'entre en tirette");
+    Serial.println(F("j'entre en tirette"));
 #endif
 
 
@@ -69,7 +69,7 @@ void deinitTirette(sState *next)
     _matchStart=millis();
 
 	#ifdef DEBUG
-		Serial.println("fin tirette");
+		Serial.println(F("fin tirette"));
 	#endif
 	}
 

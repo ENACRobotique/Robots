@@ -22,13 +22,13 @@ periodicTraj periodicFunction = &periodicProgTraj;
 void initTrajGreenInit(sState *prev)
 	{
 		#ifdef DEBUG
-			Serial.println("debut traj rouge (premier trajet)");
+			Serial.println(F("debut traj rouge (premier trajet)"));
 		#endif
 
 	    if (prev==&sPause)
 	    	{
 			#ifdef DEBUG
-				Serial.println("\tback from pause");
+				Serial.println(F("\tback from pause"));
 			#endif
 	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 	        st_saveTime_radar=millis()-st_saveTime_radar+st_prevSaveTime_radar;
@@ -56,48 +56,72 @@ void deinitTrajGreenInit(sState *next)
 	    	}
 	}
 
-trajElem start_green[]={
-	//Début trajectoire vers cabines de plage
-	{-300,-11,1100},
-	{-400,0,1200},
-	{-300,11,1100},
-	{-200,0,1000},
-	{0,0,100},//1ere porte fermée
-	{300,0,1300},
-	{0,-90,400},
-	{300,-90,1300},
-	{0,0,400},
-	{300,0,1700},
-	{0,90,400},
-	{300,90,1200},
-	{0,0,400},
-	{-300,0,1000},
-	{-200,0,1400},
-	{0,0,100},//2eme porte fermée
-	{300,0,1700},
-	{0,-90,400},
-	{300,-90,1400},
-	{0,0,300},
-	{-300,0,4000},
-	{0,0,0},
+trajElem start_purple[]={
+//Début trajectoire vers cabines de plage
+		{-300,15,1100},
+		{-400,0,1500},
+		{-300,-15,900},
+		{-200,0,900},
+		{0,0,100},//1ere porte fermée
+		{300,0,1300},
+		{0,90,400},
+		{300,90,1200},
+		{0,0,400},
+		{300,0,1700},
+		{0,-90,400},
+		{300,-90,1300},
+		{0,0,400},
+		{-300,0,1000},
+		{-200,0,1500},
+		{0,0,100},//2eme porte fermée
+		{300,0,1400},
+		{0,90,400},
+		{300,90,1300},
+		{0,-35,300},
+		{-300,-35,2350},
+		{0,0,0},
 };
+trajElem start_green[]={
+		//Début trajectoire vers cabines de plage
+						{-300,-10,1100},
+						{-400,0,1500},
+						{-300,10,900},
+						{-200,0,900},
+						{0,0,100},//1ere porte fermée
+						{300,0,1300},
+						{0,-90,400},
+						{300,-90,1500},
+						{0,0,400},
+						{300,0,1700},
+						{0,90,400},
+						{300,90,1300},
+						{0,0,400},
+						{-300,0,1000},
+						{-200,0,1500},
+						{0,0,100},//2eme porte fermée
+						{300,0,1400},
+						{0,-90,400},
+						{300,-90,1300},
+						{0,35,300},
+						{-300,35,2350},
+						{0,0,0},
+				};
 
 sState *testTrajGreenInit()
 	{
-
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
     	if(!flag_end){
 		    if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis)){
 				#ifdef DEBUG
-					Serial.println("\tTrajet 1 fini !");
+					Serial.println(F("\tTrajet 1 fini !"));
 				#endif
 		    	flag_end = 1;
 		    }
     	}
     	else{
-    		move(-200,0);
+    		move(-300,0);
 		    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 				move(0,0);
 				return &sRecalage;
@@ -120,14 +144,14 @@ sState sTrajGreenInit={
 void initTrajPurple(sState *prev)
 	{
 		    #ifdef DEBUG
-				Serial.println("debut traj violet");
+				Serial.println(F("debut traj violet"));
 			#endif
 
 
 		    if (prev==&sPause)
 		    	{
 				#ifdef DEBUG
-					Serial.println("\tback from pause");
+					Serial.println(F("\tback from pause"));
 				#endif
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 		        _backFromPause = 1;
@@ -146,38 +170,14 @@ void deinitTrajYellowInit(sState *next)
 		    else
 		    	{
 #ifdef DEBUG
-	Serial.println("Fin traj jaune");
+	Serial.println(F("Fin traj jaune"));
 #endif
 		        st_saveTime=0;
 		        st_prevSaveTime=0;
 		    	}
 }
 
-trajElem start_purple[]={
-		//Début trajectoire vers cabines de plage
-						{-300,15,1100},
-						{-400,0,1500},
-						{-300,-15,900},
-						{-200,0,900},
-						{0,0,100},//1ere porte fermée
-						{300,0,1300},
-						{0,90,400},
-						{300,90,1200},
-						{0,0,400},
-						{300,0,1700},
-						{0,-90,400},
-						{300,-90,1300},
-						{0,0,400},
-						{-300,0,1000},
-						{-200,0,1500},
-						{0,0,100},//2eme porte fermée
-						{300,0,1400},
-						{0,90,400},
-						{300,90,1300},
-						{0,-35,300},
-						{-300,-35,2350},
-						{0,0,0},
-				};
+
 
 sState *testTrajPurple()
 	{
@@ -187,7 +187,7 @@ sState *testTrajPurple()
     	if(!flag_end){
 		    if(periodicFunction(start_purple,&st_saveTime,&i,&prev_millis)){
 				#ifdef DEBUG
-					Serial.println("\tTrajet 1 fini !");
+					Serial.println(F("\tTrajet 1 fini !"));
 				#endif
 		    	flag_end = 1;
 		    }
@@ -209,8 +209,5 @@ sState sTrajPurpleInit={
         &deinitTrajYellowInit,
         &testTrajPurple
 };
-
-
-
 
 
