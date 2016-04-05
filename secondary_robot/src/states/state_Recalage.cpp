@@ -68,7 +68,7 @@ sState* testRecalage(){
 			if(purple){
 				pin = PIN_SWITCH_LEFT;
 			}
-			move(-300,0);
+			move(-400,0);
 			if(digitalRead(pin))
 				{
 					move(0,0);

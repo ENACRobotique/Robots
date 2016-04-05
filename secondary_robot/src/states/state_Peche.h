@@ -11,5 +11,6 @@
 #include "state_types.h"
 
 extern sState sPeche;
+extern sState sPeche2;
 
 #endif /* STATE_PECHE_ */

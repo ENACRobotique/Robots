@@ -19,6 +19,33 @@
 #include "state_tirette.h"
 
 
+void initPeche(sState *prev){
+	Serial.println(F("J'entre en etat peche"));
+	move(0,0);
+
+	canne_servo.write(CANNE_UP);
+
+	crema_servo.write(CREMA_OUT);
+    }
+
+void deinitPeche(sState *next){
+	Serial.println(F("Je sors de l'etat peche"));
+    }
+
+sState* testPeche();
+sState sPeche2={
+		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+		&initPeche,
+		&deinitPeche,
+		&testPeche
+};
+sState sPeche={
+		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+        &initPeche,
+        &deinitPeche,
+        &testPeche
+};
+
 sState* testPeche(){
 
 
@@ -33,27 +60,37 @@ sState* testPeche(){
 			{-200,-12,500},//canne up
 			{-200,-20,1500},
 			{-200,35,2000},
-			{-200,-15,2000},
+			{-200,-15,2200},
 			{0,0,500},//canne down		7
 			{0,0,1000},//crema in		8
 			{0,0,200},//canne up		9
 			{0,0,100},//crema out		10
-			{200,-15,2100},
+			{200,-15,2000},
 			{200,35,1500},
-			{200,-15,1000},
-			{200,0,1000},//canne down	14
-			{60,0,6000},
+			{200,-15,1200},
+			{200,-2,800},//canne down	14
+			{60,0,7000},
 			{0,0,1000},//canne up		16
 			{-200,0,800},
-			{-200,-12,500},
-			{-200,-20,1500},
-			{-200,35,2000},
+			{-200,-2,500},
+			{-200,-10,1700},
+			{-200,30,2000},
 			{-200,-15,2000},
 			{0,0,500},//canne down		22
 			{0,0,1000},//crema in		23
 			{0,0,200},//canne up		24
 			{0,0,100},//crema out		25
-			{0,0,50000},
+
+			{200,-15,2000},
+			{200,35,1700},
+			{200,-15,1200},
+			{200,-2,1400},
+
+			{0,30,100},
+			{-200,30,800},
+			{-200,-30,600},
+
+			{-200,0,5000},// et on recommence 33
 			{0,0,0},
 	};
 	static unsigned long st_saveTime=0;
@@ -67,7 +104,7 @@ sState* testPeche(){
 			break;
 		case 2:
 			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-				pos_servo = max(pos_servo - 5, CANNE_UP);
+				pos_servo = max(pos_servo - 3, CANNE_UP);
 				canne_servo.write(pos_servo);
 			}
 			break;
@@ -89,7 +126,7 @@ sState* testPeche(){
 			break;
 		case 16:
 			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-				pos_servo = max(pos_servo - 5, CANNE_UP);
+				pos_servo = max(pos_servo - 3, CANNE_UP);
 				canne_servo.write(pos_servo);
 			}
 			break;
@@ -105,7 +142,16 @@ sState* testPeche(){
 		case 25:
 			crema_servo.write(CREMA_OUT);
 			break;
-
+		case 33:
+			if( digitalRead(PIN_SWITCH_LEFT) )
+			{
+				st_saveTime=0;
+				i=0;
+				prev_millis=0;
+				pos_servo = CANNE_VERTICAL;
+				return &sPeche2;
+			}
+			break;
 	}
 	if(periodicProgTraj(purple_fishing,&st_saveTime,&i,&prev_millis))
 	{
@@ -115,22 +161,10 @@ sState* testPeche(){
 	return NULL;
 }
 
-void initPeche(sState *prev){
-	move(0,0);
 
-	canne_servo.write(CANNE_UP);
-
-	crema_servo.write(CREMA_OUT);
-    }
-
-void deinitPeche(sState *next){
-        // Your code here !
-    }
-
-sState sPeche={
-		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-        &initPeche,
-        &deinitPeche,
-        &testPeche
-};
-
+//sState sPeche={
+//		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+//        &initPeche,
+//        &deinitPeche,
+//        &testPeche
+//};
