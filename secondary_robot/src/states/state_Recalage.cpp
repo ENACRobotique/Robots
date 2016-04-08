@@ -39,8 +39,8 @@ sState* testRecalage(){
 				};
 
 	trajElem calage_largeur_green[] = {
-						{0,-60,300},
-						{250,-60,1650},
+						{0,60,300},
+						{250,60,1700},
 						{0,0,100},
 						{0,0,0}
 				};

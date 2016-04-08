@@ -83,9 +83,10 @@ trajElem start_purple[]={
 };
 trajElem start_green[]={
 		//Début trajectoire vers cabines de plage
-						{-300,-10,1100},
+						{0,-25,100},
+						{-300,-25,1100},
 						{-400,0,1500},
-						{-300,10,900},
+						{-300,25,900},
 						{-200,0,900},
 						{0,0,100},//1ere porte fermée
 						{300,0,1300},
@@ -121,7 +122,7 @@ sState *testTrajGreenInit()
 		    }
     	}
     	else{
-    		move(-300,0);
+    		move(-500,0);
 		    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 				move(0,0);
 				return &sRecalage;
@@ -193,7 +194,7 @@ sState *testTrajPurple()
 		    }
     	}
     	else{
-    		move(-300,0);
+    		move(-500,0);
 		    if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 				move(0,0);
 				return &sRecalage;
