@@ -67,7 +67,7 @@
 #define PIN_CANNE_A_PECHE 4
 #define CANNE_DOWN 137
 #define CANNE_UP 100
-#define CANNE_VERTICAL 62 //perpendiculaire : 47
+#define CANNE_VERTICAL 70 //perpendiculaire : 47
 
 #define PIN_CREMA 3
 #define CREMA_OUT 169
