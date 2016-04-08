@@ -10,7 +10,9 @@
 
 #include "state_types.h"
 
-extern sState sPeche;
-extern sState sPeche2;
+extern sState sPechePurple;
+extern sState sPeche2Purple;
+extern sState sPecheGreen;
+extern sState sPeche2Green;
 
 #endif /* STATE_PECHE_ */

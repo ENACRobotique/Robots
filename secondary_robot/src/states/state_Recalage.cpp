@@ -62,17 +62,17 @@ sState* testRecalage(){
 				}
 		}
 		else{
-			int pin=PIN_SWITCH_RIGHT;
-			if(purple){
-				pin = PIN_SWITCH_LEFT;
-			}
-			move(-400,0);
-			if(digitalRead(pin))
+			move(-300,0);
+
+			if(digitalRead(PIN_SWITCH_LEFT))
 				{
 					move(0,0);
 					st_saveTime = 0;
 					i = 0;
 					flag_end = 0;
+					if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sPecheGreen;
+					else return &sPechePurple;
+
 				}
 		}
 		if (radarIntrusion()) return &sPause;
