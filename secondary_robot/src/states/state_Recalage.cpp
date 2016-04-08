@@ -16,7 +16,6 @@
 #include "../params.h"
 #include "state_wait.h"
 #include "lib_radar_mask.h"
-#include "state_PrePeche.h"
 #include "state_funny_action.h"
 #include "state_pause.h"
 #include "state_Peche.h"
@@ -56,7 +55,6 @@ sState* testRecalage(){
         static int i=0;
 		static unsigned long prev_millis=0;
 		static int flag_end = 0;
-		static int call_number = 1;
 		if(!flag_end){
 			if(periodicProgTraj(calage,&st_saveTime,&i,&prev_millis))
 				{
@@ -75,13 +73,6 @@ sState* testRecalage(){
 					st_saveTime = 0;
 					i = 0;
 					flag_end = 0;
-					if (not call_number) {
-						call_number += 1;
-						return &sPrePeche;
-					}
-					else{
-						return &sPeche;
-					}
 				}
 		}
 		if (radarIntrusion()) return &sPause;
