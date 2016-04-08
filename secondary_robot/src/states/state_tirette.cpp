@@ -51,11 +51,7 @@ sState* testTirette()
 void initTirette(sState *prev)
 	{
     move(0,0);
-    crema_servo.attach(PIN_CREMA);
-	crema_servo.write(CREMA_VERTICAL);
 
-	canne_servo.attach(PIN_CANNE_A_PECHE);
-	canne_servo.write(CANNE_VERTICAL);
 #ifdef DEBUG
     Serial.println(F("j'entre en tirette"));
 #endif

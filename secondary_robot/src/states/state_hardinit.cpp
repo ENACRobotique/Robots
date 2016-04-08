@@ -23,7 +23,7 @@ sState* reTirette(){
 void initHard(sState *prev){
 
 #ifdef DEBUG
-    Serial.println("debut init matérielles");
+    Serial.println(F("debut init matérielles"));
 #endif
     //movements
     int pin_motors_dir[NB_MOTORS];
@@ -53,11 +53,18 @@ void initHard(sState *prev){
     pinMode(PIN_SWITCH_LEFT, INPUT_PULLUP);
     pinMode(PIN_SWITCH_RIGHT, INPUT_PULLUP);
 
+    //initialisation parasol, créma et canne
     parasol_servo.attach(PIN_PARASOL);
     parasol_servo.write(2);
 
+    crema_servo.attach(PIN_CREMA);
+	crema_servo.write(CREMA_VERTICAL);
+
+	canne_servo.attach(PIN_CANNE_A_PECHE);
+	canne_servo.write(CANNE_VERTICAL);
+
 #ifdef DEBUG
-    Serial.println("fin init matérielles");
+    Serial.println(F("fin init matérielles"));
 #endif
 
 }

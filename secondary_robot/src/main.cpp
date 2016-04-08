@@ -29,7 +29,7 @@ unsigned long _matchStart;
 void setup(){
 #ifdef DEBUG
     Serial.begin(115200);
-    Serial.println("start");
+    Serial.println(F("start"));
     Serial.println(digitalRead(PIN_COLOR));
 #endif
 
@@ -37,7 +37,7 @@ void setup(){
     if (current->init) {
 
 #ifdef DEBUG
-    Serial.println("sortie init mat");
+    Serial.println(F("sortie init mat"));
 #endif
     current->init(NULL);
     }
