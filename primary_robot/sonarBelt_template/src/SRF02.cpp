@@ -12,12 +12,14 @@
  * @param ard I2C Device address in hexadecimal
  * @param mode ranging mode
  */
-SRF02::SRF02(uint8_t addr, PoseSonar_t p) {
+SRF02::SRF02(uint8_t addr, PoseSonar_t p){
 	_addr = addr;  // Can be used like an id
-	_startTime = 0;
+	_timeIdxForLastDist = 0;
 	_pose = p;
 	_unit = cm;
 	_fd = 0;
+	_state = unknown;
+	_lastDist = 0;
 
 	// Set the file descriptor
 	_fd = wiringPiI2CSetup(_addr);
@@ -59,10 +61,11 @@ int SRF02::readSRF02_info(eSRF02_Info typeInfo){
 		res = wiringPiI2CReadReg8(_fd, REG_AUTOTUNE_MIN_H)*256;
 		res += wiringPiI2CReadReg8(_fd, REG_AUTOTUNE_MIN_L);
 		break;
-#ifdef DBG
 	default:
+#ifdef DBG
 		std::cout<<"Unknown sonar type info: "<<typeInfo<<std::endl;
 #endif
+		break;
 	}
 
 	return res;
@@ -112,3 +115,19 @@ bool SRF02::writeSRF02_cmd(eSRF02_Cmd typeCmd){
 int SRF02::get_fd(){
 	return _fd;
 }
+
+void SRF02::updateLastDist(int dist){
+	_lastDist = dist;
+}
+
+void SRF02::updateTimeIdx(int idx){
+#ifdef DBG_SRF02
+	if(idx <= _timeIdxForLastDist)
+		printf("SRF02::updateTimeIdx not valid\n");
+#endif
+	_timeIdxForLastDist = idx;
+}
+
+//// For debug purpose
+#ifdef DBG_SRF02
+#endif

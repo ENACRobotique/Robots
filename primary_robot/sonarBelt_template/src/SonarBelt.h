@@ -12,7 +12,6 @@
 #include <vector>
 #include <PointOrient2D.h>
 #include <map>
-#include <linux/i2c-dev.h>
 #include <string>
 #include <iostream>
 #include <fcntl.h>
@@ -42,6 +41,7 @@ typedef enum eIdSonar{
 }eIdSonar;
 using listAddrPoseSonars_t = std::pair<uint8_t, PoseSonar_t>;
 using listSonar_t = std::map<eIdSonar, listAddrPoseSonars_t>;
+using mapSonars_t = std::map<eIdSonar, SRF02*>;
 using orderToProcess_t = std::vector<std::vector<eIdSonar>>;
 using sonarsDist_t = std::map<eIdSonar, int>;
 
@@ -54,7 +54,7 @@ typedef enum eStateThread{
 
 // _________________ Eurobot 2016 _________________________
 const listSonar_t initListSonars1 = {
-	 // {id, {addr, {alpha, r}}}
+	 // {id, {addr, {alpha, r}}}  // template
 		{s1, {0xE0, {O_S, 100}}},
 		{s2, {0xE2, {O_S+D_S, 100}}},
 		{s3, {0xE4, {O_S+D_S*2, 100}}},
@@ -68,13 +68,14 @@ const listSonar_t initListSonars1 = {
 	    {s11, {0xF4, {O_S+D_S*10, 100}}},
 	    {s12, {0xF6, {O_S+D_S*11, 100}}}
 };
-orderToProcess_t orderToProcess_3PerRev = {
+
+const orderToProcess_t orderToProcess_3PerRev = {
 		{s1, s5, s9},  // First revo
 		{s2, s6, s10},  // 2nd revo
 		{s3, s7, s11},
 		{s4, s8,s12}
 };
-orderToProcess_t orderToProcess_4PerRev = {
+const orderToProcess_t orderToProcess_4PerRev = {
 		{s1, s4, s7, s10},  // First rev
 		{s2, s5, s8, s11},
 		{s3, s6, s9, s12}  // 3rd revo
@@ -83,8 +84,7 @@ orderToProcess_t orderToProcess_4PerRev = {
 
 class SonarBelt {
 public:
-	SonarBelt(int idI2C, const listSonar_t listPoseSonars, const orderToProcess_t order,
-			bool openI2C = false, int file = 0);
+	SonarBelt(int idI2C, const listSonar_t listPoseSonars, const orderToProcess_t order);
 	int readSonarInfo(eIdSonar id, eSRF02_Info typeInfo);
 	void writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd);
 	int readSonarVers(eIdSonar id);
@@ -101,26 +101,25 @@ public:
 
 private:
 	uint8_t _nbSonars;
-	int _idI2C;
-	uint8_t _addrCurSonar;
-	std::string _fileName;
-	int _file;
-	listSonar_t _listSonars;
-	orderToProcess_t _orderToProccess;
-	sonarsDist_t _lastDistances;  // Concurrent access
 	int _nbRevolu;  // Concurrent access
+	mapSonars_t _sonars;
+	orderToProcess_t _orderToProccess;
+
+	// thread for auto_measure
 	bool _autoMeasure;
 	std::mutex _m;
 	std::condition_variable _cv;
 	std::thread* _thMeasure;
 	eStateThread _stateThreadMeas;
 
-
-	int readRegister(int reg);
-	void writeRegister(int reg, int val);
-	bool startComWithSonar(uint8_t idSonar);
+	int getInfoSonar(eIdSonar id, eSRF02_Info infoType);
+	void setCmdSonar(eIdSonar id, eSRF02_Cmd cmdType);
 	void threadMeasure();
-	void startThreadMeasure();
+
+	//// For debug purpose
+#ifdef DBG
+public:
+#endif
 };
 
 #endif /* SONARBELT_H_ */

@@ -68,6 +68,14 @@ typedef enum eSRF02_unit{
 	ms
 }eSRF02_unit;
 
+typedef enum eSRF02State{
+	ok,
+	ko,
+	com_failed,
+	unknown,
+	eSRF02State_max
+}eSRF02State;
+
 typedef enum eSRF02_Cmd{
 	srf02_mes_inch,
 	srf02_mes_cm,
@@ -86,8 +94,8 @@ class SRF02 {
 public:
 	/**
 	 * @brief SRF02, initializing SRF02 with address and mode
-	 * @param ard I2C Device address
-	 * @param mode ranging mode
+	 * @param addr id I2C device address
+	 * @param p is an enum type to describe to position of the sonar (angle, dist)
 	 */
 	SRF02(uint8_t addr, PoseSonar_t p);
 
@@ -129,14 +137,23 @@ public:
 	 */
 	bool writeSRF02_cmd(eSRF02_Cmd typeCmd);
 
-	private:
-		uint8_t _addr;		// address of the sensor
-		int _fd;  // file descriptor
-		unsigned long _startTime;	// start time of a ranging, needed
-									// to proceed with correct sensor values
-		PoseSonar_t _pose;  // circular coordinates: range, azimuth
-		eSRF02_unit _unit;
-		int _lastDist;
+	void updateLastDist(int dist);
+	void updateTimeIdx(int idx);
+
+private:
+	eSRF02State _state;
+	uint8_t _addr;		// address of the sensor
+	int _fd;  // file descriptor
+	PoseSonar_t _pose;  // circular coordinates: range, azimuth
+	eSRF02_unit _unit;
+	int _lastDist;
+	int _timeIdxForLastDist;
+
+	// For debug purpose
+#ifdef DBG_SRF02
+public:
+
+#endif
 };
 
 
