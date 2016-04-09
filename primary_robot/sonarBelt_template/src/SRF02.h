@@ -84,18 +84,49 @@ typedef enum eSRF02_Cmd{
 
 class SRF02 {
 public:
-
 	/**
 	 * @brief SRF02, initializing SRF02 with address and mode
 	 * @param ard I2C Device address
 	 * @param mode ranging mode
 	 */
 	SRF02(uint8_t addr, PoseSonar_t p);
+
+	/**
+	 * @return the address of the sonar.
+	 */
 	uint8_t getAddr();
+
+	/**
+	 * @return the last position measured by the sonar
+	 */
 	PoseSonar_t getPose();
+
+	/**
+	 * @return the current unit of the sonar
+	 */
 	eSRF02_unit getUnit();
+
+	/**
+	 * @return the file descriptor
+	 */
+	int get_fd();
+
+
+	/**
+	 * @return the delay (in ms) needed to complete a measure
+	 */
 	int getMeasDelay_ms();
+
+	/**
+	 * @param typeInfo is an enum describing the type of requested information
+	 * @return an integer following the request
+	 */
 	int readSRF02_info(eSRF02_Info typeInfo);
+
+	/**
+	 * @param typeCmd id an enum describing the type of requested command
+	 * @return true if success, false otherwise
+	 */
 	bool writeSRF02_cmd(eSRF02_Cmd typeCmd);
 
 	private:
@@ -105,6 +136,7 @@ public:
 									// to proceed with correct sensor values
 		PoseSonar_t _pose;  // circular coordinates: range, azimuth
 		eSRF02_unit _unit;
+		int _lastDist;
 };
 
 

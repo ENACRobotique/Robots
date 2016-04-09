@@ -40,7 +40,7 @@ eSRF02_unit SRF02::getUnit(){
 	return _unit;
 }
 
-int getMeasDelay_ms(){
+int SRF02::getMeasDelay_ms(){
 	return SRF02_MEAS_PERIOD;
 }
 
@@ -59,8 +59,8 @@ int SRF02::readSRF02_info(eSRF02_Info typeInfo){
 		res = wiringPiI2CReadReg8(_fd, REG_AUTOTUNE_MIN_H)*256;
 		res += wiringPiI2CReadReg8(_fd, REG_AUTOTUNE_MIN_L);
 		break;
-	default:
 #ifdef DBG
+	default:
 		std::cout<<"Unknown sonar type info: "<<typeInfo<<std::endl;
 #endif
 	}
@@ -107,4 +107,8 @@ bool SRF02::writeSRF02_cmd(eSRF02_Cmd typeCmd){
 	}
 
 	return true;
+}
+
+int SRF02::get_fd(){
+	return _fd;
 }
