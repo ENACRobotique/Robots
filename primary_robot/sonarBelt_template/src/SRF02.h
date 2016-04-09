@@ -11,6 +11,10 @@
 #include <chrono>
 #include <utility> // pair
 #include <cstdint>
+#include <stdint.h>
+#include <linux/i2c-dev.h>
+
+#include "wiringPiI2C.h"
 
 #define DBG_SRF02
 
@@ -91,9 +95,12 @@ public:
 	PoseSonar_t getPose();
 	eSRF02_unit getUnit();
 	int getMeasDelay_ms();
+	int readSRF02_info(eSRF02_Info typeInfo);
+	bool writeSRF02_cmd(eSRF02_Cmd typeCmd);
 
 	private:
 		uint8_t _addr;		// address of the sensor
+		int _fd;  // file descriptor
 		unsigned long _startTime;	// start time of a ranging, needed
 									// to proceed with correct sensor values
 		PoseSonar_t _pose;  // circular coordinates: range, azimuth
