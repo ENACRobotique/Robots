@@ -54,8 +54,8 @@ sState* testPechePurple(){
 #endif
 
 	trajElem purple_fishing[] = {
-			{0,0,400},//				0
-			{60,0,6450},//canne down
+			{0,0,400},
+			{60,0,6450},//canne down	1
 			{0,0,1000},//				2
 			{-200,-12,500},//canne up
 			{-200,-20,1500},
@@ -66,7 +66,7 @@ sState* testPechePurple(){
 			{0,0,200},//canne up		9
 			{0,0,100},//crema out		10
 			{200,-15,2000},
-			{200,35,1500},
+			{200,35,1300},
 			{200,-15,1200},
 			{200,-2,800},//canne down	14
 			{60,0,7000},
@@ -197,78 +197,74 @@ sState* testPecheGreen(){
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
 
-	trajElem purple_fishing[] = {
-			{0,0,400},//				0
-			{60,0,6450},//canne down
-			{0,0,1000},//				2
-			{-200,-12,500},//canne up
-			{-200,-20,1500},
-			{-200,35,2000},
-			{-200,-15,2200},
-			{0,0,500},//canne down		7
-			{0,0,1000},//crema in		8
-			{0,0,200},//canne up		9
-			{0,0,100},//crema out		10
-			{200,-15,2000},
-			{200,35,1500},
-			{200,-15,1200},
-			{200,-2,800},//canne down	14
-			{60,0,7000},
-			{0,0,1000},//canne up		16
-			{-200,0,800},
-			{-200,-2,500},
-			{-200,-10,1700},
-			{-200,30,2000},
+	trajElem green_fishing[] = {
+			{0,0,100},
+			{300,0,1450},
+			{100,0,5500},//canne down	2
+			{0,0,1000},//				3
+			{200,-12,500},//canne up
+			{200,-20,1500},
+			{200,35,2000},
+			{200,-15,2200},
+			{0,0,500},//canne down		8
+			{0,0,1000},//crema in		9
+			{0,0,200},//canne up		10
+			{0,0,100},//crema out		11
 			{-200,-15,2000},
+			{-200,35,1700},
+			{-200,-15,1300},
+			{-200,-3,1700},
+			{100,0,4000},//canne down	16
+			{0,0,1000},//canne up 		17
+			{-200,0,1275},
+			{200,-15,1700},
+			{200,35,1700},
+			{200,-15,2000},
 			{0,0,500},//canne down		22
 			{0,0,1000},//crema in		23
 			{0,0,200},//canne up		24
 			{0,0,100},//crema out		25
-
-			{200,-15,2000},
-			{200,35,1700},
-			{200,-15,1200},
-			{200,-2,1400},
-
-			{0,30,100},
-			{-200,30,800},
-			{-200,-30,600},
-
-			{-200,0,5000},// et on recommence 33
+			{-200,-15,2000},
+			{-200,35,1700},
+			{-200,-15,1300},
+			{-200,-3,1700},
+			{-300,0,2000},
+			{-200,0,5000},// et on recommence 31
 			{0,0,0},
 	};
 	static unsigned long st_saveTime=0;
 	static int i=0;
 	static unsigned long prev_millis=0;
 	static int pos_servo = CANNE_VERTICAL;
+
 	switch (i) {
-		case 1:
+		case 2:
 			canne_servo.write(CANNE_DOWN);
 			pos_servo = CANNE_DOWN;
 			break;
-		case 2:
+		case 3:
 			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
 				pos_servo = max(pos_servo - 3, CANNE_UP);
 				canne_servo.write(pos_servo);
 			}
 			break;
-		case 7:
+		case 8:
 			canne_servo.write(CANNE_DOWN);
 			break;
-		case 8:
+		case 9:
 			crema_servo.write(CREMA_IN);
 			break;
-		case 9:
+		case 10:
 			canne_servo.write(CANNE_UP);
 			break;
-		case 10:
+		case 11:
 			crema_servo.write(CREMA_OUT);
 			break;
-		case 14:
+		case 16:
 			canne_servo.write(CANNE_DOWN);
 			pos_servo = CANNE_DOWN;
 			break;
-		case 16:
+		case 17:
 			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
 				pos_servo = max(pos_servo - 3, CANNE_UP);
 				canne_servo.write(pos_servo);
@@ -286,18 +282,18 @@ sState* testPecheGreen(){
 		case 25:
 			crema_servo.write(CREMA_OUT);
 			break;
-		case 33:
+		case 31:
 			if( digitalRead(PIN_SWITCH_LEFT) )
 			{
 				st_saveTime=0;
 				i=0;
 				prev_millis=0;
 				pos_servo = CANNE_VERTICAL;
-				return &sPeche2Purple;
+				return &sPeche2Green;
 			}
 			break;
 	}
-	if(periodicProgTraj(purple_fishing,&st_saveTime,&i,&prev_millis))
+	if(periodicProgTraj(green_fishing,&st_saveTime,&i,&prev_millis))
 	{
 		return &sWait;
 	}
