@@ -1,0 +1,5 @@
+# In a terminal
+source /opt/ros/indigo/setu.bash
+source primary_robot/catkin_ws/devel/setup.bash
+bash -i -c "eclipse"
+
