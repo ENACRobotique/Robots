@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+
+<robot name="arm_hrrr" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find arm_hrrr_model)/robots/arm_hrrr_macro.xacro"/>
+  <xacro:arm_hrrr prefix=""/>
+</robot>

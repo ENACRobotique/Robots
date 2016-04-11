@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<!--robot xmlns:xacro="http://www.enacRobotique.org/2016/primaire/arm/xacro" name="armHRRR"-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+<xacro:property name="alpha" value="1" />
+<xacro:property name="intColor" value="0.9" />
+
+<xacro:property name="baseCol" value="Grey" />
+<xacro:property name="L0Col" value="Grey" />
+<xacro:property name="L1Col" value="Grey" />
+<xacro:property name="L2Col" value="Grey" />
+<xacro:property name="L3Col" value="Grey" />
+<xacro:property name="L4Col" value="Grey" />
+<xacro:property name="toolCol" value="Blue" />
+
+<xacro:property name="velServo" value="4" />
+
+<!--xacro:property name="path2Model" value="package://testbot_description/model" /-->
+<xacro:property name="path2Meshes" value="package://arm_hrrr_model/meshes" />
+
+<!--robot name="armHRRR"-->
+    <xacro:macro name="arm_hrrr" params="prefix">
+        <!-- ______ links _____ -->
+        <!-- ROS base_link to arm world coordinates trnsform -->
+        <link name="${prefix}_base_link">
+            <visual>
+                <origin xyz="0 0 0.05" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.1 0.1 0.1"/>
+                </geometry>
+                <material name="${baseCol}"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0.05" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.1 0.1 0.1"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <link name="${prefix}_L0"> 
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L0.STL" />
+                </geometry>
+                <material name="${L0Col}"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L0.STL"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="1.1345E-16 -0.013352 0.017446" rpy="0 0 0" />
+                <mass value="0.07757" />
+            <inertia
+                ixx="2.6624E-05"
+                ixy="8.3213E-21"
+                ixz="6.6331E-21"
+                iyy="4.1325E-05"
+                iyz="1.2551E-06"
+                izz="3.1336E-05" />
+            </inertial>
+       </link>
+
+       <link name="${prefix}_L1"> 
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L1.STL"/>
+                </geometry>
+                <material name="${L1Col}"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L1.STL"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="-0.000652188482918968 0.0205351960403008 0.0250735944101231" rpy="0 0 0" />
+                <mass value="0.12726" />
+                <inertia
+                    ixx="5.5052684991225E-05"
+                    ixy="-1.08478385518745E-06"
+                    ixz="1.00389750980177E-06"
+                    iyy="5.63745220297769E-05"
+                    iyz="3.00857513519924E-07"
+                    izz="5.73934780370408E-05" />
+            </inertial>
+       </link>
+
+       <link name="${prefix}_L2"> 
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L2.STL"/>
+                </geometry>
+                <material name="${L2Col}"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L2.STL"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0.0711649776786391 0.00148673503523068 -0.0024225415303807" rpy="0 0 0" />
+                <mass value="0.0715177471991291" />
+                <inertia
+                    ixx="2.3477639305661E-05"
+                    ixy="-1.66762564977195E-06"
+                    ixz="-3.54152135672619E-06"
+                    iyy="6.64208248542604E-05"
+                    iyz="1.34881284045922E-07"
+                    izz="8.36014077475221E-05" />
+            </inertial>
+       </link>
+
+       <link name="${prefix}_L3"> 
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L3.STL"/>
+                </geometry>
+                <material name="${L3Col}"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L3.STL"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0.0443605865306002 -0.00229589696194459 0.031243645036507" rpy="0 0 0" />
+                <mass value="0.0755630413994574" />
+                <inertia
+                    ixx="2.94318237373478E-05"
+                    ixy="3.76099873612448E-06"
+                    ixz="1.12245038462398E-05"
+                    iyy="8.53576932065445E-05"
+                    iyz="2.11221731367707E-07"
+                    izz="9.92701100131562E-05" />
+            </inertial>
+       </link>
+
+        <link name="${prefix}_L4"> 
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L4.STL"/>
+                </geometry>
+                <material name="${L4Col}"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${path2Meshes}/L4.STL"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0.0177621067869408 -0.00137877579388009 0" rpy="0 0 0" />
+                <mass value="0.0147045616164208" />
+                <inertia
+                    ixx="8.03850612396533E-06"
+                    ixy="1.23133424762755E-07"
+                    ixz="8.86897583275476E-22"
+                    iyy="2.93912182741925E-06"
+                    iyz="-1.45471455660844E-23"
+                    izz="1.01319116064202E-05" />
+            </inertial>
+        </link>
+
+        <link name="${prefix}_tool">
+            <inertial>
+                <origin xyz="0.0030009631938903 -7.32426842593086E-17 -0.00531092074064319" rpy="0 0 0" />
+                <mass value="0.00367938214213686" />
+                <inertia
+                    ixx="1.43250300085364E-07"
+                    ixy="1.0687385703068E-22"
+                    ixz="-3.07881511704918E-08"
+                    iyy="4.48135044755976E-07"
+                    iyz="-2.89447699129957E-23"
+                    izz="4.23540638940663E-07" />
+            </inertial>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="${path2Meshes}/tool.STL" />
+                </geometry>
+                <material name="${toolCol}"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                <mesh filename="${path2Meshes}/tool.STL" />
+                </geometry>
+            </collision>
+        </link>
+        <link name="${prefix}_endTool">
+        </link>
+
+       <!-- _____ joints _____ -->
+        <joint name="${prefix}_base_L0" type="fixed">
+            <origin xyz="0 0 0.1" rpy="3.1416 0 0"/>
+            <parent link="${prefix}base_link"/>
+            <child link="${prefix}_L0"/>
+        </joint>
+        <joint name="${prefix}_J0" type="revolute">
+            <origin xyz="0 0 -0.03" rpy="3.1416 0 0" />
+            <parent link="${prefix}_L0"/>
+            <child link="${prefix}_L1"/>
+            <axis xyz="0 0 1" />
+            <limit upper="1.57" lower="-1.57" effort="10" velocity="${velServo}"/>
+       </joint>
+       <joint name="${prefix}_J1" type="revolute">
+            <origin xyz="0 0.0365 0.0358" rpy="1.5708 -1.5708 3.1416" />
+            <parent link="${prefix}_L1"/>
+            <child link="${prefix}_L2"/>
+            <axis xyz="0 1 0" />
+            <limit lower="-2.356" upper="0.785" effort="1000" velocity="${velServo}"/>
+       </joint>
+       <joint name="${prefix}_J2" type="revolute">
+            <origin xyz="0.102 0 -0.004" rpy="0 0 3.1416" />
+            <parent link="${prefix}_L2"/>
+            <child link="${prefix}_L3"/>
+            <axis xyz="0 1 0" />
+            <limit lower="-3.14" upper="0" effort="1000" velocity="${velServo}"/>
+       </joint>
+       <joint name="${prefix}_J3" type="revolute">
+            <origin xyz="0.080 0 0.035" rpy="0 0 0" />
+            <parent link="${prefix}_L3"/>
+            <child link="${prefix}_L4"/>
+            <axis xyz="0 1 0" />
+            <limit lower="-2.356" upper="0.785" effort="1000" velocity="${velServo}"/>
+       </joint>
+       <joint name="${prefix}_JTl" type="fixed">
+            <origin xyz="0.042 0 0" rpy="0 0 0" />
+            <parent link="${prefix}_L4"/>
+            <child link="${prefix}_tool"/>
+       </joint>
+       <joint name="${prefix}_JEndTl" type="fixed">
+            <origin xyz="0.03 0 -0.005" rpy="0 0 0" />
+            <parent link="${prefix}_tool"/>
+            <child link="${prefix}_endTool"/>
+       </joint>
+
+        <material name="Green">
+            <color rgba="0 ${intColor} 0 ${alpha}"/>
+        </material>
+
+        <material name="Red">
+            <color rgba="${intColor} 0 0 ${alpha}"/>
+        </material>
+
+        <material name="Blue">
+            <color rgba="0 0 ${intColor} ${alpha}"/>
+        </material>
+
+        <material name="Yellow">
+            <color rgba="${intColor} ${intColor} 0 ${alpha}"/>
+        </material>
+
+        <material name="Grey">
+            <color rgba="0.5 0.5 0.5 ${alpha}"/>
+        </material>
+    </xacro:macro>
+</robot>

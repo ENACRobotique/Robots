@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find arm_hrrr_moveit_config)/launch/demo.launch"/>
+  <node name="moveit_test" pkg="arm_hrrr" type="moveit_test" respawn="false" output="screen"></node>
+</launch>
