@@ -9,6 +9,7 @@
 #include "state_tirette.h"
 #include "state_dead.h"
 #include "state_funny_action.h"
+#include "lib_us.h"
 
 sState *pausePrevState;
 sState* testPause(){
@@ -16,7 +17,6 @@ sState* testPause(){
     if(radarIntrusion()) lastSeen=millis();
     if( (millis()-lastSeen)>= RADAR_SAFETY_TIME ) return pausePrevState;
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
-
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
@@ -39,7 +39,7 @@ void deinitPause(sState *next){
 }
 
 sState sPause={
-    BIT(E_MOTOR) /*| BIT(E_RADAR)*/,
+    BIT(E_MOTOR) | BIT(E_RADAR),
     &initPause,
     &deinitPause,
     &testPause

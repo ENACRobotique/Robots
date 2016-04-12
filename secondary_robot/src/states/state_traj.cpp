@@ -34,7 +34,7 @@ void initTrajGreenInit(sState *prev)
 	        st_saveTime_radar=millis()-st_saveTime_radar+st_prevSaveTime_radar;
 	        _backFromPause = 1;
 	    	}
-	    uint16_t limits[RAD_NB_PTS]={40};
+	    uint16_t limits[RAD_NB_PTS]={30, 30, 30, 30};
 	   	    		radarSetLim(limits);
 	}
 
@@ -93,9 +93,9 @@ trajElem start_green[]={
 						{300,0,1300},
 						{0,-90,400},
 						{300,-90,1400},
-						{0,0,400},
+						{0,0,400},//Radar active 9
 						{300,0,1700},
-						{0,90,400},
+						{0,90,400},//Radar inactive 11
 						{300,90,1300},
 						{0,0,400},
 						{-300,0,1000},
@@ -108,6 +108,7 @@ trajElem start_green[]={
 						{-300,35,2350},
 						{0,0,0},
 				};
+
 
 sState *testTrajGreenInit()
 	{
@@ -129,13 +130,20 @@ sState *testTrajGreenInit()
 				return &sRecalage;
 			}
     	}
-
+    	switch(i){
+    		case 9:
+    			sTrajGreenInit.flag |= BIT(E_RADAR);
+    			break;
+    		case 11:
+				sTrajGreenInit.flag &= ~BIT(E_RADAR);
+				break;
+    	}
 		 if (radarIntrusion()) return &sPause;
 	    return 0;
 	}
 
 sState sTrajGreenInit={
-        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+        BIT(E_MOTOR),
         &initTrajGreenInit,
         &deinitTrajGreenInit,
         &testTrajGreenInit
@@ -158,11 +166,11 @@ void initTrajPurple(sState *prev)
 		        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 		        _backFromPause = 1;
 		    	}
-		    uint16_t limits[RAD_NB_PTS]={40};
+		    uint16_t limits[RAD_NB_PTS]={40, 40, 40, 40};
 		        radarSetLim(limits);
 	}
 
-void deinitTrajYellowInit(sState *next)
+void deinitTrajPurpleInit(sState *next)
 	{
 		    if (next==&sPause)
 		    	{
@@ -208,7 +216,7 @@ sState *testTrajPurple()
 sState sTrajPurpleInit={
 		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
         &initTrajPurple,
-        &deinitTrajYellowInit,
+        &deinitTrajPurpleInit,
         &testTrajPurple
 };
 
