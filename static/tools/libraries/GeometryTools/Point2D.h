@@ -96,6 +96,14 @@ public:
         ret.y = y + p.x * sin(a) + p.y * cos(a);
         return ret;
     }
+
+	T getX() const {
+		return x;
+	}
+
+	T getY() const {
+		return y;
+	}
 };
 
 template<typename T>
