@@ -18,19 +18,4 @@ typedef struct PtLidar {
     int updTour;	/**< At wich tour this point has been seen ? */
 } PtLidar;
 
-/*
-class PtLidar {
-public: 
-    
-    int getAzimut();
-    
-    int getDist();
-private: 
-    int azimut;
-    int distance;
-    int quality;
-    bool valid;
-    int updTour;
-};*/
-
 #endif //_PTLIDAR_H

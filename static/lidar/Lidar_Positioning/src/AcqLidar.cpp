@@ -8,9 +8,8 @@
 #define DEVICE_PORT "/dev/ttyUSB0"
 #define PERSISTANCE 2
 /**
- * AcqLidar implementation
+ *
  */
-
 AcqLidar::AcqLidar() {
 	for (int i = 0; i < NB_PTS; ++i) {
 		buffData[i].azimut = 0;

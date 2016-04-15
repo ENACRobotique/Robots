@@ -48,8 +48,8 @@ int Group::computeParameters() {
 	double y2 = d2*sin(a2*DEG_TO_RAD);
 	sizeMin = (int) sqrt(pow((x2-x1),2) + pow((y2-y1),2));
 
-	a1-=1;
-	a2+=1;
+	a1-=2;
+	a2+=2;
 
 	x1 = d1*cos(a1*DEG_TO_RAD);
 	y1 = d1*sin(a1*DEG_TO_RAD);
