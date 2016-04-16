@@ -54,7 +54,7 @@ void deinitTrajGreenStart(sState *next)
 	}
 }
 
-trajElem start_green[]={
+const PROGMEM trajElem start_green[]={
 	{30,3,1500},
 	{30,-3,1500},
 	{-20,-10,4000},
@@ -124,7 +124,7 @@ void deinitTrajPurpleInit(sState *next)
 	}
 }
 
-trajElem start_purple[]={
+const PROGMEM trajElem start_purple[]={
 	{30,0,4500},
 	{20,10,6000},
 	{15,0,750},

@@ -9,6 +9,7 @@
 #define DEFS_H_
 
 #include "Servo.h"
+#include <avr/pgmspace.h>
 //#define NO_ATTITUDE_BEFORE_STAIRS
 
 #define TIME_BEFORE_START 100
