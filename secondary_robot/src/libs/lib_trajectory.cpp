@@ -49,25 +49,27 @@ int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, uns
 }
 
 
-int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
-    if (!(*prev_millis)){
+int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
+    trajElem elt;/* = tab[*i];*/
+    memcpy_P(&elt,&(tab[*i]),sizeof(trajElem));
+	if (!(*prev_millis)){
     	*prev_millis=millis();
-        move(tab[*i].speed,tab[*i].teta);
+        move(elt.speed,elt.teta);
     }
 
     if(_backFromPause){
     	_backFromPause = 0;
-    	move(tab[*i].speed,tab[*i].teta);
+    	move(elt.speed,elt.teta);
 
     }
 
-    if ( (millis()-*prev_millis-*pausetime)>tab[*i].duration ) {
+    if ( (millis()-*prev_millis-*pausetime)>elt.duration ) {
         (*i)++;
         *prev_millis=millis();
         *pausetime=0;
-        move(tab[*i].speed,tab[*i].teta);
+        move(elt.speed,elt.teta);
     }
-    if ( tab[*i].teta==0 && tab[*i].duration==0 && tab[*i].speed==0) {
+    if ( elt.teta==0 && elt.duration==0 && elt.speed==0) {
         *i=0;
         *prev_millis=0;
         return 1;
