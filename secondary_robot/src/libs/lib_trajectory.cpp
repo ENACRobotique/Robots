@@ -65,6 +65,7 @@ int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsi
 
     if ( (millis()-*prev_millis-*pausetime)>elt.duration ) {
         (*i)++;
+        memcpy_P(&elt,&(tab[*i]),sizeof(trajElem));
         *prev_millis=millis();
         *pausetime=0;
         move(elt.speed,elt.teta);
