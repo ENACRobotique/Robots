@@ -6,7 +6,6 @@
 #include "state_pause.h"
 #include "lib_radar.h"
 #include "lib_move.h"
-#include "state_tirette.h"
 #include "state_dead.h"
 #include "state_funny_action.h"
 #include "lib_us.h"

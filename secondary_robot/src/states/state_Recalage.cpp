@@ -15,7 +15,6 @@
 #include "../tools.h"
 #include "../params.h"
 #include "state_wait.h"
-#include "lib_radar_mask.h"
 #include "state_funny_action.h"
 #include "state_pause.h"
 #include "state_Peche.h"

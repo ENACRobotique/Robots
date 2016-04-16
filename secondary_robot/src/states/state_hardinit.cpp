@@ -8,14 +8,10 @@
 #include "state_dead.h"
 #include "state_traj.h"
 #include "state_tirette.h"
-
-#include "../libs/lib_attitude.h"
-#include "../libs/MPU_6050.h"
 #include "../libs/lib_move.h"
 #include "../libs/lib_motor.h"
 #include "../libs/lib_radar.h"
 #include "state_funny_action.h"
-#include "lib_wall.h"
 
 sState* reTirette(){
 	return &sTirette;

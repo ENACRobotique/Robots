@@ -10,7 +10,6 @@
 #include "state_pause.h"
 #include "state_Recalage.h"
 #include "state_wait.h"
-#include "lib_radar_mask.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
 #ifdef HEADING
