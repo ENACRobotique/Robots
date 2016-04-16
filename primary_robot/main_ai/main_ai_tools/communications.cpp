@@ -123,7 +123,7 @@ int roleSetup(bool simu_ai, bool simu_prop, bool simu_beacons){
         msg.payload.roleSetup.steps[0].role = ROLE_PRIM_AI;
         msg.payload.roleSetup.steps[0].address = ADDRD1_MAIN_AI_SIMU;
 
-        bn_send(msg);
+        bn_send(&msg);
 
 
         msg.header.type = E_ROLE_SETUP;

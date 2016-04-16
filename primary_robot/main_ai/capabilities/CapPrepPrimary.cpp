@@ -61,9 +61,9 @@ int CapPrepPrimary::loop(){
          //   float theta_robot;
             Point2D<float> pos_robot;
 
-            if (capTeam->getColor() == eColor_t::YELLOW) {
-                logs << INFO << "Color selected is YELLOW";
-                pos_robot = {INIT_POS_YELLOW_X, INIT_POS_YELLOW_Y};
+            if (capTeam->getColor() == eColor_t::PURPLE) {
+                logs << INFO << "Color selected is PURPLE";
+                pos_robot = {INIT_POS_PURPLE_X, INIT_POS_PURPLE_Y};
          //       theta_robot = INIT_ANGLE_YELLOW;
             }
             else if (capTeam->getColor() == eColor_t::GREEN) {
@@ -139,8 +139,8 @@ int CapPrepPrimary::loop(){
       //  Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
      //   float theta_robot = (180.)*M_PI/180.;
 
-        Point2D<float> pos_robot(300.-7.-11.2, 80.+2.7+17.5);
-        float theta_robot = (-191.6)*M_PI/180.;
+        Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
+        float theta_robot = INIT_ANGLE_GREEN;
 
         sendSetPosPrimary(pos_robot, theta_robot, MINVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
 

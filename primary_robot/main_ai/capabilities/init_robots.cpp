@@ -32,7 +32,7 @@
 
 std::vector<Robot*> robots;
 
-using namespace Env2015;
+using namespace Env2016;
 
 void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hmi_simu, eColor_t primary_color, eAIState_t eState){
 
@@ -70,7 +70,7 @@ void setupRobots(bool primary_prop_simu, bool primary_prop_holo, bool primary_hm
 
         robots.push_back(new Robot("", ELT_ADV_PRIMARY, &env));
 
-        robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color==eColor_t::YELLOW?eColor_t::GREEN:eColor_t::YELLOW);
+        robots.back()->caps[eCap::TEAM] = new CapTeam(robots.back(), primary_color==eColor_t::PURPLE?eColor_t::GREEN:eColor_t::PURPLE);
         robots.back()->caps[eCap::POS] = new CapPosStatuses(robots.back(), 2);
 
     }

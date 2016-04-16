@@ -10,12 +10,10 @@
 #include "state_tirette.h"
 #include "state_traj.h"
 #include "lib_radar.h"
-#include "lib_line.h"
-#include "params.h"
-#include "tools.h"
-
+#include "../params.h"
+#include "../tools.h"
 #include "lib_move.h"
-#include "sharp_2d120x.h"
+//#include "sharp_2d120x.h"
 
 /* State : tirette, first state of all, waits until the tirette is pulled
  *
@@ -24,41 +22,47 @@
  */
 
 sState* testTirette()
-	{
+{
+	_matchStart=millis();
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
+    static unsigned long timepull=0;
     if (digitalRead(PIN_TIRETTE)==TIRETTE_IN) prevIn=millis();
     if ( ( millis() - prevIn) > DEBOUNCE_DELAY)
-    	{
-        if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajStart_GREEN;
-        else return &sTrajStart_YELLOW;
-    	}
-    return 0;
+	{
+		if(timepull==0){
+			timepull = millis();
+		}
+		if(millis() - timepull > TIME_BEFORE_START){
+			if (digitalRead(PIN_COLOR)==COLOR_RED)return &sTrajGreenStart;
+			else return &sTrajPurpleStart;
+		}
 	}
+    return 0;
+}
 
 void initTirette(sState *prev)
-	{
+{
     move(0,0);
+	#ifdef DEBUG
+    	Serial.println("j'entre en tirette");
+	#endif
 
-#ifdef DEBUG
-    Serial.println("j'entre en tirette");
-#endif
 
-
-	}
+}
 
 void deinitTirette(sState *next)
-	{
+{
     _matchStart=millis();
 
 	#ifdef DEBUG
 		Serial.println("fin tirette");
 	#endif
-	}
+}
 
 sState sTirette={
-        BIT(E_MOTOR),
-        &initTirette,
-        &deinitTirette,
-        &testTirette
+	BIT(E_MOTOR)|BIT(E_RADAR),
+	&initTirette,
+	&deinitTirette,
+	&testTirette
 };
 

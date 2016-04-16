@@ -12,7 +12,7 @@
 extern "C" {
 #include "millis.h"
 }
-
+/*
 typedef enum {
     GET_STAND_ENTRY,
     GET_STAND_OPEN,
@@ -197,4 +197,4 @@ int dropStand(unsigned int id){
     }
     return 0;
 }
-
+*/

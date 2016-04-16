@@ -10,6 +10,7 @@ void video_draw_cross(unsigned char *rgb, unsigned int w, unsigned int h, unsign
 void video_draw_arrow(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int x, int y, int dx, int dy, unsigned int size, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void video_draw_circle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int xc, int yc, unsigned int ray, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void video_draw_filled_circle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int xc, int yc, unsigned int ray, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+void video_draw_quarter_filled_circle(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int xc, int yc, unsigned int ray, int quarter, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void video_draw_arc(unsigned char *rgb, unsigned int w, unsigned int h, unsigned int rowstride, int xc, int yc, unsigned int ray, int x1, int y1, int x2, int y2, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
 #define BLACK() 0, 0, 0
@@ -23,5 +24,13 @@ void video_draw_arc(unsigned char *rgb, unsigned int w, unsigned int h, unsigned
 #define YELLOW(i) (i), (i), 0
 
 #define ORANGE(i) (i), (i)>>1, 0
+
+#define PURPLE(i) (i), 0 ,(i)
+
+#define TOP_RIGHT 0
+#define TOP_LEFT 1
+#define BOTTOM_LEFT 2
+#define BOTTOM_RIGHT 3
+
 
 #endif

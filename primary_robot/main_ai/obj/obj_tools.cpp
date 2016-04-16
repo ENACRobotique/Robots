@@ -13,7 +13,6 @@
 #include <obj.h>
 #include <obj_tools.h>
 #include <tools.h>
-#include "clap.h"
 
 //#define DEBUG_OBJ
 
@@ -140,16 +139,15 @@ int nextObj(const unsigned int start_time, const int robot, const bool axle, par
         logs << INFO << "type=" << i.type
                      << "; id=" << i.id;
 
-        if(i.type == ELEVATOR){
-            logs << "; number element=" << i.elevator.number
-                 << "; light=" << i.elevator.ball
-                 << "; full=" << i.elevator.full
-                 << "; empty=" << i.elevator.empty;
+        if(i.type == SANDDOOR){
+            logs << "; cone number=" << i.doors.cone_number
+                 << "; cube number=" << i.doors.cube_number
+				 << "; cylinder number=" << i.doors.cylinder_number;
         }
-        else if(i.type == CUP){
-            logs << "; distributor=" << i.cupActuator.distributor
-                 << "; full=" << i.cupActuator.full;
-        }
+//        else if(i.type == S){
+//            logs << "; distributor=" << i.cupActuator.distributor
+//                 << "; full=" << i.cupActuator.full;
+//        }
     }
 
     logs << INFO << "The selected objective is :" << tmp_inx;
