@@ -21,62 +21,60 @@
 
 int purple=0;
 
+const PROGMEM trajElem calage_largeur_purple[] = {
+	{300,0,1400},
+	{0,-45,200},
+	{-200,-45,2500},
+	{0,0,0},
+};
+
+const PROGMEM trajElem calage_largeur_green[] = {
+	{0,60,300},
+	{250,60,1700},
+	{0,0,100},
+	{0,0,0}
+};
+
 sState* testRecalage(){
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-	trajElem calage_largeur_purple[] = {
-					{300,0,1400},
-					{0,-45,200},
-					{-200,-45,2500},
-//old recalage		{0,60,300},
-//					{250,60,1650},
-//					{0,0,100},
-//					{0,0,0}
-					{0,0,0},
-				};
 
-	trajElem calage_largeur_green[] = {
-						{0,60,300},
-						{250,60,1700},
-						{0,0,100},
-						{0,0,0}
-				};
 
-	trajElem* calage=calage_largeur_green;
+	const trajElem* calage=calage_largeur_green;
 
-		if(purple)
-		{
-			calage = calage_largeur_purple;
-		}
-        static unsigned long st_saveTime=0;
-        static int i=0;
-		static unsigned long prev_millis=0;
-		static int flag_end = 0;
-		if(!flag_end){
-			if(periodicProgTraj(calage,&st_saveTime,&i,&prev_millis))
-				{
-					flag_end = 1;
-				}
-		}
-		else{
-			move(-300,0);
-
-			if(digitalRead(PIN_SWITCH_LEFT))
-				{
-					move(0,0);
-					st_saveTime = 0;
-					i = 0;
-					flag_end = 0;
-					if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sPecheGreen;
-					else return &sPechePurple;
-
-				}
-		}
-		if (radarIntrusion()) return &sPause;
-		return NULL;
+	if(purple)
+	{
+		calage = calage_largeur_purple;
 	}
+	static unsigned long st_saveTime=0;
+	static int i=0;
+	static unsigned long prev_millis=0;
+	static int flag_end = 0;
+	if(!flag_end){
+		if(periodicProgTraj(calage,&st_saveTime,&i,&prev_millis))
+			{
+				flag_end = 1;
+			}
+	}
+	else{
+		move(-300,0);
+
+		if(digitalRead(PIN_SWITCH_LEFT))
+			{
+				move(0,0);
+				st_saveTime = 0;
+				i = 0;
+				flag_end = 0;
+				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sPecheGreen;
+				else return &sPechePurple;
+
+			}
+	}
+	if (radarIntrusion()) return &sPause;
+	return NULL;
+}
 
 
 

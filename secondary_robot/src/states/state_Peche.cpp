@@ -65,18 +65,57 @@ void deinitPechePurple(sState *next){
 
 sState* testPechePurple();
 sState sPeche2Purple={
-		BIT(E_MOTOR)|BIT(E_RADAR),
-		&initPechePurple,
-		&deinitPechePurple,
-		&testPechePurple
+	BIT(E_MOTOR)|BIT(E_RADAR),
+	&initPechePurple,
+	&deinitPechePurple,
+	&testPechePurple
 };
 sState sPechePurple={
-		BIT(E_MOTOR)|BIT(E_RADAR),
-        &initPechePurple,
-        &deinitPechePurple,
-        &testPechePurple
+	BIT(E_MOTOR)|BIT(E_RADAR),
+	&initPechePurple,
+	&deinitPechePurple,
+	&testPechePurple
 };
+const PROGMEM trajElem purple_fishing[] = {
+	{0,0,400},
+	{60,0,6450},//canne down	1
+	{0,0,1000},//				2
+	{-200,-12,500},//canne up
+	{-200,-20,1500},
+	{-200,35,2000},
+	{-200,-15,2200},
+	{0,0,500},//canne down		7
+	{0,0,1000},//crema in		8
+	{0,0,200},//canne up		9
+	{0,0,100},//crema out		10
+	{200,-15,2000},
+	{200,35,1300},
+	{200,-15,1200},
+	{200,-2,800},//canne down	14
+	{60,0,7000},
+	{0,0,1000},//canne up		16
+	{-200,0,800},
+	{-200,-2,500},
+	{-200,-10,1700},
+	{-200,30,2000},
+	{-200,-15,2000},
+	{0,0,500},//canne down		22
+	{0,0,1000},//crema in		23
+	{0,0,200},//canne up		24
+	{0,0,100},//crema out		25
 
+	{200,-15,2000},
+	{200,35,1700},
+	{200,-15,1200},
+	{200,-2,1400},
+
+	{0,30,100},
+	{-200,30,800},
+	{-200,-30,600},
+
+	{-200,0,5000},// et on recommence 33
+	{0,0,0},
+};
 sState* testPechePurple(){
 
 
@@ -84,46 +123,7 @@ sState* testPechePurple(){
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
 
-	trajElem purple_fishing[] = {
-			{0,0,400},
-			{60,0,6450},//canne down	1
-			{0,0,1000},//				2
-			{-200,-12,500},//canne up
-			{-200,-20,1500},
-			{-200,35,2000},
-			{-200,-15,2200},
-			{0,0,500},//canne down		7
-			{0,0,1000},//crema in		8
-			{0,0,200},//canne up		9
-			{0,0,100},//crema out		10
-			{200,-15,2000},
-			{200,35,1300},
-			{200,-15,1200},
-			{200,-2,800},//canne down	14
-			{60,0,7000},
-			{0,0,1000},//canne up		16
-			{-200,0,800},
-			{-200,-2,500},
-			{-200,-10,1700},
-			{-200,30,2000},
-			{-200,-15,2000},
-			{0,0,500},//canne down		22
-			{0,0,1000},//crema in		23
-			{0,0,200},//canne up		24
-			{0,0,100},//crema out		25
 
-			{200,-15,2000},
-			{200,35,1700},
-			{200,-15,1200},
-			{200,-2,1400},
-
-			{0,30,100},
-			{-200,30,800},
-			{-200,-30,600},
-
-			{-200,0,5000},// et on recommence 33
-			{0,0,0},
-	};
 	static int i=0;
 	static unsigned long prev_millis=0;
 	static int pos_servo = CANNE_VERTICAL;
@@ -238,18 +238,19 @@ void deinitPecheGreen(sState *next){
 
 sState* testPecheGreen();
 sState sPeche2Green={
-		BIT(E_MOTOR)|BIT(E_RADAR),
-		&initPecheGreen,
-		&deinitPecheGreen,
-		&testPecheGreen
+	BIT(E_MOTOR)|BIT(E_RADAR),
+	&initPecheGreen,
+	&deinitPecheGreen,
+	&testPecheGreen
 };
 sState sPecheGreen={
-		BIT(E_MOTOR)|BIT(E_RADAR),
-        &initPecheGreen,
-        &deinitPecheGreen,
-        &testPecheGreen
+	BIT(E_MOTOR)|BIT(E_RADAR),
+	&initPecheGreen,
+	&deinitPecheGreen,
+	&testPecheGreen
 };
-trajElem green_fishing[] = {
+
+const PROGMEM trajElem green_fishing[] = {
 	{0,0,100},
 	{300,0,1450},
 	{100,0,5500},//canne down	2
