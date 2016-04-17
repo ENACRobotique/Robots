@@ -138,7 +138,12 @@ add_definitions(-std=c++11)
 
 ## Declare a C++ executable
 add_executable(arm_hrrr_joint_controller_node src/arm_controller/src/arm_hrrr_joint_controller_node.cpp src/arm_controller/src/JointController.cpp src/arm_controller/src/ArmHrrrHW.cpp)
-add_executable(moveit_test src/moveit_test.cpp src/IK_arm_hrrr/IK_arm_hrrr.cpp src/ObjsConstruc.cpp)
+add_executable(moveit_test 
+    src/moveit_test.cpp 
+    src/IK_arm_hrrr/IK_arm_hrrr.cpp 
+    src/ObjsConstruc.cpp
+    src/UI/UI_functions.cpp
+    src/tools/tools_functions.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

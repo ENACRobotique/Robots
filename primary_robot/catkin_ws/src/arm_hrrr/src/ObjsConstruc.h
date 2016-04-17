@@ -8,15 +8,11 @@
 #include "ros/ros.h"
 #include <moveit_msgs/CollisionObject.h>
 
-
+#include "arm.h"
+#include "objet.h"
 #define DIMOBJ 0.058  // In mm
 
 
-typedef enum eOrienTool{
-    vertical,
-    horizontal,
-    eOrienToolMax
-}eOrienTool;
 
 typedef enum eActionManip{
     grabObj,
@@ -32,12 +28,6 @@ typedef enum eTypeConstruc{
     eTypeConstrucMax
 }eTypeConstruc;
 
-typedef enum eShape{
-    cub,
-    cyl,
-    con,
-    eShapeMax
-}eShape;
 
 typedef std::tuple<eActionManip, eOrienTool, std::string, geometry_msgs::Pose> stepConstruc_t;
 typedef std::vector<stepConstruc_t> planConstruc_t;
