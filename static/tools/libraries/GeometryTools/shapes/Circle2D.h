@@ -19,6 +19,7 @@
 #ifndef SIGN
 #define SIGN(x) ((x > 0) - (x < 0))
 #endif
+#define SIGN2(x) ((x > 0))
 
 template<typename T>
 class Circle2D/*: public Ellipse2D<T>*/ {
@@ -123,14 +124,21 @@ class Circle2D/*: public Ellipse2D<T>*/ {
         T perimeter() const{
             return 2 * M_PI * r;
         }
-        T arcLenght(const Point2D<T>& p1, const Point2D<T>& p2){ // p1 and p2 is an angle
+        T arcLenght(const Point2D<T>& p1, const Point2D<T>& p2, bool dir){ // p1 and p2 is an angle, dir==false ->CW and dir==true -> CCW
             if (p1 == c || p2 == c)
                 return 0;
 
             Vector2D<T> v1(c, p1), v2(c, p2);
             T d = v1.angle(v2) ;
-            if (d < 0)
-                d = d + 2 * M_PI;
+
+            if (SIGN2(d) != dir) {
+                if (d < 0) {
+                    d += 2 * M_PI;
+                }
+                else {
+                    d -= 2 * M_PI;
+                }
+            }
             d *= perimeter() / (2 * M_PI);
 
             return d < 0 ? -d : d;

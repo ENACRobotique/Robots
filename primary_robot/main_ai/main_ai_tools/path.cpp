@@ -456,8 +456,9 @@ void Path::setPathLength() {
     if(!_path.empty()){
         for (unsigned int i = 0; i < _path.size() - 1; i++) {
             Circle2D<float> c(_path[i].obs.c.x, _path[i].obs.c.y, _path[i].obs.r);
-            Point2D<float> p1(_path[i].p2.x, _path[i].p2.y), p2(_path[i+1].p1.x, _path[i+1].p1.y);
-            _path[i].arc_len = c.arcLenght(p1, p2);
+            Point2D<float> p1(_path[i].p2.x, _path[i].p2.y), p2(_path[i+1].p1.x, _path[i+1].p1.y), cobs(_path[i].obs.c.x, _path[i].obs.c.y);
+            Vector2D<float> v1(_path[i].p1, _path[i].p2), v2(cobs, _path[i].p2);
+            _path[i].arc_len = c.arcLenght(p1, p2, (v2^v1) > 0 ? true : false);
             _path[i].seg_len = _path[i].p1.distanceTo(_path[i].p2);
         }
 
@@ -467,8 +468,9 @@ void Path::setPathLength() {
     else if(!_path_orient.empty()){
         for (unsigned int i = 0; i < _path_orient.size() - 1; i++) {
             Circle2D<float> c(_path_orient[i].obs.c.x, _path_orient[i].obs.c.y, _path_orient[i].obs.r);
-            Point2D<float> p1(_path_orient[i].p2.x, _path_orient[i].p2.y), p2(_path_orient[i+1].p1.x, _path_orient[i+1].p1.y);
-            _path_orient[i].arc_len = c.arcLenght(p1, p2);
+            Point2D<float> p1(_path_orient[i].p2.x, _path_orient[i].p2.y), p2(_path_orient[i+1].p1.x, _path_orient[i+1].p1.y), cobs(_path_orient[i].obs.c.x, _path_orient[i].obs.c.y);
+            Vector2D<float> v1(_path_orient[i].p1, _path_orient[i].p2), v2(cobs, _path_orient[i].p2);
+            _path_orient[i].arc_len = c.arcLenght(p1, p2, (v2^v1) > 0 ? true : false);
             _path_orient[i].seg_len = _path_orient[i].p1.distanceTo(_path_orient[i].p2);
         }
 
