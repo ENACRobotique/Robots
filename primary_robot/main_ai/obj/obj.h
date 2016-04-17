@@ -26,7 +26,7 @@ typedef enum{
 }objective;
 
 typedef enum {
-    E_NULL, E_SANDHEAP, E_DUNEHEAP, E_DUNE, E_SANDDROP, E_SHELL, E_SHELL_ROCK, E_SHELLDROP, E_OBJ_STARTING_ZONE, E_RECALAGE
+    E_NULL,E_BUILDING_ZONE, E_SANDHEAP, E_DUNEHEAP, E_DUNE, E_SANDDROP, E_SHELL, E_SHELL_ROCK, E_SHELLDROP, E_OBJ_STARTING_ZONE, E_RECALAGE
 } eObj_t;
 
 typedef enum {
@@ -40,9 +40,7 @@ typedef struct {
         Point2D<float> pos;
 
         struct{
-            unsigned int cone_number;
-            unsigned int cube_number;
-            unsigned int cylinder_number;
+            bool full;
         }doors;
 
         struct{
@@ -138,6 +136,8 @@ class Obj {
 
         string objType(){
             switch(_type){
+            	case E_BUILDING_ZONE:
+            		return "BUILDINGZONE";
                 case E_SANDHEAP:
                     return "SANDHEAP";
                 case E_DUNEHEAP:
