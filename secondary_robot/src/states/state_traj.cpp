@@ -87,7 +87,7 @@ const PROGMEM trajElem start_purple[]={
 	{0,90,400},
 	{300,90,1300},
 	{0,-35,300},
-	{-300,-35,2325},
+	{-300,-35,2200},
 	{0,0,0},
 };
 const PROGMEM trajElem start_green[]={
