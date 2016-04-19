@@ -19,10 +19,12 @@ typedef struct {
     unsigned long duration;   //in ms
 }trajElem;
 
+//pointeur de fonction
+typedef int(*periodicTraj)(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
 extern int _backFromPause;
 
-int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
+int periodicProgTrajHeading(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
-int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
+int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 #endif /* STATE_TRAJECTORY_H_ */
