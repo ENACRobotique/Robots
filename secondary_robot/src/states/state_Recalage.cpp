@@ -20,6 +20,8 @@
 #include "state_Peche.h"
 
 int purple=0;
+unsigned long st_saveTime_R=0,st_prevSaveTime_R=0,st_saveTime_radar_R=0,st_prevSaveTime_radar_R=0;
+
 
 const PROGMEM trajElem calage_largeur_purple[] = {
 	{300,0,1400},
@@ -40,7 +42,7 @@ sState* testRecalage(){
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-
+	uint16_t limits[RAD_NB_PTS]={25,0,0,0};
 
 	const trajElem* calage=calage_largeur_green;
 
@@ -60,7 +62,7 @@ sState* testRecalage(){
 	}
 	else{
 		move(-300,0);
-
+		radarSetLim(limits);
 		if(digitalRead(PIN_SWITCH_LEFT))
 			{
 				move(0,0);
@@ -85,14 +87,38 @@ void initRecalage(sState *prev){
 	else{
 		purple=1;
 	}
+	if (prev==&sPause)
+	{
+		#ifdef DEBUG
+			Serial.println(F("\tback from pause"));
+		#endif
+		st_saveTime_R=millis()-st_saveTime_R+st_prevSaveTime_R;
+		st_saveTime_radar_R=millis()-st_saveTime_radar_R+st_prevSaveTime_radar_R;
+		_backFromPause = 1;
+	}
+	uint16_t limits[RAD_NB_PTS]={0,0,0,25};
+	radarSetLim(limits);
 }
 
 void deinitRecalage(sState *next){
-        // Your code here !
-    }
+	if (next==&sPause)
+	{
+		st_prevSaveTime_R=st_saveTime_R;
+		st_saveTime_R=millis();
+		st_prevSaveTime_radar_R=st_saveTime_radar_R;
+		st_saveTime_radar_R=millis();
+	}
+	else
+	{
+		st_saveTime_R=0;
+		st_prevSaveTime_R=0;
+		st_saveTime_radar_R=0;
+		st_prevSaveTime_radar_R=0;
+	}
+}
 
 sState sRecalage={
-	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+	BIT(E_MOTOR)|BIT(E_RADAR),
     &initRecalage,
     &deinitRecalage,
     &testRecalage
