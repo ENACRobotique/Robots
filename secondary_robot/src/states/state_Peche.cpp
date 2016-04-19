@@ -121,6 +121,10 @@ sState* testPechePurple(){
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
+	else if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION-1000)
+	{
+		canne_servo.write(CANNE_SECURE);
+	}
 #endif
 
 
