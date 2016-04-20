@@ -121,71 +121,75 @@ sState* testPechePurple(){
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
-	else if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION-1000)
-	{
-		canne_servo.write(CANNE_SECURE);
-	}
+
 #endif
 
 
 	static int i=0;
 	static unsigned long prev_millis=0;
 	static int pos_servo = CANNE_VERTICAL;
-	switch (i) {
-		case 1:
-			canne_servo.write(CANNE_DOWN);
-			pos_servo = CANNE_DOWN;
-			break;
-		case 2:
-			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-				pos_servo = max(pos_servo - 3, CANNE_UP);
-				canne_servo.write(pos_servo);
-			}
-			break;
-		case 7:
-			canne_servo.write(CANNE_DOWN);
-			break;
-		case 8:
-			crema_servo.write(CREMA_IN);
-			break;
-		case 9:
-			canne_servo.write(CANNE_UP);
-			break;
-		case 10:
-			crema_servo.write(CREMA_OUT);
-			break;
-		case 14:
-			canne_servo.write(CANNE_DOWN);
-			pos_servo = CANNE_DOWN;
-			break;
-		case 16:
-			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-				pos_servo = max(pos_servo - 3, CANNE_UP);
-				canne_servo.write(pos_servo);
-			}
-			break;
-		case 22:
-			canne_servo.write(CANNE_DOWN);
-			break;
-		case 23:
-			crema_servo.write(CREMA_IN);
-			break;
-		case 24:
-			canne_servo.write(CANNE_UP);
-			break;
-		case 25:
-			crema_servo.write(CREMA_OUT);
-			break;
-		case 33:
-			if( digitalRead(PIN_SWITCH_LEFT) )
-			{
-				st_saveTime_P=0;
-				i=0;
-				prev_millis=0;
-				pos_servo = CANNE_VERTICAL;
-				return &sPeche2Purple;
-			}
-			break;
+	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION-1000)
+	{
+		canne_servo.write(CANNE_SECURE);
+	}
+	else
+	{
+		switch (i) {
+			case 1:
+				canne_servo.write(CANNE_DOWN);
+				pos_servo = CANNE_DOWN;
+				break;
+			case 2:
+				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
+					pos_servo = max(pos_servo - 3, CANNE_UP);
+					canne_servo.write(pos_servo);
+				}
+				break;
+			case 7:
+				canne_servo.write(CANNE_DOWN);
+				break;
+			case 8:
+				crema_servo.write(CREMA_IN);
+				break;
+			case 9:
+				canne_servo.write(CANNE_UP);
+				break;
+			case 10:
+				crema_servo.write(CREMA_OUT);
+				break;
+			case 14:
+				canne_servo.write(CANNE_DOWN);
+				pos_servo = CANNE_DOWN;
+				break;
+			case 16:
+				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
+					pos_servo = max(pos_servo - 3, CANNE_UP);
+					canne_servo.write(pos_servo);
+				}
+				break;
+			case 22:
+				canne_servo.write(CANNE_DOWN);
+				break;
+			case 23:
+				crema_servo.write(CREMA_IN);
+				break;
+			case 24:
+				canne_servo.write(CANNE_UP);
+				break;
+			case 25:
+				crema_servo.write(CREMA_OUT);
+				break;
+			case 33:
+				if( digitalRead(PIN_SWITCH_LEFT) )
+				{
+					st_saveTime_P=0;
+					i=0;
+					prev_millis=0;
+					pos_servo = CANNE_VERTICAL;
+					return &sPeche2Purple;
+				}
+				break;
+		}
 	}
 	if(periodicProgTraj(purple_fishing,&st_saveTime_P,&i,&prev_millis))
 	{
@@ -299,62 +303,68 @@ sState* testPecheGreen(){
 	static int i=0;
 	static unsigned long prev_millis=0;
 	static int pos_servo = CANNE_VERTICAL;
-
-	switch (i) {
-		case 2:
-			canne_servo.write(CANNE_DOWN);
-			pos_servo = CANNE_DOWN;
-			break;
-		case 3:
-			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-				pos_servo = max(pos_servo - 3, CANNE_UP);
-				canne_servo.write(pos_servo);
-			}
-			break;
-		case 8:
-			canne_servo.write(CANNE_DOWN);
-			break;
-		case 9:
-			crema_servo.write(CREMA_IN);
-			break;
-		case 10:
-			canne_servo.write(CANNE_UP);
-			break;
-		case 11:
-			crema_servo.write(CREMA_OUT);
-			break;
-		case 16:
-			canne_servo.write(CANNE_DOWN);
-			pos_servo = CANNE_DOWN;
-			break;
-		case 17:
-			if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-				pos_servo = max(pos_servo - 3, CANNE_UP);
-				canne_servo.write(pos_servo);
-			}
-			break;
-		case 22:
-			canne_servo.write(CANNE_DOWN);
-			break;
-		case 23:
-			crema_servo.write(CREMA_IN);
-			break;
-		case 24:
-			canne_servo.write(CANNE_UP);
-			break;
-		case 25:
-			crema_servo.write(CREMA_OUT);
-			break;
-		case 31:
-			if( digitalRead(PIN_SWITCH_LEFT) )
-			{
-				st_saveTime_P=0;
-				i=0;
-				prev_millis=0;
-				pos_servo = CANNE_VERTICAL;
-				return &sPeche2Green;
-			}
-			break;
+	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION-1000)
+	{
+		canne_servo.write(CANNE_SECURE);
+	}
+	else
+	{
+		switch (i) {
+			case 2:
+				canne_servo.write(CANNE_DOWN);
+				pos_servo = CANNE_DOWN;
+				break;
+			case 3:
+				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
+					pos_servo = max(pos_servo - 3, CANNE_UP);
+					canne_servo.write(pos_servo);
+				}
+				break;
+			case 8:
+				canne_servo.write(CANNE_DOWN);
+				break;
+			case 9:
+				crema_servo.write(CREMA_IN);
+				break;
+			case 10:
+				canne_servo.write(CANNE_UP);
+				break;
+			case 11:
+				crema_servo.write(CREMA_OUT);
+				break;
+			case 16:
+				canne_servo.write(CANNE_DOWN);
+				pos_servo = CANNE_DOWN;
+				break;
+			case 17:
+				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
+					pos_servo = max(pos_servo - 3, CANNE_UP);
+					canne_servo.write(pos_servo);
+				}
+				break;
+			case 22:
+				canne_servo.write(CANNE_DOWN);
+				break;
+			case 23:
+				crema_servo.write(CREMA_IN);
+				break;
+			case 24:
+				canne_servo.write(CANNE_UP);
+				break;
+			case 25:
+				crema_servo.write(CREMA_OUT);
+				break;
+			case 31:
+				if( digitalRead(PIN_SWITCH_LEFT) )
+				{
+					st_saveTime_P=0;
+					i=0;
+					prev_millis=0;
+					pos_servo = CANNE_VERTICAL;
+					return &sPeche2Green;
+				}
+				break;
+		}
 	}
 	if(periodicProgTraj(green_fishing,&st_saveTime_P,&i,&prev_millis))
 	{
