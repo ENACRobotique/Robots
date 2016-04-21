@@ -48,17 +48,17 @@ sServoData servosTable[] = { //servo number (club)|a|b   (us = a*deg+b)
 };
 #define NUM_SERVOS (sizeof(servosTable)/sizeof(*servosTable))
 #define PIN_DBG_LED (13)
-#define PIN_MODE_SWITCH (3)
-#define PIN_STARTING_CORD (2)
+#define PIN_MODE_SWITCH (2)
+#define PIN_STARTING_CORD (4)
 #define PIN_LED_BLUE (5)
-#define PIN_LED_RED (9)
+#define PIN_LED_RED (3)
 #define PIN_LED_GREEN (6)
 
-#define PIN_PRESENCE_1 (4)
-#define PIN_PRESENCE_2 (7)
-#define PIN_PRESENCE_3 (8)
-#define PIN_PRESENCE_4 (10)
-#define PIN_PRESENCE_5 (11)
+#define PIN_PRESENCE_1 (8)
+#define PIN_PRESENCE_2 (9)
+#define PIN_PRESENCE_3 (10)
+#define PIN_PRESENCE_4 (11)
+#define PIN_PRESENCE_5 (12)
 
 Adafruit_PWMServoDriver pwm(0x40);
 
@@ -73,16 +73,21 @@ void fctStartingCord(void);
 
 
 void setup(){
-    attachInterrupt(0, fctStartingCord, CHANGE);
-    attachInterrupt(1, fctModeSwitch, CHANGE);
+    //attachInterrupt(0, fctStartingCord, CHANGE);
+    //attachInterrupt(1, fctModeSwitch, CHANGE);
 
     pinMode(PIN_LED_BLUE, OUTPUT);
     pinMode(PIN_LED_RED, OUTPUT);
     pinMode(PIN_LED_GREEN, OUTPUT);
     pinMode(PIN_DBG_LED, OUTPUT);
-    pinMode(PIN_MODE_SWITCH, INPUT);
-    pinMode(PIN_STARTING_CORD, INPUT);
+    pinMode(PIN_MODE_SWITCH, INPUT_PULLUP);
+    pinMode(PIN_STARTING_CORD, INPUT_PULLUP);
 
+    pinMode(PIN_PRESENCE_1, INPUT_PULLUP);
+    pinMode(PIN_PRESENCE_2, INPUT_PULLUP);
+    pinMode(PIN_PRESENCE_3, INPUT_PULLUP);
+    pinMode(PIN_PRESENCE_4, INPUT_PULLUP);
+    pinMode(PIN_PRESENCE_5, INPUT_PULLUP);
     //init led
     digitalWrite(PIN_LED_BLUE, LOW);
     digitalWrite(PIN_LED_RED, LOW);
@@ -104,9 +109,9 @@ void setup(){
 
 
 sMsg inMsg, outMsg;
-int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwitch = 0, StartingCord = 0, Led = 0;
+int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwitch = 0, StartingCord = 0, StartingCordOld=0, Led = 0;
 int flagPresence1=0, flagPresence2=0, flagPresence3=0, flagPresence4=0, debounceModeSwitch=0;
-int debounceStartingCord, presence1Old=0, presence1=0, presence2Old=0, presence2=0, presence3Old=0, presence3=0, presence4Old=0;
+int presence1Old=0, presence1=0, presence2Old=0, presence2=0, presence3Old=0, presence3=0, presence4Old=0;
 int presence4=0, presence5Old=0, presence5=0, flagPresence5=0;
 unsigned long led_prevT = 0, time=0, timeModeSwitch=0, timeStartingCord=0, timePresence1=0, timePresence2=0, timePresence3=0,timeLedStart=0;
 unsigned long timePresence4=0, timePresence5=0;
@@ -244,10 +249,23 @@ void loop(){
         digitalWrite(PIN_DBG_LED, ledState^=1);
     }
 
+
+    if (!flagStartingCord){
+		StartingCordOld = StartingCord;
+		StartingCord = digitalRead(PIN_STARTING_CORD);
+		if (StartingCordOld != StartingCord){
+			timeStartingCord = time;
+			flagStartingCord = 1;
+			StartingCordOld = StartingCord;
+		}
+
+	}
+
     if( (time -  timeStartingCord > 40) && flagStartingCord){
         StartingCord = digitalRead(PIN_STARTING_CORD);
 
-        if (StartingCord == debounceStartingCord){
+        if (StartingCord == StartingCordOld){
+        	setLedRGB(255,255,255);
         	outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         	outMsg.header.type = E_IHM_STATUS;
         	outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
@@ -416,17 +434,17 @@ void loop(){
 
 }
 
-void fctModeSwitch(void){
-    timeModeSwitch = time;
-    debounceModeSwitch = digitalRead(PIN_MODE_SWITCH);
-    flagModeSwitch = 1;
-}
-
-void fctStartingCord(void){
-    timeStartingCord = time;
-    debounceStartingCord = digitalRead(PIN_STARTING_CORD);
-    flagStartingCord = 1;
-}
+//void fctModeSwitch(void){
+//    timeModeSwitch = time;
+//    debounceModeSwitch = digitalRead(PIN_MODE_SWITCH);
+//    flagModeSwitch = 1;
+//}
+//
+//void fctStartingCord(void){
+//    timeStartingCord = time;
+//    debounceStartingCord = digitalRead(PIN_STARTING_CORD);
+//    flagStartingCord = 1;
+//}
 
 int degreesTo4096th(float degrees, float a, float b){
     float fCmdOutOf4096 = SERVO_FREQ*4096.*(a*degrees + b)/1000000.;
