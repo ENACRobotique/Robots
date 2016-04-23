@@ -121,6 +121,8 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  /home/yoyo/Robots/network_config
+  /home/yoyo/Robots/static/communication/botNet/shared
 )
 
 ## Declare a C++ library

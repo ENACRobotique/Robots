@@ -18,6 +18,11 @@
 #include <sstream>
 #include "parameters.h"
 
+#include "messages.h"
+//#include <shared/botNet_core.h>
+#include "/home/yoyo/Robots/static/communication/botNet/shared/botNet_core.h"
+#include "/home/yoyo/Robots/static/communication/network_tools/bn_debug.h"
+#include "/home/yoyo/Robots/static/communication/network_tools/bn_intp.h"
 
 
 int main(int argc, char **argv){
@@ -41,38 +46,22 @@ int main(int argc, char **argv){
     geometry_msgs::Pose pose_eef = groupArm0.getCurrentPose().pose;
     printPose("pose_eef", pose_eef);
 
-    const std::vector<std::string> vName = groupArm0.getActiveJoints();
-    std::cout<<"Active joints:\n";
-    for(int i=0;i<(int)vName.size(); i++)
-        std::cout<<vName[i]<<std::endl;
-
-    const moveit::core::JointModelGroup *jntModelGrp = groupArm0.getJointValueTarget().getJointModelGroup(groupArm0.getName());
-    std::vector<std::string> jntNames = jntModelGrp->getVariableNames();
-    for(int i=0; i<(int)jntNames.size(); i++)
-        std::cout<<"Joint's name: "<<jntNames[i]<<std::endl;
-
     geometry_msgs::Pose start_pose = groupArm0.getCurrentPose().pose;
     geometry_msgs::Pose target_pose = groupArm0.getCurrentPose().pose;
     groupArm0.setPoseTarget(target_pose);
     printPose("start_pose", start_pose);
     printPose("target_pose", target_pose);
 
-    ROS_INFO("Pose reference frame: %s", groupArm0.getPoseReferenceFrame().c_str());
-    ROS_INFO("End-effector link: %s", groupArm0.getEndEffectorLink().c_str());
-    ROS_INFO("End-effector: %s", groupArm0.getEndEffector().c_str());
-    ROS_INFO("Planning frame: %s", groupArm0.getPlanningFrame().c_str());
-//    groupArm0.setPlannerId("TRRTkConfigDefault");
-
+    groupArm0.setPlannerId("TRRTkConfigDefault");
 
     // Setting planning parameters
     groupArm0.setGoalTolerance(0.001);
 
     robot_state::RobotState curState = *groupArm0.getCurrentState();
-
+    robot_state::RobotState goalState = *groupArm0.getCurrentState();
 
     bool successPlan = false, successExec = false, targetPoseValid = false;
     std::string id_obj;
-    robot_state::RobotState goalState = *groupArm0.getCurrentState();
     moveit::planning_interface::MoveGroup::Plan my_plan;
     std::map<std::string, double> joints;
 
@@ -86,11 +75,38 @@ int main(int argc, char **argv){
     std::vector<ObjsConstruc*> listConstruc;
     std::vector<moveit_msgs::CollisionObject*> objsForConstruc;
 
-    // Start mode loop
+    // Botnet
+    sMsg inMsg = {{0}}, outMsg = {{0}};
+    int ret;
+
+    // botNet initialization
+//    bn_attach(E_ROLE_SETUP, role_setup);
+//    bn_attach(E_INTP, intp_sync_handler); // replaces bn_intp_install() to catch synchronization
+
+    bn_init();
+
+    // Start loop
     while(!endProg){
+    	ret = bn_receive(&inMsg);
+
+    	if(ret>0){
+//            role_relay(&inMsg); // relay any received message if asked to
+
+            switch(inMsg.header.type){
+            case E_SPEED_SETPOINT:
+                // TODO
+                break;
+            case E_DATA:
+            case E_PING:
+                break;
+            default:
+                bn_printfDbg("got unhandled msg: type%hhu sz%hhu", inMsg.header.type, inMsg.header.size);
+                break;
+            }
+    	}
+
         targetPoseValid = true;
         double x, y, z, beta;
-        int selectedObj, attachedObj;
         std::ostringstream stm ;
         // Get the mode
         do{
