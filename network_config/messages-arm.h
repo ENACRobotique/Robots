@@ -17,6 +17,14 @@ typedef enum eTypeArmMsgs{
     eTypeArmMsgs_max
 }eTypeArmMsgs;
 
+typedef enum eTypeConstruction{ // WARNING: the order must be same that in file ObjsConstruct.h in arm_hrrr project.
+    construct_tower11,
+    construct_tower21,
+    construct_wall222,
+    construct_wall322,
+    eTypeConstructionMax
+}eTypeConstruction;
+
 typedef struct __attribute__((packed)){
 // position in reference frame (specified in field "frame")
     uint8_t idArm;      // the arm
@@ -43,5 +51,14 @@ typedef struct __attribute__((packed)){
     float beta;         // (rad)
 } sPickPutObject; // to grasp or place an object
 
+typedef struct __attribute__((packed)){
+// position in reference frame (specified in field "frame")
+    uint8_t idConstruct;      // the construction
+    eTypeConstruction type;   // type of the construction
+    float x;                  // center of the construction(cm)
+    float y;                  // center of the construction(cm)
+    float z;                  // center of the construction(cm)
+    float beta;               // (rad)
+} sMakeConstruct; // to grasp or place an object
 
 #endif /* LIB_NETWORK_CONFIG_MESSAGES_ARM_H_ */

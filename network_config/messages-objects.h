@@ -27,7 +27,7 @@ typedef enum eStateObj{
 typedef struct __attribute__((packed)){
 // position in reference frame (specified in field "frame")
     eTypeObj type;      // type of the object
-    uint8_t id;         // id of the object
+    uint8_t idObj;         // id of the object
     float x;            // (cm)
     float y;            // (cm)
     float z;            // (cm)

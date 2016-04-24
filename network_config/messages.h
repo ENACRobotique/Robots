@@ -58,11 +58,12 @@ typedef enum{
     E_DONE_ABSPOS,          // @payload.doneAbsPos: for sending result of position fix
     E_PROP_STOP,            //  stop the robot
     E_TRAJ_POS_SPD_EL,      // @payload.trajPosSpdEl: complex trajectory element (position + speed wrt time)
-    E_ARM_CONSTRUCT,        // @payload.armConstruct: Make a construction
-    E_ARM_PICK,             // @payload.armConstruct: Pick an object
-    E_ARM_PUT,              // @payload.armConstruct: Put an object
-    E_ARM_STATIC_CONF,      // @payload.armConstruct: The arm return to the rest configuration
-    E_ARM_TARGET,           // @payload.armConstruct: The tip point of the arm go to the target point
+    E_ARM_CONSTRUCT,        // @payload.makeConstruct: Make a construction
+    E_ARM_PICK,             // @payload.pickPutObject: Pick an object
+    E_ARM_PUT,              // @payload.pickPutObject: Put an object
+    E_ARM_STATIC_CONF,      // @payload.staticConf: The arm return to the rest configuration
+    E_ARM_TARGET,           // @payload.goalTarget: The tip point of the arm go to the target point
+    E_ARM_OBJECT,           // @payload.object: Information about an object
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -158,6 +159,8 @@ typedef union{
     sGoalTarget goalTarget;             // E_ARM_TARGET
     sStaticConf staticConf;             // E_ARM_STATIC_CONF
     sPickPutObject pickPutObj;          // E_ARM_PICK or E_ARM_PUT
+    sMakeConstruct makeConstruct;       // E_ARM_CONSTRUCT
+    sObject object;                     // E_ARM_OBJECT
 /************************ user payload stop ************************/
 
 }uPayload;
