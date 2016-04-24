@@ -19,6 +19,22 @@ void setOrienInPose(geometry_msgs::Pose pos, eOrienTool orien){
     }
 }
 
+geometry_msgs::Pose set_gmPose(const double x, const double y, const double z,
+                                  const double roll, const double pitch, const double yaw){
+    geometry_msgs::Pose pose;
+    pose.position.x = x;
+    pose.position.y = y;
+    pose.position.z = z;
+
+    Eigen::Quaterniond q = euler2Quaternion(roll, pitch, yaw);
+    pose.orientation.x = q.x();
+    pose.orientation.y = q.y();
+    pose.orientation.z = q.z();
+    pose.orientation.w = q.w();
+
+    return pose;
+}
+
 
 Eigen::Quaterniond euler2Quaternion(const double rollDeg, const double pitchDeg,
                                     const double yawDeg){
@@ -172,6 +188,29 @@ bool isObjtsInWS(const int nbDesiCub, const int nbDesiCyl, const int nbDesiCon, 
              (nbDesiCon <= nbCon)?(true):(false));
 }
 
+bool isObjtsInWS(const eTypeConstruc type, std::vector<moveit_msgs::CollisionObject>& objs){
+    int nbCub = 0, nbCyl = 0, nbCon = 0;
+    switch (type) {
+    case tower11:
+        nbCyl = nbCon = 1;
+        break;
+    case tower21:
+        nbCyl = 2;
+        nbCon = 1;
+        break;
+    case wall222:
+        nbCub = nbCyl = nbCon = 2;
+        break;
+    case wall322:
+        nbCub = 3;
+        nbCyl = nbCon = 2;
+        break;
+    default:
+        ROS_WARN("Uknowm type of construction %d or not processed yet", type);
+    }
+
+    return isObjtsInWS(nbCub, nbCyl, nbCon, objs);
+}
 
 
 bool armRetToHome(moveit::planning_interface::MoveGroup& group){
