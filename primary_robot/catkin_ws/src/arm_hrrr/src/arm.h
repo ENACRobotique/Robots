@@ -15,4 +15,9 @@ typedef enum eOrienTool{
     eOrienToolMax
 }eOrienTool;
 
+typedef enum eStaticConf{
+    rest,
+    sStaticConfMax
+}eStaticConf;
+
 #endif // ARM_H

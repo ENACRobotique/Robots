@@ -175,20 +175,20 @@ eOrienTool getAttachDir_UI(){
     return (eOrienTool)std::stoi(sIn);
 }
 
-void addInitObjs(std::vector<moveit_msgs::CollisionObject>& coll_objs,
-                 moveit::planning_interface::PlanningSceneInterface& planning_scene_interface,
-                 moveit::planning_interface::MoveGroup& group){
-    // Add cone
-    coll_objs.push_back(addInitSandObj(std::string("0"), group, con, sArmPose{0.1, 0.1, 0.029, 0.}));
-    std::cout<<"Add obj 0 into the world\n";
+//void addInitObjs(std::vector<moveit_msgs::CollisionObject>& coll_objs,
+//                 moveit::planning_interface::PlanningSceneInterface& planning_scene_interface,
+//                 moveit::planning_interface::MoveGroup& group){
+//    // Add cone
+//    coll_objs.push_back(addInitSandObj(std::string("0"), group, con, sArmPose{0.1, 0.1, 0.029, 0.}));
+//    std::cout<<"Add obj 0 into the world\n";
 
-    // Add cylinder
-    coll_objs.push_back(addInitSandObj(std::string("1"), group, cyl, sArmPose{0.15, 0.05, 0.029, 0.}));
-    std::cout<<"Add obj 1 into the world\n";
+//    // Add cylinder
+//    coll_objs.push_back(addInitSandObj(std::string("1"), group, cyl, sArmPose{0.15, 0.05, 0.029, 0.}));
+//    std::cout<<"Add obj 1 into the world\n";
 
-    // Add cylinder
-    coll_objs.push_back(addInitSandObj(std::string("2"), group, cyl, sArmPose{0.0, 0.1, 0.029, 0.}));
-    std::cout<<"Add obj 2 into the world\n";
+//    // Add cylinder
+//    coll_objs.push_back(addInitSandObj(std::string("2"), group, cyl, sArmPose{0.0, 0.1, 0.029, 0.}));
+//    std::cout<<"Add obj 2 into the world\n";
 
-    planning_scene_interface.addCollisionObjects(coll_objs);
-}
+//    planning_scene_interface.addCollisionObjects(coll_objs);
+//}

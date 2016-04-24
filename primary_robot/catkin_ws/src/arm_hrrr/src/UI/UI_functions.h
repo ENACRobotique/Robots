@@ -26,8 +26,8 @@ void printPose(std::string name, geometry_msgs::Pose& p);
 
 
 //___________ Other
-void addInitObjs(std::vector<moveit_msgs::CollisionObject>& coll_objs,
+/*void addInitObjs(std::vector<moveit_msgs::CollisionObject>& coll_objs,
                  moveit::planning_interface::PlanningSceneInterface& planning_scene_interface,
                  moveit::planning_interface::MoveGroup& group);
-
+*/
 #endif // UI_FUNCTIONS_H

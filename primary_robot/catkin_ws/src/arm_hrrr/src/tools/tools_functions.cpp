@@ -30,8 +30,51 @@ Eigen::Quaterniond euler2Quaternion(const double rollDeg, const double pitchDeg,
         return q;
 }
 
+///
+/// \brief setAffine3d: Construct an Eigen::Affine3d object which represents a translation
+///        and a quaternion
+/// \param x
+/// \param y
+/// \param z
+/// \param roll
+/// \param pitch
+/// \param yaw
+/// \param conv2Rad is by default false and need to be true if the input angles are in degree.
+/// \return an Eigen::Affine3d
+///
+Eigen::Affine3d setAffine3d(const double x, const double y, const double z,
+                const double roll, const double pitch, const double yaw, const bool conv2Rad){
+    if(conv2Rad){
+        return Eigen::Translation3d(x, y, z)*
+               Eigen::Quaterniond(euler2Quaternion(roll*DEG2RAD, pitch*DEG2RAD, yaw*DEG2RAD));
+    }
+    return Eigen::Translation3d(x, y, z)*
+           Eigen::Quaterniond(euler2Quaternion(roll, pitch, yaw));
+}
 
-moveit_msgs::CollisionObject addInitSandObj(const std::string id, const moveit::planning_interface::MoveGroup& group,
+Eigen::Affine3d setEefAffine3d(const double x, const double y, const double z, const double beta,
+                               const bool conv2Rad){
+    double gamma = -atan2(x,y), betaRad = beta;
+
+    if(conv2Rad)
+        betaRad *= DEG2RAD;
+
+    Eigen::Matrix3d R, Ru, Rsc;
+    R = Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(0.0*M_PI_2, Eigen::Vector3d::UnitY())*
+        Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ());
+
+    Ru = Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitY()) *
+         Eigen::AngleAxisd(gamma, Eigen::Vector3d::UnitZ())*
+         Eigen::AngleAxisd(betaRad, Eigen::Vector3d::UnitX());
+
+    Rsc = Ru*R;
+
+    Eigen::Quaterniond quat = Eigen::Quaterniond(Rsc);
+    return Eigen::Translation3d(x, y, z)*quat;
+}
+
+moveit_msgs::CollisionObject createSandObj(const std::string id, const moveit::planning_interface::MoveGroup& group,
                                             const eShape shape, const sArmPose poseObj){
     moveit_msgs::CollisionObject obj;
 
@@ -169,17 +212,15 @@ bool moveToObj(moveit::planning_interface::MoveGroup& group){
     else{
         return false;
     }
-    sleep(SLEEP);  // To give Rviz time to visualize the plan
     return true;
 }
 
-bool planTo(moveit::planning_interface::MoveGroup& group, sArmPose goal){
+bool planTo(moveit::planning_interface::MoveGroup& group, sArmPose goal, IK_arm_hrrr* Ik_arm){
     // Compute the goal position
-    IK_arm_hrrr* Ik_arm = new IK_arm_hrrr();
     std::map<std::string, double> joints;
     bool successIK = Ik_arm->setJntsFromIK(joints, goal.x, goal.y, goal.z, goal.beta);
     if(!successIK){
-        ROS_INFO("Planning IK FAILED");
+        ROS_WARN("Planning IK FAILED");
         return false;
     }
     if(!group.setJointValueTarget(joints)){
@@ -279,7 +320,16 @@ bool armGrabObj(const moveit_msgs::CollisionObject* collObj,
               moveit::planning_interface::MoveGroup& group, eOrienTool orienTool){
     if(!planToObj(collObj, group, orienTool)){
         ROS_WARN("Error during planing");
-        return false;
+        if(orienTool == vertical){
+            ROS_WARN("Try again with horizontal orientation");
+            orienTool = horizontal;
+            if(!planToObj(collObj, group, orienTool)){
+                ROS_WARN("Error again during planing");
+                return false;
+            }
+        }else{
+            return false;
+        }
     }
     std::cout<<"armGrabObj(): Plan OK\n";
     if(!moveToObj(group)){
@@ -299,8 +349,8 @@ bool armGrabObj(const moveit_msgs::CollisionObject* collObj,
 }
 
 bool armPutObj(moveit_msgs::CollisionObject* collObj, const sArmPose goalArm,
-            moveit::planning_interface::MoveGroup& group){
-    if(!planTo(group, goalArm)){
+            moveit::planning_interface::MoveGroup& group, IK_arm_hrrr* Ik_arm){
+    if(!planTo(group, goalArm, Ik_arm)){
         ROS_WARN("Error during planing");
         return false;
     }
@@ -348,7 +398,7 @@ moveit_msgs::CollisionObject* findCollObj(const std::vector<moveit_msgs::Collisi
 
 // _________________________
 bool makeConstruction(const planConstruc_t planConstruc, const std::vector<moveit_msgs::CollisionObject>& collObjs,
-                      moveit::planning_interface::MoveGroup& group, bool retToHome = false){
+                      moveit::planning_interface::MoveGroup& group, IK_arm_hrrr* IK_arm, bool retToHome = false){
     int n = (int)planConstruc.size();
     std::cout<<"Start construction: "<<n<<" steps\n";
     moveit_msgs::CollisionObject* collObj;
@@ -356,7 +406,7 @@ bool makeConstruction(const planConstruc_t planConstruc, const std::vector<movei
     for(int i=0; i<n; i++){
         std::cout<<"Step "<<i<<std::endl;
         collObj = findCollObj(collObjs, std::get<2>(planConstruc[i]));
-        if(!doActionManipObj(collObj, planConstruc[i], group)){
+        if(!doActionManipObj(collObj, planConstruc[i], group, IK_arm)){
             return false;
         }
     }
@@ -411,7 +461,7 @@ bool isConstruAreaFree(std::vector<moveit_msgs::CollisionObject>& objs,
 }
 
 bool doActionManipObj(moveit_msgs::CollisionObject* collObj, stepConstruc_t stepConstruc,
-                      moveit::planning_interface::MoveGroup& group){
+                      moveit::planning_interface::MoveGroup& group, IK_arm_hrrr* Ik_arm){
     sArmPose armPose;
     switch (std::get<0>(stepConstruc)) {
     case grabObj:
@@ -422,7 +472,7 @@ bool doActionManipObj(moveit_msgs::CollisionObject* collObj, stepConstruc_t step
         break;
     case putObj:
         setGoalArmWithObj(armPose, std::get<3>(stepConstruc), std::get<1>(stepConstruc) );
-        if(!armPutObj(collObj, armPose, group)){
+        if(!armPutObj(collObj, armPose, group, Ik_arm)){
             ROS_WARN("doActionManipObj(): Fail to put object %s", collObj->id.c_str());
             return false;
         }
