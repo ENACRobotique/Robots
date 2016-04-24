@@ -24,6 +24,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 # catkin_python_setup()
 
+add_definitions(-DARCH_X86_LINUX)
+
 ################################################
 ## Declare ROS messages, services and actions ##
 ################################################
@@ -123,6 +125,11 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   /home/yoyo/Robots/network_config
   /home/yoyo/Robots/static/communication/botNet/shared
+  /home/yoyo/Robots/static/communication/tools/bn_bridge
+  /home/yoyo/Robots/static/core/shared/Core
+  /home/yoyo/Robots/static/tools/libraries/Timeout
+  /home/yoyo/Robots/static/core/linux/libraries/Millis
+  /home/yoyo/Robots/static/communication/UART_framing/linux
 )
 
 ## Declare a C++ library
@@ -138,14 +145,35 @@ add_definitions(-std=c++11)
 ## either from message generation or dynamic reconfigure
 # add_dependencies(arm_hrrr ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-## Declare a C++ executable
-add_executable(arm_hrrr_joint_controller_node src/arm_controller/src/arm_hrrr_joint_controller_node.cpp src/arm_controller/src/JointController.cpp src/arm_controller/src/ArmHrrrHW.cpp)
+## Declare a C++ executables
+add_executable(arm_hrrr_joint_controller_node
+    src/arm_controller/src/arm_hrrr_joint_controller_node.cpp
+    src/arm_controller/src/JointController.cpp
+    src/arm_controller/src/ArmHrrrHW.cpp
+)
 add_executable(moveit_test 
     src/moveit_test.cpp 
     src/IK_arm_hrrr/IK_arm_hrrr.cpp 
     src/ObjsConstruc.cpp
     src/UI/UI_functions.cpp
-    src/tools/tools_functions.cpp)
+    src/tools/tools_functions.cpp
+    /home/yoyo/Robots/static/communication/botNet/shared/botNet_core.c
+    /home/yoyo/Robots/static/communication/network_tools/bn_debug.c
+    /home/yoyo/Robots/static/communication/network_tools/bn_intp.c
+    /home/yoyo/Robots/static/communication/network_tools/bn_utils.c
+    /home/yoyo/Robots/static/communication/UART_framing/shared/lib_UART_framing.c
+    /home/yoyo/Robots/static/communication/botNet/shared/UDP4bn.c
+    /home/yoyo/Robots/static/communication/botNet/shared/bn_attach.c
+    /home/yoyo/Robots/static/communication/botNet/shared/bn_checksum.c
+    /home/yoyo/Robots/static/communication/botNet/shared/bn_inbuf.c
+    /home/yoyo/Robots/static/tools/libraries/Timeout/timeout.c
+    /home/yoyo/Robots/network_config/network_cfg.c
+    /home/yoyo/Robots/network_config/roles.c
+    /home/yoyo/Robots/network_config/messages.c
+    /home/yoyo/Robots/network_config/messages-elements.c
+    /home/yoyo/Robots/static/core/linux/libraries/Millis/millis.c
+    /home/yoyo/Robots/static/communication/UART_framing/linux/lib_UART_framing_linux.c
+)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
