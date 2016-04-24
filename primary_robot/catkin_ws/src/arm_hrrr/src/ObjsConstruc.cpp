@@ -89,10 +89,10 @@ void ObjsConstruc::makePlanConstruc(){
             ROS_WARN("Could not find cylinder obj to build tower11");
         }
         break;
-    case wall2:
+    case wall222:
 
         break;
-    case wall3:
+    case wall322:
 
         break;
     default:

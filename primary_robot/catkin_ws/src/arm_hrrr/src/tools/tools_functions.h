@@ -10,6 +10,8 @@
 #include "../ObjsConstruc.h" //FIXME: Not definef here
 #include "../IK_arm_hrrr/IK_arm_hrrr.h" //FIXME: same
 
+geometry_msgs::Pose set_gmPose(const double x, const double y, const double z,
+                                  const double roll, const double pitch, const double yaw);
 void setOrienInPose(geometry_msgs::Pose pos, eOrienTool orien);
 Eigen::Quaterniond euler2Quaternion(const double rollDeg, const double pitchDeg,
                                     const double yawDeg);
@@ -21,6 +23,7 @@ moveit_msgs::CollisionObject createSandObj(const std::string id, const moveit::p
                                             const eShape shape, const sArmPose poseObj);
 std::string getSelectedIDObj(std::vector<moveit_msgs::CollisionObject>& objs, std::string info);
 bool isObjtsInWS(const int nbDesiCub, const int nbDesiCyl, const int nbDesiCon, std::vector<moveit_msgs::CollisionObject>& objs);
+bool isObjtsInWS(const eTypeConstruc type, std::vector<moveit_msgs::CollisionObject>& objs);
 bool armRetToHome(moveit::planning_interface::MoveGroup& group);
 bool moveToObj(moveit::planning_interface::MoveGroup& group);
 bool planTo(moveit::planning_interface::MoveGroup& group, sArmPose goal, IK_arm_hrrr* Ik_arm);

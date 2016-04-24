@@ -1,8 +1,6 @@
-//#include "moveit_api_test.h"
 #include "ros/ros.h"
 #include <moveit/move_group_interface/move_group.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-//#include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <visualization_msgs/Marker.h>
 #include <cstdint>
@@ -38,18 +36,6 @@ int main(int argc, char **argv){
 #endif
 
     moveit::planning_interface::MoveGroup groupArm0("arm0");
-    moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-
-    geometry_msgs::Pose pose_eef = groupArm0.getCurrentPose().pose;
-    printPose("pose_eef", pose_eef);
-
-    geometry_msgs::Pose start_pose = groupArm0.getCurrentPose().pose;
-    geometry_msgs::Pose target_pose = groupArm0.getCurrentPose().pose;
-    groupArm0.setPoseTarget(target_pose);
-    printPose("start_pose", start_pose);
-    printPose("target_pose", target_pose);
-
-    groupArm0.setPlannerId("TRRTkConfigDefault");
 
     // Setting planning parameters
     groupArm0.setGoalTolerance(0.001);
@@ -57,16 +43,18 @@ int main(int argc, char **argv){
     IK_arm_hrrr* Ik_arm = new IK_arm_hrrr();
 
     std::vector<moveit_msgs::CollisionObject> coll_objs;
-    std::vector<std::string> objsToRemove;
 
     // Constructions
     geometry_msgs::Pose centerConstruc;
+    std::vector<std::string> objsToRemove;
     std::vector<ObjsConstruc*> listConstruc;
     std::vector<moveit_msgs::CollisionObject*> objsForConstruc;
 
     sArmPose goal;
     eShape shape;
     sPickPutObject pickPutObj;
+    sObject obj;
+    sMakeConstruct infoConstruct;
 
     // Botnet
     sMsg inMsg = {{0}}, outMsg = {{0}};
@@ -111,7 +99,7 @@ int main(int argc, char **argv){
                 goal.y = pickPutObj.y;
                 goal.z = pickPutObj.z;
                 goal.beta = pickPutObj.beta;
-                coll_objs.push_back(createSandObj(std::string("obj"), groupArm0, shape, goal)); // FIXME: Make a unique id
+                coll_objs.push_back(createSandObj(std::to_string(pickPutObj.idObj), groupArm0, shape, goal)); // FIXME: Make a unique id
                 armGrabObj(&(coll_objs.front()), groupArm0);
             	break;
             case E_ARM_PUT:
@@ -124,8 +112,38 @@ int main(int argc, char **argv){
                 break;
             break;
             case E_ARM_CONSTRUCT:
-            	//TODO
+                infoConstruct = inMsg.payload.makeConstruct;
+
+                if(isObjtsInWS((eTypeConstruc) infoConstruct.type, coll_objs)){
+                    // Get the center of the construction
+
+                    centerConstruc = set_gmPose(infoConstruct.x, infoConstruct.y, infoConstruct.z,
+                                                0., 0., infoConstruct.beta);
+                    if(isConstruAreaFree(coll_objs, centerConstruc, (eTypeConstruc) infoConstruct.type)){
+                        objsForConstruc.push_back(findCollObj(coll_objs,
+                                getSelectedIDObj(coll_objs, std::string("first object")))); // FIXME
+                        objsForConstruc.push_back(findCollObj(coll_objs,
+                                getSelectedIDObj(coll_objs, std::string("second object"))));
+                        ObjsConstruc* constr = new ObjsConstruc((eTypeConstruc) infoConstruct.type, centerConstruc, objsForConstruc); // FIXME
+                        listConstruc.push_back(constr);
+                        makeConstruction(constr->getPlanConstruc(), coll_objs, groupArm0, Ik_arm, true);
+                    }
+                }
+                else{
+                    ROS_WARN("Not enought objects to build the construction");
+                }
 			break;
+            case E_ARM_OBJECT:
+                obj = inMsg.payload.object;
+                shape = cub;
+                goal.x = obj.x;
+                goal.y = obj.y;
+                goal.z = obj.z;
+                goal.beta = obj.beta;
+                coll_objs.push_back(createSandObj(std::to_string(obj.idObj), groupArm0, shape, goal));
+                ROS_INFO("Add new object (x,y,z,beta) = %.2f, %.2f, %.2f, %.2f\n",
+                         goal.x, goal.y, goal.z, goal.beta);
+                break;
             case E_DATA:
             case E_PING:
                 break;

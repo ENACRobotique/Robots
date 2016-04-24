@@ -20,11 +20,11 @@ typedef enum eActionManip{
     eActionManipMax
 }eActionManip;
 
-typedef enum eTypeConstruc{
+typedef enum eTypeConstruc{ // WARNING: the order must be same that in file message-arm.h in network_cfg folder.
     tower11,
     tower21,
-    wall2,
-    wall3,
+    wall222,
+    wall322,
     eTypeConstrucMax
 }eTypeConstruc;
 
