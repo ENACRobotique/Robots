@@ -58,6 +58,11 @@ typedef enum{
     E_DONE_ABSPOS,          // @payload.doneAbsPos: for sending result of position fix
     E_PROP_STOP,            //  stop the robot
     E_TRAJ_POS_SPD_EL,      // @payload.trajPosSpdEl: complex trajectory element (position + speed wrt time)
+    E_ARM_CONSTRUCT,        // @payload.armConstruct: Make a construction
+    E_ARM_PICK,             // @payload.armConstruct: Pick an object
+    E_ARM_PUT,              // @payload.armConstruct: Put an object
+    E_ARM_STATIC_CONF,      // @payload.armConstruct: The arm return to the rest configuration
+    E_ARM_TARGET,           // @payload.armConstruct: The tip point of the arm go to the target point
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -94,6 +99,8 @@ const char *eType2str(E_TYPE elem);
 #include "messages-localization.h"
 #include "messages-interactions.h"
 #include "messages-statuses.h"
+#include "messages-arm.h"
+#include "messages-objects.h"
 
 /************************ user payload definition stop ************************/
 
@@ -146,6 +153,11 @@ typedef union{
     sGenericPosStatus genericPosStatus; // E_GENERIC_POS_STATUS
     sSyncQuery syncQuery;               // E_SYNC_QUERY
     sSyncResponse syncResponse;         // E_SYNC_RESPONSE
+
+// ARM (cf messages-arm.h)
+    sGoalTarget goalTarget;             // E_ARM_TARGET
+    sStaticConf staticConf;             // E_ARM_STATIC_CONF
+    sPickPutObject pickPutObj;          // E_ARM_PICK or E_ARM_PUT
 /************************ user payload stop ************************/
 
 }uPayload;
