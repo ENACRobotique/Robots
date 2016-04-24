@@ -19,17 +19,17 @@
 //pins
 //digital I/O
 
-#define SERVO1 0
-#define SERVO2 1
+#define SERVO2 0
+#define SERVO3 1
 #define PIN_PWM_SERVO 11
 
 #define CODERINT 2
-#define CODERSTATE 4
+#define CODERSTATE 5
 
 #define ENCODER1 3
-#define ENCODER2 5
+#define ENCODER2 4
 #define SELECT 6
-#define RETOUR A2
+#define RETOUR A3
 
 #define LCD1 7
 #define LCD2 8
@@ -40,7 +40,7 @@
 
 #define AREAD A0
 #define LED1 A1
-#define LED2 A3
+#define LED2 A2
 
 
 #define DUREE_BIG_STEPS 20
