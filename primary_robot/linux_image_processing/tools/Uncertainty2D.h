@@ -23,7 +23,7 @@ public:
 
 #ifdef USE_BOTNET
     Uncertainty2D(const s2DPAUncert& u) :
-        a_var(u.a_var), b_var(u.b_var), a_angle(u.a_angle), theta(u.theta) {
+        a_var(u.a_var), b_var(u.b_var), a_angle(u.a_angle), theta(u.theta_var) {
     }
 #endif
 };

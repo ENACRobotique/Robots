@@ -42,10 +42,10 @@ public:
     virtual ~TestPoint() {
     }
 
-    float getCost(float mHue, float mSat, float mVal) const
-            {
+    float getCost(float mHue, float mSat, float mVal) const{
         float dVal = val - mVal; // dVal in range [-1;1]
 
+        // Eurobot 2015
         float dHue = hue - mHue;
         if (dHue > 0.5)
             dHue -= 1.f;
@@ -54,6 +54,9 @@ public:
         // dHue in range [-0.5;0.5]
 
         return weight * (val * std::abs(dHue) + (1.f - val) * 2.f * std::abs(dVal)); // encourages low val because black is a very good landmark this year :)
+
+        // Eurobot 2016
+        //TODO
     }
 
     float getHue() const

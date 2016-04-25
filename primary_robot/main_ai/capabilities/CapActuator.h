@@ -23,49 +23,38 @@ class CapActuator : public Capability{
         }
 
         void setup(){
-            Actuator spot, cup, popCornLoader, camera;
-            float spotAngle[2] = {-181.84*M_PI/180, 58.16*M_PI/180.};
-            float cupAngle[3] = {345.74*M_PI/180, -123.6*M_PI/180, 114.59*M_PI/180};
-            float popCornLoaderAngle[] = {M_PI/2, 3*M_PI/2};
+            Actuator door, grip, camera;
+//#error "Actuator angle and position to be defined !!!"
+            float doorAngle[2] = {-181.84*M_PI/180, 180*M_PI/180};
+            float gripAngle = 90.;
 
-            Point2D<float> cupPos[3];
-            cupPos[0].x = (R_ROBOT + 4.)*cos(cupAngle[0]);
-            cupPos[0].y = (R_ROBOT + 4.)*sin(cupAngle[0]);
-            cupPos[1].x = (R_ROBOT + 4.)*cos(cupAngle[1]);
-            cupPos[1].y = (R_ROBOT + 4.)*sin(cupAngle[1]);
-            cupPos[2].x = (R_ROBOT + 4.)*cos(cupAngle[2]);
-            cupPos[2].y = (R_ROBOT + 4.)*sin(cupAngle[2]);
+            Point2D<float> doorPos[2];
+            doorPos[0].x = (R_ROBOT + 4.)*cos(doorAngle[0]);
+            doorPos[0].y = (R_ROBOT + 4.)*sin(doorAngle[0]);
+            doorPos[1].x = (R_ROBOT + 4.)*cos(doorAngle[1]);
+            doorPos[1].y = (R_ROBOT + 4.)*sin(doorAngle[1]);
 
-            for(unsigned int i = 0 ; i < 2 ; i++){
-                _act.push_back(spot);
-                _act.back().type = ActuatorType::ELEVATOR;
-                _act.back().id = i;
-                _act.back().elevator.full = i==1?false:true;
-                _act.back().elevator.empty = i==1?true:false;
-                _act.back().angle = spotAngle[i];
-                //TODO _act.back().pos
-                _act.back().elevator.ball = i==1?true:false; //if modify, change in objStatingZone
-                _act.back().elevator.number = 0;
-            }
-
-            for(unsigned int i = 0 ; i < 3 ; i++){
-                _act.push_back(cup);
-                _act.back().id = i;
-                _act.back().type = ActuatorType::CUP;
-                _act.back().cupActuator.full = false;
-                _act.back().angle = cupAngle[i];
-                _act.back().pos = cupPos[i];
-                _act.back().cupActuator.distributor = false;
-            }
+            Point2D<float> gripPos;
+            gripPos.x = 2.;
+            gripPos.y = 3.;
 
             for(unsigned int i = 0 ; i < 2 ; i++){
-                _act.push_back(popCornLoader);
+                _act.push_back(door);
+                _act.back().type = ActuatorType::SANDDOOR;
                 _act.back().id = i;
-                _act.back().type = ActuatorType::POP_CORN_LOADER;
-                _act.back().angle = popCornLoaderAngle[i];
+                _act.back().doors.cone_number = 0; //if modify, change in objStatingZone;
+                _act.back().doors.cube_number =0;
+                _act.back().doors.cylinder_number = 0;
+                _act.back().angle = doorAngle[i];
                 //TODO _act.back().pos
-                _act.back().cupActuator.distributor = false;
             }
+
+            _act.push_back(grip);
+            _act.back().id = 0;
+            _act.back().type = ActuatorType::SANDGRIP;
+            _act.back().grip.full = false;
+            _act.back().angle = gripAngle;
+            _act.back().pos = gripPos;
 
             _act.push_back(camera);
             _act.back().id = 0;

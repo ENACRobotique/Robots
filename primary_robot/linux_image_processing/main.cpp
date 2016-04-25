@@ -30,38 +30,44 @@ using namespace std;
 
 //##### Main #####
 int main(int argc, char* argv[]) {
-    Perf& perf = Perf::getPerf();
+    Perf& perf = Perf::getPerf();  //& ?
     Mat frameRaw;
 
-    // init cameras
+    // Initialize cameras
     map<Cam*, VideoCapture*> camList;
     camList.insert(make_pair(
-            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),
+            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(0)));
 //            new VideoCapture("Images/captures/guvcview_image-25.jpg"))); // coin avec 2 pieds
 //            new VideoCapture("Images/captures/1-955-743.jpg"))); // zone de départ jaune
-            new VideoCapture("Images/captures/z1.png"))); // "obomovie"
+            new VideoCapture("../Images/captures/z1.png"))); // "Robomovie"
+//            new VideoCapture("z1.png"))); // "Robomovie"
 
-// init processes
+
+    // Initialize processes
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "simu/testpoints.csv"));
+    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv"));
 
-    // init botnet
+    // Initialize botnet
     bn_init();
 
     if (!camList.begin()->second->read(frameRaw)) { //if not success, break loop
         cout << "Cannot read the frame from source video file" << endl;
+        return -1;
     }
+
 
     bool quit = false;
     do {
+        // Communications
 //		ret = bn_receive(&inMsg);
 //
 //		switch(inMsg.header.type){
 //            case E_POS_CAM:
-        perf.beginFrame();
 
+        // Perform processes
+        perf.beginFrame();
         for (Process* p : processList) {
             vector<Acq*> acqList;
 
@@ -75,6 +81,7 @@ int main(int argc, char* argv[]) {
 //                }
 
                 if (frameRaw.size() != c->getSize()) {
+                    cout<< "skip cam c <- (frameRaw.size() = "<<frameRaw.size()<<") != (c->getSize() = "<<c->getSize()<<")\n";
                     continue;
                 }
 
@@ -89,6 +96,7 @@ int main(int argc, char* argv[]) {
 //            p->process(acqList, AbsPos2D<float>(100, 62, 60 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 93.58, 73.58, 64
             p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
 
+            cout<<"Mk2: process done\n";
             for (Acq* a : acqList) {
                 delete a;
             }
@@ -106,6 +114,9 @@ int main(int argc, char* argv[]) {
 //        }
 
         perf.endFrame();
+
+
+
         quit = 1;
 //
 //                break;
@@ -119,7 +130,18 @@ int main(int argc, char* argv[]) {
 
     } while (!quit);  // End while
 
-    printf("End loop\n");
+    // Test
+    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+    imshow( "Display window", frameRaw );                   // Show our image inside it.
+    waitKey(0);
+
+    printf("End prog\n");
 
     return 0;
 }
+
+/*
+ * TODO: DEBUG
+ *
+ *
+ */

@@ -15,7 +15,7 @@
 #include "communications.h"
 
 #define INIT_POS_SLAVE_X 150
-#define INIT_POS_SLAVE_Y 80
+#define INIT_POS_SLAVE_Y 170
 #define INIT_ANGLE_SLAVE -M_PI_2
 
 

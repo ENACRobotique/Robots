@@ -29,6 +29,7 @@ public:
      * f (in pixels)
      * size (in pixels)
      */
+    // Constructor
     Cam(float f, cv::Size size, const Transform3D<float>& rob2cam) :
             rob2cam(rob2cam), size(size) {
         aperAngle = cv::Size2f(
@@ -51,6 +52,7 @@ public:
         matTransi_C2R = rob2cam.getReverse().getMatrix();
     }
 
+    // Accessors
     const cv::Mat& getMatI2C() const {
         return matK_I2C;
     }
