@@ -50,6 +50,7 @@ sServoData servosTable[] = { //servo number (club)|a|b   (us = a*deg+b)
 #define PIN_DBG_LED (13)
 #define PIN_MODE_SWITCH (2)
 #define PIN_STARTING_CORD (4)
+#define PIN_BUTTON (7)
 #define PIN_LED_BLUE (5)
 #define PIN_LED_RED (3)
 #define PIN_LED_GREEN (6)
@@ -73,8 +74,9 @@ int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0,
 int flagPresence1=0, flagPresence2=0, flagPresence3=0, flagPresence4=0, debounceModeSwitch=0;
 int presence1Old=0, presence1=0, presence2Old=0, presence2=0, presence3Old=0, presence3=0, presence4Old=0;
 int presence4=0, presence5Old=0, presence5=0, flagPresence5=0;
+int flagButton = 0, Button = 0, ButtonOld = 0;
 unsigned long led_prevT = 0, time=0, timeModeSwitch=0, timeStartingCord=0, timePresence1=0, timePresence2=0, timePresence3=0,timeLedStart=0;
-unsigned long timePresence4=0, timePresence5=0;
+unsigned long timePresence4=0, timePresence5=0, timeButton = 0;
 unsigned int numberLedRepetitions,ledBlinkTimes, durationLedColorCurrent, durationLedColorNext;
 sRGB currentLedColor, nextLedColor;
 
@@ -176,13 +178,16 @@ void loop(){
                 outMsg.header.type = E_IHM_STATUS;
                 outMsg.header.size = 2 + 3*sizeof(*outMsg.payload.ihmStatus.states);
 
-                outMsg.payload.ihmStatus.nb_states = 2;
+                outMsg.payload.ihmStatus.nb_states = 3;
 
                 outMsg.payload.ihmStatus.states[0].id = IHM_PRESENCE_4;
                 outMsg.payload.ihmStatus.states[0].state.state_presence = eIhmPresence(presence4);
 
                 outMsg.payload.ihmStatus.states[1].id = IHM_PRESENCE_5;
                 outMsg.payload.ihmStatus.states[1].state.state_presence = eIhmPresence(presence5);
+
+                outMsg.payload.ihmStatus.states[2].id = IHM_BUTTON;
+                outMsg.payload.ihmStatus.states[2].state.state_switch = eIhmSwitch(Button);
 
                 while( (ret = bn_send(&outMsg)) <= 0);
 
@@ -298,6 +303,31 @@ void loop(){
         }
 
         flagModeSwitch = 0;
+    }
+
+    if (!flagButton){
+    	ButtonOld = Button;
+    	Button = digitalRead(PIN_BUTTON);
+    	if (ButtonOld != Button){
+    		timeButton = time;
+    		flagButton = 1;
+    		ButtonOld = Button;
+    	}
+    }
+    if ((time - timeButton > 40) && flagButton){
+    	Button = digitalRead(PIN_BUTTON);
+
+    	if (Button == ButtonOld){
+    		outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
+    		outMsg.header.type = E_IHM_STATUS;
+    		outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
+    		outMsg.payload.ihmStatus.nb_states = 1;
+    		outMsg.payload.ihmStatus.states[0].id = IHM_BUTTON;
+    		outMsg.payload.ihmStatus.states[0].state.state_switch = eIhmSwitch(Button);
+    		while((ret = bn_send(&outMsg)) <=0);
+    	}
+
+    	flagButton = 0;
     }
 
 
