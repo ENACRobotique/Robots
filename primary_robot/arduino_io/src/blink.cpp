@@ -68,13 +68,17 @@ Adafruit_PWMServoDriver pwm(0x40);
 
 //#define DEBUG
 
-void fctModeSwitch(void);
-void fctStartingCord(void);
-
+sMsg inMsg, outMsg;
+int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwitch = 0, StartingCord = 0, StartingCordOld=0, Led = 0;
+int flagPresence1=0, flagPresence2=0, flagPresence3=0, flagPresence4=0, debounceModeSwitch=0;
+int presence1Old=0, presence1=0, presence2Old=0, presence2=0, presence3Old=0, presence3=0, presence4Old=0;
+int presence4=0, presence5Old=0, presence5=0, flagPresence5=0;
+unsigned long led_prevT = 0, time=0, timeModeSwitch=0, timeStartingCord=0, timePresence1=0, timePresence2=0, timePresence3=0,timeLedStart=0;
+unsigned long timePresence4=0, timePresence5=0;
+unsigned int numberLedRepetitions,ledBlinkTimes, durationLedColorCurrent, durationLedColorNext;
+sRGB currentLedColor, nextLedColor;
 
 void setup(){
-    //attachInterrupt(0, fctStartingCord, CHANGE);
-    //attachInterrupt(1, fctModeSwitch, CHANGE);
 
     pinMode(PIN_LED_BLUE, OUTPUT);
     pinMode(PIN_LED_RED, OUTPUT);
@@ -107,16 +111,6 @@ void setup(){
 #endif
 }
 
-
-sMsg inMsg, outMsg;
-int ledState = 0, ledState1 = 0, i, j, flagModeSwitch = 0, flagStartingCord = 0, ModeSwitch = 0, StartingCord = 0, StartingCordOld=0, Led = 0;
-int flagPresence1=0, flagPresence2=0, flagPresence3=0, flagPresence4=0, debounceModeSwitch=0;
-int presence1Old=0, presence1=0, presence2Old=0, presence2=0, presence3Old=0, presence3=0, presence4Old=0;
-int presence4=0, presence5Old=0, presence5=0, flagPresence5=0;
-unsigned long led_prevT = 0, time=0, timeModeSwitch=0, timeStartingCord=0, timePresence1=0, timePresence2=0, timePresence3=0,timeLedStart=0;
-unsigned long timePresence4=0, timePresence5=0;
-unsigned int numberLedRepetitions,ledBlinkTimes, durationLedColorCurrent, durationLedColorNext;
-sRGB currentLedColor, nextLedColor;
 
 
 void setLedRGB(unsigned int red, unsigned int green, unsigned int blue);
@@ -278,6 +272,17 @@ void loop(){
         flagStartingCord = 0;
     }
 
+
+    if (!flagModeSwitch){
+    	debounceModeSwitch = ModeSwitch;
+    	ModeSwitch = digitalRead(PIN_MODE_SWITCH);
+    	if (debounceModeSwitch != ModeSwitch){
+    		timeModeSwitch = time;
+    		flagModeSwitch = 1;
+    		debounceModeSwitch = ModeSwitch;
+    	}
+    }
+
     if( (time -  timeModeSwitch > 40) && flagModeSwitch){
         ModeSwitch = digitalRead(PIN_MODE_SWITCH);
 
@@ -434,17 +439,6 @@ void loop(){
 
 }
 
-//void fctModeSwitch(void){
-//    timeModeSwitch = time;
-//    debounceModeSwitch = digitalRead(PIN_MODE_SWITCH);
-//    flagModeSwitch = 1;
-//}
-//
-//void fctStartingCord(void){
-//    timeStartingCord = time;
-//    debounceStartingCord = digitalRead(PIN_STARTING_CORD);
-//    flagStartingCord = 1;
-//}
 
 int degreesTo4096th(float degrees, float a, float b){
     float fCmdOutOf4096 = SERVO_FREQ*4096.*(a*degrees + b)/1000000.;
