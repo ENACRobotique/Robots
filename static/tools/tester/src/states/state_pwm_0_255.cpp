@@ -24,7 +24,8 @@ sState* testpwm_0_255(){
 		display(pos_enc);
 		myEnc.write(pos_enc);
 		pos_enc_old=pos_enc;
-		analogWrite(PIN_PWM_SERVO,pos_enc);
+		pwm_level = pos_enc;
+		analogWrite(PIN_PWM_SERVO,pwm_level);
 	}
 
 	if(!digitalRead(RETOUR)){
@@ -43,7 +44,7 @@ void initpwm_0_255(sState *prev){
 	myEnc.setLimits(0,255);
 	myEnc.write(0);
 	myEnc.setMultiplicators(1,10);
-	analogWrite(PIN_PWM_SERVO,0);
+	analogWrite(PIN_PWM_SERVO,pwm_level);
 	display(0);
 }
 
