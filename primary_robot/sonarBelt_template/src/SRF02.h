@@ -12,9 +12,10 @@
 #include <utility> // pair
 #include <cstdint>
 #include <stdint.h>
-#include <linux/i2c-dev.h>
+//#include <linux/i2c-dev.h>
 
 #include "wiringPiI2C.h"
+//#include "wiringPi.h"
 
 #define DBG_SRF02
 
@@ -97,12 +98,12 @@ public:
 	 * @param addr id I2C device address
 	 * @param p is an enum type to describe to position of the sonar (angle, dist)
 	 */
-	SRF02(uint8_t addr, PoseSonar_t p);
+	SRF02(int addr, PoseSonar_t p);
 
 	/**
 	 * @return the address of the sonar.
 	 */
-	uint8_t getAddr();
+	int getAddr();
 
 	/**
 	 * @return the last position measured by the sonar
@@ -140,9 +141,12 @@ public:
 	void updateLastDist(int dist);
 	void updateTimeIdx(int idx);
 
+	int getLastDist();
+	int getTimeIdxLastDist();
+
 private:
 	eSRF02State _state;
-	uint8_t _addr;		// address of the sensor
+	int _addr;		// address of the sensor
 	int _fd;  // file descriptor
 	PoseSonar_t _pose;  // circular coordinates: range, azimuth
 	eSRF02_unit _unit;

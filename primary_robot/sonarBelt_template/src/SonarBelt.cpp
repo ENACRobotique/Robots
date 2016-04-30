@@ -18,26 +18,34 @@
  */
 SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, const orderToProcess_t order) {
 	_nbSonars = (int) initListSonars.size();
+	std::cout<<"InitListSonar has a size of "<<initListSonars.size()<<std::endl;
+
+
 	_nbRevolu = 0;
-	_stateThreadMeas = notLaunched;
 	_orderToProccess = order;
 
 	// Create the sonars
+	std::cout<<"Initialize list of SRF02: starting\n";
 	for(listSonar_t::const_iterator it=initListSonars.begin();
 			it!= initListSonars.end(); ++it){
+		std::cout<<"SRF02 start initialization: id = "<<it->first<<", address = "<<it->second.first<<
+				", orient = "<<it->second.second.first<<", r = "<<it->second.second.second<<std::endl;
 		_sonars[it->first] = new SRF02(it->second.first, it->second.second);
+		std::cout<<"SRF02 initialized: id = "<<it->first<<", address = "<<it->second.first<<std::endl;
 	}
+	std::cout<<"Initialize list of SRF02: finished and succeed\n";
 
 	// Test connections with the sonars
 #if defined(DBG)  &&  defined(DBG_SRF02)
+	std::cout<<"_____ Test connection with sonars: start\n";
 	for(mapSonars_t::iterator it = _sonars.begin(); it!= _sonars.end(); ++it){
 		std::cout<<"sonar "<<it->first<<", addr = "<<it->second->getAddr()<<
 				": vers = "<<it->second->readSRF02_info(srf02_version)<<std::endl;
 	}
+	std::cout<<"_____ Test connection with sonars: end\n";
 #endif
 
 	// Initialize thread for permanent measures
-	_autoMeasure = false;
 	try{
 		_thMeasure = new std::thread(&SonarBelt::threadMeasure, this);
 	}catch (std::exception &e) {
@@ -47,102 +55,32 @@ SonarBelt::SonarBelt(int idI2C, const listSonar_t initListSonars, const orderToP
 
 void SonarBelt::threadMeasure(){
 	while(1){
-		std::cout<<"threadMeasures "<<_thMeasure->get_id()<<" launched: state = wait\n";
-		// Wait until auto-measure is true
-		std::unique_lock<std::mutex> lk(_m);
-		while(!_autoMeasure){
-			if(_stateThreadMeas != waiting)
-				_stateThreadMeas = waiting;
-			_cv.wait(lk);
-		}
-
-		// Now it is locked and ready
-		_stateThreadMeas = processing;
-		std::cout<<"threadMeasures(): state = processing, _count = "<<_nbRevolu<<std::endl;
-		// TODO! process
-		std::this_thread::sleep_for (std::chrono::milliseconds(500));
-		_nbRevolu++;
-
-	    // Manual unlocking is done before notifying, to avoid waking up
-	    // the waiting thread only to block again (see notify_one for details)
-		lk.unlock();
-		_cv.notify_one();
+		doMeasure_revol();
 	}
 }
 
-void SonarBelt::playAutoMeasure(){
-	if(_stateThreadMeas != notLaunched){
-		std::lock_guard<std::mutex> lk(_m);
-		_autoMeasure = true;
-		std::cout << "_autoMeasure = true\n";
-		_cv.notify_one();
-	}
-}
-
-void SonarBelt::pauseAutoMeasure(){
-	if(_stateThreadMeas != notLaunched){
-		std::lock_guard<std::mutex> lk(_m);
-		_autoMeasure = false;
-		std::cout << "_autoMeasure = false\n";
-		_cv.notify_one();
-	}
-}
 
 int SonarBelt::getNbRevo(){
-	std::unique_lock<std::mutex> lk(_m);
+	std::cout<<"getNbRevo(): in"<<std::endl;
+	_m_data.lock();
 	int nb = _nbRevolu;
-	lk.unlock();
+	_m_data.unlock();
+
 	return nb;
 }
 
-/**
- *
- * @param id
- * @param typeInfo
- * @return
- */
-int SonarBelt::readSonarInfo(eIdSonar id, eSRF02_Info typeInfo){
-	int res = -1;
-
-	// Check if i2c is not use by thread measure
-	pauseAutoMeasure();
-	std::unique_lock<std::mutex> lk(_m);
-	while(_stateThreadMeas != waiting)
-			_cv.wait(lk);
-
-	// Get the info
-	res = getInfoSonar(id, typeInfo);
-
-	// Continue the auto-measure
-	playAutoMeasure();
-
-	return res;
-}
-
 void SonarBelt::writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd){
-	// Check if i2c is not use by thread measure
-	pauseAutoMeasure();
-	std::unique_lock<std::mutex> lk(_m);
-	while(_stateThreadMeas != waiting)
-			_cv.wait(lk);
-
 	// Send the cmd to the sonar
 	setCmdSonar(id, typeCmd);
-
-	// Continue the auto-measure
-	playAutoMeasure();
 }
 
-int SonarBelt::readSonarVers(eIdSonar id){
-	return readSonarInfo(id, srf02_version);
+
+int SonarBelt::getSonarDist(eIdSonar id){
+	return _sonars.find(id)->second->getLastDist();
 }
 
-int SonarBelt::readSonarDist(eIdSonar id){
-	return readSonarInfo(id, srf02_range);
-}
-
-int SonarBelt::readSonarAutotuneMin(eIdSonar id){
-	return readSonarInfo(id, srf02_autotuneMin);  //FIXME: not guarantee to have ms
+int SonarBelt::getSonarTimeIdx(eIdSonar id){
+	return _sonars.find(id)->second->getTimeIdxLastDist();
 }
 
 int SonarBelt::getInfoSonar(eIdSonar id, eSRF02_Info infoType){
@@ -177,7 +115,7 @@ void SonarBelt::doMeasure_revol(){
 
 	// Wait the specific time and read the distance for each sonar
 	while(dur_ms.count() < SRF02_MEAS_PERIOD){
-		std::cout<<"Unvalid dur = "<<dur_ms.count()<<" ms\n";  // Just to evaluate the method
+//		std::cout<<"Unvalid dur = "<<dur_ms.count()<<" ms\n";  // Just to evaluate the method
 		dur_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::high_resolution_clock::now() - startTimeRev);
 	}
@@ -186,9 +124,10 @@ void SonarBelt::doMeasure_revol(){
 		for(int j=0; j<(int)_orderToProccess[0].size(); j++){  // for a sonar on a revo
 			eIdSonar id = _orderToProccess[i][j];
 
-			std::unique_lock<std::mutex> lk(_m);
+			std::unique_lock<std::mutex> lk(_m_data);
 			_sonars.find(id)->second->updateLastDist(_sonars.find(id)->second->readSRF02_info(srf02_range));
 			_sonars.find(id)->second->updateTimeIdx(_nbRevolu);
+			_nbRevolu++;
 			lk.unlock();
 		}
 	}
