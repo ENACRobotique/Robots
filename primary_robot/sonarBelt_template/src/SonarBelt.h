@@ -8,9 +8,7 @@
 #ifndef SONARBELT_H_
 #define SONARBELT_H_
 
-#include "SRF02.h"
 #include <vector>
-#include <PointOrient2D.h>
 #include <map>
 #include <string>
 #include <iostream>
@@ -22,8 +20,13 @@
 #include <chrono>
 #include <exception>
 
+#include "SRF02.h"
+#include <PointOrient2D.h>
+#include "Vector2D.h"
 
-#define DBG
+
+
+//#define DBG_SONAR_BELT
 
 #ifdef DBG
 #include <stdio.h>
@@ -52,7 +55,7 @@ typedef enum eStateThread{
 // _________________ Eurobot 2016 _________________________
 #define O_S (SRF02_APERT_ANGLE/2)
 #define D_S 30
-const listSonar_t initListSonars1 = {
+const listSonar_t initListSonars_2016 = {
 	 // {id, {addr, {alpha, r}}}  // template
 		{s1, {0xE0>>1, {O_S, 100}}},
 		{s2, {0xE2>>1, {O_S+D_S, 100}}},
@@ -79,6 +82,16 @@ const orderToProcess_t orderToProcess_4PerRev = {
 		{s2, s5, s8, s11},
 		{s3, s6, s9, s12}  // 3rd revo
 };
+
+// For individual test
+const listSonar_t initList1Sonar = {
+	 // {id, {addr, {alpha, r}}}  // template
+		{s1, {0xE0>>1, {O_S, 100}}}
+};
+
+const orderToProcess_t orderToProcess_1PerRev = {
+		{s1}
+};
 // ________________________________________________________
 
 class SonarBelt {
@@ -86,26 +99,25 @@ public:
 	SonarBelt(int idI2C, const listSonar_t listPoseSonars, const orderToProcess_t order);
 	int getSonarDist(eIdSonar id);
 	int getSonarTimeIdx(eIdSonar id);
-	int readSonarAutotuneMin(eIdSonar id);
-	void launchBurst(eIdSonar id);
-	int getNbRevo();
-
-	// Thread
-	void doMeasure_revol();
-
+	int getNbRevo(); // Similar to time index in SRF02 class
+	std::vector<std::pair<double, double>> scanInThisDirect(const double theta,
+			const double delta) const ;
 
 private:
 	int readSonarInfo(eIdSonar id, eSRF02_Info typeInfo);
 	void writeSonarCmd(eIdSonar id, eSRF02_Cmd typeCmd);
+	int readSonarAutotuneMin(eIdSonar id); // FIXME
+	void launchBurst(eIdSonar id); //FIXME
+	// Thread
+	void doMeasure_revol();
 
-	uint8_t _nbSonars;
+	int _nbSonars;
 	int _nbRevolu;  // Concurrent access
 	mapSonars_t _sonars;
 	orderToProcess_t _orderToProccess;
 
-	// thread for auto_measure
+	// Thread
 	std::mutex _m_data;
-//	std::condition_variable _cv;
 	std::thread* _thMeasure;
 
 	int getInfoSonar(eIdSonar id, eSRF02_Info infoType);

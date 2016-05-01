@@ -24,7 +24,7 @@
 #endif
 
 #define SRF02_APERT_ANGLE 30  // Aperture angle of the detection cone in degrees
-#define SRF02_MEAS_PERIOD 65  // Amount of time in milliseconds to process the measures
+#define SRF02_MEAS_PERIOD 70  // Amount of time in milliseconds to process the measures
 
 // Registers
 #define REG_CMD 0

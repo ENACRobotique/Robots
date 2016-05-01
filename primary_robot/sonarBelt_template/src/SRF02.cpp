@@ -132,8 +132,8 @@ void SRF02::updateLastDist(int dist) {
 
 void SRF02::updateTimeIdx(int idx) {
 #ifdef DBG_SRF02
-	if (idx <= _timeIdxForLastDist)
-		printf("SRF02::updateTimeIdx not valid\n");
+	if (idx <= _timeIdxForLastDist  && idx != 0)
+		std::cout<<"SRF02::updateTimeIdx = "<<idx<<" not valid\n";
 #endif
 	_timeIdxForLastDist = idx;
 }
