@@ -45,8 +45,8 @@ void Encoder::update()
 		int mult= base_inc;
 		if(millis()-prev < BIG_STEP) mult = fast_inc;
 		prev = millis();
-		if (digitalRead(pin1)) position += ((digitalRead(pin2)<<1) -1)*mult;
-		else position -= ((digitalRead(pin2)<<1) -1)*mult;
+		if (digitalRead(pin1)) position -= ((digitalRead(pin2)<<1) -1)*mult;
+		else position += ((digitalRead(pin2)<<1) -1)*mult;
 		write(position);
 	}
 }

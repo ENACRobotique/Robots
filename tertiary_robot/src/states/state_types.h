@@ -15,8 +15,21 @@ typedef enum {
     E_MOTOR,
     E_WALL, //(c) sneydi
     E_LINE,
-    E_SHARP
+    E_ATTITUDE,
+    E_HEADING,
 }eBlocks;
+
+typedef enum {
+	X_ANGLE,
+	Y_ANGLE,
+	Z_ANGLE,
+	X_ACCEL,
+	Y_ACCEL,
+	Z_ACCEL,
+	X_ANGLE_ACCEL,
+	Y_ANGLE_ACCEL,
+	Z_ANGLE_ACCEL
+}eInertial;
 
 //pointeur de fonction
 typedef int(*pfi)();

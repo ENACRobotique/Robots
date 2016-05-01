@@ -15,17 +15,11 @@ class Encoder
     public:
 
 	Encoder(int p1, int p2);
-
     int read();
-
     void write(int nb);
-
     void init();
-
     void setLimits(int min, int max);
-
     void setMultiplicators(int base_multiplicator, int fast_multiplicator);
-
     void update();
 
     private:
