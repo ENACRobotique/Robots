@@ -108,6 +108,12 @@ void setup(){
     pwm.reset();
     pwm.setPWMFreq(SERVO_FREQ);  // 50Hz
 
+    Button = digitalRead(PIN_BUTTON);
+    ButtonOld = Button;
+    ModeSwitch = digitalRead(PIN_MODE_SWITCH);
+    debounceModeSwitch = ModeSwitch;
+
+
 #ifdef DEBUG
     bn_printDbg("start arduino_io");
 #endif
