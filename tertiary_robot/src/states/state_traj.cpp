@@ -55,9 +55,9 @@ void deinitTrajGreenStart(sState *next)
 }
 
 const PROGMEM trajElem start_green[]={
-	{30,3,1500},
-	{30,-3,1500},
-	{-20,-10,4000},
+	{50,0,1000},
+	{30,0,3000},
+	{-20,30,1000},
 	{0,0,0},
 };
 
