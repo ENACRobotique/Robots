@@ -270,7 +270,6 @@ void loop(){
         StartingCord = digitalRead(PIN_STARTING_CORD);
 
         if (StartingCord == StartingCordOld){
-        	setLedRGB(255,255,255);
         	outMsg.header.destAddr = role_get_addr(ROLE_PRIM_AI);
         	outMsg.header.type = E_IHM_STATUS;
         	outMsg.header.size = 2 + 1*sizeof(*outMsg.payload.ihmStatus.states);
