@@ -23,6 +23,7 @@ typedef struct __attribute__((packed)){
 typedef enum{
     IHM_STARTING_CORD,
     IHM_MODE_SWITCH,
+	IHM_BUTTON,
     IHM_LED,
     IHM_PRESENCE_1,
 	IHM_PRESENCE_2,
