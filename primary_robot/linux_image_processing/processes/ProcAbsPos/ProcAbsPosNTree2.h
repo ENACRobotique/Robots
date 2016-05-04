@@ -12,7 +12,7 @@
 
 class ProcAbsPosNTree2: public ProcAbsPos {
 public:
-    ProcAbsPosNTree2(Cam* c, const std::string& staticTestPointFile) : ProcAbsPos(c, staticTestPointFile) {}
+    ProcAbsPosNTree2(Cam* c, const std::string& staticTestPointFile, eVidTypeProc typeProcess) : ProcAbsPos(c, staticTestPointFile, typeProcess) {}
     virtual ~ProcAbsPosNTree2(){}
 
     void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;

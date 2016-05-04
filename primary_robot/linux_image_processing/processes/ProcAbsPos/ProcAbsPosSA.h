@@ -12,7 +12,7 @@
 
 class ProcAbsPosSA: public ProcAbsPos {
 public:
-    ProcAbsPosSA(Cam* c, const std::string& staticTestPointFile) : ProcAbsPos(c, staticTestPointFile) {}
+    ProcAbsPosSA(Cam* c, const std::string& staticTestPointFile, eVidTypeProc typeProcess) : ProcAbsPos(c, staticTestPointFile, typeProcess) {}
     virtual ~ProcAbsPosSA(){}
 
     void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;

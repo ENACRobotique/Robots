@@ -26,8 +26,9 @@
 using namespace std;
 using namespace cv;
 
-ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile){
+ProcAbsPos::ProcAbsPos(Cam* c, const string& staticTestPointFile, eVidTypeProc typeProcess){
     camList.push_back(c);
+    typeProc = typeProcess;
 
     ifstream infile(staticTestPointFile);
     if( !infile ) {

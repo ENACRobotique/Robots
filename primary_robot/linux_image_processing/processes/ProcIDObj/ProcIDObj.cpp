@@ -13,9 +13,10 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-ProcIDObj::ProcIDObj(Cam* c, const std::string& objPlgrdFile){
+ProcIDObj::ProcIDObj(Cam* c, const std::string& objPlgrdFile, eVidTypeProc typeProcess){
     cout<<"_______ProcIDOj(): start init__________\n";
     camList.push_back(c);
+    typeProc = typeProcess;
     _stateCalib = notDone;
 
     // Load the template objects

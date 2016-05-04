@@ -32,7 +32,7 @@ typedef std::map<int, mapCol_T> mapsMapCol_T;
 
 class ProcIDObj: public Process{
 public:
-    ProcIDObj(Cam* c, const std::string& objPlgrdFile);
+    ProcIDObj(Cam* c, const std::string& objPlgrdFile, eVidTypeProc typeProcess);
     virtual ~ProcIDObj();
 
     void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) override;

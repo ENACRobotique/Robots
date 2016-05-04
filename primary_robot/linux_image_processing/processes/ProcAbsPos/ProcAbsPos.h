@@ -81,7 +81,7 @@ protected:
     }
 
 public:
-    ProcAbsPos(Cam* c, const std::string& staticTestPointFile);
+    ProcAbsPos(Cam* c, const std::string& staticTestPointFile, eVidTypeProc typeProcess);
 };
 
 #endif /* PROCESSES_PROCABSPOS_H_ */

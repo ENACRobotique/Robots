@@ -12,6 +12,7 @@
 #include <tools/Acq.h>
 #include <tools/Cam.h>
 #include <vector>
+#include "messages-videos.h"
 
 template<typename T> class Uncertainty2D;
 
@@ -22,6 +23,8 @@ template<typename T> class AbsPos2D;
 class Process {
 protected:
     std::vector<Cam*> camList;
+    eVidTypeProc typeProc;
+
 
 public:
     using Pos = AbsPos2D<float>;
@@ -34,6 +37,8 @@ public:
     std::vector<Cam*> getCamList() {
         return camList;
     }
+
+    eVidTypeProc getProcType(){return getProcType();};
 
     virtual void process(const std::vector<Acq*>& acqList, const Pos& pos, const PosU& posU) = 0;
 };
