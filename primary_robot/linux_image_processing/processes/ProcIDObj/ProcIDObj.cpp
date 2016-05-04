@@ -439,6 +439,10 @@ vector<pair<eObjShape, Pos3D<float>>> ProcIDObj::recogShape(const Acq& acq, cons
     vector<Pos3D<float>> shapeFound;  // Contains the configuration of the shapes found
     vector<pair<eObjShape, Pos3D<float>>> shapes;
 
+    if(isNotObject(vertexes)){
+        return shapes;
+    }
+
     int s = (int)vertexes.size();
     if(isThereCube(vertexes, acq)  &&  s==6) { // TODO: do not depend of s == 6
         cout<<"s = 6\n";
@@ -452,6 +456,19 @@ vector<pair<eObjShape, Pos3D<float>>> ProcIDObj::recogShape(const Acq& acq, cons
     }
 
     return shapes;
+}
+
+bool ProcIDObj::isNotObject(const vector<cv::Mat>& vertexes){
+    double min=40, max=150;
+    for(unsigned int i = 0; i < vertexes.size(); i++){
+        if(cv::norm(vertexes[i], vertexes[(i+1)%vertexes.size()], cv::NORM_L2) < min &&
+        (cv::norm(vertexes[i], vertexes[(i-1)%vertexes.size()], cv::NORM_L2) > max || max < cv::norm(vertexes[(i+1)%vertexes.size()], vertexes[(i+2)%vertexes.size()], cv::NORM_L2))){
+            cout << "Cleat detected, vertexes : " << i << endl;
+            return false;
+        }
+    }
+//    cv::norm(vertexes[ind_pt-1], vertexes[ind_pt+1], cv::NORM_L2);
+    return true;
 }
 
 bool ProcIDObj::isThereCube(const vector<cv::Mat>& vertexes, const Acq& acq){
@@ -491,6 +508,25 @@ bool ProcIDObj::isThereCube(const vector<cv::Mat>& vertexes, const Acq& acq){
     return false;
 }
 
+bool ProcIDObj::isThereCone(const vector<cv::Mat>& vertexes, const Acq& acq){
+    // Find right angle
+    float m = 0.2; // +- 18°
+    float ref_angle = 0.9; // ~51.5°
+    Vector3D<float> vp, vn;
+    int s = (int)vertexes.size();
+    for(int i=-1; i<=1; i++){ // Just check if a cube is the nearest object to the robot
+        vp = Vector3D<float>(vertexes[(s - 1 + i)%s] - vertexes[(s + i)%s]);  // [(s - 1 - i)%s] <=> ptp (previous point from the right angle pt)
+        vn = Vector3D<float>(vertexes[(s + i)%s] - vertexes[(s + i + 1)%s]);  // [(s + 1 - i)%s] <=> ptp (next point from the right angle pt)
+        float angle = vp.angle(vn);
+        cout<<"angle("<<i<<") = "<<angle<<endl;
+        if(fabs(angle) < M_PI_2l*(ref_angle + m)  &&  fabs(angle) > M_PI_2l*(ref_angle - m)){
+            cout<<"cone top angle found: vertex "<<i<<"; "<<M_PI_2l*(1 - m)<<" < "<<fabs(angle)<<" < "<<M_PI_2l*(1 + m)<<endl;
+            return true;
+        }
+    }
+    return false;
+}
+
 vector<Play_Obj*>ProcIDObj::recogObj(const Acq& acq, vector<cv::Mat>& vertexes, eObjCol col){
     vector<Play_Obj*> objectsFound;
 
@@ -503,7 +539,7 @@ vector<Play_Obj*>ProcIDObj::recogObj(const Acq& acq, vector<cv::Mat>& vertexes, 
     for(int i=0; i<(int)vShape.size(); i++){
         vector<Play_Obj*> vObj = getSameInListRefObj(col, vShape[i].first);
         if((int)vObj.size() == 1)
-            objectsFound.push_back(new Play_Obj(*(getSameInListRefObj(col, vShape[i].first)[0]), vShape[i].second));
+            objectsFound.push_back(new Play_Obj((getSameInListRefObj(col, vShape[i].first)[0]),vShape[i].second));
         else
             cout<<"recoObj(): Can't recognize object: too many solution ("<<vObj.size()<<")\n";
     }
@@ -664,6 +700,42 @@ int ProcIDObj::compNbIdenticObjH(const eObjType objType, const cv::Mat& pt1, con
     }
 
     return (int)nbCubeH;
+}
+
+Play_Obj* ProcIDObj::findCone(const cv::Mat& ptCam_R, const vector<cv::Mat>& vertexes){
+    Play_Obj* cone(getObjInListRef(sandCone));
+//    const float theta = Vector3D<float>(0., 1.,0.).angle(dirFace01);  // Arbitrary direction of the face 0-1
+    float angle;
+    for(unsigned int i = 0; i < vertexes.size(); i++){
+        angle = Vector3D<float>(vertexes[(i+1)%vertexes.size()]-vertexes[i]).angle(Vector3D<float>(vertexes[(i-1)%vertexes.size()]-vertexes[i]));
+        if (angle < (60 * 1.1)*180/M_PI && angle > (60 * 0.9)*180/M_PI){
+            cone = findConeCarac(ptCam_R, vertexes, i);
+            // TODO : specific part if cone down
+        }
+    }
+    return cone;
+}
+
+Play_Obj* ProcIDObj::findConeCarac(const cv::Mat& ptCam_R, const vector<cv::Mat>& vertexes, const int ind_pt){
+    Pos3D<float> pos();
+    Play_Obj* cone_found(getObjInListRef(sandCone));
+
+    float coradius, cylhigh, factDir;
+
+    // Barycentre deux points autour sommet
+    cv::Mat ptTable = vertexes[ind_pt];// ajouter sommet
+    cv::Mat vDir = cv::Mat(ptCam_R - ptTable);
+
+    cylhigh = getObjInListRef(sandCyl)->getDim()[0];
+    coradius = getObjInListRef(sandCone)->getDim()[1];
+
+    factDir = (2*coradius)/cv::norm(vertexes[ind_pt-1], vertexes[ind_pt+1], cv::NORM_L2);
+
+    cv::Mat ptBase(ptCam_R + factDir * vDir);
+    cout<< "Old cone : " << ptBase;
+    ptBase.at<float>(2) = cylhigh*roundf(ptBase.at<float>(2)/cylhigh);
+    // Recalculer hauteur cone trouvé.
+    return cone_found;
 }
 
 int ProcIDObj::compNbIdenticObjV(const eObjType objType, const cv::Mat& ptCam_R, const cv::Mat& ptTable, const cv::Mat& ptProj, const float err){

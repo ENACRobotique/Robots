@@ -56,7 +56,11 @@ private:
     vector<Pos3D<float>> recoCubeAside(const cv::Mat C2R, const vector<cv::Mat>& vertexes);
     int compNbIdenticObjH(const eObjType objType, const cv::Mat& pt1, const cv::Mat& pt2, const float err = 0.1);
     int compNbIdenticObjV(const eObjType objType, const cv::Mat& ptCam_R, const cv::Mat& ptTable, const cv::Mat& ptProj, const float err = 0.1);
+    bool isNotObject(const vector<cv::Mat>& vertexes);
     bool isThereCube(const vector<cv::Mat>& vertexes, const Acq& acq);
+    bool isThereCone(const vector<cv::Mat>& vertexes, const Acq& acq);
+    Play_Obj* findCone(const cv::Mat& ptCam_R, const vector<cv::Mat>& vertexes);
+    Play_Obj* findConeCarac(const cv::Mat& ptCam_R, const vector<cv::Mat>& vertexes, const int ind_pt);
 
 protected:
     int _stateCalib;

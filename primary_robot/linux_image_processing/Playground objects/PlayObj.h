@@ -16,8 +16,9 @@ using namespace std;
 
 class Play_Obj {
 public:
+    Play_Obj(Play_Obj* playObj, Pos3D<float>& conf);
     Play_Obj(eObjType type, eObjShape shape, vector<float>& dim, eObjCol color);
-    Play_Obj(Play_Obj playObj, Pos3D<float> conf);
+    Play_Obj(eObjType type, Pos3D<float> conf, std::vector<Play_Obj*> _listRefObj);
     virtual ~Play_Obj();
 
     void setConf(Pos3D<float> conf);

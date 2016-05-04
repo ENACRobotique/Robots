@@ -70,7 +70,8 @@ int main(int argc, char* argv[]) {
     map<Cam*, VideoCapture*> camList;
     camList.insert(make_pair(
 //            new Cam(0, 516.3, Size(640, 480), Transform3D<float>(0, 12.7, 26.7, 226. * M_PI / 180., 0, 0)),  // Position camera ?
-            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0), 0),
+//            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0), 0),
+            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 8.5, 32, 221. * M_PI / 180., 0, 0), 0), // Robomovie
             //            new VideoCapture("MyVideo.avi")));
             new VideoCapture(0)));
 //            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
@@ -182,7 +183,7 @@ int main(int argc, char* argv[]) {
 
     // Test
 //    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-//    imshow( "Display window", frameRaw);                   // Show our image inside it.
+    imshow( "Display window", frameRaw);                   // Show our image inside it.
     waitKey(0);
 
     printf("End prog\n");

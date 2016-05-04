@@ -17,13 +17,27 @@ Play_Obj::Play_Obj(eObjType type, eObjShape shape, vector<float>& dim, eObjCol c
     _col = color;
 }
 
-Play_Obj::Play_Obj(Play_Obj playObj, Pos3D<float> conf){
-    _type = playObj.getType();
-    _shape = playObj.getShape();
-    _dim = playObj.getDim();
-    _col = playObj.getCol();
+Play_Obj::Play_Obj(Play_Obj* playObj, Pos3D<float>& conf){
+    _type = playObj->getType();
+    _shape = playObj->getShape();
+    _dim = playObj->getDim();
+    _col = playObj->getCol();
     _conf = conf;
 }
+
+Play_Obj::Play_Obj(eObjType type, Pos3D<float> conf, std::vector<Play_Obj*> _listRefObj){
+    std::vector<Play_Obj*>::const_iterator it = _listRefObj.begin();
+    _type = type;
+    _conf = conf;
+
+    for(it = _listRefObj.begin(); it != _listRefObj.end(); ++it){
+        if((*it)->getType() == type){
+            _shape = (*it)->getShape();
+            _col = (*it)->getCol();
+        }
+    }
+}
+
 
 Play_Obj::~Play_Obj(){}
 
