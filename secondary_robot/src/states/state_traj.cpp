@@ -66,11 +66,11 @@ void deinitTrajGreenInit(sState *next)
 
 const PROGMEM trajElem start_purple[]={
 //Début trajectoire vers cabines de plage
-	{0,-20,100},//Radar active 0
-	{-300,20,1100},
+	{0,-18,100},//Radar active 0
+	{-300,18,1100},
 	{-400,0,1500},
 	{-300,-20,900},//Radar inactive 3
-	{-200,0,900},
+	{-200,0,1200},
 	{0,0,100},//1ere porte fermée
 	{300,0,1300},
 	{0,90,400},
@@ -86,7 +86,7 @@ const PROGMEM trajElem start_purple[]={
 	{300,0,1400},
 	{0,90,400},
 	{300,90,1300},
-	{0,-35,300},
+	{0,-35,300},// Radar active 20
 	{-300,-35,2300},
 	{0,0,0},
 };
@@ -96,8 +96,8 @@ const PROGMEM trajElem start_green[]={
 	{0,-15,100},//Radar active 0
 	{-300,-15,1100},
 	{-400,0,1500},
-	{-300,25,900},
-	{-200,0,1050},//Radar inactive 3
+	{-300,25,800},
+	{-200,0,1450},//Radar inactive 3
 	{0,0,100},//1ere porte fermée
 	{300,0,1300},
 	{0,-90,400},
@@ -108,11 +108,11 @@ const PROGMEM trajElem start_green[]={
 	{300,90,1300},
 	{0,0,400},
 	{-300,0,1000},
-	{-200,0,1500},
+	{-200,0,1650},
 	{0,0,100},//2eme porte fermée
 	{300,0,1400},
 	{0,-90,400},
-	{300,-90,1300},
+	{300,-90,1300},//Radar active 20
 	{0,35,300},
 	{-300,35,2150},
 	{0,0,0},
@@ -124,7 +124,7 @@ sState *testTrajGreenInit()
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
-    uint16_t limits[RAD_NB_PTS]={25, 25,0, 0};
+    uint16_t limits[RAD_NB_PTS]={30, 30,0, 0};
 
 	if(!flag_end){
 		if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis)){
@@ -157,6 +157,9 @@ sState *testTrajGreenInit()
 		case 11:
 			sTrajGreenInit.flag &= ~BIT(E_RADAR);
 			break;
+		case 20:
+			sTrajGreenInit.flag |= BIT(E_RADAR);
+			break;
 	}
 	 if (radarIntrusion())
 	 {
@@ -188,6 +191,7 @@ void initTrajPurple(sState *prev)
 		#endif
 		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 		_backFromPause = 1;
+		pause_time+=(millis()-start_pause);
 	}
 	uint16_t limits[RAD_NB_PTS]={0, 20, 0, 0};
 	radarSetLim(limits);
@@ -218,7 +222,7 @@ sState *testTrajPurple()
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
-    uint16_t limits[RAD_NB_PTS]={25, 25,0, 0};
+    uint16_t limits[RAD_NB_PTS]={30, 30,0, 0};
 	if(!flag_end){
 		if(periodicFunction(start_purple,&st_saveTime,&i,&prev_millis)){
 			#ifdef DEBUG
@@ -249,6 +253,9 @@ sState *testTrajPurple()
 		break;
 	case 11:
 		sTrajPurpleInit.flag &= ~BIT(E_RADAR);
+		break;
+	case 20:
+		sTrajPurpleInit.flag |= BIT(E_RADAR);
 		break;
 	}
 	 if (radarIntrusion())

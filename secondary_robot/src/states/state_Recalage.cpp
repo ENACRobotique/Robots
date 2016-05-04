@@ -24,7 +24,7 @@ unsigned long st_saveTime_R=0,st_prevSaveTime_R=0,st_saveTime_radar_R=0,st_prevS
 
 
 const PROGMEM trajElem calage_largeur_purple[] = {
-	{300,0,1400},
+	{300,0,1500},
 	{0,-45,200},
 	{-200,-45,2450},
 	{0,0,0},
