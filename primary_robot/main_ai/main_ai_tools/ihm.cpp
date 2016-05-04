@@ -34,6 +34,8 @@ sRGB ihmLedConvertEnumToRgb(eIhmLed led){
             return {0, 255, 0};
         case LED_YELLOW:
             return {255, 170, 0};
+        case LED_PURPLE:
+        	return {153,0,153};
         case LED_OFF:
             return {0, 0, 0};
     }

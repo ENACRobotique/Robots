@@ -20,6 +20,7 @@ using namespace std;
 typedef enum{
     LED_OFF,
     LED_YELLOW,
+	LED_PURPLE,
     LED_GREEN
 }eIhmLed;
 
