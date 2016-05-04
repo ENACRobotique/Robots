@@ -84,8 +84,8 @@ int main(int argc, char* argv[]) {
 
     // Initialize processes
     vector<Process*> processList;
-    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv", ));
-//    processList.push_back(new ProcIDObj(camList.begin()->first, "../2016/listObj.csv"));
+    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv", PROC_POS));
+//    processList.push_back(new ProcIDObj(camList.begin()->first, "../2016/listObj.csv", PROC_OBJ));
 
     // Initialize botnet
     bn_init();
@@ -98,15 +98,16 @@ int main(int argc, char* argv[]) {
 
 
     bool quit = false;
-    int ret;
-    sMsg inMsg;
+//    int ret;
+//    sMsg inMsg;
     do {
         // Communications
-		ret = bn_receive(&inMsg);
+//		ret = bn_receive(&inMsg);
 
-		switch(inMsg.header.type){
-		default:
-		}
+//		switch(inMsg.header.type){
+//
+//		default:
+//		}
 
         // Perform processes
         perf.beginFrame();

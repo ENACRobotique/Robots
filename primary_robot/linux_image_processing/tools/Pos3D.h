@@ -19,8 +19,8 @@
 #include <messages-position.h>
 #endif
 
-template<typename T>
-class AbsPos3D;
+//template<typename T>
+//class AbsPos3D;
 
 //template<typename T>
 //std::ostream& operator<<(std::ostream& out, const Pos3D<T>& p);
@@ -29,70 +29,52 @@ class AbsPos3D;
 template<typename T>
 class Pos3D {
     Point3D<T> _p; // (cm x cm x cm)
-    T _rx; // (rad)
-    T _ry; // (rad)
-    T _rz; // (rad)
-    Vector3D<T> _dir;
+    T _roll; // (rad)
+    T _pitch; // (rad)
+    T _yaw; // (rad)
 
 public:
     Pos3D() :
-            _rx(0), _ry(0), _rz(0) {
+            _roll(0), _pitch(0), _yaw(0) {
     }
 
     /**
      * x, y, z in centimeters
-     * rx in radians
-     * ry in radians
-     * rz in radians
+     * roll in radians
+     * pitch in radians
+     * yaw in radians
      */
-    Pos3D(T x, T y, T z, T rx, T ry, T rz) :
-            _p(x, y, z), _rx(rx), _ry(ry), _rz(rz) {
+    Pos3D(T x, T y, T z, T roll, T pitch, T yaw) :
+            _p(x, y, z), _roll(roll), _pitch(pitch), _yaw(yaw) {
     }
 
-    Pos3D(T x, T y, T z, T rx) :
-            _p(x, y, z), _rx(rx), _ry((T)0), _rz((T)0) {
+    Pos3D(T x, T y, T z, T roll) :
+            _p(x, y, z), _roll(roll), _pitch((T)0), _yaw((T)0) {
     }
-
-//    /**
-//     * x, y, z in centimeters
-//     * rx in radians
-//     */
-//    AbsPos2D(T x, T y, T theta, Vector2D<T> const& camDir) :
-//            _p(x, y), _theta(theta), _camDir(camDir) {
-//    }
-
-//    /**
-//     * p.x, p.y in centimeters
-//     * theta in radians
-//     */
-//    AbsPos2D(Point2D<T> p, T theta, Vector2D<T> const& camDir) :
-//            _p(p), _theta(theta), _camDir(camDir) {
-//    }
 
     /**
      * p.x, p.y, p.z in centimeters
-     * rx in radians
-     * ry in radians
-     * rz in radians
+     * roll in radians
+     * pitch in radians
+     * yaw in radians
      */
-    Pos3D(Point3D<T> p, T rx, T ry, T rz) :
-            _p(p), _rx(rx), _ry(ry), _rz(rz) {
+    Pos3D(Point3D<T> p, T roll, T pitch, T yaw) :
+            _p(p), _roll(roll), _pitch(pitch), _yaw(yaw) {
     }
 
-    Pos3D(Vector3D<T> v, T rx, T ry, T rz) :
-            _p(v), _rx(rx), _ry(ry), _rz(rz) {
+    Pos3D(Vector3D<T> v, T roll, T pitch, T yaw) :
+            _p(v), _roll(roll), _pitch(pitch), _yaw(yaw) {
     }
 
-    Pos3D(cv::Mat p, T rx, T ry, T rz) :
-            _p(p.at<T>(0), p.at<T>(1), p.at<T>(2)), _rx(rx), _ry(ry), _rz(rz) {
+    Pos3D(cv::Mat p, T roll, T pitch, T yaw) :
+            _p(p.at<T>(0), p.at<T>(1), p.at<T>(2)), _roll(roll), _pitch(pitch), _yaw(yaw) {
     }
 
-    // TODO : Implement botnet messages for 3D points
-//#ifdef USE_BOTNET
-//    Pos2D(const s2DPosAtt& p) :
-//            _p(p.x, p.y), _theta(p.theta) {
-//    }
-//#endif
+#ifdef USE_BOTNET
+    Pos3D(const s3DPos& p) :
+            _p(p.x, p.y, p.z, p.roll, p.pitch, p.yaw) {
+    }
+#endif
 
     T const& x() const {
         return _p.x;
@@ -106,25 +88,25 @@ public:
         return _p.z;
     }
 
-    T const& rx() const {
-        return rx;
+    T const& roll() const {
+        return roll;
     }
 
-    T const& ry() const {
-        return ry;
+    T const& pitch() const {
+        return pitch;
     }
 
-    T const& rz() const {
-        return rz;
+    T const& yaw() const {
+        return yaw;
     }
 
 
     Pos3D operator*(const T& r) const {
-        return {Point3D<T>(_p.x*r, _p.y*r, _p.z*r), _rx*r, _ry*r, _rz*r, _dir};
+        return {Point3D<T>(_p.x*r, _p.y*r, _p.z*r), _roll*r, _pitch*r, _yaw*r};
     }
     Pos3D operator+(const Pos3D& v) const {
         return {Point3D<T>(_p.x + v._p.x, _p.y + v._p.y, _p.z + v._p.z)
-            ,_rx + v._rx, _ry + v._ry, _rz + v._rz, v._dir};
+            ,_roll + v._roll, _pitch + v._pitch, _yaw + v._yaw};
     }
 
     Pos3D& operator+=(const Pos3D& v) {
@@ -136,47 +118,16 @@ public:
     }
 
     Vector3D<T> getRxyz(){
-        return Vector3D<T>(_rx, _ry, _rz);
+        return Vector3D<T>(_roll, _pitch, _yaw);
     }
-
-//    AbsPos2D operator+(const RelPos2D<T>& v) const {
-////        Vector2D<T> const* camDir = &_camDir;
-////        T nSq = camDir->normSq();
-////        if(!nSq) {
-////            camDir = &v.camDir();
-////            nSq = camDir->normSq();
-////            std::cout << "using camDir " << *camDir << " from vector..." << std::endl;
-////        }
-////
-////        T dtheta = 0;
-////        if(nSq) {
-////            Vector2D<T> vv_rob(getTransform().transformDir(v.v().toCv())); // from pg2rob
-////
-////            dtheta = (vv_rob ^ *camDir) / nSq;
-////        }
-//
-//        return {_p.x + v.x(), _p.y + v.y(), _theta + v.theta() /*+ dtheta*/, _camDir};
-//    }
-//    AbsPos2D operator-(const RelPos2D<T>& v) const {
-//        return {_p.x - v.x(), _p.y - v.y(), _theta - v.theta(), _camDir};
-//    }
-//    RelPos2D<T> operator-(const AbsPos2D& p) const {
-//        return {_p.x - p._p.x, _p.y - p._p.y, _theta - p._theta, _camDir};
-//    }
-
-//    Transform3D<T> getTransform() const {
-//        return Transform3D<T>(_p.x, _p.y, _p.z, _rx(rx), _ry(ry), _rz(rz));
-//    }
-
-//    friend std::ostream& operator<<<T>(std::ostream& out, const Pos3D& p);
 };
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const Pos3D<T>& p) {
     out << "(" << p.x() << " cm;" << p.y() << " cm;" << p.z() << " cm;"
-        << p.rx() * T(180) / T(M_PI) << " deg;"
-        << p.ry() * T(180) / T(M_PI) << " deg;"
-        << p.rz() * T(180) / T(M_PI) << " deg)";
+        << p.roll() * T(180) / T(M_PI) << " deg;"
+        << p.pitch() * T(180) / T(M_PI) << " deg;"
+        << p.yaw() * T(180) / T(M_PI) << " deg)";
 
     return out;
 }

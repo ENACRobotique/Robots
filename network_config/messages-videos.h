@@ -9,7 +9,6 @@
 #define LIB_NETWORK_CONFIG_MESSAGES_VIDEOS_H_
 
 #include <stdint.h>
-#include "tools/AbsPos2D.h"
 #include "messages-objects.h"
 
 typedef enum eVidTypeProc{
@@ -19,14 +18,14 @@ typedef enum eVidTypeProc{
 
 typedef struct sVidReq{
     eVidTypeProc type;
-    AbsPos2D<double> pose;
-    AbsPos2D<double> pose_u;
+    s2DPosAtt pose;
+    s2DPosAtt pose_u;
 } sVidReq; // does not excess 56 bytes
 
 typedef struct sVidPosResp{
-    bool sucess;
-    AbsPos2D<double> pose;
-    AbsPos2D<double> pose_u;
+    uint8_t sucess;
+    s2DPosAtt pose;
+    s2DPosAtt pose_u;
 } sVidPosResp; // does not excess 56 bytes
 
 typedef struct sVidObjResp{

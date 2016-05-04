@@ -9,7 +9,7 @@
 #define LIB_NETWORK_CONFIG_MESSAGES_OBJECTS_H_
 
 #include <stdint.h>
-#include "tools/Pos3D.h"
+#include "messages-position.h"
 
 typedef enum eObjectType{
     SAND_CUB,
@@ -22,8 +22,8 @@ typedef enum eObjectType{
 
 typedef struct sObject{
     eObjectType type;
-    Pos3D<double> pose;
-    Pos3D<double> pose_u;
+    s3DPos pose;
+    s3DPos pose_u;
 } sObject; // does not excess 56 bytes
 
 

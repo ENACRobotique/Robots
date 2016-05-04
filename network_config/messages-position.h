@@ -22,6 +22,17 @@ typedef struct __attribute__((packed)){
 } s2DPosAtt; // 2D position & attitude
 
 typedef struct __attribute__((packed)){
+// position in reference frame (specified in field "frame")
+    float x;            // (cm)
+    float y;            // (cm)
+    float z;            // (cm)
+    float roll;        // (rad)
+    float pitch;        // (rad)
+    float yaw;        // (rad)
+    frame_t frame:8;
+} s3DPos; // 3D position with orientation
+
+typedef struct __attribute__((packed)){
 // speed in reference frame
     float vx; // linear velocity along x axis of specified reference frame (cm/s)
     float vy; // linear velocity along y axis of specified reference frame (cm/s)
