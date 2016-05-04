@@ -70,13 +70,13 @@ void initChoice_servo(sState *prev){
 
 void deinitChoice_servo(sState *next){
 	if(!servo_choosen->attached()){
-		if(servo_choosen == &servo1){
-			servo_choosen->attach(SERVO1);
-		}
 		if(servo_choosen == &servo2){
 			servo_choosen->attach(SERVO2);
 		}
 		if(servo_choosen == &servo3){
+			servo_choosen->attach(SERVO3);
+		}
+		if(servo_choosen == &servo1){
 			servo_choosen->attach(PIN_PWM_SERVO);
 		}
 	}

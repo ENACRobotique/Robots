@@ -36,8 +36,8 @@ sState* testpwm_0_255(){
 }
 
 void initpwm_0_255(sState *prev){
-	if(servo3.attached()){
-		servo3.detach();
+	if(servo1.attached()){
+		servo1.detach();
 	}
 	pinMode(PIN_PWM_SERVO,OUTPUT);
 	myEnc.setLimits(0,255);
