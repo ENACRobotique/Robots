@@ -2,9 +2,10 @@ clear all;
 close all;
 clc; % clear console
 
+
 %% load source image
 I = imread('src_edges.png');
-%figure;imshow(I);title('table 2015');
+figure;imshow(I);title('table 2015');
 
 factor = 4; % (px/cm)
 
@@ -23,7 +24,7 @@ figure;imshow(J);title('Detect edges: canny');
 if  ~exist('dist.mat', 'file')
     E = J;
     D = E;
-    SE = [0 1 0;1 1 1;0 1 0]%strel('diamond', 1);
+    SE = [0 1 0;1 1 1;0 1 0]; %strel('diamond', 1);
     while min(min(E)) == 0
         E = imdilate(E, SE);
 
@@ -92,7 +93,6 @@ imwrite(P, 'prob.png', 'bitdepth', 16);
 
 Q = false(size(P));
 Q(P > rand(size(P))) = true;
-imshow(Q)
 
 figure;imshow(Q);
 
@@ -121,9 +121,9 @@ A = i.*a;
 % ig = A(:, :, 2); ig(b) = 1; A(:, :, 2) = ig;
 % ib = A(:, :, 3); ib(b) = 1; A(:, :, 3) = ib;
 
-%figure;imshow(A);
+figure;imshow(A);
 
-imwrite(A, 'tp_col.png');
+imwrite(A, 'tp_col.png')
 
 %% mask-out the result
 
@@ -159,12 +159,13 @@ V = HSV(:,:,3);
 h = H(R);
 s = S(R);
 v = V(R);
-dist = D(R)
+dist = D(R);
 dens = P(R) .* factor^2;
 
 M = [(col - 30 + 1)./factor, (size(i,1) - row + 1  - 30 + 1)./factor, h, s, v, dist, dens];
 
-dlmwrite('testpoints.csv', M);
+dlmwrite('testpoints.csv', M)
+csvwrite('testpoints.csv', M)
 
 %%
 % %j = J(100:200, 100:200);
