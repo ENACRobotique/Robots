@@ -58,6 +58,9 @@ typedef enum{
     E_DONE_ABSPOS,          // @payload.doneAbsPos: for sending result of position fix
     E_PROP_STOP,            //  stop the robot
     E_TRAJ_POS_SPD_EL,      // @payload.trajPosSpdEl: complex trajectory element (position + speed wrt time)
+    E_VID_REQ,              // @payload.vidReq: holds the type of request of a video process and the position.
+    E_VID_RESP_POS,         // @payload.vidRespPos: Holds the position computed by the video positioning process
+    E_VID_RESP_OBJ,         // @payload.vidRespObj: Holds the objects identified by the video positioning process
 /************************ user types stop ************************/
 
     E_TYPE_COUNT            // This one MUST be the last element of the enum
@@ -94,9 +97,11 @@ const char *eType2str(E_TYPE elem);
 #include "messages-localization.h"
 #include "messages-interactions.h"
 #include "messages-statuses.h"
+#include "messages-objects.h"
+#include "messages-videos.h"
+
 
 /************************ user payload definition stop ************************/
-
 
 
 /*
@@ -146,6 +151,11 @@ typedef union{
     sGenericPosStatus genericPosStatus; // E_GENERIC_POS_STATUS
     sSyncQuery syncQuery;               // E_SYNC_QUERY
     sSyncResponse syncResponse;         // E_SYNC_RESPONSE
+
+ // VIDEOS (cf messages-videos.h)
+    sVidReq vidReq;                     // E_VID_REQ
+    sVidPosResp vidPosResp;             // E_VID_POS_RESP
+    sVidObjResp vidObjResp;             // E_VID_OBJ_RESP
 /************************ user payload stop ************************/
 
 }uPayload;
