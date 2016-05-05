@@ -79,10 +79,10 @@ sState sPechePurple={
 const PROGMEM trajElem purple_fishing[] = {
 	{0,0,400},
 	{120,0,3225},//canne down	1
-	{0,0,1500},//				2
+	{0,0,60},//				2
 	{-200,-12,1000},//canne up
 	{-200,-20,1500},
-	{-200,35,2000},
+	{-200,35,2200},
 	{-200,-15,2200},
 	{0,0,500},//canne down		7
 	{0,0,1000},//crema in		8
@@ -93,7 +93,7 @@ const PROGMEM trajElem purple_fishing[] = {
 	{200,-15,1200},
 	{200,-2,800},//canne down	14
 	{60,0,7000},
-	{0,0,1000},//canne up		16
+	{0,0,60},//canne up		16
 	{-200,0,800},
 	{-200,-2,500},
 	{-200,-10,1700},
@@ -140,9 +140,10 @@ sState* testPechePurple(){
 				pos_servo = CANNE_DOWN;
 				break;
 			case 2:
-				if ((millis()-prev_millis)>200 and pos_servo>CANNE_UP){
-					pos_servo = pos_servo - 1;
+				if ((millis()-prev_millis)>50 and pos_servo>CANNE_UP){
+					pos_servo = pos_servo - 2;
 					canne_servo.write(pos_servo);
+					prev_millis=millis();
 				}
 				break;
 			case 7:
@@ -162,9 +163,10 @@ sState* testPechePurple(){
 				pos_servo = CANNE_DOWN;
 				break;
 			case 16:
-				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-					pos_servo = max(pos_servo - 1, CANNE_UP);
+				if ((millis()-prev_millis)>50 and pos_servo>CANNE_UP){
+					pos_servo = pos_servo - 2;
 					canne_servo.write(pos_servo);
+					prev_millis=millis();
 				}
 				break;
 			case 22:
@@ -254,8 +256,8 @@ sState sPecheGreen={
 const PROGMEM trajElem green_fishing[] = {
 	{0,0,100},
 	{300,-1,1450},
-	{100,0,5500},//canne down	2
-	{0,0,1000},//				3
+	{100,0,4583},//canne down	2
+	{0,0,60},//				3
 	{200,-12,500},//canne up
 	{200,-20,1500},
 	{200,35,2000},
@@ -269,10 +271,11 @@ const PROGMEM trajElem green_fishing[] = {
 	{-200,-15,1300},
 	{-200,-3,1700},
 	{100,0,4000},//canne down	16
-	{0,0,1000},//canne up 		17
-	{-200,0,1275},
-	{200,-15,1700},
+	{0,0,60},//canne up 		17
+	{-200,0,1100},
+	{200,-15,1850},
 	{200,35,1700},
+
 	{200,-15,2000},
 	{0,0,500},//canne down		22
 	{0,0,1000},//crema in		23
@@ -308,9 +311,10 @@ sState* testPecheGreen(){
 				pos_servo = CANNE_DOWN;
 				break;
 			case 3:
-				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-					pos_servo = max(pos_servo - 3, CANNE_UP);
+				if ((millis()-prev_millis)>50 and pos_servo>CANNE_UP){
+					pos_servo = pos_servo - 2;
 					canne_servo.write(pos_servo);
+					prev_millis=millis();
 				}
 				break;
 			case 8:
@@ -330,9 +334,10 @@ sState* testPecheGreen(){
 				pos_servo = CANNE_DOWN;
 				break;
 			case 17:
-				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-					pos_servo = max(pos_servo - 3, CANNE_UP);
+				if ((millis()-prev_millis)>50 and pos_servo>CANNE_UP){
+					pos_servo = pos_servo - 2;
 					canne_servo.write(pos_servo);
+					prev_millis=millis();
 				}
 				break;
 			case 22:
