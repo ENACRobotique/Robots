@@ -25,6 +25,12 @@ SRF02::SRF02(int addr, PoseSonar_t p) {
 
 	// Set the file descriptor
 	_fd = wiringPiI2CSetup(_addr);
+#ifdef DBG_SRF02
+	if(_fd < 0){
+		std::cout<<"Cannot access to srf02 at address = "<<addr<<std::endl;
+	}
+#endif
+
 
 #ifdef DBG_SRF02
 	printf("Created SRF02 sonar: addr = %d, pose = (%d, %d)\n", addr,

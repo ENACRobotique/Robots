@@ -15,9 +15,8 @@
 //#include <linux/i2c-dev.h>
 
 #include "wiringPiI2C.h"
-//#include "wiringPi.h"
 
-#define DBG_SRF02
+//#define DBG_SRF02
 
 #ifdef DBG_SRF02
 #include <stdio.h>
