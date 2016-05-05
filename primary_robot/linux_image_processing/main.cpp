@@ -21,6 +21,7 @@ using namespace cv;
 using namespace std;
 
 #include "shared/botNet_core.h"
+#include "bn_debug.h"
 
 #include "tools.hpp"
 #include "params.hpp"
@@ -30,6 +31,11 @@ using namespace std;
 #include "sourceVid.hpp"
 
 //#define CALIB_HSV
+#define FAKE_RECV_MSG
+#ifdef FAKE_RECV_MSG
+#define DEV_POS
+#define DEV_OBJ
+#endif
 
 #ifdef CALIB_HSV
 // To remove
@@ -73,19 +79,20 @@ int main(int argc, char* argv[]) {
 //            new Cam(516.3, Size(640, 480), Transform3D<float>(0, 17, 31.5, 221. * M_PI / 180., 0, 0), 0),
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 8.5, 32, 221. * M_PI / 180., 0, 0), 0), // Robomovie
             //            new VideoCapture("MyVideo.avi")));
-            new VideoCapture(0)));
+//            new VideoCapture(0)));
 //            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubes4x4x4.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/violetShell.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cubesFace.jpg"))); // "Robomovie"
 //            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
+                new VideoCapture("../2016/Captures/dolphin_198_146_15.jpg"))); // "Robomovie, positioning"
 
 
     // Initialize processes
-    vector<Process*> processList;
-    processList.push_back(new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv", PROC_POS));
-//    processList.push_back(new ProcIDObj(camList.begin()->first, "../2016/listObj.csv", PROC_OBJ));
+    std::map<eVidTypeProc, Process*> processMap;
+    processMap[PROC_POS] = new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv", PROC_POS);
+//    processMap[PROC_POS] = new ProcIDObj(camList.begin()->first, "../2016/listObj.csv", PROC_OBJ);
 
     // Initialize botnet
     bn_init();
@@ -98,44 +105,71 @@ int main(int argc, char* argv[]) {
 
 
     bool quit = false;
-//    int ret;
-//    sMsg inMsg;
+    int ret;
+    sMsg inMsg;
+    std::map<eVidTypeProc, Process*>::iterator itProc;
+    vector<Acq*> acqList;
+
+#ifdef FAKE_RECV_MSG
+    // ************** For dev purpose: start user ***************
+    // Received request message for positioning
+    inMsg.header.type = E_VID_REQ;
+    inMsg.payload.vidReq.type = PROC_POS;
+    inMsg.payload.vidReq.type = PROC_OBJ;
+    inMsg.payload.vidReq.pose.x = 198.;
+    inMsg.payload.vidReq.pose.y = 146.;
+    inMsg.payload.vidReq.pose.theta = 15.*DEG2RAD;
+    //**********************************************************/
+#endif
+
     do {
         // Communications
-//		ret = bn_receive(&inMsg);
+		if(ret = bn_receive(&inMsg)){ // A message has been received
+		    perf.beginFrame();
 
-//		switch(inMsg.header.type){
-//
-//		default:
-//		}
+		    // Set the right process
+		    switch(inMsg.header.type){
+            case PROC_POS:
+                // Get the right process
+                itProc = processMap.find(PROC_POS);
 
-        // Perform processes
-        perf.beginFrame();
-        for (Process* p : processList) {
-            vector<Acq*> acqList;
+                // Get the list of acquisition
+                for (Cam* c : itProc->second->getCamList()) {
+                    map<Cam*, VideoCapture*>::iterator it = camList.find(c);
 
-            for (Cam* c : p->getCamList()) {
-                map<Cam*, VideoCapture*>::iterator it = camList.find(c);
-
-                // Read a new frame from the video source
-//                *(it->second) >> frameRaw; // Need to read 5 times to get the last frame
-//                *(it->second) >> frameRaw;
-//                *(it->second) >> frameRaw;
-//                *(it->second) >> frameRaw;
-//                if (!it->second->read(frameRaw)) {  //if not success, break loop
-//                    cout << "Cannot read the frame from source video file." << endl;
-//                    continue;
-//                }
-                if (frameRaw.size() != c->getSize()) {
-                    cout<< "skip cam c <- (frameRaw.size() = "<<frameRaw.size()<<") != (c->getSize() = "<<c->getSize()<<")\n";
-                    continue;
+                    // Read a new frame from the video source
+//                    *(it->second) >> frameRaw; // Need to read 5 times to get the last frame
+//                    *(it->second) >> frameRaw;
+//                    *(it->second) >> frameRaw;
+//                    *(it->second) >> frameRaw;
+                    if (!it->second->read(frameRaw)) {  //if not success, break loop
+                        cout << "Cannot read the frame from source video file." << endl;
+                        continue;
+                    }
+                    if (frameRaw.size() != c->getSize()) {
+                        cout<< "skip cam c <- (frameRaw.size() = "<<frameRaw.size()<<") != (c->getSize() = "<<c->getSize()<<")\n";
+                        continue;
+                    }
+                    acqList.push_back(new Acq(frameRaw, BGR, c));
                 }
-                acqList.push_back(new Acq(frameRaw, BGR, c));
+
+                break;
+            case PROC_OBJ:
+
+                break;
+            case E_DATA:
+            case E_PING:
+                break;
+            default:
+                bn_printfDbg("got unhandled msg: type%hhu sz%hhu", inMsg.header.type, inMsg.header.size);
+                break;
             }
+		    perf.endOfStep("acquisitions");
 
-            perf.endOfStep("acquisitions");
-
-            p->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
+		    // Execute the process
+            itProc->second->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
+            perf.endOfStep("process");
+            cout<<"Mk2: process done\n";
 
 #ifdef CALIB_HSV
             // Test HSV
@@ -146,18 +180,27 @@ int main(int argc, char* argv[]) {
 //            cv::imwrite("im_hsv.png", im_range);
             imshow( "RGL_HSV", im_range );
 #endif
-            cout<<"Mk2: process done\n";
-            for (Acq* a : acqList) {
+            for (Acq* a : acqList)
                 delete a;
-            }
 
-            perf.endOfStep("process");
+
 
             imshow( "Display window", frameRaw );
 #ifndef CALIB_HSV
             waitKey(0);
 #endif
-        }
+		}
+
+#ifdef CALIB_HSV
+            // Test HSV
+            cv::Mat im_hsv = acqList.front()->getMat(HSV);
+            cv::Mat im_range;
+            cv::inRange(im_hsv, hsvT_min, hsvT_max, im_range);
+            cout<<"hsvT_min = "<<hsvT_min<<", hsvT_max = "<<hsvT_max<<endl;
+//            cv::imwrite("im_hsv.png", im_range);
+            imshow( "RGL_HSV", im_range );
+#endif
+
 #ifdef CALIB_HSV
         switch(waitKey(1000./10)){
         case 0x110001B:
@@ -168,18 +211,6 @@ int main(int argc, char* argv[]) {
             break;
         }
 #endif
-        perf.endFrame();
-
-//        quit = 1;
-//
-//                break;
-//            case E_DATA:
-//            case E_PING:
-//                break;
-//            default:
-//                bn_printfDbg("got unhandled msg: type%hhu sz%hhu", inMsg.header.type, inMsg.header.size);
-//                break;
-//		}  // End switch
     } while (!quit);  // End while
 
     // Test

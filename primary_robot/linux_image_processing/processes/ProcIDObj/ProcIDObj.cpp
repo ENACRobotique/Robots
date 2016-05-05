@@ -446,7 +446,7 @@ pair<eObjShape, Pos3D<float>> ProcIDObj::recogPuck(const Acq& acq, const vector<
         }
     }
 
-    Pos3D<float> posShape (vertexes[min]);
+    Pos3D<float> posShape (vertexes[min], 0., 0., 0.);
 
     if(Vector3D<float>(vertexes[(min + 1)%vertexes.size()]).norm() > Vector3D<float>(vertexes[(min - 1)%vertexes.size()]).norm()){
 //        posShape += Pos3D<float>(vertexes[(min - 1)%vertexes.size()]);

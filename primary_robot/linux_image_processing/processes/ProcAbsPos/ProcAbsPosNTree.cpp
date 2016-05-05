@@ -72,7 +72,6 @@ void ProcAbsPosNTree::process(const std::vector<Acq*>& acqList, const Pos& pos, 
                 };
             });
 
-
     perf.endOfStep("ProcAbsPosNTree::optim");
 
     fout_trials.close();
