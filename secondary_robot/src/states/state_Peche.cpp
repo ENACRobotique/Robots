@@ -78,9 +78,9 @@ sState sPechePurple={
 };
 const PROGMEM trajElem purple_fishing[] = {
 	{0,0,400},
-	{60,0,6450},//canne down	1
-	{0,0,1000},//				2
-	{-200,-12,500},//canne up
+	{120,0,3225},//canne down	1
+	{0,0,1500},//				2
+	{-200,-12,1000},//canne up
 	{-200,-20,1500},
 	{-200,35,2000},
 	{-200,-15,2200},
@@ -109,11 +109,11 @@ const PROGMEM trajElem purple_fishing[] = {
 	{200,-15,1200},
 	{200,-2,1400},
 
-	{0,30,100},
+	{0,30,100},// canne down 30
 	{-200,30,800},
 	{-200,-30,600},
 
-	{-200,0,5000},// et on recommence 33
+	{0,0,5000},// et on recommence 33
 	{0,0,0},
 };
 sState* testPechePurple(){
@@ -140,8 +140,8 @@ sState* testPechePurple(){
 				pos_servo = CANNE_DOWN;
 				break;
 			case 2:
-				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-					pos_servo = max(pos_servo - 3, CANNE_UP);
+				if ((millis()-prev_millis)>200 and pos_servo>CANNE_UP){
+					pos_servo = pos_servo - 1;
 					canne_servo.write(pos_servo);
 				}
 				break;
@@ -163,7 +163,7 @@ sState* testPechePurple(){
 				break;
 			case 16:
 				if ((millis()-prev_millis)>500 and pos_servo>CANNE_UP){
-					pos_servo = max(pos_servo - 3, CANNE_UP);
+					pos_servo = max(pos_servo - 1, CANNE_UP);
 					canne_servo.write(pos_servo);
 				}
 				break;
@@ -179,15 +179,8 @@ sState* testPechePurple(){
 			case 25:
 				crema_servo.write(CREMA_OUT);
 				break;
-			case 33:
-				if( digitalRead(PIN_SWITCH_LEFT) )
-				{
-					st_saveTime_P=0;
-					i=0;
-					prev_millis=0;
-					pos_servo = CANNE_VERTICAL;
-					return &sPeche2Purple;
-				}
+			case 30:
+				canne_servo.write(CANNE_DOWN);
 				break;
 		}
 	}
