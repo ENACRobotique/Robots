@@ -156,11 +156,14 @@ void SonarBelt::doMeasure_revol(){
  */
 std::vector<std::pair<double, double>> SonarBelt::scanInThisDirect(const double theta, const double delta)const{
 	std::vector<std::pair<double, double>> res;
-	double angle = (theta<0)? (theta + 360.): (theta);
+	double angle = (theta<0)?
+			       ((theta<360)? (angle = 0): (angle = theta + 360.)):
+		           ((theta>360)? (angle = 0): (angle = theta));
 	double angle_cur, angle_next;
+	double aper = (delta>0)? (delta): (-delta);
 
 	// Compute the necessary number of sonars required to cover the delta angle
-	int nb_half_sonars = (int)delta / SRF02_APERT_ANGLE + 1;
+	int nb_half_sonars = (int)aper/SRF02_APERT_ANGLE + 1;
 
 	// Find the median
 	mapSonars_t::const_iterator it_cur;
@@ -173,6 +176,8 @@ std::vector<std::pair<double, double>> SonarBelt::scanInThisDirect(const double 
 
 		angle_cur = it_cur->second->getPose().first;
 		angle_next = it_next->second->getPose().first;
+		if(angle_next < angle_cur)
+			angle_cur -= 360;
 		if((angle_cur <= angle)  &&  (angle < angle_next)){
 			// Set the result
 			// Warning use the previous values of it_cur and it_next
