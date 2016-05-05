@@ -191,7 +191,38 @@ int main(int argc, char* argv[]) {
                     }
                     break;
                     case PROC_OBJ: // The message is a request for video recognition
+                    itProc = processMap.find(PROC_OBJ); // Get the right process
+                    if(itProc == processMap.end()){
+                        std::cout<<"Cannot find process PROC_POBJ\n";
+                        break;
+                    }
 
+                    std::cout<<"main(): M5\n";
+                    // Get the list of acquisition
+                    std::cout<<"itProc->second->getCamList().size = "<<itProc->second->getCamList().size()<<std::endl;
+                    for (Cam* c : itProc->second->getCamList()) {
+                        map<Cam*, VideoCapture*>::iterator it = camList.find(c);
+
+                        // Read a new frame from the video source
+    //                    *(it->second) >> frameRaw; // Need to read 5 times to get the last frame
+    //                    *(it->second) >> frameRaw;
+    //                    *(it->second) >> frameRaw;
+    //                    *(it->second) >> frameRaw;
+//                        if (!it->second->read(frameRaw)) {  //if not success, break loop
+//                            cout << "Cannot read the frame from source video file." << endl;
+//                            continue;
+//                        }
+                        if (frameRaw.size() != c->getSize()) {
+                            cout<< "skip cam c <- (frameRaw.size() = "<<frameRaw.size()<<") != (c->getSize() = "<<c->getSize()<<")\n";
+                            continue;
+                        }
+                        acqList.push_back(new Acq(frameRaw, BGR, c));
+                    }
+
+                    // Check if the acquisition is a sucess
+                    if(acqList.size() != 0){
+                        succesAcq = true;
+                    }
                     break;
                     }
 		        break;

@@ -449,13 +449,14 @@ pair<eObjShape, Pos3D<float>> ProcIDObj::recogPuck(const Acq& acq, const vector<
     Pos3D<float> posShape (vertexes[min], 0., 0., 0.);
 
     if(Vector3D<float>(vertexes[(min + 1)%vertexes.size()]).norm() > Vector3D<float>(vertexes[(min - 1)%vertexes.size()]).norm()){
-//        posShape += Pos3D<float>(vertexes[(min - 1)%vertexes.size()]);
+        Pos3D<float> test(vertexes[(min - 1)%vertexes.size()], 0., 0., 0.);
+        posShape += test;
     }
     else
     {
-//        posShape += Pos3D<float>(vertexes[(min + 1)%vertexes.size()]);
+        posShape += Pos3D<float>(vertexes[(min + 1)%vertexes.size()], 0., 0., 0.);
     }
-//            shapes = (std::make_pair(parallelepiped, (Pos3D<float>)(posShape*0.5)));
+            shapes = (std::make_pair(parallelepiped, (Pos3D<float>)(posShape*0.5)));
 
     return shapes;
 }
