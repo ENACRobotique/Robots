@@ -39,7 +39,7 @@ sState* testTirette()
     		if(timepull==0){timepull = millis();}
 			if(millis() - timepull > TIME_BEFORE_START){
 				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajGreenInit;
-				else return &sTrajPurpleInit;//&sPechePurple;
+				else return  &sTrajPurpleInit;//&sPechePurple;
 			}
     	}
     return 0;
@@ -60,7 +60,7 @@ void initTirette(sState *prev)
 	}
 
 void deinitTirette(sState *next)
-	{
+{
     _matchStart=millis();
 
 	#ifdef DEBUG

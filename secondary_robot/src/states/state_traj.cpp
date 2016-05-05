@@ -9,6 +9,7 @@
 #include "state_traj.h"
 #include "state_pause.h"
 #include "state_Recalage.h"
+#include "state_funny_action.h"
 #include "state_wait.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
@@ -125,6 +126,9 @@ sState *testTrajGreenInit()
     static unsigned long prev_millis=0;
     static int flag_end = 0;
     uint16_t limits[RAD_NB_PTS]={30, 30,0, 0};
+#ifdef TIME_FOR_FUNNY_ACTION
+	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
+#endif
 
 	if(!flag_end){
 		if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis)){
@@ -142,6 +146,14 @@ sState *testTrajGreenInit()
 		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL )
 		{
 			Serial.println(F("désactivation RADAR"));
+#ifdef DEBUG
+		Serial.println(millis()-start_move-pause_time);
+#endif
+		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
+			move(0,0);
+			return &sWait;
+		}
+		else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
 			sTrajGreenInit.flag &= ~BIT(E_RADAR);
 			move(-300,0);
 		}
@@ -150,13 +162,6 @@ sState *testTrajGreenInit()
 			move(-500,0);
 			sTrajGreenInit.flag |= BIT(E_RADAR);
 		}
-
-#ifdef DEBUG
-		Serial.print(F("switches : left: "));
-		Serial.print(digitalRead(PIN_SWITCH_LEFT));
-		Serial.print(F("\tright: "));
-		Serial.println(digitalRead(PIN_SWITCH_RIGHT));
-#endif
 
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 			move(0,0);
@@ -239,6 +244,11 @@ sState *testTrajPurple()
     static unsigned long prev_millis=0;
     static int flag_end = 0;
     uint16_t limits[RAD_NB_PTS]={30, 30,0, 0};
+
+#ifdef TIME_FOR_FUNNY_ACTION
+	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
+#endif
+
 	if(!flag_end){
 		if(periodicFunction(start_purple,&st_saveTime,&i,&prev_millis)){
 			#ifdef DEBUG
@@ -251,7 +261,14 @@ sState *testTrajPurple()
 	else{
 
 		static unsigned long start_move=millis();
-		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
+#ifdef DEBUG
+		Serial.println(millis()-start_move-pause_time-TIME_TO_TRAVEL);
+#endif
+		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
+			move(0,0);
+			return &sWait;
+		}
+		else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
 			sTrajPurpleInit.flag &= ~BIT(E_RADAR);
 			move(-300,0);
 		}
@@ -285,6 +302,7 @@ sState *testTrajPurple()
 		 start_pause=millis();
 		 return &sPause;
 	 }
+
 	 return 0;
 }
 sState sTrajPurpleInit={
