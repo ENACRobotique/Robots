@@ -260,7 +260,7 @@ sState sPecheGreen={
 
 const PROGMEM trajElem green_fishing[] = {
 	{0,0,100},
-	{300,0,1450},
+	{300,-1,1450},
 	{100,0,5500},//canne down	2
 	{0,0,1000},//				3
 	{200,-12,500},//canne up

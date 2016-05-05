@@ -136,11 +136,19 @@ sState *testTrajGreenInit()
 		}
 	}
 	else{
-		move(-500,0);
+
 		radarSetLim(limits);
 		static unsigned long start_move=millis();
-		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){sTrajGreenInit.flag &= ~BIT(E_RADAR);}
-		else{sTrajGreenInit.flag |= BIT(E_RADAR);}
+		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL )
+		{
+			sTrajGreenInit.flag &= ~BIT(E_RADAR);
+			move(-300,0);
+		}
+		else
+		{
+			move(-500,0);
+			sTrajGreenInit.flag |= BIT(E_RADAR);
+		}
 
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 			move(0,0);
@@ -233,11 +241,17 @@ sState *testTrajPurple()
 		}
 	}
 	else{
-		move(-500,0);
-		static unsigned long start_move=millis();
-		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){sTrajPurpleInit.flag &= ~BIT(E_RADAR);}
-		else{sTrajPurpleInit.flag |= BIT(E_RADAR);}
 
+		static unsigned long start_move=millis();
+		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
+			sTrajPurpleInit.flag &= ~BIT(E_RADAR);
+			move(-300,0);
+		}
+		else
+		{
+			move(-500,0);
+			sTrajPurpleInit.flag |= BIT(E_RADAR);
+		}
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 			move(0,0);
 			return &sRecalage;
