@@ -105,13 +105,29 @@ const PROGMEM trajElem purple_fishing[] = {
 	{0,0,100},//crema out		25
 
 	{200,-15,2000},
-	{200,35,1700},
+	{200,35,1300},
 	{200,-15,1200},
-	{200,-2,1400},
+	{200,-2,800},//canne down	29
+	{60,0,7000},
+	{0,0,60},//canne up		31
+	{-200,0,800},
+	{-200,-2,500},
+	{-200,-10,1700},
+	{-200,30,2000},
+	{-200,-15,2000},
+	{0,0,500},//canne down		37
+	{0,0,1000},//crema in		38
+	{0,0,200},//canne up		39
+	{0,0,100},//crema out		40
 
-	{0,30,100},// canne down 30
-	{-200,30,800},
-	{-200,-30,600},
+//	{200,-15,2000},
+//	{200,35,1700},
+//	{200,-15,1200},
+//	{200,-2,1400},
+//
+//	{0,30,100},// canne down 30
+//	{-200,30,800},
+//	{-200,-30,600},
 
 	{0,0,5000},// et on recommence 33
 	{0,0,0},
@@ -181,8 +197,28 @@ sState* testPechePurple(){
 			case 25:
 				crema_servo.write(CREMA_OUT);
 				break;
-			case 30:
+			case 29:
 				canne_servo.write(CANNE_DOWN);
+				pos_servo = CANNE_DOWN;
+				break;
+			case 31:
+				if ((millis()-prev_millis)>50 and pos_servo>CANNE_UP){
+					pos_servo = pos_servo - 2;
+					canne_servo.write(pos_servo);
+					prev_millis=millis();
+				}
+				break;
+			case 37:
+				canne_servo.write(CANNE_DOWN);
+				break;
+			case 38:
+				crema_servo.write(CREMA_IN);
+				break;
+			case 39:
+				canne_servo.write(CANNE_UP);
+				break;
+			case 40:
+				crema_servo.write(CREMA_OUT);
 				break;
 		}
 	}
