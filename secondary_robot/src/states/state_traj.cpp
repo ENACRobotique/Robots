@@ -21,7 +21,7 @@ periodicTraj periodicFunction = &periodicProgTraj;
 
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
-#define TIME_TO_TRAVEL 5750
+#define TIME_TO_TRAVEL 7500
 
 void initTrajGreenInit(sState *prev)
 	{
@@ -79,7 +79,7 @@ const PROGMEM trajElem start_purple[]={
 	{0,0,400},//Radar active 9
 	{300,0,1800},
 	{0,-90,400},//Radar inactive 11
-	{300,-90,1300},
+	{300,-90,1600},
 	{0,0,400},
 	{-300,0,1000},
 	{-200,0,1600},
@@ -88,12 +88,11 @@ const PROGMEM trajElem start_purple[]={
 	{0,90,400},
 	{300,90,1300},
 	{0,-35,300},// Radar active 20
-	{-300,-35,2300},
+	{-300,-35,2100},
 	{0,0,0},
 };
 const PROGMEM trajElem start_green[]={
 	//Début trajectoire vers cabines de plage
-	//{0,0,3600000},
 	{0,-15,100},//Radar active 0
 	{-300,-15,1100},
 	{-400,0,1500},
@@ -102,20 +101,20 @@ const PROGMEM trajElem start_green[]={
 	{0,0,100},//1ere porte fermée
 	{300,0,1300},
 	{0,-90,400},
-	{300,-90,1400},
+	{300,-90,1600},
 	{0,0,400},//Radar active 9
 	{300,0,1700},
 	{0,90,400},//Radar inactive 11
-	{300,90,1300},
+	{300,90,1100},
 	{0,0,400},
-	{-300,0,1000},
-	{-200,0,1650},
+	{-300,0,1500},
+	{-200,0,1600},
 	{0,0,100},//2eme porte fermée
 	{300,0,1400},
 	{0,-90,400},
 	{300,-90,1300},//Radar active 20
 	{0,35,300},
-	{-300,35,2150},
+	{-300,35,2700},
 	{0,0,0},
 };
 
@@ -125,7 +124,8 @@ sState *testTrajGreenInit()
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
-    uint16_t limits[RAD_NB_PTS]={30, 30,0, 0};
+    uint16_t limits[RAD_NB_PTS]={25,25,0, 0};
+
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
@@ -143,9 +143,6 @@ sState *testTrajGreenInit()
 
 		radarSetLim(limits);
 		static unsigned long start_move=millis();
-		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL )
-		{
-			Serial.println(F("désactivation RADAR"));
 #ifdef DEBUG
 		Serial.println(millis()-start_move-pause_time);
 #endif
@@ -243,7 +240,7 @@ sState *testTrajPurple()
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
-    uint16_t limits[RAD_NB_PTS]={30, 30,0, 0};
+    uint16_t limits[RAD_NB_PTS]={25,25,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
