@@ -146,7 +146,8 @@ void ProcIDObj::process(const std::vector<Acq*>& acqList, const Pos& pos, const 
         cv::imwrite("im_pAcq.png", im_pAcq);
 
         // Process the image following each color filter (HSV)
-        for(int colInt=0; colInt<1/*(int)objColMax*/; colInt++){
+//        for(int colInt=0; colInt<1/*(int)objColMax*/; colInt++){
+        for(int colInt=0; colInt<(int)objColMax; colInt++){
             cout<<"Process color: col = "<<colInt<<endl;
 
             eObjCol col = static_cast<eObjCol>(colInt);
@@ -213,7 +214,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
         std::exit( -1 );
     }
     std::string line;
-    int nbPara =0, nbCone = 0, nbCylinder = 0;
+    int nbPara =0, nbCone = 0, nbCylinder = 0, nbShell = 0;
     while (getline(infile, line)) {
         std::istringstream s(line);
         string obj;
@@ -267,31 +268,31 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
             _listRefObj.push_back(new Play_Obj(sandCyl, cylinder, dim, ObjCol));
             break;
         case shellGreen:
-            nbCylinder++;
+            nbShell++;
             obj = obj.substr(string("shellGreen").length()+1);
 
             setDim(dim, obj, 2);
             setColors(ObjCol, obj, 0);
 
-            _listRefObj.push_back(new Play_Obj(shellGreen, cylinder, dim, ObjCol));
+            _listRefObj.push_back(new Play_Obj(shellGreen, shell_cylinder, dim, ObjCol));
             break;
         case shellViolet:
-            nbCylinder++;
+            nbShell++;
             obj = obj.substr(string("shellViolet").length()+1);
 
             setDim(dim, obj, 2);
             setColors(ObjCol, obj, 0);
 
-            _listRefObj.push_back(new Play_Obj(shellViolet, cylinder, dim, ObjCol));
+            _listRefObj.push_back(new Play_Obj(shellViolet, shell_cylinder, dim, ObjCol));
             break;
         case shellWhite:
-            nbCylinder++;
+            nbShell++;
             obj = obj.substr(string("shellWhite").length()+1);
 
             setDim(dim, obj, 2);
             setColors(ObjCol, obj, 0);
 
-            _listRefObj.push_back(new Play_Obj(shellWhite, cylinder, dim, ObjCol));
+            _listRefObj.push_back(new Play_Obj(shellWhite, shell_cylinder, dim, ObjCol));
             break;
         case objTypeMax:
             break;
@@ -303,7 +304,7 @@ int ProcIDObj::loadListObj(const std::string& objPlgrdFile){
     infile.close();
 
     cout << "Read " << _listRefObj.size() << " template objects from file \"" << objPlgrdFile << "\"" <<
-            nbPara << " Parallelepiped(s), "<< nbCylinder <<" Cylinder(s), " << nbCone << " Cone(s)"<<endl;
+            nbPara << " Parallelepiped(s), "<< nbCylinder <<" Cylinder(s), " << nbCone << " Cone(s)," << nbShell << " Shell(s)" <<endl;
 
     return 0;
 }
@@ -433,10 +434,12 @@ pair<eObjShape, Pos3D<float>> ProcIDObj::recogPuck(const Acq& acq, const vector<
 //    Pos3D<float> posShape;  // Contains the configuration of the shapes found
     pair<eObjShape, Pos3D<float>> shapes;
 
-    double max=70;
+    // Reject all shape with an egde > max
+    double max=7;
     unsigned int min = 0;
 
     for(unsigned int i = 0; i < vertexes.size(); i++){
+//        cout << "Border " << i << " : " << cv::norm(vertexes[i], vertexes[(i+1)%vertexes.size()], cv::NORM_L2) << endl;
         if(cv::norm(vertexes[i], vertexes[(i+1)%vertexes.size()], cv::NORM_L2) > max){
             cout << "Towel detected" << endl;
             return shapes;
@@ -446,17 +449,23 @@ pair<eObjShape, Pos3D<float>> ProcIDObj::recogPuck(const Acq& acq, const vector<
         }
     }
 
-    Pos3D<float> posShape (vertexes[min], 0., 0., 0.);
+    cv::Mat posShape = vertexes[min];
 
     if(Vector3D<float>(vertexes[(min + 1)%vertexes.size()]).norm() > Vector3D<float>(vertexes[(min - 1)%vertexes.size()]).norm()){
-        Pos3D<float> test(vertexes[(min - 1)%vertexes.size()], 0., 0., 0.);
-        posShape += test;
+//        Pos3D<float> test(vertexes[(min - 1)%vertexes.size()], 0., 0., 0.);
+//        posShape += test;
+        posShape += vertexes[(min - 1)%vertexes.size()];
     }
     else
     {
-        posShape += Pos3D<float>(vertexes[(min + 1)%vertexes.size()], 0., 0., 0.);
+//        posShape += Pos3D<float>(vertexes[(min + 1)%vertexes.size()], 0., 0., 0.);
+        posShape += vertexes[(min + 1)%vertexes.size()];
     }
-            shapes = (std::make_pair(parallelepiped, (Pos3D<float>)(posShape*0.5)));
+
+    // Other way with barycentre
+
+
+            shapes = (std::make_pair(shell_cylinder, Pos3D<float>(posShape*0.5, 0., 0., 0.)));
 
     return shapes;
 }
@@ -568,20 +577,24 @@ vector<Play_Obj*>ProcIDObj::recogObj(const Acq& acq, vector<cv::Mat>& vertexes, 
     translateValVector(vertexes, indexPt0);
 
     if(col != yellowDaffodil){
-       vShape = recogPuck(acq, vertexes);
-       objectsFound.push_back(new Play_Obj ((getSameInListRefObj(col, vShape.first)[0]),vShape.second));
+        // If nothing found return cone
+        vShape = recogPuck(acq, vertexes);
+        if (vShape.first == cone)
+           return objectsFound;
+
+           objectsFound.push_back(new Play_Obj ((getSameInListRefObj(col, vShape.first)[0]),vShape.second));
     }
-    else
-    {
-        vShapes = recogShape(acq, vertexes);
-        for(int i=0; i<(int)vShapes.size(); i++){
-            vector<Play_Obj*> vObj = getSameInListRefObj(col, vShapes[i].first);
-            if((int)vObj.size() == 1)
-                objectsFound.push_back(new Play_Obj((getSameInListRefObj(col, vShapes[i].first)[0]),vShapes[i].second));
-            else
-                cout<<"recoObj(): Can't recognize object: too many solution ("<<vObj.size()<<")\n";
-        }
-    }
+//    else
+//    {
+//        vShapes = recogShape(acq, vertexes);
+//        for(int i=0; i<(int)vShapes.size(); i++){
+//            vector<Play_Obj*> vObj = getSameInListRefObj(col, vShapes[i].first);
+//            if((int)vObj.size() == 1)
+//                objectsFound.push_back(new Play_Obj((getSameInListRefObj(col, vShapes[i].first)[0]),vShapes[i].second));
+//            else
+//                cout<<"recoObj(): Can't recognize object: too many solution ("<<vObj.size()<<")\n";
+//        }
+//    }
 
     return objectsFound;
 }

@@ -79,6 +79,9 @@ void Play_Obj::print(bool dispConf){
     case cylinder:
         cout<<"\t cylinder: ";
         break;
+    case shell_cylinder:
+            cout<<"\t shell cylinder: ";
+            break;
     default:
         cout<<"Unknown shape of playground object"<<endl;
     }

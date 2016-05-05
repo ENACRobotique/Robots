@@ -1,4 +1,4 @@
-#type,dim1,...,dim_n,typeColor,Hmin_color,Smin_color,Vmin_color,Hmax_color,Smax_color,Vmax_color
+#type,dim1,...,dim_n,typeColor(enum int),Hmin_color,Smin_color,Vmin_color,Hmax_color,Smax_color,Vmax_color
 #parallelepipede : x, y, z
 #cylindre : h, r
 #cone : h, r
@@ -7,10 +7,6 @@
 sandCube,58,58,58,0,10,150,50,21,256,256
 sandCyl,58,29,0,10,150,50,21,256,256
 sandCone,60,29,0,10,150,50,21,256,256
-shellGreen,25,38.1,2,40,110,50,256,80,256
-shellViolet,25,38.1,3,130,180,30,256,0,256
-shellWhite,25,38.1,1,0,26,0,85,180,256
-#shellGreen,25,38.1,2,40,35,0,80,256,256
-#shellViolet,25,38.1,3,120,60,0,180,256,256
-#shellWhite,25,38.1,1,20,0,50,42,75,0 
-
+shellWhite,25,38.1,1,0,0,180,26,85,256
+shellGreen,25,38.1,2,40,50,24,110,256,86
+shellViolet,25,38.1,3,130,30,0,180,256,256

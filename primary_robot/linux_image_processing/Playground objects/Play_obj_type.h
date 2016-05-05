@@ -9,6 +9,7 @@
 typedef enum eObjShape {
     cone,
     cylinder,
+    shell_cylinder,
     parallelepiped,
     objShapeMax
 }eObjShape;

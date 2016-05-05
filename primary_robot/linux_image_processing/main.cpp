@@ -86,19 +86,14 @@ int main(int argc, char* argv[]) {
             new Cam(516.3, Size(640, 480), Transform3D<float>(0, 8.5, 32, 221. * M_PI / 180., 0, 0), 0), // Robomovie
             //            new VideoCapture("MyVideo.avi")));
 //            new VideoCapture(0)));
-//            new VideoCapture("../2016/Captures/1cube.jpg"))); // "Robomovie"
-//            new VideoCapture("../2016/Captures/cubesBiais.jpg"))); // "Robomovie"
-//            new VideoCapture("../2016/Captures/cubes4x4x4.jpg"))); // "Robomovie"
-//            new VideoCapture("../2016/Captures/violetShell.jpg"))); // "Robomovie"
-//            new VideoCapture("../2016/Captures/cubesFace.jpg"))); // "Robomovie"
-//            new VideoCapture("../2016/Captures/cylFar.jpg"))); // "Robomovie"
-                new VideoCapture("../2016/Captures/dolphin_198_146_15.jpg"))); // "Robomovie, positioning"
+            new VideoCapture("../2016/Captures/guvcview_image-32.jpg"))); // "Robomovie"
+//                new VideoCapture("../2016/Captures/dolphin_198_146_15.jpg"))); // "Robomovie, positioning"
 
 
     // Initialize processes
     std::map<eVidTypeProc, Process*> processMap;
-    processMap[PROC_POS] = new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv", PROC_POS);
-//    processMap[PROC_POS] = new ProcIDObj(camList.begin()->first, "../2016/listObj.csv", PROC_OBJ);
+//    processMap[PROC_POS] = new ProcAbsPosNTree(camList.begin()->first, "../simu/testpoints.csv", PROC_POS);
+    processMap[PROC_OBJ] = new ProcIDObj(camList.begin()->first, "../2016/listObj.csv", PROC_OBJ);
 
     // Initialize botnet
     bn_init();
@@ -193,7 +188,7 @@ int main(int argc, char* argv[]) {
                     case PROC_OBJ: // The message is a request for video recognition
                     itProc = processMap.find(PROC_OBJ); // Get the right process
                     if(itProc == processMap.end()){
-                        std::cout<<"Cannot find process PROC_POBJ\n";
+                        std::cout<<"Cannot find process PROC_OBJ\n";
                         break;
                     }
 
