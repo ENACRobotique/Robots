@@ -76,7 +76,7 @@
 #define CREMA_VERTICAL 90
 
 
-//#define DEBUG
+#define DEBUG
 
 /* endDefines *********************************************/
 

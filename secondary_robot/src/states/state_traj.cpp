@@ -25,7 +25,7 @@ static unsigned long start_pause=0;
 void initTrajGreenInit(sState *prev)
 	{
 		#ifdef DEBUG
-			Serial.println(F("debut traj rouge (premier trajet)"));
+			Serial.println(F("debut traj vert (premier trajet)"));
 		#endif
 
 	    if (prev==&sPause)
@@ -129,7 +129,7 @@ sState *testTrajGreenInit()
 	if(!flag_end){
 		if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis)){
 			#ifdef DEBUG
-				Serial.println(F("\tTrajet 1 fini !"));
+				Serial.println(F("\tTrajet vert 1 fini !"));
 			#endif
 			flag_end = 1;
 			pause_time=0;
@@ -141,6 +141,7 @@ sState *testTrajGreenInit()
 		static unsigned long start_move=millis();
 		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL )
 		{
+			Serial.println(F("désactivation RADAR"));
 			sTrajGreenInit.flag &= ~BIT(E_RADAR);
 			move(-300,0);
 		}
@@ -149,6 +150,13 @@ sState *testTrajGreenInit()
 			move(-500,0);
 			sTrajGreenInit.flag |= BIT(E_RADAR);
 		}
+
+#ifdef DEBUG
+		Serial.print(F("switches : left: "));
+		Serial.print(digitalRead(PIN_SWITCH_LEFT));
+		Serial.print(F("\tright: "));
+		Serial.println(digitalRead(PIN_SWITCH_RIGHT));
+#endif
 
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 			move(0,0);
