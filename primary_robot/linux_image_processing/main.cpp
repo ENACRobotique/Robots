@@ -33,9 +33,15 @@ using namespace std;
 //#define CALIB_HSV
 #define FAKE_RECV_MSG
 #ifdef FAKE_RECV_MSG
+// Warning Use only one of the next two defines
 #define DEV_POS
-#define DEV_OBJ
+//#define DEV_OBJ
 #endif
+
+// Pose of the robot in the reference fram of the table
+#define X_T 218.
+#define Y_T 166.
+#define Z_T ((15. - 90.) * DEG2RAD)
 
 #ifdef CALIB_HSV
 // To remove
@@ -105,6 +111,7 @@ int main(int argc, char* argv[]) {
 
 
     bool quit = false;
+    bool succesAcq = false;
     int ret;
     sMsg inMsg;
     std::map<eVidTypeProc, Process*>::iterator itProc;
@@ -112,49 +119,82 @@ int main(int argc, char* argv[]) {
 
 #ifdef FAKE_RECV_MSG
     // ************** For dev purpose: start user ***************
+#ifdef DEV_POS
     // Received request message for positioning
     inMsg.header.type = E_VID_REQ;
     inMsg.payload.vidReq.type = PROC_POS;
-    inMsg.payload.vidReq.type = PROC_OBJ;
     inMsg.payload.vidReq.pose.x = 198.;
     inMsg.payload.vidReq.pose.y = 146.;
     inMsg.payload.vidReq.pose.theta = 15.*DEG2RAD;
+#endif
+#ifdef DEV_OBJ
+    // Received request message for objects recognition
+    inMsg.header.type = E_VID_REQ;
+    inMsg.payload.vidReq.type = PROC_OBJ;
+    inMsg.payload.vidReq.pose.x = 198.;  // Warning: Update the position wrt to the image source.
+    inMsg.payload.vidReq.pose.y = 146.;
+    inMsg.payload.vidReq.pose.theta = 15.*DEG2RAD;
+#endif
+    // Simulate a reception
+    ret = 1;
     //**********************************************************/
 #endif
 
     do {
         // Communications
-		if(ret = bn_receive(&inMsg)){ // A message has been received
+#ifdef FAKE_RECV_MSG
+		if(ret){ // A message has been received
+#else
+        ;
+        if(ret = bn_receive(&inMsg)){ // A message has been received
+#endif
 		    perf.beginFrame();
+
+		    ret = 0; // 1 loop
 
 		    // Set the right process
 		    switch(inMsg.header.type){
-            case PROC_POS:
-                // Get the right process
-                itProc = processMap.find(PROC_POS);
-
-                // Get the list of acquisition
-                for (Cam* c : itProc->second->getCamList()) {
-                    map<Cam*, VideoCapture*>::iterator it = camList.find(c);
-
-                    // Read a new frame from the video source
-//                    *(it->second) >> frameRaw; // Need to read 5 times to get the last frame
-//                    *(it->second) >> frameRaw;
-//                    *(it->second) >> frameRaw;
-//                    *(it->second) >> frameRaw;
-                    if (!it->second->read(frameRaw)) {  //if not success, break loop
-                        cout << "Cannot read the frame from source video file." << endl;
-                        continue;
+		    case E_VID_REQ: // The message is for the video processing program
+                switch (inMsg.payload.vidReq.type) {
+                case PROC_POS: // The message is a request for video positioning
+                    itProc = processMap.find(PROC_POS); // Get the right process
+                    if(itProc == processMap.end()){
+                        std::cout<<"Cannot find process PROC_POS\n";
+                        break;
                     }
-                    if (frameRaw.size() != c->getSize()) {
-                        cout<< "skip cam c <- (frameRaw.size() = "<<frameRaw.size()<<") != (c->getSize() = "<<c->getSize()<<")\n";
-                        continue;
-                    }
-                    acqList.push_back(new Acq(frameRaw, BGR, c));
-                }
 
-                break;
-            case PROC_OBJ:
+                    std::cout<<"main(): M4\n";
+                    // Get the list of acquisition
+                    std::cout<<"itProc->second->getCamList().size = "<<itProc->second->getCamList().size()<<std::endl;
+                    for (Cam* c : itProc->second->getCamList()) {
+                        map<Cam*, VideoCapture*>::iterator it = camList.find(c);
+
+                        // Read a new frame from the video source
+    //                    *(it->second) >> frameRaw; // Need to read 5 times to get the last frame
+    //                    *(it->second) >> frameRaw;
+    //                    *(it->second) >> frameRaw;
+    //                    *(it->second) >> frameRaw;
+//                        if (!it->second->read(frameRaw)) {  //if not success, break loop
+//                            cout << "Cannot read the frame from source video file." << endl;
+//                            continue;
+//                        }
+                        if (frameRaw.size() != c->getSize()) {
+                            cout<< "skip cam c <- (frameRaw.size() = "<<frameRaw.size()<<") != (c->getSize() = "<<c->getSize()<<")\n";
+                            continue;
+                        }
+                        acqList.push_back(new Acq(frameRaw, BGR, c));
+                    }
+
+                    // Check if the acquisition is a sucess
+                    if(acqList.size() != 0){
+                        succesAcq = true;
+                    }
+                    break;
+                    case PROC_OBJ: // The message is a request for video recognition
+
+                    break;
+                    }
+		        break;
 
                 break;
             case E_DATA:
@@ -164,31 +204,36 @@ int main(int argc, char* argv[]) {
                 bn_printfDbg("got unhandled msg: type%hhu sz%hhu", inMsg.header.type, inMsg.header.size);
                 break;
             }
-		    perf.endOfStep("acquisitions");
 
-		    // Execute the process
-            itProc->second->process(acqList, AbsPos2D<float>(145, 30, 5 * M_PI / 180.), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
-            perf.endOfStep("process");
-            cout<<"Mk2: process done\n";
+		    if(succesAcq){
+                perf.endOfStep("acquisitions");
 
-#ifdef CALIB_HSV
-            // Test HSV
-            cv::Mat im_hsv = acqList.front()->getMat(HSV);
-            cv::Mat im_range;
-            cv::inRange(im_hsv, hsvT_min, hsvT_max, im_range);
-            cout<<"hsvT_min = "<<hsvT_min<<", hsvT_max = "<<hsvT_max<<endl;
-//            cv::imwrite("im_hsv.png", im_range);
-            imshow( "RGL_HSV", im_range );
-#endif
-            for (Acq* a : acqList)
-                delete a;
+                // Execute the process
+                std::cout<<"____ acqList.size() = "<<acqList.size()<<std::endl;
+                itProc->second->process(acqList, AbsPos2D<float>(X_T, Y_T, Z_T), Uncertainty2D<float>(180, 180, 0, 10.f * M_PI / 180.f)); /// optim: 159.58, 21.58, 0
+                std::cout<<"main(): M12\n";
+                perf.endOfStep("process");
+                cout<<"Mk2: process done\n";
+
+    #ifdef CALIB_HSV
+                // Test HSV
+                cv::Mat im_hsv = acqList.front()->getMat(HSV);
+                cv::Mat im_range;
+                cv::inRange(im_hsv, hsvT_min, hsvT_max, im_range);
+                cout<<"hsvT_min = "<<hsvT_min<<", hsvT_max = "<<hsvT_max<<endl;
+    //            cv::imwrite("im_hsv.png", im_range);
+                imshow( "RGL_HSV", im_range );
+    #endif
+                for (Acq* a : acqList)
+                    delete a;
 
 
 
-            imshow( "Display window", frameRaw );
-#ifndef CALIB_HSV
-            waitKey(0);
-#endif
+                imshow( "Display window", frameRaw );
+    #ifndef CALIB_HSV
+                waitKey(0);
+    #endif
+		    }
 		}
 
 #ifdef CALIB_HSV
@@ -218,7 +263,7 @@ int main(int argc, char* argv[]) {
     imshow( "Display window", frameRaw);                   // Show our image inside it.
     waitKey(0);
 
-    printf("End prog\n");
+    printf("End prog, bye bye!!!\n");
 
     return 0;
 }

@@ -23,7 +23,7 @@ class ProjAcq;
 #define COMP_TESTPOINTS
 #define COMP_SIMULATED
 //#define COMP_PLAYGROUND
-//#define COMP_HSV
+#define COMP_HSV
 //#define HSV_TO_HGRAY
 //#define HSV_TO_VGRAY
 

@@ -110,6 +110,7 @@ void ProcAbsPos::handleStart(ProjAcq& pAcq, AbsPos2D<float> const& pos) const {
 #endif /* SHOW_IMAGES */
 #endif /* COMP_HSV */
 
+
 #ifdef COMP_SIMULATED
     // simulate acquisition
     Mat _im3 = getSimulatedAt(pAcq, pos);
@@ -121,10 +122,11 @@ void ProcAbsPos::handleStart(ProjAcq& pAcq, AbsPos2D<float> const& pos) const {
     imshow(bn, _im3);
 #endif /* SHOW_IMAGES */
 
+
 #ifdef COMP_HSV
     // show simulated acquisition in hsv
-    Mat im3_hsv = im3.clone();
-    cvtColor(im3, im3_hsv, COLOR_BGR2HSV);
+    Mat im3_hsv = rgb.clone();
+    cvtColor(rgb, im3_hsv, COLOR_BGR2HSV);
 #ifdef HSV_TO_HGRAY
     for (Mat_<Vec3b>::iterator it = im3_hsv.begin<Vec3b>();
             it != im3_hsv.end<Vec3b>(); it++) {
@@ -152,6 +154,8 @@ void ProcAbsPos::handleStart(ProjAcq& pAcq, AbsPos2D<float> const& pos) const {
     imshow(bn + "_diff_hsv", diff_hsv);
 #endif /* SHOW_IMAGES */
 #endif /* COMP_HSV */
+
+
 
 #ifdef COMP_TESTPOINTS
     Mat _im3_tp = getTestPointsAt(pAcq, pos.getTransform().getReverse());
@@ -297,7 +301,6 @@ void ProcAbsPos::handleEnd(ProjAcq& pAcq, AbsPos2D<float> const& endPos) const {
 
 Mat ProcAbsPos::getSimulatedAt(ProjAcq& pAcq, const Pos& robPos) const {
     Transform2D<float> tr_rob2pg = robPos.getTransform().getReverse();
-
     return getSimulatedAt(pAcq, tr_rob2pg);
 }
 

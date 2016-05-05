@@ -142,14 +142,10 @@ Mat ProjAcq::cam2plane(Mat pt_px) {
     }
 
     Mat vec = _rot_cam1TOcam2 * cam->getMatI2C() * pt_px; // pt_px from image of cam1 to cam2
-    cout<<"pt_px_C2 = "<<vec<<endl;
     vec *= (_distPlaneCam / vec.at<float>(2, 0)); // put the point on the plane
-    cout<<"pt_px_C2onPl = "<<vec<<endl;
     vec = _rot_cam2TOcam1 * vec;
     vec.push_back(1.f);
-    cout<<"pt_px_C1Pl = "<<vec<<endl;
     vec = cam->getMatC2R() * vec;
-    cout<<"pt_px_R = "<<vec<<endl;
     vec.pop_back(1);
 
     return vec;
