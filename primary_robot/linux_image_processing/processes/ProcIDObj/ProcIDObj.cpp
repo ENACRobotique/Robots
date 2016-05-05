@@ -429,6 +429,37 @@ void ProcIDObj::compApproxCtr(const vector<cv::Point>& ctr, vector<cv::Point>& a
     approxPolyDP(cv::Mat(ctr), approxCtr, arcLength(cv::Mat(ctr), true) * 0.02, true);
 }
 
+pair<eObjShape, Pos3D<float>> ProcIDObj::recogPuck(const Acq& acq, const vector<cv::Mat>& vertexes){
+//    Pos3D<float> posShape;  // Contains the configuration of the shapes found
+    pair<eObjShape, Pos3D<float>> shapes;
+
+    double max=70;
+    unsigned int min = 0;
+
+    for(unsigned int i = 0; i < vertexes.size(); i++){
+        if(cv::norm(vertexes[i], vertexes[(i+1)%vertexes.size()], cv::NORM_L2) > max){
+            cout << "Towel detected" << endl;
+            return shapes;
+        }
+        else if(cv::norm(vertexes[i], vertexes[(i+1)%vertexes.size()], cv::NORM_L2) < cv::norm(vertexes[min],vertexes[(min+1)%vertexes.size()], cv::NORM_L2)){
+            min = i;
+        }
+    }
+
+    Pos3D<float> posShape (vertexes[min]);
+
+    if(Vector3D<float>(vertexes[(min + 1)%vertexes.size()]).norm() > Vector3D<float>(vertexes[(min - 1)%vertexes.size()]).norm()){
+//        posShape += Pos3D<float>(vertexes[(min - 1)%vertexes.size()]);
+    }
+    else
+    {
+//        posShape += Pos3D<float>(vertexes[(min + 1)%vertexes.size()]);
+    }
+//            shapes = (std::make_pair(parallelepiped, (Pos3D<float>)(posShape*0.5)));
+
+    return shapes;
+}
+
 /**
  * @description: Try to identify the shape describe by the contour "ctr".
  *      If the shape is recognized then set the type of object in "t",
@@ -529,19 +560,26 @@ bool ProcIDObj::isThereCone(const vector<cv::Mat>& vertexes, const Acq& acq){
 
 vector<Play_Obj*>ProcIDObj::recogObj(const Acq& acq, vector<cv::Mat>& vertexes, eObjCol col){
     vector<Play_Obj*> objectsFound;
-
+    pair<eObjShape, Pos3D<float>> vShape;
+    vector<pair<eObjShape, Pos3D<float>>> vShapes;
     // Find the nearest pt "pt0" to the robot and arrange "vertexes" such that vertexes[0] is pt0. (trigonometric direction)
     int indexPt0 = getNearestPtTo(vertexes, (cv::Mat_<float>(3,1)<< 0.,0.,0.));
     translateValVector(vertexes, indexPt0);
 
-    vector<pair<eObjShape, Pos3D<float>>> vShape = recogShape(acq, vertexes);
-
-    for(int i=0; i<(int)vShape.size(); i++){
-        vector<Play_Obj*> vObj = getSameInListRefObj(col, vShape[i].first);
-        if((int)vObj.size() == 1)
-            objectsFound.push_back(new Play_Obj((getSameInListRefObj(col, vShape[i].first)[0]),vShape[i].second));
-        else
-            cout<<"recoObj(): Can't recognize object: too many solution ("<<vObj.size()<<")\n";
+    if(col != yellowDaffodil){
+       vShape = recogPuck(acq, vertexes);
+       objectsFound.push_back(new Play_Obj ((getSameInListRefObj(col, vShape.first)[0]),vShape.second));
+    }
+    else
+    {
+        vShapes = recogShape(acq, vertexes);
+        for(int i=0; i<(int)vShapes.size(); i++){
+            vector<Play_Obj*> vObj = getSameInListRefObj(col, vShapes[i].first);
+            if((int)vObj.size() == 1)
+                objectsFound.push_back(new Play_Obj((getSameInListRefObj(col, vShapes[i].first)[0]),vShapes[i].second));
+            else
+                cout<<"recoObj(): Can't recognize object: too many solution ("<<vObj.size()<<")\n";
+        }
     }
 
     return objectsFound;

@@ -89,21 +89,22 @@ public:
     }
 
     T const& roll() const {
-        return roll;
+        return _roll;
     }
 
     T const& pitch() const {
-        return pitch;
+        return _pitch;
     }
 
     T const& yaw() const {
-        return yaw;
+        return _yaw;
     }
 
 
     Pos3D operator*(const T& r) const {
         return {Point3D<T>(_p.x*r, _p.y*r, _p.z*r), _roll*r, _pitch*r, _yaw*r};
     }
+
     Pos3D operator+(const Pos3D& v) const {
         return {Point3D<T>(_p.x + v._p.x, _p.y + v._p.y, _p.z + v._p.z)
             ,_roll + v._roll, _pitch + v._pitch, _yaw + v._yaw};

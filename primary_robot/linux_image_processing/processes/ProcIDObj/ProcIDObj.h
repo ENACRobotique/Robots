@@ -61,7 +61,7 @@ private:
     bool isThereCone(const vector<cv::Mat>& vertexes, const Acq& acq);
     Play_Obj* findCone(const cv::Mat& ptCam_R, const vector<cv::Mat>& vertexes);
     Play_Obj* findConeCarac(const cv::Mat& ptCam_R, const vector<cv::Mat>& vertexes, const int ind_pt);
-
+    pair<eObjShape, Pos3D<float>> recogPuck(const Acq& acq, const vector<cv::Mat>& vertexes);
 protected:
     int _stateCalib;
     std::vector<int> listIdCamOfInterest;  // TODO: For future improvement
