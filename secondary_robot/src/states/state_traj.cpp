@@ -71,7 +71,7 @@ const PROGMEM trajElem start_purple[]={
 	{-300,18,1100},
 	{-400,0,1500},
 	{-300,-20,900},//Radar inactive 3
-	{-200,0,1200},
+	{-200,0,1350},
 	{0,0,100},//1ere porte fermée
 	{300,0,1300},
 	{0,90,400},
@@ -88,7 +88,7 @@ const PROGMEM trajElem start_purple[]={
 	{0,90,400},
 	{300,90,1300},
 	{0,-35,300},// Radar active 20
-	{-300,-35,2100},
+	{-300,-35,1800},
 	{0,0,0},
 };
 const PROGMEM trajElem start_green[]={
