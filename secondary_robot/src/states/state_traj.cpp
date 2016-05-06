@@ -124,7 +124,7 @@ sState *testTrajGreenInit()
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
-    uint16_t limits[RAD_NB_PTS]={25,25,0, 0};
+    uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
@@ -240,7 +240,7 @@ sState *testTrajPurple()
 	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
-    uint16_t limits[RAD_NB_PTS]={25,25,0, 0};
+    uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
