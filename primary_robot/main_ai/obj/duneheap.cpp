@@ -76,8 +76,6 @@ int DuneHeap::loopObj(paramObj par){
 			servo.openDoor(DOOR_1_R);
 
 			path.go2PointOrient(scratchPoint, par.obs, scratchAngle);
-
-			_time = millis();
 			stepLoc = DUNEHEAP_CONTACT;
 			break;
 
@@ -120,6 +118,8 @@ int DuneHeap::loopObj(paramObj par){
 
 	case (DUNEHEAP_END):
 		if (millis() - _time > 250.){
+
+			par.act[_actuator_select].doors.full = true;
 			_state =FINISH;
 			return 0;
 		}

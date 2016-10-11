@@ -140,9 +140,7 @@ int nextObj(const unsigned int start_time, const int robot, const bool axle, par
                      << "; id=" << i.id;
 
         if(i.type == SANDDOOR){
-            logs << "; cone number=" << i.doors.cone_number
-                 << "; cube number=" << i.doors.cube_number
-				 << "; cylinder number=" << i.doors.cylinder_number;
+            logs << ": FULL ?" << i.doors.full;
         }
 //        else if(i.type == S){
 //            logs << "; distributor=" << i.cupActuator.distributor
