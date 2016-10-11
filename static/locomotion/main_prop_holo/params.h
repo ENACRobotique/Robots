@@ -64,7 +64,7 @@
 #define ssPI (PI*dASHIFT) // (rad<<(RAD_SHIFT+SHIFT))
 #define issPI iROUND(ssPI)
 
-#define WDIAM (3.25*2.54)  // wheel diameter (cm)
+#define WDIAM  (8.04) //(3.25*2.54)  // wheel diameter (cm)
 
 #define SpP (0.02)  // seconds per sampling period
 #define MSpP (20.)  // milliseconds per sampling period

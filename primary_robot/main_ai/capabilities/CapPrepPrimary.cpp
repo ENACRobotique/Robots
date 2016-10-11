@@ -64,11 +64,14 @@ int CapPrepPrimary::loop(){
             if (capTeam->getColor() == eColor_t::PURPLE) {
                 logs << INFO << "Color selected is PURPLE";
                 pos_robot = {INIT_POS_PURPLE_X, INIT_POS_PURPLE_Y};
+                float theta_robot = INIT_ANGLE_PURPLE;
+
          //       theta_robot = INIT_ANGLE_YELLOW;
             }
             else if (capTeam->getColor() == eColor_t::GREEN) {
                 logs << INFO << "Color selected is GREEN";
                 pos_robot = {INIT_POS_GREEN_X, INIT_POS_GREEN_Y};
+                float theta_robot = INIT_ANGLE_GREEN;
              //   theta_robot = INIT_ANGLE_GREEN;
             }
             else {
@@ -139,8 +142,26 @@ int CapPrepPrimary::loop(){
       //  Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
      //   float theta_robot = (180.)*M_PI/180.;
 
-        Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
-        float theta_robot = INIT_ANGLE_GREEN;
+//        Point2D<float> pos_robot(INIT_POS_GREEN_X, INIT_POS_GREEN_Y);
+//        float theta_robot = INIT_ANGLE_GREEN;
+        Point2D<float> pos_robot;
+        float theta_robot;
+
+        if (capTeam->getColor() == eColor_t::PURPLE) {
+            logs << INFO << "Color selected is PURPLE";
+            pos_robot = {INIT_POS_PURPLE_X, INIT_POS_PURPLE_Y};
+
+     //       theta_robot = INIT_ANGLE_YELLOW;
+        }
+        else if (capTeam->getColor() == eColor_t::GREEN) {
+            logs << INFO << "Color selected is GREEN";
+            pos_robot = {INIT_POS_GREEN_X, INIT_POS_GREEN_Y};
+         //   theta_robot = INIT_ANGLE_GREEN;
+        }
+        else {
+            logs << ERR << "Error selection color";
+            return -1;
+        }
 
         sendSetPosPrimary(pos_robot, theta_robot, MINVARIANCE_XY, MINVARIANCE_XY, 0., MINVARIANCE_THETA);
 

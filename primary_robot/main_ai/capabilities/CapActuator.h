@@ -42,9 +42,7 @@ class CapActuator : public Capability{
                 _act.push_back(door);
                 _act.back().type = ActuatorType::SANDDOOR;
                 _act.back().id = i;
-                _act.back().doors.cone_number = 0; //if modify, change in objStatingZone;
-                _act.back().doors.cube_number =0;
-                _act.back().doors.cylinder_number = 0;
+                _act.back().doors.full = false; //if modify, change in objStatingZone;
                 _act.back().angle = doorAngle[i];
                 //TODO _act.back().pos
             }

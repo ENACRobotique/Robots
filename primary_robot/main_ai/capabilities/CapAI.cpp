@@ -22,48 +22,34 @@ extern "C"{
 #include "sand_heap.h"
 #include "duneheap.h"
 #include "objStartingZone.h"
+#include "buildingzone.h"
 #include "environment.h"
 
 
 void CapAI::updateWaitObj(paramObj& par){
 
     for (unsigned int i = 0 ; i < par.obj.size() ; i++){
-        if(par.obj[i]->state() == WAIT_MES){/*
+        if(par.obj[i]->state() == WAIT_MES){
             switch(par.obj[i]->type()){
-                case E_OBJ_STARTING_ZONE:
+                case E_BUILDING_ZONE:
                     {
                         int perform = 0;
                         for(Actuator& j : par.act){
                             if(j.type == ActuatorType::SANDDOOR){
-                                if(j.elevator.ball && j.elevator.number == 3){
-                                    j.elevator.full = 1;
-                                    perform++;
+                                if (j.doors.full){
+                                    logs << INFO << "Activation OBJ Starting zone";
+                                    par.obj[i]->state() = ACTIVE;
+                                    break;
                                 }
-                                else if(!j.elevator.ball && j.elevator.number == 2){
-                                    j.elevator.full = 1;
-                                    perform++;
-                                }
-                            }
-                        }
-                        if(perform == 2){
-                            logs << INFO << "Activation OBJ Starting zone";
-                            par.obj[i]->state() = ACTIVE;
-                        }
-                    }
-                    break;
-                case E_DROP_CUP:
-                    for(Actuator& j : par.act){
-                        if(j.type == ActuatorType::CUP){
-                            if(j.cupActuator.full){
-                                par.obj[i]->state() = ACTIVE;
-                                break;
                             }
                         }
                     }
                     break;
+                case E_OBJ_STARTING_ZONE:
+                	break;
                 default:
-                    logs << ERR << "No action define in WAIT_MES for this objective";
-            }*/
+                    logs << ERR << "No action define in WAIT_MES for this objective" << par.obj[i]->type();
+            }
 
         }
 
@@ -209,6 +195,8 @@ void CapAI::initObjective(){
     }else{
     	listObj.push_back(new SandHeap(1));
     }
+
+    listObj.push_back(new BuildingZone(capTeam->getColor()));
 
     listObj.push_back(new DuneHeap(0));
     listObj.push_back(new DuneHeap(1));

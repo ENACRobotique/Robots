@@ -70,12 +70,26 @@
  -0.037864591009775 -0.999282879242741   13.176
   0.884336654495959 0.466849741902997   13.176
  */
-const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
-        { -0.846472063486183 * dMSHIFT, 0.532433137339744 * dMSHIFT, D2I(13.176) * dMoRSHIFT },
-        { -0.037864591009775 * dMSHIFT, -0.999282879242741 * dMSHIFT, D2I(13.176) * dMoRSHIFT },
-        { 0.884336654495959 * dMSHIFT, 0.466849741902997 * dMSHIFT, D2I(13.176) * dMoRSHIFT }
-};
 
+
+// Angle angles
+//#define apla1 147.83
+//#define apla2 -92.17
+//#define apla3 27.83
+//#define aplaoff (31.5 + 0.7)
+
+
+#define radius (360./371*120./132.*12.8)
+//const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
+//        { -0.846472063486183 * dMSHIFT, 0.532433137339744 * dMSHIFT, D2I(radius) * dMoRSHIFT },
+//        { -0.037864591009775 * dMSHIFT, -0.999282879242741 * dMSHIFT, D2I(radius) * dMoRSHIFT },
+//        { 0.884336654495959 * dMSHIFT, 0.466849741902997 * dMSHIFT, D2I(radius) * dMoRSHIFT }
+//};
+const int32_t mat_rob2pods[NB_PODS][NB_SPDS] = {
+        { -0.9999998629221643 * dMSHIFT, -0.000523598751673548 * dMSHIFT, D2I(radius) * dMoRSHIFT },
+        { 0.5004533812814215 * dMSHIFT, -0.8657634856957137 * dMSHIFT, D2I(radius) * dMoRSHIFT },
+        { 0.4995464816407428 * dMSHIFT, 0.8662870844473874 * dMSHIFT, D2I(radius) * dMoRSHIFT }
+};
 
 int main() {
     //// Initialization
@@ -166,7 +180,7 @@ int main() {
         }
 
         time_ms = millis();
-        if ((time_ms - prevLed_ms) > 200) {
+        if ((time_ms - prevLed_ms) > 1000) {
             prevLed_ms = time_ms;
             ledState ^= 1; // toggle state (led blinking)
             gpio_write(1, 24, ledState);
