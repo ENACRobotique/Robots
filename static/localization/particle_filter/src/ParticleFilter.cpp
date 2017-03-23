@@ -1,0 +1,59 @@
+/*
+ * ParticleFilter.cpp
+ *
+ *  Created on: 18 mars 2017
+ *      Author: guilhem
+ */
+
+#include "ParticleFilter.h"
+
+using namespace std;
+
+ParticleFilter::ParticleFilter() {
+	for (int i = 0; i < PARTICLES_NUMBER; i++){
+		particles[i] = Particle();
+	}
+	random_device rd;
+	generator = default_random_engine( rd());
+}
+
+ParticleFilter::~ParticleFilter() {
+	// TODO Auto-generated destructor stub
+}
+
+void ParticleFilter::move(float theta, float distance){
+	for (int i = 0; i < PARTICLES_NUMBER; i++){
+		this->particles[i].move(theta, distance);
+	}
+}
+
+void ParticleFilter::sense(vector<float> measure){
+	Particle resampledParticles[PARTICLES_NUMBER];
+	double weights[PARTICLES_NUMBER];
+	double maxWeight = 0.0;
+	double beta = 0.0;
+	int turningIndex = rand() % PARTICLES_NUMBER;
+	uniform_real_distribution<double> distribution(0.0, 1.0); //Engine for random numbers [0.0; 1.0[
+	for (int i = 0; i < PARTICLES_NUMBER; i++){
+		weights[i] = particles[i].measurementProb(measure);
+		maxWeight = max(weights[i], maxWeight);
+	}
+	for (int i = 0; i < PARTICLES_NUMBER; i++){
+		beta += distribution(generator) * 2.0 * maxWeight;
+		while (beta > weights[turningIndex]){
+			beta -= weights[turningIndex];
+			turningIndex = (turningIndex + 1) % PARTICLES_NUMBER;
+		}
+		resampledParticles[i] = particles[turningIndex];
+	}
+	for (int i = 0; i < PARTICLES_NUMBER; i++){
+		particles[i] = resampledParticles[i];
+
+	}
+}
+
+PointOrient2D<float> ParticleFilter::locate(){
+	int selectedPaticle = rand() % PARTICLES_NUMBER;
+	return PointOrient2D<float>(particles[selectedPaticle].x, particles[selectedPaticle].y,
+			particles[selectedPaticle].theta);
+}
