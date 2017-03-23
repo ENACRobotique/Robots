@@ -9,6 +9,7 @@
 #define LIB_GEOMETRYTOOLS_POINTORIENT2D_H_
 
 #include <cmath>
+#include "Point2D.h"
 
 template<typename T>
 class Point2D;
@@ -30,6 +31,10 @@ public:
     }
     ~PointOrient2D(){
     }
+
+	T getO() const {
+		return o;
+	}
 
 private:
 };
