@@ -48,6 +48,7 @@ void ParticleFilter::sense(vector<float> measure){
 	}
 	for (int i = 0; i < PARTICLES_NUMBER; i++){
 		particles[i] = resampledParticles[i];
+		//cout << "Particle : " << i << "X : " << particles[i].x << "Y : " << particles[i].y << "\n";
 
 	}
 }

@@ -38,7 +38,7 @@ Particle::Particle(){
 	this->y = this->randomFloat(generator);
 	this->randomFloat = uniform_real_distribution<float>(0.0, M_PI * 2);
 	this->theta = this->randomFloat(generator);
-	this->randomFloat = uniform_real_distribution<float>(0.0, 20.0);
+	this->randomFloat = uniform_real_distribution<float>(0.0, 100.0);
 	this->turnNoise = this->randomFloat(generator);
 	this->senseNoise = this->randomFloat(generator);
 	this->forwardNoise = this->randomFloat(generator);
@@ -148,8 +148,8 @@ void Particle::move(float theta, float distance){
 	float forwardError = forwardDistribution(generator);
 
 	this->theta = fmod(this->theta + theta + senseDistribution(generator), 2 * M_PI);
-	this->x = min((distance + forwardError) * cos(theta * M_PI / 180.), MAX_X);
-	this->y = min((distance + forwardError) * sin(theta * M_PI / 180.), MAX_Y);
+	this->x = max(min(this->x + (distance + forwardError) * cos(theta), (float)MAX_X), 0.0f);
+	this->y = max(min(this->y + (distance + forwardError) * sin(theta), (float)MAX_Y), 0.0f);
 }
 
 

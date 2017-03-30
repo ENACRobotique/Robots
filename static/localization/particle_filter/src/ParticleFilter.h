@@ -25,7 +25,7 @@ public:
 	void sense(std::vector<float> measure);
 
 
-private:
+public:
 	Particle particles[PARTICLES_NUMBER];
 	std::default_random_engine generator;
 };
