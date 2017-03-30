@@ -38,10 +38,11 @@ Particle::Particle(){
 	this->y = this->randomFloat(generator);
 	this->randomFloat = uniform_real_distribution<float>(0.0, M_PI * 2);
 	this->theta = this->randomFloat(generator);
-	this->randomFloat = uniform_real_distribution<float>(0.0, 100.0);
-	this->turnNoise = this->randomFloat(generator);
+	this->randomFloat = uniform_real_distribution<float>(0.0, 20.0);
 	this->senseNoise = this->randomFloat(generator);
+	this->randomFloat = uniform_real_distribution<float>(0.0, 100.0);
 	this->forwardNoise = this->randomFloat(generator);
+	this->randomFloat = uniform_real_distribution<float>(0.0, M_PI_4);
 	this->senseDistribution = normal_distribution<float>(0.0, senseNoise);
 	this->forwardDistribution = normal_distribution<float>(0.0, forwardNoise);
 	this->turnDistribution = normal_distribution<float>(0.0, turnNoise);
@@ -78,7 +79,7 @@ Particle::~Particle(){
 
 vector<float> Particle::sense() const{
 
-	vector<float> toRet(LIDAR_POINTS_NUMBER, -1.);
+	vector<float> toRet = vector<float>();
 
 	/*for (int i = 0; i<CIRCLES_NUMBERS; i++){
 		alpha = fmod(atan2(circleCenters[i].y - y, circleCenters[i].x - x) - theta * M_PI / 180., 2 * M_PI);
@@ -91,13 +92,15 @@ vector<float> Particle::sense() const{
 	}*/
 
 
-	float a, b, c, delta, sqrtDelta, x1, y1, alpha, talpha, talpha2, xsol1, ysol1, xsol2, ysol2, d1, d2;
+	float a, b, c, delta, sqrtDelta, x1, y1, alpha, talpha, talpha2, cosalpha, sinalpha, xsol1, ysol1, xsol2, ysol2, d1, d2;
 	float minMeasure;
 	for (int i = 0; i < LIDAR_POINTS_NUMBER; i++){
 		minMeasure = MAX_LIDAR_VALUE;
-		alpha = i;
+		alpha = i * M_PI / 180;
 		talpha = tan(alpha);
 		talpha2 = pow(talpha, 2);
+		cosalpha = cos(alpha);
+		sinalpha  = sin(alpha);
 
 
 		if (i == 90 ||i == 270){
@@ -132,8 +135,14 @@ vector<float> Particle::sense() const{
 					xsol2 = (-b - sqrt(delta)) / (2 * a);
 					ysol1 = talpha * (xsol1 - this->x) + this->y;
 					ysol2 = talpha * (xsol2 - this->x) + this->y;
-					d1 = sqrt(pow(xsol1 - this->x, 2) + pow(ysol1 - this->y, 2));
-					d2 = sqrt(pow(xsol2 - this->x, 2) + pow(ysol2 - this->y, 2));
+					d1 = cosalpha * xsol1 + sinalpha * ysol1; //Compute the distance by rotating the frame by alpha (then yn = 0 and xn = d)
+					d2 = cosalpha * xsol2 + sinalpha * ysol2;
+					if (d1 < 0){ // Checks if the point is on the good side of the line
+						d1 = MAX_LIDAR_VALUE;
+					}
+					if (d2 < 0){
+						d2 = MAX_LIDAR_VALUE;
+					}
 					minMeasure = min(minMeasure, min(d1, d2));
 				}
 			}
@@ -146,10 +155,11 @@ vector<float> Particle::sense() const{
 void Particle::move(float theta, float distance){
 
 	float forwardError = forwardDistribution(generator);
+	float turnError = turnDistribution(generator);
 
-	this->theta = fmod(this->theta + theta + senseDistribution(generator), 2 * M_PI);
-	this->x = max(min(this->x + (distance + forwardError) * cos(theta), (float)MAX_X), 0.0f);
-	this->y = max(min(this->y + (distance + forwardError) * sin(theta), (float)MAX_Y), 0.0f);
+	this->theta = fmod(this->theta + theta + turnError, 2 * M_PI);
+	this->x = max(min(this->x + (distance + forwardError) * cos(this->theta), (float)MAX_X), 0.0f);
+	this->y = max(min(this->y + (distance + forwardError) * sin(this->theta), (float)MAX_Y), 0.0f);
 }
 
 
