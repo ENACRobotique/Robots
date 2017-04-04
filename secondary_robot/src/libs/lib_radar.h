@@ -23,8 +23,8 @@
 #define RAD_POS_MAX 	0
 #define RAD_POS_INC 	1  //must be a submultiple of RAD_POS_MAX-RAD_POS_MIN && must be different from zero (equal to 1 if no servo is usedà
 #define RAD_NB_POS  	1
-#define RAD_NB_PTS  	2
-#define RAD_NB_SENSORS 	2
+#define RAD_NB_PTS  	4
+#define RAD_NB_SENSORS 	4
 
 /* how are stored the values in C_rad and C_rad_limits (0° pointing toward the front of the robot, angles increasing clockwise):
 old index  angle  direction

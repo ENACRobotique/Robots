@@ -106,7 +106,7 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
 				<externalSettings containerId="arduinoUno_core;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 			</storageModule>
-			<storageModule moduleId="packages"/>
+			<storageModule adwaita-icon-theme="false" bash-completion="false" dbus-python="false" fontutil="false" ibus-table="false" intel-gen4asm="false" iso-codes="false" libquvi-scripts="false" mobile-broadband-provider-info="false" moduleId="packages" pm-utils="false" poppler-data="false" shared-mime-info="false" systemd="false" udev="false" usbutils="false" xbitmaps="false" xkbcomp="false" xkeyboard-config="false" xorg-wacom="false" yelp-xsl="false"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">

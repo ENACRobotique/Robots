@@ -16,8 +16,8 @@ volatile int _nbIncOdo[NB_MOTORS]={0};   //number of increments (signed)
 
 
 void odoIsr1(){
-    if (!digitalRead(_pinIntOdo[0])) _nbIncOdo[0] += (digitalRead(_pinSenOdo[0])<<1) -1;
-    else _nbIncOdo[0] -= (digitalRead(_pinSenOdo[0])<<1) -1;
+    if (!digitalRead(_pinIntOdo[0])) _nbIncOdo[0] -= (digitalRead(_pinSenOdo[0])<<1) -1;
+    else _nbIncOdo[0] += (digitalRead(_pinSenOdo[0])<<1) -1;
 }
 
 #if NB_MOTORS > 1
