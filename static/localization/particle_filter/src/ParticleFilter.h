@@ -14,13 +14,16 @@
 #include <random>
 #include <iostream>
 
-#define PARTICLES_NUMBER 500
+#define DEBUG
+
+#define PARTICLES_NUMBER 1000
 
 class ParticleFilter {
 public:
 	ParticleFilter();
 	virtual ~ParticleFilter();
 	PointOrient2D<float> locate();
+	PointOrient2D<float> locate(std::vector<float> measure);
 	void move(float theta, float distance);
 	void sense(std::vector<float> measure);
 

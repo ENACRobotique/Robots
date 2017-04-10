@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <math.h>
 #include <random>
+#include <algorithm>
 
 class Particle{
 
@@ -43,7 +44,7 @@ class Particle{
 		virtual ~Particle();
 		std::vector<float> sense() const;
 		void move(float theta, float distance);
-		const double measurementProb(std::vector<float> measure);
+		double measurementProb(std::vector<float> measure);
 		static const double Gaussian(double mu, double sigma, double x);
 
 	private:

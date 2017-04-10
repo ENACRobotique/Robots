@@ -12,6 +12,9 @@ using namespace std;
 ParticleFilter::ParticleFilter() {
 	for (int i = 0; i < PARTICLES_NUMBER; i++){
 		particles[i] = Particle();
+#ifdef DEBUG
+		cout << particles[i].x << ":" << particles[i].y << "\n";
+#endif
 	}
 	random_device rd;
 	generator = default_random_engine( rd());
@@ -37,6 +40,7 @@ void ParticleFilter::sense(vector<float> measure){
 	for (int i = 0; i < PARTICLES_NUMBER; i++){
 		weights[i] = particles[i].measurementProb(measure);
 		maxWeight = max(weights[i], maxWeight);
+		//cout << "weight : " << weights[i];
 	}
 	for (int i = 0; i < PARTICLES_NUMBER; i++){
 		beta += distribution(generator) * 2.0 * maxWeight;
@@ -46,8 +50,10 @@ void ParticleFilter::sense(vector<float> measure){
 		}
 		resampledParticles[i] = particles[turningIndex];
 	}
+	cout << "new\n";
 	for (int i = 0; i < PARTICLES_NUMBER; i++){
 		particles[i] = resampledParticles[i];
+		cout << particles[i].x << ":" << particles[i].y << "\n";
 		//cout << "Particle : " << i << "X : " << particles[i].x << "Y : " << particles[i].y << "\n";
 
 	}
@@ -57,4 +63,16 @@ PointOrient2D<float> ParticleFilter::locate(){
 	int selectedPaticle = rand() % PARTICLES_NUMBER;
 	return PointOrient2D<float>(particles[selectedPaticle].x, particles[selectedPaticle].y,
 			particles[selectedPaticle].theta);
+}
+
+PointOrient2D<float> ParticleFilter::locate(vector<float> measure){
+	vector<double> weights = vector<double>(PARTICLES_NUMBER);
+	int maxWeightIndex;
+	for (int i = 0; i < PARTICLES_NUMBER; i++){
+		weights[i] = particles[i].measurementProb(measure);
+		//cout << "weight : " << weights[i];
+	}
+	maxWeightIndex = distance(weights.begin(), min_element(weights.begin(), weights.end()));
+	return PointOrient2D<float>(particles[maxWeightIndex].x, particles[maxWeightIndex].y,
+				particles[maxWeightIndex].theta);
 }
