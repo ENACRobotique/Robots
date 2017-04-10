@@ -32,6 +32,10 @@ public:
     ~PointOrient2D(){
     }
 
+	T getO() const {
+		return o;
+	}
+
 private:
 };
 

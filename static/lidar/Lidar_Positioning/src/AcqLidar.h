@@ -14,6 +14,10 @@
 
 using namespace std;
 
+/**
+ * \brief	Classe d'acquisition du LIDAR.
+ * \details	Acquiert les données du LIDAR et fournit un vector<#PtLidar> par la méthode #getData.
+ */
 class AcqLidar {
 public: 
     AcqLidar();
