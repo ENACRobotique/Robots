@@ -6,6 +6,8 @@
  */
 
 #include "messages.h"
+#include "Arduino.h"
+//#include "../propulsion.cpp"
 
 typedef union{
 
@@ -20,15 +22,15 @@ uData raw_data;
 
 int message_recieve(sMessage *msg){
 
-  if (SERIAL.available()){
+  if (HWSERIAL.available()){
 
-    digitalWrite(led, HIGH);
+    digitalWrite(13, HIGH);
 
     int i = 0;
 
-    while (SERIAL.available()){
+    while (HWSERIAL.available()){
 
-      raw_data.data[i] = Serial1.read();
+      raw_data.data[i] = HWSERIAL.read();
 
       i++;
 

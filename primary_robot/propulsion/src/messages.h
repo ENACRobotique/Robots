@@ -7,7 +7,7 @@
 
 #ifndef MESSAGES_H_
 #define MESSAGES_H_
-
+#include "Arduino.h"
 #include <avr/io.h>
 
 #include <avr/interrupt.h>
@@ -18,7 +18,7 @@
 
 #define BAUDRATE 115200
 
-#define SERIAL Serial1 //The serial of the teensy used to link with the raspi
+#define HWSERIAL Serial1 //The serial of the teensy used to link with the raspi
 
 
 
