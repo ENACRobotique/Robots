@@ -127,13 +127,13 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.ESP8266.NETWO
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.ESP8266.NETWORK.UPLOAD.TOOL/value=esp8266OTA
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.DTS/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.DTS/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.DTS/value=0
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.DTS/value=3600
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.LOCAL/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.LOCAL/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.LOCAL/value=1488756931
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.LOCAL/value=1491952696
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.UTC/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.UTC/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.UTC/value=1488753331
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.UTC/value=1491945496
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.ZONE/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.ZONE/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.EXTRA.TIME.ZONE/value=3600
@@ -166,7 +166,7 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.PROGRAM.TOOL/
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.PROGRAM.TOOL/value=${A.UPLOAD.TOOL}
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc-ar" rcs 
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc-ar" rcs 
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN.2/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN.2/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN.2/value=\ 
@@ -178,19 +178,19 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PAT
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.AR.PATTERN/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.AR}" rcs "${A.BUILD.PATH}/core/${A.ARCHIVE_FILE}" "${A.OBJECT_FILE}"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc" -Os --specs\=nano.specs -Wl,--gc-sections,--relax,--defsym\=__rtc_localtime\=1488756931 "-T/home/fabien/eclipse//arduinoPlugin/packages/teensy/avr/cores/teensy3/mk64fx512.ld" -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -o "/home/fabien/code/primary_robot/propulsion/Release/Propulsion.elf" 
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc" -Os --specs\=nano.specs -Wl,--gc-sections,--relax,--defsym\=__rtc_localtime\=1491952696 "-T/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/avr/cores/teensy3/mk64fx512.ld" -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -o "/home/darian/Documents/ClubRobot/Code/primary_robot/propulsion/Release/Propulsion.elf" 
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.2/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.2/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.2/value=\ 
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.3/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.3/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.3/value=\ "-L/home/fabien/code/primary_robot/propulsion/Release" -larm_cortexM4lf_math -lm
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN.3/value=\ "-L/home/darian/Documents/ClubRobot/Code/primary_robot/propulsion/Release" -larm_cortexM4lf_math -lm
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.COMBINE.PATTERN/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.GCC}" ${A.BUILD.FLAGS.OPTIMIZE} ${A.BUILD.FLAGS.LD} ${A.BUILD.FLAGS.LDSPECS} ${A.BUILD.FLAGS.CPU} -o "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.elf" ${A.OBJECT_FILES} "${A.BUILD.PATH}/${A.ARCHIVE_FILE}" "-L${A.BUILD.PATH}" ${A.BUILD.FLAGS.LIBS}
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc" -c -Os --specs\=nano.specs -g -Wall -ffunction-sections -fdata-sections -nostdlib -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -D__MK64FX512__ -DTEENSYDUINO\=134 -DARDUINO\=10609 -DF_CPU\=120000000 -DUSB_SERIAL -DLAYOUT_FRENCH 
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc" -c -Os --specs\=nano.specs -g -Wall -ffunction-sections -fdata-sections -nostdlib -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -D__MK64FX512__ -DTEENSYDUINO\=134 -DARDUINO\=10609 -DF_CPU\=120000000 -DUSB_SERIAL -DLAYOUT_FRENCH 
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN.2/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN.2/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN.2/value=\ -o 
@@ -202,7 +202,7 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PA
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.C.O.PATTERN/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.GCC}" -c ${A.BUILD.FLAGS.OPTIMIZE} ${A.BUILD.FLAGS.COMMON} ${A.BUILD.FLAGS.DEP} ${A.BUILD.FLAGS.C} ${A.BUILD.FLAGS.CPU} ${A.BUILD.FLAGS.DEFS} -DARDUINO\=${A.RUNTIME.IDE.VERSION} -DF_CPU\=${A.BUILD.FCPU} -D${A.BUILD.USBTYPE} -DLAYOUT_${A.BUILD.KEYLAYOUT} ${A.INCLUDES} "${A.SOURCE_FILE}" -o "${A.OBJECT_FILE}"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.CPP.O.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.CPP.O.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.CPP.O.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-g++" -c -Os --specs\=nano.specs -g -Wall -ffunction-sections -fdata-sections -nostdlib -fno-exceptions -felide-constructors -std\=gnu++0x -fno-rtti -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -D__MK64FX512__ -DTEENSYDUINO\=134 -DARDUINO\=10609 -DF_CPU\=120000000 -DUSB_SERIAL -DLAYOUT_FRENCH 
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.CPP.O.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-g++" -c -Os --specs\=nano.specs -g -Wall -ffunction-sections -fdata-sections -nostdlib -fno-exceptions -felide-constructors -std\=gnu++0x -fno-rtti -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -D__MK64FX512__ -DTEENSYDUINO\=134 -DARDUINO\=10609 -DF_CPU\=120000000 -DUSB_SERIAL -DLAYOUT_FRENCH 
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.CPP.O.PATTERN.2/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.CPP.O.PATTERN.2/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.CPP.O.PATTERN.2/value=\ -o 
@@ -220,13 +220,13 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.HOOKS.
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.HOOKS.POSTBUILD.1.PATTERN/value="${A.COMPILER.PATH}/teensy_post_compile" "-file\=${A.BUILD.PROJECT_NAME}" "-path\=${A.BUILD.PATH}" "-tools\=${A.COMPILER.PATH}" "-board\=${A.BUILD.BOARD}"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.EEP.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.EEP.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.EEP.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-objcopy" -O ihex -j .eeprom --set-section-flags\=.eeprom\=alloc,load --no-change-warnings --change-section-lma .eeprom\=0 "/home/fabien/code/primary_robot/propulsion/Release/Propulsion.elf" "/home/fabien/code/primary_robot/propulsion/Release/Propulsion.eep"
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.EEP.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-objcopy" -O ihex -j .eeprom --set-section-flags\=.eeprom\=alloc,load --no-change-warnings --change-section-lma .eeprom\=0 "/home/darian/Documents/ClubRobot/Code/primary_robot/propulsion/Release/Propulsion.elf" "/home/darian/Documents/ClubRobot/Code/primary_robot/propulsion/Release/Propulsion.eep"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.EEP.PATTERN/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.EEP.PATTERN/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.EEP.PATTERN/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.OBJCOPY}" ${A.COMPILER.OBJCOPY.EEP.FLAGS} "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.elf" "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.eep"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.HEX.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.HEX.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.HEX.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-objcopy" -O ihex -R .eeprom "/home/fabien/code/primary_robot/propulsion/Release/Propulsion.elf" "/home/fabien/code/primary_robot/propulsion/Release/Propulsion.hex"
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.HEX.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-objcopy" -O ihex -R .eeprom "/home/darian/Documents/ClubRobot/Code/primary_robot/propulsion/Release/Propulsion.elf" "/home/darian/Documents/ClubRobot/Code/primary_robot/propulsion/Release/Propulsion.hex"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.HEX.PATTERN/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.HEX.PATTERN/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.OBJCOPY.HEX.PATTERN/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.OBJCOPY}" ${A.COMPILER.ELF2HEX.FLAGS} "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.elf" "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.hex"
@@ -250,7 +250,7 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.PREPRO
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.PREPROC.MACROS/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.G++}" -E -CC -x c++ -w ${A.COMPILER.CPP.FLAGS} ${A.BUILD.FLAGS.COMMON} ${A.BUILD.FLAGS.CPP} ${A.BUILD.FLAGS.CPU} ${A.BUILD.FLAGS.DEFS} -DARDUINO\=${A.RUNTIME.IDE.VERSION} -DF_CPU\=${A.BUILD.FCPU} -D${A.BUILD.USBTYPE} -DLAYOUT_${A.BUILD.KEYLAYOUT} ${A.INCLUDES} "${A.SOURCE_FILE}" -o "${A.PREPROCESSED_FILE_PATH}"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc" -c -Os --specs\=nano.specs -g -Wall -ffunction-sections -fdata-sections -nostdlib -x assembler-with-cpp -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -D__MK64FX512__ -DTEENSYDUINO\=134 -DARDUINO\=10609 -DF_CPU\=120000000 -DUSB_SERIAL -DLAYOUT_FRENCH 
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-gcc" -c -Os --specs\=nano.specs -g -Wall -ffunction-sections -fdata-sections -nostdlib -x assembler-with-cpp -mthumb -mcpu\=cortex-m4 -mfloat-abi\=hard -mfpu\=fpv4-sp-d16 -fsingle-precision-constant -D__MK64FX512__ -DTEENSYDUINO\=134 -DARDUINO\=10609 -DF_CPU\=120000000 -DUSB_SERIAL -DLAYOUT_FRENCH 
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN.2/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN.2/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN.2/value=\ -o 
@@ -262,7 +262,7 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PA
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.S.O.PATTERN/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.GCC}" -c ${A.BUILD.FLAGS.OPTIMIZE} ${A.BUILD.FLAGS.COMMON} ${A.BUILD.FLAGS.DEP} ${A.BUILD.FLAGS.S} ${A.BUILD.FLAGS.CPU} ${A.BUILD.FLAGS.DEFS} -DARDUINO\=${A.RUNTIME.IDE.VERSION} -DF_CPU\=${A.BUILD.FCPU} -D${A.BUILD.USBTYPE} -DLAYOUT_${A.BUILD.KEYLAYOUT} ${A.INCLUDES} "${A.SOURCE_FILE}" -o "${A.OBJECT_FILE}"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.SIZE.PATTERN.1/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.SIZE.PATTERN.1/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.SIZE.PATTERN.1/value="/home/fabien/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-size" -A "/home/fabien/code/primary_robot/propulsion/Release/Propulsion.elf"
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.SIZE.PATTERN.1/value="/home/darian/Documents/Installation/Eclipse/cpp-neon/eclipse//arduinoPlugin/packages/teensy/../tools/arm/bin/arm-none-eabi-size" -A "/home/darian/Documents/ClubRobot/Code/primary_robot/propulsion/Release/Propulsion.elf"
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.SIZE.PATTERN/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.SIZE.PATTERN/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RECIPE.SIZE.PATTERN/value="${A.COMPILER.PATH}${A.BUILD.TOOLCHAIN}${A.BUILD.COMMAND.SIZE}" -A "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.elf"
@@ -287,33 +287,33 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.IDE.V
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.PLATFORM.PATH/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.PLATFORM.PATH/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.PLATFORM.PATH/value=${eclipse_home}/arduinoPlugin/packages/teensy/avr
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA-1.0.0.PATH/delimiter=\:
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA-1.0.0.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA-1.0.0.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/arduinoOTA/1.0.0
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA-1.1.1.PATH/delimiter=\:
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA-1.1.1.PATH/operation=replace
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA-1.1.1.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/arduinoOTA/1.1.1
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA.PATH/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/arduinoOTA/1.0.0
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA1.0.0.PATH/delimiter=\:
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA1.0.0.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA1.0.0.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/arduinoOTA/1.0.0
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC-4.9.2-ATMEL3.5.3-ARDUINO2.PATH/delimiter=\:
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC-4.9.2-ATMEL3.5.3-ARDUINO2.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC-4.9.2-ATMEL3.5.3-ARDUINO2.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/arduinoOTA/1.1.1
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA1.1.1.PATH/delimiter=\:
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA1.1.1.PATH/operation=replace
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.ARDUINOOTA1.1.1.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/arduinoOTA/1.1.1
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC-4.9.2-ATMEL3.5.4-ARDUINO2.PATH/delimiter=\:
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC-4.9.2-ATMEL3.5.4-ARDUINO2.PATH/operation=replace
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC-4.9.2-ATMEL3.5.4-ARDUINO2.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC.PATH/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC4.9.2-ATMEL3.5.3-ARDUINO2.PATH/delimiter=\:
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC4.9.2-ATMEL3.5.3-ARDUINO2.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC4.9.2-ATMEL3.5.3-ARDUINO2.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE-6.3.0-ARDUINO8.PATH/delimiter=\:
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE-6.3.0-ARDUINO8.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE-6.3.0-ARDUINO8.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avrdude/6.3.0-arduino8
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC4.9.2-ATMEL3.5.4-ARDUINO2.PATH/delimiter=\:
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC4.9.2-ATMEL3.5.4-ARDUINO2.PATH/operation=replace
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVR-GCC4.9.2-ATMEL3.5.4-ARDUINO2.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE-6.3.0-ARDUINO9.PATH/delimiter=\:
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE-6.3.0-ARDUINO9.PATH/operation=replace
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE-6.3.0-ARDUINO9.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avrdude/6.3.0-arduino9
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE.PATH/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avrdude/6.3.0-arduino8
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE6.3.0-ARDUINO8.PATH/delimiter=\:
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE6.3.0-ARDUINO8.PATH/operation=replace
-environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE6.3.0-ARDUINO8.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avrdude/6.3.0-arduino8
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avrdude/6.3.0-arduino9
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE6.3.0-ARDUINO9.PATH/delimiter=\:
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE6.3.0-ARDUINO9.PATH/operation=replace
+environment/project/io.sloeber.core.toolChain.release.1058770224/A.RUNTIME.TOOLS.AVRDUDE6.3.0-ARDUINO9.PATH/value=${eclipse_home}/arduinoPlugin/packages/arduino/tools/avrdude/6.3.0-arduino9
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.SERIAL.PORT.FILE/delimiter=\:
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.SERIAL.PORT.FILE/operation=replace
 environment/project/io.sloeber.core.toolChain.release.1058770224/A.SERIAL.PORT.FILE/value=${A.SERIAL.PORT}
