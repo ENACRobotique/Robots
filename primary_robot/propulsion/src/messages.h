@@ -93,7 +93,10 @@ typedef struct __attribute__((packed)){
 	uint8_t point_id; //Point reached position in the list of the down message (so <= 14)
 }sMessageUp; //9 bytes
 
-//TODO : add initialization !!!!
+/*Must be called once before checking or sending messages
+ *
+ * */
+void message_init(int baudrate=BAUDRATE);
 
 /* Read the data available on SERIAL and store fill the msg given in argument
  * (one message max per function call)

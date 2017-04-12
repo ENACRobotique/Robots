@@ -24,6 +24,10 @@ typedef union {
 
 
 
+void message_init(int baudrate){
+	HWSERIAL.begin(baudrate);
+}
+
 uint8_t compute_checksum_down(uDownData msg) {
 	uint8_t sum = 0;
 	for (int i = DOWN_HEADER_SIZE; i < MSG_DOWN_MAX_SIZE; i++) {
