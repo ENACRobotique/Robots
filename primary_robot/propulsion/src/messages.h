@@ -15,6 +15,7 @@
 #define MAX_SIZE 64
 
 #define MSG_DOWN_MAX_SIZE 63
+#define DOWN_HEADER_SIZE 3 //Number of octet not taken into account for the checksum computation
 #define MSG_UP_MAX_SIZE 9
 
 #define BAUDRATE 115200
@@ -100,6 +101,7 @@ typedef struct __attribute__((packed)){
  * 1 : new message in msg !
  * 0 : no new message, msg unchanged
  * <0 : error
+ * -1 : Serial not available
  * */
 int message_recieve(sMessageDown * msg);
 
