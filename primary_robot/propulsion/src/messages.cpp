@@ -11,16 +11,22 @@
 
 typedef union{
 
-  sMessage msg;
+  sMessageDown msg;
 
-  byte data[MSG_MAX_SIZE];
+  byte data[MSG_DOWN_MAX_SIZE];
 
-}uData;
+}uDownData;
 
-uData raw_data;
+typedef union{
+	sMessageUp msg;
+	byte data[MSG_UP_MAX_SIZE];
+}uUpData;
+
+uDownData raw_data_down;
+uUpData raw_data_up;
 
 
-int message_recieve(sMessage *msg){
+int message_recieve(sMessageDown *msg){
 
   if (HWSERIAL.available()){
 
@@ -30,7 +36,7 @@ int message_recieve(sMessage *msg){
 
     while (HWSERIAL.available()){
 
-      raw_data.data[i] = HWSERIAL.read();
+      raw_data_down.data[i] = HWSERIAL.read();
 
       i++;
 
@@ -41,7 +47,7 @@ int message_recieve(sMessage *msg){
 
     //TODO : SEND ACK OR NOT
 
-    *msg = raw_data.msg;
+    *msg = raw_data_down.msg;
 
     return 1;
 

@@ -14,7 +14,8 @@
 
 #define MAX_SIZE 64
 
-#define MSG_MAX_SIZE 60
+#define MSG_DOWN_MAX_SIZE 63
+#define MSG_UP_MAX_SIZE 9
 
 #define BAUDRATE 115200
 
@@ -22,9 +23,9 @@
 
 
 
-/////// THE FOLLOWING DEFINES MESSAGES RASPI -> TEENSY////////
+/////// THE FOLLOWING DEFINES MESSAGES RASPI -> TEENSY (Down messages)////////
 
-typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE}eType;
+typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE}eTypeDown;
 
 
 
@@ -64,7 +65,7 @@ typedef struct __attribute__((packed)){
 
   uint8_t id; //message id for resend
 
-  eType type :8; //type
+  eTypeDown type :8; //type
 
   uint8_t checksum; //checksum !
 
@@ -76,9 +77,21 @@ typedef struct __attribute__((packed)){
 
   };
 
-}sMessage; // 3 + [4 + n*4] || [6]
+}sMessageDown; // 3 + [4 + n*4] || [6]
 
 ////////// END RASPI -> TEENSY MESSAGES ////////
+/////// THE FOLLOWING DEFINES MESSAGES TEENSY -> RASPI (Up messages)////////
+typedef enum{ACK, NON_ACK, POINT_REACHED, POSITION}eTypeUp;
+
+typedef struct __attribute__((packed)){
+	eTypeUp type :8; //type
+	uint8_t down_id; //the number of the DOWN message (answer to ack, non ack, position or point reached
+	uint16_t x; //X coord (for position and point_reached)
+	uint16_t y; //Y coord (for position and point_reached)
+	uint16_t theta; //Orientation of the robot (for position and point_reached) <<13 for radians or <<7 for degrees
+	uint8_t point_id; //Point reached position in the list of the down message (so <= 14)
+}sMessageUp; //9 bytes
+
 
 
 /* Read the data available on SERIAL and store fill the msg given in argument
@@ -88,7 +101,7 @@ typedef struct __attribute__((packed)){
  * 0 : no new message, msg unchanged
  * <0 : error
  * */
-int message_recieve(sMessage * msg);
+int message_recieve(sMessageDown * msg);
 
 
 
