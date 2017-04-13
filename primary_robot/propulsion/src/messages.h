@@ -98,8 +98,9 @@ typedef struct __attribute__((packed)){
  * */
 void message_init(int baudrate=BAUDRATE);
 
-/* Read the data available on SERIAL and store fill the msg given in argument
+/* Read the data available on HWSERIAL and store fill the msg given in argument
  * (one message max per function call)
+ * message_init() must have been called
  * Returns an int for check state purposes :
  * 1 : new message in msg !
  * 0 : no new message, msg unchanged
@@ -107,6 +108,12 @@ void message_init(int baudrate=BAUDRATE);
  * */
 int message_recieve(sMessageDown * msg);
 
-
+/* Send the message msg via HWSERIAL (must be type POINT_REACHED or POSITION)
+ * message_init() must have been called
+ * Returns an int for check state purposes
+ * 0 : Msg sent
+ * <0 : Error
+ */
+int message_send(sMessageUp msg);
 
 #endif /* MESSAGES_H_ */

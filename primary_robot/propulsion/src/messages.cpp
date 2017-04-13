@@ -77,3 +77,10 @@ int message_recieve(sMessageDown *msg) {
 	}
 }
 
+int message_send(sMessageUp msg){
+	uUpData raw_data_up;
+	raw_data_up.msg = msg;
+	HWSERIAL.write(raw_data_up.data, MSG_UP_MAX_SIZE);
+	return 0;
+}
+
