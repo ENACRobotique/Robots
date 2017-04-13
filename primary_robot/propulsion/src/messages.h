@@ -104,7 +104,6 @@ void message_init(int baudrate=BAUDRATE);
  * 1 : new message in msg !
  * 0 : no new message, msg unchanged
  * <0 : error
- * -1 : Serial not available
  * */
 int message_recieve(sMessageDown * msg);
 

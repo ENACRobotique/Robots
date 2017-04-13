@@ -39,14 +39,13 @@ uint8_t compute_checksum_down(uDownData msg) {
 int message_recieve(sMessageDown *msg) {
 	uDownData raw_data_down;
 	uUpData raw_ack_message;
+	static uint8_t lastId;
+	static boolean isFirstMessage = true;
 
-	if (HWSERIAL.available()) {
-
-		digitalWrite(13, HIGH);
-
+	if (HWSERIAL.available()) { //If there is some data waiting in the buffer
 		int i = 0;
 
-		while (HWSERIAL.available()) {
+		while (HWSERIAL.available()) { //Read all the data in the buffer (asserting raspi is sending at max one message per teensy loop)
 
 			raw_data_down.data[i] = HWSERIAL.read();
 
@@ -54,14 +53,18 @@ int message_recieve(sMessageDown *msg) {
 
 		}
 
-		if (compute_checksum_down(raw_data_down)
-				== raw_data_down.msg.checksum) {
+		if (compute_checksum_down(raw_data_down) == raw_data_down.msg.checksum) {
 			raw_ack_message.msg.type = ACK;
 			raw_ack_message.msg.down_id = raw_data_down.msg.id;
 			HWSERIAL.write(raw_ack_message.data, MSG_UP_MAX_SIZE);
-			//TODO : check message id
-			*msg = raw_data_down.msg;
-			return 1;
+			if (isFirstMessage || //If it is the first message, accept it
+					((raw_data_down.msg.id - lastId)%256>0 && (raw_data_down.msg.id - lastId)%256<128)) { //Check if the message has a id bigger than the last recevied
+				lastId = raw_data_down.msg.id;
+				*msg = raw_data_down.msg;
+				return 1;
+			}else{ //This message is an ancient one (previous ACK not received ?)
+				return 0;
+			}
 		} else {
 			raw_ack_message.msg.type = NON_ACK;
 			raw_ack_message.msg.down_id = raw_data_down.msg.id;
@@ -70,7 +73,7 @@ int message_recieve(sMessageDown *msg) {
 
 		}
 	} else {
-		return -1; //Serial not available
+		return 0; //Serial is empty :'(
 	}
 }
 
