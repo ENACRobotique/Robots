@@ -10,9 +10,9 @@ SERIAL_SEND_TIMEOUT = 500  # ms
 
 ### Down (raspi -> prop) message declaration ###
 class eTypeDown(Enum):
-    TRAJECTORY = 0,
-    STOP = 1,
-    RESTART = 2,
+    TRAJECTORY = 0
+    STOP = 1
+    RESTART = 2
     REPOSITIONING = 3
 
 
@@ -81,7 +81,7 @@ class sMessageDown():
 
         self.checksum = self.checksum % 0xFF
 
-        ser = bitstring.pack('uint:8, uint:8, uint:8', self.id, self.message_type, self.checksum)
+        ser = bitstring.pack('uint:8, uint:8, uint:8', self.id, self.message_type.value, self.checksum)
         return ser + ser2
 
 
@@ -91,9 +91,9 @@ class sMessageDown():
 
 
 class eTypeUp(Enum):
-    ACK = 0,
-    NON_ACK = 1,
-    POINT_REACHED = 2,
+    ACK = 0
+    NON_ACK = 1
+    POINT_REACHED = 2
     POSITION = 3
 
 
@@ -114,7 +114,9 @@ class Communication:
         self._current_msg_id = 0
 
     def send_message(self, msg, max_retries=1000):
-        serialized = msg.serialize.tobytes()
+        msg.id = self._current_msg_id
+        self._current_msg_id = (self._current_msg_id + 1) % 256
+        serialized = msg.serialize().tobytes()
         for i in range(max_retries):
             self._serial_port.write(serialized)
             time_sent = int(round(time.time() * 1000))
@@ -123,7 +125,8 @@ class Communication:
                     break  # waiting for ack
             if self._serial_port.in_waiting >= 9:
                 packed = self._serial_port.read(9)
-                upMsg = sMessageUp().desserialize(packed)
+                upMsg = sMessageUp()
+                upMsg.desserialize(packed)
                 if upMsg.type == eTypeUp.ACK:
                     return 0  # success
         return -1  ##failure

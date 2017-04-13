@@ -59,6 +59,7 @@ int message_recieve(sMessageDown *msg) {
 			HWSERIAL.write(raw_ack_message.data, MSG_UP_MAX_SIZE);
 			if (isFirstMessage || //If it is the first message, accept it
 					((raw_data_down.msg.id - lastId)%256>0 && (raw_data_down.msg.id - lastId)%256<128)) { //Check if the message has a id bigger than the last recevied
+				isFirstMessage = false;
 				lastId = raw_data_down.msg.id;
 				*msg = raw_data_down.msg;
 				return 1;
