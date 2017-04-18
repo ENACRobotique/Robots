@@ -63,21 +63,22 @@ void deinitTrajGreenInit(sState *next)
 		st_prevSaveTime=0;
 		st_saveTime_radar=0;
 		st_prevSaveTime_radar=0;
+		move(0,0);
 		}
 }
 
 const PROGMEM trajElem start_purple[]={
 //Début trajectoire purple
 
-	{50,15,1000},
-	{400,0,1000},
+	{0,0,5000},
+	{400,15,1000},
 	{0,0,0},//Stop
 };
 const PROGMEM trajElem start_green[]={
 	//Début trajectoire green
-	{200,-15,1000},
-	{100,15,2200},
-	{0,0,0},//Stop
+	{0,0,500},
+	{150,0,7000},
+	{0,0,0},
 };
 
 
@@ -99,6 +100,7 @@ sState *testTrajGreenInit()
 			#endif
 			flag_end = 1;
 			pause_time=0;
+			move(0,0);
 		}
 	}
 	else{
@@ -207,6 +209,7 @@ sState *testTrajPurple()
 			#endif
 			flag_end = 1;
 			pause_time=0;
+			move(0,0);
 		}
 	}
 	else{

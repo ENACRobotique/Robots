@@ -6,6 +6,7 @@
  */
 
 #include "state_dead.h"
+#include "tools.h"
 
-sState sDead={0};
+sState sDead={BIT(E_MOTOR)};
 
