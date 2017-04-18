@@ -11,7 +11,7 @@
 #include "state_wait.h"
 #include "state_dead.h"
 #include "lib_move.h"
-
+#include "state_funny_action.h"
 
 
 void initWait(sState *prev)
@@ -24,6 +24,11 @@ void initWait(sState *prev)
 
 sState* testWait(){
     if ((millis()-_matchStart) > TIME_MATCH_STOP ) return &sDead;
+
+#ifdef TIME_FOR_FUNNY_ACTION
+	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
+#endif
+
     return 0;
 }
 

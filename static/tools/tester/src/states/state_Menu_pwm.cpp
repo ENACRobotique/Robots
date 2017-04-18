@@ -17,6 +17,7 @@
 
 #define NB_menu_pwm 3
 int mode_pwm = 0;
+int pwm_level = 0;
 const char *menu_pwm[] = {
 		  "  0 - 255",
 		  "  0 - 100 %%",

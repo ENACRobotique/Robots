@@ -6,17 +6,17 @@
  */
 
 #include "Arduino.h"
-#include "params.h"
-#include "tools.h"
+#include "../params.h"
+#include "../tools.h"
 #include "state_wait.h"
-#include "lib_move.h"
 #include "state_dead.h"
+#include "lib_move.h"
 
 
 
 void initWait(sState *prev)
 	{
-    move(0,0);
+    emergencyStop();
 		#ifdef DEBUG
 			Serial.println("start wait");
 		#endif

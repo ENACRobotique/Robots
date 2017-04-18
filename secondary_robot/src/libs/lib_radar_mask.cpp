@@ -25,11 +25,12 @@ int periodicProgRadarLimit(radarElem tab[], unsigned long *pausetime, int *i, un
 	long dt = millis() - *prev_millis -*pausetime;    //time since start of the current traj element
 	long duration = long(tab[*i].duration);
 	uint16_t limit = ((tab[*i].limit_end-tab[*i].limit_start)*dt)/duration + tab[*i].limit_start;
-	uint16_t limits[RAD_NB_PTS]={limit,limit};
+	uint16_t limits[RAD_NB_PTS]={limit, limit, limit, limit};
 	radarSetLim(limits);
 
 
 	if(limit != limit_mem){
+#ifdef DEBUG_RADAR
 		Serial.print("start: ");
 		Serial.print(tab[*i].limit_start);
 		Serial.print("   end: ");
@@ -38,6 +39,7 @@ int periodicProgRadarLimit(radarElem tab[], unsigned long *pausetime, int *i, un
 		Serial.print(limit);
 		Serial.print("   time:  ");
 		Serial.println(dt);
+#endif
 		limit_mem = limit;
 	}
 

@@ -190,8 +190,9 @@ float Obj::update(const bool /*axle*/,  std::vector<astar::sObs_t>& obs, const i
 
                     for (unsigned int j = 0; j < _path.path_len - 1; j++) {
                         Circle2D<float> c(_path.path[j].obs.c.x, _path.path[j].obs.c.y, _path.path[j].obs.r);
-                        Point2D<float> p1(_path.path[j].p2.x, _path.path[j].p2.y), p2(_path.path[j+1].p1.x, _path.path[j+1].p1.y);
-                        _path.path[j].arc_len = c.arcLenght(p1, p2);
+                        Point2D<float> p1(_path.path[j].p2.x, _path.path[j].p2.y), p2(_path.path[j+1].p1.x, _path.path[j+1].p1.y), cobs(_path.path[j].obs.c.x, _path.path[j].obs.c.y);
+                        Vector2D<float> v1(_path.path[j].p1, _path.path[j].p2), v2(cobs, _path.path[j].p2);
+                        _path.path[j].arc_len = c.arcLenght(p1, p2, (v2^v1) > 0 ? true : false);
                         _path.path[j].seg_len = _path.path[j].p1.distanceTo(_path.path[j].p2);
                     }
 

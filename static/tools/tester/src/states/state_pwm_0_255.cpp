@@ -24,7 +24,8 @@ sState* testpwm_0_255(){
 		display(pos_enc);
 		myEnc.write(pos_enc);
 		pos_enc_old=pos_enc;
-		analogWrite(PIN_PWM_SERVO,pos_enc);
+		pwm_level = pos_enc;
+		analogWrite(PIN_PWM_SERVO,pwm_level);
 	}
 
 	if(!digitalRead(RETOUR)){
@@ -36,14 +37,14 @@ sState* testpwm_0_255(){
 }
 
 void initpwm_0_255(sState *prev){
-	if(servo3.attached()){
-		servo3.detach();
+	if(servo1.attached()){
+		servo1.detach();
 	}
 	pinMode(PIN_PWM_SERVO,OUTPUT);
 	myEnc.setLimits(0,255);
 	myEnc.write(0);
 	myEnc.setMultiplicators(1,10);
-	analogWrite(PIN_PWM_SERVO,0);
+	analogWrite(PIN_PWM_SERVO,pwm_level);
 	display(0);
 }
 

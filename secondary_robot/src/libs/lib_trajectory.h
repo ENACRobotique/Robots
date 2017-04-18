@@ -16,13 +16,15 @@
 typedef struct {
     int speed;      // speed/1.77 = real_speed in cm/s
     int teta;      //in ° (degrees)
-    unsigned long duration;   //in ms
+    unsigned int duration;   //in ms <60s
 }trajElem;
 
+//pointeur de fonction
+typedef int(*periodicTraj)(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
 extern int _backFromPause;
 
-int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
+int periodicProgTrajHeading(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
-int periodicProgTraj(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
+int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 #endif /* STATE_TRAJECTORY_H_ */

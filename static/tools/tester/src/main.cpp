@@ -9,14 +9,8 @@
 #include "tools.h"
 #include "states/state_types.h"
 #include "states/state_hardinit.h"
-#include "libs/lib_IHM.h"
-#include "states/state_Menu_principal.h"
-#include "states/state_mode_servo.h"
-#include "states/state_Menu_pwm.h"
 #include "Arduino.h"
-#include "Servo.h"
 
-#define NB_menu_servo 3
 sState *current = &sInitHard;
 unsigned long _matchStart;
 
@@ -33,13 +27,19 @@ void setup() {
 #endif
 		current->init(0);
 	}
+}
 
-	pinMode(SELECT,INPUT_PULLUP);
-	pinMode(RETOUR,INPUT_PULLUP);
+void blink(){
+    static unsigned int inv_state=0;
+    static unsigned long prevMillis=0;
+    if ( (millis()-prevMillis) >(100+900*inv_state)){
+        digitalWrite(LED1, inv_state);    // set the LED off
+        inv_state^=1;
+        prevMillis=millis();
+    }
 }
 
 void loop() {
-
 	sState *next;
 	if (current->testFunction) {
 		if ((next = (current->testFunction()))) {
@@ -51,4 +51,5 @@ void loop() {
 		}
 	}
 
+	blink();
 }

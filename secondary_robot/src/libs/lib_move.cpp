@@ -24,7 +24,7 @@ Servo _dirServo;
 int _servo_zero=0;
 
 #define MAX_ANGLE 180
-#define MIN_ANGLE 0
+#define MIN_ANGLE 24
 
 //initialises stirring servo (1pin + "null value"+ First value)
 //REQUIRES : motorInitHard()
@@ -37,14 +37,14 @@ void moveInitHard(int pinDirServo,int zeroAngle,int startAngle){
 #endif
 
 //sets speed motors (omega=0 means straight line)
-void move(int speed,int omega){
+void move(int speed,int angle){
 #ifdef TANK
-	int speeds[NB_MOTORS]={-speed - omega, -speed + omega};
+	int speeds[NB_MOTORS]={-speed - angle, -speed + angle};
     motSetCon(speeds);
 #else
 #ifdef TRIKE
     motSetCon(&speed);
-    _dirServo.write(CLAMP(MIN_ANGLE , omega+_servo_zero, MAX_ANGLE));
+    _dirServo.write(CLAMP(MIN_ANGLE , angle+_servo_zero, MAX_ANGLE));
 #endif
 #endif
 }
