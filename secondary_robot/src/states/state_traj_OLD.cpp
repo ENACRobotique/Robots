@@ -11,7 +11,6 @@
 #include "state_Recalage.h"
 #include "state_funny_action.h"
 #include "state_wait.h"
-#include "state_dead.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
 #ifdef HEADING
@@ -22,7 +21,7 @@ periodicTraj periodicFunction = &periodicProgTraj;
 
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
-#define TIME_TO_TRAVEL 75000
+#define TIME_TO_TRAVEL 7500
 
 void initTrajGreenInit(sState *prev)
 	{
@@ -67,23 +66,62 @@ void deinitTrajGreenInit(sState *next)
 }
 
 const PROGMEM trajElem start_purple[]={
-//Début trajectoire purple
-
-	{50,15,1000},
-	{400,0,1000},
-	{0,0,0},//Stop
+//Début trajectoire vers cabines de plage
+	{0,-18,100},//Radar active 0
+	{-300,18,1100},
+	{-400,0,1500},
+	{-300,-20,900},//Radar inactive 3
+	{-200,0,1350},
+	{0,0,100},//1ere porte fermée
+	{300,0,1300},
+	{0,90,400},
+	{300,90,1200},
+	{0,0,400},//Radar active 9
+	{300,0,1800},
+	{0,-90,400},//Radar inactive 11
+	{300,-90,1600},
+	{0,0,400},
+	{-300,0,1000},
+	{-200,0,2500},
+	{0,0,100},//2eme porte fermée
+	{300,0,1400},
+	{0,90,400},
+	{300,90,1300},
+	{0,-35,300},// Radar active 20
+	{-300,-35,2400},
+	{0,0,0},
 };
 const PROGMEM trajElem start_green[]={
-	//Début trajectoire green
-	{200,-15,1000},
-	{100,15,2200},
-	{0,0,0},//Stop
+	//Début trajectoire vers cabines de plage
+	{0,-15,100},//Radar active 0
+	{-300,-15,1100},
+	{-400,0,1500},
+	{-300,25,800},
+	{-200,0,1450},//Radar inactive 3
+	{0,0,100},//1ere porte fermée
+	{300,0,1300},
+	{0,-90,400},
+	{300,-90,1600},
+	{0,0,400},//Radar active 9
+	{300,0,1700},
+	{0,90,400},//Radar inactive 11
+	{300,90,1100},
+	{0,0,400},
+	{-300,0,1500},
+	{-200,0,1600},
+	{0,0,100},//2eme porte fermée
+	{300,0,1400},
+	{0,-90,400},
+	{300,-90,1300},//Radar active 20
+	{0,35,300},
+	{-300,35,2700},
+	{0,0,0},
 };
 
 
 sState *testTrajGreenInit()
 {
-	static int i=0; //indice de la pos ds la traj
+	static int i=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
     uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
@@ -105,16 +143,14 @@ sState *testTrajGreenInit()
 
 		radarSetLim(limits);
 		static unsigned long start_move=millis();
-
-		#ifdef DEBUG
-				Serial.println(millis()-start_move-pause_time);
-		#endif
-
+#ifdef DEBUG
+		Serial.println(millis()-start_move-pause_time);
+#endif
 		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
 			move(0,0);
-			return &sDead;
+			return &sWait;
 		}
-		/*else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
+		else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
 			sTrajGreenInit.flag &= ~BIT(E_RADAR);
 			move(-300,0);
 		}
@@ -122,26 +158,37 @@ sState *testTrajGreenInit()
 		{
 			move(-500,0);
 			sTrajGreenInit.flag |= BIT(E_RADAR);
-		}*/
+		}
 
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 			move(0,0);
-			return &sDead;
+			return &sRecalage;
 		}
 	}
-	/*switch(i){
-
-	}*/
-	/*if (radarIntrusion())
+	switch(i){
+		case 3:
+			sTrajGreenInit.flag &= ~BIT(E_RADAR);
+			break;
+		case 9:
+			sTrajGreenInit.flag |= BIT(E_RADAR);
+			break;
+		case 11:
+			sTrajGreenInit.flag &= ~BIT(E_RADAR);
+			break;
+		case 20:
+			sTrajGreenInit.flag |= BIT(E_RADAR);
+			break;
+	}
+	 if (radarIntrusion())
 	 {
 		 start_pause=millis();
-		 return &sDead;
-	 }*/
+		 return &sPause;
+	 }
 	return 0;
 }
 
 sState sTrajGreenInit={
-	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+	BIT(E_MOTOR)|BIT(E_RADAR),
 	&initTrajGreenInit,
 	&deinitTrajGreenInit,
 	&testTrajGreenInit
@@ -192,9 +239,8 @@ sState *testTrajPurple()
 {
 	static int i=0;
     static unsigned long prev_millis=0;
-
     static int flag_end = 0;
-    //uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
+    uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
@@ -217,9 +263,9 @@ sState *testTrajPurple()
 #endif
 		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
 			move(0,0);
-			return &sDead;
+			return &sWait;
 		}
-		/*else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
+		else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
 			sTrajPurpleInit.flag &= ~BIT(E_RADAR);
 			move(-300,0);
 		}
@@ -227,13 +273,13 @@ sState *testTrajPurple()
 		{
 			move(-500,0);
 			sTrajPurpleInit.flag |= BIT(E_RADAR);
-		}*/
+		}
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 			move(0,0);
-			return &sDead;
+			return &sRecalage;
 		}
 	}
-	/*switch(i){
+	switch(i){
 	case 3:
 		sTrajPurpleInit.flag &= ~BIT(E_RADAR);
 		break;
@@ -247,18 +293,17 @@ sState *testTrajPurple()
 	case 20:
 		sTrajPurpleInit.flag |= BIT(E_RADAR);
 		break;
-	}*/
-
-	 /*if (radarIntrusion())
+	}
+	 if (radarIntrusion())
 	 {
 		 start_pause=millis();
-		 return &sDead;
-	 }*/
+		 return &sPause;
+	 }
 
 	 return 0;
 }
 sState sTrajPurpleInit={
-	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+	BIT(E_MOTOR)|BIT(E_RADAR),
 	&initTrajPurple,
 	&deinitTrajPurpleInit,
 	&testTrajPurple
