@@ -1,5 +1,6 @@
 
-#include "Arduino.h"
+/*
+ * #include "Arduino.h"
 #include "state_types.h"
 #include "lib_move.h"
 #include "lib_radar.h"
@@ -121,7 +122,7 @@ const PROGMEM trajElem start_green[]={
 
 sState *testTrajGreenInit()
 {
-	static int i=0;
+	static int i=0; //indice de la pos ds la traj
     static unsigned long prev_millis=0;
     static int flag_end = 0;
     uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
@@ -143,9 +144,11 @@ sState *testTrajGreenInit()
 
 		radarSetLim(limits);
 		static unsigned long start_move=millis();
-#ifdef DEBUG
-		Serial.println(millis()-start_move-pause_time);
-#endif
+
+		#ifdef DEBUG
+				Serial.println(millis()-start_move-pause_time);
+		#endif
+
 		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
 			move(0,0);
 			return &sWait;
@@ -310,3 +313,4 @@ sState sTrajPurpleInit={
 };
 
 
+*/
