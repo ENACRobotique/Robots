@@ -101,7 +101,7 @@ class sMessageUp:
     def desserialize(self, packed):
         s = bitstring.BitStream(packed)
         type_int, self.down_id, self.x, self.y, self.theta, self.point_id = s.unpack(
-            'uint:8, uint:8, uint:16, uint:16, uint:16, uint:8')
+            'uint:8, uint:8, uintle:16, uintle:16, uintle:16, uint:8')
         self.type = eTypeUp(type_int)
 
 

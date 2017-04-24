@@ -22,10 +22,13 @@ typedef union {
 	char data[MSG_UP_MAX_SIZE];
 } uUpData;
 
+static boolean isFirstMessage;
+static uint8_t lastId;
 
 
 void message_init(int baudrate){
 	HWSERIAL.begin(baudrate);
+	isFirstMessage = true;
 }
 
 uint8_t compute_checksum_down(uDownData msg) {
@@ -39,8 +42,6 @@ uint8_t compute_checksum_down(uDownData msg) {
 int message_recieve(sMessageDown *msg) {
 	uDownData raw_data_down;
 	uUpData raw_ack_message;
-	static uint8_t lastId;
-	static boolean isFirstMessage = true;
 
 	if (HWSERIAL.available()) { //If there is some data waiting in the buffer
 		int i = 0;
