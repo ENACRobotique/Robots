@@ -77,7 +77,13 @@ const PROGMEM trajElem start_purple[]={
 const PROGMEM trajElem start_green[]={
 	//Début trajectoire green
 	{0,0,500},
-	{150,0,7000},
+	{-200,0,1200},
+	{0,90,100},
+	{-100,90,3600},
+	{0,0,100},
+	{-300,0,1660},
+	{0,0,500},
+	{200,0,2000},
 	{0,0,0},
 };
 
