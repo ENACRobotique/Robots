@@ -4,14 +4,14 @@
  *  Created on: 6 mars 2017
  *      Author: fabien
  */
-#include "motor.h"
+#include "motorOld.h"
 
 double currentTime = 0;
 double speed = MAX_SPEED;
 double t1 = 0;
 double t2 = 0;
 double tFinal = 0;
-long x1 = 0, x2 = 0, xTarget = 0, x1Real, x2Real, x = 0;
+//long x1 = 0, x2 = 0, xTarget = 0, x1Real, x2Real, x = 0;
 long thetaTarget = 0;
 long baseIncRight = 0, baseIncLeft = 0, baseL = 0;
 int sign = 0;
@@ -34,6 +34,7 @@ void computeTrajParameters(long targetLength, long targetTheta) {
     baseL = getL();
     baseIncLeft = getIncLeft();
     baseIncRight = getIncRight();
+
     xTarget = abs(targetLength);
     thetaTarget = targetTheta;
     if(targetLength > 0) {
@@ -41,20 +42,11 @@ void computeTrajParameters(long targetLength, long targetTheta) {
     } else {
         sign = -1;
     }
-    //speed = min(MAX_SPEED, ((float)targetLength) / ACCEL);
     speed = MAX_SPEED;
-    //t1 = ((float)speed)/ ACCEL;
-    //t2 = targetLength/speed - ((float)speed)/ACCEL;
-    //tFinal = t2 + t1;
     x1 = pow(speed,2) / (2*ACCEL);
     x2 = xTarget - x1;
     currentTime = 0;
     x = 0;
-    /*speed = min(MAX_SPEED, targetLength / ACCEL);
-    t1 = speed / ACCEL;
-    t2 = targetLength/speed - speed/ACCEL;
-    x1 = pow(speed,2) / (2*ACCEL);
-    x2 = targetLength - x1;*/
 }
 
 int getConsigneLength(double t) {
