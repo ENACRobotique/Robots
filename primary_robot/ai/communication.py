@@ -7,6 +7,9 @@ SERIAL_BAUDRATE = 115200
 SERIAL_PATH = "/dev/ttyAMA0"
 SERIAL_SEND_TIMEOUT = 500  # ms
 
+DOWN_MSG_SIZE = 47
+UP_MSG_SIZE = 9
+
 
 ### Down (raspi -> prop) message declaration ###
 class eTypeDown(Enum):
@@ -23,7 +26,7 @@ class sTrajElement():
         self.y = 0  #:16
 
     def serialize(self):
-        return bitstring.pack('uint:16, uint:16', self.x, self.y)
+        return bitstring.pack('uintle:16, uintle:16', self.x, self.y)
 
 
 class sTrajectory():
@@ -37,7 +40,7 @@ class sTrajectory():
         self.element = []
 
     def serialize(self):
-        ser = bitstring.pack('uint:8, uint:8, uint:16', self.nb_traj, self.speed, self.theta_final)
+        ser = bitstring.pack('uint:8, uint:8, uintle:16', self.nb_traj, self.speed, self.theta_final)
 
         for elt in self.element:
             ser += elt.serialize()
@@ -54,7 +57,7 @@ class sRepositionning():
         self.theta = 0  # 16
 
     def serialize(self):
-        return bitstring.pack('uint:16, uint:16, uint:16', self.x, self.y, self.theta)
+        return bitstring.pack('uintle:16, uintle:16, uintle:16', self.x, self.y, self.theta)
 
 
 class sMessageDown():
@@ -76,13 +79,15 @@ class sMessageDown():
 
             self.checksum = 0
 
-            for octet in ser2.hex:
-                self.checksum += int(octet, 16)
+            for octet in ser2.tobytes():
+                self.checksum += octet
 
         self.checksum = self.checksum % 0xFF
 
         ser = bitstring.pack('uint:8, uint:8, uint:8', self.id, self.message_type.value, self.checksum)
-        return ser + ser2
+        serialized_msg = ser + ser2
+        pad = bitstring.pack('pad:{}'.format((DOWN_MSG_SIZE - len(serialized_msg.tobytes())) * 8))
+        return serialized_msg + pad
 
 
 ### End down message declaration ###
@@ -120,11 +125,11 @@ class Communication:
         for i in range(max_retries):
             self._serial_port.write(serialized)
             time_sent = int(round(time.time() * 1000))
-            while self._serial_port.in_waiting < 9:
+            while self._serial_port.in_waiting < UP_MSG_SIZE:
                 if int(round(time.time() * 1000)) - time_sent > SERIAL_SEND_TIMEOUT:
                     break  # waiting for ack
-            if self._serial_port.in_waiting >= 9:
-                packed = self._serial_port.read(9)
+            if self._serial_port.in_waiting >= UP_MSG_SIZE:
+                packed = self._serial_port.read(UP_MSG_SIZE)
                 upMsg = sMessageUp()
                 upMsg.desserialize(packed)
                 if upMsg.type == eTypeUp.ACK:
@@ -132,8 +137,8 @@ class Communication:
         return -1  ##failure
 
     def check_message(self):
-        if self._serial_port.in_waiting >= 9:
-            packed = self._serial_port.read(9)
+        if self._serial_port.in_waiting >= UP_MSG_SIZE:
+            packed = self._serial_port.read(UP_MSG_SIZE)
             upMsg = sMessageUp().desserialize(packed)
             return upMsg
         return None

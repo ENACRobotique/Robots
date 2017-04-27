@@ -44,20 +44,21 @@ int message_recieve(sMessageDown *msg) {
 	uUpData raw_ack_message;
 
 	if (HWSERIAL.available()) { //If there is some data waiting in the buffer
-		int i = 0;
 
-		while (HWSERIAL.available()) { //Read all the data in the buffer (asserting raspi is sending at max one message per teensy loop)
-
-			raw_data_down.data[i] = HWSERIAL.read();
-
-			i++;
-
+		if (HWSERIAL.available() >= MSG_DOWN_MAX_SIZE) { //Read all the data in the buffer (asserting raspi is sending at max one message per teensy loop)
+			for (int i = 0; i < MSG_DOWN_MAX_SIZE; i++){
+				raw_data_down.data[i] = HWSERIAL.read();
+			}
+		}else{
+			return 0;
 		}
 
 		if (compute_checksum_down(raw_data_down) == raw_data_down.msg.checksum) {
 			raw_ack_message.msg.type = ACK;
 			raw_ack_message.msg.down_id = raw_data_down.msg.id;
 			HWSERIAL.write(raw_ack_message.data, MSG_UP_MAX_SIZE);
+
+
 			if (isFirstMessage || //If it is the first message, accept it
 					((raw_data_down.msg.id - lastId)%256>0 && (raw_data_down.msg.id - lastId)%256<128)) { //Check if the message has a id bigger than the last recevied
 				isFirstMessage = false;

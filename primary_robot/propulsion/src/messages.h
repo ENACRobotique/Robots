@@ -14,7 +14,7 @@
 
 #define MAX_SIZE 64
 
-#define MSG_DOWN_MAX_SIZE 63
+#define MSG_DOWN_MAX_SIZE 47
 #define DOWN_HEADER_SIZE 3 //Number of octet not taken into account for the checksum computation
 #define MSG_UP_MAX_SIZE 9
 
@@ -32,7 +32,7 @@ typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE}eTypeDown;
 
 typedef struct __attribute__((packed)){
 
-  uint8_t nb_trajectories; //must be <= 14 !
+  uint8_t nb_trajectories; //must be <= 10 !
 
   uint8_t traj_speed;
 
