@@ -6,45 +6,50 @@
  */
 
 #include "Motor.h"
+#include "Odometry.h"
+#include "params.h"
 
 
-Motor::Motor(Odometry* odometry) {
+Motor::Motor() {
 	_p = _p1 = _p2 =_p1Real = _p2Real = _pTarget = 0;
 	_speed = 0;
-	_t1 = _t2 = _tFinal = 0;
+	_t1 = _t2 = _tFinal = _t0 = 0;
 	_sign = true;
 	_currentMovementType = Straight;
 	_currentTime = 0;
 	_intErrorLenght = _intErrorTheta = 0;
-	_odometry = odometry;
+	_odometry = NULL;
 }
 
 Motor::~Motor() {
 	// TODO Auto-generated destructor stub
 }
 
-void Motor::initMotors(MotorConfiguration motorConfiguration) {
-	_motorConfiguration = motorConfiguration;
+void Motor::init(Odometry* odometry) {
 
-	pinMode(motorConfiguration.pinDirLeft, OUTPUT);
-	pinMode(motorConfiguration.pinDirRight, OUTPUT);
-	pinMode(motorConfiguration.pinPwmLeft, OUTPUT);
-	pinMode(motorConfiguration.pinPwmRight, OUTPUT);
+	pinMode(DIR_LEFT, OUTPUT);
+	pinMode(DIR_RIGHT, OUTPUT);
+	pinMode(PWM_LEFT, OUTPUT);
+	pinMode(PWM_RIGHT, OUTPUT);
 
-	analogWriteFrequency(motorConfiguration.pinPwmLeft, 20000);
-	analogWriteFrequency(motorConfiguration.pinPwmRight, 20000);
+	analogWriteFrequency(PWM_LEFT, 20000);
+	analogWriteFrequency(PWM_RIGHT, 20000);
 	analogWriteResolution(10);
 
-	analogWrite(motorConfiguration.pinPwmLeft, 0);
-	analogWrite(motorConfiguration.pinPwmRight, 0);
+	analogWrite(PWM_LEFT, 0);
+	analogWrite(PWM_RIGHT, 0);
+	_odometry = odometry;
 }
 
 void Motor::computeParameters(long target, MovementType movementType) {
-	_pTarget = target;
+	_t0 = millis()/1000.0;
+	_odometry->razIncs();
+	_pTarget = abs(target);
 	if(target > 0) {
 		_sign = true;
 	} else {
 		_sign = false;
+
 	}
 	_speed = MAX_SPEED;
 	_p1 = pow(_speed,2) / (2*ACCEL);
@@ -55,40 +60,51 @@ void Motor::computeParameters(long target, MovementType movementType) {
 }
 
 void Motor::controlMotors() {
-	int speedRobot = (_odometry->getNbIncLeft() + _odometry->getNbIncRight())/2;
+	int speedRobot = (_odometry->getSpeedLeft() + _odometry->getSpeedRight())/2;
 	long lenCons = getLenghtConsigne();
 	int lenError = lenCons - _odometry->getLength();
 	_intErrorLenght += lenError;
 	double lenghtCommand =  lenError * KP_DIST + _intErrorLenght*KI_DIST - KD_DIST * speedRobot;
 
 	int orientation = _odometry->getLeftAcc() - _odometry->getRightAcc();
-	int orientationSpeed = _odometry->getNbIncLeft() - _odometry->getNbIncRight();
+	int orientationSpeed = _odometry->getSpeedLeft() - _odometry->getSpeedRight();
 	long thetaCons = getThetaConsigne();
 	int thetaError = thetaCons - orientation;
 	_intErrorTheta += thetaError;
-	double thetaCommand = thetaError * 0.3 + _intErrorTheta*KI_ORIENT - KD_ORIENT * orientationSpeed;
+	double thetaCommand = thetaError * KP_ORIENT + _intErrorTheta*KI_ORIENT - KD_ORIENT * orientationSpeed;
 
-	double leftCommand = lenghtCommand - thetaCommand;
-	double rightCommand = lenghtCommand + thetaCommand;
+	double leftCommand = lenghtCommand + thetaCommand;
+	double rightCommand = lenghtCommand - thetaCommand;
 
 	if(abs(rightCommand) < MIN_PWM) {
 		rightCommand = 0;
 	}
 	if(abs(leftCommand) < MIN_PWM) {
 			leftCommand = 0;
-		}
+	}
 
 	int absRightCommand = min(abs(rightCommand), 1023);
 	int absLeftCommand  = min(abs(leftCommand), 1023);
+	//int absRightCommand = min(abs(rightCommand), 250);
+	//int absLeftCommand  = min(abs(leftCommand), 250);
 
-	analogWrite(_motorConfiguration.pinPwmLeft, absLeftCommand);
-	analogWrite(_motorConfiguration.pinPwmRight, absRightCommand);
-	digitalWrite(_motorConfiguration.pinDirLeft, leftCommand > 0);
-	digitalWrite(_motorConfiguration.pinDirRight, rightCommand < 0);
+	analogWrite(PWM_LEFT, absLeftCommand);
+	analogWrite(PWM_RIGHT, absRightCommand);
+	digitalWrite(DIR_LEFT, leftCommand > 0);
+	digitalWrite(DIR_RIGHT, rightCommand < 0);
+
+	Serial.print("Lcons: ");
+	Serial.print(lenCons);
+	Serial.print("\tlen: ");
+	Serial.print(_odometry->getLength());
+	Serial.print("\torient: ");
+	Serial.println(orientation);
+	//Serial.print()
+
 }
 
 long Motor::getConsigne() {
-	long t = millis();
+	double t = millis()/1000.0 - _t0;
     if(_p < _p1) {             //accélération
         //serial.printf("accel\n\r");
         _p = (ACCEL * pow(t,2)) / 2;

@@ -10,18 +10,17 @@
 
 class Odometry {
 public:
-	Odometry(double posXi, double posYi, double thetaRadi);
+	Odometry();
 	virtual ~Odometry();
+	void init(double posXi, double posYi, double thetaRadi);
 	void razIncs();
 	void updatePosition();
 
 	long getLength();
 
 	/*incr/decr increments*/
-	void leftIncr();
-	void leftDecr();
-	void rightIncr();
-	void rightDecr();
+	void ISRLeft();
+	void ISRRight();
 
 	/*Getters*/
 	volatile int getNbIncLeft() const {
@@ -56,6 +55,14 @@ public:
 		return _rightAcc;
 	}
 
+	long getSpeedLeft() const {
+		return _speedLeft;
+	}
+
+	long getSpeedRight() const {
+		return _speedRight;
+	}
+
 private:
 	double _posX;
 	double _posY;
@@ -67,8 +74,8 @@ private:
 	long _prevL;
 	long _leftAcc;
 	long _rightAcc;
+	long _speedLeft, _speedRight;
 
 
 };
-
 #endif /* ODOMETRY_H_ */

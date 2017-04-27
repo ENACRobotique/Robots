@@ -19,5 +19,7 @@
 #define ODO_I_RIGHT 4
 #define ODO_S_RIGHT 5
 
+#define UPDATE_PERIOD 0.02f
+
 
 #endif /* PARAMS_H_ */
