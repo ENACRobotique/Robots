@@ -103,6 +103,14 @@ class eTypeUp(Enum):
 
 
 class sMessageUp:
+    def __init__(self):
+        self.type = None
+        self.down_id = None
+        self.x = None
+        self.y = None
+        self.theta = None
+        self.point_id = None
+
     def desserialize(self, packed):
         s = bitstring.BitStream(packed)
         type_int, self.down_id, self.x, self.y, self.theta, self.point_id = s.unpack(
@@ -139,6 +147,7 @@ class Communication:
     def check_message(self):
         if self._serial_port.in_waiting >= UP_MSG_SIZE:
             packed = self._serial_port.read(UP_MSG_SIZE)
-            upMsg = sMessageUp().desserialize(packed)
-            return upMsg
+            up_msg = sMessageUp()
+            up_msg.desserialize(packed)
+            return up_msg
         return None
