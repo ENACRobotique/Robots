@@ -7,6 +7,7 @@
 
 #include "Motor.h"
 
+
 Motor::Motor(Odometry* odometry) {
 	_p = _p1 = _p2 =_p1Real = _p2Real = _pTarget = 0;
 	_speed = 0;
@@ -15,7 +16,7 @@ Motor::Motor(Odometry* odometry) {
 	_currentMovementType = Straight;
 	_currentTime = 0;
 	_intErrorLenght = _intErrorTheta = 0;
-	_odometry = odometry
+	_odometry = odometry;
 }
 
 Motor::~Motor() {
@@ -46,7 +47,7 @@ void Motor::computeParameters(long target, MovementType movementType) {
 		_sign = false;
 	}
 	_speed = MAX_SPEED;
-	_p1 = pow(speed,2) / (2*ACCEL);
+	_p1 = pow(_speed,2) / (2*ACCEL);
 	_p2 = _pTarget - _p1;
 	_currentTime = millis();
 	_p = 0;
@@ -54,14 +55,14 @@ void Motor::computeParameters(long target, MovementType movementType) {
 }
 
 void Motor::controlMotors() {
-	int speedRobot = (_odometry->getLeftSpeed() + _odometry->getRightSpeed())/2;
+	int speedRobot = (_odometry->getNbIncLeft() + _odometry->getNbIncRight())/2;
 	long lenCons = getLenghtConsigne();
 	int lenError = lenCons - _odometry->getLength();
 	_intErrorLenght += lenError;
 	double lenghtCommand =  lenError * KP_DIST + _intErrorLenght*KI_DIST - KD_DIST * speedRobot;
 
-	int orientation = _odometry->getAccIncLeft() - _odometry->getAccIncRight();
-	int orientationSpeed = _odometry->getLeftSpeed() - _odometry->getRightSpeed();
+	int orientation = _odometry->getLeftAcc() - _odometry->getRightAcc();
+	int orientationSpeed = _odometry->getNbIncLeft() - _odometry->getNbIncRight();
 	long thetaCons = getThetaConsigne();
 	int thetaError = thetaCons - orientation;
 	_intErrorTheta += thetaError;
@@ -96,7 +97,7 @@ long Motor::getConsigne() {
         return _p;
     } else if (_p < _p2) {    //palier de vitesse
         //serial.printf("cruise\n\r");
-        _p = speed*(t-t1) + _p1Real;
+        _p = _speed*(t-_t1) + _p1Real;
         _p2Real = _p;
         _t2 = t;
         return _p;
@@ -104,7 +105,7 @@ long Motor::getConsigne() {
         if(_p >= _pTarget) {
             return _pTarget;
         } else {
-            int newX = _p2Real + speed*(t-_t2) - ((ACCEL * pow((t-_t2),2)) / 2);
+            int newX = _p2Real + _speed*(t-_t2) - ((ACCEL * pow((t-_t2),2)) / 2);
             if(newX < _p) {
                 return _pTarget;
             } else {

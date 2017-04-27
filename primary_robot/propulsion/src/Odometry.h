@@ -15,6 +15,8 @@ public:
 	void razIncs();
 	void updatePosition();
 
+	long getLength();
+
 	/*incr/decr increments*/
 	void leftIncr();
 	void leftDecr();
@@ -44,6 +46,14 @@ public:
 
 	long getPrevL() const {
 		return _prevL;
+	}
+
+	long getLeftAcc() const {
+		return _leftAcc;
+	}
+
+	long getRightAcc() const {
+		return _rightAcc;
 	}
 
 private:

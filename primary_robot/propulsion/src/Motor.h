@@ -5,8 +5,11 @@
  *      Author: fabien
  */
 
+
 #ifndef MOTOR_H_
 #define MOTOR_H_
+#include "Odometry.h"
+#include "Arduino.h"
 
 #define MAX_SPEED 10000   //in increments per seconds
 #define ACCEL 15000        //in increments per second square
@@ -52,7 +55,7 @@ private:
 	double _speed;
 	double _t1, _t2, _tFinal;
 	long _p1, _p2, _pTarget, _p1Real, _p2Real, _p;
-	boolean _sign;
+	bool _sign;
 	long _currentTime;
 	MovementType _currentMovementType;
 	MotorConfiguration _motorConfiguration;

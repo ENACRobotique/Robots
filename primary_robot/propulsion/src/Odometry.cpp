@@ -40,6 +40,10 @@ void Odometry::razIncs() {
 	_rightAcc = 0;
 }
 
+long Odometry::getLength(){
+	return (_leftAcc + _rightAcc)/2;
+}
+
 void Odometry::updatePosition() {
 	/* Update total increment for the trajectory*/
 	_leftAcc += _nbIncLeft;
