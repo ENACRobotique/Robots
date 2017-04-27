@@ -48,7 +48,7 @@ private:
 	double _speed;
 	double _t1, _t2, _tFinal, _t0;
 	long _p1, _p2, _pTarget, _p1Real, _p2Real, _p;
-	bool _sign;
+	int _sign;
 	long _currentTime;
 	MovementType _currentMovementType;
 

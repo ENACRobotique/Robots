@@ -14,7 +14,7 @@ Motor::Motor() {
 	_p = _p1 = _p2 =_p1Real = _p2Real = _pTarget = 0;
 	_speed = 0;
 	_t1 = _t2 = _tFinal = _t0 = 0;
-	_sign = true;
+	_sign = 1;
 	_currentMovementType = Straight;
 	_currentTime = 0;
 	_intErrorLenght = _intErrorTheta = 0;
@@ -46,9 +46,9 @@ void Motor::computeParameters(long target, MovementType movementType) {
 	_odometry->razIncs();
 	_pTarget = abs(target);
 	if(target > 0) {
-		_sign = true;
+		_sign = 1;
 	} else {
-		_sign = false;
+		_sign = -1;
 
 	}
 	_speed = MAX_SPEED;
@@ -57,6 +57,9 @@ void Motor::computeParameters(long target, MovementType movementType) {
 	_currentTime = millis();
 	_p = 0;
 	_currentMovementType = movementType;
+
+	Serial.print("computeParameters  ");
+	Serial.println(_pTarget);
 }
 
 void Motor::controlMotors() {
