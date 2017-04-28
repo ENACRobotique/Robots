@@ -19,7 +19,7 @@ typedef union {
 
 typedef union {
 	sMessageUp msg;
-	char data[MSG_UP_MAX_SIZE];
+	byte data[MSG_UP_MAX_SIZE];
 } uUpData;
 
 static boolean isFirstMessage;
