@@ -5,7 +5,7 @@
  *      Author: darian
  */
 
-#include "Odometry.h"
+#include "OdometryController.h"
 
 #include "Arduino.h" //TODO : change to Motor.h
 #include "params.h"
@@ -13,7 +13,9 @@
 #define ENTRAXE 7865.56f
 #define UPDATE_PERIOD 0.02f
 
-Odometry::Odometry() {
+OdometryController Odometry = OdometryController();
+
+OdometryController::OdometryController() {
 	_posX = 0;
 	_posY = 0;
 	_thetaRad = 0;
@@ -36,22 +38,22 @@ Odometry::Odometry() {
 	//_odometryTimer.begin(updatePosition, UPDATE_PERIOD*1000000); //Conversion of period in micro sec
 }
 
-void Odometry::init(double posXi, double posYi, double thetaRadi) {
+void OdometryController::init(double posXi, double posYi, double thetaRadi) {
 	_posX = posXi;
 	_posY = posYi;
 	_thetaRad = thetaRadi;
 }
 
-void Odometry::razIncs() {
+void OdometryController::razIncs() {
 	_leftAcc = 0;
 	_rightAcc = 0;
 }
 
-long Odometry::getLength(){
+long OdometryController::getLength(){
 	return (_leftAcc + _rightAcc)/2;
 }
 
-void Odometry::updatePosition() {
+void OdometryController::updatePosition() {
 	/*Serial.print(_nbIncLeft);
 	Serial.print("\t");
 	Serial.println(_nbIncRight);*/
@@ -62,9 +64,6 @@ void Odometry::updatePosition() {
 	_speedLeft = _nbIncLeft;
 	_speedRight = _nbIncRight;
 
-	/*Compute length*/
-	long L = getLength();
-	//double speed = L - _prevL;
 	double speed = (_speedLeft + _speedRight) / 2;
 
 	/*Reset incr calculated since last update*/
@@ -89,7 +88,7 @@ void Odometry::updatePosition() {
 	_posY += dy;
 }
 
-void Odometry::ISRLeft() {
+void OdometryController::ISRLeft() {
 	if(digitalRead(ODO_S_LEFT)) {
 		_nbIncLeft++;
 	} else {
@@ -97,7 +96,7 @@ void Odometry::ISRLeft() {
 	}
 }
 
-void Odometry::ISRRight() {
+void OdometryController::ISRRight() {
 	if(digitalRead(ODO_S_RIGHT)) {
 		_nbIncRight--;
 	} else {
@@ -107,7 +106,7 @@ void Odometry::ISRRight() {
 
 
 
-Odometry::~Odometry() {
+OdometryController::~OdometryController() {
 }
 
 

@@ -8,10 +8,10 @@
 #ifndef ODOMETRY_H_
 #define ODOMETRY_H_
 
-class Odometry {
+class OdometryController {
 public:
-	Odometry();
-	virtual ~Odometry();
+	OdometryController();
+	virtual ~OdometryController();
 	void init(double posXi, double posYi, double thetaRadi);
 	void razIncs();
 	void updatePosition();
@@ -78,4 +78,7 @@ private:
 
 
 };
+
+extern OdometryController Odometry;
+
 #endif /* ODOMETRY_H_ */
