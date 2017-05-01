@@ -3,6 +3,7 @@
 #include "src/messages.h"
 #include "src/MotorController.h"
 #include "src/OdometryController.h"
+#include "src/TrajectoryManagerClass.h"
 #include "src/params.h"
 
 unsigned long time = 0;
@@ -43,8 +44,12 @@ void setup()
 	delay(2000);
 	digitalWrite(13, LOW);
 	//Motors.computeParameters(20000, Rotation);
-    delay(3000);
+    delay(2000);
 
+    Point3D pt = Point3D();
+    int ret;
+    TrajectoryManager.addPoint(pt, &ret);
+    TrajectoryManager.readPoint(&pt, &ret);
 }
 
 // The loop function is called in an endless loop
