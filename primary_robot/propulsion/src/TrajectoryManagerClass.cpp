@@ -6,6 +6,7 @@
  */
 
 #include "TrajectoryManagerClass.h"
+#include "OdometryController.h"
 
 TrajectoryManagerClass TrajectoryManager = TrajectoryManagerClass();
 
@@ -50,4 +51,28 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 
 	*point = _objectives[_readIndex];
 	_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
+}
+
+void TrajectoryManagerClass::computeNextStep(){
+	Point3D nextPoint = _objectives[_readIndex];
+	double dx = Odometry.getPosX() - nextPoint.getX();
+	double dy = Odometry.getPosY() - nextPoint.getY();
+	switch (_trajectoryStep){
+		case InitialRotationStep:
+			double rotationAngle = atan2(dy, dx) - Odometry.getThetaRad();
+			Motors.computeParameters(rotationAngle, Rotation);
+			_trajectoryStep = CruiseStep;
+			break;
+		case CruiseStep:
+			double translationLength = sqrt(pow(dx, 2) + pow (dy, 2));
+			Motors.computeParameters(translationLength, Straight);
+			_trajectoryStep = FinalRotationStep;
+			break;
+		case FinalRotationStep:
+			if (nextPoint._careAboutTheta){
+				double rotation = nextPoint.getTheta() - Odometry.getThetaRad();
+			}
+			_trajectoryStep = InitialRotationStep;
+			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
+	}
 }

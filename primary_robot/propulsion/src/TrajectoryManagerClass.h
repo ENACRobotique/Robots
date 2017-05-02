@@ -24,6 +24,7 @@ public:
 	virtual ~TrajectoryManagerClass();
 	void addPoint(Point3D point, int * returnValue);
 	void readPoint(Point3D *point, int * returnValue);
+	void computeNextStep();
 private:
 	TrajectoryStep _trajectoryStep;
 	Point3D _objectives[NB_POINTS_MAX];
