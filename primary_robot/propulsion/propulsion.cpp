@@ -45,11 +45,11 @@ void setup()
 	digitalWrite(13, LOW);
 	//Motors.computeParameters(20000, Rotation);
     delay(2000);
-
+/*
     Point3D pt = Point3D();
     int ret;
     TrajectoryManager.addPoint(pt, &ret);
-    TrajectoryManager.readPoint(&pt, &ret);
+    TrajectoryManager.readPoint(&pt, &ret);*/
 }
 
 // The loop function is called in an endless loop
@@ -63,10 +63,12 @@ void loop()
 	delay(3000);
 	Motors.computeParameters(-20000, Straight);
 	delay(3000);*/
-	Motors.computeParameters(5000, Straight, 20000);
-	delay(1500);
-	Motors.computeParameters(-5000, Straight, 20000);
-	delay(1500);
+	Motors.computeParameters(2200, Straight);
+	delay(10000);
+	Motors.computeParameters(-2200, Straight);
+	delay(10000);
+	//Motors.computeParameters(6.283, Rotation);
+	//delay(20000);
 	if(millis() - time > 500) {
 		digitalWrite(13, !ledState);
 		ledState = !ledState;
