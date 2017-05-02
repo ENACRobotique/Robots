@@ -69,6 +69,7 @@ void loop()
 	delay(10000);
 	//Motors.computeParameters(6.283, Rotation);
 	//delay(20000);
+
 	if(millis() - time > 500) {
 		digitalWrite(13, !ledState);
 		ledState = !ledState;
