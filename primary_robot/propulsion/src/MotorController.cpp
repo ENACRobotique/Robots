@@ -21,6 +21,7 @@ MotorController::MotorController() {
 	_intErrorLenght = _intErrorTheta = 0;
 	_odometry = NULL;
 	_movementPhase = Stopped;
+	_accel = 0;
 }
 
 MotorController::~MotorController() {
@@ -43,10 +44,20 @@ void MotorController::init(OdometryController* odometry) {
 	_odometry = odometry;
 }
 
-void MotorController::computeParameters(long target, MovementType movementType, double speed) {
+void MotorController::computeParameters(double target, MovementType movementType, double speed) {
 	_t0 = millis()/1000.0;
 	_odometry->razIncs();
-	_pTarget = abs(target);
+	long lTarget = 0;
+
+	switch (movementType) {
+		case Straight:
+			_pTarget = abs(target * MM_TO_INC);
+			break;
+		case Rotation:
+			_pTarget = abs(target * RAD_TO_INC);
+			break;
+	}
+
 	if(target > 0) {
 		_sign = 1;
 	} else {
@@ -103,11 +114,12 @@ void MotorController::controlMotors() {
 	digitalWrite(DIR_LEFT, leftCommand > 0);
 	digitalWrite(DIR_RIGHT, rightCommand < 0);
 
-	//Serial.print("Lcons: ");
-	Serial.println(lenCons);
+	Serial.print(_pTarget);
+	Serial.print("\tLcons: ");
+	Serial.print(lenCons);
 	//Serial.print(";");
-	//Serial.print("\tlen: ");
-	//Serial.println(_odometry->getLength());
+	Serial.print("\tlen: ");
+	Serial.println(_odometry->getLength());
 	//Serial.print("\torient: ");
 	//Serial.println(orientation);
 
@@ -132,6 +144,7 @@ long MotorController::getConsigne() {
 			} else {
 				Serial.println("Deceleration");
 				_movementPhase = Deceleration;
+				setAccel();
 				getDecelConsigne(t);
 			}
 			break;
@@ -141,6 +154,7 @@ long MotorController::getConsigne() {
 			} else {
 				Serial.println("Deceleration");
 				_movementPhase = Deceleration;
+				setAccel();
 				getDecelConsigne(t);
 			}
 			break;
@@ -196,7 +210,7 @@ long MotorController::getCruiseConsigne(double t) {
 
 long MotorController::getDecelConsigne(double t) {
 
-	int newX = _p2Real + _speed*(t-_t2) - ((ACCEL * pow((t-_t2),2)) / 2);
+	int newX = _p2Real + _speed*(t-_t2) - ((_accel * pow((t-_t2),2)) / 2);
 	if(newX < _pMax) {
 		return _pTarget;
 	} else {
@@ -204,4 +218,8 @@ long MotorController::getDecelConsigne(double t) {
 		_pMax = _p;
 		return _p;
 	}
+}
+
+void MotorController::setAccel() {
+	_accel = pow(_speed,2)/(2*(_pTarget - _p2Real));
 }
