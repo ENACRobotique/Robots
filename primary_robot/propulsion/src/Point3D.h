@@ -39,6 +39,14 @@ public:
 		this->_y = y;
 	}
 
+	bool careAboutTheta() const {
+		return _careAboutTheta;
+	}
+
+	void setCareAboutTheta(bool careAboutTheta) {
+		_careAboutTheta = careAboutTheta;
+	}
+
 private:
 	double _x;
 	double _y;
