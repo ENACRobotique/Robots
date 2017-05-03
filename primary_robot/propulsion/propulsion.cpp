@@ -22,6 +22,9 @@ void isrRight() {
 }
 void updateOdometry() {
 	Odometry.updatePosition();
+	if(Motors.isAtDestination()) {
+		TrajectoryManager.computeNextStep();
+	}
 	Motors.controlMotors();
 }
 
