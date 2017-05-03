@@ -3,6 +3,7 @@
 #include "src/messages.h"
 #include "src/MotorController.h"
 #include "src/OdometryController.h"
+#include "src/TrajectoryManagerClass.h"
 #include "src/params.h"
 
 unsigned long time = 0;
@@ -21,6 +22,9 @@ void isrRight() {
 }
 void updateOdometry() {
 	Odometry.updatePosition();
+	if(Motors.isAtDestination()) {
+		TrajectoryManager.computeNextStep();
+	}
 	Motors.controlMotors();
 }
 
@@ -42,8 +46,14 @@ void setup()
 	digitalWrite(13, HIGH);
 	delay(2000);
 	digitalWrite(13, LOW);
-	//Motors.computeParameters(20000, Rotation);
-    delay(3000);
+    delay(2000);
+
+    int ret;
+    TrajectoryManager.addPoint(Point3D(300,0), &ret);
+    TrajectoryManager.addPoint(Point3D(300, 300), &ret);
+    TrajectoryManager.addPoint(Point3D(1300, 0, 0), &ret);
+    TrajectoryManager.addPoint(Point3D(500, -300), &ret);
+    TrajectoryManager.addPoint(Point3D(0, 0, 0), &ret);
 
 }
 
@@ -54,14 +64,7 @@ void loop()
 		Serial.print("\nJ'ai un message ! de type ");
 		Serial.println(msgDown.type);
 	}
-	/*Motors.computeParameters(20000, Straight);
-	delay(3000);
-	Motors.computeParameters(-20000, Straight);
-	delay(3000);*/
-	Motors.computeParameters(5000, Straight, 20000);
-	delay(1500);
-	Motors.computeParameters(-5000, Straight, 20000);
-	delay(1500);
+
 	if(millis() - time > 500) {
 		digitalWrite(13, !ledState);
 		ledState = !ledState;

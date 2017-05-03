@@ -7,6 +7,7 @@
 
 #include "MotorController.h"
 #include "OdometryController.h"
+#include "TrajectoryManagerClass.h"
 #include "params.h"
 
 MotorController Motors = MotorController();
@@ -21,6 +22,7 @@ MotorController::MotorController() {
 	_intErrorLenght = _intErrorTheta = 0;
 	_odometry = NULL;
 	_movementPhase = Stopped;
+	_accel = 0;
 }
 
 MotorController::~MotorController() {
@@ -43,10 +45,20 @@ void MotorController::init(OdometryController* odometry) {
 	_odometry = odometry;
 }
 
-void MotorController::computeParameters(long target, MovementType movementType, double speed) {
+void MotorController::computeParameters(double target, MovementType movementType, double speed) {
 	_t0 = millis()/1000.0;
 	_odometry->razIncs();
-	_pTarget = abs(target);
+	long lTarget = 0;
+
+	switch (movementType) {
+		case Straight:
+			_pTarget = abs(target * MM_TO_INC);
+			break;
+		case Rotation:
+			_pTarget = abs(target * RAD_TO_INC);
+			break;
+	}
+
 	if(target > 0) {
 		_sign = 1;
 	} else {
@@ -76,15 +88,15 @@ void MotorController::controlMotors() {
 	_intErrorLenght += lenError;
 	double lenghtCommand =  lenError * KP_DIST + _intErrorLenght*KI_DIST - KD_DIST * speedRobot;
 
-	int orientation = _odometry->getLeftAcc() - _odometry->getRightAcc();
-	int orientationSpeed = _odometry->getSpeedLeft() - _odometry->getSpeedRight();
+	int orientation = _odometry->getRightAcc() - _odometry->getLeftAcc();
+	int orientationSpeed = _odometry->getSpeedRight() - _odometry->getSpeedLeft();
 	long thetaCons = getThetaConsigne();
 	int thetaError = thetaCons - orientation;
 	_intErrorTheta += thetaError;
 	double thetaCommand = thetaError * KP_ORIENT + _intErrorTheta*KI_ORIENT - KD_ORIENT * orientationSpeed;
 
-	double leftCommand = lenghtCommand + thetaCommand;
-	double rightCommand = lenghtCommand - thetaCommand;
+	double leftCommand = lenghtCommand - thetaCommand;
+	double rightCommand = lenghtCommand + thetaCommand;
 
 	if(abs(rightCommand) < MIN_PWM) {
 		rightCommand = 0;
@@ -102,15 +114,15 @@ void MotorController::controlMotors() {
 	analogWrite(PWM_RIGHT, absRightCommand);
 	digitalWrite(DIR_LEFT, leftCommand > 0);
 	digitalWrite(DIR_RIGHT, rightCommand < 0);
-
-	//Serial.print("Lcons: ");
-	Serial.println(lenCons);
-	//Serial.print(";");
-	//Serial.print("\tlen: ");
-	//Serial.println(_odometry->getLength());
-	//Serial.print("\torient: ");
-	//Serial.println(orientation);
-
+/*
+	Serial.print(_pTarget);
+	Serial.print("\tLcons: ");
+	Serial.print(lenCons);
+	Serial.print("\tlen: ");
+	Serial.print(_odometry->getLength());
+	Serial.print("\torient: ");
+	Serial.println(orientation);
+*/
 }
 
 long MotorController::getConsigne() {
@@ -120,7 +132,7 @@ long MotorController::getConsigne() {
 
 	switch(_movementPhase) {
 		case Stopped:
-			return 0;
+			return _pTarget;
 			break;
 		case Acceleration:
 			if(_p < _p1) {
@@ -132,6 +144,7 @@ long MotorController::getConsigne() {
 			} else {
 				Serial.println("Deceleration");
 				_movementPhase = Deceleration;
+				setAccel();
 				getDecelConsigne(t);
 			}
 			break;
@@ -141,6 +154,7 @@ long MotorController::getConsigne() {
 			} else {
 				Serial.println("Deceleration");
 				_movementPhase = Deceleration;
+				setAccel();
 				getDecelConsigne(t);
 			}
 			break;
@@ -196,12 +210,24 @@ long MotorController::getCruiseConsigne(double t) {
 
 long MotorController::getDecelConsigne(double t) {
 
-	int newX = _p2Real + _speed*(t-_t2) - ((ACCEL * pow((t-_t2),2)) / 2);
+	int newX = _p2Real + _speed*(t-_t2) - ((_accel * pow((t-_t2),2)) / 2);
 	if(newX < _pMax) {
+		_movementPhase = Stopped;
 		return _pTarget;
 	} else {
 		_p = newX;
 		_pMax = _p;
 		return _p;
 	}
+}
+
+bool MotorController::isAtDestination() {
+	if(abs(_pTarget - _p) < 10) {		//TODO : better condition
+		return true;
+	}
+	return false;
+}
+
+void MotorController::setAccel() {
+	_accel = pow(_speed,2)/(2*(_pTarget - _p2Real));
 }
