@@ -9,6 +9,10 @@
 
 #include "Arduino.h" //TODO : change to Motor.h
 #include "params.h"
+extern "C" {
+	#include "utils.h"
+}
+
 
 //#define ENTRAXE 7865.56f
 #define UPDATE_PERIOD 0.02f
@@ -54,9 +58,6 @@ long OdometryController::getLength(){
 }
 
 void OdometryController::updatePosition() {
-	/*Serial.print(_nbIncLeft);
-	Serial.print("\t");
-	Serial.println(_nbIncRight);*/
 	/* Update total increment for the trajectory*/
 	_leftAcc += _nbIncLeft;
 	_rightAcc += _nbIncRight;
@@ -66,7 +67,7 @@ void OdometryController::updatePosition() {
 
 	double speed = (_speedLeft + _speedRight) / 2;
 
-	_thetaRad += (_nbIncRight - _nbIncLeft) / RAD_TO_INC;
+	_thetaRad = constrainAngle(_thetaRad + (_nbIncRight - _nbIncLeft) / RAD_TO_INC);
 
 	_nbIncLeft = 0;
 	_nbIncRight = 0;

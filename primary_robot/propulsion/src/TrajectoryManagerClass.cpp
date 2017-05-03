@@ -8,6 +8,9 @@
 #include "TrajectoryManagerClass.h"
 #include "OdometryController.h"
 #include "MotorController.h"
+extern "C" {
+	#include "utils.h"
+}
 #include <math.h>
 
 TrajectoryManagerClass TrajectoryManager = TrajectoryManagerClass();
@@ -56,7 +59,6 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 }
 
 void TrajectoryManagerClass::computeNextStep(){
-	Serial.println("Compute Next Step !!!!!");
 	if(_readIndex == _writeIndex) {		//no more points to read
 		Serial.println("This is the end");
 		return;
@@ -73,6 +75,7 @@ void TrajectoryManagerClass::computeNextStep(){
 	switch (_trajectoryStep){
 		case InitialRotationStep:
 			value = atan2(dy, dx) - Odometry.getThetaRad();
+			value = constrainAngle(value);
 			//TODO : tourner au minimum (vers la gauche ou la droite)
 			Motors.computeParameters(value, Rotation);
 			_trajectoryStep = CruiseStep;
@@ -87,6 +90,7 @@ void TrajectoryManagerClass::computeNextStep(){
 		case FinalRotationStep:
 			if (nextPoint.careAboutTheta()){
 				value = nextPoint.getTheta() - Odometry.getThetaRad();
+				value = constrainAngle(value);
 				Motors.computeParameters(value, Rotation);
 			}
 			_trajectoryStep = InitialRotationStep;
