@@ -13,8 +13,7 @@
 
 #define MAX_SPEED 10000.0 	  //in increments per seconds
 #define ACCEL 15000.0 	    //in increments per second square
-#define MM_TO_INC 28.64
-#define RAD_TO_INC 7853.40
+
 #define KP_DIST 0.3
 #define KI_DIST 0.05
 #define KD_DIST 0.1
@@ -45,6 +44,7 @@ public:
 	void init(OdometryController* odometry);
 	void computeParameters(double target, MovementType, double speed = MAX_SPEED);
 	void controlMotors();
+	bool isAtDestination();
 
 protected:
 	long getConsigne();

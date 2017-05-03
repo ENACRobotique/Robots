@@ -10,7 +10,7 @@
 #include "Arduino.h" //TODO : change to Motor.h
 #include "params.h"
 
-#define ENTRAXE 7865.56f
+//#define ENTRAXE 7865.56f
 #define UPDATE_PERIOD 0.02f
 
 OdometryController Odometry = OdometryController();
@@ -66,26 +66,21 @@ void OdometryController::updatePosition() {
 
 	double speed = (_speedLeft + _speedRight) / 2;
 
-	/*Reset incr calculated since last update*/
-
-
-
-	// TODO : controlMotors(L, _leftAcc, _rightAcc, speedLeft, speedRight, UPDATE_PERIOD);
-
-	/*Store current length*/
-	//_prevL = L;
-
-	/*Compute new position*/
-	//_thetaRad = (_rightAcc - _leftAcc) / ENTRAXE;
-	_thetaRad += (_nbIncRight - _nbIncLeft) / ENTRAXE;
+	_thetaRad += (_nbIncRight - _nbIncLeft) / RAD_TO_INC;
 
 	_nbIncLeft = 0;
 	_nbIncRight = 0;
 
 	double dx = speed * cos(_thetaRad);
 	double dy = speed * sin(_thetaRad);
-	_posX += dx;
-	_posY += dy;
+	_posX += dx/MM_TO_INC;
+	_posY += dy/MM_TO_INC;
+	/*Serial.print("x=");
+	Serial.print(_posX);
+	Serial.print("\ty=");
+	Serial.print(_posY);
+	Serial.print("\ttheta=");
+	Serial.println(_thetaRad);*/
 }
 
 void OdometryController::ISRLeft() {

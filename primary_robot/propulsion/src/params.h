@@ -21,5 +21,8 @@
 
 #define UPDATE_PERIOD 0.02f
 
+#define MM_TO_INC 28.64
+#define RAD_TO_INC 7853.40
+
 
 #endif /* PARAMS_H_ */

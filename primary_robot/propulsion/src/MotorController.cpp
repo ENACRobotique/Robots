@@ -7,6 +7,7 @@
 
 #include "MotorController.h"
 #include "OdometryController.h"
+#include "TrajectoryManagerClass.h"
 #include "params.h"
 
 MotorController Motors = MotorController();
@@ -113,16 +114,15 @@ void MotorController::controlMotors() {
 	analogWrite(PWM_RIGHT, absRightCommand);
 	digitalWrite(DIR_LEFT, leftCommand > 0);
 	digitalWrite(DIR_RIGHT, rightCommand < 0);
-
+/*
 	Serial.print(_pTarget);
 	Serial.print("\tLcons: ");
 	Serial.print(lenCons);
-	//Serial.print(";");
 	Serial.print("\tlen: ");
-	Serial.println(_odometry->getLength());
-	//Serial.print("\torient: ");
-	//Serial.println(orientation);
-
+	Serial.print(_odometry->getLength());
+	Serial.print("\torient: ");
+	Serial.println(orientation);
+*/
 }
 
 long MotorController::getConsigne() {
@@ -132,7 +132,7 @@ long MotorController::getConsigne() {
 
 	switch(_movementPhase) {
 		case Stopped:
-			return 0;
+			return _pTarget;
 			break;
 		case Acceleration:
 			if(_p < _p1) {
@@ -212,12 +212,20 @@ long MotorController::getDecelConsigne(double t) {
 
 	int newX = _p2Real + _speed*(t-_t2) - ((_accel * pow((t-_t2),2)) / 2);
 	if(newX < _pMax) {
+		_movementPhase = Stopped;
 		return _pTarget;
 	} else {
 		_p = newX;
 		_pMax = _p;
 		return _p;
 	}
+}
+
+bool MotorController::isAtDestination() {
+	if(abs(_pTarget - _p) < 10) {		//TODO : better condition
+		return true;
+	}
+	return false;
 }
 
 void MotorController::setAccel() {
