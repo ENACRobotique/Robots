@@ -88,15 +88,15 @@ void MotorController::controlMotors() {
 	_intErrorLenght += lenError;
 	double lenghtCommand =  lenError * KP_DIST + _intErrorLenght*KI_DIST - KD_DIST * speedRobot;
 
-	int orientation = _odometry->getLeftAcc() - _odometry->getRightAcc();
-	int orientationSpeed = _odometry->getSpeedLeft() - _odometry->getSpeedRight();
+	int orientation = _odometry->getRightAcc() - _odometry->getLeftAcc();
+	int orientationSpeed = _odometry->getSpeedRight() - _odometry->getSpeedLeft();
 	long thetaCons = getThetaConsigne();
 	int thetaError = thetaCons - orientation;
 	_intErrorTheta += thetaError;
 	double thetaCommand = thetaError * KP_ORIENT + _intErrorTheta*KI_ORIENT - KD_ORIENT * orientationSpeed;
 
-	double leftCommand = lenghtCommand + thetaCommand;
-	double rightCommand = lenghtCommand - thetaCommand;
+	double leftCommand = lenghtCommand - thetaCommand;
+	double rightCommand = lenghtCommand + thetaCommand;
 
 	if(abs(rightCommand) < MIN_PWM) {
 		rightCommand = 0;
