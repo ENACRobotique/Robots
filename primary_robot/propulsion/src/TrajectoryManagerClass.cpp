@@ -7,6 +7,8 @@
 
 #include "TrajectoryManagerClass.h"
 #include "OdometryController.h"
+#include "MotorController.h"
+#include <math.h>
 
 TrajectoryManagerClass TrajectoryManager = TrajectoryManagerClass();
 
@@ -54,23 +56,38 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 }
 
 void TrajectoryManagerClass::computeNextStep(){
+	Serial.println("Compute Next Step !!!!!");
+	if(_readIndex == _writeIndex) {		//no more points to read
+		Serial.println("This is the end");
+		return;
+	}
+
 	Point3D nextPoint = _objectives[_readIndex];
-	double dx = Odometry.getPosX() - nextPoint.getX();
-	double dy = Odometry.getPosY() - nextPoint.getY();
+	double dx = nextPoint.getX() - Odometry.getPosX();
+	double dy = nextPoint.getY() - Odometry.getPosY();
+	//double rotationAngle;
+	//double translationLength;
+	double value;
+	Serial.println("trajectoryStep : ");
+	Serial.println(_trajectoryStep);
 	switch (_trajectoryStep){
 		case InitialRotationStep:
-			double rotationAngle = atan2(dy, dx) - Odometry.getThetaRad();
-			Motors.computeParameters(rotationAngle, Rotation);
+			value = atan2(dy, dx) - Odometry.getThetaRad();
+			//TODO : tourner au minimum (vers la gauche ou la droite)
+			Motors.computeParameters(value, Rotation);
 			_trajectoryStep = CruiseStep;
+
 			break;
 		case CruiseStep:
-			double translationLength = sqrt(pow(dx, 2) + pow (dy, 2));
-			Motors.computeParameters(translationLength, Straight);
+			value = sqrt(pow(dx, 2) + pow (dy, 2));
+			Motors.computeParameters(value, Straight);
 			_trajectoryStep = FinalRotationStep;
+
 			break;
 		case FinalRotationStep:
-			if (nextPoint._careAboutTheta){
-				double rotation = nextPoint.getTheta() - Odometry.getThetaRad();
+			if (nextPoint.careAboutTheta()){
+				value = nextPoint.getTheta() - Odometry.getThetaRad();
+				Motors.computeParameters(value, Rotation);
 			}
 			_trajectoryStep = InitialRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
