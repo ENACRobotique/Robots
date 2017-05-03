@@ -46,19 +46,15 @@ void setup()
 	digitalWrite(13, HIGH);
 	delay(2000);
 	digitalWrite(13, LOW);
-	//Motors.computeParameters(20000, Rotation);
     delay(2000);
 
-    //Point3D pt = Point3D(1000,300);
     int ret;
-    TrajectoryManager.addPoint(Point3D(100, 0, -1.57), &ret);
-    //TrajectoryManager.addPoint(Point3D(150,0,1.57), &ret);
-    //TrajectoryManager.addPoint(Point3D(150,0,-1.57), &ret);
-    //TrajectoryManager.addPoint(Point3D(300, 300, 0), &ret);
-    //TrajectoryManager.addPoint(Point3D(1000, 0), &ret);
-    //TrajectoryManager.addPoint(Point3D(2000, 0), &ret);
-    //TrajectoryManager.readPoint(&pt, &ret);
-    TrajectoryManager.computeNextStep();
+    TrajectoryManager.addPoint(Point3D(300,0), &ret);
+    TrajectoryManager.addPoint(Point3D(300, 300), &ret);
+    TrajectoryManager.addPoint(Point3D(1300, 0, 0), &ret);
+    TrajectoryManager.addPoint(Point3D(500, -300), &ret);
+    TrajectoryManager.addPoint(Point3D(0, 0, 0), &ret);
+
 }
 
 // The loop function is called in an endless loop
@@ -68,16 +64,6 @@ void loop()
 		Serial.print("\nJ'ai un message ! de type ");
 		Serial.println(msgDown.type);
 	}
-	/*Motors.computeParameters(20000, Straight);
-	delay(3000);
-	Motors.computeParameters(-20000, Straight);
-	delay(3000);*/
-	//Motors.computeParameters(2200, Straight);
-	//delay(10000);
-	//Motors.computeParameters(-2200, Straight);
-	//delay(10000);
-	//Motors.computeParameters(6.283, Rotation);
-	//delay(20000);
 
 	if(millis() - time > 500) {
 		digitalWrite(13, !ledState);
