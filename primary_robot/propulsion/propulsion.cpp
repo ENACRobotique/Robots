@@ -48,11 +48,17 @@ void setup()
 	digitalWrite(13, LOW);
 	//Motors.computeParameters(20000, Rotation);
     delay(2000);
-/*
-    Point3D pt = Point3D();
+
+    //Point3D pt = Point3D(1000,300);
     int ret;
-    TrajectoryManager.addPoint(pt, &ret);
-    TrajectoryManager.readPoint(&pt, &ret);*/
+    TrajectoryManager.addPoint(Point3D(100, 0, -1.57), &ret);
+    //TrajectoryManager.addPoint(Point3D(150,0,1.57), &ret);
+    //TrajectoryManager.addPoint(Point3D(150,0,-1.57), &ret);
+    //TrajectoryManager.addPoint(Point3D(300, 300, 0), &ret);
+    //TrajectoryManager.addPoint(Point3D(1000, 0), &ret);
+    //TrajectoryManager.addPoint(Point3D(2000, 0), &ret);
+    //TrajectoryManager.readPoint(&pt, &ret);
+    TrajectoryManager.computeNextStep();
 }
 
 // The loop function is called in an endless loop
@@ -66,10 +72,10 @@ void loop()
 	delay(3000);
 	Motors.computeParameters(-20000, Straight);
 	delay(3000);*/
-	Motors.computeParameters(2200, Straight);
-	delay(10000);
-	Motors.computeParameters(-2200, Straight);
-	delay(10000);
+	//Motors.computeParameters(2200, Straight);
+	//delay(10000);
+	//Motors.computeParameters(-2200, Straight);
+	//delay(10000);
 	//Motors.computeParameters(6.283, Rotation);
 	//delay(20000);
 
