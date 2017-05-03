@@ -44,7 +44,7 @@ typedef struct __attribute__((packed)){
 
    uint16_t y; //mm
 
-  }element[];
+  }element[(MSG_DOWN_MAX_SIZE - DOWN_HEADER_SIZE - 4)/4];
 
 }sTrajectory; //4 + n * 4 bytes
 
