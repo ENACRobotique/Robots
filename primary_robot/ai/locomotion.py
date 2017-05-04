@@ -1,15 +1,3 @@
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-
-class PointOrient(Point):
-    def __init__(self, x, y, theta=0):
-        super().__init__(x, y)
-        self.theta = theta
-
-
 class Locomotion:
     def __init__(self, robot):
         self.robot = robot
@@ -31,6 +19,16 @@ class Locomotion:
 
     def restart_robot(self):
         pass
+
+    class Point:
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
+    class PointOrient(Point):
+        def __init__(self, x, y, theta=0):
+            super().__init__(x, y)
+            self.theta = theta
 
 
 
