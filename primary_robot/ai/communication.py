@@ -11,98 +11,6 @@ SERIAL_SEND_TIMEOUT = 500  # ms
 DOWN_MSG_SIZE = 47
 UP_MSG_SIZE = 9
 
-
-### Down (raspi -> prop) message declaration ###
-class eTypeDown(Enum):
-    TRAJECTORY = 0
-    STOP = 1
-    RESTART = 2
-    REPOSITIONING = 3
-    # 2017 Cup Specials
-    START_BALL_PICKER_MOTOR = 4
-    STOP_BALL_PICKER_MOTOR = 5
-    START_CANNON_MOTOR = 6
-    STOP_CANNON_MOTOR = 7
-    OPEN_CANNON_BARRIER = 8
-    CLOSE_CANNON_BARRIER = 9
-    OPEN_ROCKET_LAUNCHER = 10
-    LOCK_ROCKET_LAUNCHER = 11
-
-
-
-class sTrajElement():
-    def __init__(self):
-        self.x = 0  # :16
-
-        self.y = 0  # :16
-
-    def serialize(self):
-        return bitstring.pack('uintle:16, uintle:16', self.x, self.y)
-
-
-class sTrajectory():
-    def __init__(self):
-        self.nb_traj = 0  # :8
-
-        self.speed = 0  # :8
-
-        self.theta_final = 0  # :16
-
-        self.element = []
-
-    def serialize(self):
-        ser = bitstring.pack('uint:8, uint:8, uintle:16', self.nb_traj, self.speed, self.theta_final)
-
-        for elt in self.element:
-            ser += elt.serialize()
-
-        return ser
-
-
-class sRepositionning():
-    def __init__(self):
-        self.x = 0  # 16
-
-        self.y = 0  # 16
-
-        self.theta = 0  # 16
-
-    def serialize(self):
-        return bitstring.pack('uintle:16, uintle:16, uintle:16', self.x, self.y, self.theta)
-
-
-class sMessageDown():
-    def __init__(self):
-
-        self.id = 0  # :8
-
-        self.message_type = None  # :8
-
-        self.checksum = 0  # :8
-
-        self.payload = None  # sReposionning or sTrajectory
-
-    def serialize(self):
-
-        ser2 = None
-        if self.payload is not None:
-            ser2 = self.payload.serialize()
-
-            self.checksum = 0
-
-            for octet in ser2.tobytes():
-                self.checksum += octet
-
-        self.checksum = self.checksum % 0xFF
-
-        ser = bitstring.pack('uint:8, uint:8, uint:8', self.id, self.message_type.value, self.checksum)
-        serialized_msg = ser + ser2
-        pad = bitstring.pack('pad:{}'.format((DOWN_MSG_SIZE - len(serialized_msg.tobytes())) * 8))
-        return serialized_msg + pad
-
-
-### End down message declaration ###
-
 ### Up (Prop -> raspi) message declaration ###
 
 
@@ -199,3 +107,89 @@ class Communication:
         if len(self._mailbox) > 0:
             return self._mailbox.popleft()
         return None
+
+    ### Down (raspi -> prop) message declaration ###
+    class eTypeDown(Enum):
+        TRAJECTORY = 0
+        STOP = 1
+        RESTART = 2
+        REPOSITIONING = 3
+        # 2017 Cup Specials
+        START_BALL_PICKER_MOTOR = 4
+        STOP_BALL_PICKER_MOTOR = 5
+        START_CANNON_MOTOR = 6
+        STOP_CANNON_MOTOR = 7
+        OPEN_CANNON_BARRIER = 8
+        CLOSE_CANNON_BARRIER = 9
+        OPEN_ROCKET_LAUNCHER = 10
+        LOCK_ROCKET_LAUNCHER = 11
+
+    class sTrajElement():
+        def __init__(self):
+            self.x = 0  # :16
+
+            self.y = 0  # :16
+
+        def serialize(self):
+            return bitstring.pack('uintle:16, uintle:16', self.x, self.y)
+
+    class sTrajectory():
+        def __init__(self):
+            self.nb_traj = 0  # :8
+
+            self.speed = 0  # :8
+
+            self.theta_final = 0  # :16
+
+            self.element = []
+
+        def serialize(self):
+            ser = bitstring.pack('uint:8, uint:8, uintle:16', self.nb_traj, self.speed, self.theta_final)
+
+            for elt in self.element:
+                ser += elt.serialize()
+
+            return ser
+
+    class sRepositionning():
+        def __init__(self):
+            self.x = 0  # 16
+
+            self.y = 0  # 16
+
+            self.theta = 0  # 16
+
+        def serialize(self):
+            return bitstring.pack('uintle:16, uintle:16, uintle:16', self.x, self.y, self.theta)
+
+    class sMessageDown():
+        def __init__(self):
+
+            self.id = 0  # :8
+
+            self.message_type = None  # :8
+
+            self.checksum = 0  # :8
+
+            self.payload = None  # sReposionning or sTrajectory
+
+        def serialize(self):
+
+            ser2 = None
+            if self.payload is not None:
+                ser2 = self.payload.serialize()
+
+                self.checksum = 0
+
+                for octet in ser2.tobytes():
+                    self.checksum += octet
+
+            self.checksum = self.checksum % 0xFF
+
+            ser = bitstring.pack('uint:8, uint:8, uint:8', self.id, self.message_type.value, self.checksum)
+            serialized_msg = ser + ser2
+            pad = bitstring.pack('pad:{}'.format((DOWN_MSG_SIZE - len(serialized_msg.tobytes())) * 8))
+            return serialized_msg + pad
+
+
+            ### End down message declaration ###
