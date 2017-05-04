@@ -1,10 +1,21 @@
-import communication
+import robot
+import time
 
-comm = communication.Communication()
-msgDown = communication.sMessageDown()
+robot = robot.Robot()
 while 1:
-    type_int = input("Msg type ?")
-    msgDown.message_type = communication.eTypeDown(int(type_int))
-    print("Sending...")
-    comm.send_message(msgDown)
-    print("Sent !")
+    input("test")
+    robot.io.set_led_color(robot.io.LedColor.BLACK)
+    time.sleep(0.5)
+    robot.io.set_led_color(robot.io.LedColor.RED)
+    time.sleep(0.5)
+    robot.io.set_led_color(robot.io.LedColor.GREEN)
+    time.sleep(0.5)
+    robot.io.set_led_color(robot.io.LedColor.BLUE)
+    time.sleep(0.5)
+    robot.io.set_led_color(robot.io.LedColor.YELLOW)
+    time.sleep(0.5)
+    robot.io.set_led_color(robot.io.LedColor.PURPLE)
+    time.sleep(0.5)
+    robot.io.set_led_color(robot.io.LedColor.CYAN)
+    time.sleep(0.5)
+    robot.io.set_led_color(robot.io.LedColor.WHITE)
