@@ -13,6 +13,9 @@ class PointOrient(Point):
 class Locomotion:
     def __init__(self, robot):
         self.robot = robot
+        self.x = None
+        self.y = None
+        self.theta = None
 
     def follow_trajectory(self, points, speed):
         pass
@@ -22,4 +25,12 @@ class Locomotion:
 
     def go_to_orient(self, point, speed):
         self.go_to_orient(point.x, point.y, point.theta, speed)
+
+    def stop_robot(self):
+        pass
+
+    def restart_robot(self):
+        pass
+
+
 
