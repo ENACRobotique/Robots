@@ -9,7 +9,7 @@
 #define TRAJECTORYMANAGERCLASS_H_
 
 #include "Point3D.h"
-
+#include "messages.h"
 #define NB_POINTS_MAX 20
 
 typedef enum {
@@ -25,6 +25,7 @@ public:
 	void addPoint(Point3D point, int * returnValue);
 	void readPoint(Point3D *point, int * returnValue);
 	void computeNextStep();
+	void readMessage(sMessageDown msg);
 private:
 	TrajectoryStep _trajectoryStep;
 	Point3D _objectives[NB_POINTS_MAX];

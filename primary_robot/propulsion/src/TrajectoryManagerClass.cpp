@@ -97,3 +97,33 @@ void TrajectoryManagerClass::computeNextStep(){
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
 	}
 }
+
+void TrajectoryManagerClass::readMessage(sMessageDown msg){
+	eTypeDown msgType = msg.type;
+	Point3D point;
+	int ret;
+	switch (msgType){
+		TRAJECTOIRE:
+			for (int i=0; i < msg.traj.nb_trajectories; i++){
+				if (i == msg.traj.nb_trajectories){ //Si c'est le dernier point,  careAboutTheta
+					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, msg.traj.theta_final);
+				} else {
+					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y);
+				}
+				addPoint(point, &ret);
+				if (ret != 0){ // Buffer de trajectoire plein
+					Serial.print("Tableau plein?");
+				}
+			}
+			break;
+		STOP:
+			//TODO : Stop
+			break;
+		RESTART:
+			//TODO : Restart
+			break;
+		RECALAGE:
+			//TODO : Recalage
+			break;
+	}
+}
