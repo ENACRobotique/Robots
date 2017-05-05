@@ -19,6 +19,7 @@ TrajectoryManagerClass::TrajectoryManagerClass() {
 	_readIndex = 0;
 	_writeIndex = 0;
 	_trajectoryStep = InitialRotationStep;
+	_prevStep = Stop;
 
 }
 
@@ -67,12 +68,13 @@ void TrajectoryManagerClass::computeNextStep(){
 	Point3D nextPoint = _objectives[_readIndex];
 	double dx = nextPoint.getX() - Odometry.getPosX();
 	double dy = nextPoint.getY() - Odometry.getPosY();
-	//double rotationAngle;
-	//double translationLength;
 	double value;
 	Serial.println("trajectoryStep : ");
 	Serial.println(_trajectoryStep);
 	switch (_trajectoryStep){
+		case Stop:
+			//Motors.computeParameters(0, Straight);
+			break;
 		case InitialRotationStep:
 			value = atan2(dy, dx) - Odometry.getThetaRad();
 			value = constrainAngle(value);
@@ -96,4 +98,18 @@ void TrajectoryManagerClass::computeNextStep(){
 			_trajectoryStep = InitialRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
 	}
+}
+
+void TrajectoryManagerClass::stop(){
+	_prevStep = _trajectoryStep;
+	_trajectoryStep = Stop;
+	Motors.computeParameters(0, Straight);
+	Serial.println(_prevStep);
+}
+
+void TrajectoryManagerClass::resume(){
+	_trajectoryStep = _prevStep;
+	_prevStep = Stop;
+	_trajectoryStep = InitialRotationStep;
+	Serial.println(_trajectoryStep);
 }

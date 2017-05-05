@@ -54,6 +54,10 @@ void setup()
     TrajectoryManager.addPoint(Point3D(1300, 0, 0), &ret);
     TrajectoryManager.addPoint(Point3D(500, -300), &ret);
     TrajectoryManager.addPoint(Point3D(0, 0, 0), &ret);
+    /*delay(5000);
+    TrajectoryManager.stop();
+    delay(5000);
+    TrajectoryManager.resume();*/
 
 }
 
@@ -64,7 +68,6 @@ void loop()
 		Serial.print("\nJ'ai un message ! de type ");
 		Serial.println(msgDown.type);
 	}
-
 	if(millis() - time > 500) {
 		digitalWrite(13, !ledState);
 		ledState = !ledState;
