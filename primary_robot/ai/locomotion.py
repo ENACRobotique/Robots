@@ -37,7 +37,7 @@ class Locomotion:
         message.payload.element = [traj_elt]
         self.robot.communication.send_message(message)
 
-    def go_to_orient(self, point, speed):
+    def go_to_orient_point(self, point, speed):
         self.go_to_orient(point.x, point.y, point.theta, speed)
 
     def stop_robot(self):
