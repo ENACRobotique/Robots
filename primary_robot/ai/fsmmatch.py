@@ -12,6 +12,7 @@ END_MATCH_TIME = 95  # in seconds
 #2017 specific
 SMALL_CRATER_COLLECT_DURATION = 8 # in seconds
 SMALL_CRATER_FIRE_DURATION = 7 # in seconds
+STANDART_SEPARATION_US = 20 # in cm
 
 class Color(Enum):
     BLUE = "blue"
@@ -101,13 +102,13 @@ class StateTraj1Yellow(FSMState):
         p1 = self.behavior.robot.locomotion.Point(2150, 1820)
         p2 = self.behavior.robot.locomotion.Point(1850, 1700)
         p3 = self.behavior.robot.locomotion.Point(1980, 1450)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=70)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=100)
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+        if self.behavior.robot.io.front_distance <= STANDART_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+        if self.behavior.robot.io.front_distance > STANDART_SEPARATION_US and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
@@ -138,10 +139,10 @@ class StateSmallCrater1Yellow(FSMState):
         self.ball_picker_start_time = time.time()
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+        if self.behavior.robot.io.front_distance <= STANDART_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+        if self.behavior.robot.io.front_distance > STANDART_SEPARATION_US and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
@@ -159,17 +160,17 @@ class StateTrajFirePositionYellow1(FSMState):
         self.behavior = behavior
         self.stopped = False
         #p1 = self.behavior.robot.locomotion.Point(2700, 1450)
-        self.behavior.robot.locomotion.go_to_orient(2700, 1350, 5.40, 100)
+        self.behavior.robot.locomotion.go_to_orient(2700, 1350, 4.71, 120)
         #p2 = self.behavior.robot.locomotion.Point(2700, 1680)
-        self.behavior.robot.locomotion.go_to_orient(2700, 1600, 5.40, -100)
+        self.behavior.robot.locomotion.go_to_orient(2850, 1600, 4.41, -100)
         self.fire_started = False
         self.fire_start_time = 0
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+        if self.behavior.robot.io.front_distance <= STANDART_SEPARATION_US  and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+        if self.behavior.robot.io.front_distance > STANDART_SEPARATION_US  and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
