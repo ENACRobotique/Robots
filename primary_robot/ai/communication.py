@@ -25,6 +25,7 @@ class eTypeUp(Enum):
     POINT_REACHED = 2
     POSITION = 3
     POINTS_BUFFER_FULL = 4
+    RECALAGE_OK = 5
 
 
 class sMessageUp:
@@ -136,15 +137,16 @@ class Communication:
         RESTART = 2
         REPOSITIONING = 3
         EMPTY_POINTS = 4
+        DO_RECALAGE = 5
         # 2017 Cup Specials
-        START_BALL_PICKER_MOTOR = 5
-        STOP_BALL_PICKER_MOTOR = 6
-        START_CANNON_MOTOR = 7
-        STOP_CANNON_MOTOR = 8
-        OPEN_CANNON_BARRIER = 9
-        CLOSE_CANNON_BARRIER = 10
-        OPEN_ROCKET_LAUNCHER = 11
-        LOCK_ROCKET_LAUNCHER = 12
+        START_BALL_PICKER_MOTOR = 6
+        STOP_BALL_PICKER_MOTOR = 7
+        START_CANNON_MOTOR = 8
+        STOP_CANNON_MOTOR = 9
+        OPEN_CANNON_BARRIER = 10
+        CLOSE_CANNON_BARRIER = 11
+        OPEN_ROCKET_LAUNCHER = 12
+        LOCK_ROCKET_LAUNCHER = 13
 
     class sTrajElement():
         def __init__(self):

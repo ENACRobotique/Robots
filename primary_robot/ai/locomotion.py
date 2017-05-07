@@ -74,6 +74,11 @@ class Locomotion:
         self.theta = theta
         self.synchronize_position()
 
+    def do_recalage(self):
+        message = self.robot.communication.sMessageDown()
+        message.message_type = self.robot.communication.eTypeDown.DO_RECALAGE
+        self.robot.communication.send_message(message)
+
     def synchronize_position(self):
         message = self.robot.communication.sMessageDown()
         message.message_type = self.robot.communication.eTypeDown.REPOSITIONING

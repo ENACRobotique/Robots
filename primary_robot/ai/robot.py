@@ -33,4 +33,6 @@ if __name__ == '__main__':
                 robot.locomotion.theta = msg.theta
             if msg.type == eTypeUp.POINT_REACHED:
                 robot.locomotion.point_reached(msg.down_id, msg.point_id, msg.x, msg.y, msg.theta)
+            if msg.type == eTypeUp.RECALAGE_OK:
+                print("Recalage ok")
         robot.behavior.loop()
