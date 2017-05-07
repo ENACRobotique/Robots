@@ -9,6 +9,9 @@ from behavior import Behavior
 FUNNY_ACTION_TIME = 90  # in seconds
 END_MATCH_TIME = 95  # in seconds
 
+#2017 specific
+SMALL_CRATER_COLLECT_DURATION = 8 # in seconds
+SMALL_CRATER_FIRE_DURATION = 7 # in seconds
 
 class Color(Enum):
     BLUE = "blue"
@@ -95,10 +98,10 @@ class StateTraj1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        p1 = self.behavior.robot.locomotion.Point(2100, 1820)
+        p1 = self.behavior.robot.locomotion.Point(2150, 1820)
         p2 = self.behavior.robot.locomotion.Point(1850, 1700)
         p3 = self.behavior.robot.locomotion.Point(1980, 1450)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=100)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=70)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
@@ -130,9 +133,9 @@ class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
+        self.behavior.robot.locomotion.go_to_orient(2250, 1450, 0, 50)
         self.behavior.robot.io.start_ball_picker()
-        self.behavior.robot.locomotion.go_to_orient(2600, 1500, 0)
-
+        self.ball_picker_start_time = time.time()
 
     def test(self):
         if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
@@ -142,20 +145,44 @@ class StateSmallCrater1Yellow(FSMState):
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
-        if self.behavior.robot.locomotion.is_trajectory_finished:
+        collect_time = time.time() - self.ball_picker_start_time
+        if self.behavior.robot.locomotion.is_trajectory_finished and collect_time >= SMALL_CRATER_COLLECT_DURATION:
             return StateTrajFirePositionYellow1
 
     def deinit(self):
         pass
 
 
+
 class StateTrajFirePositionYellow1(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
-        pass
+        self.stopped = False
+        #p1 = self.behavior.robot.locomotion.Point(2700, 1450)
+        self.behavior.robot.locomotion.go_to_orient(2700, 1350, 5.40, 100)
+        #p2 = self.behavior.robot.locomotion.Point(2700, 1680)
+        self.behavior.robot.locomotion.go_to_orient(2700, 1600, 5.40, -100)
+        self.fire_started = False
+        self.fire_start_time = 0
 
     def test(self):
-        pass
+        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished and not self.fire_started:
+            self.fire_start_time = time.time()
+            self.behavior.robot.io.open_cannon_barrier()
+            self.behavior.robot.io.start_cannon()
+
+        if  self.fire_started:
+            fire_duration = time.time() - self.fire_start_time
+            if fire_duration > SMALL_CRATER_FIRE_DURATION:
+                self.behavior.robot.io.stop_cannon()
+                return StateEnd
 
     def deinit(self):
         pass
