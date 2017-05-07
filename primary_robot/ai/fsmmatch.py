@@ -83,9 +83,9 @@ class StateColorSelection(FSMState):
     def deinit(self):
         self.behavior.start_match()
         if self.behavior.color == Color.YELLOW:
-            self.behavior.robot.locomotion.reposition_robot(2800, 1820, math.pi)
+            self.behavior.robot.locomotion.reposition_robot(2955, 1800, math.pi)
         else:
-            self.behavior.robot.locomotion.reposition_robot(200, 1820, 0)
+            self.behavior.robot.locomotion.reposition_robot(200, 1800, 0)
 
 
 
@@ -96,8 +96,9 @@ class StateTraj1Yellow(FSMState):
         self.behavior = behavior
         self.stopped = False
         p1 = self.behavior.robot.locomotion.Point(2100, 1820)
-        p2 = self.behavior.robot.locomotion.Point(2100, 1500)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2], theta=0, speed=100)
+        p2 = self.behavior.robot.locomotion.Point(1850, 1700)
+        p3 = self.behavior.robot.locomotion.Point(1980, 1450)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
