@@ -8,6 +8,8 @@
 #include "TrajectoryManagerClass.h"
 #include "OdometryController.h"
 #include "MotorController.h"
+#include "messages.h"
+#include "params.h"
 extern "C" {
 	#include "utils.h"
 }
@@ -15,10 +17,15 @@ extern "C" {
 
 TrajectoryManagerClass TrajectoryManager = TrajectoryManagerClass();
 
+Point3D *lastPoint = NULL;
+
 TrajectoryManagerClass::TrajectoryManagerClass() {
 	_readIndex = 0;
 	_writeIndex = 0;
 	_trajectoryStep = InitialRotationStep;
+	_trajReadIndex = 0;
+	_trajWriteIndex = 0;
+	_pointId = 0;
 }
 
 TrajectoryManagerClass::~TrajectoryManagerClass() {
@@ -58,14 +65,28 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 }
 
 void TrajectoryManagerClass::computeNextStep(){
+	//Serial.print("CNS : ");
+	//Serial.print((long) lastPoint);
+	if(lastPoint != NULL) {
+		Serial.print(lastPoint->getX());
+	}
+	/*Serial.print(" ");
+	Serial.println(_trajectoryStep);*/
+	if (lastPoint != NULL && _trajectoryStep == InitialRotationStep){
+		Serial.print("Traj id : ");
+		Serial.println(lastPoint->getTrajId());
+		reached_point(lastPoint->getTrajId(), lastPoint->getPointId());
+		lastPoint = NULL;
+	}
 	if(_readIndex == _writeIndex) {		//no more points to read
 		return;
 	}
 
-	Point3D nextPoint = _objectives[_readIndex];
-	double dx = nextPoint.getX() - Odometry.getPosX();
-	double dy = nextPoint.getY() - Odometry.getPosY();
-	int speed = nextPoint.getSpeed();
+	//Point3D* nextPoint = &(_objectives[_readIndex]);
+	Point3D* nextPoint = _objectives + _readIndex;
+	double dx = nextPoint->getX() - Odometry.getPosX();
+	double dy = nextPoint->getY() - Odometry.getPosY();
+	int speed = nextPoint->getSpeed();
 	double value;
 	switch (_trajectoryStep){
 		case Stop:
@@ -90,11 +111,14 @@ void TrajectoryManagerClass::computeNextStep(){
 
 			break;
 		case FinalRotationStep:
-			if (nextPoint.careAboutTheta()){
-				value = nextPoint.getTheta() - Odometry.getThetaRad();
+			if (nextPoint->careAboutTheta()){
+				value = nextPoint->getTheta() - Odometry.getThetaRad();
 				value = constrainAngle(value);
 				Motors.computeParameters(value, Rotation);
+				Serial.print("Final rotation value: ");
+				Serial.println(value);
 			}
+			lastPoint = nextPoint;
 			_trajectoryStep = InitialRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
 	}
@@ -113,4 +137,24 @@ void TrajectoryManagerClass::emptyPoints() {
 	Motors.computeParameters(0, Straight);
 	_readIndex = 0;
 	_writeIndex = 0;
+	_trajReadIndex = 0;
+	_trajWriteIndex = 0;
+	_pointId = 0;
+}
+
+void TrajectoryManagerClass::reached_point(int trajId, int pointId){
+	sMessageUp msg;
+	msg.type = POINT_REACHED;
+	msg.down_id = trajId;
+	msg.x = (int) Odometry.getPosX();
+	msg.y = (int) Odometry.getPosY();
+	msg.theta = (int)(Odometry.getThetaRad() * RAD_TO_UINT16);
+	msg.point_id = pointId;
+	message_send(msg);
+}
+
+void TrajectoryManagerClass::addTrajectoryInfo(int trajId, int trajLength){
+	_trajectoriesId[_trajWriteIndex] = trajId;
+	_trajectoriesLength[_trajWriteIndex] = trajLength;
+	_trajWriteIndex = (_trajWriteIndex + 1)%NB_POINTS_MAX;
 }

@@ -36,22 +36,22 @@
 #define SERVO_ROCKET SERVO4
 #define SERVO_CANNON_BARRIER SERVO3
 
-#define LAUNCHER_SPEED 50
-#define PICKER_SPEED 100
+#define LAUNCHER_SPEED 100
+#define PICKER_SPEED 512
 
-#define CANNON_BARRIER_OPENED 65
-#define CANNON_BARRIER_CLOSED 125
+#define CANNON_BARRIER_OPENED 125
+#define CANNON_BARRIER_CLOSED 65
 #define ROCKET_IDLE 10
 #define ROCKET_LAUNCH 150
 
 #define UPDATE_PERIOD 0.02f
+#define REPORT_POSITION_TIMER 3000
 
 #define MM_TO_INC 28.64
 #define RAD_TO_INC 7853.40
 #define RAD_TO_UINT16 10430.378350470453
 
 #define SPEED_COEFF 78
-
 /*
  * All pwm on the same timer have the same frequency.
  * Timer | pwm pins
