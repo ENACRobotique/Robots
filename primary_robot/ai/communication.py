@@ -4,6 +4,8 @@ import serial
 import time
 from collections import deque
 
+MOCK_COMMUNICATION = False  # Set to True if Serial is not plugged to the Teensy
+
 SERIAL_BAUDRATE = 115200
 SERIAL_PATH = "/dev/ttyAMA0"
 SERIAL_SEND_TIMEOUT = 500  # ms
@@ -73,6 +75,9 @@ class Communication:
         :return: 0 if the message is sent, -1 if max_retries has been reached
         :rtype: int
         """
+        if MOCK_COMMUNICATION:
+            max_retries = 0
+
         msg.id = self._current_msg_id
         self._current_msg_id = (self._current_msg_id + 1) % 256
         serialized = msg.serialize().tobytes()
@@ -99,6 +104,9 @@ class Communication:
         :return: The oldest message non read
         :rtype: sMessageUp
         """
+        if MOCK_COMMUNICATION:
+            return None
+
         if self._serial_port.in_waiting >= UP_MSG_SIZE:
             packed = self._serial_port.read(UP_MSG_SIZE)
             up_msg = sMessageUp()
