@@ -15,10 +15,14 @@ class Locomotion:
         self.go_to_orient(point.x, point.y, point.theta, speed)
 
     def stop_robot(self):
-        pass
+        message = self.robot.communication.sMessageDown()
+        message.message_type = self.robot.communication.eTypeDown.STOP
+        self.robot.communication.send_message(message)
 
     def restart_robot(self):
-        pass
+        message = self.robot.communication.sMessageDown()
+        message.message_type = self.robot.communication.eTypeDown.RESTART
+        self.robot.communication.send_message(message)
 
     class Point:
         def __init__(self, x, y):
