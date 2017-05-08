@@ -68,7 +68,10 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 }
 
 void TrajectoryManagerClass::computeNextStep(){
-	//Serial.print("CNS : ");
+	//Serial.print("CNS : currentStep =  ");
+	//Serial.println(_trajectoryStep);
+	//Serial.print(" , prevStep =  ");
+	//Serial.println(_prevStep);
 	//Serial.print((long) lastPoint);
 	if(lastPoint != NULL) {
 		Serial.print(lastPoint->getX());
@@ -116,6 +119,7 @@ void TrajectoryManagerClass::computeNextStep(){
 
 			break;
 		case FinalRotationStep:
+			Serial.println("Entering Final rotation...");
 			if (nextPoint->careAboutTheta()){
 				value = nextPoint->getTheta() - Odometry.getThetaRad();
 				value = constrainAngle(value);
@@ -131,7 +135,11 @@ void TrajectoryManagerClass::computeNextStep(){
 }
 
 void TrajectoryManagerClass::stop(){
+	if (_prevStep == FinalRotationStep){
+		_readIndex = (_readIndex - 1)%NB_POINTS_MAX;
+	}
 	_trajectoryStep = Stop;
+	lastPoint = NULL;
 	Motors.computeParameters(0, Straight);
 }
 
