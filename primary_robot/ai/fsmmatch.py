@@ -8,11 +8,11 @@ from behavior import Behavior
 
 FUNNY_ACTION_TIME = 92  # in seconds
 END_MATCH_TIME = 95  # in seconds
-INITIAL_WAIT = 30 #in seconds
+INITIAL_WAIT = 0 #in seconds
 
 #2017 specific
-SMALL_CRATER_COLLECT_DURATION = 5 # in seconds
-SMALL_CRATER_FIRE_DURATION = 8 # in seconds
+SMALL_CRATER_COLLECT_DURATION = 4 # in seconds
+SMALL_CRATER_FIRE_DURATION = 6 # in seconds
 STANDARD_SEPARATION_US = 20 # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
 AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
@@ -360,8 +360,8 @@ class StateTrajFirePositionYellow1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
-        self.behavior.robot.locomotion.go_to_orient(2550, 1350, 1.5*math.pi, 120)
-        self.behavior.robot.locomotion.go_to_orient(2780, 1700, 4.41, -100)
+        self.behavior.robot.locomotion.go_to_orient(2600, 1450, 1.5*math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(2780, 1700, 1.5*math.pi, -100)
 
     def test(self):
         # Activate front US before recalage
@@ -402,8 +402,8 @@ class StateTrajFirePositionBlue1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
-        self.behavior.robot.locomotion.go_to_orient(420, 1350, 1.5*math.pi, 120)
-        self.behavior.robot.locomotion.go_to_orient(250, 1700, 4.91, -100)
+        self.behavior.robot.locomotion.go_to_orient(400, 1450, 1.5*math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(250, 1700, 1.5*math.pi, -100)
 
     def test(self):
         # Activate front US before recalage
@@ -453,11 +453,11 @@ class StateFire1(FSMMatch):
             self.firing = True
 
         if self.firing and time.time() - self.fire_start >= SMALL_CRATER_FIRE_DURATION:
-            #return StateEnd
-            if self.behavior.color == self.behavior.color.YELLOW:
-                return StateTraj2Yellow
-            else:
-                return StateTraj2Blue
+            return StateEnd
+            #if self.behavior.color == self.behavior.color.YELLOW:
+                #return StateTraj2Yellow
+            #else:
+                #return StateTraj2Blue
 
 
     def deinit(self):
