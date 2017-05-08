@@ -174,7 +174,7 @@ class StateTrajFirePositionYellow1(FSMState):
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
-        if self.behavior.robot.locomotion.is_trajectory_finished:
+        if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
             self.wait_for_repositionning = True
 
