@@ -26,7 +26,7 @@
 
 /////// THE FOLLOWING DEFINES MESSAGES RASPI -> TEENSY (Down messages)////////
 
-typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE}eTypeDown;
+typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE, LED}eTypeDown;
 
 
 
