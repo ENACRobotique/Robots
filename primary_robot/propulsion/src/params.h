@@ -22,12 +22,11 @@
 #define SERVO2 21
 #define SERVO3 22
 #define SERVO4 23
+#define MOTOR_PICKER 29
+#define MOTOR_LAUNCHER 30
 
 #define TIRETTE 27
 #define COLOR 28
-#define MOTOR_PICKUP 29
-#define MOTOR_LAUNCHER 30
-
 #define IHM_BONUS 35
 #define LED_RED 36
 #define LED_GREEN 37
@@ -37,6 +36,15 @@
 
 #define MM_TO_INC 28.64
 #define RAD_TO_INC 7853.40
+
+/*
+ * All pwm on the same timer have the same frequency.
+ * Timer | pwm pins
+ *  FTM0 | 5, 6, 9, 10, 20, 21, 22, 23
+ *  FTM1 | 3, 4
+ *  FTM2 | 29, 30
+ *  FTM3 | 2, 7, 8, 14, 35, 36, 37, 38
+ */
 
 
 #endif /* PARAMS_H_ */
