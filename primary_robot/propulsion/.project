@@ -36,5 +36,10 @@
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/teensy/avr/cores/teensy3</locationURI>
 		</link>
+		<link>
+			<name>libraries/Servo</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/teensy/avr/libraries/Servo</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
