@@ -6,7 +6,7 @@ from communication import *
 from io_robot import *
 from locomotion import *
 
-TRACE_FILE = "log/AI_LOG"+str(datetime.datetime.now()).replace(' ', '')
+TRACE_FILE = "log/log_"+str(datetime.datetime.now()).replace(' ', '_')
 
 behaviors = {
     "FSMMatch": 0,
