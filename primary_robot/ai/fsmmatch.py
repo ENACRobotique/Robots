@@ -305,7 +305,7 @@ class StateTrajFirePositionYellow1(FSMState):
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
         self.behavior.robot.locomotion.go_to_orient(2550, 1350, 1.5*math.pi, 120)
-        self.behavior.robot.locomotion.go_to_orient(2750, 1700, 4.41, -100)
+        self.behavior.robot.locomotion.go_to_orient(2780, 1700, 4.41, -100)
 
     def test(self):
         # Activate front US before recalage
@@ -346,7 +346,7 @@ class StateTrajFirePositionBlue1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
-        self.behavior.robot.locomotion.go_to_orient(450, 1350, 1.5*math.pi, 120)
+        self.behavior.robot.locomotion.go_to_orient(420, 1350, 1.5*math.pi, 120)
         self.behavior.robot.locomotion.go_to_orient(250, 1700, 4.91, -100)
 
     def test(self):
