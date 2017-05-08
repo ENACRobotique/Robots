@@ -39,6 +39,11 @@ typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE, EMPTY_POINTS, DO_RECALAGE, RE
 }eTypeDown;
 
 
+typedef struct __attribute__((packed)){
+	uint8_t motor_speed;
+}sCannonMotorSpeed
+
+
 
 typedef struct __attribute__((packed)){
 
@@ -85,6 +90,8 @@ typedef struct __attribute__((packed)){
     sTrajectory traj;
 
     sRecalage recalage;
+
+    sCannonMotorSpeed cannon_motor_speed;
 
   };
 
