@@ -430,3 +430,6 @@ environment/project/io.sloeber.core.toolChain.release.1058770224/PATH/operation=
 environment/project/io.sloeber.core.toolChain.release.1058770224/PATH/value=${A.COMPILER.PATH}${PathDelimiter}${A.BUILD.GENERIC.PATH}${PathDelimiter}${PATH}
 environment/project/io.sloeber.core.toolChain.release.1058770224/append=true
 environment/project/io.sloeber.core.toolChain.release.1058770224/appendContributed=true
+environment/project/io.sloeber.core.toolChain.release.1058770224/project_loc/delimiter=\:
+environment/project/io.sloeber.core.toolChain.release.1058770224/project_loc/operation=replace
+environment/project/io.sloeber.core.toolChain.release.1058770224/project_loc/value=${PWD}/..
