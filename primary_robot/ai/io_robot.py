@@ -44,7 +44,7 @@ class IO(object):
         self._thread_us_reader.start()
         self.robot = robot
         self._cord_state = None
-        self._color = None
+        self._button_state = None
         self.led_color = None
         self.ball_picker_state = None
         self.cannon_state = None
@@ -72,9 +72,9 @@ class IO(object):
         IN = "in"
         OUT = "out"
 
-    class Color(Enum):
-        YELLOW = "yellow"
-        BLUE = "blue"
+    class ButtonState(Enum):
+        PRESSED = "pressed"
+        RELEASED = "released"
 
     class BallPickerState(Enum):
         STARTED = "started"
@@ -98,9 +98,9 @@ class IO(object):
         return self._cord_state
 
     @property
-    def color(self):
+    def button_state(self):
         self._read_switch(PIN_COLOR)
-        return self._color
+        return self._button_state
 
     @property
     def front_distance(self):
@@ -178,9 +178,9 @@ class IO(object):
 
     def _read_switch(self, channel):
         if GPIO.input(channel):
-            self._color = self.Color.BLUE
+            self._button_state = self.ButtonState.RELEASED
         else:
-            self._color = self.Color.YELLOW
+            self._button_state = self.ButtonState.PRESSED
 
 
 class USReader(threading.Thread):
