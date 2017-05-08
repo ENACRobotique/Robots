@@ -8,6 +8,9 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#ifndef BIT
+#define BIT(i) (1<<(i))
+#endif
 
 double constrainAngle(double x);
 
