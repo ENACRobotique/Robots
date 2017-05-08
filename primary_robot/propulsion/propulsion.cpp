@@ -4,6 +4,7 @@
 #include "src/MotorController.h"
 #include "src/OdometryController.h"
 #include "src/TrajectoryManagerClass.h"
+#include "src/interruptFunctions.h"
 #include "src/params.h"
 
 unsigned long time = 0;
@@ -13,13 +14,7 @@ sMessageDown msgDown;
 sMessageUp msgUp;
 IntervalTimer odometryTimer;
 
-void isrLeft() {
-	Odometry.ISRLeft();
-}
 
-void isrRight() {
-	Odometry.ISRRight();
-}
 void updateOdometry() {
 	Odometry.updatePosition();
 	if(Motors.isAtDestination()) {
@@ -33,8 +28,7 @@ void setup()
 	Serial.begin(115200);
 	Odometry.init(0,0,0);
 	Motors.init(&Odometry);
-	attachInterrupt(ODO_I_LEFT, isrLeft, RISING);
-	attachInterrupt(ODO_I_RIGHT, isrRight, RISING);
+	setupInterrupts();
 
 	odometryTimer.begin(updateOdometry, UPDATE_PERIOD * 1000000);
 
