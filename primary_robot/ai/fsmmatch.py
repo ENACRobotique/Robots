@@ -195,8 +195,8 @@ class StateFireYellow1(FSMMatch):
         self.firing = False
 
     def test(self):
-        if self.robot.io.cannon_barrier_state == self.robot.io.CannonBarrierState.CLOSED and time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
-            self.robot.io.open_cannon_barrier()
+        if self.behavior.robot.io.cannon_barrier_state == self.behavior.robot.io.CannonBarrierState.CLOSED and time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
+            self.behavior.robot.io.open_cannon_barrier()
             self.fire_start = time.time()
             self.firing = True
 
@@ -206,6 +206,7 @@ class StateFireYellow1(FSMMatch):
     def deinit(self):
         self.behavior.robot.io.close_cannon_barrier()
         self.behavior.robot.io.stop_cannon()
+        self.behavior.robot.io.stop_ball_picker()
 
 
 
