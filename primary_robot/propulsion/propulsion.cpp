@@ -27,7 +27,7 @@ void setup()
 {
 	Serial.begin(115200);
 	Odometry.init(0,0,0);
-	Motors.init(&Odometry);
+	Motors.init();
 	setupInterrupts();
 
 	odometryTimer.begin(updateOdometry, UPDATE_PERIOD * 1000000);
