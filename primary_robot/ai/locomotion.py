@@ -24,7 +24,6 @@ class Locomotion:
 
         self.robot.communication.send_message(message)
 
-
     def go_to_orient(self, x, y, theta, speed):
         message = self.robot.communication.sMessageDown()
         message.message_type = self.robot.communication.eTypeDown.TRAJECTORY
@@ -49,6 +48,15 @@ class Locomotion:
     def restart_robot(self):
         message = self.robot.communication.sMessageDown()
         message.message_type = self.robot.communication.eTypeDown.RESTART
+        self.robot.communication.send_message(message)
+
+    def synchronize_position(self):
+        message = self.robot.communication.sMessageDown()
+        message.message_type = self.robot.communication.eTypeDown.REPOSITIONING
+        message.payload = self.robot.communication.sRepositionning()
+        message.payload.x = self.x
+        message.payload.y = self.y
+        message.payload.theta = self.theta
         self.robot.communication.send_message(message)
 
     class Point:
