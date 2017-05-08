@@ -30,16 +30,24 @@ class FSMMatch(Behavior):
     def loop(self):
         time_now = time.time()
         if self.start_time is not None and time_now - self.start_time >= FUNNY_ACTION_TIME:  # Checks time for funny action!
+            if __debug__:
+                print("[FSMMatch] Funny Action time")
             next_state = StateFunnyAction
         elif self.start_time is not None and time_now - self.start_time >= END_MATCH_TIME:
+            if __debug__:
+                print("[FSMMatch] End match")
             next_state = StateEnd
         else:
             next_state = self.state.test()
         if next_state is not None:
+            if __debug__:
+                print("[FSMMatch] Leaving {}, entering {}".format(self.state.__class__.__name__, next_state.__name__))
             self.state.deinit()
             self.state = next_state(self)
 
     def start_match(self):
+        if __debug__:
+            print("[FSMMatch] Match Started")
         self.start_time = time.time()
 
 

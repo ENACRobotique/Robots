@@ -1,6 +1,12 @@
+import sys
+
+import datetime
+
 from communication import *
 from io_robot import *
 from locomotion import *
+
+TRACE_FILE = "log/AI_LOG"+str(datetime.datetime.now()).replace(' ', '')
 
 behaviors = {
     "FSMMatch": 0,
@@ -21,8 +27,7 @@ class Robot(object):
         else:
             raise NotImplementedError("This behavior is not implemented yet !")
 
-
-if __name__ == '__main__':
+def main():
     robot = Robot()
     while True:
         msg = robot.communication.check_message()
@@ -36,3 +41,13 @@ if __name__ == '__main__':
             if msg.type == eTypeUp.RECALAGE_OK:
                 robot.locomotion.recalage_ok()
         robot.behavior.loop()
+
+
+if __name__ == '__main__':
+    if __debug__:
+        with open(TRACE_FILE, 'w') as sys.stdout:
+            main()
+    else:
+        main()
+
+
