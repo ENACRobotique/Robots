@@ -9,11 +9,9 @@ behaviors = {
 
 class Robot(object):
     def __init__(self, behavior=behaviors["FSMMatch"]):
-        self.x = 0
-        self.y = 0
-        self.theta = 0
         self.communication = Communication()
         self.io = IO(self)
+        self.locomotion = Locomotion(self)
         if behavior == behaviors["FSMMatch"]:
             from fsmmatch import FSMMatch
             self.behavior = FSMMatch(self)
