@@ -8,6 +8,7 @@ from behavior import Behavior
 
 FUNNY_ACTION_TIME = 90  # in seconds
 END_MATCH_TIME = 95  # in seconds
+INITIAL_WAIT = 30 #in seconds
 
 #2017 specific
 SMALL_CRATER_COLLECT_DURATION = 5 # in seconds
@@ -106,10 +107,7 @@ class StateColorSelection(FSMState):
             self.state = self.ColorState.IDLE
 
         if self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.OUT:
-            if self.behavior.color == Color.YELLOW:
-                return StateSeesawYellow
-            else:
-                return StateSeesawBlue
+            return StateInitialWait
 
     def deinit(self):
         self.behavior.start_match()
@@ -117,6 +115,21 @@ class StateColorSelection(FSMState):
             self.behavior.robot.locomotion.reposition_robot(2955, 1800, math.pi)
         else:
             self.behavior.robot.locomotion.reposition_robot(45, 1800, 0)
+
+class StateInitialWait(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.start_time = time.time()
+
+    def test(self):
+        if time.time() - self.start_time > INITIAL_WAIT:
+            if self.behavior.color == Color.YELLOW:
+                return StateSeesawYellow
+            else:
+                return StateSeesawBlue
+
+    def deinit(self):
+        pass
 
 
 class StateSeesawYellow(FSMState):
