@@ -442,7 +442,7 @@ class StateGreatCrater(FSMState):
         self.behavior = behavior
         self.stopped = False
         self.ball_picker_start_time = time.time()
-        self.behavior.robot.communication.start_cannon(MAX_CANNON_POWER)
+        self.behavior.robot.io.start_cannon(MAX_CANNON_POWER)
         self.x0 = self.behavior.robot.locomotion.x
         self.behavior.robot.locomotion.go_to_orient(self.x0, 0, 1.5 * math.pi)
 
