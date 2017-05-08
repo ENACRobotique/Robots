@@ -144,10 +144,10 @@ class StateSeesawYellow(FSMState):
         self.behavior.robot.locomotion.go_to_orient(2150, 1820, 1.5*math.pi, 100)
 
     def test(self):
-        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_left") <= STANDARD_SEPARATION_US and not self.stopped:
+        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_left") <= STANDARD_SEPARATION_US and not self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_left") > STANDARD_SEPARATION_US and self.stopped:
+        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_left") > STANDARD_SEPARATION_US and self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
@@ -177,10 +177,10 @@ class StateSeesawBlue(FSMState):
         self.recalage_start_time = 0
 
     def test(self):
-        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_right") <= STANDARD_SEPARATION_US and not self.stopped:
+        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_right") <= STANDARD_SEPARATION_US and not self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_right") > STANDARD_SEPARATION_US and self.stopped:
+        if self.behavior.robot.io.__class__.get_us_distance_by_postion("front_right") > STANDARD_SEPARATION_US and self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
