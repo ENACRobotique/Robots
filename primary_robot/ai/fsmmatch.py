@@ -431,7 +431,7 @@ class StateGoToGreatCrater(FSMState):
             return StateGreatCrater
         if self.y0 - self.behavior.robot.locomotion.y > CANNON_AUGMENTATION_DISTANCE_STEP:
             self.cannon_power = min(self.cannon_power + 5, MAX_CANNON_POWER)
-            self.behavior.robot.communication.start_cannon(self.cannon_power)
+            self.behavior.robot.io.start_cannon(self.cannon_power)
 
     def deinit(self):
         pass
