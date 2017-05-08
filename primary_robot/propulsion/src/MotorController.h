@@ -41,7 +41,7 @@ public:
 	MotorController();
 	virtual ~MotorController();
 
-	void init(OdometryController* odometry);
+	void init();
 	void computeParameters(double target, MovementType, double speed = MAX_SPEED);
 	void controlMotors();
 	bool isAtDestination();
@@ -56,8 +56,6 @@ protected:
 	long getDecelConsigne(double t);
 	void setAccel();
 
-
-
 private:
 	double _speed;
 	double _t1, _t2, _tFinal, _t0;
@@ -69,8 +67,6 @@ private:
 	MovementPhase _movementPhase;
 
 	int _intErrorLenght, _intErrorTheta;
-
-	OdometryController* _odometry;
 
 };
 extern MotorController Motors;

@@ -20,7 +20,6 @@ MotorController::MotorController() {
 	_currentMovementType = Straight;
 	_currentTime = 0;
 	_intErrorLenght = _intErrorTheta = 0;
-	_odometry = NULL;
 	_movementPhase = Stopped;
 	_accel = 0;
 }
@@ -29,7 +28,7 @@ MotorController::~MotorController() {
 	// TODO Auto-generated destructor stub
 }
 
-void MotorController::init(OdometryController* odometry) {
+void MotorController::init() {
 
 	pinMode(DIR_LEFT, OUTPUT);
 	pinMode(DIR_RIGHT, OUTPUT);
@@ -42,12 +41,11 @@ void MotorController::init(OdometryController* odometry) {
 
 	analogWrite(PWM_LEFT, 0);
 	analogWrite(PWM_RIGHT, 0);
-	_odometry = odometry;
 }
 
 void MotorController::computeParameters(double target, MovementType movementType, double speed) {
 	_t0 = millis()/1000.0;
-	_odometry->razIncs();
+	Odometry.razIncs();
 	long lTarget = 0;
 
 	switch (movementType) {
@@ -82,14 +80,14 @@ void MotorController::computeParameters(double target, MovementType movementType
 }
 
 void MotorController::controlMotors() {
-	int speedRobot = (_odometry->getSpeedLeft() + _odometry->getSpeedRight())/2;
+	int speedRobot = (Odometry.getSpeedLeft() + Odometry.getSpeedRight())/2;
 	long lenCons = getLenghtConsigne();
-	int lenError = lenCons - _odometry->getLength();
+	int lenError = lenCons - Odometry.getLength();
 	_intErrorLenght += lenError;
 	double lenghtCommand =  lenError * KP_DIST + _intErrorLenght*KI_DIST - KD_DIST * speedRobot;
 
-	int orientation = _odometry->getRightAcc() - _odometry->getLeftAcc();
-	int orientationSpeed = _odometry->getSpeedRight() - _odometry->getSpeedLeft();
+	int orientation = Odometry.getRightAcc() - Odometry.getLeftAcc();
+	int orientationSpeed = Odometry.getSpeedRight() - Odometry.getSpeedLeft();
 	long thetaCons = getThetaConsigne();
 	int thetaError = thetaCons - orientation;
 	_intErrorTheta += thetaError;
