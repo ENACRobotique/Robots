@@ -72,9 +72,9 @@ class IO(object):
         IN = "in"
         OUT = "out"
 
-    class Color(Enum):
-        YELLOW = "yellow"
-        BLUE = "blue"
+    class ButtonState(Enum):
+        PRESSED = "pressed"
+        RELEASED = "released"
 
     class BallPickerState(Enum):
         STARTED = "started"
@@ -178,9 +178,9 @@ class IO(object):
 
     def _read_switch(self, channel):
         if GPIO.input(channel):
-            self._color = self.Color.BLUE
+            self._color = self.ButtonState.RELEASED
         else:
-            self._color = self.Color.YELLOW
+            self._color = self.ButtonState.PRESSED
 
 
 class USReader(threading.Thread):
