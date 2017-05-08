@@ -8,7 +8,7 @@ from behavior import Behavior
 
 FUNNY_ACTION_TIME = 92  # in seconds
 END_MATCH_TIME = 95  # in seconds
-INITIAL_WAIT = 30 #in seconds
+INITIAL_WAIT = 35 #in seconds
 
 #2017 specific
 SMALL_CRATER_COLLECT_DURATION = 4  # in seconds
@@ -20,7 +20,7 @@ AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
 FIRE1_RECALAGE_MAX_TIME = 5  # in sec
 FIRE1_CANNON_POWER = 45  # between 0 and 255
 MAX_CANNON_POWER = 75  # between 0 and 255
-CANNON_AUGMENTATION_DISTANCE_STEP = 5  # in cm
+CANNON_AUGMENTATION_DISTANCE_STEP = 50  # in mm
 CANNON_AUGMENTATION_POWER_STEP = 5  # between 0 and 255
 
 
@@ -429,9 +429,10 @@ class StateGoToGreatCrater(FSMState):
 
         if self.behavior.robot.locomotion.is_trajectory_finished:
             return StateGreatCrater
-        if self.y0 - self.behavior.robot.locomotion.y > CANNON_AUGMENTATION_DISTANCE_STEP:
+        if abs(self.y0 - self.behavior.robot.locomotion.y) > CANNON_AUGMENTATION_DISTANCE_STEP:
             self.cannon_power = min(self.cannon_power + 5, MAX_CANNON_POWER)
             self.behavior.robot.io.start_cannon(self.cannon_power)
+            self.y0 = self.behavior.robot.locomotion.y
 
     def deinit(self):
         pass
@@ -444,7 +445,7 @@ class StateGreatCrater(FSMState):
         self.ball_picker_start_time = time.time()
         self.behavior.robot.io.start_cannon(MAX_CANNON_POWER)
         self.x0 = self.behavior.robot.locomotion.x
-        self.behavior.robot.locomotion.go_to_orient(self.x0, 0, 1.5 * math.pi, 70)
+        self.behavior.robot.locomotion.go_to_orient(self.x0, 10, 1.5 * math.pi, 70)
         self.behavior.robot.locomotion.go_to_orient(self.x0, 350, 1.5 * math.pi, -70)
 
     def test(self):
