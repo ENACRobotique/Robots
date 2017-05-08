@@ -45,7 +45,8 @@ def main():
 
 if __name__ == '__main__':
     if __debug__:
-        with open(TRACE_FILE, 'w') as sys.stdout:
+        #with open(TRACE_FILE, 'w') as sys.stdout:
+            sys.stdout = open(TRACE_FILE, "w")
             main()
     else:
         main()
