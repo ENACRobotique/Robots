@@ -19,8 +19,6 @@ TrajectoryManagerClass::TrajectoryManagerClass() {
 	_readIndex = 0;
 	_writeIndex = 0;
 	_trajectoryStep = InitialRotationStep;
-	_prevStep = Stop;
-
 }
 
 TrajectoryManagerClass::~TrajectoryManagerClass() {
@@ -73,7 +71,6 @@ void TrajectoryManagerClass::computeNextStep(){
 	Serial.println(_trajectoryStep);
 	switch (_trajectoryStep){
 		case Stop:
-			//Motors.computeParameters(0, Straight);
 			break;
 		case InitialRotationStep:
 			value = atan2(dy, dx) - Odometry.getThetaRad();
@@ -101,15 +98,10 @@ void TrajectoryManagerClass::computeNextStep(){
 }
 
 void TrajectoryManagerClass::stop(){
-	_prevStep = _trajectoryStep;
 	_trajectoryStep = Stop;
 	Motors.computeParameters(0, Straight);
-	Serial.println(_prevStep);
 }
 
 void TrajectoryManagerClass::resume(){
-	_trajectoryStep = _prevStep;
-	_prevStep = Stop;
 	_trajectoryStep = InitialRotationStep;
-	Serial.println(_trajectoryStep);
 }
