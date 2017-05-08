@@ -139,7 +139,7 @@ class IO(object):
         #FIXME : Satan comes a bit closer to our world
         #FIXME : (no really it should be fixed by defining own structure to this action)
         down_msg.payload = self.robot.communication.sTrajectory()
-        down_msg.payload.speed = speed + 128 #Hack to set the speed between 0-255 (and not -128, 127)
+        down_msg.payload.speed = speed - 128 #Hack to set the speed between 0-255 (and not -128, 127)
 
         self.robot.communication.send_message(down_msg)
         self.cannon_state = self.CannonState.FIRING
