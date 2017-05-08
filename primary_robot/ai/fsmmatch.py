@@ -1,10 +1,18 @@
+from enum import Enum
+
 from behavior import Behavior
+
+
+class Color(Enum):
+    BLUE = "blue"
+    YELLOW = "yellow"
 
 
 class FSMMatch(Behavior):
     def __init__(self, robot):
-        self.state = StateInit(robot)
+        self.state = StateInit(self)
         self.robot = robot
+        self.color = None
 
     def loop(self):
         next_state = self.state.test()
@@ -14,7 +22,7 @@ class FSMMatch(Behavior):
 
 
 class FSMState:
-    def __init__(self, robot):
+    def __init__(self, behavior):
         raise NotImplementedError("this state is not defined yet")
 
     def test(self):
@@ -25,11 +33,41 @@ class FSMState:
 
 
 class StateInit(FSMState):
-    def __init__(self, robot):
+    class ColorState(Enum):
+        IDLE = "idle"
+        PRESSED = "pressed"
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.color = Color.BLUE
+        self.state = self.ColorState.IDLE
+        self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.BLUE)
+
+    def test(self):
+        if self.state == self.ColorState.IDLE and self.behavior.robot.io.button_state == self.behavior.robot.io.ButtonState.PRESSED:
+            if self.behavior.color == Color.YELLOW:
+                self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.BLUE)
+                self.behavior.color = Color.BLUE
+            else:
+                self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.YELLOW)
+                self.behavior.color = Color.YELLOW
+            self.state = self.ColorState.PRESSED
+
+        if self.state == self.ColorState.PRESSED and self.behavior.robot.io.button_state == self.behavior.robot.io.ButtonState.RELEASED:
+            self.state = self.ColorState.IDLE
+
+        if self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.OUT:
+            return StateTraj1
+
+    def deinit(self):
+        pass
+
+class StateTraj1(FSMState):
+    def deinit(self):
         pass
 
     def test(self):
         pass
 
-    def deinit(self):
+    def __init__(self, behavior):
         pass
