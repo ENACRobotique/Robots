@@ -179,7 +179,7 @@ class StateTrajFirePositionYellow1(FSMState):
             self.wait_for_repositionning = True
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            self.behavior.robot.locomotion.reposition_robot(2850, 1618)
+            self.behavior.robot.locomotion.reposition_robot(2850, 1618, 3 * math.pi / 4)
             return StateFireYellow1
 
     def deinit(self):
