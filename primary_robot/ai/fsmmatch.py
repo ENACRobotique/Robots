@@ -17,11 +17,11 @@ GREAT_CRATER_COLLECT_DURATION = 2  # in seconds
 STANDARD_SEPARATION_US = 20  # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
 AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
-FIRE1_RECALAGE_MAX_TIME = 5  # in sec
+FIRE1_RECALAGE_MAX_TIME = 3  # in sec
 FIRE1_CANNON_POWER = 45  # between 0 and 255
-MAX_CANNON_POWER = 75  # between 0 and 255
+MAX_CANNON_POWER = 105  # between 0 and 255
 CANNON_AUGMENTATION_DISTANCE_STEP = 50  # in mm
-CANNON_AUGMENTATION_POWER_STEP = 5  # between 0 and 255
+CANNON_AUGMENTATION_POWER_STEP = 7  # between 0 and 255
 
 
 class Color(Enum):
@@ -445,7 +445,7 @@ class StateGreatCrater(FSMState):
         self.ball_picker_start_time = time.time()
         self.behavior.robot.io.start_cannon(MAX_CANNON_POWER)
         self.x0 = self.behavior.robot.locomotion.x
-        self.behavior.robot.locomotion.go_to_orient(self.x0, 10, 1.5 * math.pi, 70)
+        self.behavior.robot.locomotion.go_to_orient(self.x0, 50, 1.5 * math.pi, 70)
         self.behavior.robot.locomotion.go_to_orient(self.x0, 350, 1.5 * math.pi, -70)
 
     def test(self):
