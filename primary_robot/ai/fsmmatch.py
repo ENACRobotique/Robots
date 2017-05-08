@@ -388,7 +388,7 @@ class StateTrajFirePositionBlue1(FSMState):
         pass
 
 
-class StateFire1(FSMMatch):
+class StateFire1(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.behavior.robot.io.start_cannon(FIRE1_CANNON_POWER)
