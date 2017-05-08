@@ -1,6 +1,8 @@
 import sys
 
 import datetime
+import builtins
+import time
 
 from communication import *
 from io_robot import *
@@ -17,6 +19,7 @@ behaviors = {
 class Robot(object):
     def __init__(self, behavior=behaviors["FSMMatch"]):
         self.communication = Communication()
+        self.reset_teensy()
         self.io = IO(self)
         self.locomotion = Locomotion(self)
         if behavior == behaviors["FSMMatch"]:
@@ -26,6 +29,13 @@ class Robot(object):
             raise NotImplementedError("This behavior is not implemented yet !")
         else:
             raise NotImplementedError("This behavior is not implemented yet !")
+    
+    def reset_teensy(self):
+        message = self.communication.sMessageDown()
+        message.message_type = self.communication.eTypeDown.RESET
+        self.communication.send_message(message)
+        time.sleep(3)
+
 
 def main():
     robot = Robot()
@@ -45,8 +55,7 @@ def main():
 
 if __name__ == '__main__':
     if __debug__:
-        #with open(TRACE_FILE, 'w') as sys.stdout:
-            sys.stdout = open(TRACE_FILE, "w")
+        with open(TRACE_FILE, 'w') as sys.stdout:
             main()
     else:
         main()
