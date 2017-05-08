@@ -5,11 +5,38 @@ class Locomotion:
         self.y = None
         self.theta = None
 
-    def follow_trajectory(self, points, speed):
-        pass
+    def follow_trajectory(self, points, theta, speed):
+        if len(points) > 10:
+            raise AttributeError("Too much points given -- Message Size restriction")
 
-    def go_to_orient(self, x, y, theta, point, speed):
-        pass
+        message = self.robot.communication.sMessageDown()
+        message.message_type = self.robot.communication.eTypeDown.TRAJECTORY
+        message.payload = self.robot.communication.sTrajectory()
+        message.payload.nb_traj = len(points)
+        message.payload.speed = speed
+        message.payload.theta_final = theta
+        message.payload.element = []
+        for pt in points:
+            traj_elt = self.robot.communication.sTrajElement()
+            traj_elt.x = pt.x
+            traj_elt.y = pt.y
+            message.payload.element.append(traj_elt)
+
+        self.robot.communication.send_message(message)
+
+
+    def go_to_orient(self, x, y, theta, speed):
+        message = self.robot.communication.sMessageDown()
+        message.message_type = self.robot.communication.eTypeDown.TRAJECTORY
+        message.payload = self.robot.communication.sTrajectory()
+        message.payload.nb_traj = 1
+        message.payload.speed = speed
+        message.payload.theta_final = theta
+        traj_elt = self.robot.communication.sTrajElement()
+        traj_elt.x = x
+        traj_elt.y = y
+        message.payload.element = [traj_elt]
+        self.robot.communication.send_message(message)
 
     def go_to_orient(self, point, speed):
         self.go_to_orient(point.x, point.y, point.theta, speed)
