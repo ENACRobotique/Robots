@@ -18,7 +18,6 @@ behaviors = {
 class Robot(object):
     def __init__(self, behavior=behaviors["FSMMatch"]):
         self.communication = Communication()
-        self.reset_teensy()
         self.io = IO(self)
         self.locomotion = Locomotion(self)
         if behavior == behaviors["FSMMatch"]:
