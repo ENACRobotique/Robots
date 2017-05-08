@@ -36,6 +36,7 @@ public:
 	void resume();
 private:
 	TrajectoryStep _trajectoryStep;
+	TrajectoryStep _prevStep;
 	Point3D _objectives[NB_POINTS_MAX];
 	int _readIndex;
 	int _writeIndex;
