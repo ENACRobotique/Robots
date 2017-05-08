@@ -1,10 +1,8 @@
-import communication
+import robot
+import time
 
-comm = communication.Communication()
-msgDown = communication.sMessageDown()
+robot = robot.Robot()
 while 1:
-    type_int = input("Msg type ?")
-    msgDown.message_type = communication.eTypeDown(int(type_int))
-    print("Sending...")
-    comm.send_message(msgDown)
-    print("Sent !")
+    input("test")
+    print("Front : " + str(robot.io.front_distance))
+    print("Rear : " + str(robot.io.rear_distance))

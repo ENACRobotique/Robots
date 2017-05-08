@@ -1,5 +1,5 @@
 from communication import *
-from io import *
+from io_robot import *
 
 behaviors = {
     "FSMMatch": 0,
@@ -7,7 +7,7 @@ behaviors = {
 }
 
 
-class Robot:
+class Robot(object):
     def __init__(self, behavior=behaviors["FSMMatch"]):
         self.x = 0
         self.y = 0
@@ -21,6 +21,7 @@ class Robot:
             raise NotImplementedError("This behavior is not implemented yet !")
         else:
             raise NotImplementedError("This behavior is not implemented yet !")
+
 
 if __name__ == '__main__':
     robot = Robot()
