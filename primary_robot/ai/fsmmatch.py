@@ -6,7 +6,7 @@ import math
 
 from behavior import Behavior
 
-FUNNY_ACTION_TIME = 90  # in seconds
+FUNNY_ACTION_TIME = 92  # in seconds
 END_MATCH_TIME = 95  # in seconds
 INITIAL_WAIT = 30 #in seconds
 
