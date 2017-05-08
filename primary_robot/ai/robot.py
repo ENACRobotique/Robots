@@ -1,5 +1,6 @@
 from communication import *
 from io import *
+from locomotion import *
 
 behaviors = {
     "FSMMatch": 0,
@@ -11,6 +12,7 @@ class Robot:
     def __init__(self, behavior=behaviors["FSMMatch"]):
         self.communication = Communication()
         self.io = IO(self)
+        self.locomotion = Locomotion(self)
         if behavior == behaviors["FSMMatch"]:
             from fsmmatch import FSMMatch
             self.behavior = FSMMatch(self)
@@ -25,7 +27,7 @@ if __name__ == '__main__':
         msg = robot.communication.check_message()
         if msg is not None:
             if msg.type == eTypeUp.POSITION or msg.type == eTypeUp.POINT_REACHED:
-                robot.communication.x = msg.x
-                robot.communication.y = msg.y
-                robot.communication.theta = msg.theta
+                robot.locomotion.x = msg.x
+                robot.locomotion.y = msg.y
+                robot.locomotion.theta = msg.theta
         robot.behavior.loop()
