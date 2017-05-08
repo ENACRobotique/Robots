@@ -16,7 +16,7 @@ SMALL_CRATER_FIRE_DURATION = 8 # in seconds
 STANDARD_SEPARATION_US = 20 # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
 AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
-FIRE1_RECALAGE_MAX_TIME = 7  # in sec
+FIRE1_RECALAGE_MAX_TIME = 5  # in sec
 
 class Color(Enum):
     BLUE = "blue"
@@ -254,7 +254,7 @@ class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(2150, 1500, 0, 50)
+        self.behavior.robot.locomotion.go_to_orient(2150, 1450, 0, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
@@ -312,16 +312,16 @@ class StateTrajFirePositionYellow1(FSMState):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and not self.stopped and not self.wait_for_repositionning:
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
         # Active back us while recalage
-        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
-            self.behavior.robot.locomotion.stop_robot()
-            self.stopped = True
-        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
-            self.behavior.robot.locomotion.restart_robot()
-            self.stopped = False
+        #if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.stop_robot()
+        #    self.stopped = True
+        #if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.restart_robot()
+        #    self.stopped = False
 
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
@@ -358,12 +358,12 @@ class StateTrajFirePositionBlue1(FSMState):
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
         # Active back us while recalage
-        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
-            self.behavior.robot.locomotion.stop_robot()
-            self.stopped = True
-        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
-            self.behavior.robot.locomotion.restart_robot()
-            self.stopped = False
+        #if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.stop_robot()
+        #    self.stopped = True
+        #if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.restart_robot()
+        #    self.stopped = False
 
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
