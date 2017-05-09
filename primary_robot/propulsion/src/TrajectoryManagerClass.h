@@ -28,7 +28,6 @@ public:
 	void computeNextStep();
 	void stop();
 	void resume();
-	void readMessage(sMessageDown msg);
 private:
 	TrajectoryStep _trajectoryStep;
 	Point3D _objectives[NB_POINTS_MAX];

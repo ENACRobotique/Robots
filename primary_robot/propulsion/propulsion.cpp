@@ -6,6 +6,7 @@
 #include "src/TrajectoryManagerClass.h"
 #include "src/interruptFunctions.h"
 #include "src/params.h"
+#include "src/messageHandlers.h"
 
 unsigned long time = 0;
 char ledState = 0;
@@ -13,6 +14,7 @@ volatile long acc = 0;
 sMessageDown msgDown;
 sMessageUp msgUp;
 IntervalTimer odometryTimer;
+
 
 
 void updateOdometry() {
@@ -61,6 +63,7 @@ void loop()
 	if (message_recieve(&msgDown) == 1){
 		Serial.print("\nJ'ai un message ! de type ");
 		Serial.println(msgDown.type);
+		handleMessage(msgDown);
 	}
 	if(millis() - time > 500) {
 		digitalWrite(13, !ledState);

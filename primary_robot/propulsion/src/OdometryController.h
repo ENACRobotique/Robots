@@ -63,6 +63,18 @@ public:
 		return _speedRight;
 	}
 
+	void setPosX(double posX) {
+		_posX = posX;
+	}
+
+	void setPosY(double posY) {
+		_posY = posY;
+	}
+
+	void setThetaRad(double thetaRad) {
+		_thetaRad = thetaRad;
+	}
+
 private:
 	double _posX;
 	double _posY;

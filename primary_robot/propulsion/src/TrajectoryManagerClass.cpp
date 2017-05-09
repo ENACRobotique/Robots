@@ -105,36 +105,3 @@ void TrajectoryManagerClass::stop(){
 void TrajectoryManagerClass::resume(){
 	_trajectoryStep = InitialRotationStep;
 }
-
-void TrajectoryManagerClass::readMessage(sMessageDown msg){
-	eTypeDown msgType = msg.type;
-	Point3D point;
-	int ret;
-	switch (msgType){
-		case TRAJECTOIRE:
-			for (int i=0; i < msg.traj.nb_trajectories; i++){
-				if (i == msg.traj.nb_trajectories){ //Si c'est le dernier point,  careAboutTheta
-					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, msg.traj.theta_final);
-				} else {
-					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y);
-				}
-				addPoint(point, &ret);
-				if (ret != 0){ // Buffer de trajectoire plein
-					Serial.print("Tableau plein?");
-				}
-			}
-			break;
-		case STOP:
-			//TODO : Stop
-			break;
-		case RESTART:
-			//TODO : Restart
-			break;
-		case RECALAGE:
-			//TODO : Recalage
-			break;
-		default:
-			//this message should have been processed. Why are we here ?
-			break;
-	}
-}
