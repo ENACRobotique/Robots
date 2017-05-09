@@ -1,5 +1,5 @@
 #include "state_hardinit.h"
-
+#include "DynamixelSerial.h"
 #include "state_types.h"
 #include "../params.h"
 #include "Arduino.h"
@@ -58,6 +58,17 @@ void initHard(sState *prev){
 
 	canne_servo.attach(PIN_CANNE_A_PECHE);
 	canne_servo.write(CANNE_VERTICAL);
+
+	//init DYNAMIXEL
+	//initialisation => hard init
+	Dynamixel.begin(1000000,PIN_CTRL_DYNAMIX);  // Inicialize the servo at 1Mbps and Pin Control 2//action de prévention:
+	Dynamixel.setTempLimit(NUM_DYNAMIXEL,80);//max 80°
+	Dynamixel.setVoltageLimit(NUM_DYNAMIXEL,65,160);//6.5v=> 16v
+	Dynamixel.setMaxTorque(NUM_DYNAMIXEL,512);//50%
+	//action concrète
+	Dynamixel.ledStatus(NUM_DYNAMIXEL,ON);
+
+	//Init servo
 
 #ifdef DEBUG
     Serial.println(F("fin init matérielles"));

@@ -25,6 +25,7 @@
 #define TRIKE
 #define PIN_SERVO_DIR 5
 #define NB_MOTORS 1
+#define PIN_CTRL_DYNAMIX 2
 #define PIN_MOTOR1_PWM 6
 #define PIN_MOTOR1_DIR 7
 #define PIN_ODO1_INT 2//odometer1, interruption pin
@@ -74,6 +75,8 @@
 #define CREMA_OUT 169
 #define CREMA_IN 30
 #define CREMA_VERTICAL 90
+
+#define NUM_DYNAMIXEL 1
 
 
 #define DEBUG

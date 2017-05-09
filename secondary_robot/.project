@@ -33,6 +33,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>arduinolib/DynamixelSerial</name>
+			<type>2</type>
+			<location>/home/ness/club_robot/code/static/core/arduino/libraries/DynamixelSerial</location>
+		</link>
+		<link>
 			<name>arduinolib/Servo</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/static/core/arduino/libraries/Servo</locationURI>
