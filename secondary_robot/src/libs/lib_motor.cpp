@@ -34,7 +34,7 @@ void motorInitHard(int pinDir[],int pinPWM[]){
 }
 #if NB_MOTORS == 1
 int Kp[NB_MOTORS] ={11};
-int Ki[NB_MOTORS] = {2}; // >>2
+int Ki[NB_MOTORS] = {4}; // >>2
 #elif NB_MOTORS == 2
 int Kp[NB_MOTORS] ={18,18}; // >>2
 int Ki[NB_MOTORS] = {5,5}; // >>2
@@ -60,30 +60,30 @@ void motAsser(){
 				eps = motCurrentCon[i] - read;//odoRead is negative if the robot is going forward "red side"
 
 				//compute error integral
-				intEps[i]= CLAMP( -(64<<5) ,intEps[i]+eps, (64<<5));
+				intEps[i]= CLAMP( -(1<<11) ,intEps[i]+eps, (1<<11));
 				//compute command
 				if(motCurrentCon[i]==0){
 				_motCmd[i]=0;
 				}
 				else{
-					_motCmd[i]=  ((Kp[i]*eps)>>4) + ((Ki[i]*intEps[i])>>5);
+					_motCmd[i]=  ((Kp[i]*eps)>>4) + ((Ki[i]*intEps[i])>>6);
 				}
 
 	#ifdef DEBUG_MOTOR
 	Serial.print(_motCon[i]);
-	Serial.print("\t");
+	Serial.print(",\t");
 	Serial.print(motCurrentCon[i]);
-	Serial.print("\t");
+	Serial.print(",\t");
 	Serial.print(read);
-	Serial.print("\t");
+	Serial.print(",\t");
 	Serial.print(_motCmd[i]);
-	Serial.print("\t");
+	Serial.print(",\t");
 	Serial.print(CLAMP(0,abs(_motCmd[i]),254));
-	Serial.print("\t");
+	Serial.print(",\t");
 	Serial.print(eps);
-	Serial.print("\t");
+	Serial.print(",\t");
 	Serial.print(intEps[i]);
-	Serial.print("\t");
+	Serial.print(",\t");
 	Serial.println(millis());
 	#endif
 				if(_motCmd[i]>=0) digitalWrite(_motPinDir[i],LOW);

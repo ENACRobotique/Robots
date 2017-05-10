@@ -59,6 +59,7 @@ void initHard(sState *prev){
 	canne_servo.attach(PIN_CANNE_A_PECHE);
 	canne_servo.write(CANNE_VERTICAL);
 
+#ifdef DYN_USE
 	//init DYNAMIXEL
 	//initialisation => hard init
 	Dynamixel.begin(1000000,PIN_CTRL_DYNAMIX);  // Inicialize the servo at 1Mbps and Pin Control 2//action de prévention:
@@ -67,7 +68,7 @@ void initHard(sState *prev){
 	Dynamixel.setMaxTorque(NUM_DYNAMIXEL,512);//50%
 	//action concrète
 	Dynamixel.ledStatus(NUM_DYNAMIXEL,ON);
-
+#endif
 	//Init servo
 
 #ifdef DEBUG

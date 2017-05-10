@@ -44,8 +44,6 @@ void move(int speed,int angle){
 #else
 #ifdef TRIKE
     motSetCon(&speed);
-    Serial.print(F("\tSpeed  !"));
-    Serial.println(speed);
     _dirServo.write(CLAMP(MIN_ANGLE , angle+_servo_zero, MAX_ANGLE));
 #endif
 #endif

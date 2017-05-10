@@ -25,7 +25,7 @@
 #define TRIKE
 #define PIN_SERVO_DIR 5
 #define NB_MOTORS 1
-#define PIN_CTRL_DYNAMIX 2
+
 #define PIN_MOTOR1_PWM 6
 #define PIN_MOTOR1_DIR 7
 #define PIN_ODO1_INT 2//odometer1, interruption pin
@@ -45,7 +45,7 @@
 #define TIME_MATCH_STOP 94000   //in ms  en théorie 90s mais on prend un peu de marge
 #define TIME_FOR_FUNNY_ACTION 90000 // the beginning of the funny action
 
-#define ANGLE_ZERO 88//108
+#define ANGLE_ZERO 97 //88
 
 //tirette related infos
 #define TIRETTE_IN HIGH
@@ -76,8 +76,11 @@
 #define CREMA_IN 30
 #define CREMA_VERTICAL 90
 
+//#define DYN_USE
+#ifdef DYN_USE
+#define PIN_CTRL_DYNAMIX 2
 #define NUM_DYNAMIXEL 1
-
+#endif
 
 #define DEBUG
 

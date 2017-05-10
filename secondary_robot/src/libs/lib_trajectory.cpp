@@ -71,8 +71,10 @@ int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsi
         *prev_millis=millis();
         *pausetime=0;
         move(elt.speed,elt.teta);
+#ifdef DEBUG
         Serial.println(elt.duration);
         Serial.println(elt.teta);
+#endif
     }
     if ( elt.teta==0 && elt.duration==0 && elt.speed==0) {
         *i=0;
