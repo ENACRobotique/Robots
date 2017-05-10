@@ -10,9 +10,9 @@ class Color(Enum):
 
 class FSMMatch(Behavior):
     def __init__(self, robot):
-        self.state = StateInit(self)
         self.robot = robot
         self.color = None
+        self.state = StateInit(self)
 
     def loop(self):
         next_state = self.state.test()

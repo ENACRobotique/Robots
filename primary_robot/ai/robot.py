@@ -1,5 +1,6 @@
 from communication import *
 from io_robot import *
+from locomotion import *
 
 behaviors = {
     "FSMMatch": 0,
