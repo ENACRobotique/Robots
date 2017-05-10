@@ -14,7 +14,7 @@
 #define FACTOR_HEADING_ASSERV 1.5
 
 int _backFromPause = 0;
-
+/*
 int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
 	static int teta0 = headingGetCon();
 	int dt = millis() - *prev_millis -*pausetime;    //time since start of the current traj element
@@ -48,14 +48,14 @@ int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, uns
     return 0;
 }
 
-
+*/
 int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
     trajElem elt;/* = tab[*i];*/
     memcpy_P(&elt,&(tab[*i]),sizeof(trajElem));
 	if (!(*prev_millis)){
     	*prev_millis=millis();
         move(elt.speed,elt.teta);
-        Serial.println(elt.duration);
+        Serial.println(elt.value);
         Serial.println(elt.teta);
     }
 
@@ -64,19 +64,27 @@ int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsi
     	move(elt.speed,elt.teta);
 
     }
-
-    if ( (millis()-*prev_millis-*pausetime)>elt.duration ) {
+    long dist=readAccumulators(0);
+    if((elt.mode==DISTANCE &&( abs(dist)>abs(elt.value*1036.269) ))||
+       (elt.mode==TEMPS &&((millis()-*prev_millis-*pausetime)>(unsigned long)elt.value )) ){
         (*i)++;
+        razAccumulators();
         memcpy_P(&elt,&(tab[*i]),sizeof(trajElem));
         *prev_millis=millis();
         *pausetime=0;
-        move(elt.speed,elt.teta);
+        if(elt.value>0)
+        {
+        	move( elt.speed,elt.teta);
+        }
+        else{
+        	move(-elt.speed,elt.teta);
+        }
 #ifdef DEBUG
-        Serial.println(elt.duration);
+        Serial.println(elt.value);
         Serial.println(elt.teta);
 #endif
     }
-    if ( elt.teta==0 && elt.duration==0 && elt.speed==0) {
+    if ( elt.teta==0 && elt.value==0 && elt.speed==0) {
         *i=0;
         *prev_millis=0;
         return 1;

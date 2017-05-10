@@ -23,5 +23,8 @@ void odoDeinit();
 //returns the (signed) number of increments between now and the previous call to odo_read, and resets this number
 int odoRead(int index_motor);
 
+//
+void razAccumulators();
+long readAccumulators(int motor_index);
 
 #endif /* LIB_ODO_H_ */

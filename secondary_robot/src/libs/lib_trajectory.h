@@ -12,11 +12,16 @@
 
 #include "state_types.h"
 
+typedef  enum {
+	DISTANCE,
+	TEMPS,
+}traj_mode;
 
 typedef struct {
     int speed;      // speed/1.77 = real_speed in cm/s
     int teta;      //in ° (degrees)
-    unsigned int duration;   //in ms <60s
+    double value;   //in ms <60s
+    traj_mode mode;
 }trajElem;
 
 //pointeur de fonction

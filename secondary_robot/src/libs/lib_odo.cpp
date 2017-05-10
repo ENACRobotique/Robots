@@ -13,11 +13,17 @@
 //globals
 int _pinIntOdo[NB_MOTORS],_pinSenOdo[NB_MOTORS];  //interruption pin, sense pin
 volatile int _nbIncOdo[NB_MOTORS]={0};   //number of increments (signed)
-
+volatile long _nbIncTraj [NB_MOTORS]={0}; //accumule increments
 
 void odoIsr1(){
-    if (!digitalRead(_pinIntOdo[0])) _nbIncOdo[0] -= (digitalRead(_pinSenOdo[0])<<1) -1;
-    else _nbIncOdo[0] += (digitalRead(_pinSenOdo[0])<<1) -1;
+    if (!digitalRead(_pinIntOdo[0])){
+    	_nbIncOdo[0] -= (digitalRead(_pinSenOdo[0])<<1) -1;
+    	_nbIncTraj[0]-= (digitalRead(_pinSenOdo[0])<<1) -1;
+    }
+    else{
+    	_nbIncOdo[0] += (digitalRead(_pinSenOdo[0])<<1) -1;
+    	_nbIncTraj[0]+= (digitalRead(_pinSenOdo[0])<<1) -1;
+    }
 }
 
 #if NB_MOTORS > 1
@@ -58,3 +64,16 @@ int odoRead(int motor_index){
     _nbIncOdo[motor_index]=0;
     return tmp;
 }
+
+void razAccumulators(){
+	for (int i = 0; i < NB_MOTORS; ++i) {
+		_nbIncTraj[i]=0;
+	}
+}
+
+long readAccumulators(int motor_index){
+	return _nbIncTraj[motor_index];
+}
+
+
+
