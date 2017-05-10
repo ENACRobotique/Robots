@@ -28,13 +28,8 @@ if __name__ == '__main__':
         msg = robot.communication.check_message()
         if msg is not None:
             if msg.type == eTypeUp.POSITION or msg.type == eTypeUp.POINT_REACHED:
-<<<<<<< HEAD
-                robot.x = msg.x
-                robot.y = msg.y
-                robot.theta = msg.theta
-=======
                 robot.locomotion.x = msg.x
                 robot.locomotion.y = msg.y
                 robot.locomotion.theta = msg.theta
->>>>>>> dev_locomotion
+
         robot.behavior.loop()
