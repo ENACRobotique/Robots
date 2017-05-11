@@ -22,14 +22,14 @@ class Robot(object):
             raise NotImplementedError("This behavior is not implemented yet !")
 
 
-if __name__ == '__main__':
-    robot = Robot()
-    while True:
-        msg = robot.communication.check_message()
-        if msg is not None:
-            if msg.type == eTypeUp.POSITION or msg.type == eTypeUp.POINT_REACHED:
-                robot.locomotion.x = msg.x
-                robot.locomotion.y = msg.y
-                robot.locomotion.theta = msg.theta
-
-        robot.behavior.loop()
+# if __name__ == '__main__':
+#     robot = Robot()
+#     while True:
+#         msg = robot.communication.check_message()
+#         if msg is not None:
+#             if msg.type == eTypeUp.POSITION or msg.type == eTypeUp.POINT_REACHED:
+#                 robot.locomotion.x = msg.x
+#                 robot.locomotion.y = msg.y
+#                 robot.locomotion.theta = msg.theta
+#
+#         robot.behavior.loop()
