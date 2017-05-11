@@ -32,6 +32,9 @@
 #define LED_GREEN 37
 #define LED_BLUE 38
 
+
+#define SERVO_ROCKET SERVO4
+
 #define UPDATE_PERIOD 0.02f
 
 #define MM_TO_INC 28.64

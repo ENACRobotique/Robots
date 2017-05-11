@@ -32,6 +32,8 @@ public:
 
 	void setServoPosition(int servo, int position);
 
+	void launchRocket();
+
 	void tiretteRising();
 	void tiretteFalling();
 	void colorRising();
