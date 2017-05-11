@@ -62,6 +62,11 @@ void OdometryController::updatePosition() {
 	_leftAcc += _nbIncLeft;
 	_rightAcc += _nbIncRight;
 
+	/*Serial.print(_leftAcc);
+	Serial.print("\t");
+	Serial.println(_rightAcc);*/
+
+
 	_speedLeft = _nbIncLeft;
 	_speedRight = _nbIncRight;
 

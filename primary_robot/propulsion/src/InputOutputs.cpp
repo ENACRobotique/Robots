@@ -40,9 +40,16 @@ void InputOutputs::init() {
 		_servos[i] = Servo();
 	}
 	_servos[0].attach(SERVO1);
-	_servos[0].attach(SERVO2);
-	_servos[0].attach(SERVO3);
-	_servos[0].attach(SERVO4);
+	_servos[0].write(0);
+	_servos[1].attach(SERVO2);
+	_servos[1].write(0);
+	_servos[2].attach(SERVO3);
+	_servos[2].write(0);
+	_servos[3].attach(SERVO4);
+	_servos[3].write(10);
+
+
+	analogWriteResolution(8);
 }
 
 void InputOutputs::processActions() {
@@ -73,7 +80,23 @@ void InputOutputs::setPickerSpeed(int speed) {
 }
 
 void InputOutputs::setServoPosition(int servoNb, int position) {
-	_servos[servoNb].write(position);
+	int index = -1;
+	switch(servoNb) {
+		case SERVO1:
+			index = 0;
+			break;
+		case SERVO2:
+			index = 1;
+			break;
+		case SERVO3:
+			index = 2;
+			break;
+		case SERVO4:
+			index = 3;
+			break;
+
+	}
+	_servos[index].write(position);
 }
 
 void InputOutputs::tiretteRising() {
@@ -89,6 +112,10 @@ void InputOutputs::tiretteFalling() {
 void InputOutputs::colorRising() {
 	events |= BIT(ColorEvent);
 	events |= BIT(ColorState);
+}
+
+void InputOutputs::launchRocket() {
+	setServoPosition(SERVO_ROCKET, 150);
 }
 
 void InputOutputs::colorFalling() {
