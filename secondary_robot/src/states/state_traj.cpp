@@ -24,10 +24,10 @@ static unsigned long pause_time =0;
 static unsigned long start_pause=0;
 #define TIME_TO_TRAVEL 75000
 
-void initTrajGreenInit(sState *prev)
+void initTrajyellowInit(sState *prev)
 	{
 		#ifdef DEBUG
-			Serial.println(F("debut traj vert (premier trajet)"));
+			Serial.println(F("debut traj yellow (premier trajet)"));
 		#endif
 
 	    if (prev==&sPause)
@@ -48,7 +48,7 @@ void initTrajGreenInit(sState *prev)
 
 	}
 
-void deinitTrajGreenInit(sState *next)
+void deinitTrajyellowInit(sState *next)
 {
 	if (next==&sPause)
 		{
@@ -67,8 +67,8 @@ void deinitTrajGreenInit(sState *next)
 		}
 }
 
-const PROGMEM trajElem start_purple[]={
-//Début trajectoire purple
+const PROGMEM trajElem start_blue[]={
+//Début trajectoire blue
 		/*
 	{0,90,500,TEMPS},
 	{250,90,71.5,DISTANCE},*/
@@ -76,21 +76,31 @@ const PROGMEM trajElem start_purple[]={
 	{0,0,5000,TEMPS},
 	{0,0,0},//Stop
 };
-const PROGMEM trajElem start_green[]={
-	//Début trajectoire green
-	{0,0,500},
-	{-200,0,1200},
-	{0,90,100},
-	{-100,90,3600},
-	{0,0,100},
-	{-300,0,1660},
-	{0,0,500},
-	{200,0,2000},
+const PROGMEM trajElem start_yellow[]={
+	//Début trajectoire yellow
+	{200,0,-13,DISTANCE},
+	QUART_TOUR_NEG,
+	{-300,0,3500,TEMPS},//on fonce dans la tour
+	{300,0,20,DISTANCE},//on s'extrait
+	{0,0,5000,TEMPS},//Dyn action
+
+	{-300,0,3500,TEMPS},//on fonce dans la tour
+	{300,0,20,DISTANCE},//on s'extrait
+	{0,0,5000,TEMPS},//Dyn action
+
+	{-300,0,3500,TEMPS},//on fonce dans la tour
+	{300,0,20,DISTANCE},//on s'extrait
+	{0,0,5000,TEMPS},//Dyn action
+
+	{-300,0,3500,TEMPS},//on fonce dans la tour
+	{300,0,20,DISTANCE},//on s'extrait
+	{0,0,5000,TEMPS},//Dyn action
+
 	{0,0,0},
 };
 
 
-sState *testTrajGreenInit()
+sState *testTrajyellowInit()
 {
 	static int i=0; //indice de la pos ds la traj
     static unsigned long prev_millis=0;
@@ -102,9 +112,9 @@ sState *testTrajGreenInit()
 #endif
 
 	if(!flag_end){
-		if(periodicFunction(start_green,&st_saveTime,&i,&prev_millis)){
+		if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis)){
 			#ifdef DEBUG
-				Serial.println(F("\tTrajet vert 1 fini !"));
+				Serial.println(F("\tTrajet yellow fini !"));
 			#endif
 			flag_end = 1;
 			pause_time=0;
@@ -117,7 +127,7 @@ sState *testTrajGreenInit()
 		static unsigned long start_move=millis();
 
 		#ifdef DEBUG
-				Serial.println(millis()-start_move-pause_time);
+			Serial.println(millis()-start_move-pause_time-TIME_TO_TRAVEL);
 		#endif
 
 		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
@@ -125,13 +135,13 @@ sState *testTrajGreenInit()
 			return &sDead;
 		}
 		/*else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
-			sTrajGreenInit.flag &= ~BIT(E_RADAR);
+			sTrajyellowInit.flag &= ~BIT(E_RADAR);
 			move(-300,0);
 		}
 		else
 		{
 			move(-500,0);
-			sTrajGreenInit.flag |= BIT(E_RADAR);
+			sTrajyellowInit.flag |= BIT(E_RADAR);
 		}*/
 
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
@@ -150,19 +160,19 @@ sState *testTrajGreenInit()
 	return 0;
 }
 
-sState sTrajGreenInit={
+sState sTrajyellowInit={
 	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-	&initTrajGreenInit,
-	&deinitTrajGreenInit,
-	&testTrajGreenInit
+	&initTrajyellowInit,
+	&deinitTrajyellowInit,
+	&testTrajyellowInit
 };
 //*****************************************************************************************************************
 
 
-void initTrajPurple(sState *prev)
+void initTrajblue(sState *prev)
 {
 	#ifdef DEBUG
-		Serial.println(F("debut traj violet"));
+		Serial.println(F("debut traj blue"));
 	#endif
 
 	if (prev==&sPause)
@@ -178,7 +188,7 @@ void initTrajPurple(sState *prev)
 	radarSetLim(limits);
 }
 
-void deinitTrajPurpleInit(sState *next)
+void deinitTrajblueInit(sState *next)
 {
 	if (next==&sPause)
 	{
@@ -198,7 +208,7 @@ void deinitTrajPurpleInit(sState *next)
 
 
 
-sState *testTrajPurple()
+sState *testTrajblue()
 {
 	static int i=0;
     static unsigned long prev_millis=0;
@@ -211,9 +221,9 @@ sState *testTrajPurple()
 #endif
 
 	if(!flag_end){
-		if(periodicFunction(start_purple,&st_saveTime,&i,&prev_millis)){
+		if(periodicFunction(start_blue,&st_saveTime,&i,&prev_millis)){
 			#ifdef DEBUG
-				Serial.println(F("\tTrajet 1 fini !"));
+				Serial.println(F("\tTrajet blue fini !"));
 			#endif
 			flag_end = 1;
 			pause_time=0;
@@ -231,13 +241,13 @@ sState *testTrajPurple()
 			return &sDead;
 		}
 		/*else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
-			sTrajPurpleInit.flag &= ~BIT(E_RADAR);
+			sTrajblueInit.flag &= ~BIT(E_RADAR);
 			move(-300,0);
 		}
 		else
 		{
 			move(-500,0);
-			sTrajPurpleInit.flag |= BIT(E_RADAR);
+			sTrajblueInit.flag |= BIT(E_RADAR);
 		}*/
 		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
 			move(0,0);
@@ -246,17 +256,17 @@ sState *testTrajPurple()
 	}
 	/*switch(i){
 	case 3:
-		sTrajPurpleInit.flag &= ~BIT(E_RADAR);
+		sTrajblueInit.flag &= ~BIT(E_RADAR);
 		break;
 	case 9:
 		radarSetLim(limits);
-		sTrajPurpleInit.flag |= BIT(E_RADAR);
+		sTrajblueInit.flag |= BIT(E_RADAR);
 		break;
 	case 11:
-		sTrajPurpleInit.flag &= ~BIT(E_RADAR);
+		sTrajblueInit.flag &= ~BIT(E_RADAR);
 		break;
 	case 20:
-		sTrajPurpleInit.flag |= BIT(E_RADAR);
+		sTrajblueInit.flag |= BIT(E_RADAR);
 		break;
 	}*/
 
@@ -268,11 +278,11 @@ sState *testTrajPurple()
 
 	 return 0;
 }
-sState sTrajPurpleInit={
+sState sTrajblueInit={
 	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-	&initTrajPurple,
-	&deinitTrajPurpleInit,
-	&testTrajPurple
+	&initTrajblue,
+	&deinitTrajblueInit,
+	&testTrajblue
 };
 
 

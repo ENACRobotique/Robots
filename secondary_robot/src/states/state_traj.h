@@ -16,11 +16,8 @@
 int progTraj(trajElem tab[]);
 
 
-extern sState sTrajGreenInit;
-extern sState sTrajPurpleInit;
-
-extern sState sTrajGreenInit;
-extern sState sTrajPurpleInit;
+extern sState sTrajyellowInit;
+extern sState sTrajblueInit;
 
 
 

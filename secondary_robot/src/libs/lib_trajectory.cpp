@@ -54,9 +54,17 @@ int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsi
     memcpy_P(&elt,&(tab[*i]),sizeof(trajElem));
 	if (!(*prev_millis)){
     	*prev_millis=millis();
-        move(elt.speed,elt.teta);
+    	 if(elt.value>0)
+		{
+			move( elt.speed,elt.teta);
+		}
+		else{
+			move(-elt.speed,elt.teta);
+		}
+#ifdef DEBUG_MOTOR
         Serial.println(elt.value);
         Serial.println(elt.teta);
+#endif
     }
 
     if(_backFromPause){
@@ -79,7 +87,7 @@ int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsi
         else{
         	move(-elt.speed,elt.teta);
         }
-#ifdef DEBUG
+#ifdef DEBUG_MOTOR
         Serial.println(elt.value);
         Serial.println(elt.teta);
 #endif
