@@ -56,25 +56,17 @@ void initHard(sState *prev){
     pinMode(PIN_SWITCH_LEFT, INPUT_PULLUP);
     pinMode(PIN_SWITCH_RIGHT, INPUT_PULLUP);
 
-    //initialisation parasol, créma et canne
-    parasol_servo.attach(PIN_PARASOL);
-    parasol_servo.write(2);
-
-    crema_servo.attach(PIN_CREMA);
-	crema_servo.write(CREMA_VERTICAL);
-
-	canne_servo.attach(PIN_CANNE_A_PECHE);
-	canne_servo.write(CANNE_VERTICAL);
 
 #ifdef DYN_USE
 	//init DYNAMIXEL
 	//initialisation => hard init
-	Dynamixel.begin(1000000);  // Inicialize the servo at 1Mbps and Pin Control 2//action de prévention:
+	Dynamixel.begin(1000000,DATA_DYNAMIXEL);  // Inicialize the servo at 1Mbps and Pin Control 2//action de prévention:
 	Dynamixel.setTempLimit(NUM_DYNAMIXEL,80);//max 80°
 	Dynamixel.setVoltageLimit(NUM_DYNAMIXEL,65,160);//6.5v=> 16v
 	Dynamixel.setMaxTorque(NUM_DYNAMIXEL,512);//50%
 	//action concrète
 	Dynamixel.ledStatus(NUM_DYNAMIXEL,ON);
+	Dynamixel.move(NUM_DYNAMIXEL,800);
 #endif
 	//Init servo
 

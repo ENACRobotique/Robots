@@ -80,22 +80,31 @@ const PROGMEM trajElem start_blue[]={
 const PROGMEM trajElem start_yellow[]={
 	//Début trajectoire yellow
 	{200,0,-13,DISTANCE},
-	QUART_TOUR_NEG,
-	{-300,0,3500,TEMPS},//on fonce dans la tour
-	{300,0,20,DISTANCE},//on s'extrait
-	{0,0,5000,TEMPS},//Dyn action
+	QUART_TOUR_NEG, //compte pour 3 instructions
 
-	{-300,0,3500,TEMPS},//on fonce dans la tour
+	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	4
 	{300,0,20,DISTANCE},//on s'extrait
-	{0,0,5000,TEMPS},//Dyn action
+	{0,0, 500,TEMPS},//								Dyn up		6
+	{0,0,2500,TEMPS},//								Pompe off	7
+	{0,0,1000,TEMPS},//								Dyn down	8
 
-	{-300,0,3500,TEMPS},//on fonce dans la tour
+	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	9
 	{300,0,20,DISTANCE},//on s'extrait
-	{0,0,5000,TEMPS},//Dyn action
+	{0,0, 500,TEMPS},//								Dyn up		11
+	{0,0,2500,TEMPS},//								Pompe off	12
+	{0,0,1000,TEMPS},//								Dyn down	13
 
-	{-300,0,3500,TEMPS},//on fonce dans la tour
+	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	14
 	{300,0,20,DISTANCE},//on s'extrait
-	{0,0,5000,TEMPS},//Dyn action
+	{0,0, 500,TEMPS},//								Dyn up		16
+	{0,0,2500,TEMPS},//								Pompe off	17
+	{0,0,1000,TEMPS},//								Dyn down	18
+
+	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	19
+	{300,0,20,DISTANCE},//on s'extrait
+	{0,0, 500,TEMPS},//								Dyn up		21
+	{0,0,2500,TEMPS},//								Pompe off	22
+	{0,0,1000,TEMPS},//								Dyn down	23
 
 	{0,0,0},
 };
@@ -121,6 +130,36 @@ sState *testTrajyellowInit()
 			pause_time=0;
 			move(0,0);
 
+		}
+		else{
+			switch(i){
+			case 4://Pompe On
+			case 9:
+			case 14:
+			case 19:
+				analogWrite(PIN_POMPE_PWM,255);
+				break;
+			case  6://Dyn up
+			case 11:
+			case 16:
+			case 21:
+				Dynamixel.move(NUM_DYNAMIXEL,90);
+				break;
+			case  7://Pompe Off+vibration
+			case 12:
+			case 17:
+			case 22:
+				analogWrite(PIN_POMPE_PWM,0);
+				break;
+			case  8://Dyn down
+			case 13:
+			case 18:
+			case 23:
+				Dynamixel.move(NUM_DYNAMIXEL,800);
+				break;
+
+			default:break;
+			}
 		}
 	}
 	else{

@@ -78,6 +78,7 @@
 
 #define DYN_USE
 #ifdef DYN_USE
+#define DATA_DYNAMIXEL 3
 #define NUM_DYNAMIXEL 1
 #endif
 
