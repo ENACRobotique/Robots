@@ -69,7 +69,10 @@ void deinitTrajGreenInit(sState *next)
 
 const PROGMEM trajElem start_purple[]={
 //Début trajectoire purple
-	{400,0,50,DISTANCE},
+		/*
+	{0,90,500,TEMPS},
+	{250,90,71.5,DISTANCE},*/
+	QUART_TOUR_POS,
 	{0,0,5000,TEMPS},
 	{0,0,0},//Stop
 };

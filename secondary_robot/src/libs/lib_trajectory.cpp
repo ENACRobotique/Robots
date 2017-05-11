@@ -14,11 +14,11 @@
 #define FACTOR_HEADING_ASSERV 1.5
 
 int _backFromPause = 0;
-/*
+
 int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
 	static int teta0 = headingGetCon();
 	int dt = millis() - *prev_millis -*pausetime;    //time since start of the current traj element
-	int dteta = (tab[*i].teta-teta0)*min((dt*FACTOR_HEADING_ASSERV/tab[*i].duration),1);
+	int dteta = (tab[*i].teta-teta0)*min((dt*FACTOR_HEADING_ASSERV/tab[*i].value),1);
 	headingSetCon( teta0+dteta);
 
     if (!(*prev_millis)){
@@ -32,14 +32,14 @@ int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, uns
 
     }
 
-    if ( (millis()-*prev_millis-*pausetime)>tab[*i].duration ) {
+    if ( (millis()-*prev_millis-*pausetime)>tab[*i].value ) {
         (*i)++;
         *prev_millis=millis();
         *pausetime=0;
         teta0 = headingGetCon();
         speedSetCon(tab[*i].speed);
     }
-    if ( tab[*i].teta==0 && tab[*i].duration==0 && tab[*i].speed==0) {
+    if ( tab[*i].teta==0 && tab[*i].value==0 && tab[*i].speed==0) {
         *i=0;
         *prev_millis=0;
         return 1;
@@ -48,7 +48,7 @@ int periodicProgTrajHeading(trajElem tab[],unsigned long *pausetime, int *i, uns
     return 0;
 }
 
-*/
+
 int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis){
     trajElem elt;/* = tab[*i];*/
     memcpy_P(&elt,&(tab[*i]),sizeof(trajElem));
@@ -65,7 +65,7 @@ int periodicProgTraj(const trajElem tab[],unsigned long *pausetime, int *i, unsi
 
     }
     long dist=readAccumulators(0);
-    if((elt.mode==DISTANCE &&( abs(dist)>abs(elt.value*1036.269) ))||
+    if((elt.mode==DISTANCE &&( abs(dist)>abs(elt.value*TRAJ_CM2ACCU) ))||
        (elt.mode==TEMPS &&((millis()-*prev_millis-*pausetime)>(unsigned long)elt.value )) ){
         (*i)++;
         razAccumulators();

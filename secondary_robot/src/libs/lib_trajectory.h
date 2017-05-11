@@ -24,6 +24,11 @@ typedef struct {
     traj_mode mode;
 }trajElem;
 
+#define TRAJ_CM2ACCU 1036.269
+//quart de tour trigo
+#define QUART_TOUR_POS {0,90,250,TEMPS},{250,90,+71.5/4,DISTANCE}
+#define QUART_TOUR_NEG {0,90,250,TEMPS},{250,90,-71.5/4,DISTANCE}
+
 //pointeur de fonction
 typedef int(*periodicTraj)(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);
 
