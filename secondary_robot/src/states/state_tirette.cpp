@@ -38,8 +38,8 @@ sState* testTirette()
     	{
     		if(timepull==0){timepull = millis();}
 			if(millis() - timepull > TIME_BEFORE_START){
-				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajyellowInit;
-				else return &sTrajblueInit;
+				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sTrajblueInit;
+				else return &sTrajyellowInit;
 			}
     	}
     return 0;

@@ -31,6 +31,13 @@ void initHard(sState *prev){
     int pin_odo_sen[NB_MOTORS]={PIN_ODO1_SEN};
     odoInitHard(pin_odo_int,pin_odo_sen);
     moveInitHard(PIN_SERVO_DIR,ANGLE_ZERO,0);
+
+    pinMode(PIN_POMPE_PWM, OUTPUT);
+    pinMode(PIN_POMPE_DIR, OUTPUT);
+
+    digitalWrite(PIN_POMPE_DIR,HIGH);
+    analogWrite(PIN_POMPE_PWM,0);
+
     //radar
     Wire.begin();
 #ifdef ATTITUDE
@@ -62,7 +69,7 @@ void initHard(sState *prev){
 #ifdef DYN_USE
 	//init DYNAMIXEL
 	//initialisation => hard init
-	Dynamixel.begin(1000000,PIN_CTRL_DYNAMIX);  // Inicialize the servo at 1Mbps and Pin Control 2//action de prévention:
+	Dynamixel.begin(1000000);  // Inicialize the servo at 1Mbps and Pin Control 2//action de prévention:
 	Dynamixel.setTempLimit(NUM_DYNAMIXEL,80);//max 80°
 	Dynamixel.setVoltageLimit(NUM_DYNAMIXEL,65,160);//6.5v=> 16v
 	Dynamixel.setMaxTorque(NUM_DYNAMIXEL,512);//50%

@@ -30,10 +30,10 @@
 #define PIN_MOTOR1_DIR 7
 #define PIN_ODO1_INT 2//odometer1, interruption pin
 #define PIN_ODO1_SEN 9
-//#define PIN_MOTOR2_PWM 6
-//#define PIN_MOTOR2_DIR 13
-//#define PIN_ODO2_INT 3//odometer2, interruption pin
-//#define PIN_ODO2_SEN 8
+
+#define PIN_POMPE_PWM 11
+#define PIN_POMPE_DIR A2
+
 #define PIN_TIRETTE 10
 //#define PIN_LED 13
 #define PIN_COLOR 12
@@ -76,9 +76,8 @@
 #define CREMA_IN 30
 #define CREMA_VERTICAL 90
 
-//#define DYN_USE
+#define DYN_USE
 #ifdef DYN_USE
-#define PIN_CTRL_DYNAMIX 2
 #define NUM_DYNAMIXEL 1
 #endif
 

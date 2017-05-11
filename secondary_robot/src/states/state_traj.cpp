@@ -12,6 +12,7 @@
 #include "state_funny_action.h"
 #include "state_wait.h"
 #include "state_dead.h"
+#include "DynamixelSerial.h"
 
 unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
 #ifdef HEADING
@@ -73,7 +74,7 @@ const PROGMEM trajElem start_blue[]={
 	{0,90,500,TEMPS},
 	{250,90,71.5,DISTANCE},*/
 	QUART_TOUR_POS,
-	{0,0,5000,TEMPS},
+	{0,0,1000,TEMPS},
 	{0,0,0},//Stop
 };
 const PROGMEM trajElem start_yellow[]={
@@ -119,6 +120,7 @@ sState *testTrajyellowInit()
 			flag_end = 1;
 			pause_time=0;
 			move(0,0);
+
 		}
 	}
 	else{
@@ -228,6 +230,11 @@ sState *testTrajblue()
 			flag_end = 1;
 			pause_time=0;
 			move(0,0);
+#ifdef DYN_USE
+			Dynamixel.move(NUM_DYNAMIXEL,80);
+			delay(1000);
+			Dynamixel.move(NUM_DYNAMIXEL,800);
+#endif
 		}
 	}
 	else{
