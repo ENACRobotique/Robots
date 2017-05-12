@@ -9,6 +9,7 @@
 #include "InputOutputs.h"
 #include "TrajectoryManagerClass.h"
 #include "OdometryController.h"
+#include "params.h"
 
 void handleMessage(sMessageDown msg) {
 	eTypeDown msgType = msg.type;
@@ -39,9 +40,32 @@ void handleMessage(sMessageDown msg) {
 			Odometry.setPosY(msg.recalage.y);
 			Odometry.setThetaRad(msg.recalage.theta);
 			break;
-		case LED:
-			IOs.setLedColor(0,0,0);
+		case EMPTY_POINTS:
+			TrajectoryManager.emptyPoints();
 			break;
-
+		case START_BALL_PICKER_MOTOR:
+			IOs.setPickerSpeed(PICKER_SPEED);
+			break;
+		case STOP_BALL_PICKER_MOTOR:
+			IOs.setPickerSpeed(0);
+			break;
+		case START_CANNON_MOTOR:
+			IOs.setLauncherSpeed(LAUNCHER_SPEED);
+			break;
+		case STOP_CANNON_MOTOR:
+			IOs.setLauncherSpeed(0);
+			break;
+		case OPEN_CANNON_BARRIER:
+			IOs.setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_OPENED);
+			break;
+		case CLOSE_CANNON_BARRIER:
+			IOs.setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_CLOSED);
+			break;
+		case OPEN_ROCKET_LAUNCHER:
+			IOs.setServoPosition(SERVO_ROCKET, ROCKET_LAUNCH);
+			break;
+		case LOCK_ROCKET_LAUNCHER:
+			IOs.setServoPosition(SERVO_ROCKET, ROCKET_IDLE);
+			break;
 	}
 }
