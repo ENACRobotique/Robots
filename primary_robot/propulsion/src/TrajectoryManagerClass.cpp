@@ -105,3 +105,8 @@ void TrajectoryManagerClass::stop(){
 void TrajectoryManagerClass::resume(){
 	_trajectoryStep = InitialRotationStep;
 }
+
+void TrajectoryManagerClass::emptyPoints() {
+	_readIndex = 0;
+	_writeIndex = 0;
+}

@@ -46,8 +46,8 @@ void setup()
 	digitalWrite(13, LOW);
     delay(2000);
 
-    IOs.setLauncherSpeed(100);
-    IOs.setServoPosition(SERVO_ROCKET, 150);
+    //IOs.setLauncherSpeed(100);
+    //IOs.setServoPosition(SERVO_ROCKET, 150);
 
     int ret;
     TrajectoryManager.addPoint(Point3D(300,0), &ret);

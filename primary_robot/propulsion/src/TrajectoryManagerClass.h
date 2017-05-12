@@ -24,6 +24,7 @@ public:
 	TrajectoryManagerClass();
 	virtual ~TrajectoryManagerClass();
 	void addPoint(Point3D point, int * returnValue);
+	void emptyPoints();
 	void readPoint(Point3D *point, int * returnValue);
 	void computeNextStep();
 	void stop();
