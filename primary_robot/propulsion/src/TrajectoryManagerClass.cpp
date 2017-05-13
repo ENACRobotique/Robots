@@ -122,6 +122,9 @@ void TrajectoryManagerClass::resume(){
 void TrajectoryManagerClass::emptyPoints() {
 	_readIndex = 0;
 	_writeIndex = 0;
+	_trajReadIndex = 0;
+	_trajWriteIndex = 0;
+	_pointId = 0;
 }
 
 void TrajectoryManagerClass::reached_point(int trajId, int pointId){
