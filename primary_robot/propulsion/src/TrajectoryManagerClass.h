@@ -23,9 +23,11 @@ class TrajectoryManagerClass {
 public:
 	TrajectoryManagerClass();
 	virtual ~TrajectoryManagerClass();
+	void addTrajectoryInfo(int trajId, int trajLentgh);
 	void addPoint(Point3D point, int * returnValue);
 	void emptyPoints();
 	void readPoint(Point3D *point, int * returnValue);
+	void reached_point(int trajId, int pointId);
 	void computeNextStep();
 	void stop();
 	void resume();
@@ -34,6 +36,12 @@ private:
 	Point3D _objectives[NB_POINTS_MAX];
 	int _readIndex;
 	int _writeIndex;
+
+	int _trajectoriesId[NB_POINTS_MAX]; // Numéros des messages contenant les trajectoires
+	int _trajectoriesLength[NB_POINTS_MAX]; // Nombre de points des trajectoires
+	int _trajReadIndex;
+	int _trajWriteIndex;
+	int _pointId; //Numéro du point dans sa trajectoire
 };
 
 extern TrajectoryManagerClass TrajectoryManager;

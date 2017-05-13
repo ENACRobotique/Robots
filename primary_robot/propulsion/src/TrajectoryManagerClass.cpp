@@ -8,6 +8,7 @@
 #include "TrajectoryManagerClass.h"
 #include "OdometryController.h"
 #include "MotorController.h"
+#include "messages.h"
 extern "C" {
 	#include "utils.h"
 }
@@ -19,6 +20,9 @@ TrajectoryManagerClass::TrajectoryManagerClass() {
 	_readIndex = 0;
 	_writeIndex = 0;
 	_trajectoryStep = InitialRotationStep;
+	_trajReadIndex = 0;
+	_trajWriteIndex = 0;
+	_pointId = 0;
 }
 
 TrajectoryManagerClass::~TrajectoryManagerClass() {
@@ -92,6 +96,15 @@ void TrajectoryManagerClass::computeNextStep(){
 				value = constrainAngle(value);
 				Motors.computeParameters(value, Rotation);
 			}
+
+			reached_point(_trajectoriesId[_trajReadIndex], _pointId);
+			if (_pointId == _trajectoriesLength[_readIndex] - 1){ //Trajectoire finie
+				_trajReadIndex = (_trajReadIndex + 1)%NB_POINTS_MAX;
+				_pointId = 0;
+			} else {
+			_pointId++;
+			}
+
 			_trajectoryStep = InitialRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
 	}
@@ -109,4 +122,21 @@ void TrajectoryManagerClass::resume(){
 void TrajectoryManagerClass::emptyPoints() {
 	_readIndex = 0;
 	_writeIndex = 0;
+}
+
+void TrajectoryManagerClass::reached_point(int trajId, int pointId){
+	sMessageUp msg;
+	msg.type = POINT_REACHED;
+	msg.down_id = trajId;
+	msg.x  = Odometry.getPosX();
+	msg.y = Odometry.getPosY();
+	msg.theta = Odometry.getThetaRad();
+	msg.point_id = pointId;
+	message_send(msg);
+}
+
+void TrajectoryManagerClass::addTrajectoryInfo(int trajId, int trajLength){
+	_trajectoriesId[_trajWriteIndex] = trajId;
+	_trajectoriesLength[_trajWriteIndex] = trajLength;
+	_trajWriteIndex = (_trajWriteIndex + 1)%NB_POINTS_MAX;
 }
