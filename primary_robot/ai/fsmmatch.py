@@ -12,7 +12,7 @@ class FSMMatch(Behavior):
     def __init__(self, robot):
         self.robot = robot
         self.color = None
-        self.state = StateInit(self)
+        self.state = StateColorSelection(self)
 
     def loop(self):
         next_state = self.state.test()
@@ -32,7 +32,7 @@ class FSMState:
         raise NotImplementedError("deinit of this state is not defined yet !")
 
 
-class StateInit(FSMState):
+class StateColorSelection(FSMState):
     class ColorState(Enum):
         IDLE = "idle"
         PRESSED = "pressed"
@@ -57,17 +57,55 @@ class StateInit(FSMState):
             self.state = self.ColorState.IDLE
 
         if self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.OUT:
-            return StateTraj1
+            if self.behavior.color == Color.YELLOW:
+                return StateTraj1Yellow
+            else:
+                return StateTraj1Blue
+
+    def deinit(self):
+        if self.behavior.color == Color.YELLOW:
+            self.behavior.robot.locomotion.reposition_robot(1820, 2800, 180)
+        else:
+            self.behavior.robot.locomotion.reposition_robot(1820, 200, 0)
+
+
+
+
+
+class StateTraj1Yellow(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        p1 = self.behavior.robot.locomotion.Point(1820, 2100)
+        p2 = self.behavior.robot.locomotion.Point(1500, 2100)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 1)
+        pass
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateSmallCrater1
 
     def deinit(self):
         pass
 
-class StateTraj1(FSMState):
-    def deinit(self):
+
+class StateTraj1Blue(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
         pass
 
     def test(self):
         pass
 
-    def __init__(self, behavior):
+    def deinit(self):
         pass
+
+class StateSmallCrater1(FSMState):
+    pass
