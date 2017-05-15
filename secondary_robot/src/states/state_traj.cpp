@@ -77,34 +77,18 @@ const PROGMEM trajElem start_blue[]={
 	{0,0,1000,TEMPS},
 	{0,0,0},//Stop
 };
+const PROGMEM trajElem aller_retour[]={
+		{-300,0,1500,TEMPS},
+		{300,0,15,DISTANCE},
+		{0,0,0},
+};
+#define Recup {-300,0,1500,TEMPS},{300,0,15,DISTANCE},{0,0,1500,TEMPS},{0,0,2000,TEMPS},{0,0,1000,TEMPS}
+//				Pompe on 	4 		Dyn up		6						Pompe off	7		Dyn down	8
+
 const PROGMEM trajElem start_yellow[]={
 	//Début trajectoire yellow
 	{200,0,-13,DISTANCE},
 	QUART_TOUR_NEG, //compte pour 3 instructions
-
-	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	4
-	{300,0,20,DISTANCE},//on s'extrait
-	{0,0, 500,TEMPS},//								Dyn up		6
-	{0,0,2500,TEMPS},//								Pompe off	7
-	{0,0,1000,TEMPS},//								Dyn down	8
-
-	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	9
-	{300,0,20,DISTANCE},//on s'extrait
-	{0,0, 500,TEMPS},//								Dyn up		11
-	{0,0,2500,TEMPS},//								Pompe off	12
-	{0,0,1000,TEMPS},//								Dyn down	13
-
-	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	14
-	{300,0,20,DISTANCE},//on s'extrait
-	{0,0, 500,TEMPS},//								Dyn up		16
-	{0,0,2500,TEMPS},//								Pompe off	17
-	{0,0,1000,TEMPS},//								Dyn down	18
-
-	{-300,0,3500,TEMPS},//on fonce dans la tour 	Pompe on 	19
-	{300,0,20,DISTANCE},//on s'extrait
-	{0,0, 500,TEMPS},//								Dyn up		21
-	{0,0,2500,TEMPS},//								Pompe off	22
-	{0,0,1000,TEMPS},//								Dyn down	23
 
 	{0,0,0},
 };
@@ -113,8 +97,12 @@ const PROGMEM trajElem start_yellow[]={
 sState *testTrajyellowInit()
 {
 	static int i=0; //indice de la pos ds la traj
+	static int nb_recup= -1;
+	static int step=0;
     static unsigned long prev_millis=0;
     static int flag_end = 0;
+    static int time_for_pompe=0;
+
     uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
@@ -122,78 +110,69 @@ sState *testTrajyellowInit()
 #endif
 
 	if(!flag_end){
-		if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis)){
-			#ifdef DEBUG
-				Serial.println(F("\tTrajet yellow fini !"));
-			#endif
-			flag_end = 1;
-			pause_time=0;
-			move(0,0);
-
-		}
-		else{
-			switch(i){
-			case 4://Pompe On
-			case 9:
-			case 14:
-			case 19:
-				analogWrite(PIN_POMPE_PWM,255);
-				break;
-			case  6://Dyn up
-			case 11:
-			case 16:
-			case 21:
-				Dynamixel.move(NUM_DYNAMIXEL,90);
-				break;
-			case  7://Pompe Off+vibration
-			case 12:
-			case 17:
-			case 22:
-				analogWrite(PIN_POMPE_PWM,0);
-				break;
-			case  8://Dyn down
-			case 13:
-			case 18:
-			case 23:
-				Dynamixel.move(NUM_DYNAMIXEL,800);
-				break;
-
-			default:break;
+		switch(step)
+		{
+		case 0:
+			if(nb_recup<0)
+			{
+				if(periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
+				{
+					nb_recup++;
+					move(0,0);
+					pause_time=0;
+				}
 			}
+			else
+			{
+				analogWrite(PIN_POMPE_PWM,255);
+				if(periodicFunction(aller_retour,&st_saveTime,&i,&prev_millis))
+				{
+					nb_recup++;
+					step++;
+					move(0,0);
+					if(nb_recup==4)
+					{
+						//flag_end = 1;
+						//analogWrite(PIN_POMPE_PWM,0);
+					}
+					pause_time=0;
+				}
+			}
+			break;
+		case 1:
+			Dynamixel.move(NUM_DYNAMIXEL,DYN_UP);
+
+			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_UP)<10)
+			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
+			{step++;}
+			break;
+		case 2:
+			analogWrite(PIN_POMPE_PWM,0);
+			time_for_pompe=millis();
+			step++;
+			//on part comme ça
+			if(nb_recup==4)
+				flag_end=true;
+			break;
+		case 3:
+			if(millis()-time_for_pompe>2000)
+			{
+				step++;
+				Dynamixel.move(NUM_DYNAMIXEL,DYN_DOWN);
+			}
+			break;
+		case 4:
+			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_DOWN)<10)
+				step=0;
+			break;
+
 		}
 	}
 	else{
-
-		radarSetLim(limits);
-		static unsigned long start_move=millis();
-
-		#ifdef DEBUG
-			Serial.println(millis()-start_move-pause_time-TIME_TO_TRAVEL);
-		#endif
-
-		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
-			move(0,0);
 			return &sDead;
-		}
-		/*else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
-			sTrajyellowInit.flag &= ~BIT(E_RADAR);
-			move(-300,0);
-		}
-		else
-		{
-			move(-500,0);
-			sTrajyellowInit.flag |= BIT(E_RADAR);
-		}*/
-
-		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
-			move(0,0);
-			return &sDead;
-		}
 	}
-	/*switch(i){
-
-	}*/
-	/*if (radarIntrusion())
+	/*
+	if (radarIntrusion())
 	 {
 		 start_pause=millis();
 		 return &sDead;

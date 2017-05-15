@@ -65,8 +65,10 @@ void initHard(sState *prev){
 	Dynamixel.setVoltageLimit(NUM_DYNAMIXEL,65,160);//6.5v=> 16v
 	Dynamixel.setMaxTorque(NUM_DYNAMIXEL,512);//50%
 	//action concrète
+
+	Dynamixel.move(NUM_DYNAMIXEL,DYN_DOWN);
 	Dynamixel.ledStatus(NUM_DYNAMIXEL,ON);
-	Dynamixel.move(NUM_DYNAMIXEL,800);
+
 #endif
 	//Init servo
 

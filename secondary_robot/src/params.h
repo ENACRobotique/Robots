@@ -80,6 +80,8 @@
 #ifdef DYN_USE
 #define DATA_DYNAMIXEL 3
 #define NUM_DYNAMIXEL 1
+#define DYN_UP 485
+#define DYN_DOWN 825
 #endif
 
 #define DEBUG
