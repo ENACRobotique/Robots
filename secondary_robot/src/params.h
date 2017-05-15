@@ -45,7 +45,7 @@
 #define TIME_MATCH_STOP 94000   //in ms  en théorie 90s mais on prend un peu de marge
 #define TIME_FOR_FUNNY_ACTION 90000 // the beginning of the funny action
 
-#define ANGLE_ZERO 98 //88
+#define ANGLE_ZERO 98
 
 //tirette related infos
 #define TIRETTE_IN HIGH
@@ -54,8 +54,8 @@
 #define WALL_DST 0 //in cm<<1
 #define WALL_SPEED 80
 
-#define COLOR_GREEN HIGH
-#define COLOR_PURPLE LOW
+#define COLOR_BLUE HIGH
+#define COLOR_YELLOW LOW
 
 
 #define RADAR_SAFETY_DST 30 //in cm

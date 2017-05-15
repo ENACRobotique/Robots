@@ -69,7 +69,7 @@ sState* testRecalage(){
 				st_saveTime = 0;
 				i = 0;
 				flag_end = 0;
-				if (digitalRead(PIN_COLOR)==COLOR_GREEN)return &sPecheGreen;
+				if (digitalRead(PIN_COLOR)==COLOR_BLUE)return &sPecheGreen;
 				else return &sPechePurple;
 
 			}
@@ -81,7 +81,7 @@ sState* testRecalage(){
 
 
 void initRecalage(sState *prev){
-	if (digitalRead(PIN_COLOR)==COLOR_GREEN){
+	if (digitalRead(PIN_COLOR)==COLOR_BLUE){
 		purple=0;
 	}
 	else{
