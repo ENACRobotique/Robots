@@ -18,7 +18,7 @@ class FSMMatch(Behavior):
         next_state = self.state.test()
         if next_state is not None:
             self.state.deinit()
-            self.state = next_state(self.robot)
+            self.state = next_state(self)
 
 
 class FSMState:
