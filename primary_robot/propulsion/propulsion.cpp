@@ -45,11 +45,17 @@ void setup()
 	delay(2000);
 	digitalWrite(13, LOW);
     delay(2000);
-
-    //IOs.setLauncherSpeed(100);
-    //IOs.setServoPosition(SERVO_ROCKET, 150);
-
-    int ret;
+/*
+    IOs.setLauncherSpeed(100);
+    delay(2000);
+    IOs.setLauncherSpeed(0);
+    IOs.setPickerSpeed(500);
+    delay(2000);
+    IOs.setPickerSpeed(0);
+    IOs.setServoPosition(SERVO_ROCKET, ROCKET_LAUNCH);
+    IOs.setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_OPENED);
+*/
+    /*int ret;
     TrajectoryManager.addPoint(Point3D(300,0), &ret);
     TrajectoryManager.addPoint(Point3D(300, 300), &ret);
     TrajectoryManager.addPoint(Point3D(1300, 0, 0), &ret);
@@ -58,7 +64,7 @@ void setup()
     delay(5000);
     TrajectoryManager.stop();
     delay(5000);
-    TrajectoryManager.resume();
+    TrajectoryManager.resume();*/
 
 }
 
