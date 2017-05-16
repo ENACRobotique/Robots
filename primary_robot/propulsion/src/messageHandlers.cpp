@@ -26,6 +26,7 @@ void handleMessage(sMessageDown msg) {
 				TrajectoryManager.addPoint(point, &ret);
 				if (ret != 0){ // Buffer de trajectoire plein
 					Serial.print("Tableau plein?");
+					//TODO : send POINTS_BUFFER_FULL message.
 				}
 			}
 			break;

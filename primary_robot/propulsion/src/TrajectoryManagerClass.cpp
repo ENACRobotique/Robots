@@ -107,6 +107,7 @@ void TrajectoryManagerClass::resume(){
 }
 
 void TrajectoryManagerClass::emptyPoints() {
+	Motors.computeParameters(0, Straight);
 	_readIndex = 0;
 	_writeIndex = 0;
 }
