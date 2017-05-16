@@ -8,7 +8,6 @@
 #include "../params.h"
 #include "state_traj.h"
 #include "state_pause.h"
-#include "state_Recalage.h"
 #include "state_funny_action.h"
 #include "state_wait.h"
 #include "state_dead.h"
@@ -26,56 +25,56 @@ static unsigned long start_pause=0;
 #define TIME_TO_TRAVEL 75000
 
 void initTrajyellowInit(sState *prev)
+{
+#ifdef DEBUG
+	Serial.println(F("debut traj yellow (premier trajet)"));
+#endif
+
+	if (prev==&sPause)
 	{
-		#ifdef DEBUG
-			Serial.println(F("debut traj yellow (premier trajet)"));
-		#endif
-
-	    if (prev==&sPause)
-	    	{
-			#ifdef DEBUG
-				Serial.println(F("\tback from pause"));
-			#endif
-	        st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-	        st_saveTime_radar=millis()-st_saveTime_radar+st_prevSaveTime_radar;
-	        _backFromPause = 1;
-		   	pause_time+=(millis()-start_pause);
-	    	}
-	    uint16_t limits[RAD_NB_PTS]={25,0,0,0};
-	   	radarSetLim(limits);
-		#ifdef DEBUG
-	   		Serial.println(pause_time);
-		#endif
-
+#ifdef DEBUG
+		Serial.println(F("\tback from pause"));
+#endif
+		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
+		st_saveTime_radar=millis()-st_saveTime_radar+st_prevSaveTime_radar;
+		_backFromPause = 1;
+		pause_time+=(millis()-start_pause);
 	}
+	uint16_t limits[RAD_NB_PTS]={25,0,0,0};
+	radarSetLim(limits);
+#ifdef DEBUG
+	Serial.println(pause_time);
+#endif
+
+}
 
 void deinitTrajyellowInit(sState *next)
 {
 	if (next==&sPause)
-		{
+	{
 		st_prevSaveTime=st_saveTime;
 		st_saveTime=millis();
 		st_prevSaveTime_radar=st_saveTime_radar;
 		st_saveTime_radar=millis();
-		}
+	}
 	else
-		{
+	{
 		st_saveTime=0;
 		st_prevSaveTime=0;
 		st_saveTime_radar=0;
 		st_prevSaveTime_radar=0;
 		move(0,0);
-		}
+	}
 }
 
 const PROGMEM trajElem start_blue[]={
-//Début trajectoire blue
+		//Début trajectoire blue
 		/*
 	{0,90,500,TEMPS},
 	{250,90,71.5,DISTANCE},*/
-	QUART_TOUR_POS,
-	{0,0,1000,TEMPS},
-	{0,0,0},//Stop
+		QUART_TOUR_POS,
+		{0,0,1000,TEMPS},
+		{0,0,0},//Stop
 };
 const PROGMEM trajElem aller_retour[]={
 		{-300,0,1500,TEMPS},
@@ -86,11 +85,10 @@ const PROGMEM trajElem aller_retour[]={
 //				Pompe on 	4 		Dyn up		6						Pompe off	7		Dyn down	8
 
 const PROGMEM trajElem start_yellow[]={
-	//Début trajectoire yellow
-	{200,0,-13,DISTANCE},
-	QUART_TOUR_NEG, //compte pour 3 instructions
-
-	{0,0,0},
+		//Début trajectoire yellow
+		{200,0,-13,DISTANCE},
+		QUART_TOUR_NEG, //compte pour 3 instructions
+		{0,0,0},
 };
 
 
@@ -99,11 +97,11 @@ sState *testTrajyellowInit()
 	static int i=0; //indice de la pos ds la traj
 	static int nb_recup= -1;
 	static int step=0;
-    static unsigned long prev_millis=0;
-    static int flag_end = 0;
-    static int time_for_pompe=0;
+	static unsigned long prev_millis=0;
+	static int flag_end = 0;
+	static int time_for_pompe=0;
 
-    uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
+	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
@@ -130,11 +128,6 @@ sState *testTrajyellowInit()
 					nb_recup++;
 					step++;
 					move(0,0);
-					if(nb_recup==4)
-					{
-						//flag_end = 1;
-						//analogWrite(PIN_POMPE_PWM,0);
-					}
 					pause_time=0;
 				}
 			}
@@ -169,7 +162,7 @@ sState *testTrajyellowInit()
 		}
 	}
 	else{
-			return &sDead;
+		return &sDead;
 	}
 	/*
 	if (radarIntrusion())
@@ -181,25 +174,25 @@ sState *testTrajyellowInit()
 }
 
 sState sTrajyellowInit={
-	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-	&initTrajyellowInit,
-	&deinitTrajyellowInit,
-	&testTrajyellowInit
+		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+		&initTrajyellowInit,
+		&deinitTrajyellowInit,
+		&testTrajyellowInit
 };
 //*****************************************************************************************************************
 
 
 void initTrajblue(sState *prev)
 {
-	#ifdef DEBUG
-		Serial.println(F("debut traj blue"));
-	#endif
+#ifdef DEBUG
+	Serial.println(F("debut traj blue"));
+#endif
 
 	if (prev==&sPause)
 	{
-		#ifdef DEBUG
-			Serial.println(F("\tback from pause"));
-		#endif
+#ifdef DEBUG
+		Serial.println(F("\tback from pause"));
+#endif
 		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
 		_backFromPause = 1;
 		pause_time+=(millis()-start_pause);
@@ -231,10 +224,10 @@ void deinitTrajblueInit(sState *next)
 sState *testTrajblue()
 {
 	static int i=0;
-    static unsigned long prev_millis=0;
+	static unsigned long prev_millis=0;
 
-    static int flag_end = 0;
-    //uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
+	static int flag_end = 0;
+	//uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
@@ -242,9 +235,9 @@ sState *testTrajblue()
 
 	if(!flag_end){
 		if(periodicFunction(start_blue,&st_saveTime,&i,&prev_millis)){
-			#ifdef DEBUG
-				Serial.println(F("\tTrajet blue fini !"));
-			#endif
+#ifdef DEBUG
+			Serial.println(F("\tTrajet blue fini !"));
+#endif
 			flag_end = 1;
 			pause_time=0;
 			move(0,0);
@@ -265,49 +258,18 @@ sState *testTrajblue()
 			move(0,0);
 			return &sDead;
 		}
-		/*else if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL ){
-			sTrajblueInit.flag &= ~BIT(E_RADAR);
-			move(-300,0);
-		}
-		else
-		{
-			move(-500,0);
-			sTrajblueInit.flag |= BIT(E_RADAR);
-		}*/
-		if (digitalRead(PIN_SWITCH_LEFT) && digitalRead(PIN_SWITCH_RIGHT)){
-			move(0,0);
-			return &sDead;
-		}
+
 	}
-	/*switch(i){
-	case 3:
-		sTrajblueInit.flag &= ~BIT(E_RADAR);
-		break;
-	case 9:
-		radarSetLim(limits);
-		sTrajblueInit.flag |= BIT(E_RADAR);
-		break;
-	case 11:
-		sTrajblueInit.flag &= ~BIT(E_RADAR);
-		break;
-	case 20:
-		sTrajblueInit.flag |= BIT(E_RADAR);
-		break;
-	}*/
 
-	 /*if (radarIntrusion())
-	 {
-		 start_pause=millis();
-		 return &sDead;
-	 }*/
 
-	 return 0;
+
+	return 0;
 }
 sState sTrajblueInit={
-	BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-	&initTrajblue,
-	&deinitTrajblueInit,
-	&testTrajblue
+		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+		&initTrajblue,
+		&deinitTrajblueInit,
+		&testTrajblue
 };
 
 

@@ -35,7 +35,7 @@
 		<link>
 			<name>arduinolib/DynamixelSerial</name>
 			<type>2</type>
-			<locationURI>WORKSPACE_LOC/static/core/arduino/libraries/DynamixelSerial</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/static/core/arduino/libraries/DynamixelSerial</locationURI>
 		</link>
 		<link>
 			<name>arduinolib/Servo</name>

@@ -28,21 +28,20 @@
 
 #define PIN_MOTOR1_PWM 6
 #define PIN_MOTOR1_DIR 7
-#define PIN_ODO1_INT 2//odometer1, interruption pin
+#define PIN_ODO1_INT 2  //odometer1, interruption pin
 #define PIN_ODO1_SEN 9
 
+//POMPE
 #define PIN_POMPE_PWM 11
 #define PIN_POMPE_DIR A2
 
 #define PIN_TIRETTE 10
 //#define PIN_LED 13
 #define PIN_COLOR 12
-#define PIN_SWITCH_LEFT A3
-#define PIN_SWITCH_RIGHT A2
 
 
 //times
-#define TIME_MATCH_STOP 94000   //in ms  en théorie 90s mais on prend un peu de marge
+#define TIME_MATCH_STOP 94  //in ms  en théorie 90s mais on prend un peu de marge
 #define TIME_FOR_FUNNY_ACTION 90000 // the beginning of the funny action
 
 #define ANGLE_ZERO 98
@@ -50,9 +49,6 @@
 //tirette related infos
 #define TIRETTE_IN HIGH
 #define DEBOUNCE_DELAY 100 //(in ms)
-
-#define WALL_DST 0 //in cm<<1
-#define WALL_SPEED 80
 
 #define COLOR_BLUE HIGH
 #define COLOR_YELLOW LOW
@@ -63,21 +59,14 @@
 
 #define TIME_READY_LAUNCHER 500 //in ms
 
-#define PIN_PARASOL 8
 
-#define PIN_CANNE_A_PECHE 4
-#define CANNE_DOWN 137
-#define CANNE_UP 100
-#define CANNE_VERTICAL 70 //perpendiculaire : 47
-#define CANNE_SECURE 90
+#define HODOR 8
+#define HODOR_CLOSE 130
+#define HODOR_OPEN 30
 
-#define PIN_CREMA 3
-#define CREMA_OUT 169
-#define CREMA_IN 30
-#define CREMA_VERTICAL 90
 
 #define DYN_USE
-#ifdef DYN_USE
+#ifdef  DYN_USE
 #define DATA_DYNAMIXEL 3
 #define NUM_DYNAMIXEL 1
 #define DYN_UP 485

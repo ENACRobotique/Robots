@@ -13,8 +13,6 @@
 #include "../params.h"
 #include "../tools.h"
 #include "lib_move.h"
-#include "state_Peche.h"
-#include "state_Recalage.h"
 
 /* State : tirette, first state of all, waits until the tirette is pulled
  *

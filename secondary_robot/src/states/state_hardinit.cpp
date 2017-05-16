@@ -52,10 +52,11 @@ void initHard(sState *prev){
     //"color" (start side) button
     pinMode(PIN_COLOR,INPUT_PULLUP);
 
-    //Switches (wall detection)
-    pinMode(PIN_SWITCH_LEFT, INPUT_PULLUP);
-    pinMode(PIN_SWITCH_RIGHT, INPUT_PULLUP);
-
+    //servo simple
+    pinMode(HODOR, OUTPUT);
+    Servo Hodor ;
+    Hodor.attach(HODOR);
+    Hodor.write(HODOR_CLOSE);
 
 #ifdef DYN_USE
 	//init DYNAMIXEL
