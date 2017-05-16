@@ -54,7 +54,7 @@ void initHard(sState *prev){
 
     //servo simple
     pinMode(HODOR, OUTPUT);
-    Servo Hodor ;
+    Servo Hodor;
     Hodor.attach(HODOR);
     Hodor.write(HODOR_CLOSE);
 
