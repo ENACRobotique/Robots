@@ -14,7 +14,5 @@
 
 extern sState sTirette;
 
-extern Servo canne_servo;
-extern Servo crema_servo;
 
 #endif /* STATE_TIRETTE_H_ */

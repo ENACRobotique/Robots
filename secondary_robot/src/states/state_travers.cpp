@@ -6,14 +6,13 @@
 #include "lib_trajectory.h"
 #include "../tools.h"
 #include "../params.h"
-#include "state_traj.h"
-#include "state_recup.h"
+#include "state_travers.h"
 #include "state_pause.h"
 #include "state_funny_action.h"
 #include "state_wait.h"
 #include "state_dead.h"
 
-static unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
+unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
 #ifdef HEADING
 periodicTraj periodicFunction = &periodicProgTrajHeading;
 #else
@@ -24,10 +23,10 @@ static unsigned long pause_time =0;
 static unsigned long start_pause=0;
 #define TIME_TO_TRAVEL 75000
 
-void initTrajyellowInit(sState *prev)
+void TraversYellowInit(sState *prev)
 {
 #ifdef DEBUG
-	Serial.println(F("debut traj yellow (premier trajet)"));
+	Serial.println(F("debut traverser yellow (premier trajet)"));
 #endif
 
 	if (prev==&sPause)
@@ -48,7 +47,7 @@ void initTrajyellowInit(sState *prev)
 
 }
 
-void deinitTrajyellowInit(sState *next)
+void TraversYellowDeinit(sState *next)
 {
 	if (next==&sPause)
 	{
@@ -67,26 +66,19 @@ void deinitTrajyellowInit(sState *next)
 	}
 }
 
-const PROGMEM trajElem start_blue[]={
+const PROGMEM trajElem trav_blue[]={
 		//Début trajectoire blue
-		/*
-	{0,90,500,TEMPS},
-	{250,90,71.5,DISTANCE},*/
-		QUART_TOUR_POS,
-		{0,0,1000,TEMPS},
 		{0,0,0},//Stop
 };
 
 
-const PROGMEM trajElem start_yellow[]={
+const PROGMEM trajElem trav_yellow[]={
 		//Début trajectoire yellow
-		{200,0,-13,DISTANCE},
-		QUART_TOUR_NEG, //compte pour 3 instructions
 		{0,0,0},
 };
 
 
-sState *testTrajyellowInit()
+sState *TraversYellowTest()
 {
 	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
@@ -96,10 +88,10 @@ sState *testTrajyellowInit()
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-	if (periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
+	if (periodicFunction(trav_yellow,&st_saveTime,&i,&prev_millis))
 	{
 		move(0,0);
-		return &sRecup;
+		return &sDead;
 	}
 	/*
 	if (radarIntrusion())
@@ -110,19 +102,19 @@ sState *testTrajyellowInit()
 	return 0;
 }
 
-sState sTrajyellowInit={
+sState sTraverseYellow={
 		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-		&initTrajyellowInit,
-		&deinitTrajyellowInit,
-		&testTrajyellowInit
+		&TraversYellowInit,
+		&TraversYellowDeinit,
+		&TraversYellowTest
 };
 //*****************************************************************************************************************
 
 
-void initTrajblue(sState *prev)
+void TraversBlueInit(sState *prev)
 {
 #ifdef DEBUG
-	Serial.println(F("debut traj blue"));
+	Serial.println(F("debut traverser blue"));
 #endif
 
 	if (prev==&sPause)
@@ -138,7 +130,7 @@ void initTrajblue(sState *prev)
 	radarSetLim(limits);
 }
 
-void deinitTrajblueInit(sState *next)
+void TraversBlueDeinit(sState *next)
 {
 	if (next==&sPause)
 	{
@@ -156,9 +148,7 @@ void deinitTrajblueInit(sState *next)
 	}
 }
 
-
-
-sState *testTrajblue()
+sState *TraversBlueTest()
 {
 	static int i=0;
 	static unsigned long prev_millis=0;
@@ -171,37 +161,23 @@ sState *testTrajblue()
 #endif
 
 	if(!flag_end){
-		if(periodicFunction(start_blue,&st_saveTime,&i,&prev_millis)){
+		if(periodicFunction(trav_blue,&st_saveTime,&i,&prev_millis)){
 #ifdef DEBUG
-			Serial.println(F("\tTrajet blue fini !"));
+			Serial.println(F("\tTrav blue fini !"));
 #endif
 			flag_end = 1;
 			pause_time=0;
 			move(0,0);
 		}
 	}
-	else{
-
-		static unsigned long start_move=millis();
-#ifdef DEBUG
-		Serial.println(millis()-start_move-pause_time-TIME_TO_TRAVEL);
-#endif
-		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
-			move(0,0);
-			return &sRecup;
-		}
-
-	}
-
-
-
 	return 0;
 }
-sState sTrajblueInit={
+
+sState sTraverseBlue={
 		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-		&initTrajblue,
-		&deinitTrajblueInit,
-		&testTrajblue
+		&TraversBlueInit,
+		&TraversBlueDeinit,
+		&TraversBlueTest
 };
 
 
