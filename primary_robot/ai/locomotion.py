@@ -9,8 +9,7 @@ class Locomotion:
         self.y = None
         self.theta = None
         self.is_trajectory_finished = True
-        self.is_stopped = None
-        self.stop_robot()
+        self.is_stopped = True
         self.current_trajectory = []
 
     def follow_trajectory(self, points, theta, speed):
@@ -33,6 +32,8 @@ class Locomotion:
 
         for i, pt in enumerate(points):
             self.current_trajectory.append(trajectory_point(self.robot.communication._current_msg_id - 1, i, pt))
+        self.is_trajectory_finished = False
+        self.is_stopped = False
 
 
 
@@ -49,10 +50,11 @@ class Locomotion:
         message.payload.element = [traj_elt]
         self.robot.communication.send_message(message)
         self.current_trajectory.append(trajectory_point(self.robot.communication._current_msg_id - 1, 0, self.Point(x , y)))
+        self.is_trajectory_finished = False
+        self.is_stopped = False
 
-
-    def go_to_orient(self, point, speed):
-        self.go_to_orient(point.x, point.y, point.theta, speed)
+    # def go_to_orient(self, point, speed):
+    #     self.go_to_orient(point.x, point.y, point.theta, speed)
 
     def stop_robot(self):
         message = self.robot.communication.sMessageDown()
@@ -82,6 +84,10 @@ class Locomotion:
         self.robot.communication.send_message(message)
 
     def point_reached(self, traj_id, point_id, x, y, theta):
+        print("Point Reached")
+        self.x = x
+        self.y = y
+        self.theta = theta
         index_to_remove = None
         for i, traj_elt in enumerate(self.current_trajectory):
             if traj_elt.traj_id == traj_id and traj_elt.point_number == point_id:
@@ -94,6 +100,7 @@ class Locomotion:
         if len(self.current_trajectory) == 0:
             self.is_trajectory_finished = True
             self.is_stopped = True
+            print("Traj Finished !")
 
     def distance_to(self, x, y):
         return math.sqrt((self.x - x)**2 + (self.y - y)**2)

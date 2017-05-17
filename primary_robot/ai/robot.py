@@ -27,9 +27,10 @@ if __name__ == '__main__':
     while True:
         msg = robot.communication.check_message()
         if msg is not None:
-            if msg.type == eTypeUp.POSITION or msg.type == eTypeUp.POINT_REACHED:
+            if msg.type == eTypeUp.POSITION:
                 robot.locomotion.x = msg.x
                 robot.locomotion.y = msg.y
                 robot.locomotion.theta = msg.theta
-
+            if msg.type == eTypeUp.POINT_REACHED:
+                robot.locomotion.point_reached(msg.down_id, msg.point_id, msg.x, msg.y, msg.theta)
         robot.behavior.loop()
