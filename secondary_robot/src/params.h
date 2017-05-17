@@ -83,7 +83,7 @@
 
 /*  externs*************************************************/
 extern unsigned long _matchStart;
-extern Servo launcherServoUp,launcherServoDown, launcherServoNet;
+extern volatile Servo Hodor;
 
 /*  end externs*********************************************/
 
