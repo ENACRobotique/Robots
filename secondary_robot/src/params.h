@@ -36,8 +36,7 @@
 #define PIN_POMPE_DIR A2
 
 #define PIN_TIRETTE 10
-//#define PIN_LED 13
-#define PIN_COLOR 12
+#define PIN_COLOR 4
 
 
 //times
@@ -50,8 +49,8 @@
 #define TIRETTE_IN HIGH
 #define DEBOUNCE_DELAY 100 //(in ms)
 
-#define COLOR_BLUE HIGH
-#define COLOR_YELLOW LOW
+#define COLOR_BLUE LOW
+#define COLOR_YELLOW HIGH
 
 
 #define RADAR_SAFETY_DST 30 //in cm
