@@ -69,12 +69,9 @@ void deinitTrajyellowInit(sState *next)
 
 const PROGMEM trajElem start_blue[]={
 		//Début trajectoire blue
-		/*
-	{0,90,500,TEMPS},
-	{250,90,71.5,DISTANCE},*/
-		QUART_TOUR_POS,
-		{0,0,1000,TEMPS},
-		{0,0,0},//Stop
+		{200,0,-13,DISTANCE},
+		QUART_TOUR_POS, //compte pour 3 instructions
+		{0,0,0},
 };
 
 
@@ -160,43 +157,29 @@ void deinitTrajblueInit(sState *next)
 
 sState *testTrajblue()
 {
-	static int i=0;
+	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
 
-	static int flag_end = 0;
-	//uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
+	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-
-	if(!flag_end){
-		if(periodicFunction(start_blue,&st_saveTime,&i,&prev_millis)){
-#ifdef DEBUG
-			Serial.println(F("\tTrajet blue fini !"));
-#endif
-			flag_end = 1;
-			pause_time=0;
-			move(0,0);
-		}
+	if (periodicFunction(start_blue,&st_saveTime,&i,&prev_millis))
+	{
+		move(0,0);
+		return &sRecup;
 	}
-	else{
-
-		static unsigned long start_move=millis();
-#ifdef DEBUG
-		Serial.println(millis()-start_move-pause_time-TIME_TO_TRAVEL);
-#endif
-		if( (millis()-start_move-pause_time)>TIME_TO_TRAVEL+10000 ){
-			move(0,0);
-			return &sRecup;
-		}
-
-	}
-
-
-
+	/*
+		if (radarIntrusion())
+		 {
+			 start_pause=millis();
+			 return &sDead;
+		 }*/
 	return 0;
 }
+
+
 sState sTrajblueInit={
 		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
 		&initTrajblue,

@@ -12,6 +12,7 @@
 #include "state_funny_action.h"
 #include "state_wait.h"
 #include "state_dead.h"
+#include "state_travers.h"
 #include "DynamixelSerial.h"
 
 static unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
@@ -144,7 +145,9 @@ sState *testRecup()
 		}
 	}
 	else{
-		return &sDead;
+		if (digitalRead(PIN_COLOR)==COLOR_BLUE)return &sTraverseBlue;
+		if (digitalRead(PIN_COLOR)==COLOR_YELLOW)return &sTraverseYellow;
+
 	}
 	/*
 	if (radarIntrusion())

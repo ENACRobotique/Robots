@@ -68,13 +68,15 @@ void TraversYellowDeinit(sState *next)
 
 const PROGMEM trajElem trav_blue[]={
 		//Début trajectoire blue
-		{0,0,0},//Stop
+		DEMI_TOUR_NEG,//Turn
+		(0,0,0),
 };
 
 
 const PROGMEM trajElem trav_yellow[]={
 		//Début trajectoire yellow
-		{0,0,0},
+		{200,0,150,DISTANCE},
+		(0,0,0),
 };
 
 
@@ -90,6 +92,9 @@ sState *TraversYellowTest()
 #endif
 	if (periodicFunction(trav_yellow,&st_saveTime,&i,&prev_millis))
 	{
+#ifdef DEBUG
+		Serial.println(F("\tTravers jaune fini !"));
+#endif
 		move(0,0);
 		return &sDead;
 	}
@@ -163,11 +168,14 @@ sState *TraversBlueTest()
 	if(!flag_end){
 		if(periodicFunction(trav_blue,&st_saveTime,&i,&prev_millis)){
 #ifdef DEBUG
-			Serial.println(F("\tTrav blue fini !"));
+			Serial.println(F("\tTravers blue fini !"));
 #endif
+			Servo Hodor;
+			Hodor.write(HODOR_OPEN);
 			flag_end = 1;
 			pause_time=0;
 			move(0,0);
+			return &sDead;
 		}
 	}
 	return 0;
