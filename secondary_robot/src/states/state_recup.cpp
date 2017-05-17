@@ -87,6 +87,7 @@ sState *testRecup()
 	static unsigned long prev_millis=0;
 	static int flag_end = 0;
 	static int time_for_pompe=0;
+	static int time_for_release;
 
 	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
@@ -105,15 +106,16 @@ sState *testRecup()
 				step++;
 				move(0,0);
 				pause_time=0;
+				time_for_release=millis();
 			}
 
 			break;
 #ifdef DYN_UP
 		case 1:
 			Dynamixel.move(NUM_DYNAMIXEL,DYN_UP);
-
+			if(millis()-time_for_release>1000)
 			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_UP)<10)
-			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
+			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
 			{step++;}
 			break;
 		case 2:
@@ -147,8 +149,9 @@ sState *testRecup()
 	else{
 		if (digitalRead(PIN_COLOR)==COLOR_BLUE)return &sTraverseBlue;
 		if (digitalRead(PIN_COLOR)==COLOR_YELLOW)return &sTraverseYellow;
-
+		//return &sDead;
 	}
+
 	/*
 	if (radarIntrusion())
 	 {

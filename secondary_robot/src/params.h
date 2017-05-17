@@ -61,7 +61,7 @@
 
 #define HODOR 8
 #define HODOR_CLOSE 130
-#define HODOR_OPEN 30
+#define HODOR_OPEN 40
 
 
 #define DYN_USE
@@ -82,7 +82,7 @@
 
 /*  externs*************************************************/
 extern unsigned long _matchStart;
-extern volatile Servo Hodor;
+
 
 /*  end externs*********************************************/
 

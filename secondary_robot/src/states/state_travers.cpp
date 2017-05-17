@@ -21,6 +21,7 @@ static periodicTraj periodicFunction = &periodicProgTraj;
 
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
+Servo Hodor;
 #define TIME_TO_TRAVEL 75000
 
 void TraversYellowInit(sState *prev)
@@ -170,7 +171,8 @@ sState *TraversBlueTest()
 #ifdef DEBUG
 			Serial.println(F("\tTravers blue fini !"));
 #endif
-			Servo Hodor;
+
+
 			Hodor.write(HODOR_OPEN);
 			flag_end = 1;
 			pause_time=0;

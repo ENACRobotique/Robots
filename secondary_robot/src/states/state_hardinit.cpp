@@ -4,7 +4,7 @@
 #include "../params.h"
 #include "Arduino.h"
 #include "Wire.h"
-
+#include "state_travers.h"
 #include "state_dead.h"
 #include "state_traj.h"
 #include "state_tirette.h"
@@ -53,7 +53,6 @@ void initHard(sState *prev){
     pinMode(PIN_COLOR,INPUT_PULLUP);
 
     //servo simple
-    Servo Hodor;
     pinMode(HODOR, OUTPUT);
     Hodor.attach(HODOR);
     Hodor.write(HODOR_CLOSE);

@@ -13,6 +13,7 @@
 
 int progTraj(trajElem tab[]);
 
+extern Servo Hodor;
 extern sState sTraverseBlue;
 extern sState sTraverseYellow;
 
