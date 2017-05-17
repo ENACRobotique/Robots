@@ -134,7 +134,12 @@ sState *testRecup()
 			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_DOWN)<10)
 				step=0;
 			break;
+#else
+		default:
+			return &sDead;
+
 #endif
+
 
 		}
 	}
