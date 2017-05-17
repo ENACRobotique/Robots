@@ -11,11 +11,12 @@ CANNON_MOTOR = 4
 PIN_LED_RED = 22  # In GPIO.BOARD number
 PIN_LED_GREEN = 24
 PIN_LED_BLUE = 40
-PIN_CORD = 16
-PIN_COLOR = 18
+PIN_CORD = 18
+PIN_COLOR = 16
 
 UltraSoundSensor = namedtuple('ultra_sound_sensor', ['address', 'position'])
-us_sensors = [UltraSoundSensor(0x70, "front"), UltraSoundSensor(0x78, "rear")]
+us_sensors = [UltraSoundSensor(0x70, "front"), UltraSoundSensor(0x78, "rear")]  #Sets US sensors here !, empty list if no US is plugged
+#us_sensors=[]
 us_sensors_distance = {us_sensors[i]: 0 for i in range(len(us_sensors))}
 
 
@@ -28,7 +29,10 @@ def get_us_distance_by_postion(position):
     global us_sensors
     correct_sensors = [i for i in range(len(us_sensors)) if position.lower() in us_sensors[i].position.lower()]
     distances = [get_us_distance(i) for i in correct_sensors]
-    return min(distances)
+    if len(distances) == 0:
+        return 500000
+    else:
+        return min(distances)
 
 
 class IO(object):
