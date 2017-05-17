@@ -96,7 +96,11 @@ sState *testTrajyellowInit()
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-	if (periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
+
+	if (( (digitalRead(PIN_COLOR)==COLOR_BLUE) &&
+		 periodicFunction(start_blue,&st_saveTime,&i,&prev_millis) )||
+		( (digitalRead(PIN_COLOR)==COLOR_YELLOW) &&
+				 periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis) ))
 	{
 		move(0,0);
 		return &sRecup;
