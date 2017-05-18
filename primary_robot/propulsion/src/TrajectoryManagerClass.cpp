@@ -59,7 +59,6 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 
 void TrajectoryManagerClass::computeNextStep(){
 	if(_readIndex == _writeIndex) {		//no more points to read
-		Serial.println("This is the end");
 		return;
 	}
 
@@ -68,8 +67,6 @@ void TrajectoryManagerClass::computeNextStep(){
 	double dy = nextPoint.getY() - Odometry.getPosY();
 	int speed = nextPoint.getSpeed();
 	double value;
-	Serial.println("trajectoryStep : ");
-	Serial.println(_trajectoryStep);
 	switch (_trajectoryStep){
 		case Stop:
 			break;
@@ -79,7 +76,6 @@ void TrajectoryManagerClass::computeNextStep(){
 				value += PI;
 			}
 			value = constrainAngle(value);
-			//TODO : tourner au minimum (vers la gauche ou la droite)
 			Motors.computeParameters(value, Rotation);
 			_trajectoryStep = CruiseStep;
 
