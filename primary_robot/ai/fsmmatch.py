@@ -2,6 +2,8 @@ from enum import Enum
 
 import time
 
+import math
+
 from behavior import Behavior
 
 FUNNY_ACTION_TIME = 90  # in seconds
@@ -81,7 +83,7 @@ class StateColorSelection(FSMState):
     def deinit(self):
         self.behavior.start_match()
         if self.behavior.color == Color.YELLOW:
-            self.behavior.robot.locomotion.reposition_robot(1820, 2800, 180)
+            self.behavior.robot.locomotion.reposition_robot(1820, 2800, math.pi)
         else:
             self.behavior.robot.locomotion.reposition_robot(1820, 200, 0)
 
@@ -95,7 +97,7 @@ class StateTraj1Yellow(FSMState):
         self.stopped = False
         p1 = self.behavior.robot.locomotion.Point(1820, 2100)
         p2 = self.behavior.robot.locomotion.Point(1500, 2100)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 1)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], theta=0, speed=100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
@@ -126,6 +128,29 @@ class StateTraj1Blue(FSMState):
 class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
+        self.stopped = False
+        self.behavior.robot.io.start_ball_picker()
+        self.behavior.robot.locomotion.go_to_orient(1500, 2600, 0)
+
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateTrajFirePositionYellow1
+
+    def deinit(self):
+        pass
+
+
+class StateTrajFirePositionYellow1(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
         pass
 
     def test(self):
@@ -133,6 +158,7 @@ class StateSmallCrater1Yellow(FSMState):
 
     def deinit(self):
         pass
+
 
 
 class StateFunnyAction(FSMState):
