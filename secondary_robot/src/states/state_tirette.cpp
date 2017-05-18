@@ -9,6 +9,7 @@
 #include "Arduino.h"
 #include "state_tirette.h"
 #include "state_traj.h"
+#include "state_travers.h"
 #include "lib_radar.h"
 #include "../params.h"
 #include "../tools.h"

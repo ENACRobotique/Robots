@@ -76,7 +76,10 @@ const PROGMEM trajElem trav_blue[]={
 
 const PROGMEM trajElem trav_yellow[]={
 		//Début trajectoire yellow
-		{200,0,150,DISTANCE},
+		{300,0,100,DISTANCE},
+		{0,90,250,TEMPS},
+		{250,90,-71.5/8,DISTANCE},
+		{0,0,250,TEMPS},
 		(0,0,0),
 };
 
@@ -96,6 +99,8 @@ sState *TraversYellowTest()
 #ifdef DEBUG
 		Serial.println(F("\tTravers jaune fini !"));
 #endif
+		Hodor.write(HODOR_OPEN);
+		pause_time=0;
 		move(0,0);
 		return &sDead;
 	}
