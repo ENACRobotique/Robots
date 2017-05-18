@@ -22,7 +22,6 @@ static periodicTraj periodicFunction = &periodicProgTraj;
 
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
-#define TIME_TO_TRAVEL 75000
 
 void initTrajyellowInit(sState *prev)
 {
@@ -69,7 +68,7 @@ void deinitTrajyellowInit(sState *next)
 
 const PROGMEM trajElem start_blue[]={
 		//Début trajectoire blue
-		{200,0,-13,DISTANCE},
+		{200,0,-23,DISTANCE},
 		QUART_TOUR_POS, //compte pour 3 instructions
 		{0,0,0},
 };
