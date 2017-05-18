@@ -46,7 +46,6 @@ void MotorController::init() {
 void MotorController::computeParameters(double target, MovementType movementType, double speed) {
 	_t0 = millis()/1000.0;
 	Odometry.razIncs();
-	long lTarget = 0;
 
 	switch (movementType) {
 		case Straight:
