@@ -18,7 +18,7 @@ void handleMessage(sMessageDown msg) {
 	switch (msgType){
 		case TRAJECTOIRE:
 			for (int i=0; i < msg.traj.nb_trajectories; i++){
-				if (i == msg.traj.nb_trajectories){ //Si c'est le dernier point,  careAboutTheta
+				if (i == msg.traj.nb_trajectories - 1){ //Si c'est le dernier point,  careAboutTheta
 					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, msg.traj.theta_final);
 				} else {
 					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y);
