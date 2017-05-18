@@ -15,13 +15,17 @@ void handleMessage(sMessageDown msg) {
 	eTypeDown msgType = msg.type;
 	Point3D point;
 	int ret;
+	int speed;
+	double theta;
 	switch (msgType){
 		case TRAJECTOIRE:
 			for (int i=0; i < msg.traj.nb_trajectories; i++){
-				if (i == msg.traj.nb_trajectories){ //Si c'est le dernier point,  careAboutTheta
-					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, msg.traj.theta_final);
+				speed = (msg.traj.traj_speed - 127) * SPEED_COEFF;
+				theta = (double)msg.traj.theta_final / RAD_TO_UINT16;
+				if (i == msg.traj.nb_trajectories - 1){ //Si c'est le dernier point,  careAboutTheta
+					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, theta, speed);
 				} else {
-					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y);
+					point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, speed);
 				}
 				TrajectoryManager.addPoint(point, &ret);
 				if (ret != 0){ // Buffer de trajectoire plein
