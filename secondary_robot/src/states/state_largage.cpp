@@ -6,14 +6,14 @@
 #include "lib_trajectory.h"
 #include "../tools.h"
 #include "../params.h"
-#include "state_travers.h"
+#include "state_traj.h"
+#include "state_recup.h"
 #include "state_pause.h"
 #include "state_funny_action.h"
 #include "state_wait.h"
 #include "state_dead.h"
-#include "state_largage.h"
 
-unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
+static unsigned long st_saveTime=0,st_prevSaveTime=0,st_saveTime_radar=0,st_prevSaveTime_radar=0;
 #ifdef HEADING
 periodicTraj periodicFunction = &periodicProgTrajHeading;
 #else
@@ -22,12 +22,11 @@ static periodicTraj periodicFunction = &periodicProgTraj;
 
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
-#define TIME_TO_TRAVEL 75000
 
-void TraversYellowInit(sState *prev)
+void initlargyellow(sState *prev)
 {
 #ifdef DEBUG
-	Serial.println(F("debut traverser yellow (premier trajet)"));
+	Serial.println(F("debut traj yellow (premier trajet)"));
 #endif
 
 	if (prev==&sPause)
@@ -48,7 +47,7 @@ void TraversYellowInit(sState *prev)
 
 }
 
-void TraversYellowDeinit(sState *next)
+void deinitlargyellow(sState *next)
 {
 	if (next==&sPause)
 	{
@@ -67,25 +66,22 @@ void TraversYellowDeinit(sState *next)
 	}
 }
 
-const PROGMEM trajElem trav_blue[]={
+const PROGMEM trajElem start_blue[]={
 		//Début trajectoire blue
-		DEMI_TOUR_NEG,//Turn
-		(0,0,0),
+		{200,0,-23,DISTANCE},
+		QUART_TOUR_POS, //compte pour 3 instructions
+		{0,0,0},
 };
 
 
-const PROGMEM trajElem trav_yellow[]={
+const PROGMEM trajElem start_yellow[]={
 		//Début trajectoire yellow
-		{300,0,102.5,DISTANCE},
-		{0,90,250,TEMPS},
-		{250,90,-71.5/8,DISTANCE},
-		{300,0,45,DISTANCE},
-		{0,0,250,TEMPS},
-		(0,0,0),
+		{300,0,-45,DISTANCE},
+		{0,0,0},
 };
 
 
-sState *TraversYellowTest()
+sState *testlargyellow()
 {
 	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
@@ -95,14 +91,15 @@ sState *TraversYellowTest()
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-	if (periodicFunction(trav_yellow,&st_saveTime,&i,&prev_millis))
+
+	Hodor.write(HODOR_OPEN);
+	if (( (digitalRead(PIN_COLOR)==COLOR_BLUE) &&
+		 periodicFunction(start_blue,&st_saveTime,&i,&prev_millis) )||
+		( (digitalRead(PIN_COLOR)==COLOR_YELLOW) &&
+				 periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis) ))
 	{
-#ifdef DEBUG
-		Serial.println(F("\tTravers jaune fini !"));
-#endif
-		pause_time=0;
 		move(0,0);
-		return &sLargageYellow;
+		return &sDead;
 	}
 	/*
 	if (radarIntrusion())
@@ -113,19 +110,19 @@ sState *TraversYellowTest()
 	return 0;
 }
 
-sState sTraverseYellow={
+sState sLargageYellow={
 		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-		&TraversYellowInit,
-		&TraversYellowDeinit,
-		&TraversYellowTest
+		&initlargyellow,
+		&deinitlargyellow,
+		&testlargyellow
 };
 //*****************************************************************************************************************
 
 
-void TraversBlueInit(sState *prev)
+void initlargblue(sState *prev)
 {
 #ifdef DEBUG
-	Serial.println(F("debut traverser blue"));
+	Serial.println(F("debut largage blue"));
 #endif
 
 	if (prev==&sPause)
@@ -141,7 +138,7 @@ void TraversBlueInit(sState *prev)
 	radarSetLim(limits);
 }
 
-void TraversBlueDeinit(sState *next)
+void deinitlargblue(sState *next)
 {
 	if (next==&sPause)
 	{
@@ -159,40 +156,38 @@ void TraversBlueDeinit(sState *next)
 	}
 }
 
-sState *TraversBlueTest()
+
+
+sState *testlargblue()
 {
-	static int i=0;
+	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
 
-	static int flag_end = 0;
-	//uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
+	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
-
-	if(!flag_end){
-		if(periodicFunction(trav_blue,&st_saveTime,&i,&prev_millis)){
-#ifdef DEBUG
-			Serial.println(F("\tTravers blue fini !"));
-#endif
-
-
-			Hodor.write(HODOR_OPEN);
-			flag_end = 1;
-			pause_time=0;
-			move(0,0);
-			return &sDead;
-		}
+	if (periodicFunction(start_blue,&st_saveTime,&i,&prev_millis))
+	{
+		move(0,0);
+		return &sDead;
 	}
+	/*
+		if (radarIntrusion())
+		 {
+			 start_pause=millis();
+			 return &sDead;
+		 }*/
 	return 0;
 }
 
-sState sTraverseBlue={
+
+sState sLargageBlue={
 		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
-		&TraversBlueInit,
-		&TraversBlueDeinit,
-		&TraversBlueTest
+		&initlargblue,
+		&deinitlargblue,
+		&testlargblue
 };
 
 
