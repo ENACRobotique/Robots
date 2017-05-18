@@ -66,6 +66,7 @@ void TrajectoryManagerClass::computeNextStep(){
 	Point3D nextPoint = _objectives[_readIndex];
 	double dx = nextPoint.getX() - Odometry.getPosX();
 	double dy = nextPoint.getY() - Odometry.getPosY();
+	int speed = nextPoint.getSpeed();
 	double value;
 	Serial.println("trajectoryStep : ");
 	Serial.println(_trajectoryStep);
@@ -74,6 +75,9 @@ void TrajectoryManagerClass::computeNextStep(){
 			break;
 		case InitialRotationStep:
 			value = atan2(dy, dx) - Odometry.getThetaRad();
+			if(speed < 0) {
+				value += PI;
+			}
 			value = constrainAngle(value);
 			//TODO : tourner au minimum (vers la gauche ou la droite)
 			Motors.computeParameters(value, Rotation);
@@ -82,7 +86,10 @@ void TrajectoryManagerClass::computeNextStep(){
 			break;
 		case CruiseStep:
 			value = sqrt(pow(dx, 2) + pow (dy, 2));
-			Motors.computeParameters(value, Straight);
+			if(speed < 0) {
+				value = -value;
+			}
+			Motors.computeParameters(value, Straight, abs(speed));
 			_trajectoryStep = FinalRotationStep;
 
 			break;
