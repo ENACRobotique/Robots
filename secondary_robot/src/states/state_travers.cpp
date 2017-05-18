@@ -21,7 +21,6 @@ static periodicTraj periodicFunction = &periodicProgTraj;
 
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
-Servo Hodor;
 #define TIME_TO_TRAVEL 75000
 
 void TraversYellowInit(sState *prev)
@@ -76,9 +75,10 @@ const PROGMEM trajElem trav_blue[]={
 
 const PROGMEM trajElem trav_yellow[]={
 		//Début trajectoire yellow
-		{300,0,100,DISTANCE},
+		{300,0,102.5,DISTANCE},
 		{0,90,250,TEMPS},
 		{250,90,-71.5/8,DISTANCE},
+		{300,0,45,DISTANCE},
 		{0,0,250,TEMPS},
 		(0,0,0),
 };

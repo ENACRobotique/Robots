@@ -12,6 +12,7 @@
 #include "../libs/lib_motor.h"
 #include "../libs/lib_radar.h"
 #include "state_funny_action.h"
+Servo Hodor;
 
 sState* reTirette(){
 	return &sTirette;

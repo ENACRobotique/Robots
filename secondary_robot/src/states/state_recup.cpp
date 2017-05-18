@@ -115,7 +115,7 @@ sState *testRecup()
 			Dynamixel.move(NUM_DYNAMIXEL,DYN_UP);
 			if(millis()-time_for_release>1000)
 			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_UP)<10)
-			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
+			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
 			{step++;}
 			break;
 		case 2:
