@@ -13,6 +13,9 @@ SERIAL_SEND_TIMEOUT = 500  # ms
 DOWN_MSG_SIZE = 47
 UP_MSG_SIZE = 9
 
+RAD_TO_UINT16_FACTOR = 10430.378350470453
+SPEED_TO_UINT8_SUBSTRACTOR = 127
+
 ### Up (Prop -> raspi) message declaration ###
 
 
@@ -39,8 +42,16 @@ class sMessageUp:
         self.down_id = None  # The id of the answered down (raspi-> teensy) message. Used for ACK, NON_ACK and POINT_REACHED
         self.x = None  # x position in mm, in table frame
         self.y = None  # y position in mm, in table frame
-        self.theta = None  # orientation in degree/radians, in table frame
+        self.__theta = None  # orientation in degree/radians, in table frame
         self.point_id = None  # the id of the trajectory point reached. Used in POINT_REACHED.
+
+    @property
+    def theta(self):
+        return self.__theta / RAD_TO_UINT16_FACTOR
+
+    @theta.setter
+    def theta(self, theta):
+        self.__theta = theta * RAD_TO_UINT16_FACTOR
 
     def deserialize(self, packed):
         s = bitstring.BitStream(packed)
@@ -145,11 +156,27 @@ class Communication:
         def __init__(self):
             self.nb_traj = 0  # :8
 
-            self.speed = 0  # :8
+            self.__speed = 0  # :8
 
-            self.theta_final = 0  # :16
+            self.__theta_final = 0  # :16
 
             self.element = []
+
+        @property
+        def theta_final(self):
+            return self.__theta_final / RAD_TO_UINT16_FACTOR
+
+        @theta_final.setter
+        def theta_final(self, theta_final):
+            self.__theta_final = theta_final * RAD_TO_UINT16_FACTOR
+
+        @property
+        def speed(self):
+            return self.__speed - SPEED_TO_UINT8_SUBSTRACTOR
+
+        @speed.setter
+        def speed(self, speed):
+            self.__speed = speed + SPEED_TO_UINT8_SUBSTRACTOR
 
         def serialize(self):
             ser = bitstring.pack('uint:8, uint:8, uintle:16', self.nb_traj, self.speed, self.theta_final)
@@ -165,7 +192,16 @@ class Communication:
 
             self.y = 0  # 16
 
-            self.theta = 0  # 16
+            self.__theta = 0  # 16
+
+        @property
+        def theta(self):
+            return self.__theta / RAD_TO_UINT16_FACTOR
+
+        @theta.setter
+        def theta(self, theta):
+            self.__theta = theta * RAD_TO_UINT16_FACTOR
+
 
         def serialize(self):
             return bitstring.pack('uintle:16, uintle:16, uintle:16', self.x, self.y, self.theta)
