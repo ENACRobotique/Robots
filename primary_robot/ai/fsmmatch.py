@@ -83,9 +83,9 @@ class StateColorSelection(FSMState):
     def deinit(self):
         self.behavior.start_match()
         if self.behavior.color == Color.YELLOW:
-            self.behavior.robot.locomotion.reposition_robot(1820, 2800, math.pi)
+            self.behavior.robot.locomotion.reposition_robot(2800, 1820, math.pi)
         else:
-            self.behavior.robot.locomotion.reposition_robot(1820, 200, 0)
+            self.behavior.robot.locomotion.reposition_robot(200, 1820, 0)
 
 
 
@@ -95,8 +95,8 @@ class StateTraj1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        p1 = self.behavior.robot.locomotion.Point(1820, 2100)
-        p2 = self.behavior.robot.locomotion.Point(1500, 2100)
+        p1 = self.behavior.robot.locomotion.Point(2100, 1820)
+        p2 = self.behavior.robot.locomotion.Point(2100, 1500)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], theta=0, speed=100)
 
     def test(self):
@@ -130,7 +130,7 @@ class StateSmallCrater1Yellow(FSMState):
         self.behavior = behavior
         self.stopped = False
         self.behavior.robot.io.start_ball_picker()
-        self.behavior.robot.locomotion.go_to_orient(1500, 2600, 0)
+        self.behavior.robot.locomotion.go_to_orient(2600, 1500, 0)
 
 
     def test(self):
