@@ -41,9 +41,10 @@ void handleMessage(sMessageDown msg) {
 			TrajectoryManager.resume();
 			break;
 		case RECALAGE:
+			theta = (double)msg.recalage.theta / RAD_TO_UINT16;
 			Odometry.setPosX(msg.recalage.x);
 			Odometry.setPosY(msg.recalage.y);
-			Odometry.setThetaRad(msg.recalage.theta);
+			Odometry.setThetaRad(theta);
 			break;
 		case EMPTY_POINTS:
 			TrajectoryManager.emptyPoints();
