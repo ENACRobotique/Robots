@@ -133,15 +133,16 @@ class Communication:
         STOP = 1
         RESTART = 2
         REPOSITIONING = 3
+        EMPTY_POINTS = 4
         # 2017 Cup Specials
-        START_BALL_PICKER_MOTOR = 4
-        STOP_BALL_PICKER_MOTOR = 5
-        START_CANNON_MOTOR = 6
-        STOP_CANNON_MOTOR = 7
-        OPEN_CANNON_BARRIER = 8
-        CLOSE_CANNON_BARRIER = 9
-        OPEN_ROCKET_LAUNCHER = 10
-        LOCK_ROCKET_LAUNCHER = 11
+        START_BALL_PICKER_MOTOR = 5
+        STOP_BALL_PICKER_MOTOR = 6
+        START_CANNON_MOTOR = 7
+        STOP_CANNON_MOTOR = 8
+        OPEN_CANNON_BARRIER = 9
+        CLOSE_CANNON_BARRIER = 10
+        OPEN_ROCKET_LAUNCHER = 11
+        LOCK_ROCKET_LAUNCHER = 12
 
     class sTrajElement():
         def __init__(self):
