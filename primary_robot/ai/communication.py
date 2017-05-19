@@ -24,6 +24,7 @@ class eTypeUp(Enum):
     NON_ACK = 1
     POINT_REACHED = 2
     POSITION = 3
+    POINTS_BUFFER_FULL = 4
 
 
 class sMessageUp:

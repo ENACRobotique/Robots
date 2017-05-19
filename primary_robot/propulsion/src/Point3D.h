@@ -12,7 +12,9 @@ class Point3D {
 public:
 	Point3D();
 	Point3D(double x, double y);
+	Point3D(double x, double y, int speed);
 	Point3D(double x, double y, double theta);
+	Point3D(double x, double y, double theta, int speed);
 	virtual ~Point3D();
 
 	double getTheta() const {
@@ -39,6 +41,8 @@ public:
 		this->_y = y;
 	}
 
+
+
 	bool careAboutTheta() const {
 		return _careAboutTheta;
 	}
@@ -47,10 +51,15 @@ public:
 		_careAboutTheta = careAboutTheta;
 	}
 
+	double getSpeed() const {
+		return _speed;
+	}
+
 private:
 	double _x;
 	double _y;
 	double _theta;
+	double _speed;
 	bool _careAboutTheta;
 };
 
