@@ -38,7 +38,6 @@ class FSMMatch(Behavior):
         self.start_time = time.time()
 
 
-
 class FSMState:
     def __init__(self, behavior):
         raise NotImplementedError("this state is not defined yet")
@@ -85,10 +84,7 @@ class StateColorSelection(FSMState):
         if self.behavior.color == Color.YELLOW:
             self.behavior.robot.locomotion.reposition_robot(2955, 1800, math.pi)
         else:
-            self.behavior.robot.locomotion.reposition_robot(200, 1800, 0)
-
-
-
+            self.behavior.robot.locomotion.reposition_robot(45, 1800, 0)
 
 
 class StateTraj1Yellow(FSMState):
@@ -118,21 +114,34 @@ class StateTraj1Yellow(FSMState):
 class StateTraj1Blue(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
+        self.stopped = False
+        p1 = self.behavior.robot.locomotion.Point(900, 1820)
+        p2 = self.behavior.robot.locomotion.Point(1150, 1700)
+        p3 = self.behavior.robot.locomotion.Point(1020, 1450)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=math.pi, speed=100)
         pass
 
     def test(self):
-        pass
+        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateSmallCrater1Blue
 
     def deinit(self):
         pass
+
 
 class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
         self.behavior.robot.io.start_ball_picker()
-        self.behavior.robot.locomotion.go_to_orient(2600, 1500, 0)
-
+        self.behavior.robot.locomotion.go_to_orient(2600, 1500, 0, 50)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
@@ -149,7 +158,41 @@ class StateSmallCrater1Yellow(FSMState):
         pass
 
 
+class StateSmallCrater1Blue(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        self.behavior.robot.io.start_ball_picker()
+        self.behavior.robot.locomotion.go_to_orient(400, 1500, math.pi, 50)
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= 15 and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > 15 and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateTrajFirePositionBlue1
+
+    def deinit(self):
+        pass
+
+
 class StateTrajFirePositionYellow1(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        pass
+
+    def test(self):
+        pass
+
+    def deinit(self):
+        pass
+
+
+class StateTrajFirePositionBlue1(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         pass
