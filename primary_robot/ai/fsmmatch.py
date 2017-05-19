@@ -24,9 +24,9 @@ class FSMMatch(Behavior):
 
     def loop(self):
         time_now = time.time()
-        if time_now - self.start_time >= FUNNY_ACTION_TIME:  # Checks time for funny action!
+        if self.start_time is not None and time_now - self.start_time >= FUNNY_ACTION_TIME:  # Checks time for funny action!
             next_state = StateFunnyAction
-        elif time_now - self.start_time >= END_MATCH_TIME:
+        elif self.start_time is not None and time_now - self.start_time >= END_MATCH_TIME:
             next_state = StateEnd
         else:
             next_state = self.state.test()
