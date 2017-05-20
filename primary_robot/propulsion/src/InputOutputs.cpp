@@ -40,16 +40,13 @@ void InputOutputs::init() {
 		_servos[i] = Servo();
 	}
 	_servos[0].attach(SERVO1);
-	_servos[0].write(0);
 	_servos[1].attach(SERVO2);
-	_servos[1].write(0);
 	_servos[2].attach(SERVO3);
-	_servos[2].write(0);
 	_servos[3].attach(SERVO4);
-	_servos[3].write(10);
 
 
-	analogWriteResolution(8);
+	setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_CLOSED);
+	IOs.setServoPosition(SERVO_ROCKET, ROCKET_IDLE);
 }
 
 void InputOutputs::processActions() {
