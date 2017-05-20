@@ -16,6 +16,8 @@ extern "C" {
 
 TrajectoryManagerClass TrajectoryManager = TrajectoryManagerClass();
 
+Point3D *lastPoint = NULL;
+
 TrajectoryManagerClass::TrajectoryManagerClass() {
 	_readIndex = 0;
 	_writeIndex = 0;
@@ -62,6 +64,16 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 }
 
 void TrajectoryManagerClass::computeNextStep(){
+	Serial.print("CNS : ");
+	Serial.print((long) lastPoint);
+	Serial.print(" ");
+	Serial.println(_trajectoryStep);
+	if (lastPoint != NULL && _trajectoryStep == InitialRotationStep){
+		Serial.print("Traj id : ");
+		Serial.println(lastPoint->getTrajId());
+		reached_point(lastPoint->getTrajId(), lastPoint->getPointId());
+		lastPoint = NULL;
+	}
 	if(_readIndex == _writeIndex) {		//no more points to read
 		return;
 	}
@@ -99,14 +111,13 @@ void TrajectoryManagerClass::computeNextStep(){
 				value = constrainAngle(value);
 				Motors.computeParameters(value, Rotation);
 			}
-
-			reached_point(_trajectoriesId[_trajReadIndex], _pointId);
-			if (_pointId == _trajectoriesLength[_trajReadIndex] - 1){ //Trajectoire finie
+			*lastPoint = nextPoint;
+			/*if (_pointId == _trajectoriesLength[_trajReadIndex] - 1){ //Trajectoire finie
 				_trajReadIndex = (_trajReadIndex + 1)%NB_POINTS_MAX;
 				_pointId = 0;
 			} else {
 			_pointId++;
-			}
+			}*/
 
 			_trajectoryStep = InitialRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;

@@ -23,6 +23,7 @@ bool isInit = false;
 void updateOdometry() {
 	Odometry.updatePosition();
 	if(Motors.isAtDestination()) {
+		Serial.println("DEstination");
 		TrajectoryManager.computeNextStep();
 	}
 	Motors.controlMotors();
