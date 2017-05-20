@@ -76,3 +76,14 @@ void handleMessage(sMessageDown msg) {
 			break;
 	}
 }
+
+void reportPosition(){
+	sMessageUp msg;
+	msg.type = POSITION;
+	msg.down_id = 0;
+	msg.x  = (int) Odometry.getPosX();
+	msg.y = (int) Odometry.getPosY();
+	msg.theta = (int) (Odometry.getThetaRad() * RAD_TO_UINT16);
+	msg.point_id = 0;
+	message_send(msg);
+}

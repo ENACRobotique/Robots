@@ -135,7 +135,7 @@ void TrajectoryManagerClass::reached_point(int trajId, int pointId){
 	sMessageUp msg;
 	msg.type = POINT_REACHED;
 	msg.down_id = trajId;
-	msg.x  = Odometry.getPosX();
+	msg.x = Odometry.getPosX();
 	msg.y = Odometry.getPosY();
 	msg.theta = Odometry.getThetaRad();
 	msg.point_id = pointId;
