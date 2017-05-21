@@ -25,8 +25,8 @@
 #define MOTOR_PICKER 29
 #define MOTOR_LAUNCHER 30
 
-#define TIRETTE 27
-#define COLOR 28
+#define BUTEE_LEFT 27
+#define BUTEE_RIGHT 28
 #define IHM_BONUS 35
 #define LED_RED 36
 #define LED_GREEN 37
@@ -45,7 +45,7 @@
 #define ROCKET_LAUNCH 150
 
 #define UPDATE_PERIOD 0.02f
-#define REPORT_POSITION_TIMER 3000
+#define REPORT_POSITION_TIMER 3000000
 
 #define MM_TO_INC 28.64
 #define RAD_TO_INC 7853.40

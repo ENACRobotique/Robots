@@ -22,6 +22,7 @@ bool isInit = false;
 
 void updateOdometry() {
 	Odometry.updatePosition();
+	TrajectoryManager.testRecalage();
 	if(Motors.isAtDestination()) {
 		TrajectoryManager.computeNextStep();
 	}

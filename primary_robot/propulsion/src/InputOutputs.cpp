@@ -22,8 +22,8 @@ InputOutputs::~InputOutputs() {
 }
 
 void InputOutputs::init() {
-	pinMode(TIRETTE, INPUT_PULLUP);
-	pinMode(COLOR, INPUT_PULLUP);
+	pinMode(BUTEE_LEFT, INPUT_PULLUP);
+	pinMode(BUTEE_RIGHT, INPUT_PULLUP);
 	pinMode(LED_RED, OUTPUT);
 	pinMode(LED_GREEN, OUTPUT);
 	pinMode(LED_BLUE, OUTPUT);
@@ -118,4 +118,11 @@ void InputOutputs::launchRocket() {
 void InputOutputs::colorFalling() {
 	events |= BIT(ColorEvent);
 	events &= ~BIT(ColorState);
+}
+
+int InputOutputs::isRecaled() {
+	if(!digitalRead(BUTEE_LEFT) && !digitalRead(BUTEE_RIGHT)) {
+		return true;
+	}
+	return false;
 }

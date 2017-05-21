@@ -38,6 +38,7 @@ public:
 	void tiretteFalling();
 	void colorRising();
 	void colorFalling();
+	int isRecaled();
 
 private:
 

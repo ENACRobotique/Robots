@@ -19,7 +19,8 @@ void handleMessage(sMessageDown msg) {
 	double theta;
 	switch (msgType){
 		case TRAJECTOIRE:
-			TrajectoryManager.addTrajectoryInfo(msg.id, msg.traj.nb_trajectories);
+			//TODO : supprimer cette ligne si elle n'a plus d'impact (c'est à priori le cas)
+			//TrajectoryManager.addTrajectoryInfo(msg.id, msg.traj.nb_trajectories);
 			for (int i=0; i < msg.traj.nb_trajectories; i++){
 				speed = (msg.traj.traj_speed - 127) * SPEED_COEFF;
 				point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, speed, msg.id, i);
@@ -46,6 +47,7 @@ void handleMessage(sMessageDown msg) {
 			TrajectoryManager.resume();
 			break;
 		case RECALAGE:
+			TrajectoryManager.stopRecalage();
 			theta = (double)msg.recalage.theta / RAD_TO_UINT16;
 			Odometry.setPosX(msg.recalage.x);
 			Odometry.setPosY(msg.recalage.y);
@@ -53,6 +55,9 @@ void handleMessage(sMessageDown msg) {
 			break;
 		case EMPTY_POINTS:
 			TrajectoryManager.emptyPoints();
+			break;
+		case DO_RECALAGE:
+			TrajectoryManager.doRecalage();
 			break;
 		case START_BALL_PICKER_MOTOR:
 			IOs.setPickerSpeed(PICKER_SPEED);
