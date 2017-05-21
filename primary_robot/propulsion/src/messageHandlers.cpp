@@ -23,14 +23,21 @@ void handleMessage(sMessageDown msg) {
 			for (int i=0; i < msg.traj.nb_trajectories; i++){
 				speed = (msg.traj.traj_speed - 127) * SPEED_COEFF;
 				point = Point3D(msg.traj.element[i].x, msg.traj.element[i].y, speed, msg.id, i);
+				if (i == msg.traj.nb_trajectories - 1){ //Dernier point
+					theta = (double)msg.traj.theta_final / RAD_TO_UINT16;
+					point.setTheta(theta);
+				}
 				TrajectoryManager.addPoint(point, &ret);
 				if (ret != 0){ // Buffer de trajectoire plein
 					Serial.print("Tableau plein?");
 					//TODO : send POINTS_BUFFER_FULL message.
 				}
 			}
-			theta = (double)msg.traj.theta_final / RAD_TO_UINT16;
+			/*Serial.print("Theta final : ");
+			Serial.print(theta);
 			point.setTheta(theta);
+			Serial.print(" -> ");
+			Serial.println(point.careAboutTheta());*/
 			break;
 		case STOP:
 			TrajectoryManager.stop();

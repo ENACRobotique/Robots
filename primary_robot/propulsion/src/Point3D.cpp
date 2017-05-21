@@ -51,7 +51,7 @@ Point3D::Point3D(double x, double y, double theta, int speed) {
 	_x = x;
 	_y = y;
 	_theta = theta;
-	_careAboutTheta = true;
+	_careAboutTheta = false;
 	_speed = speed;
 	_trajId = 0;
 	_pointId = 0;
@@ -62,7 +62,7 @@ Point3D::Point3D(double x, double y, int speed, int trajId,
 	 _x = x;
 	_y = y;
 	_theta = 0;
-	_careAboutTheta = true;
+	_careAboutTheta = false;
 	_speed = speed;
 	_trajId = trajId;
 	_pointId = pointId;
