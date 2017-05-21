@@ -65,7 +65,10 @@ void TrajectoryManagerClass::readPoint(Point3D *point, int* returnValue) {
 
 void TrajectoryManagerClass::computeNextStep(){
 	Serial.print("CNS : ");
-	Serial.print((long) lastPoint);
+	//Serial.print((long) lastPoint);
+	if(lastPoint != NULL) {
+		Serial.print(lastPoint->getX());
+	}
 	Serial.print(" ");
 	Serial.println(_trajectoryStep);
 	if (lastPoint != NULL && _trajectoryStep == InitialRotationStep){
@@ -78,10 +81,11 @@ void TrajectoryManagerClass::computeNextStep(){
 		return;
 	}
 
-	Point3D nextPoint = _objectives[_readIndex];
-	double dx = nextPoint.getX() - Odometry.getPosX();
-	double dy = nextPoint.getY() - Odometry.getPosY();
-	int speed = nextPoint.getSpeed();
+	//Point3D* nextPoint = &(_objectives[_readIndex]);
+	Point3D* nextPoint = _objectives + _readIndex;
+	double dx = nextPoint->getX() - Odometry.getPosX();
+	double dy = nextPoint->getY() - Odometry.getPosY();
+	int speed = nextPoint->getSpeed();
 	double value;
 	switch (_trajectoryStep){
 		case Stop:
@@ -106,19 +110,12 @@ void TrajectoryManagerClass::computeNextStep(){
 
 			break;
 		case FinalRotationStep:
-			if (nextPoint.careAboutTheta()){
-				value = nextPoint.getTheta() - Odometry.getThetaRad();
+			if (nextPoint->careAboutTheta()){
+				value = nextPoint->getTheta() - Odometry.getThetaRad();
 				value = constrainAngle(value);
 				Motors.computeParameters(value, Rotation);
 			}
-			*lastPoint = nextPoint;
-			/*if (_pointId == _trajectoriesLength[_trajReadIndex] - 1){ //Trajectoire finie
-				_trajReadIndex = (_trajReadIndex + 1)%NB_POINTS_MAX;
-				_pointId = 0;
-			} else {
-			_pointId++;
-			}*/
-
+			lastPoint = nextPoint;
 			_trajectoryStep = InitialRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
 	}
