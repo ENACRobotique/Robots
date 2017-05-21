@@ -26,7 +26,7 @@
 
 /////// THE FOLLOWING DEFINES MESSAGES RASPI -> TEENSY (Down messages)////////
 
-typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE, EMPTY_POINTS,
+typedef enum{TRAJECTOIRE, STOP, RESTART, RECALAGE, EMPTY_POINTS, DO_RECALAGE,
 //2017 Specials :
     START_BALL_PICKER_MOTOR,
     STOP_BALL_PICKER_MOTOR,
@@ -92,7 +92,7 @@ typedef struct __attribute__((packed)){
 
 ////////// END RASPI -> TEENSY MESSAGES ////////
 /////// THE FOLLOWING DEFINES MESSAGES TEENSY -> RASPI (Up messages)////////
-typedef enum{ACK, NON_ACK, POINT_REACHED, POSITION, POINTS_BUFFER_FULL}eTypeUp;
+typedef enum{ACK, NON_ACK, POINT_REACHED, POSITION, POINTS_BUFFER_FULL, RECALAGE_OK}eTypeUp;
 
 typedef struct __attribute__((packed)){
 	eTypeUp type :8; //type

@@ -133,6 +133,9 @@ void TrajectoryManagerClass::stop(){
 
 void TrajectoryManagerClass::resume(){
 	_trajectoryStep = InitialRotationStep;
+	if(_recalageRunning) {
+		doRecalage();
+	}
 }
 
 void TrajectoryManagerClass::emptyPoints() {
@@ -166,6 +169,17 @@ void TrajectoryManagerClass::testRecalage() {
 		Serial.println("recalage  ok !!!");
 		Motors.computeParameters(0, Straight, 0);
 		_recalageRunning = false;
+
+
+		sMessageUp msg;
+		msg.type = RECALAGE_OK;
+		msg.down_id = 0;
+		msg.x = (int) Odometry.getPosX();
+		msg.y = (int) Odometry.getPosY();
+		msg.theta = (int)(Odometry.getThetaRad() * RAD_TO_UINT16);
+		msg.point_id = 0;
+		message_send(msg);
+
 		//TODO send msg ok
 	}
 
@@ -175,4 +189,9 @@ void TrajectoryManagerClass::doRecalage() {
 	Serial.println("recalage !");
 	_recalageRunning = true;
 	Motors.computeParameters(-200000, Straight, 5000);
+}
+
+void TrajectoryManagerClass::stopRecalage() {
+	Motors.computeParameters(0, Straight, 0);
+	_recalageRunning = false;
 }

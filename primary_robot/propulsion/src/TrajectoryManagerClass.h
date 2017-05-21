@@ -31,6 +31,7 @@ public:
 	void computeNextStep();
 	void testRecalage();
 	void doRecalage();
+	void stopRecalage();
 	void stop();
 	void resume();
 private:
