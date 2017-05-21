@@ -9,6 +9,7 @@
 #include "OdometryController.h"
 #include "MotorController.h"
 #include "messages.h"
+#include "params.h"
 extern "C" {
 	#include "utils.h"
 }
@@ -143,9 +144,9 @@ void TrajectoryManagerClass::reached_point(int trajId, int pointId){
 	sMessageUp msg;
 	msg.type = POINT_REACHED;
 	msg.down_id = trajId;
-	msg.x = Odometry.getPosX();
-	msg.y = Odometry.getPosY();
-	msg.theta = Odometry.getThetaRad();
+	msg.x = (int) Odometry.getPosX();
+	msg.y = (int) Odometry.getPosY();
+	msg.theta = (int)(Odometry.getThetaRad() * RAD_TO_UINT16);
 	msg.point_id = pointId;
 	message_send(msg);
 }
