@@ -12,10 +12,10 @@ void setupInterrupts();
 
 void isrLeft();
 void isrRight();
-
+/*
 void isrTiretteRising();
 void isrTiretteFalling();
 void isrColorRising();
 void isrColorFalling();
-
+*/
 #endif /* INTERRUPTFUNCTIONS_H_ */

@@ -7,6 +7,7 @@
 
 #include "TrajectoryManagerClass.h"
 #include "OdometryController.h"
+#include "InputOutputs.h"
 #include "MotorController.h"
 #include "messages.h"
 #include "params.h"
@@ -26,6 +27,7 @@ TrajectoryManagerClass::TrajectoryManagerClass() {
 	_trajReadIndex = 0;
 	_trajWriteIndex = 0;
 	_pointId = 0;
+	_recalageRunning = false;
 }
 
 TrajectoryManagerClass::~TrajectoryManagerClass() {
@@ -157,4 +159,20 @@ void TrajectoryManagerClass::addTrajectoryInfo(int trajId, int trajLength){
 	_trajectoriesId[_trajWriteIndex] = trajId;
 	_trajectoriesLength[_trajWriteIndex] = trajLength;
 	_trajWriteIndex = (_trajWriteIndex + 1)%NB_POINTS_MAX;
+}
+
+void TrajectoryManagerClass::testRecalage() {
+	if(_recalageRunning && IOs.isRecaled()) {
+		Serial.println("recalage  ok !!!");
+		Motors.computeParameters(0, Straight, 0);
+		_recalageRunning = false;
+		//TODO send msg ok
+	}
+
+}
+
+void TrajectoryManagerClass::doRecalage() {
+	Serial.println("recalage !");
+	_recalageRunning = true;
+	Motors.computeParameters(-200000, Straight, 5000);
 }

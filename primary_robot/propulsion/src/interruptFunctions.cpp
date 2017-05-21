@@ -19,7 +19,7 @@ void isrLeft() {
 void isrRight() {
 	Odometry.ISRRight();
 }
-
+/*
 void isrTiretteRising() {
 	IOs.tiretteRising();
 }
@@ -35,13 +35,13 @@ void isrColorRising() {
 void isrColorFalling() {
 	IOs.colorFalling();
 }
-
+*/
 void setupInterrupts() {
 	attachInterrupt(ODO_I_LEFT, isrLeft, RISING);
 	attachInterrupt(ODO_I_RIGHT, isrRight, RISING);
-	attachInterrupt(TIRETTE, isrTiretteRising, RISING);
-	attachInterrupt(TIRETTE, isrTiretteFalling, FALLING);
-	attachInterrupt(COLOR, isrColorRising, RISING);
-	attachInterrupt(COLOR, isrColorFalling, FALLING);
+	//attachInterrupt(TIRETTE, isrTiretteRising, RISING);
+	//attachInterrupt(TIRETTE, isrTiretteFalling, FALLING);
+	//attachInterrupt(COLOR, isrColorRising, RISING);
+	//attachInterrupt(COLOR, isrColorFalling, FALLING);
 
 }

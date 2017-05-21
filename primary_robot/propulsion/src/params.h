@@ -25,8 +25,8 @@
 #define MOTOR_PICKER 29
 #define MOTOR_LAUNCHER 30
 
-#define TIRETTE 27
-#define COLOR 28
+#define BUTEE_LEFT 27
+#define BUTEE_RIGHT 28
 #define IHM_BONUS 35
 #define LED_RED 36
 #define LED_GREEN 37

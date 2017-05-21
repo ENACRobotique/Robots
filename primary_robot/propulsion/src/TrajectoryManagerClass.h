@@ -29,6 +29,8 @@ public:
 	void readPoint(Point3D *point, int * returnValue);
 	void reached_point(int trajId, int pointId);
 	void computeNextStep();
+	void testRecalage();
+	void doRecalage();
 	void stop();
 	void resume();
 private:
@@ -42,6 +44,7 @@ private:
 	int _trajReadIndex;
 	int _trajWriteIndex;
 	int _pointId; //Numéro du point dans sa trajectoire
+	bool _recalageRunning;
 };
 
 extern TrajectoryManagerClass TrajectoryManager;
