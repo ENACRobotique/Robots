@@ -11,5 +11,6 @@
 #include "messages.h"
 
 void handleMessage(sMessageDown msg);
+void reportPosition();
 
 #endif /* MESSAGEHANDLERS_H_ */

@@ -15,6 +15,7 @@ public:
 	Point3D(double x, double y, int speed);
 	Point3D(double x, double y, double theta);
 	Point3D(double x, double y, double theta, int speed);
+	Point3D(double x, double y, int speed, int trajId, int pointId);
 	virtual ~Point3D();
 
 	double getTheta() const {
@@ -22,6 +23,7 @@ public:
 	}
 
 	void setTheta(double theta) {
+		this->_careAboutTheta = true;
 		this->_theta = theta;
 	}
 
@@ -55,12 +57,30 @@ public:
 		return _speed;
 	}
 
+	int getPointId() const {
+		return _pointId;
+	}
+
+	int getTrajId() const {
+		return _trajId;
+	}
+
+	void setPointId(int pointId) {
+		_pointId = pointId;
+	}
+
+	void setTrajId(int trajId) {
+		_trajId = trajId;
+	}
+
 private:
 	double _x;
 	double _y;
 	double _theta;
 	double _speed;
 	bool _careAboutTheta;
+	int _trajId;
+	int _pointId;
 };
 
 #endif /* POINT3D_H_ */

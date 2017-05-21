@@ -45,13 +45,13 @@
 #define ROCKET_LAUNCH 150
 
 #define UPDATE_PERIOD 0.02f
+#define REPORT_POSITION_TIMER 3000
 
 #define MM_TO_INC 28.64
 #define RAD_TO_INC 7853.40
 #define RAD_TO_UINT16 10430.378350470453
 
 #define SPEED_COEFF 78
-
 /*
  * All pwm on the same timer have the same frequency.
  * Timer | pwm pins

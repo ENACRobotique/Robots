@@ -15,6 +15,8 @@ volatile long acc = 0;
 sMessageDown msgDown;
 sMessageUp msgUp;
 IntervalTimer odometryTimer;
+IntervalTimer positionReportTimer;
+bool isInit = false;
 
 
 
@@ -72,6 +74,10 @@ void setup()
 void loop()
 {
 	if (message_recieve(&msgDown) == 1){
+		if (!isInit){
+			isInit = true;
+			positionReportTimer.begin(reportPosition, REPORT_POSITION_TIMER);
+		}
 		Serial.print("\nJ'ai un message ! de type ");
 		Serial.println(msgDown.type);
 		handleMessage(msgDown);
