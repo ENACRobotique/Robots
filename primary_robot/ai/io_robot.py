@@ -198,8 +198,10 @@ class USReader(threading.Thread):
         while True:
             for i, sensor in enumerate(us_sensors):
                 self.i2c.write_byte_data(sensor.address, 0, 81)
+            time.sleep(0.070)
+            for i, sensor in enumerate(us_sensors):
                 dst = self.i2c.read_word_data(sensor.address, 2) / 255
-                us_sensors_distance[us_sensors[i]] = dst
-            time.sleep(1)
+                if dst != 0:
+                    us_sensors_distance[us_sensors[i]] = dst
 
 
