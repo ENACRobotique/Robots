@@ -39,8 +39,6 @@ void initTrajyellowInit(sState *prev)
 		_backFromPause = 1;
 		pause_time+=(millis()-start_pause);
 	}
-	uint16_t limits[RAD_NB_PTS]={25,0,0,0};
-	radarSetLim(limits);
 #ifdef DEBUG
 	Serial.println(pause_time);
 #endif
@@ -64,6 +62,8 @@ void deinitTrajyellowInit(sState *next)
 		st_prevSaveTime_radar=0;
 		move(0,0);
 	}
+	uint16_t limits[RAD_NB_PTS]={0,0,0,0};
+	radarSetLim(limits);
 }
 
 const PROGMEM trajElem start_blue[]={
@@ -86,12 +86,17 @@ sState *testTrajyellowInit()
 {
 	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
-
-	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
+	//						   E 6 4  2  0
+	uint16_t limits[RAD_NB_PTS]={0,0,30,30};
+	radarSetLim(limits);
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
+	if(radarIntrusion()>0){
+		 return &sPause;
+	}
+
 
 	if (( (digitalRead(PIN_COLOR)==COLOR_BLUE) &&
 		 periodicFunction(start_blue,&st_saveTime,&i,&prev_millis) )||
@@ -111,7 +116,7 @@ sState *testTrajyellowInit()
 }
 
 sState sTrajyellowInit={
-		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+		BIT(E_MOTOR)|BIT(E_RADAR),
 		&initTrajyellowInit,
 		&deinitTrajyellowInit,
 		&testTrajyellowInit
@@ -184,7 +189,7 @@ sState *testTrajblue()
 
 
 sState sTrajblueInit={
-		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+		BIT(E_MOTOR),//|BIT(E_RADAR),
 		&initTrajblue,
 		&deinitTrajblueInit,
 		&testTrajblue

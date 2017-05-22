@@ -49,6 +49,11 @@ void move(int speed,int angle){
 #endif
 }
 
+void stop(){
+	motSetCon(0);
+}
+
+
 void emergencyStop(){
 	move(0,0);
 	for(int i=0;i<NB_MOTORS;i++){

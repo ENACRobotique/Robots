@@ -12,6 +12,7 @@
 #include "Arduino.h"
 
 void move(int speed,int angle);
+void stop();
 void emergencyStop();
 void moveInitHard(int pinDirServo,int zeroAngle,int startAngle);
 

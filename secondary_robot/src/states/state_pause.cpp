@@ -25,7 +25,7 @@ sState* testPause(){
 
 void initPause(sState *prev){
     pausePrevState=prev;
-    move(0,0);
+    stop();
 #ifdef DEBUG
     Serial.println(F("debut pause"));
 #endif

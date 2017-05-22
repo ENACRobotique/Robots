@@ -26,7 +26,6 @@ Servo crema_servo;
 
 sState* testTirette()
 	{
-
 	_matchStart=millis();
     static unsigned long prevIn=0;  //last time the tirette was seen "in"
     static unsigned long timepull=0;
@@ -68,7 +67,7 @@ void deinitTirette(sState *next)
 	}
 
 sState sTirette={
-        BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+        BIT(E_MOTOR),//|BIT(E_RADAR),
         &initTirette,
         &deinitTirette,
         &testTirette
