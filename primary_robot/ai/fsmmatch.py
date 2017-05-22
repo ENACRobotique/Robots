@@ -12,7 +12,8 @@ END_MATCH_TIME = 95  # in seconds
 #2017 specific
 SMALL_CRATER_COLLECT_DURATION = 8 # in seconds
 SMALL_CRATER_FIRE_DURATION = 7 # in seconds
-STANDART_SEPARATION_US = 20 # in cm
+STANDARD_SEPARATION_US = 20 # in cm
+FULL_SPEED_CANNON_TIME = 2  # in seconds
 
 class Color(Enum):
     BLUE = "blue"
@@ -105,10 +106,10 @@ class StateTraj1Yellow(FSMState):
         self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=100)
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= STANDART_SEPARATION_US and not self.stopped:
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDART_SEPARATION_US and self.stopped:
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
@@ -139,10 +140,10 @@ class StateSmallCrater1Yellow(FSMState):
         self.ball_picker_start_time = time.time()
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= STANDART_SEPARATION_US and not self.stopped:
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDART_SEPARATION_US and self.stopped:
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
@@ -159,34 +160,52 @@ class StateTrajFirePositionYellow1(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
+        self.wait_for_repositionning = False
         #p1 = self.behavior.robot.locomotion.Point(2700, 1450)
         self.behavior.robot.locomotion.go_to_orient(2700, 1350, 4.71, 120)
         #p2 = self.behavior.robot.locomotion.Point(2700, 1680)
-        self.behavior.robot.locomotion.go_to_orient(2850, 1600, 4.41, -100)
-        self.fire_started = False
-        self.fire_start_time = 0
+        self.behavior.robot.locomotion.go_to_orient(2850, 1700, 4.41, -100)
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= STANDART_SEPARATION_US  and not self.stopped:
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDART_SEPARATION_US  and self.stopped:
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
-        if self.behavior.robot.locomotion.is_trajectory_finished and not self.fire_started:
-            self.fire_start_time = time.time()
-            self.behavior.robot.io.open_cannon_barrier()
-            self.behavior.robot.io.start_cannon()
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
 
-        if  self.fire_started:
-            fire_duration = time.time() - self.fire_start_time
-            if fire_duration > SMALL_CRATER_FIRE_DURATION:
-                self.behavior.robot.io.stop_cannon()
-                return StateEnd
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(2850, 1618)
+            return StateFireYellow1
 
     def deinit(self):
         pass
+
+class StateFireYellow1(FSMMatch):
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.io.start_cannon()
+        self.run_motor_start = time.time()
+        self.fire_start = 0
+        self.firing = False
+
+    def test(self):
+        if self.robot.io.cannon_barrier_state == self.robot.io.CannonBarrierState.CLOSED and time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
+            self.robot.io.open_cannon_barrier()
+            self.fire_start = time.time()
+            self.firing = True
+
+        if self.firing and time.time() - self.fire_start >= SMALL_CRATER_FIRE_DURATION:
+            return StateEnd
+
+    def deinit(self):
+        self.behavior.robot.io.close_cannon_barrier()
+        self.behavior.robot.io.stop_cannon()
 
 
 

@@ -95,7 +95,7 @@ class Communication:
         self._current_msg_id = (self._current_msg_id + 1) % 256
         serialized = msg.serialize().tobytes()
         for i in range(max_retries):
-            print(serialized)
+            #print(serialized)
             self._serial_port.write(serialized)
             time_sent = int(round(time.time() * 1000))
             while self._serial_port.in_waiting < UP_MSG_SIZE:
