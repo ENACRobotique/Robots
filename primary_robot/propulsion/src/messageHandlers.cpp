@@ -59,6 +59,9 @@ void handleMessage(sMessageDown msg) {
 		case DO_RECALAGE:
 			TrajectoryManager.doRecalage();
 			break;
+		case RESET:
+			RESTART();
+			break;
 		case START_BALL_PICKER_MOTOR:
 			IOs.setPickerSpeed(PICKER_SPEED);
 			break;

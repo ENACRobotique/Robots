@@ -61,4 +61,10 @@
  *  FTM3 | 2, 7, 8, 14, 35, 36, 37, 38
  */
 
+#define RESTART_ADDR 0xE000ED0C
+#define READ_RESTART() (*(volatile uint32_t *)RESTART_ADDR)
+#define WRITE_RESTART(val) ((*(volatile uint32_t *)RESTART_ADDR) = (val))
+#define RESTART() WRITE_RESTART(0x5FA0004);
+
+
 #endif /* PARAMS_H_ */
