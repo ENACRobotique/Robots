@@ -33,6 +33,8 @@ def get_us_distance_by_postion(position):
     if len(distances) == 0:
         return 500000
     else:
+        if __debug__:
+            print('[IO] Distance for {} : {} cm'.format(position, min(distances)))
         return min(distances)
 
 
@@ -120,55 +122,72 @@ class IO(object):
         down_msg.message_type = self.robot.communication.eTypeDown.START_BALL_PICKER_MOTOR
         self.robot.communication.send_message(down_msg)
         self.ball_picker_state = self.BallPickerState.STARTED
-        pass
+        if __debug__:
+            print("[IO] ball picker started")
 
     def stop_ball_picker(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.STOP_BALL_PICKER_MOTOR
         self.robot.communication.send_message(down_msg)
         self.ball_picker_state = self.BallPickerState.STOPPED
+        if __debug__:
+            print("[IO] ball picker stopped")
 
     def start_cannon(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.START_CANNON_MOTOR
         self.robot.communication.send_message(down_msg)
         self.cannon_state = self.CannonState.FIRING
+        if __debug__:
+            print("[IO] cannon started")
 
     def stop_cannon(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.STOP_CANNON_MOTOR
         self.robot.communication.send_message(down_msg)
         self.cannon_state = self.CannonState.IDLE
+        if __debug__:
+            print("[IO] cannon stopped")
 
     def close_cannon_barrier(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.CLOSE_CANNON_BARRIER
         self.robot.communication.send_message(down_msg)
         self.cannon_barrier_state = self.CannonBarrierState.CLOSED
+        if __debug__:
+            print("[IO] cannon barrier closed")
 
     def open_cannon_barrier(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.OPEN_CANNON_BARRIER
         self.robot.communication.send_message(down_msg)
         self.cannon_barrier_state = self.CannonBarrierState.OPEN
+        if __debug__:
+            print("[IO] cannon barrier opened")
 
     def lock_rocket_launcher(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.LOCK_ROCKET_LAUNCHER
         self.robot.communication.send_message(down_msg)
         self.rocket_launcher_state = self.RocketLauncherState.LOCKED
+        if __debug__:
+            print("[IO] rocket launcher locked")
 
     def open_rocket_launcher(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.OPEN_ROCKET_LAUNCHER
         self.robot.communication.send_message(down_msg)
         self.rocket_launcher_state = self.RocketLauncherState.OPEN
+        if __debug__:
+            print("[IO] rocket launcher opened")
 
     def set_led_color(self, color):
         GPIO.output(PIN_LED_RED, color.value[0])
         GPIO.output(PIN_LED_GREEN, color.value[1])
         GPIO.output(PIN_LED_BLUE, color.value[2])
         self.led_color = color
+        if __debug__:
+            print("[IO] Led switched to {}".format(color))
 
     def _led_init(self):
         GPIO.setup(PIN_LED_RED, GPIO.OUT, initial=GPIO.LOW)
