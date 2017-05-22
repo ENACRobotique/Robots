@@ -10,6 +10,7 @@ class Locomotion:
         self.theta = None
         self.is_trajectory_finished = True
         self.is_stopped = True
+        self.is_recalage_ended = False
         self.current_trajectory = []
 
     def follow_trajectory(self, points, theta, speed):
@@ -78,6 +79,12 @@ class Locomotion:
         message = self.robot.communication.sMessageDown()
         message.message_type = self.robot.communication.eTypeDown.DO_RECALAGE
         self.robot.communication.send_message(message)
+        self.is_recalage_ended = False
+
+    def recalage_ok(self):
+        self.is_recalage_ended = True
+        self.is_stopped = True
+
 
     def synchronize_position(self):
         message = self.robot.communication.sMessageDown()
