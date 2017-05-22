@@ -231,3 +231,15 @@ bool MotorController::isAtDestination() {
 void MotorController::setAccel() {
 	_accel = pow(_speed,2)/(2*(_pTarget - _p2Real));
 }
+
+void MotorController::setOrientCoeffs() {
+	kOrient[KP] = KP_ORIENT;
+	kOrient[KI] = KI_ORIENT;
+	kOrient[KD] = KD_ORIENT;
+}
+
+void MotorController::clearOrientCoeffs() {
+	kOrient[KP] = 0;
+	kOrient[KI] = 0;
+	kOrient[KD] = 0;
+}

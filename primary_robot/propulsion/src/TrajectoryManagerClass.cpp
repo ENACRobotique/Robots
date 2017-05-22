@@ -167,8 +167,7 @@ void TrajectoryManagerClass::addTrajectoryInfo(int trajId, int trajLength){
 void TrajectoryManagerClass::testRecalage() {
 	if(_recalageRunning && IOs.isRecaled()) {
 		Serial.println("recalage  ok !!!");
-		Motors.computeParameters(0, Straight, 0);
-		_recalageRunning = false;
+		stopRecalage();
 
 
 		sMessageUp msg;
@@ -188,10 +187,12 @@ void TrajectoryManagerClass::testRecalage() {
 void TrajectoryManagerClass::doRecalage() {
 	Serial.println("recalage !");
 	_recalageRunning = true;
+	Motors.clearOrientCoeffs();
 	Motors.computeParameters(-200000, Straight, 5000);
 }
 
 void TrajectoryManagerClass::stopRecalage() {
+	Motors.setOrientCoeffs();
 	Motors.computeParameters(0, Straight, 0);
 	_recalageRunning = false;
 }

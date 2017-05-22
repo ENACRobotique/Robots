@@ -22,6 +22,10 @@
 #define KI_ORIENT 0.05
 #define KD_ORIENT 0.1
 
+enum{
+	KP, KI, KD
+};
+
 #define MIN_PWM 40
 
 typedef enum{
@@ -45,6 +49,8 @@ public:
 	void computeParameters(double target, MovementType, double speed = MAX_SPEED);
 	void controlMotors();
 	bool isAtDestination();
+	void setOrientCoeffs();
+	void clearOrientCoeffs();
 
 protected:
 	long getConsigne();
@@ -55,6 +61,7 @@ protected:
 	long getCruiseConsigne(double t);
 	long getDecelConsigne(double t);
 	void setAccel();
+
 
 private:
 	double _speed;
@@ -67,6 +74,8 @@ private:
 	MovementPhase _movementPhase;
 
 	int _intErrorLenght, _intErrorTheta;
+
+	double kOrient[3];
 
 };
 extern MotorController Motors;
