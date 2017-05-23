@@ -60,6 +60,7 @@ int message_recieve(sMessageDown *msg) {
 
 
 			if (isFirstMessage || //If it is the first message, accept it
+					raw_data_down.msg.type == RESET ||
 					((raw_data_down.msg.id - lastId)%256>0 && (raw_data_down.msg.id - lastId)%256<128)) { //Check if the message has a id bigger than the last recevied
 				isFirstMessage = false;
 				lastId = raw_data_down.msg.id;
