@@ -2,16 +2,12 @@ import sys
 
 import datetime
 import builtins
-<<<<<<< HEAD
-=======
-import time
->>>>>>> 450e4e07b8cf1a235e48e8096bbc65cc29578955
 
 from communication import *
 from io_robot import *
 from locomotion import *
 
-TRACE_FILE = "log/log_"+str(datetime.datetime.now()).replace(' ', '_')
+TRACE_FILE = "/home/pi/code/primary_robot/ai/log/log_"+str(datetime.datetime.now()).replace(' ', '_')
 
 behaviors = {
     "FSMMatch": 0,
@@ -32,12 +28,6 @@ class Robot(object):
             raise NotImplementedError("This behavior is not implemented yet !")
         else:
             raise NotImplementedError("This behavior is not implemented yet !")
-    
-    def reset_teensy(self):
-        message = self.communication.sMessageDown()
-        message.message_type = self.communication.eTypeDown.RESET
-        self.communication.send_message(message)
-        time.sleep(3)
 
 
 def main():

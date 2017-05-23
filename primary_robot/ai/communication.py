@@ -78,6 +78,13 @@ class Communication:
         self._current_msg_id = 0  # type: int
         self._mailbox = deque()
 
+    def reset_teensy(self):
+        message = self.sMessageDown()
+        message.message_type = self.eTypeDown.RESET
+        self.send_message(message)
+        self._current_msg_id = 0
+        time.sleep(3)
+
     def send_message(self, msg, max_retries=1000):
         """
         Send message via Serial (defined during the instantiation of the class)
