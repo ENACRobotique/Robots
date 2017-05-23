@@ -40,7 +40,8 @@ void TraversYellowInit(sState *prev)
 		_backFromPause = 1;
 		pause_time+=(millis()-start_pause);
 	}
-	uint16_t limits[RAD_NB_PTS]={25,0,0,0};
+	//						   E  6  4 2 0
+	uint16_t limits[RAD_NB_PTS]={30,30,0,0};
 	radarSetLim(limits);
 #ifdef DEBUG
 	Serial.println(pause_time);
@@ -64,6 +65,8 @@ void TraversYellowDeinit(sState *next)
 		st_saveTime_radar=0;
 		st_prevSaveTime_radar=0;
 		move(0,0);
+		uint16_t limits[RAD_NB_PTS]={0,0,0,0};
+		radarSetLim(limits);
 	}
 }
 
@@ -90,11 +93,13 @@ sState *TraversYellowTest()
 	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
 
-	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
+	if(radarIntrusion()>0){
+			 return &sPause;
+	}
 	if (periodicFunction(trav_yellow,&st_saveTime,&i,&prev_millis))
 	{
 #ifdef DEBUG
@@ -114,7 +119,7 @@ sState *TraversYellowTest()
 }
 
 sState sTraverseYellow={
-		BIT(E_MOTOR)/*|BIT(E_RADAR)*/,
+		BIT(E_MOTOR)|BIT(E_RADAR),
 		&TraversYellowInit,
 		&TraversYellowDeinit,
 		&TraversYellowTest

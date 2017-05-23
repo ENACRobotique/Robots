@@ -50,7 +50,8 @@ void move(int speed,int angle){
 }
 
 void stop(){
-	motSetCon(0);
+	int no=0;
+	motSetCon(&no);
 }
 
 

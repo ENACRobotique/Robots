@@ -139,25 +139,16 @@ sState *testRecup()
 			break;
 #else
 		default:
+			analogWrite(PIN_POMPE_PWM,0);
 			return &sDead;
 
 #endif
-
-
 		}
 	}
 	else{
 		if (digitalRead(PIN_COLOR)==COLOR_BLUE)return &sTraverseBlue;
 		if (digitalRead(PIN_COLOR)==COLOR_YELLOW)return &sTraverseYellow;
-		//return &sDead;
 	}
-
-	/*
-	if (radarIntrusion())
-	 {
-		 start_pause=millis();
-		 return &sDead;
-	 }*/
 	return 0;
 }
 

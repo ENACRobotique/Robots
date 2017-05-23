@@ -42,7 +42,9 @@ void initTrajyellowInit(sState *prev)
 #ifdef DEBUG
 	Serial.println(pause_time);
 #endif
-
+	//						   E 6 4  2  0
+	uint16_t limits[RAD_NB_PTS]={0,0,30,30};
+	radarSetLim(limits);
 }
 
 void deinitTrajyellowInit(sState *next)
@@ -61,14 +63,14 @@ void deinitTrajyellowInit(sState *next)
 		st_saveTime_radar=0;
 		st_prevSaveTime_radar=0;
 		move(0,0);
+		uint16_t limits[RAD_NB_PTS]={0,0,0,0};
+		radarSetLim(limits);
 	}
-	uint16_t limits[RAD_NB_PTS]={0,0,0,0};
-	radarSetLim(limits);
 }
 
 const PROGMEM trajElem start_blue[]={
 		//Début trajectoire blue
-		{200,0,-23,DISTANCE},
+		{-200,0,23,DISTANCE},
 		QUART_TOUR_POS, //compte pour 3 instructions
 		{0,0,0},
 };
@@ -76,7 +78,7 @@ const PROGMEM trajElem start_blue[]={
 
 const PROGMEM trajElem start_yellow[]={
 		//Début trajectoire yellow
-		{200,0,-13,DISTANCE},
+		{-200,0,13,DISTANCE},
 		QUART_TOUR_NEG, //compte pour 3 instructions
 		{0,0,0},
 };
@@ -86,9 +88,6 @@ sState *testTrajyellowInit()
 {
 	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
-	//						   E 6 4  2  0
-	uint16_t limits[RAD_NB_PTS]={0,0,30,30};
-	radarSetLim(limits);
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
@@ -96,7 +95,6 @@ sState *testTrajyellowInit()
 	if(radarIntrusion()>0){
 		 return &sPause;
 	}
-
 
 	if (( (digitalRead(PIN_COLOR)==COLOR_BLUE) &&
 		 periodicFunction(start_blue,&st_saveTime,&i,&prev_millis) )||
@@ -106,12 +104,11 @@ sState *testTrajyellowInit()
 		move(0,0);
 		return &sRecup;
 	}
-	/*
-	if (radarIntrusion())
-	 {
-		 start_pause=millis();
-		 return &sDead;
-	 }*/
+	if(i>=1){
+		uint16_t limits[RAD_NB_PTS]={0,0,0,0};
+		radarSetLim(limits);
+	}
+
 	return 0;
 }
 
