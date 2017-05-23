@@ -24,6 +24,7 @@ TrajectoryManagerClass::TrajectoryManagerClass() {
 	_readIndex = 0;
 	_writeIndex = 0;
 	_trajectoryStep = InitialRotationStep;
+	_prevStep = Stop;
 	_trajReadIndex = 0;
 	_trajWriteIndex = 0;
 	_pointId = 0;
@@ -101,6 +102,7 @@ void TrajectoryManagerClass::computeNextStep(){
 			value = constrainAngle(value);
 			Motors.computeParameters(value, Rotation);
 			_trajectoryStep = CruiseStep;
+			_prevStep = InitialRotationStep;
 
 			break;
 		case CruiseStep:
@@ -110,6 +112,7 @@ void TrajectoryManagerClass::computeNextStep(){
 			}
 			Motors.computeParameters(value, Straight, abs(speed));
 			_trajectoryStep = FinalRotationStep;
+			_prevStep = CruiseStep;
 
 			break;
 		case FinalRotationStep:
@@ -122,6 +125,7 @@ void TrajectoryManagerClass::computeNextStep(){
 			}
 			lastPoint = nextPoint;
 			_trajectoryStep = InitialRotationStep;
+			_prevStep = FinalRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
 	}
 }
@@ -132,7 +136,7 @@ void TrajectoryManagerClass::stop(){
 }
 
 void TrajectoryManagerClass::resume(){
-	_trajectoryStep = InitialRotationStep;
+	_trajectoryStep = _prevStep;
 	if(_recalageRunning) {
 		doRecalage();
 	}
