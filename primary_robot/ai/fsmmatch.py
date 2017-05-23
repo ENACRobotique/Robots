@@ -114,31 +114,7 @@ class StateColorSelection(FSMState):
         if self.behavior.color == Color.YELLOW:
             self.behavior.robot.locomotion.reposition_robot(2955, 1800, math.pi)
         else:
-            self.behavior.robot.locomotion.reposition_robot(200, 1800, 0)
-
-
-
-
-class StateSeesawBlue(FSMState):
-    def __init__(self, behavior):
-        self.behavior = behavior
-        self.stopped = False
-        self.wait_for_repositionning = False
-        self.behavior.robot.locomotion.go_to_orient(2150, 1820, 4.71, 100)
-
-    def test(self):
-        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
-            self.behavior.robot.locomotion.stop_robot()
-            self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
-            self.behavior.robot.locomotion.restart_robot()
-            self.stopped = False
-
-        if self.behavior.robot.locomotion.is_trajectory_finished:
-            return StateTraj1Blue
-
-    def deinit(self):
-        pass
+            self.behavior.robot.locomotion.reposition_robot(45, 1800, 0)
 
 
 class StateSeesawYellow(FSMState):
@@ -168,14 +144,37 @@ class StateSeesawYellow(FSMState):
         pass
 
 
+class StateSeesawBlue(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        self.wait_for_repositionning = False
+        self.behavior.robot.locomotion.go_to_orient(850, 1820, 1.5.math.pi, 100)
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(850, 1955, 1.5*math.pi)
+            return StateTraj1Blue
+
+    def deinit(self):
+        pass
+
+
 class StateTraj1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        #p1 = self.behavior.robot.locomotion.Point(2150, 1820)
-        #p2 = self.behavior.robot.locomotion.Point(1850, 1700)
-        #p3 = self.behavior.robot.locomotion.Point(1980, 1450)
-        #self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=100)
         self.behavior.robot.locomotion.go_to_orient(1930, 1530, 0, 100)
 
     def test(self):
@@ -196,19 +195,29 @@ class StateTraj1Yellow(FSMState):
 class StateTraj1Blue(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
-        pass
+        self.stopped = False
+        self.behavior.robot.locomotion.go_to_orient(1070, 1530, math.pi, 100)
 
     def test(self):
-        pass
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateSmallCrater1Blue
 
     def deinit(self):
         pass
+
 
 class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(2150, 1450, 0, 50)
+        self.behavior.robot.locomotion.go_to_orient(850, 1450, math.pi, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
@@ -228,15 +237,37 @@ class StateSmallCrater1Yellow(FSMState):
         pass
 
 
+class StateSmallCrater1Blue(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        self.behavior.robot.locomotion.go_to_orient(2150, 1450, 0, 50)
+        self.behavior.robot.io.start_ball_picker()
+        self.ball_picker_start_time = time.time()
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        collect_time = time.time() - self.ball_picker_start_time
+        if self.behavior.robot.locomotion.is_trajectory_finished and collect_time >= SMALL_CRATER_COLLECT_DURATION:
+            return StateTrajFirePositionBlue1
+
+    def deinit(self):
+        pass
+
+
 
 class StateTrajFirePositionYellow1(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
         self.wait_for_repositionning = False
-        #p1 = self.behavior.robot.locomotion.Point(2700, 1450)
         self.behavior.robot.locomotion.go_to_orient(2600, 1350, 1.5*math.pi, 120)
-        #p2 = self.behavior.robot.locomotion.Point(2700, 1680)
         self.behavior.robot.locomotion.go_to_orient(2750, 1700, 4.41, -100)
 
     def test(self):
@@ -253,12 +284,41 @@ class StateTrajFirePositionYellow1(FSMState):
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
             self.behavior.robot.locomotion.reposition_robot(2750, 1618, 3 * math.pi / 4)
-            return StateFireYellow1
+            return StateFire1
 
     def deinit(self):
         pass
 
-class StateFireYellow1(FSMMatch):
+
+class StateTrajFirePositionBlue1(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        self.wait_for_repositionning = False
+        self.behavior.robot.locomotion.go_to_orient(400, 1350, 1.5*math.pi, 120)
+        self.behavior.robot.locomotion.go_to_orient(250, 1700, 4.91, -100)
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(250, 1618, 3 * math.pi / 4)
+            return StateFire1
+
+    def deinit(self):
+        pass
+
+
+class StateFire1(FSMMatch):
 
     def __init__(self, behavior):
         self.behavior = behavior
