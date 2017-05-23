@@ -113,10 +113,9 @@ sState *testRecup()
 #ifdef DYN_UP
 		case 1:
 			Dynamixel.move(NUM_DYNAMIXEL,DYN_UP);
-			if(millis()-time_for_release>1000)
-			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_UP)<10)
-			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
-			{step++;}
+			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_UP)<20)
+			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
+			{step++;delay(5);}
 			break;
 		case 2:
 			analogWrite(PIN_POMPE_PWM,0);
@@ -134,7 +133,7 @@ sState *testRecup()
 			}
 			break;
 		case 4:
-			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_DOWN)<10)
+			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_DOWN)<20)
 				step=0;
 			break;
 #else
