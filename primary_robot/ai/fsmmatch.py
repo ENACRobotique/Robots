@@ -10,8 +10,8 @@ FUNNY_ACTION_TIME = 90  # in seconds
 END_MATCH_TIME = 95  # in seconds
 
 #2017 specific
-SMALL_CRATER_COLLECT_DURATION = 8 # in seconds
-SMALL_CRATER_FIRE_DURATION = 7 # in seconds
+SMALL_CRATER_COLLECT_DURATION = 5 # in seconds
+SMALL_CRATER_FIRE_DURATION = 8 # in seconds
 STANDARD_SEPARATION_US = 20 # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
 
@@ -25,7 +25,7 @@ class FSMMatch(Behavior):
         self.robot = robot
         self.color = None
         self.start_time = None
-        self.state = StateColorSelection(self)
+        self.state = StateRepositionningPreMatch(self)
 
     def loop(self):
         time_now = time.time()
@@ -62,6 +62,22 @@ class FSMState:
     def deinit(self):
         raise NotImplementedError("deinit of this state is not defined yet !")
 
+class StateRepositionningPreMatch(FSMMatch):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.repositionning = False
+
+    def test(self):
+        if not self.repositionning and self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.IN:
+            self.behavior.robot.locomotion.do_recalage()
+            self.repositionning = True
+        if self.repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            return StateColorSelection
+
+    def deinit(self):
+        pass
+
+
 
 class StateColorSelection(FSMState):
     class ColorState(Enum):
@@ -89,9 +105,9 @@ class StateColorSelection(FSMState):
 
         if self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.OUT:
             if self.behavior.color == Color.YELLOW:
-                return StateTraj1Yellow
+                return StateSeesawYellow
             else:
-                return StateTraj1Blue
+                return StateSeesawBlue
 
     def deinit(self):
         self.behavior.start_match()
@@ -103,15 +119,64 @@ class StateColorSelection(FSMState):
 
 
 
+class StateSeesawBlue(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        self.wait_for_repositionning = False
+        self.behavior.robot.locomotion.go_to_orient(2150, 1820, 4.71, 100)
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateTraj1Blue
+
+    def deinit(self):
+        pass
+
+
+class StateSeesawYellow(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        self.wait_for_repositionning = False
+        self.behavior.robot.locomotion.go_to_orient(2150, 1820, 1.5*math.pi, 100)
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(2150, 1955, 1.5*math.pi)
+            return StateTraj1Yellow
+
+    def deinit(self):
+        pass
+
 
 class StateTraj1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        p1 = self.behavior.robot.locomotion.Point(2150, 1820)
-        p2 = self.behavior.robot.locomotion.Point(1850, 1700)
-        p3 = self.behavior.robot.locomotion.Point(1980, 1450)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=100)
+        #p1 = self.behavior.robot.locomotion.Point(2150, 1820)
+        #p2 = self.behavior.robot.locomotion.Point(1850, 1700)
+        #p3 = self.behavior.robot.locomotion.Point(1980, 1450)
+        #self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], theta=0, speed=100)
+        self.behavior.robot.locomotion.go_to_orient(1930, 1530, 0, 100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -143,7 +208,7 @@ class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(2250, 1450, 0, 50)
+        self.behavior.robot.locomotion.go_to_orient(2150, 1450, 0, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
@@ -170,9 +235,9 @@ class StateTrajFirePositionYellow1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         #p1 = self.behavior.robot.locomotion.Point(2700, 1450)
-        self.behavior.robot.locomotion.go_to_orient(2700, 1350, 4.71, 120)
+        self.behavior.robot.locomotion.go_to_orient(2600, 1350, 1.5*math.pi, 120)
         #p2 = self.behavior.robot.locomotion.Point(2700, 1680)
-        self.behavior.robot.locomotion.go_to_orient(2850, 1700, 4.41, -100)
+        self.behavior.robot.locomotion.go_to_orient(2750, 1700, 4.41, -100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -187,7 +252,7 @@ class StateTrajFirePositionYellow1(FSMState):
             self.wait_for_repositionning = True
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            self.behavior.robot.locomotion.reposition_robot(2850, 1618, 3 * math.pi / 4)
+            self.behavior.robot.locomotion.reposition_robot(2750, 1618, 3 * math.pi / 4)
             return StateFireYellow1
 
     def deinit(self):

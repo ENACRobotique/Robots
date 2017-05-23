@@ -2,6 +2,10 @@ import sys
 
 import datetime
 import builtins
+<<<<<<< HEAD
+=======
+import time
+>>>>>>> 450e4e07b8cf1a235e48e8096bbc65cc29578955
 
 from communication import *
 from io_robot import *
@@ -18,6 +22,7 @@ behaviors = {
 class Robot(object):
     def __init__(self, behavior=behaviors["FSMMatch"]):
         self.communication = Communication()
+        self.reset_teensy()
         self.io = IO(self)
         self.locomotion = Locomotion(self)
         if behavior == behaviors["FSMMatch"]:
@@ -27,6 +32,13 @@ class Robot(object):
             raise NotImplementedError("This behavior is not implemented yet !")
         else:
             raise NotImplementedError("This behavior is not implemented yet !")
+    
+    def reset_teensy(self):
+        message = self.communication.sMessageDown()
+        message.message_type = self.communication.eTypeDown.RESET
+        self.communication.send_message(message)
+        time.sleep(3)
+
 
 def main():
     robot = Robot()

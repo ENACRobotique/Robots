@@ -33,6 +33,8 @@ def get_us_distance_by_postion(position):
     if len(distances) == 0:
         return 500000
     else:
+        if __debug__:
+            print('[IO] Distance for {} : {} cm'.format(position, min(distances)))
         return min(distances)
 
 
