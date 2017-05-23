@@ -4,6 +4,8 @@ import serial
 import time
 from collections import deque
 
+from RPi import GPIO
+
 MOCK_COMMUNICATION = False  # Set to True if Serial is not plugged to the Teensy
 
 SERIAL_BAUDRATE = 115200
@@ -15,6 +17,7 @@ UP_MSG_SIZE = 9
 
 RAD_TO_UINT16_FACTOR = 10430.378350470453
 SPEED_TO_UINT8_SUBSTRACTOR = 127
+PIN_RESET_TEENSY = 33  # in GPIO board number
 
 ### Up (Prop -> raspi) message declaration ###
 
@@ -77,6 +80,17 @@ class Communication:
         self._serial_port = serial.Serial(serial_path, baudrate)
         self._current_msg_id = 0  # type: int
         self._mailbox = deque()
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(PIN_RESET_TEENSY, GPIO.OUT)
+        GPIO.output(PIN_RESET_TEENSY, GPIO.HIGH)
+        self.reset_teensy()
+
+    def reset_teensy(self):
+        GPIO.output(PIN_RESET_TEENSY, GPIO.LOW)
+        time.sleep(1)
+        GPIO.output(PIN_RESET_TEENSY, GPIO.HIGH)
+        time.sleep(10)
 
     def send_message(self, msg, max_retries=1000):
         """
