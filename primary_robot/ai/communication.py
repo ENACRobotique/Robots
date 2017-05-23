@@ -77,13 +77,13 @@ class Communication:
         self._serial_port = serial.Serial(serial_path, baudrate)
         self._current_msg_id = 0  # type: int
         self._mailbox = deque()
-        self.reset_teensy()
+        #self.reset_teensy()
 
     def reset_teensy(self):
         message = self.sMessageDown()
         message.message_type = self.eTypeDown.RESET
         self.send_message(message, max_retries=1)
-        self._current_msg_id = 0
+        self._current_msg_id = 1
         time.sleep(3)
 
     def send_message(self, msg, max_retries=1000):

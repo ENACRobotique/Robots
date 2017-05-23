@@ -66,11 +66,13 @@ class StateRepositionningPreMatch(FSMMatch):
     def __init__(self, behavior):
         self.behavior = behavior
         self.repositionning = False
+        self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.WHITE)
 
     def test(self):
         if not self.repositionning and self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.IN:
             self.behavior.robot.locomotion.do_recalage()
             self.repositionning = True
+            self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.RED)
         if self.repositionning and self.behavior.robot.locomotion.is_recalage_ended:
             return StateColorSelection
 
