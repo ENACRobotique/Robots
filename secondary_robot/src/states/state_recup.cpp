@@ -24,7 +24,12 @@ static periodicTraj periodicFunction = &periodicProgTraj;
 
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
-#define TIME_TO_TRAVEL 75000
+
+#ifdef DYN_USE
+int delta_dyn=50;
+#endif
+int unsigned drop_time=2000;
+int unsigned up_time=1500;
 
 void initRecup(sState *prev)
 {
@@ -87,9 +92,6 @@ sState *testRecup()
 	static unsigned long prev_millis=0;
 	static int flag_end = 0;
 	static int time_for_pompe=0;
-	static int time_for_release;
-
-	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
@@ -104,20 +106,25 @@ sState *testRecup()
 			{
 				nb_recup++;
 				step++;
+				i=0;
 				move(0,0);
 				pause_time=0;
-				time_for_release=millis();
 			}
 
 			break;
 #ifdef DYN_UP
 		case 1:
 			Dynamixel.move(NUM_DYNAMIXEL,DYN_UP);
-			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_UP)<20)
-			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
-			{step++;delay(5);}
+			step++;
+			time_for_pompe=millis();
 			break;
 		case 2:
+			//if(abs(abs(Dynamixel.readPosition(NUM_DYNAMIXEL))-DYN_UP)<delta_dyn)
+			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
+			if(millis()-time_for_pompe>up_time)
+			{step++;delay(5);}
+			break;
+		case 3:
 			analogWrite(PIN_POMPE_PWM,0);
 			time_for_pompe=millis();
 			step++;
@@ -125,16 +132,18 @@ sState *testRecup()
 			if(nb_recup==4)
 				flag_end=true;
 			break;
-		case 3:
-			if(millis()-time_for_pompe>2000)
+		case 4:
+			if(millis()-time_for_pompe>drop_time)
 			{
 				step++;
 				Dynamixel.move(NUM_DYNAMIXEL,DYN_DOWN);
 			}
 			break;
-		case 4:
-			if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)-DYN_DOWN)<20)
+		case 5:
+			if(abs(abs(Dynamixel.readPosition(NUM_DYNAMIXEL))-DYN_DOWN)<delta_dyn)
+			{
 				step=0;
+			}
 			break;
 #else
 		default:

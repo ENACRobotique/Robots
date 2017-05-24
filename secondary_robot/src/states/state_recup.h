@@ -15,7 +15,6 @@
 
 int progTraj(trajElem tab[]);
 
-
 extern sState sRecup;
 
 
