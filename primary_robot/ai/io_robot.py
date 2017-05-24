@@ -26,16 +26,6 @@ def get_us_distance(i):
     return us_sensors_distance[us_sensors[i]]
 
 
-def get_us_distance_by_postion(position):
-    global us_sensors
-    correct_sensors = [i for i in range(len(us_sensors)) if position.lower() in us_sensors[i].position.lower()]
-    distances = [get_us_distance(i) for i in correct_sensors]
-    if len(distances) == 0:
-        return 500000
-    else:
-        return min(distances)
-
-
 class IO(object):
     def __init__(self, robot):
         GPIO.setwarnings(False)
@@ -107,13 +97,23 @@ class IO(object):
         self._read_switch(PIN_COLOR)
         return self._button_state
 
+    @staticmethod
+    def get_us_distance_by_postion(position):
+        global us_sensors
+        correct_sensors = [i for i in range(len(us_sensors)) if position.lower() in us_sensors[i].position.lower()]
+        distances = [get_us_distance(i) for i in correct_sensors]
+        if len(distances) == 0:
+            return 500000
+        else:
+            return min(distances)
+
     @property
     def front_distance(self):
-        return get_us_distance_by_postion("front")
+        return self.get_us_distance_by_postion("front")
 
     @property
     def rear_distance(self):
-        return get_us_distance_by_postion("rear")
+        return self.get_us_distance_by_postion("rear")
 
     def start_ball_picker(self):
         down_msg = self.robot.communication.sMessageDown()
