@@ -277,7 +277,6 @@ class StateSmallCrater1Blue(FSMState):
         pass
 
 
-
 class StateTrajFirePositionYellow1(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
@@ -287,13 +286,6 @@ class StateTrajFirePositionYellow1(FSMState):
         self.behavior.robot.locomotion.go_to_orient(2750, 1700, 4.41, -100)
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
-            self.behavior.robot.locomotion.stop_robot()
-            self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
-            self.behavior.robot.locomotion.restart_robot()
-            self.stopped = False
-
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
             self.wait_for_repositionning = True
@@ -315,13 +307,6 @@ class StateTrajFirePositionBlue1(FSMState):
         self.behavior.robot.locomotion.go_to_orient(250, 1700, 4.91, -100)
 
     def test(self):
-        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
-            self.behavior.robot.locomotion.stop_robot()
-            self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
-            self.behavior.robot.locomotion.restart_robot()
-            self.stopped = False
-
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
             self.wait_for_repositionning = True
@@ -335,7 +320,6 @@ class StateTrajFirePositionBlue1(FSMState):
 
 
 class StateFire1(FSMMatch):
-
     def __init__(self, behavior):
         self.behavior = behavior
         self.behavior.robot.io.start_cannon()
@@ -356,7 +340,6 @@ class StateFire1(FSMMatch):
         self.behavior.robot.io.close_cannon_barrier()
         self.behavior.robot.io.stop_cannon()
         self.behavior.robot.io.stop_ball_picker()
-
 
 
 class StateFunnyAction(FSMState):
