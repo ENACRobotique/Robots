@@ -228,7 +228,7 @@ class StateTraj1Blue(FSMState):
         self.behavior = behavior
         self.stopped = False
         self.behavior.robot.locomotion.go_to_orient(850, 1920, 1.5 * math.pi, 70)
-        self.behavior.robot.locomotion.go_to_orient(1200, 1500, math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(1100, 1500, math.pi, 100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
