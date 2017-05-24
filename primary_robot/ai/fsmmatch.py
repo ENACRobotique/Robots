@@ -205,7 +205,8 @@ class StateTraj1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(1930, 1530, 0, 100)
+        self.behavior.robot.locomotion.go_to_orient(2150, 1920, 1.5*math.pi, 70)
+        self.behavior.robot.locomotion.go_to_orient(1850, 1500, 0, 100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -226,7 +227,8 @@ class StateTraj1Blue(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(1070, 1530, math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(850, 1920, 1.5 * math.pi, 70)
+        self.behavior.robot.locomotion.go_to_orient(1200, 1500, math.pi, 100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -247,7 +249,7 @@ class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(2150, 1450, 0, 50)
+        self.behavior.robot.locomotion.go_to_orient(2150, 1500, 0, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
@@ -271,7 +273,7 @@ class StateSmallCrater1Blue(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(850, 1450, math.pi, 50)
+        self.behavior.robot.locomotion.go_to_orient(850, 1500, math.pi, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
