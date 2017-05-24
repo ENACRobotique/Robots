@@ -26,7 +26,7 @@ static unsigned long start_pause=0;
 void initTrajyellowInit(sState *prev)
 {
 #ifdef DEBUG
-	Serial.println(F("debut traj yellow (premier trajet)"));
+	Serial.println(F("debut traj (premier trajet)"));
 #endif
 
 	if (prev==&sPause)
@@ -95,11 +95,19 @@ sState *testTrajyellowInit()
 	if(radarIntrusion()>0){
 		 return &sPause;
 	}
+	bool finish=false;
 
-	if (( (digitalRead(PIN_COLOR)==COLOR_BLUE) &&
-		 periodicFunction(start_blue,&st_saveTime,&i,&prev_millis) )||
-		( (digitalRead(PIN_COLOR)==COLOR_YELLOW) &&
-				 periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis) ))
+	if (digitalRead(PIN_COLOR)==COLOR_BLUE)
+	{
+		finish=periodicFunction(start_blue,&st_saveTime,&i,&prev_millis);
+		Serial.println("Traj Yellow running ...");
+	}
+	if (digitalRead(PIN_COLOR)==COLOR_YELLOW)
+	{
+		finish=periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis);
+		Serial.println("Traj Blue running ...");
+	}
+	if(finish)
 	{
 		move(0,0);
 		return &sRecup;
