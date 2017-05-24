@@ -87,7 +87,7 @@ sState *testRecup()
 	static int step=0;
 	static unsigned long prev_millis=0;
 	static int flag_end = 0;
-	static int time_for_pompe=0;
+	static unsigned long time_for_pompe=0;
 
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
@@ -96,13 +96,13 @@ sState *testRecup()
 	if(!flag_end){
 
 		analogWrite(PIN_POMPE_PWM,255);
-		if(periodicFunction(aller_retour,&st_saveTime,&i,&prev_millis))
+		flag_end=periodicFunction(aller_retour,&st_saveTime,&i,&prev_millis);
+		if(flag_end)
 		{
 			nb_recup++;
 			step++;
 			move(0,0);
 			pause_time=0;
-			flag_end=1;
 			Dynamixel.ledStatus(NUM_DYNAMIXEL,OFF);
 		}
 	}
@@ -120,7 +120,9 @@ sState *testRecup()
 			//if(abs(abs(Dynamixel.readPosition(NUM_DYNAMIXEL))-DYN_UP)<delta_dyn)
 			//if(abs(Dynamixel.readPosition(NUM_DYNAMIXEL)==DYN_UP))
 			if(millis()-time_for_pompe>up_time)
-			{step++;delay(5);}
+			{
+				step++;
+			}
 			break;
 		case 3:
 			analogWrite(PIN_POMPE_PWM,0);
@@ -148,12 +150,10 @@ sState *testRecup()
 			if(nb_recup<4)
 			{
 				//reset all static var
-				i=0;
 				step=0;
 				prev_millis=0;
 				flag_end = 0;
 				time_for_pompe=0;
-				return &sRecup;
 			}
 			else{
 				if (digitalRead(PIN_COLOR)==COLOR_BLUE)
