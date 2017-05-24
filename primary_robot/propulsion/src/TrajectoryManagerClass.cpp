@@ -143,11 +143,6 @@ void TrajectoryManagerClass::computeNextStep(){
 }
 
 void TrajectoryManagerClass::stop(){
-	if (_prevStep == WaitEndFinalRotationStep and _trajectoryStep != Stop){
-		//_readIndex = (_readIndex - 1 + NB_POINTS_MAX)%NB_POINTS_MAX;
-		Serial.print("ReadIndex after stop : ");
-		Serial.println(_readIndex);
-	}
 	_trajectoryStep = Stop;
 	lastPoint = NULL;
 	Motors.computeParameters(0, Straight);
