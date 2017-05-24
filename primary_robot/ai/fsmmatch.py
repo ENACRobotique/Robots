@@ -14,6 +14,8 @@ SMALL_CRATER_COLLECT_DURATION = 5 # in seconds
 SMALL_CRATER_FIRE_DURATION = 8 # in seconds
 STANDARD_SEPARATION_US = 20 # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
+AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
+FIRE1_RECALAGE_MAX_TIME = 7  # in sec
 
 class Color(Enum):
     BLUE = "blue"
@@ -124,6 +126,7 @@ class StateSeesawYellow(FSMState):
         self.behavior = behavior
         self.stopped = False
         self.wait_for_repositionning = False
+        self.recalage_start_time = 0
         self.behavior.robot.locomotion.go_to_orient(2150, 1820, 1.5*math.pi, 100)
 
     def test(self):
@@ -137,9 +140,14 @@ class StateSeesawYellow(FSMState):
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
             self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
             self.behavior.robot.locomotion.reposition_robot(2150, 1955, 1.5*math.pi)
+            return StateTraj1Yellow
+
+        if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
+            self.behavior.robot.locomotion.reposition_robot(2150, 1955, 1.5 * math.pi)
             return StateTraj1Yellow
 
     def deinit(self):
@@ -152,6 +160,7 @@ class StateSeesawBlue(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.behavior.robot.locomotion.go_to_orient(850, 1820, 1.5.math.pi, 100)
+        self.recalage_start_time = 0
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -164,9 +173,14 @@ class StateSeesawBlue(FSMState):
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
             self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
             self.behavior.robot.locomotion.reposition_robot(850, 1955, 1.5*math.pi)
+            return StateTraj1Blue
+
+        if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
+            self.behavior.robot.locomotion.reposition_robot(850, 1955, 1.5 * math.pi)
             return StateTraj1Blue
 
     def deinit(self):
@@ -269,6 +283,7 @@ class StateTrajFirePositionYellow1(FSMState):
         self.behavior = behavior
         self.stopped = False
         self.wait_for_repositionning = False
+        self.recalage_start_time = 0
         self.behavior.robot.locomotion.go_to_orient(2600, 1350, 1.5*math.pi, 120)
         self.behavior.robot.locomotion.go_to_orient(2750, 1700, 4.41, -100)
 
@@ -283,8 +298,13 @@ class StateTrajFirePositionYellow1(FSMState):
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
             self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(2750, 1618, 3 * math.pi / 4)
+            return StateFire1
+
+        if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
             self.behavior.robot.locomotion.reposition_robot(2750, 1618, 3 * math.pi / 4)
             return StateFire1
 
@@ -297,6 +317,7 @@ class StateTrajFirePositionBlue1(FSMState):
         self.behavior = behavior
         self.stopped = False
         self.wait_for_repositionning = False
+        self.recalage_start_time = 0
         self.behavior.robot.locomotion.go_to_orient(400, 1350, 1.5*math.pi, 120)
         self.behavior.robot.locomotion.go_to_orient(250, 1700, 4.91, -100)
 
@@ -311,8 +332,13 @@ class StateTrajFirePositionBlue1(FSMState):
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
             self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(250, 1618, 3 * math.pi / 4)
+            return StateFire1
+
+        if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
             self.behavior.robot.locomotion.reposition_robot(250, 1618, 3 * math.pi / 4)
             return StateFire1
 
