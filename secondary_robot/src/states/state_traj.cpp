@@ -23,7 +23,7 @@ static periodicTraj periodicFunction = &periodicProgTraj;
 static unsigned long pause_time =0;
 static unsigned long start_pause=0;
 
-void initTrajyellowInit(sState *prev)
+void initTrajInit(sState *prev)
 {
 #ifdef DEBUG
 	Serial.println(F("debut traj (premier trajet)"));
@@ -47,7 +47,7 @@ void initTrajyellowInit(sState *prev)
 	radarSetLim(limits);
 }
 
-void deinitTrajyellowInit(sState *next)
+void deinitTrajInit(sState *next)
 {
 	if (next==&sPause)
 	{
@@ -84,7 +84,7 @@ const PROGMEM trajElem start_yellow[]={
 };
 
 
-sState *testTrajyellowInit()
+sState *testTrajInit()
 {
 	static int i=0; //indice de la pos ds la traj
 	static unsigned long prev_millis=0;
@@ -120,84 +120,9 @@ sState *testTrajyellowInit()
 	return 0;
 }
 
-sState sTrajyellowInit={
+sState sTrajInit={
 		BIT(E_MOTOR)|BIT(E_RADAR),
-		&initTrajyellowInit,
-		&deinitTrajyellowInit,
-		&testTrajyellowInit
+		&initTrajInit,
+		&deinitTrajInit,
+		&testTrajInit
 };
-//*****************************************************************************************************************
-
-
-void initTrajblue(sState *prev)
-{
-#ifdef DEBUG
-	Serial.println(F("debut traj blue"));
-#endif
-
-	if (prev==&sPause)
-	{
-#ifdef DEBUG
-		Serial.println(F("\tback from pause"));
-#endif
-		st_saveTime=millis()-st_saveTime+st_prevSaveTime;
-		_backFromPause = 1;
-		pause_time+=(millis()-start_pause);
-	}
-	uint16_t limits[RAD_NB_PTS]={0, 20, 0, 0};
-	radarSetLim(limits);
-}
-
-void deinitTrajblueInit(sState *next)
-{
-	if (next==&sPause)
-	{
-		st_prevSaveTime=st_saveTime;
-		st_saveTime=millis();
-		st_prevSaveTime_radar=st_saveTime_radar;
-		st_saveTime_radar=millis();
-	}
-	else
-	{
-		st_saveTime=0;
-		st_prevSaveTime=0;
-		st_saveTime_radar=0;
-		st_prevSaveTime_radar=0;
-	}
-}
-
-
-
-sState *testTrajblue()
-{
-	static int i=0; //indice de la pos ds la traj
-	static unsigned long prev_millis=0;
-
-	uint16_t limits[RAD_NB_PTS]={0,0,0, 0};
-
-#ifdef TIME_FOR_FUNNY_ACTION
-	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
-#endif
-	if (periodicFunction(start_blue,&st_saveTime,&i,&prev_millis))
-	{
-		move(0,0);
-		return &sRecup;
-	}
-	/*
-		if (radarIntrusion())
-		 {
-			 start_pause=millis();
-			 return &sDead;
-		 }*/
-	return 0;
-}
-
-
-sState sTrajblueInit={
-		BIT(E_MOTOR),//|BIT(E_RADAR),
-		&initTrajblue,
-		&deinitTrajblueInit,
-		&testTrajblue
-};
-
-
