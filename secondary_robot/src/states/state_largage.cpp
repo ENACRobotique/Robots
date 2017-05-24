@@ -39,7 +39,7 @@ void initlargyellow(sState *prev)
 		_backFromPause = 1;
 		pause_time+=(millis()-start_pause);
 	}
-	uint16_t limits[RAD_NB_PTS]={25,0,0,0};
+	uint16_t limits[RAD_NB_PTS]={0,0,0,0};
 	radarSetLim(limits);
 #ifdef DEBUG
 	Serial.println(pause_time);
@@ -68,7 +68,8 @@ void deinitlargyellow(sState *next)
 
 const PROGMEM trajElem start_blue[]={
 		//Début trajectoire blue
-		{200,0,-23,DISTANCE},
+		{0,0,1000,TEMPS},
+		{-300,-3,45,DISTANCE},
 		QUART_TOUR_POS, //compte pour 3 instructions
 		{0,0,0},
 };
@@ -76,7 +77,8 @@ const PROGMEM trajElem start_blue[]={
 
 const PROGMEM trajElem start_yellow[]={
 		//Début trajectoire yellow
-		{300,0,-45,DISTANCE},
+		{0,0,1000,TEMPS},
+		{-300,3,45,DISTANCE},
 		{0,0,0},
 };
 
@@ -93,20 +95,11 @@ sState *testlargyellow()
 #endif
 
 	Hodor.write(HODOR_OPEN);
-	if (( (digitalRead(PIN_COLOR)==COLOR_BLUE) &&
-		 periodicFunction(start_blue,&st_saveTime,&i,&prev_millis) )||
-		( (digitalRead(PIN_COLOR)==COLOR_YELLOW) &&
-				 periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis) ))
+	if (periodicFunction(start_yellow,&st_saveTime,&i,&prev_millis))
 	{
 		move(0,0);
 		return &sDead;
 	}
-	/*
-	if (radarIntrusion())
-	 {
-		 start_pause=millis();
-		 return &sDead;
-	 }*/
 	return 0;
 }
 
@@ -134,7 +127,7 @@ void initlargblue(sState *prev)
 		_backFromPause = 1;
 		pause_time+=(millis()-start_pause);
 	}
-	uint16_t limits[RAD_NB_PTS]={0, 20, 0, 0};
+	uint16_t limits[RAD_NB_PTS]={0, 0, 0, 0};
 	radarSetLim(limits);
 }
 
@@ -168,6 +161,7 @@ sState *testlargblue()
 #ifdef TIME_FOR_FUNNY_ACTION
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
+	Hodor.write(HODOR_OPEN);
 	if (periodicFunction(start_blue,&st_saveTime,&i,&prev_millis))
 	{
 		move(0,0);
