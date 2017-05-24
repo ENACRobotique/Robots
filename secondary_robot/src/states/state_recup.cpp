@@ -78,13 +78,8 @@ void deinitRecup(sState *next)
 const PROGMEM trajElem aller_retour[]={
 		{-300,0,1500,TEMPS},
 		{300,0,15,DISTANCE},
-		{0,0,0},
+		{0,0,0}
 };
-#define Recup {-300,0,1500,TEMPS},{300,0,15,DISTANCE},{0,0,1500,TEMPS},{0,0,2000,TEMPS},{0,0,1000,TEMPS}
-//				Pompe on 	4 		Dyn up		6						Pompe off	7		Dyn down	8
-
-
-
 
 sState *testRecup()
 {
@@ -108,6 +103,7 @@ sState *testRecup()
 			move(0,0);
 			pause_time=0;
 			flag_end=1;
+			Dynamixel.ledStatus(NUM_DYNAMIXEL,OFF);
 		}
 	}
 	else
@@ -148,6 +144,7 @@ sState *testRecup()
 			}
 			break;
 		case 6:
+			Dynamixel.ledStatus(NUM_DYNAMIXEL,ON);
 			if(nb_recup<4)
 			{
 				//reset all static var
@@ -173,9 +170,6 @@ sState *testRecup()
 #endif
 		}
 	}
-
-
-
 	return 0;
 }
 
@@ -185,7 +179,4 @@ sState sRecup={
 		&deinitRecup,
 		&testRecup
 };
-
-//*****************************************************************************************************************
-
 

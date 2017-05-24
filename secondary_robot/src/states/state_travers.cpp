@@ -79,7 +79,7 @@ const PROGMEM trajElem trav_blue[]={
 		{-250,-85,71.5/8,DISTANCE},
 		{-300,0,5,DISTANCE},
 		{0,0,250,TEMPS},
-		(0,0,0),
+		{0,0,0}
 };
 
 
@@ -90,7 +90,7 @@ const PROGMEM trajElem trav_yellow[]={
 		{250,90,-71.5/8,DISTANCE},
 		{300,0,45,DISTANCE},
 		{0,0,250,TEMPS},
-		(0,0,0),
+		{0,0,0}
 };
 
 
