@@ -72,7 +72,12 @@ void TraversYellowDeinit(sState *next)
 
 const PROGMEM trajElem trav_blue[]={
 		//Début trajectoire blue
-		DEMI_TOUR_NEG,//Turn
+		DEMI_TOUR_POS,//Turn
+		{300,0,102.5,DISTANCE},
+		{0,-90,250,TEMPS},
+		{250,-90,-71.5/8,DISTANCE},
+		{300,0,45,DISTANCE},
+		{0,0,250,TEMPS},
 		(0,0,0),
 };
 

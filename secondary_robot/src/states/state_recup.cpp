@@ -148,8 +148,7 @@ sState *testRecup()
 		if (digitalRead(PIN_COLOR)==COLOR_BLUE)
 			return &sTraverseBlue;
 		if (digitalRead(PIN_COLOR)==COLOR_YELLOW)
-			//return &sTraverseYellow;
-			return &sDead;//trag homologation
+			return &sTraverseYellow;
 	}
 	return 0;
 }
