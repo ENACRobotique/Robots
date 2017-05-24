@@ -31,6 +31,8 @@ int delta_dyn=50;
 int unsigned drop_time=2000;
 int unsigned up_time=1500;
 
+static int nb_recup= 0;
+
 void initRecup(sState *prev)
 {
 #ifdef DEBUG
@@ -87,7 +89,6 @@ const PROGMEM trajElem aller_retour[]={
 sState *testRecup()
 {
 	static int i=0; //indice de la pos ds la traj
-	static int nb_recup= 0;
 	static int step=0;
 	static unsigned long prev_millis=0;
 	static int flag_end = 0;
@@ -98,20 +99,21 @@ sState *testRecup()
 #endif
 
 	if(!flag_end){
+
+		analogWrite(PIN_POMPE_PWM,255);
+		if(periodicFunction(aller_retour,&st_saveTime,&i,&prev_millis))
+		{
+			nb_recup++;
+			step++;
+			move(0,0);
+			pause_time=0;
+			flag_end=1;
+		}
+	}
+	else
+	{
 		switch(step)
 		{
-		case 0:
-			analogWrite(PIN_POMPE_PWM,255);
-			if(periodicFunction(aller_retour,&st_saveTime,&i,&prev_millis))
-			{
-				nb_recup++;
-				step++;
-				i=0;
-				move(0,0);
-				pause_time=0;
-			}
-
-			break;
 #ifdef DYN_UP
 		case 1:
 			Dynamixel.move(NUM_DYNAMIXEL,DYN_UP);
@@ -130,7 +132,7 @@ sState *testRecup()
 			step++;
 			//on part comme ça
 			if(nb_recup==4)
-				flag_end=true;
+				step=6;
 			break;
 		case 4:
 			if(millis()-time_for_pompe>drop_time)
@@ -142,7 +144,25 @@ sState *testRecup()
 		case 5:
 			if(abs(abs(Dynamixel.readPosition(NUM_DYNAMIXEL))-DYN_DOWN)<delta_dyn)
 			{
+				step++;
+			}
+			break;
+		case 6:
+			if(nb_recup<4)
+			{
+				//reset all static var
+				i=0;
 				step=0;
+				prev_millis=0;
+				flag_end = 0;
+				time_for_pompe=0;
+				return &sRecup;
+			}
+			else{
+				if (digitalRead(PIN_COLOR)==COLOR_BLUE)
+					return &sTraverseBlue;
+				if (digitalRead(PIN_COLOR)==COLOR_YELLOW)
+					return &sTraverseYellow;
 			}
 			break;
 #else
@@ -153,12 +173,9 @@ sState *testRecup()
 #endif
 		}
 	}
-	else{
-		if (digitalRead(PIN_COLOR)==COLOR_BLUE)
-			return &sTraverseBlue;
-		if (digitalRead(PIN_COLOR)==COLOR_YELLOW)
-			return &sTraverseYellow;
-	}
+
+
+
 	return 0;
 }
 
@@ -168,6 +185,7 @@ sState sRecup={
 		&deinitRecup,
 		&testRecup
 };
+
 //*****************************************************************************************************************
 
 
