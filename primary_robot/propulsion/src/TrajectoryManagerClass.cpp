@@ -79,15 +79,14 @@ void TrajectoryManagerClass::computeNextStep(){
 	/*Serial.print(" ");
 	Serial.println(_trajectoryStep);*/
 	if (lastPoint != NULL && _trajectoryStep == InitialRotationStep){
-		Serial.print("Traj id : ");
-		Serial.println(lastPoint->getTrajId());
 		reached_point(lastPoint->getTrajId(), lastPoint->getPointId());
 		lastPoint = NULL;
 	}
 	if(_readIndex == _writeIndex) {		//no more points to read
 		return;
 	}
-
+	Serial.print("Read index  : ");
+	Serial.println(_readIndex);
 	//Point3D* nextPoint = &(_objectives[_readIndex]);
 	Point3D* nextPoint = _objectives + _readIndex;
 	double dx = nextPoint->getX() - Odometry.getPosX();
@@ -127,16 +126,27 @@ void TrajectoryManagerClass::computeNextStep(){
 				Serial.print("Final rotation value: ");
 				Serial.println(value);
 			}
+//			lastPoint = nextPoint;
+			_trajectoryStep = WaitEndFinalRotationStep;
+			_prevStep = FinalRotationStep;
+//			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
+			break;
+		case WaitEndFinalRotationStep:
+			Motors.computeParameters(0, Straight);
 			lastPoint = nextPoint;
 			_trajectoryStep = InitialRotationStep;
-			_prevStep = FinalRotationStep;
+			_prevStep = WaitEndFinalRotationStep;
 			_readIndex = (_readIndex + 1)%NB_POINTS_MAX;
+
+			break;
 	}
 }
 
 void TrajectoryManagerClass::stop(){
-	if (_prevStep == FinalRotationStep){
-		_readIndex = (_readIndex - 1)%NB_POINTS_MAX;
+	if (_prevStep == WaitEndFinalRotationStep and _trajectoryStep != Stop){
+		//_readIndex = (_readIndex - 1 + NB_POINTS_MAX)%NB_POINTS_MAX;
+		Serial.print("ReadIndex after stop : ");
+		Serial.println(_readIndex);
 	}
 	_trajectoryStep = Stop;
 	lastPoint = NULL;
@@ -144,7 +154,11 @@ void TrajectoryManagerClass::stop(){
 }
 
 void TrajectoryManagerClass::resume(){
-	_trajectoryStep = _prevStep;
+	if (_prevStep == WaitEndFinalRotationStep and _trajectoryStep == Stop){
+		_trajectoryStep = InitialRotationStep;
+	}else{
+		_trajectoryStep = _prevStep;
+	}
 	if(_recalageRunning) {
 		doRecalage();
 	}
@@ -160,6 +174,13 @@ void TrajectoryManagerClass::emptyPoints() {
 }
 
 void TrajectoryManagerClass::reached_point(int trajId, int pointId){
+	if (trajId < 0){
+		Serial.print("Traj id < 0 !, ");
+	}
+	Serial.print("Traj id : ");
+	Serial.print(trajId);
+	Serial.print(", Point id : ");
+	Serial.println(pointId);
 	sMessageUp msg;
 	msg.type = POINT_REACHED;
 	msg.down_id = trajId;

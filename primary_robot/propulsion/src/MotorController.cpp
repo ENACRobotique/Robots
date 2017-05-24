@@ -74,8 +74,8 @@ void MotorController::computeParameters(double target, MovementType movementType
 
 	_movementPhase = Acceleration;
 
-	Serial.print("computeParameters  ");
-	Serial.println(_pTarget);
+	//Serial.print("computeParameters  ");
+	//Serial.println(_pTarget);
 }
 
 void MotorController::controlMotors() {
@@ -135,11 +135,11 @@ long MotorController::getConsigne() {
 			if(_p < _p1) {
 				getAccelConsigne(t);
 			} else if(_p < _p2){
-				Serial.println("Cruise");
+				//Serial.println("Cruise");
 				_movementPhase = Cruise;
 				getCruiseConsigne(t);
 			} else {
-				Serial.println("Deceleration");
+				//Serial.println("Deceleration");
 				_movementPhase = Deceleration;
 				setAccel();
 				getDecelConsigne(t);
@@ -149,7 +149,7 @@ long MotorController::getConsigne() {
 			if(_p < _p2) {
 				getCruiseConsigne(t);
 			} else {
-				Serial.println("Deceleration");
+				//Serial.println("Deceleration");
 				_movementPhase = Deceleration;
 				setAccel();
 				getDecelConsigne(t);

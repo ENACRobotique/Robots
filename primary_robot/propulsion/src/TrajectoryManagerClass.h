@@ -16,7 +16,8 @@ typedef enum {
 	Stop,
 	InitialRotationStep,
 	CruiseStep,
-	FinalRotationStep
+	FinalRotationStep,
+	WaitEndFinalRotationStep
 }TrajectoryStep;
 
 class TrajectoryManagerClass {
