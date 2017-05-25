@@ -209,7 +209,7 @@ class StateTraj1Yellow(FSMState):
         p1 = self.behavior.robot.locomotion.Point(2150, 1920)
         p2 = self.behavior.robot.locomotion.Point(1950, 1350)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], 1.5 * math.pi, 100)
-        self.behavior.robot.locomotion.go_to_orient(1950, 1500, 1.5* math.pi, -100)          
+        self.behavior.robot.locomotion.go_to_orient(1950, 1450, 1.5* math.pi, -100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -278,7 +278,7 @@ class StateSmallCrater1Blue(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(850, 1500, math.pi, 50)
+        self.behavior.robot.locomotion.go_to_orient(850, 1450, math.pi, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
@@ -304,7 +304,7 @@ class StateTrajFirePositionYellow1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
-        self.behavior.robot.locomotion.go_to_orient(2600, 1350, 1.5*math.pi, 120)
+        self.behavior.robot.locomotion.go_to_orient(2550, 1350, 1.5*math.pi, 120)
         self.behavior.robot.locomotion.go_to_orient(2750, 1700, 4.41, -100)
 
     def test(self):
@@ -338,7 +338,7 @@ class StateTrajFirePositionBlue1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
-        self.behavior.robot.locomotion.go_to_orient(400, 1350, 1.5*math.pi, 120)
+        self.behavior.robot.locomotion.go_to_orient(450, 1350, 1.5*math.pi, 120)
         self.behavior.robot.locomotion.go_to_orient(250, 1700, 4.91, -100)
 
     def test(self):
