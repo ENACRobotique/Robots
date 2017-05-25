@@ -11,13 +11,17 @@ END_MATCH_TIME = 95  # in seconds
 INITIAL_WAIT = 0 #in seconds
 
 #2017 specific
-SMALL_CRATER_COLLECT_DURATION = 4 # in seconds
-SMALL_CRATER_FIRE_DURATION = 6 # in seconds
-STANDARD_SEPARATION_US = 20 # in cm
+SMALL_CRATER_COLLECT_DURATION = 4  # in seconds
+SMALL_CRATER_FIRE_DURATION = 6  # in seconds
+GREAT_CRATER_COLLECT_DURATION = 10  # in seconds
+STANDARD_SEPARATION_US = 20  # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
 AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
 FIRE1_RECALAGE_MAX_TIME = 5  # in sec
-SPEED_FIRE = 60
+FIRE1_CANNON_POWER = 45  # between 0 and 255
+MAX_CANNON_POWER = 70  # between 0 and 255
+CANNON_AUGMENTATION_DISTANCE_STEP = 5  # in cm
+CANNON_AUGMENTATION_POWER_STEP = 5  # between 0 and 255
 
 
 class Color(Enum):
@@ -482,19 +486,41 @@ class StateFire1(FSMMatch):
             self.firing = True
 
         if self.firing and time.time() - self.fire_start >= SMALL_CRATER_FIRE_DURATION:
-
             return StateEnd
-            #if self.behavior.color == self.behavior.color.YELLOW:
-                #return StateTraj2Yellow
-            #else:
-                #return StateTraj2Blue
-
-
 
     def deinit(self):
-        self.behavior.robot.io.close_cannon_barrier()
-        self.behavior.robot.io.stop_cannon()
-        self.behavior.robot.io.stop_ball_picker()
+        #self.behavior.robot.io.close_cannon_barrier()
+        #self.behavior.robot.io.stop_ball_picker()
+        pass
+    
+
+class StateGoToGreatCrater(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        self.x0 = self.behavior.robot.locomotion.x
+        self.y0 = self.behavior.robot.locomotion.y
+        self.behavior.robot.locomotion.go_to_orient(self.x0, 350, 1.5 * math.pi)
+        self.cannon_power = FIRE1_CANNON_POWER
+
+    def test(self):
+        # Activate front US before recalage
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateGreatCrater
+        if self.y0 - self.robot.locomotion.y > CANNON_AUGMENTATION_DISTANCE_STEP:
+            self.cannon_power = min(self.cannon_power + 5, MAX_CANNON_POWER)
+            self.behavior.robot.communication.start_cannon(self.cannon_power)
+
+    def deinit(self):
+        pass
+
 
 class StateGreatCrater(FSMState):
     def __init__(self, behavior):
@@ -513,27 +539,10 @@ class StateGreatCrater(FSMState):
 
         collect_time = time.time() - self.ball_picker_start_time
         if self.behavior.robot.locomotion.is_trajectory_finished and collect_time >= SMALL_CRATER_COLLECT_DURATION:
-            return StateFire2
-
-
-class StateFire2(FSMMatch):
-    def __init__(self, behavior):
-        self.behavior = behavior
-        self.behavior.robot.io.start_cannon()
-        self.run_motor_start = time.time()
-        self.fire_start = 0
-        self.firing = False
-
-    def test(self):
-        if self.behavior.robot.io.cannon_barrier_state == self.behavior.robot.io.CannonBarrierState.CLOSED and time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
-            self.behavior.robot.io.open_cannon_barrier()
-            self.fire_start = time.time()
-            self.firing = True
-
-        if self.firing and time.time() - self.fire_start >= SMALL_CRATER_FIRE_DURATION:
             return StateEnd
 
-
+    def deinit(self):
+        pass
 
 class StateFunnyAction(FSMState):
     def __init__(self, behavior):
