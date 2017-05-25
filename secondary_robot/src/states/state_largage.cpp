@@ -70,7 +70,6 @@ const PROGMEM trajElem start_blue[]={
 		//Début trajectoire blue
 		{0,0,1000,TEMPS},
 		{-300,-3,45,DISTANCE},
-		QUART_TOUR_POS, //compte pour 3 instructions
 		{0,0,0},
 };
 

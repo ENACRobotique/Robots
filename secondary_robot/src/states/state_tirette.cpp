@@ -37,7 +37,7 @@ sState* testTirette()
     	{
     		if(timepull==0){timepull = millis();}
 			if(millis() - timepull > TIME_BEFORE_START){
-				return &sTrajInit;
+				return &sTraverseBlue;
 			}
     	}
     return 0;
