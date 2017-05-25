@@ -389,6 +389,9 @@ class StateEnd(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.behavior.robot.locomotion.stop_robot()
+        self.behavior.robot.locomotion.reposition_robot(0, 0, 0)  # To stop recalage if any
+        self.behavior.robot.io.stop_ball_picker()
+        self.behavior.robot.io.stop_cannon()
 
     def test(self):
         pass
