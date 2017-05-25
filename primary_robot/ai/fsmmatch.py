@@ -224,6 +224,35 @@ class StateTraj1Yellow(FSMState):
     def deinit(self):
         pass
 
+class StateTraj2Yellow(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        p1 = self.behavior.robot.locomotion.Point(2750,1460)
+        p2 = self.behavior.robot.locomotion.Point(2650,1300)
+        p3 = self.behavior.robot.locomotion.Point(2650,10)
+        p4 = self.behavior.robot.locomotion.Point(2650, 150)
+        p5 = self.behavior.robot.locomotion.Point(2800, 480)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], 1 * math.pi, 100)
+        self.behavior.robot.locomotion.follow_trajectory([p4], 1/3 * math.pi, -100)
+        self.behavior.robot.locomotion.follow_trajectory([p5], 1 * math.pi, 100)
+
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateSmallCrater1Yellow
+
+    def deinit(self):
+        pass
+
+
 
 class StateTraj1Blue(FSMState):
     def __init__(self, behavior):
@@ -232,6 +261,33 @@ class StateTraj1Blue(FSMState):
         p1 = self.behavior.robot.locomotion.Point(850, 1920)
         p2 = self.behavior.robot.locomotion.Point(1050, 1500)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], 1.5 * math.pi, 100)
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateSmallCrater1Blue
+
+    def deinit(self):
+        pass
+
+class StateTraj2Blue(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        p1 = self.behavior.robot.locomotion.Point(2800, 1400)
+        p2 = self.behavior.robot.locomotion.Point(2650, 1300)
+        p3 = self.behavior.robot.locomotion.Point(2650, 10)
+        p4 = self.behavior.robot.locomotion.Point(2650, 150)
+        p5 = self.behavior.robot.locomotion.Point(2800, 480)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], 1 * math.pi, 100)
+        self.behavior.robot.locomotion.follow_trajectory([p4], 1 / 3 * math.pi, -100)
+        self.behavior.robot.locomotion.follow_trajectory([p5], 1 * math.pi, 100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -379,7 +435,12 @@ class StateFire1(FSMMatch):
             self.firing = True
 
         if self.firing and time.time() - self.fire_start >= SMALL_CRATER_FIRE_DURATION:
-            return StateEnd
+            #return StateEnd
+            if self.behavior.color == self.behavior.color.YELLOW:
+                return StateTraj2Yellow
+            else:
+                return StateTraj2Blue
+
 
     def deinit(self):
         self.behavior.robot.io.close_cannon_barrier()
