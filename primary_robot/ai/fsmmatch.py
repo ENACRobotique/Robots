@@ -207,9 +207,8 @@ class StateTraj1Yellow(FSMState):
         self.behavior = behavior
         self.stopped = False
         p1 = self.behavior.robot.locomotion.Point(2150, 1920)
-        p2 = self.behavior.robot.locomotion.Point(1850, 1600)
+        p2 = self.behavior.robot.locomotion.Point(1850, 1500)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], 1.5 * math.pi, 100)
-        self.behavior.robot.locomotion.go_to_orient(1850, 1500, math.pi, -100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -231,9 +230,8 @@ class StateTraj1Blue(FSMState):
         self.behavior = behavior
         self.stopped = False
         p1 = self.behavior.robot.locomotion.Point(850, 1920)
-        p2 = self.behavior.robot.locomotion.Point(1050, 1600)
+        p2 = self.behavior.robot.locomotion.Point(1050, 1500)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], 1.5 * math.pi, 100)
-        self.behavior.robot.locomotion.go_to_orient(1050, 1500, math.pi, -100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
