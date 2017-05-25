@@ -8,7 +8,7 @@ from behavior import Behavior
 
 FUNNY_ACTION_TIME = 92  # in seconds
 END_MATCH_TIME = 95  # in seconds
-INITIAL_WAIT = 0 #in seconds
+INITIAL_WAIT = 35 #in seconds
 
 #2017 specific
 SMALL_CRATER_COLLECT_DURATION = 4  # in seconds
@@ -474,7 +474,7 @@ class StateTrajFirePositionBlue1(FSMState):
 class StateFire1(FSMMatch):
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.io.start_cannon()
+        self.behavior.robot.io.start_cannon(45)
         self.run_motor_start = time.time()
         self.fire_start = 0
         self.firing = False
