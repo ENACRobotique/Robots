@@ -131,9 +131,16 @@ class IO(object):
         if __debug__:
             print("[IO] ball picker stopped")
 
-    def start_cannon(self):
+    def start_cannon(self, speed=55):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.START_CANNON_MOTOR
+
+        #FIXME : Each time the following two lines are called,
+        #FIXME : Satan comes a bit closer to our world
+        #FIXME : (no really it should be fixed by defining own structure to this action)
+        down_msg.payload = self.robot.communication.sTrajectory()
+        down_msg.payload.speed = speed - 128 #Hack to set the speed between 0-255 (and not -128, 127)
+
         self.robot.communication.send_message(down_msg)
         self.cannon_state = self.CannonState.FIRING
         if __debug__:
