@@ -335,11 +335,11 @@ class StateTrajFirePositionYellow1(FSMState):
             self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            self.behavior.robot.locomotion.reposition_robot(2750, 1618, 3 * math.pi / 4)
+            self.behavior.robot.locomotion.reposition_robot(2750, 1618, 1.5 * math.pi)
             return StateFire1
 
         if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
-            self.behavior.robot.locomotion.reposition_robot(2750, 1618, 3 * math.pi / 4)
+            self.behavior.robot.locomotion.reposition_robot(2750, 1618, 1.5 * math.pi)
             return StateFire1
 
     def deinit(self):
@@ -377,11 +377,11 @@ class StateTrajFirePositionBlue1(FSMState):
             self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            self.behavior.robot.locomotion.reposition_robot(250, 1618, 3 * math.pi / 4)
+            self.behavior.robot.locomotion.reposition_robot(250, 1618, 1.5 * math.pi)
             return StateFire1
 
         if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
-            self.behavior.robot.locomotion.reposition_robot(250, 1618, 3 * math.pi / 4)
+            self.behavior.robot.locomotion.reposition_robot(250, 1618, 1.5 * math.pi)
             return StateFire1
 
     def deinit(self):
