@@ -8,16 +8,17 @@ from behavior import Behavior
 
 FUNNY_ACTION_TIME = 92  # in seconds
 END_MATCH_TIME = 95  # in seconds
-INITIAL_WAIT = 30 #in seconds
+INITIAL_WAIT = 0 #in seconds
 
 #2017 specific
-SMALL_CRATER_COLLECT_DURATION = 5 # in seconds
-SMALL_CRATER_FIRE_DURATION = 8 # in seconds
+SMALL_CRATER_COLLECT_DURATION = 4 # in seconds
+SMALL_CRATER_FIRE_DURATION = 6 # in seconds
 STANDARD_SEPARATION_US = 20 # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
 AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
-FIRE1_RECALAGE_MAX_TIME = 7  # in sec
+FIRE1_RECALAGE_MAX_TIME = 5  # in sec
 SPEED_FIRE = 60
+
 
 class Color(Enum):
     BLUE = "blue"
@@ -208,8 +209,9 @@ class StateTraj1Yellow(FSMState):
         self.behavior = behavior
         self.stopped = False
         p1 = self.behavior.robot.locomotion.Point(2150, 1920)
-        p2 = self.behavior.robot.locomotion.Point(1850, 1500)
+        p2 = self.behavior.robot.locomotion.Point(1950, 1350)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], 1.5 * math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(1950, 1450, 1.5* math.pi, -100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -260,8 +262,36 @@ class StateTraj1Blue(FSMState):
         self.behavior = behavior
         self.stopped = False
         p1 = self.behavior.robot.locomotion.Point(850, 1920)
-        p2 = self.behavior.robot.locomotion.Point(1050, 1500)
+        p2 = self.behavior.robot.locomotion.Point(1050, 1350)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], 1.5 * math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(1050, 1500, 1.5* math.pi, -100)
+
+    def test(self):
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateSmallCrater1Blue
+
+    def deinit(self):
+        pass
+
+class StateTraj2Blue(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.stopped = False
+        p1 = self.behavior.robot.locomotion.Point(2800, 1400)
+        p2 = self.behavior.robot.locomotion.Point(2650, 1300)
+        p3 = self.behavior.robot.locomotion.Point(2650, 10)
+        p4 = self.behavior.robot.locomotion.Point(2650, 150)
+        p5 = self.behavior.robot.locomotion.Point(2800, 480)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2, p3], 1 * math.pi, 100)
+        self.behavior.robot.locomotion.follow_trajectory([p4], 1 / 3 * math.pi, -100)
+        self.behavior.robot.locomotion.follow_trajectory([p5], 1 * math.pi, 100)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -309,7 +339,7 @@ class StateSmallCrater1Yellow(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(2150, 1500, 0, 50)
+        self.behavior.robot.locomotion.go_to_orient(2150, 1450, 0, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
@@ -333,7 +363,7 @@ class StateSmallCrater1Blue(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.stopped = False
-        self.behavior.robot.locomotion.go_to_orient(850, 1500, math.pi, 50)
+        self.behavior.robot.locomotion.go_to_orient(850, 1450, math.pi, 50)
         self.behavior.robot.io.start_ball_picker()
         self.ball_picker_start_time = time.time()
 
@@ -359,16 +389,24 @@ class StateTrajFirePositionYellow1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
-        self.behavior.robot.locomotion.go_to_orient(2600, 1350, 1.5*math.pi, 120)
-        self.behavior.robot.locomotion.go_to_orient(2750, 1700, 4.41, -100)
+        self.behavior.robot.locomotion.go_to_orient(2600, 1450, 1.5*math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(2780, 1700, 1.5*math.pi, -100)
 
     def test(self):
+        # Activate front US before recalage
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and not self.stopped and not self.wait_for_repositionning:
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
+        # Active back us while recalage
+        #if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.stop_robot()
+        #    self.stopped = True
+        #if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.restart_robot()
+        #    self.stopped = False
 
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
@@ -393,16 +431,24 @@ class StateTrajFirePositionBlue1(FSMState):
         self.stopped = False
         self.wait_for_repositionning = False
         self.recalage_start_time = 0
-        self.behavior.robot.locomotion.go_to_orient(400, 1350, 1.5*math.pi, 120)
-        self.behavior.robot.locomotion.go_to_orient(250, 1700, 4.91, -100)
+        self.behavior.robot.locomotion.go_to_orient(400, 1450, 1.5*math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(250, 1700, 1.5*math.pi, -100)
 
     def test(self):
+        # Activate front US before recalage
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
         if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
+        # Active back us while recalage
+        #if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.stop_robot()
+        #    self.stopped = True
+        #if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
+        #    self.behavior.robot.locomotion.restart_robot()
+        #    self.stopped = False
 
         if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
             self.behavior.robot.locomotion.do_recalage()
@@ -436,11 +482,14 @@ class StateFire1(FSMMatch):
             self.firing = True
 
         if self.firing and time.time() - self.fire_start >= SMALL_CRATER_FIRE_DURATION:
-            #return StateEnd
-            if self.behavior.color == self.behavior.color.YELLOW:
-                return StateTraj2Yellow
-            else:
-                return StateTraj2Blue
+
+            return StateEnd
+            #if self.behavior.color == self.behavior.color.YELLOW:
+                #return StateTraj2Yellow
+            #else:
+                #return StateTraj2Blue
+
+
 
     def deinit(self):
         self.behavior.robot.io.close_cannon_barrier()
@@ -481,7 +530,7 @@ class StateFire2(FSMMatch):
             self.fire_start = time.time()
             self.firing = True
 
-        if self.firing and time.time() - self.fire_start >= GREAT_CRATER_FIRE_DURATION:
+        if self.firing and time.time() - self.fire_start >= SMALL_CRATER_FIRE_DURATION:
             return StateEnd
 
 
