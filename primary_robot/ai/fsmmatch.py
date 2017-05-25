@@ -316,10 +316,10 @@ class StateTrajFirePositionYellow1(FSMState):
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
         # Active back us while recalage
-        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
+        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
+        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
@@ -358,10 +358,10 @@ class StateTrajFirePositionBlue1(FSMState):
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
         # Active back us while recalage
-        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
+        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped and self.wait_for_repositionning:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
+        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped and self.wait_for_repositionning:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
 
