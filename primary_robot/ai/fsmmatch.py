@@ -27,15 +27,16 @@ class FSMMatch(Behavior):
         self.robot = robot
         self.color = None
         self.start_time = None
+        self.funny_action_finished = False
         self.state = StateRepositionningPreMatch(self)
 
     def loop(self):
         time_now = time.time()
-        if self.start_time is not None and time_now - self.start_time >= FUNNY_ACTION_TIME:  # Checks time for funny action!
+        if self.start_time is not None and time_now - self.start_time >= FUNNY_ACTION_TIME and not self.funny_action_finished:  # Checks time for funny action!
             if __debug__:
                 print("[FSMMatch] Funny Action time")
             next_state = StateFunnyAction
-        elif self.start_time is not None and time_now - self.start_time >= END_MATCH_TIME:
+        elif self.start_time is not None and time_now - self.start_time >= END_MATCH_TIME and self.funny_action_finished and self.state.__class__ != StateEnd:
             if __debug__:
                 print("[FSMMatch] End match")
             next_state = StateEnd
@@ -159,7 +160,7 @@ class StateSeesawBlue(FSMState):
         self.behavior = behavior
         self.stopped = False
         self.wait_for_repositionning = False
-        self.behavior.robot.locomotion.go_to_orient(850, 1820, 1.5.math.pi, 100)
+        self.behavior.robot.locomotion.go_to_orient(850, 1820, 1.5*math.pi, 100)
         self.recalage_start_time = 0
 
     def test(self):
@@ -381,7 +382,7 @@ class StateFunnyAction(FSMState):
         return StateEnd
 
     def deinit(self):
-        pass
+        self.behavior.funny_action_finished = True
 
 
 class StateEnd(FSMState):
