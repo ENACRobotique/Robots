@@ -459,8 +459,7 @@ class StateGreatCrater(FSMState):
             return StateEnd
 
     def deinit(self):
-
-
+        pass
 
 
 class StateFunnyAction(FSMState):
