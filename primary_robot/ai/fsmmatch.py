@@ -444,7 +444,7 @@ class StateGreatCrater(FSMState):
         self.ball_picker_start_time = time.time()
         self.behavior.robot.io.start_cannon(MAX_CANNON_POWER)
         self.x0 = self.behavior.robot.locomotion.x
-        self.behavior.robot.locomotion.go_to_orient(self.x0, 0, 1.5 * math.pi)
+        self.behavior.robot.locomotion.go_to_orient(self.x0, 0, 1.5 * math.pi, 60)
 
     def test(self):
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -459,7 +459,8 @@ class StateGreatCrater(FSMState):
             return StateEnd
 
     def deinit(self):
-        pass
+
+
 
 class StateFunnyAction(FSMState):
     def __init__(self, behavior):
