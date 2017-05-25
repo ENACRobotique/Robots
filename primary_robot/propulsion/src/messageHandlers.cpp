@@ -69,7 +69,8 @@ void handleMessage(sMessageDown msg) {
 			IOs.setPickerSpeed(0);
 			break;
 		case START_CANNON_MOTOR:
-			IOs.setLauncherSpeed(LAUNCHER_SPEED);
+			speed = msg.traj.traj_speed;
+			IOs.setLauncherSpeed(speed);
 			break;
 		case STOP_CANNON_MOTOR:
 			IOs.setLauncherSpeed(0);
