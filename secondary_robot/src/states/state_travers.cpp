@@ -72,25 +72,35 @@ void TraversYellowDeinit(sState *next)
 
 const PROGMEM trajElem trav_blue[]={
 		//Début trajectoire blue
-		//DEMI_TOUR_POS,//Turn
-		/*{300,0,75,DISTANCE},
+
+		//Backup traj-mi
+		/*{300,0,85,DISTANCE},
 		DEMI_TOUR_POS,
-		{0,0,45000,TEMPS},
-		{300,0,80,DISTANCE},
+		{0,0,35000,TEMPS},
+		{300,0,90,DISTANCE},
 		{0,0,0}*/
 
 		{0,0,1000,TEMPS},
 		QUART_TOUR_POS,
-		{300,0,16,DISTANCE},
+		{300,0,15,DISTANCE},
 		QUART_TOUR_NEG,
 		{-300,0,2000,TEMPS},//recallage
 		{0,0,1000,TEMPS},
-		{300,0,125,DISTANCE},
+		{300,-1,125,DISTANCE},
 		{0,0,0}
 };
 
 
 const PROGMEM trajElem trav_yellow[]={
+
+		//Backup-mid
+/*
+		{300,0,85,DISTANCE},
+		{0,0,35000,TEMPS},
+		{-300,0,90,DISTANCE},
+		{0,0,0}
+		 */
+
 		//Début trajectoire yellow
 		{0,0,1000,TEMPS},
 		QUART_TOUR_NEG,
@@ -98,13 +108,7 @@ const PROGMEM trajElem trav_yellow[]={
 		QUART_TOUR_POS,
 		{-300,0,2000,TEMPS},//recallage
 		{300,0,20,DISTANCE},
-
 		DEMI_TOUR_POS,
-		//		{0,25,100,TEMPS},
-		//		{-300,25,27,DISTANCE},
-		//		{0,-25,100,TEMPS},
-		//		{-300,-25,27,DISTANCE},
-		//		{0,0,100,TEMPS},
 		{0,0,1000,TEMPS},
 		{-300,0,105,DISTANCE},
 		{0,0,0}
@@ -130,6 +134,8 @@ sState *TraversYellowTest()
 #endif
 		pause_time=0;
 		move(0,0);
+		//Hodor.write(HODOR_OPEN);
+		//return &sDead;
 		return &sLargageYellow;
 	}
 	return 0;
@@ -200,11 +206,11 @@ sState *TraversBlueTest()
 #endif
 
 
-			Hodor.write(HODOR_OPEN);
+			//Hodor.write(HODOR_OPEN);
 			flag_end = 1;
 			pause_time=0;
 			move(0,0);
-			return &sDead;
+			return &sLargageBlue;
 		}
 	}
 	return 0;
