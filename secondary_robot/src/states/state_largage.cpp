@@ -69,7 +69,7 @@ void deinitlargyellow(sState *next)
 const PROGMEM trajElem start_blue[]={
 		//Début trajectoire blue
 		{0,0,1000,TEMPS},
-		{-300,3,45,DISTANCE},
+		{300,1,45,DISTANCE},
 		{0,0,0},
 };
 
