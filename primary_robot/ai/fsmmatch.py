@@ -415,7 +415,12 @@ class StateGoToGreatCrater(FSMState):
         self.stopped = False
         self.x0 = self.behavior.robot.locomotion.x
         self.y0 = self.behavior.robot.locomotion.y
-        self.behavior.robot.locomotion.go_to_orient(self.x0, 350, 1.5 * math.pi, 120)
+        deltaX = 0
+        if self.behavior.color == Color.YELLOW:
+            deltaX = 75
+        elif self.behavior.color == Color.BLUE:
+            deltaX = -75
+        self.behavior.robot.locomotion.go_to_orient(self.x0 + deltaX, 350, 1.5 * math.pi, 120)
         self.cannon_power = FIRE1_CANNON_POWER
 
     def test(self):
