@@ -395,10 +395,10 @@ class StateFire1(FSMMatch):
         self.run_motor_start = time.time()
         self.fire_start = 0
         self.firing = False
+        self.behavior.robot.io.open_cannon_barrier()
 
     def test(self):
-        if self.behavior.robot.io.cannon_barrier_state == self.behavior.robot.io.CannonBarrierState.CLOSED and time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
-            self.behavior.robot.io.open_cannon_barrier()
+        if time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
             self.fire_start = time.time()
             self.firing = True
 
