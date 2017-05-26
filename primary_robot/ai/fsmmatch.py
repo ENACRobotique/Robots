@@ -72,7 +72,7 @@ class FSMState:
     def deinit(self):
         raise NotImplementedError("deinit of this state is not defined yet !")
 
-class StateRepositionningPreMatch(FSMMatch):
+class StateRepositionningPreMatch(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.repositionning = False
@@ -388,7 +388,7 @@ class StateTrajFirePositionBlue1(FSMState):
         pass
 
 
-class StateFire1(FSMMatch):
+class StateFire1(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.behavior.robot.io.start_cannon(FIRE1_CANNON_POWER)
@@ -397,7 +397,7 @@ class StateFire1(FSMMatch):
         self.firing = False
 
     def test(self):
-        if self.behavior.robot.io.cannon_barrier_state == self.behavior.robot.io.CannonBarrierState.CLOSED and time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
+        if not self.firing and time.time() - self.run_motor_start >= FULL_SPEED_CANNON_TIME:
             self.behavior.robot.io.open_cannon_barrier()
             self.fire_start = time.time()
             self.firing = True
