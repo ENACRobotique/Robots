@@ -129,7 +129,7 @@ sState *testRecup()
 			time_for_pompe=millis();
 			step++;
 			//on part comme ça
-			if(nb_recup==4)
+			if(nb_recup==3)
 				step=6;
 			break;
 		case 4:
@@ -147,7 +147,7 @@ sState *testRecup()
 			break;
 		case 6:
 			Dynamixel.ledStatus(NUM_DYNAMIXEL,ON);
-			if(nb_recup<4)
+			if(nb_recup<3)
 			{
 				//reset all static var
 				step=0;

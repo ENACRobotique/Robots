@@ -28,8 +28,8 @@ typedef struct {
 //Rotation trigo
 #define QUART_TOUR_POS {0,90,250,TEMPS},{250,90,+71.5/4,DISTANCE},{0,0,250,TEMPS}
 #define QUART_TOUR_NEG {0,90,250,TEMPS},{250,90,-71.5/4,DISTANCE},{0,0,250,TEMPS}
-#define DEMI_TOUR_POS {0,90,250,TEMPS},{250,90,+71.5/2,DISTANCE},{0,0,250,TEMPS}
-#define DEMI_TOUR_NEG {0,90,250,TEMPS},{250,90,-71.5/2,DISTANCE},{0,0,250,TEMPS}
+#define DEMI_TOUR_POS {0,90,250,TEMPS},{250,90,+70/2,DISTANCE},{0,0,250,TEMPS}
+#define DEMI_TOUR_NEG {0,90,250,TEMPS},{250,90,-70/2,DISTANCE},{0,0,250,TEMPS}
 
 //pointeur de fonction
 typedef int(*periodicTraj)(const trajElem tab[],unsigned long *pausetime, int *i, unsigned long *prev_millis);

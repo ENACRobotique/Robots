@@ -77,7 +77,7 @@ const PROGMEM trajElem start_blue[]={
 const PROGMEM trajElem start_yellow[]={
 		//Début trajectoire yellow
 		{0,0,1000,TEMPS},
-		{-300,3,45,DISTANCE},
+		{-350,-2,42,DISTANCE},
 		{0,0,0},
 };
 

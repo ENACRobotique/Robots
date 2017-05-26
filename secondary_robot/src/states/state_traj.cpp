@@ -121,7 +121,7 @@ sState *testTrajInit()
 }
 
 sState sTrajInit={
-		BIT(E_MOTOR)|BIT(E_RADAR),
+		BIT(E_MOTOR),//|BIT(E_RADAR),
 		&initTrajInit,
 		&deinitTrajInit,
 		&testTrajInit

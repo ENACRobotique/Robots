@@ -73,25 +73,42 @@ void TraversYellowDeinit(sState *next)
 const PROGMEM trajElem trav_blue[]={
 		//Début trajectoire blue
 		//DEMI_TOUR_POS,//Turn
-		{0,90,250,TEMPS},{250,90,+71.5/50,DISTANCE},{0,0,250,TEMPS},
-		{300,0,65,DISTANCE},
-		{0,90,250,TEMPS},{-250,90,+71.5/50,DISTANCE},{0,0,250,TEMPS},
-		{300,0,65,DISTANCE},
-		//{0,-80,250,TEMPS},
-		//{-250,-85,71.5/8,DISTANCE},
-		//{300,0,5,DISTANCE},
-		{0,0,250,TEMPS},
+		{300,0,75,DISTANCE},
+		DEMI_TOUR_POS,
+		{0,0,45000,TEMPS},
+		{300,0,80,DISTANCE},
 		{0,0,0}
+
+		/*{0,0,1000,TEMPS},
+		QUART_TOUR_POS,
+		{300,0,10,DISTANCE},
+		QUART_TOUR_NEG,
+		{-300,0,2000,TEMPS},//recallage
+		{300,0,20,DISTANCE},
+
+		{0,0,1000,TEMPS},
+		{300,0,105,DISTANCE},
+		{0,0,0}*/
 };
 
 
 const PROGMEM trajElem trav_yellow[]={
 		//Début trajectoire yellow
-		{300,0,107.5,DISTANCE},
-		{0,90,250,TEMPS},
-		{250,90,-71.5/8,DISTANCE},
-		{300,0,45,DISTANCE},
-		{0,0,250,TEMPS},
+		{0,0,1000,TEMPS},
+		QUART_TOUR_NEG,
+		{300,0,15,DISTANCE},
+		QUART_TOUR_POS,
+		{-300,0,2000,TEMPS},//recallage
+		{300,0,20,DISTANCE},
+
+		DEMI_TOUR_POS,
+		//		{0,25,100,TEMPS},
+		//		{-300,25,27,DISTANCE},
+		//		{0,-25,100,TEMPS},
+		//		{-300,-25,27,DISTANCE},
+		//		{0,0,100,TEMPS},
+		{0,0,1000,TEMPS},
+		{-300,0,105,DISTANCE},
 		{0,0,0}
 };
 
@@ -106,7 +123,7 @@ sState *TraversYellowTest()
 	if((millis()-_matchStart) > TIME_FOR_FUNNY_ACTION ) return &sFunnyAction;
 #endif
 	if(radarIntrusion()>0){
-			 return &sPause;
+		return &sPause;
 	}
 	if (periodicFunction(trav_yellow,&st_saveTime,&i,&prev_millis))
 	{
@@ -121,7 +138,7 @@ sState *TraversYellowTest()
 }
 
 sState sTraverseYellow={
-		BIT(E_MOTOR)|BIT(E_RADAR),
+		BIT(E_MOTOR),//|BIT(E_RADAR),
 		&TraversYellowInit,
 		&TraversYellowDeinit,
 		&TraversYellowTest
@@ -189,7 +206,7 @@ sState *TraversBlueTest()
 			flag_end = 1;
 			pause_time=0;
 			move(0,0);
-			return &sLargageBlue;
+			return &sDead;
 		}
 	}
 	return 0;
