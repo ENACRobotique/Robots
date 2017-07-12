@@ -163,6 +163,13 @@ class Communication:
         OPEN_ROCKET_LAUNCHER = 13
         LOCK_ROCKET_LAUNCHER = 14
 
+    class sCannonMotorSpeed():
+        def __init__(self):
+            self.speed = 0  # :8
+
+        def serialize(self):
+            return bitstring.pack('uint:8', self.speed)
+
     class sTrajElement():
         def __init__(self):
             self.x = 0  # :16
