@@ -18,6 +18,10 @@
 #define DOWN_HEADER_SIZE 3 //Number of octet not taken into account for the checksum computation
 #define MSG_UP_MAX_SIZE 9
 
+#define ESCAPE_OCTET 0xcd
+#define MASK_OCTET 0xdd
+#define END_OCT 0x7e
+
 #define BAUDRATE 115200
 
 #define HWSERIAL Serial1 //The serial of the teensy used to link with the raspi

@@ -12,7 +12,10 @@ SERIAL_BAUDRATE = 115200
 SERIAL_PATH = "/dev/ttyAMA0"
 SERIAL_SEND_TIMEOUT = 500  # ms
 
-DOWN_MSG_SIZE = 47
+ESCAPE_OCT = 0xcd
+MASK_OCT = 0xdd
+END_OCT = 0x7e
+
 UP_MSG_SIZE = 9
 
 RAD_TO_UINT16_FACTOR = 10430.378350470453
@@ -144,6 +147,15 @@ class Communication:
             return self._mailbox.popleft()
         return None
 
+    def escape_message(self, message):
+        """
+        
+        :param message: 
+        :type message: 
+        :return: 
+        :rtype: 
+        """
+
     ### Down (raspi -> prop) message declaration ###
     class eTypeDown(Enum):
         TRAJECTORY = 0
@@ -259,8 +271,17 @@ class Communication:
 
             ser = bitstring.pack('uint:8, uint:8, uint:8', self.id, self.message_type.value, self.checksum)
             serialized_msg = ser + ser2
-            pad = bitstring.pack('pad:{}'.format((DOWN_MSG_SIZE - len(serialized_msg.tobytes())) * 8))
-            return serialized_msg + pad
+
+            escaped_msg = bitstring.BitStream()
+            for octet in serialized_msg.tobytes():
+                if octet == END_OCT or octet == ESCAPE_OCT:
+                    escaped_msg.append(hex(ESCAPE_OCT))
+                    escaped_msg.append(hex(octet ^ MASK_OCT))
+                else:
+                    escaped_msg.append(hex(octet))
+            escaped_msg.append(hex(END_OCT))
+
+            return serialized_msg
 
 
             ### End down message declaration ###
