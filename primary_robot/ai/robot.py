@@ -1,6 +1,7 @@
 import sys
 
 import datetime
+import argparse
 import builtins
 
 from communication import *
@@ -31,6 +32,8 @@ class Robot(object):
 
 def main():
     robot = Robot()
+    # Arguments parsing
+    robot.communication.mock_communication = parsed_args.no_teensy
     while True:
         msg = robot.communication.check_message()
         if msg is not None:
@@ -46,6 +49,10 @@ def main():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser("AI option parser")
+    parser.add_argument('--no_teensy', action='store_true', default=False,
+                        help="Mock communications with teensy")
+    parsed_args = parser.parse_args()
     if __debug__:
         with open(TRACE_FILE, 'w') as sys.stdout:
             main()

@@ -6,8 +6,6 @@ from collections import deque
 
 from RPi import GPIO
 
-MOCK_COMMUNICATION = False  # Set to True if Serial is not plugged to the Teensy
-
 SERIAL_BAUDRATE = 115200
 SERIAL_PATH = "/dev/ttyAMA0"
 SERIAL_SEND_TIMEOUT = 500  # ms
@@ -18,6 +16,7 @@ UP_MSG_SIZE = 9
 RAD_TO_UINT16_FACTOR = 10430.378350470453
 SPEED_TO_UINT8_SUBSTRACTOR = 127
 PIN_RESET_TEENSY = 33  # in GPIO board number
+
 
 ### Up (Prop -> raspi) message declaration ###
 
@@ -80,6 +79,7 @@ class Communication:
         self._serial_port = serial.Serial(serial_path, baudrate)
         self._current_msg_id = 0  # type: int
         self._mailbox = deque()
+        self.mock_communication = False  # Set to True if Serial is not plugged to the Teensy
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(PIN_RESET_TEENSY, GPIO.OUT)
@@ -102,14 +102,14 @@ class Communication:
         :return: 0 if the message is sent, -1 if max_retries has been reached
         :rtype: int
         """
-        if MOCK_COMMUNICATION:
+        if self.mock_communication:
             max_retries = 0
 
         msg.id = self._current_msg_id
         self._current_msg_id = (self._current_msg_id + 1) % 256
         serialized = msg.serialize().tobytes()
         for i in range(max_retries):
-            #print(serialized)
+            # print(serialized)
             self._serial_port.write(serialized)
             time_sent = int(round(time.time() * 1000))
             while self._serial_port.in_waiting < UP_MSG_SIZE:
@@ -132,7 +132,7 @@ class Communication:
         :return: The oldest message non read
         :rtype: sMessageUp
         """
-        if MOCK_COMMUNICATION:
+        if self.mock_communication:
             return None
 
         if self._serial_port.in_waiting >= UP_MSG_SIZE:
@@ -163,7 +163,7 @@ class Communication:
         OPEN_ROCKET_LAUNCHER = 13
         LOCK_ROCKET_LAUNCHER = 14
 
-    class sTrajElement():
+    class sTrajElement:
         def __init__(self):
             self.x = 0  # :16
 
@@ -172,7 +172,7 @@ class Communication:
         def serialize(self):
             return bitstring.pack('uintle:16, uintle:16', self.x, self.y)
 
-    class sTrajectory():
+    class sTrajectory:
         def __init__(self):
             self.nb_traj = 0  # :8
 
@@ -206,7 +206,7 @@ class Communication:
 
             return ser
 
-    class sRepositionning():
+    class sRepositionning:
         def __init__(self):
             self.x = 0  # 16
 
@@ -222,11 +222,10 @@ class Communication:
         def theta(self, theta):
             self.__theta = theta * RAD_TO_UINT16_FACTOR
 
-
         def serialize(self):
             return bitstring.pack('uintle:16, uintle:16, uintle:16', self.x, self.y, self.__theta)
 
-    class sMessageDown():
+    class sMessageDown:
         def __init__(self):
 
             self.id = 0  # :8
