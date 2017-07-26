@@ -1,0 +1,96 @@
+obstacles:
+  - polygon: #Blue wall module receiver
+      points:
+        - x: 0
+          y: 1322
+        - x: 108
+          y: 1322
+        - x: 108
+          y: 828
+        - x: 0
+          y: 828
+  - polygon: #Yellow wall module receiver
+      points:
+        - x: 3000
+          y: 1322
+        - x: 2892
+          y: 1322
+        - x: 2892
+          y: 828
+        - x: 3000
+          y: 828
+  - polygon: #Blue start zone wall
+      points:
+        - x: 0
+          y: 1640
+        - x: 710
+          y: 1640
+        - x: 710
+          y: 1618
+        - x: 0
+          y: 1618
+  - polygon: #Yellow start zone wall
+      points:
+        - x: 3000
+          y: 1640
+        - x: 2290
+          y: 1640
+        - x: 2290
+          y: 1618
+        - x: 3000
+          y: 1618
+  - circle: #Blue up rocket
+      center:
+        x: 1150
+        y: 1960
+      radius: 40
+  - circle: #Yellow up rocket
+      center:
+        x: 1850
+        y: 1960
+      radius: 40
+  - circle: #Blue side rocket
+      center:
+        x: 40
+        y: 650
+      radius: 40
+  - circle: #Yellow side rocket
+      center:
+        x: 2960
+        y: 650
+      radius: 40
+  - circle: #Big circle at the bottom of the table
+      center:
+        x: 1500
+        y: 0
+      radius: 200
+  - polygon: #Module reciever bottom blue
+      points:
+        - x: 1407
+          y: 190
+        - x: 1310
+          y: 93
+        - x: 886
+          y: 518
+        - x: 982
+          y: 614
+  - polygon: #Module receiver bottom center
+      points:
+        - x: 1432
+          y: 200
+        - x: 1568
+          y: 200
+        - x: 1568
+          y: 800
+        - x: 1432
+          y: 800
+  - polygon: #Module receiver bottom yellow
+      points:
+        - x: 1593
+          y: 190
+        - x: 1690
+          y: 93
+        - x: 2114
+          y: 518
+        - x: 2018
+          y: 614

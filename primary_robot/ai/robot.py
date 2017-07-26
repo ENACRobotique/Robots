@@ -2,13 +2,17 @@ import sys
 
 import datetime
 import argparse
-import builtins
+import os
 
 from communication import *
 from io_robot import *
+from robot_ivy import Ivy
 from locomotion import *
+from obstacles import load_obstacles_from_file
 
-TRACE_FILE = "/home/pi/code/primary_robot/ai/log/log_"+str(datetime.datetime.now()).replace(' ', '_')
+#TRACE_FILE = "/home/pi/code/primary_robot/ai/log/log_"+str(datetime.datetime.now()).replace(' ', '_')
+TRACE_FILE = "plop.log"
+OBSTACLE_FILE = "obstacles2017.yml"
 
 behaviors = {
     "FSMMatch": 0,
@@ -18,6 +22,9 @@ behaviors = {
 
 class Robot(object):
     def __init__(self, behavior=behaviors["FSMMatch"]):
+        self.obstacles = load_obstacles_from_file(OBSTACLE_FILE)
+        if parsed_args.ivy_address is not None:
+            self.ivy = Ivy(self, parsed_args.ivy_address)
         self.communication = Communication()
         self.io = IO(self)
         self.locomotion = Locomotion(self)
@@ -50,8 +57,9 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("AI option parser")
-    parser.add_argument('--no_teensy', action='store_true', default=False,
+    parser.add_argument('-t', '--no_teensy', action='store_true', default=False,
                         help="Mock communications with teensy")
+    parser.add_argument('-p', '--pygargue', action='store', default=None, dest='ivy_address', type=str)
     parsed_args = parser.parse_args()
     if __debug__:
         with open(TRACE_FILE, 'w') as sys.stdout:

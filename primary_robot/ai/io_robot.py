@@ -2,7 +2,7 @@ from collections import namedtuple
 from enum import *
 import RPi.GPIO as GPIO
 import threading
-import smbus
+#import smbus
 import time
 
 BALL_PICKER_MOTOR = 3
@@ -35,8 +35,8 @@ class IO(object):
         GPIO.setup(PIN_LED_BLUE, GPIO.OUT)
         GPIO.setup(PIN_CORD, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(PIN_COLOR, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        self._thread_us_reader = USReader()
-        self._thread_us_reader.start()
+        #self._thread_us_reader = USReader()
+        #self._thread_us_reader.start()
         self.robot = robot
         self._cord_state = None
         self._button_state = None

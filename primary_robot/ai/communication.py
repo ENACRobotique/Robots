@@ -76,10 +76,13 @@ class Communication:
         :param baudrate: The baudrate of UART (must the same as the one on the other board)
         :type baudrate: int
         """
-        self._serial_port = serial.Serial(serial_path, baudrate)
+        self.mock_communication = True  # Set to True if Serial is not plugged to the Teensy
+        try:
+            self._serial_port = serial.Serial(serial_path, baudrate)
+        except Exception as e:
+            print(e)
         self._current_msg_id = 0  # type: int
         self._mailbox = deque()
-        self.mock_communication = False  # Set to True if Serial is not plugged to the Teensy
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(PIN_RESET_TEENSY, GPIO.OUT)
