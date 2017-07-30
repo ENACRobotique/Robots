@@ -16,7 +16,8 @@ OBSTACLE_FILE = "obstacles2017.yml"
 
 behaviors = {
     "FSMMatch": 0,
-    "FSMTests": 1
+    "FSMTests": 1,
+    "Slave" : 2
 }
 
 
@@ -33,12 +34,15 @@ class Robot(object):
             self.behavior = FSMMatch(self)
         elif behavior == behaviors["FSMTests"]:
             raise NotImplementedError("This behavior is not implemented yet !")
+        elif behavior == behaviors["Slave"]:
+            from slave import Slave
+            self.behavior = Slave(self)
         else:
             raise NotImplementedError("This behavior is not implemented yet !")
 
 
 def main():
-    robot = Robot()
+    robot = Robot(2)
     # Arguments parsing
     robot.communication.mock_communication = parsed_args.no_teensy
     while True:

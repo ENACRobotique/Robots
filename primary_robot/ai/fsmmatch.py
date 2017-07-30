@@ -31,7 +31,7 @@ class Color(Enum):
 
 class FSMMatch(Behavior):
     def __init__(self, robot):
-        self.robot = robot
+        super().__init__(robot)
         self.color = None
         self.start_time = None
         self.funny_action_finished = False

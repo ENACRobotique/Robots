@@ -59,6 +59,15 @@ class Locomotion:
     def go_to_orient_point(self, point, speed):
         self.go_to_orient(point.x, point.y, point.theta, speed)
 
+    def abort_trajectory(self):
+        message = self.robot.communication.sMessageDown()
+        message.message_type = self.robot.communication.eTypeDown.EMPTY_POINTS
+        self.robot.communication.send_message(message)
+        self.is_trajectory_finished = True
+        self.current_trajectory = []
+        if __debug__:
+            print("[LOCOMOTION] Robot trajectory aborted")
+
     def stop_robot(self):
         message = self.robot.communication.sMessageDown()
         message.message_type = self.robot.communication.eTypeDown.STOP
