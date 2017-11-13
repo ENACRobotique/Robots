@@ -30,7 +30,7 @@ class Particle(object):
         self.theta += (theta_speed * dt + (np.random.normal() * turn_noise)) % (2 * np.pi)
 
     def __str__(self):
-        return str((self.x, self.y, self.theta, self.weight))
+        return "{0:.0f} {1:.0f} {2:.3f} {3:.5f}".format(self.x, self.y, self.theta, self.weight)
 
     def __repr__(self):
         return self.__str__()
@@ -105,19 +105,24 @@ def update_color(particles, color):
     weight_sum = 0
     # Attribute new weight
     for p in particles:
+
+        p.weight += 0.001  # To avoid round-off to zero?
         # TODO :  Be less a pig
         if color == Color.BLUE:
-            p.weight += int((0 <= p.x <= 1500) and (0 <= p.y <= 1000))/100
+            p.weight *= int((0 <= p.x <= 1500) and (0 <= p.y <= 1000)) * 10
         elif color == Color.RED:
-            p.weight += int((0 < p.x <= 1500) and (1000 <= p.y <= 2000))/100
+            p.weight *= int((0 < p.x <= 1500) and (1000 <= p.y <= 2000)) * 10
         elif color == Color.GREEN:
-            p.weight += int((1500 < p.x <= 3000) and (1000 < p.y <= 2000))/100
+            p.weight *= int((1500 < p.x <= 3000) and (1000 < p.y <= 2000)) * 10
         elif color == Color.BLACK:
-            p.weight += int((1500 <= p.x <= 3000) and (0 < p.y <= 1000))/100
+            p.weight *= int((1500 <= p.x <= 3000) and (0 < p.y <= 1000)) * 10
         else:
             print("Color {} not found".format(color))
 
-        p.weight += 0.01# To avoid round-off to zero?
+        # Check first if particle is still inside the table
+        if p.x < 0 or p.x > 3000 or p.y < 0 or p.y > 2000:
+            p.weight = 1e-30
+
         weight_sum += p.weight
     # Normalize
     for p in particles:
@@ -138,3 +143,4 @@ def resample(particles):
 # Used to quantify how much particle are effective (i.e have high weigh)
 def effective_particle_weight(particles):
     return 1/np.sum(np.square([p.weight for p in particles]))
+

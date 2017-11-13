@@ -1,7 +1,7 @@
 import time
 import sys
 try:
-    from pymorse import Morse
+    from pymorse import Morse, Robot
 
 except ImportError:
     print("you need first to install pymorse, the Python bindings for MORSE!")
@@ -14,7 +14,8 @@ BLENDER_Y_RANGE = 2
 REAL_X_RANGE = 3
 REAL_Y_RANGE = 2
 
-
+ODOMETRY_FREQ = 100  # in Hz
+COLOR_FREQ = 100  # in Hz
 
 def blender2real(x, y):
     """ Shift origin to bottom left corner """
@@ -30,13 +31,13 @@ def acq_odometry_morse(odometry_queue, q_lock):
             vy = odometry_data['vx']
             total_speed = pow(pow(vx, 2) + pow(vy, 2), 0.5) * 1000 # to mm per sec
             theta_speed = odometry_data['wz']
-            
+            current_time = simu.time()
             # Write in queue to process
             q_lock.acquire()
-            odometry_queue.put((total_speed, theta_speed))
+            odometry_queue.put((total_speed, theta_speed, current_time))
             q_lock.release()
 
-            time.sleep(0.3)
+            # time.sleep(1/ODOMETRY_FREQ)
 
 
 def acq_rgb_morse(rgb_queue, q_lock):
@@ -60,4 +61,4 @@ def acq_rgb_morse(rgb_queue, q_lock):
             q_lock.acquire()
             rgb_queue.put(tuple(color))
             q_lock.release()
-            time.sleep(0.25)
+            # time.sleep(1/COLOR_FREQ)
