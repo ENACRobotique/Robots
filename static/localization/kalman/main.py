@@ -12,20 +12,21 @@ import copy
 import matplotlib.pyplot as plt
 
 PLOT_MODE = True  # Set to false to disable plotting
-PLOT_RATE = 3  # Frequency of plot (Hz)
+PLOT_RATE = 4  # Frequency of plot (Hz)
 
 # Data receiving threads
 data_queue = queue.Queue() # Contains tuple of the form (DATA_TYPE, data)
 data_queue_lock = Lock()
-# thread_odo = Thread(target=acquire_data.get_stimulated_odometry, args=(data_queue, data_queue_lock,))
+
 thread_odo = Thread(target=acquire_data.get_morse_odometry, args=(data_queue, data_queue_lock,))
 thread_odo.start()
+
 thread_measurement1 = Thread(target=acquire_data.get_morse_measurement, args=(data_queue, data_queue_lock,))
 thread_measurement1.start()
 
 
 # Create motion model
-Q = np.diag([0.005, 4 * np.pi / 180])  # Represent model uncertainties
+Q = np.diag([0.01, 3 * np.pi / 180])  # Represent model uncertainties
 odometry_model = model.OdometricModel(Q)
 
 # Initialize kalman filter
@@ -36,6 +37,7 @@ current_state = initial_state
 current_error = initial_error_matrix
 previous_print_state = None
 previous_print_error = None
+true_state = None
 
 # Plot
 if PLOT_MODE:
@@ -48,7 +50,7 @@ synchronized = False
 
 while True:
     if data_queue.qsize() > 0:
-        print("Q size :" + str(data_queue.qsize()))
+        # print("Q size :" + str(data_queue.qsize()))
         # Get the older data (command or measurement)
         data_queue_lock.acquire()
         data_type, data = data_queue.get()
@@ -59,8 +61,8 @@ while True:
             if synchronized:  # Need to synchronize clock before computing any prediction
                 kf.predict(data)
 
-                current_state = copy.deepcopy(kf.state)
-                current_error = copy.deepcopy(kf.error_matrix)
+                # current_state = copy.deepcopy(kf.state)
+                # current_error = copy.deepcopy(kf.error_matrix)
 
             else:
                 synchronized = True
@@ -71,16 +73,34 @@ while True:
         # Update
         elif data_type == acquire_data.DATA_TYPE.MEASUREMENT:
             kf.update(data)
-            current_state = copy.deepcopy(kf.state)
-            current_error = copy.deepcopy(kf.error_matrix)
+
+        # Save actual state (if given by the simulation)
+        elif data_type == acquire_data.DATA_TYPE.ACTUAL:
+            true_state = data
+            continue
+
+        current_state = copy.deepcopy(kf.state)
+        current_error = copy.deepcopy(kf.error_matrix)
 
         # Plot
         if PLOT_MODE:
             # if plot.need_to_refresh(current_state, previous_print_state) and time.time() - last_plot_time > 1 / PLOT_RATE:
             if time.time() - last_plot_time > 1 / PLOT_RATE:
 
+                ax.clear()
+                ax.set_xlim(0, 3)
+                ax.set_ylim(0, 2)
 
+                # Plot error ellipse
                 plot.plot_error_matrix(copy.deepcopy(kf.error_matrix), copy.deepcopy(kf.state), ax)
+
+                # Plot estimated state
+                plot.plot_estimated_state(current_state, ax)
+
+                # Plot last actual state if exists
+                if true_state is not None:
+                    plot.plot_actual_state(true_state, ax)
+
                 plt.draw()
 
                 last_plot_time = time.time()

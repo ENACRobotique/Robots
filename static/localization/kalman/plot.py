@@ -1,8 +1,8 @@
-import matplotlib as plt
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 from matplotlib.collections import PatchCollection
+import math
 
 # To no re-plot a state if it has not move much
 MINIMUM_REFRESH_DISTANCE = 0.01  # In meter
@@ -50,6 +50,23 @@ def plot_error_matrix_list(error_matrix_list, state_list):
     p = PatchCollection(ellipses)
     ax.add_collection(p)
     plt.show()
+
+
+def plot_state(state, color, ax=plt.gca()):
+        x, y = state.x, state.y
+        ax.plot(x, y, color + 'o')
+        x_end = x + 0.1 * math.cos(state.theta)
+        y_end = y + 0.1 * math.sin(state.theta)
+        ax.plot([x, x_end], [y, y_end], color)
+
+
+def plot_estimated_state(state, ax=plt.gca()):
+    plot_state(state, 'r', ax)
+
+
+def plot_actual_state(state, ax=plt.gca()):
+    plot_state(state, 'g', ax)
+
 
 
 def need_to_refresh(current_state, previous_state):

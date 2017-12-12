@@ -10,6 +10,7 @@ from enum import Enum
 from command import Command
 from measurement import SimpleMeasurement
 from sensor import BasicSensor
+from state import State
 import numpy as np
 from random import normalvariate
 
@@ -17,12 +18,19 @@ BLENDER_X_RANGE = 3
 BLENDER_Y_RANGE = 2
 REAL_X_RANGE = 3
 REAL_Y_RANGE = 2
-MORSE_MEASUREMENT_X_STD = MORSE_MEASUREMENT_Y_STD = 0.02  # in m
-MORSE_MEASUREMENT_YAW_STD = 2 * np.pi / 180  # in rad
+
+MORSE_MEASUREMENT_X_STD = MORSE_MEASUREMENT_Y_STD = 0.05  # in m
+MORSE_MEASUREMENT_YAW_STD = 3 * np.pi / 180  # in rad
+
+MORSE_ODO_TOTAL_SPEED_STD = 0.3  # in m/s
+MORSE_ODO_ROT_SPEED_STD = 15 * np.pi / 180  # in rad/sec
+
+
 
 class DATA_TYPE(Enum):
     COMMAND = 0
     MEASUREMENT = 1
+    ACTUAL = 2
 
 
 def get_stimulated_odometry(queue, lock):
@@ -54,12 +62,18 @@ def get_morse_odometry(queue, lock):
             # Create command
             command = Command(total_speed, rotation_speed, current_time)
 
+            # Add noise if moving
+            if command.has_noise():
+                command.total_speed += normalvariate(0, MORSE_ODO_TOTAL_SPEED_STD)
+                command.rotation_speed += normalvariate(0, MORSE_ODO_ROT_SPEED_STD)
+
             # Write in queue to process
             lock.acquire()
             queue.put((DATA_TYPE.COMMAND, command))
             lock.release()
 
-            time.sleep(0.02)
+            time.sleep(0.05)
+
 
 def get_morse_measurement(queue, lock):
     morse_sensor = BasicSensor(np.diag([MORSE_MEASUREMENT_X_STD, MORSE_MEASUREMENT_Y_STD, MORSE_MEASUREMENT_YAW_STD]))
@@ -74,16 +88,24 @@ def get_morse_measurement(queue, lock):
             # Shift into table coordinates
             (x, y) = blender2real(x_blender, y_blender)
 
+            # Saved true state
+            true_state = State(x, y, yaw)
+
+            # Write actual state in queue to process
+            lock.acquire()
+            queue.put((DATA_TYPE.ACTUAL, true_state))
+            lock.release()
+
             # Add Gaussian noise
             x_measured = normalvariate(x, MORSE_MEASUREMENT_X_STD)
             y_measured = normalvariate(y, MORSE_MEASUREMENT_Y_STD)
             yaw_measured = normalvariate(yaw, MORSE_MEASUREMENT_YAW_STD) #% (2 * np.pi)
             measurement = SimpleMeasurement(x_measured, y_measured, yaw_measured, morse_sensor)
 
-            # Write in queue to process
+            # Write measurement in queue to process
             lock.acquire()
             queue.put((DATA_TYPE.MEASUREMENT, measurement))
             lock.release()
 
-            time.sleep(0.1)
+            time.sleep(0.2)
 

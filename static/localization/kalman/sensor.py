@@ -23,7 +23,7 @@ class BasicSensor():
         return np.eye(len(state))
 
     def innovation(self, expected_measurement, measurement):
-        angle_difference = (measurement.theta - expected_measurement.theta) % 2 * np.pi
+        angle_difference = (measurement.theta - expected_measurement.theta) % (2 * np.pi)
         if angle_difference >= np.pi:
             angle_difference -= 2 * np.pi
         innovation = np.array([measurement.x - expected_measurement.x, measurement.y - expected_measurement.y,
