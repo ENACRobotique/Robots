@@ -63,9 +63,8 @@ def get_morse_odometry(queue, lock):
             command = Command(total_speed, rotation_speed, current_time)
 
             # Add noise if moving
-            if command.has_noise():
-                command.total_speed += normalvariate(0, MORSE_ODO_TOTAL_SPEED_STD)
-                command.rotation_speed += normalvariate(0, MORSE_ODO_ROT_SPEED_STD)
+            command.total_speed += command.total_speed * normalvariate(0, MORSE_ODO_TOTAL_SPEED_STD) * 3
+            command.rotation_speed += command.rotation_speed * normalvariate(0, MORSE_ODO_ROT_SPEED_STD) * 2
 
             # Write in queue to process
             lock.acquire()

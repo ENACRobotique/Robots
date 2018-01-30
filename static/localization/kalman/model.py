@@ -44,10 +44,12 @@ class AbstractModel():
         new_estimate = self.transition_function(state, command)
 
         # Check if we need to add noise
-        if command.has_noise():
-            noise = self.Q
-        else:
-            noise = np.zeros(self.Q.shape)
+        # if command.has_noise():
+        #     noise = self.Q
+        # else:
+        #     noise = np.zeros(self.Q.shape)
+        noise_multiplicator = np.diag([command.total_speed * 3, command.rotation_speed * 2])
+        noise = noise_multiplicator.dot(self.Q)
 
         F = self.F(state, command)
         G = self.G(state, command)
