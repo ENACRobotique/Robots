@@ -8,7 +8,7 @@ from communication import *
 from io_robot import *
 from locomotion import *
 
-TRACE_FILE = "/home/pi/code/primary_robot/ai/log/log_"+str(datetime.datetime.now()).replace(' ', '_')
+TRACE_FILE = "/home/pi/ai/log/log_"+str(datetime.datetime.now()).replace(' ', '_')
 
 behaviors = {
     "FSMMatch": 0,
