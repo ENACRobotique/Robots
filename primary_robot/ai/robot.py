@@ -54,6 +54,7 @@ if __name__ == '__main__':
                         help="Mock communications with teensy")
     parsed_args = parser.parse_args()
     if __debug__:
+        print("Debug mode enable")
         with open(TRACE_FILE, 'w') as sys.stdout:
             main()
     else:

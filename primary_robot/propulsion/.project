@@ -34,12 +34,12 @@
 		<link>
 			<name>core/core</name>
 			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/teensy/avr/cores/teensy3</locationURI>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/cores/teensy3</location>
 		</link>
 		<link>
 			<name>libraries/Servo</name>
 			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/teensy/avr/libraries/Servo</locationURI>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/Servo</location>
 		</link>
 	</linkedResources>
 </projectDescription>

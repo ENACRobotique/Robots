@@ -35,7 +35,7 @@ class FSMMatch(Behavior):
         self.color = None
         self.start_time = None
         self.funny_action_finished = False
-        self.state = StateRepositionningPreMatch(self)
+        self.state = StateTest(self)
 
     def loop(self):
         time_now = time.time()
@@ -62,6 +62,7 @@ class FSMMatch(Behavior):
 
 
 
+
 class FSMState:
     def __init__(self, behavior):
         raise NotImplementedError("this state is not defined yet")
@@ -72,24 +73,23 @@ class FSMState:
     def deinit(self):
         raise NotImplementedError("deinit of this state is not defined yet !")
 
-class StateRepositionningPreMatch(FSMState):
+
+
+class StateTest(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
-        self.repositionning = False
-        self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.WHITE)
+        self.behavior.robot.locomotion.reposition_robot(0, 0, 0)
+        p1 = self.behavior.robot.locomotion.Point(1000, 0)
+        p2 = self.behavior.robot.locomotion.Point(1000, 1000)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 100)
+
 
     def test(self):
-        if not self.repositionning and self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.IN:
-            self.behavior.robot.locomotion.do_recalage()
-            self.repositionning = True
-            self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.RED)
-        if self.repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            return StateColorSelection
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateEnd
 
     def deinit(self):
         pass
-
-
 
 class StateColorSelection(FSMState):
     class ColorState(Enum):
@@ -124,6 +124,25 @@ class StateColorSelection(FSMState):
             self.behavior.robot.locomotion.reposition_robot(2955, 1800, math.pi)
         else:
             self.behavior.robot.locomotion.reposition_robot(45, 1800, 0)
+
+
+class StateRepositionningPreMatch(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.repositionning = False
+        self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.WHITE)
+
+    def test(self):
+        if not self.repositionning and self.behavior.robot.io.cord_state == self.behavior.robot.io.CordState.IN:
+            self.behavior.robot.locomotion.do_recalage()
+            self.repositionning = True
+            self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.RED)
+        if self.repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            return StateColorSelection
+
+    def deinit(self):
+        pass
+
 
 
 class StateInitialWait(FSMState):
