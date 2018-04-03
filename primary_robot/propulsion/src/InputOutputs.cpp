@@ -96,6 +96,27 @@ void InputOutputs::setServoPosition(int servoNb, int position) {
 	_servos[index].write(position);
 }
 
+void InputOutputs::setServoPositionMs(int servoNb, int ms) {
+	int index = -1;
+	switch(servoNb) {
+		case SERVO1:
+			index = 0;
+			break;
+		case SERVO2:
+			index = 1;
+			break;
+		case SERVO3:
+			index = 2;
+			break;
+		case SERVO4:
+			index = 3;
+			break;
+
+	}
+	_servos[index].writeMicroseconds(ms);
+
+}
+
 void InputOutputs::tiretteRising() {
 	events |= BIT(TiretteEvent);
 	events |= BIT(TiretteState);

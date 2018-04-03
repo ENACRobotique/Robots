@@ -153,15 +153,11 @@ class Communication:
         EMPTY_POINTS = 4
         DO_RECALAGE = 5
         RESET = 6
-        # 2017 Cup Specials
-        START_BALL_PICKER_MOTOR = 7
-        STOP_BALL_PICKER_MOTOR = 8
-        START_CANNON_MOTOR = 9
-        STOP_CANNON_MOTOR = 10
-        OPEN_CANNON_BARRIER = 11
-        CLOSE_CANNON_BARRIER = 12
-        OPEN_ROCKET_LAUNCHER = 13
-        LOCK_ROCKET_LAUNCHER = 14
+        # 2018 Cup Specials
+        OPEN_TRAP = 7
+        CLOSE_TRAP = 8
+        SORTER_DOWN = 9
+        SORTER_UP = 10
 
     class sTrajElement:
         def __init__(self):

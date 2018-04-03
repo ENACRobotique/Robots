@@ -81,7 +81,7 @@ class StateTest(FSMState):
         self.behavior.robot.locomotion.reposition_robot(0, 0, 0)
         p1 = self.behavior.robot.locomotion.Point(1000, 0)
         p2 = self.behavior.robot.locomotion.Point(1000, 1000)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 100)
+        #self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 100)
 
 
     def test(self):

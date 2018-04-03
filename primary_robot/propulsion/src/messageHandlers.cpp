@@ -62,30 +62,20 @@ void handleMessage(sMessageDown msg) {
 		case RESET:
 			RESTART();
 			break;
-		case START_BALL_PICKER_MOTOR:
-			IOs.setPickerSpeed(PICKER_SPEED);
+		case OPEN_TRAP:
+			IOs.setServoPositionMs(SERVO_TRAP, GO_TRAP_UP);
 			break;
-		case STOP_BALL_PICKER_MOTOR:
-			IOs.setPickerSpeed(0);
+		case CLOSE_TRAP:
+			IOs.setServoPositionMs(SERVO_TRAP, GO_TRAP_DOWN);
 			break;
-		case START_CANNON_MOTOR:
-			speed = msg.traj.traj_speed;
-			IOs.setLauncherSpeed(speed);
+		case SORTER_BALL_1:
+			IOs.setServoPositionMs(SERVO_SORTER, COLLECT_BALL_1);
 			break;
-		case STOP_CANNON_MOTOR:
-			IOs.setLauncherSpeed(0);
+		case SORTER_BALL_2:
+			IOs.setServoPositionMs(SERVO_SORTER, COLLECT_BALL_2);
 			break;
-		case OPEN_CANNON_BARRIER:
-			IOs.setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_OPENED);
-			break;
-		case CLOSE_CANNON_BARRIER:
-			IOs.setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_CLOSED);
-			break;
-		case OPEN_ROCKET_LAUNCHER:
-			IOs.setServoPosition(SERVO_ROCKET, ROCKET_LAUNCH);
-			break;
-		case LOCK_ROCKET_LAUNCHER:
-			IOs.setServoPosition(SERVO_ROCKET, ROCKET_IDLE);
+		case SORTER_UP:
+			IOs.setServoPositionMs(SERVO_SORTER, GO_SORTER_UP);
 			break;
 	}
 }

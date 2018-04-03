@@ -31,6 +31,7 @@ public:
 	void setPickerSpeed(int speed);
 
 	void setServoPosition(int servo, int position);
+	void setServoPositionMs(int servo, int ms);
 
 	void launchRocket();
 
