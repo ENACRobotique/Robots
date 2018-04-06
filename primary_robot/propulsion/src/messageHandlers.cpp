@@ -63,10 +63,10 @@ void handleMessage(sMessageDown msg) {
 			RESTART();
 			break;
 		case OPEN_TRAP:
-			IOs.setServoPositionMs(SERVO_TRAP, GO_TRAP_UP);
+			IOs.setServoPositionMs(SERVO_TRAP, GO_TRAP_OPEN);
 			break;
 		case CLOSE_TRAP:
-			IOs.setServoPositionMs(SERVO_TRAP, GO_TRAP_DOWN);
+			IOs.setServoPositionMs(SERVO_TRAP, GO_TRAP_CLOSE);
 			break;
 		case SORTER_BALL_1:
 			IOs.setServoPositionMs(SERVO_SORTER, COLLECT_BALL_1);

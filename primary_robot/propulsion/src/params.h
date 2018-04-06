@@ -39,8 +39,8 @@
 #define LAUNCHER_SPEED 100
 #define PICKER_SPEED 512
 
-#define GO_TRAP_DOWN 787 //In ms
-#define GO_TRAP_UP 1222 //In ms
+#define GO_TRAP_CLOSE 787 //In ms
+#define GO_TRAP_OPEN 1222 //In ms
 #define COLLECT_BALL_1 1247 //In ms
 #define COLLECT_BALL_2 1482 //In ms
 #define GO_SORTER_UP 2252 //In ms

@@ -45,8 +45,8 @@ void InputOutputs::init() {
 	_servos[3].attach(SERVO4);
 
 
-	setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_CLOSED);
-	IOs.setServoPosition(SERVO_ROCKET, ROCKET_IDLE);
+	setServoPositionMs(SERVO_SORTER, COLLECT_BALL_1);
+	setServoPositionMs(SERVO_TRAP, GO_TRAP_CLOSE);
 }
 
 void InputOutputs::processActions() {
@@ -130,10 +130,6 @@ void InputOutputs::tiretteFalling() {
 void InputOutputs::colorRising() {
 	events |= BIT(ColorEvent);
 	events |= BIT(ColorState);
-}
-
-void InputOutputs::launchRocket() {
-	setServoPosition(SERVO_ROCKET, 150);
 }
 
 void InputOutputs::colorFalling() {

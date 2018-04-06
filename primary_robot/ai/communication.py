@@ -156,8 +156,9 @@ class Communication:
         # 2018 Cup Specials
         OPEN_TRAP = 7
         CLOSE_TRAP = 8
-        SORTER_DOWN = 9
-        SORTER_UP = 10
+        SORTER_COLLECT_1 = 9
+        SORTER_COLLECT_2 = 10
+        SORTER_UP = 11
 
     class sTrajElement:
         def __init__(self):

@@ -15,8 +15,11 @@ PIN_CORD = 18
 PIN_COLOR = 16
 
 UltraSoundSensor = namedtuple('ultra_sound_sensor', ['address', 'position'])
-us_sensors = [UltraSoundSensor(0x76, "front_left"), UltraSoundSensor(0x77, "front_right"), UltraSoundSensor(0x73, "rear_left"),
-              UltraSoundSensor(0x74, "rear_center"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
+# us_sensors = [UltraSoundSensor(0x76, "front_left"), UltraSoundSensor(0x77, "front_right"), UltraSoundSensor(0x73, "rear_left"),
+#               UltraSoundSensor(0x74, "rear_center"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
+
+us_sensors = []  #Sets US sensors here !, empty list if no US is plugged
+
 #us_sensors=[]
 us_sensors_distance = {us_sensors[i]: 0 for i in range(len(us_sensors))}
 
@@ -41,17 +44,16 @@ class IO(object):
         self._cord_state = None
         self._button_state = None
         self.led_color = None
-        self.ball_picker_state = None
-        self.cannon_state = None
-        self.cannon_barrier_state = None
-        self.rocket_launcher_state = None
-        self.stop_ball_picker()
-        self.stop_cannon()
-        self.close_cannon_barrier()
-        self.lock_rocket_launcher()
+        self.trap_state = None
+        self.sorter_state = None
         self.set_led_color(self.LedColor.BLACK)
         self._read_cord(PIN_CORD)
         self._read_switch(PIN_COLOR)
+        self.open_trap()
+        self.close_trap()
+        self.sorter_collect_ball_1()
+        self.sorter_collect_ball_2()
+        self.sorter_up()
 
     class LedColor(Enum):
         BLACK = (GPIO.LOW, GPIO.LOW, GPIO.LOW)
@@ -71,21 +73,15 @@ class IO(object):
         PRESSED = "pressed"
         RELEASED = "released"
 
-    class BallPickerState(Enum):
-        STARTED = "started"
-        STOPPED = "stopped"
-
-    class CannonState(Enum):
-        IDLE = "idle"
-        FIRING = "firing"
-
-    class CannonBarrierState(Enum):
+    class TrapState(Enum):
         OPEN = "open"
-        CLOSED = "close"
+        CLOSE = "close"
 
-    class RocketLauncherState(Enum):
-        LOCKED = "locked"
-        OPEN = "open"
+    class SorterState(Enum):
+        COLLECT1 = "collecting 1"
+        COLLECT2 = "collecting 2"
+        UP = "up"
+
 
     @property
     def cord_state(self):
@@ -115,76 +111,61 @@ class IO(object):
     def rear_distance(self):
         return self.get_us_distance_by_postion("rear")
 
-    def start_ball_picker(self):
+
+    # def start_cannon(self, speed=55):
+    #     down_msg = self.robot.communication.sMessageDown()
+    #     down_msg.message_type = self.robot.communication.eTypeDown.START_CANNON_MOTOR
+    #
+    #     #FIXME : Each time the following two lines are called,
+    #     #FIXME : Satan comes a bit closer to our world
+    #     #FIXME : (no really it should be fixed by defining own structure to this action)
+    #     down_msg.payload = self.robot.communication.sTrajectory()
+    #     down_msg.payload.speed = speed - 128 #Hack to set the speed between 0-255 (and not -128, 127)
+    #
+    #     self.robot.communication.send_message(down_msg)
+    #     self.cannon_state = self.CannonState.FIRING
+    #     if __debug__:
+    #         print("[IO] cannon started")
+
+    def open_trap(self):
         down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.START_BALL_PICKER_MOTOR
+        down_msg.message_type = self.robot.communication.eTypeDown.OPEN_TRAP
         self.robot.communication.send_message(down_msg)
-        self.ball_picker_state = self.BallPickerState.STARTED
+        self.sorter_state = self.TrapState.OPEN
         if __debug__:
-            print("[IO] ball picker started")
+            print("[IO] trap opened")
 
-    def stop_ball_picker(self):
+    def close_trap(self):
         down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.STOP_BALL_PICKER_MOTOR
+        down_msg.message_type = self.robot.communication.eTypeDown.CLOSE_TRAP
         self.robot.communication.send_message(down_msg)
-        self.ball_picker_state = self.BallPickerState.STOPPED
+        self.sorter_state = self.TrapState.CLOSE
         if __debug__:
-            print("[IO] ball picker stopped")
+            print("[IO] trap closed")
 
-    def start_cannon(self, speed=55):
+    def sorter_collect_ball_1(self):
         down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.START_CANNON_MOTOR
-
-        #FIXME : Each time the following two lines are called,
-        #FIXME : Satan comes a bit closer to our world
-        #FIXME : (no really it should be fixed by defining own structure to this action)
-        down_msg.payload = self.robot.communication.sTrajectory()
-        down_msg.payload.speed = speed - 128 #Hack to set the speed between 0-255 (and not -128, 127)
-
+        down_msg.message_type = self.robot.communication.eTypeDown.SORTER_COLLECT_1
         self.robot.communication.send_message(down_msg)
-        self.cannon_state = self.CannonState.FIRING
+        self.sorter_state = self.SorterState.COLLECT1
         if __debug__:
-            print("[IO] cannon started")
+            print("[IO] sorter in collect 1 position")
 
-    def stop_cannon(self):
+    def sorter_collect_ball_2(self):
         down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.STOP_CANNON_MOTOR
+        down_msg.message_type = self.robot.communication.eTypeDown.SORTER_COLLECT_2
         self.robot.communication.send_message(down_msg)
-        self.cannon_state = self.CannonState.IDLE
+        self.trap_state = self.SorterState.COLLECT2
         if __debug__:
-            print("[IO] cannon stopped")
+            print("[IO] sorter in collect 2 position")
 
-    def close_cannon_barrier(self):
+    def sorter_up(self):
         down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.CLOSE_CANNON_BARRIER
+        down_msg.message_type = self.robot.communication.eTypeDown.SORTER_UP
         self.robot.communication.send_message(down_msg)
-        self.cannon_barrier_state = self.CannonBarrierState.CLOSED
+        self.trap_state = self.SorterState.UP
         if __debug__:
-            print("[IO] cannon barrier closed")
-
-    def open_cannon_barrier(self):
-        down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.OPEN_CANNON_BARRIER
-        self.robot.communication.send_message(down_msg)
-        self.cannon_barrier_state = self.CannonBarrierState.OPEN
-        if __debug__:
-            print("[IO] cannon barrier opened")
-
-    def lock_rocket_launcher(self):
-        down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.LOCK_ROCKET_LAUNCHER
-        self.robot.communication.send_message(down_msg)
-        self.rocket_launcher_state = self.RocketLauncherState.LOCKED
-        if __debug__:
-            print("[IO] rocket launcher locked")
-
-    def open_rocket_launcher(self):
-        down_msg = self.robot.communication.sMessageDown()
-        down_msg.message_type = self.robot.communication.eTypeDown.OPEN_ROCKET_LAUNCHER
-        self.robot.communication.send_message(down_msg)
-        self.rocket_launcher_state = self.RocketLauncherState.OPEN
-        if __debug__:
-            print("[IO] rocket launcher opened")
+            print("[IO] sorter in up position")
 
     def set_led_color(self, color):
         GPIO.output(PIN_LED_RED, color.value[0])
