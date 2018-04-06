@@ -35,6 +35,7 @@
 
 #define SERVO_TRAP SERVO4
 #define SERVO_SORTER SERVO3
+#define SERVO_CUTTER SERVO2
 
 #define LAUNCHER_SPEED 100
 #define PICKER_SPEED 512
@@ -44,6 +45,8 @@
 #define COLLECT_BALL_1 1247 //In ms
 #define COLLECT_BALL_2 1482 //In ms
 #define GO_SORTER_UP 2252 //In ms
+#define GO_CUTTER_CLOSE 787 //In ms
+#define GO_CUTTER_OPEN 1222 //In ms
 
 #define UPDATE_PERIOD 0.02f
 #define REPORT_POSITION_TIMER 3000000

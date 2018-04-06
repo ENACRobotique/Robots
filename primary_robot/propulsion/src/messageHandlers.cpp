@@ -77,6 +77,12 @@ void handleMessage(sMessageDown msg) {
 		case SORTER_UP:
 			IOs.setServoPositionMs(SERVO_SORTER, GO_SORTER_UP);
 			break;
+		case CUTTER_OPEN:
+			IOs.setServoPositionMs(SERVO_CUTTER, GO_CUTTER_OPEN);
+			break;
+		case CUTTER_CLOSE:
+			IOs.setServoPositionMs(SERVO_CUTTER, GO_CUTTER_CLOSE);
+			break;
 	}
 }
 

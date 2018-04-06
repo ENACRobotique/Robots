@@ -46,6 +46,7 @@ class IO(object):
         self.led_color = None
         self.trap_state = None
         self.sorter_state = None
+        self.cutter_state = None
         self.set_led_color(self.LedColor.BLACK)
         self._read_cord(PIN_CORD)
         self._read_switch(PIN_COLOR)
@@ -81,6 +82,10 @@ class IO(object):
         COLLECT1 = "collecting 1"
         COLLECT2 = "collecting 2"
         UP = "up"
+
+    class CutterState(Enum):
+        OPEN = "open"
+        CLOSE = "close"
 
 
     @property
@@ -166,6 +171,22 @@ class IO(object):
         self.trap_state = self.SorterState.UP
         if __debug__:
             print("[IO] sorter in up position")
+
+    def cutter_open(self):
+        down_msg = self.robot.communication.sMessageDown()
+        down_msg.message_type = self.robot.communication.eTypeDown.CUTTER_OPEN
+        self.robot.communication.send_message(down_msg)
+        self.cutter_state = self.CutterState.OPEN
+        if __debug__:
+            print("[IO] cutter is open")
+
+    def cutter_close(self):
+        down_msg = self.robot.communication.sMessageDown()
+        down_msg.message_type = self.robot.communication.eTypeDown.CUTTER_CLOSE
+        self.robot.communication.send_message(down_msg)
+        self.cutter_state = self.CutterState.CLOSE
+        if __debug__:
+            print("[IO] cutter is closed")
 
     def set_led_color(self, color):
         GPIO.output(PIN_LED_RED, color.value[0])

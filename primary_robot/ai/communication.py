@@ -159,6 +159,8 @@ class Communication:
         SORTER_COLLECT_1 = 9
         SORTER_COLLECT_2 = 10
         SORTER_UP = 11
+        CUTTER_OPEN = 12
+        CUTTER_CLOSE = 13
 
     class sTrajElement:
         def __init__(self):
