@@ -83,10 +83,31 @@ class StateTest(FSMState):
         p2 = self.behavior.robot.locomotion.Point(1000, 1000)
         #self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 100)
 
-
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
             return StateEnd
+
+    def deinit(self):
+        pass
+
+class StateCollection(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+
+    def collection(self):
+        self.behavior.robot.io.open_trap()
+        time.sleep(3)
+        self.behavior.robot.io.close_trap()
+        time.sleep(2)
+        self.behavior.robot.io.sorter_collect_ball_2()
+        time.sleep(2)
+        self.behavior.robot.io.open_trap()
+        time.sleep(3)
+        self.behavior.robot.io.sorter_up()
+        time.sleep(7)
+        self.behavior.robot.io.sorter_collect_ball_1()
+        time.sleep(2)
+        return StateEnd
 
     def deinit(self):
         pass
