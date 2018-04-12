@@ -42,7 +42,7 @@ void setup()
     IOs.init();
 
 	pinMode(13, OUTPUT);
-	Serial.println("start !");
+	Serial.println("start Ness !");
 
 	digitalWrite(13, HIGH);
 	delay(2000);

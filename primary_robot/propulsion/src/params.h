@@ -42,9 +42,9 @@
 
 #define GO_TRAP_CLOSE 787 //In ms
 #define GO_TRAP_OPEN 1222 //In ms
-#define COLLECT_BALL_1 1247 //In ms
-#define COLLECT_BALL_2 1482 //In ms
-#define GO_SORTER_UP 2252 //In ms
+#define COLLECT_BALL_1 1447 //In ms
+#define COLLECT_BALL_2 1582 //In ms
+#define GO_SORTER_UP 1800 //In ms
 #define GO_CUTTER_CLOSE 787 //In ms
 #define GO_CUTTER_OPEN 1222 //In ms
 

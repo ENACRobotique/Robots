@@ -82,15 +82,18 @@ class Communication:
         self.mock_communication = False  # Set to True if Serial is not plugged to the Teensy
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(PIN_RESET_TEENSY, GPIO.OUT)
-        GPIO.output(PIN_RESET_TEENSY, GPIO.HIGH)
+        GPIO.setup(PIN_RESET_TEENSY, GPIO.IN)
+        # GPIO.output(PIN_RESET_TEENSY, GPIO.HIGH)
         self.reset_teensy()
 
     def reset_teensy(self):
+        GPIO.setup(PIN_RESET_TEENSY, GPIO.OUT)
         GPIO.output(PIN_RESET_TEENSY, GPIO.LOW)
         time.sleep(1)
         GPIO.output(PIN_RESET_TEENSY, GPIO.HIGH)
-        time.sleep(10)
+        time.sleep(1)
+        GPIO.setup(PIN_RESET_TEENSY, GPIO.IN)
+        time.sleep(9)
 
     def send_message(self, msg, max_retries=1000):
         """
