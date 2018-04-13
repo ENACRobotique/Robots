@@ -42,11 +42,11 @@
 
 #define GO_TRAP_CLOSE 787 //In ms
 #define GO_TRAP_OPEN 1222 //In ms
-#define COLLECT_BALL_1 1360 //In ms
-#define COLLECT_BALL_2 1620 //In ms
-#define GO_SORTER_UP 2370 //In ms
-#define GO_CUTTER_CLOSE 787 //In ms
-#define GO_CUTTER_OPEN 1222 //In ms
+#define COLLECT_BALL_1 1350 //In ms
+#define COLLECT_BALL_2 1610 //In ms
+#define GO_SORTER_UP 2365 //In ms
+#define GO_CUTTER_CLOSE 45 //In °
+#define GO_CUTTER_OPEN 37 //In °
 
 #define UPDATE_PERIOD 0.02f
 #define REPORT_POSITION_TIMER 3000000

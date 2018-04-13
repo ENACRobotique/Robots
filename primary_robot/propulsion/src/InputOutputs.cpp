@@ -45,8 +45,9 @@ void InputOutputs::init() {
 	_servos[3].attach(SERVO4);
 
 
-	setServoPositionMs(SERVO_SORTER, GO_SORTER_UP);
-	setServoPositionMs(SERVO_TRAP, GO_TRAP_OPEN);
+	setServoPositionMs(SERVO_SORTER, COLLECT_BALL_1);
+	setServoPositionMs(SERVO_TRAP, GO_TRAP_CLOSE);
+	setServoPosition(SERVO_CUTTER, GO_CUTTER_OPEN);
 }
 
 void InputOutputs::processActions() {
