@@ -86,7 +86,7 @@ void TrajectoryManagerClass::computeNextStep(){
 		return;
 	}
 	Serial.print("Read index  : ");
-	Serial.println(_readIndex);
+	//Serial.println(_readIndex);
 	//Point3D* nextPoint = &(_objectives[_readIndex]);
 	Point3D* nextPoint = _objectives + _readIndex;
 	double dx = nextPoint->getX() - Odometry.getPosX();

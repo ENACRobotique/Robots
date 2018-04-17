@@ -89,8 +89,10 @@ void MotorController::controlMotors() {
 	int orientationSpeed = Odometry.getSpeedRight() - Odometry.getSpeedLeft();
 	long thetaCons = getThetaConsigne();
 	int thetaError = thetaCons - orientation;
+	//int thetaError=0;
 	_intErrorTheta += thetaError;
 	double thetaCommand = thetaError * KP_ORIENT + _intErrorTheta*KI_ORIENT - KD_ORIENT * orientationSpeed;
+
 
 	double leftCommand = lenghtCommand - thetaCommand;
 	double rightCommand = lenghtCommand + thetaCommand;

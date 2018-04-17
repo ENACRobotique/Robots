@@ -45,14 +45,14 @@
 #define COLLECT_BALL_1 1350 //In ms
 #define COLLECT_BALL_2 1610 //In ms
 #define GO_SORTER_UP 2365 //In ms
-#define GO_CUTTER_CLOSE 45 //In °
+#define GO_CUTTER_CLOSE 50 //In °
 #define GO_CUTTER_OPEN 37 //In °
 
 #define UPDATE_PERIOD 0.02f
 #define REPORT_POSITION_TIMER 3000000
 
 #define MM_TO_INC 28.64
-#define RAD_TO_INC 7853.40
+#define RAD_TO_INC 7500 //6432.54
 #define RAD_TO_UINT16 10430.378350470453
 
 #define SPEED_COEFF 78

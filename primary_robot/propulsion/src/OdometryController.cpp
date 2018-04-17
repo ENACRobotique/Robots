@@ -81,12 +81,13 @@ void OdometryController::updatePosition() {
 	double dy = speed * sin(_thetaRad);
 	_posX += dx/MM_TO_INC;
 	_posY += dy/MM_TO_INC;
-	/*Serial.print("x=");
+
+	Serial.print("x=");
 	Serial.print(_posX);
 	Serial.print("\ty=");
 	Serial.print(_posY);
 	Serial.print("\ttheta=");
-	Serial.println(_thetaRad);*/
+	Serial.println(_thetaRad);
 }
 
 void OdometryController::ISRLeft() {

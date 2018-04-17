@@ -44,10 +44,12 @@ void setup()
 	pinMode(13, OUTPUT);
 	Serial.println("start Ness !");
 
+
 	digitalWrite(13, HIGH);
 	delay(2000);
 	digitalWrite(13, LOW);
     delay(2000);
+
 /*
     IOs.setLauncherSpeed(100);
     delay(2000);
@@ -59,15 +61,9 @@ void setup()
     IOs.setServoPosition(SERVO_CANNON_BARRIER, CANNON_BARRIER_OPENED);
 */
     /*int ret;
+    Serial.print("toto0");
     TrajectoryManager.addPoint(Point3D(300,0), &ret);
-    TrajectoryManager.addPoint(Point3D(300, 300), &ret);
-    TrajectoryManager.addPoint(Point3D(1300, 0, 0), &ret);
-    TrajectoryManager.addPoint(Point3D(500, -300), &ret);
-    TrajectoryManager.addPoint(Point3D(0, 0, 0), &ret);
-    delay(5000);
-    TrajectoryManager.stop();
-    delay(5000);
-    TrajectoryManager.resume();*/
+    Serial.print("toto1");*/
 
 }
 

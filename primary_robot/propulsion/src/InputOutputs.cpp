@@ -47,7 +47,7 @@ void InputOutputs::init() {
 
 	setServoPositionMs(SERVO_SORTER, COLLECT_BALL_1);
 	setServoPositionMs(SERVO_TRAP, GO_TRAP_CLOSE);
-	setServoPosition(SERVO_CUTTER, GO_CUTTER_OPEN);
+	setServoPosition(SERVO_CUTTER, GO_CUTTER_CLOSE);
 }
 
 void InputOutputs::processActions() {
