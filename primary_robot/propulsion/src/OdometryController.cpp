@@ -82,12 +82,20 @@ void OdometryController::updatePosition() {
 	_posX += dx/MM_TO_INC;
 	_posY += dy/MM_TO_INC;
 
-	Serial.print("x=");
+	/*Serial.print("x=");
 	Serial.print(_posX);
 	Serial.print("\ty=");
 	Serial.print(_posY);
-	Serial.print("\ttheta=");
-	Serial.println(_thetaRad);
+	Serial.print("\ttheta=");*/
+
+	static unsigned long time = millis();
+	if ((millis() - time) > 50)
+		{
+			/*Serial.print(time);
+			Serial.print("\t");*/
+			//Serial.println(_thetaRad);
+			time = millis();
+		}
 }
 
 void OdometryController::ISRLeft() {

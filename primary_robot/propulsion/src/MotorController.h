@@ -14,13 +14,13 @@
 #define MAX_SPEED 10000.0 	  //in increments per seconds
 #define ACCEL 15000.0 	    //in increments per second square
 
-#define KP_DIST 0.3
-#define KI_DIST 0.05
-#define KD_DIST 0.1
+constexpr double KP_DIST = 1.2;//0.3
+constexpr double KI_DIST =   0.1;//0.05
+constexpr double KD_DIST =   0;//0.1
 
-#define KP_ORIENT 0.5
-#define KI_ORIENT 0//0.05
-#define KD_ORIENT 0//0.1
+constexpr double KP_ORIENT  = 1.25;
+constexpr double KI_ORIENT = 0.15;//0.05
+constexpr double KD_ORIENT  = 0;//0.1
 
 enum{
 	KP, KI, KD

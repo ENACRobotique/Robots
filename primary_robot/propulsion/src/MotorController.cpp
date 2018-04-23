@@ -113,6 +113,11 @@ void MotorController::controlMotors() {
 	analogWrite(PWM_RIGHT, absRightCommand);
 	digitalWrite(DIR_LEFT, leftCommand > 0);
 	digitalWrite(DIR_RIGHT, rightCommand < 0);
+
+
+	Serial.print(thetaCons);
+	Serial.print(" ");
+	Serial.println(orientation);
 /*
 	Serial.print(_pTarget);
 	Serial.print("\tLcons: ");
@@ -121,6 +126,7 @@ void MotorController::controlMotors() {
 	Serial.print(_odometry->getLength());
 	Serial.print("\torient: ");
 	Serial.println(orientation);
+
 */
 }
 

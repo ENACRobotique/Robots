@@ -50,6 +50,8 @@ void setup()
 	digitalWrite(13, LOW);
     delay(2000);
 
+    //Motors.computeParameters(10*PI, Rotation);
+    //Motors.computeParameters(3000, Straight);
 /*
     IOs.setLauncherSpeed(100);
     delay(2000);
@@ -62,8 +64,12 @@ void setup()
 */
     /*int ret;
     Serial.print("toto0");
-    TrajectoryManager.addPoint(Point3D(300,0), &ret);
-    Serial.print("toto1");*/
+    TrajectoryManager.addPoint(Point3D(1000,0), &ret);
+    Serial.println(ret);
+    TrajectoryManager.addPoint(Point3D(2000,0), &ret);
+    TrajectoryManager.addPoint(Point3D(3000,0), &ret);
+    Serial.print("toto1");
+    TrajectoryManager.resume();*/
 
 }
 
