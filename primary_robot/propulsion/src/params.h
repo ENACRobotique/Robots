@@ -45,8 +45,8 @@
 #define COLLECT_BALL_1 1350 //In ms
 #define COLLECT_BALL_2 1610 //In ms
 #define GO_SORTER_UP 2365 //In ms
-#define GO_CUTTER_CLOSE 50 //In °
-#define GO_CUTTER_OPEN 37 //In °
+#define GO_CUTTER_CLOSE 100 //In °
+#define GO_CUTTER_OPEN 84 //In °
 
 #define UPDATE_PERIOD 0.02f
 #define REPORT_POSITION_TIMER 3000000
