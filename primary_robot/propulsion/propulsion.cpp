@@ -51,7 +51,7 @@ void setup()
     delay(2000);
 
     //Motors.computeParameters(10*PI, Rotation);
-    //Motors.computeParameters(3000, Straight);
+   // Motors.computeParameters(1500, Straight);
 /*
     IOs.setLauncherSpeed(100);
     delay(2000);

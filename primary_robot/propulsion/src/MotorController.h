@@ -18,8 +18,8 @@ constexpr double KP_DIST = 1.2;//0.3
 constexpr double KI_DIST =   0.1;//0.05
 constexpr double KD_DIST =   0;//0.1
 
-constexpr double KP_ORIENT  = 1.25;
-constexpr double KI_ORIENT = 0.15;//0.05
+constexpr double KP_ORIENT  = 1.15;
+constexpr double KI_ORIENT = 0.1;//0.05
 constexpr double KD_ORIENT  = 0;//0.1
 
 enum{
