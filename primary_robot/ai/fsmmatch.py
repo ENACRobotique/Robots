@@ -78,10 +78,11 @@ class FSMState:
 class StateTest(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.reposition_robot(0, 0, 0)
-        p1 = self.behavior.robot.locomotion.Point(1000, 0)
-        p2 = self.behavior.robot.locomotion.Point(1000, 1000)
-        #self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 100)
+        self.behavior.robot.locomotion.reposition_robot(0, 100, 0)
+        p1 = self.behavior.robot.locomotion.Point(200, 100)
+        p2 = self.behavior.robot.locomotion.Point(1100, 300)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 3*math.pi/2-math.pi/16, 50)
+        self.behavior.robot.locomotion.go_to_orient(1100, 0, 3*math.pi/2-math.pi/16, 50)
 
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
