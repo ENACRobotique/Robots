@@ -15,12 +15,10 @@ PIN_CORD = 18
 PIN_COLOR = 16
 
 UltraSoundSensor = namedtuple('ultra_sound_sensor', ['address', 'position'])
-# us_sensors = [UltraSoundSensor(0x76, "front_left"), UltraSoundSensor(0x77, "front_right"), UltraSoundSensor(0x73, "rear_left"),
-#               UltraSoundSensor(0x74, "rear_center"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
+#us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right"), 
+#            UltraSoundSensor(0x77, "rear_left"), UltraSoundSensor(0x76, "rear_middle_left"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
 
-us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right"), 
-            UltraSoundSensor(0x77, "rear_left"), UltraSoundSensor(0x76, "rear_middle_left"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
-
+us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right")]
 #us_sensors=[]
 us_sensors_distance = {us_sensors[i]: 0 for i in range(len(us_sensors))}
 

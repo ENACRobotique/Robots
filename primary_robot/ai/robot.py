@@ -38,6 +38,7 @@ def main():
         msg = robot.communication.check_message()
         if msg is not None:
             if msg.type == eTypeUp.POSITION:
+                print("Position : ", msg.x, msg.y, msg.theta)  
                 robot.locomotion.x = msg.x
                 robot.locomotion.y = msg.y
                 robot.locomotion.theta = msg.theta

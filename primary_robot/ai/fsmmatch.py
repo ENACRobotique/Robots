@@ -35,7 +35,7 @@ class FSMMatch(Behavior):
         self.color = None
         self.start_time = None
         self.funny_action_finished = False
-        self.state = StateTest(self)
+        self.state = StateBeginOrange(self)
 
     def loop(self):
         time_now = time.time()
@@ -75,19 +75,19 @@ class FSMState:
 
 
 
-class StateTest(FSMState):
+class StateBeginOrange(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.behavior.robot.locomotion.reposition_robot(0, 100, 0)
         p1 = self.behavior.robot.locomotion.Point(200, 100)
         p2 = self.behavior.robot.locomotion.Point(1100, 300)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 3*math.pi/2-math.pi/16, 50)
-        self.behavior.robot.locomotion.go_to_orient(1100, 0, 3*math.pi/2-math.pi/16, 50)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 50)
         self.stopped = False
 
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
-            return StateEnd
+            return StateCloseSwitchOrange
+            
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
@@ -99,6 +99,20 @@ class StateTest(FSMState):
     def deinit(self):
         pass
 
+
+class StateCloseSwitchOrange(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.go_to_orient(1100, 0, 3*math.pi/2, 50)
+
+    def test(self):
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateEnd
+
+    def deinit(self):
+        pass   
+    
+    
 class StateCollection(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
