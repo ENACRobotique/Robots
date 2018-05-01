@@ -55,8 +55,9 @@ if __name__ == '__main__':
     parsed_args = parser.parse_args()
     if __debug__:
         print("Debug mode enable")
-        with open(TRACE_FILE, 'w') as sys.stdout:
-            main()
+        #with open(TRACE_FILE, 'w') as sys.stdout:
+            #main()
+        main()
     else:
         main()
 
