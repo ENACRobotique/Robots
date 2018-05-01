@@ -37,6 +37,9 @@ class IO(object):
         GPIO.setup(PIN_LED_BLUE, GPIO.OUT)
         GPIO.setup(PIN_CORD, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(PIN_COLOR, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        self.set_led_color(self.LedColor.WHITE)
+
+    def InitializeIOs(self, robot):
         self._thread_us_reader = USReader()
         self._thread_us_reader.start()
         self.robot = robot
@@ -46,7 +49,6 @@ class IO(object):
         self.trap_state = None
         self.sorter_state = None
         self.cutter_state = None
-        self.set_led_color(self.LedColor.BLACK)
         self._read_cord(PIN_CORD)
         self._read_switch(PIN_COLOR)
         self.open_trap()
@@ -227,9 +229,9 @@ class IO(object):
 
     def _read_cord(self, channel):
         if GPIO.input(channel):
-            self._cord_state = self.CordState.IN
-        else:
             self._cord_state = self.CordState.OUT
+        else:
+            self._cord_state = self.CordState.IN
 
     def _read_switch(self, channel):
         if GPIO.input(channel):

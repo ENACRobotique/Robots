@@ -8,7 +8,7 @@ from behavior import Behavior
 
 FUNNY_ACTION_TIME = 92  # in seconds
 END_MATCH_TIME = 95  # in seconds
-INITIAL_WAIT = 35 #in seconds
+INITIAL_WAIT = 0 #in seconds
 
 #2017 specific
 SMALL_CRATER_COLLECT_DURATION = 4  # in seconds
@@ -25,8 +25,10 @@ CANNON_AUGMENTATION_POWER_STEP = 10  # between 0 and 255
 
 
 class Color(Enum):
-    BLUE = "blue"
-    YELLOW = "yellow"
+    # BLUE = "blue"
+    # YELLOW = "yellow"
+    ORANGE = "orange"
+    GREEN = "green"
 
 
 class FSMMatch(Behavior):
@@ -35,14 +37,14 @@ class FSMMatch(Behavior):
         self.color = None
         self.start_time = None
         self.funny_action_finished = False
-        self.state = StateBeginOrange(self)
+        self.state = StateColorSelection(self)
 
     def loop(self):
         time_now = time.time()
         if self.start_time is not None and time_now - self.start_time >= FUNNY_ACTION_TIME and not self.funny_action_finished:  # Checks time for funny action!
             if __debug__:
                 print("[FSMMatch] Funny Action time")
-            next_state = StateFunnyAction
+            next_state = StateEnd
         elif self.start_time is not None and time_now - self.start_time >= END_MATCH_TIME and self.funny_action_finished and self.state.__class__ != StateEnd:
             if __debug__:
                 print("[FSMMatch] End match")
@@ -142,18 +144,18 @@ class StateColorSelection(FSMState):
 
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.color = Color.BLUE
+        self.behavior.color = Color.ORANGE
         self.state = self.ColorState.IDLE
-        self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.BLUE)
+        self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.RED)
 
     def test(self):
         if self.state == self.ColorState.IDLE and self.behavior.robot.io.button_state == self.behavior.robot.io.ButtonState.PRESSED:
-            if self.behavior.color == Color.YELLOW:
-                self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.BLUE)
-                self.behavior.color = Color.BLUE
+            if self.behavior.color == Color.ORANGE:
+                self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.GREEN)
+                self.behavior.color = Color.GREEN
             else:
-                self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.YELLOW)
-                self.behavior.color = Color.YELLOW
+                self.behavior.robot.io.set_led_color(self.behavior.robot.io.LedColor.RED)
+                self.behavior.color = Color.ORANGE
             self.state = self.ColorState.PRESSED
 
         if self.state == self.ColorState.PRESSED and self.behavior.robot.io.button_state == self.behavior.robot.io.ButtonState.RELEASED:
@@ -164,10 +166,10 @@ class StateColorSelection(FSMState):
 
     def deinit(self):
         self.behavior.start_match()
-        if self.behavior.color == Color.YELLOW:
-            self.behavior.robot.locomotion.reposition_robot(2955, 1800, math.pi)
+        if self.behavior.color == Color.ORANGE:
+            self.behavior.robot.locomotion.reposition_robot(0, 100, 0)
         else:
-            self.behavior.robot.locomotion.reposition_robot(45, 1800, 0)
+            self.behavior.robot.locomotion.reposition_robot(1800, 100, math.pi)
 
 
 
@@ -178,10 +180,10 @@ class StateInitialWait(FSMState):
 
     def test(self):
         if time.time() - self.start_time > INITIAL_WAIT:
-            if self.behavior.color == Color.YELLOW:
-                return StateSeesawYellow
+            if self.behavior.color == Color.ORANGE:
+                return StateBeginOrange
             else:
-                return StateSeesawBlue
+                return StateBeginOrange  # TODO : code green state
 
     def deinit(self):
         pass
