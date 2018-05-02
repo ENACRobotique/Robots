@@ -7,7 +7,7 @@ import math
 from behavior import Behavior
 
 FUNNY_ACTION_TIME = 92  # in seconds
-END_MATCH_TIME = 95  # in seconds
+END_MATCH_TIME = 100  # in seconds
 INITIAL_WAIT = 0 #in seconds
 
 #2017 specific
@@ -78,17 +78,29 @@ class FSMState:
 
 
 class StateBeginOrange(FSMState):
+
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.reposition_robot(0, 100, 0)
-        p1 = self.behavior.robot.locomotion.Point(200, 100)
-        p2 = self.behavior.robot.locomotion.Point(1100, 300)
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 50)
+        self.behavior.robot.locomotion.reposition_robot(44.75, 243, 0)#Attention position Robot = position du point entre les 2 roues
+        #self.behavior.robot.locomotion.reposition_robot(0, 100, 0)#Attention localisation du coin arrière droit
+        #p1 = self.behavior.robot.locomotion.Point(200, 100)
+        #p2 = self.behavior.robot.locomotion.Point(1100, 300)
+        #self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 50)
+        self.num_pos=0
+        self.p1 = self.behavior.robot.locomotion.PointOrient(1300, 243, 0)
+        self.p2 = self.behavior.robot.locomotion.PointOrient(1130+45, 500, 3*math.pi/2)#Le bumper est décallé de 45mm du centre
+
+        self.behavior.robot.locomotion.go_to_orient_point(self.p1, 50)#Avant
         self.stopped = False
 
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
-            return StateCloseSwitchOrange
+            if self.num_pos == 0:
+                self.num_pos += 1
+                self.behavior.robot.locomotion.go_to_orient_point(self.p2, -50)#Arrière
+            else:
+                return StateEnd
+                return StateCloseSwitchOrange
             
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
