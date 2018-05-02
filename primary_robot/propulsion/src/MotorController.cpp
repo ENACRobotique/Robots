@@ -115,9 +115,9 @@ void MotorController::controlMotors() {
 	digitalWrite(DIR_RIGHT, rightCommand < 0);
 
 
-	Serial.print(thetaCons);
+	/*Serial.print(thetaCons);
 	Serial.print(" ");
-	Serial.println(orientation);
+	Serial.println(orientation);/*
 /*
 	Serial.print(_pTarget);
 	Serial.print("\tLcons: ");
