@@ -198,29 +198,47 @@ class IO(object):
             print("[IO] Led switched to {}".format(color))
 
     def collection(self):
-        n = 1
-        while n <= 3:
-            self.robot.io.cutter_close()
-            time.sleep(1)
-            self.robot.io.open_trap()
-            time.sleep(2)
-            self.robot.io.close_trap()
-            self.robot.io.sorter_collect_ball_2()
-            time.sleep(1)
-            self.robot.io.cutter_open()
-            time.sleep(1)
-            self.robot.io.cutter_close()
-            time.sleep(1)
-            self.robot.io.open_trap()
-            time.sleep(2)
-            self.robot.io.close_trap()
-            time.sleep(1)
-            self.robot.io.cutter_open()
-            self.robot.io.sorter_up()
-            time.sleep(4)
-            self.robot.io.sorter_collect_ball_1()
-            time.sleep(1)
-            n = n+1
+        for _ in range(3):
+            # self.robot.io.cutter_close()
+            # time.sleep(1)
+            # self.robot.io.open_trap()
+            # time.sleep(2)
+            # self.robot.io.close_trap()
+            # self.robot.io.sorter_collect_ball_2()
+            # time.sleep(1)
+            # self.robot.io.cutter_open()
+            # time.sleep(1)
+            # self.robot.io.cutter_close()
+            # time.sleep(1)
+            # self.robot.io.open_trap()
+            # time.sleep(2)
+            # self.robot.io.close_trap()
+            # time.sleep(1)
+            # self.robot.io.cutter_open()
+            # self.robot.io.sorter_up()
+            # time.sleep(4)
+            # self.robot.io.sorter_collect_ball_1()
+            # time.sleep(1)
+            # n = n+1
+            self.do_action_and_wait(self.robot.io.cutter_close, 1)
+            self.do_action_and_wait(self.robot.io.open_trap, 2)
+            self.do_action_and_wait(self.robot.io.close_trap, 1)
+            self.do_action_and_wait(self.robot.io.sorter_collect_ball_2, 1)
+            self.do_action_and_wait(self.robot.io.cutter_open, 1)
+            self.do_action_and_wait(self.robot.io.cutter_close, 1)
+            self.do_action_and_wait(self.robot.io.open_trap, 2)
+            self.do_action_and_wait(self.robot.io.close_trap, 1)
+            self.do_action_and_wait(self.robot.io.cutter_open, 0)
+            self.do_action_and_wait(self.robot.io.sorter_up, 4)
+            self.do_action_and_wait(self.robot.io.sorter_collect_ball_1, 1)
+
+
+
+    def do_action_and_wait(self, action, duration):
+        action()
+        debut = time.time()
+        while time.time() - debut < duration:
+            pass
 
     def _led_init(self):
         GPIO.setup(PIN_LED_RED, GPIO.OUT, initial=GPIO.LOW)
