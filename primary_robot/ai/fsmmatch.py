@@ -99,7 +99,6 @@ class StateBeginOrange(FSMState):
                 self.num_pos += 1
                 self.behavior.robot.locomotion.go_to_orient_point(self.p2, -50)#Arrière
             else:
-                return StateEnd
                 return StateCloseSwitchOrange
             
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -117,10 +116,21 @@ class StateBeginOrange(FSMState):
 class StateCloseSwitchOrange(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.go_to_orient(1100, 0, 3*math.pi/2, 50)
+        self.wait_for_repositionning = False
+        self.recalage_start_time = 0
 
     def test(self):
-        if self.behavior.robot.locomotion.is_trajectory_finished:
+        if not self.wait_for_repositionning:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(1120, 220, 1.5 * math.pi)
+            return StateEnd
+
+        if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
+            self.behavior.robot.locomotion.reposition_robot(1120, 220, 1.5 * math.pi)
             return StateEnd
 
     def deinit(self):
