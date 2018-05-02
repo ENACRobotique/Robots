@@ -4,6 +4,8 @@ import RPi.GPIO as GPIO
 import threading
 import smbus
 import time
+import Adafruit_TCS34725
+
 
 BALL_PICKER_MOTOR = 3
 CANNON_MOTOR = 4
@@ -42,6 +44,8 @@ class IO(object):
     def InitializeIOs(self, robot):
         self._thread_us_reader = USReader()
         self._thread_us_reader.start()
+        self._thread_rgb = RGBReader()
+        self._thread_rgb.start()
         self.robot = robot
         self._cord_state = None
         self._button_state = None
@@ -56,6 +60,7 @@ class IO(object):
         self.sorter_collect_ball_1()
         self.sorter_collect_ball_2()
         self.sorter_up()
+
 
     class LedColor(Enum):
         BLACK = (GPIO.LOW, GPIO.LOW, GPIO.LOW)
@@ -117,6 +122,9 @@ class IO(object):
     def rear_distance(self):
         return self.get_us_distance_by_postion("rear")
 
+    @property
+    def lux(self):
+        return _lux
 
     # def start_cannon(self, speed=55):
     #     down_msg = self.robot.communication.sMessageDown()
@@ -199,27 +207,6 @@ class IO(object):
 
     def collection(self):
         for _ in range(3):
-            # self.robot.io.cutter_close()
-            # time.sleep(1)
-            # self.robot.io.open_trap()
-            # time.sleep(2)
-            # self.robot.io.close_trap()
-            # self.robot.io.sorter_collect_ball_2()
-            # time.sleep(1)
-            # self.robot.io.cutter_open()
-            # time.sleep(1)
-            # self.robot.io.cutter_close()
-            # time.sleep(1)
-            # self.robot.io.open_trap()
-            # time.sleep(2)
-            # self.robot.io.close_trap()
-            # time.sleep(1)
-            # self.robot.io.cutter_open()
-            # self.robot.io.sorter_up()
-            # time.sleep(4)
-            # self.robot.io.sorter_collect_ball_1()
-            # time.sleep(1)
-            # n = n+1
             self.do_action_and_wait(self.robot.io.cutter_close, 1)
             self.do_action_and_wait(self.robot.io.open_trap, 2)
             self.do_action_and_wait(self.robot.io.close_trap, 1)
@@ -282,5 +269,23 @@ class USReader(threading.Thread):
                 except Exception as e:
                     print("Can not read on sensor {0}".format(sensor.address))
                     us_sensors.remove(sensor)
+
+
+
+class RGBReader(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.i2c = smbus.SMBus(1)
+
+    def run(self):
+        global _lux
+        tcs = Adafruit_TCS34725.TCS34725()
+        tcs.set_interrupt(False)
+        while True:
+            r, g, b, c = tcs.get_raw_data()
+            _lux = Adafruit_TCS34725.calculate_lux(r, g, b)
+            print('Color: red={0} green={1} blue={2} clear={3}'.format(r, g, b, c))
+            # Print out the lux.
+            print('Luminosity: {0} lux'.format(_lux))
 
 
