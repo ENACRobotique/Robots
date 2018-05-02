@@ -15,10 +15,10 @@ PIN_CORD = 18
 PIN_COLOR = 16
 
 UltraSoundSensor = namedtuple('ultra_sound_sensor', ['address', 'position'])
-#us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right"), 
-#            UltraSoundSensor(0x77, "rear_left"), UltraSoundSensor(0x76, "rear_middle_left"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
+us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right"),
+            UltraSoundSensor(0x77, "rear_left"), UltraSoundSensor(0x76, "rear_middle_left"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
 
-us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right")]
+#us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right")]
 #us_sensors=[]
 us_sensors_distance = {us_sensors[i]: 0 for i in range(len(us_sensors))}
 
@@ -250,11 +250,19 @@ class USReader(threading.Thread):
         global us_sensors, us_sensors_distance
         while True:
             for i, sensor in enumerate(us_sensors):
-                self.i2c.write_byte_data(sensor.address, 0, 81)
+                try:
+                    self.i2c.write_byte_data(sensor.address, 0, 81)
+                except Exception as e:
+                    print("Can not write on sensor {0}".format(sensor.address))
+                    us_sensors.remove(sensor)
             time.sleep(0.070)
             for i, sensor in enumerate(us_sensors):
-                dst = self.i2c.read_word_data(sensor.address, 2) / 255
-                if dst != 0:
-                    us_sensors_distance[us_sensors[i]] = dst
+                try:
+                    dst = self.i2c.read_word_data(sensor.address, 2) / 255
+                    if dst != 0:
+                        us_sensors_distance[us_sensors[i]] = dst
+                except Exception as e:
+                    print("Can not read on sensor {0}".format(sensor.address))
+                    us_sensors.remove(sensor)
 
 
