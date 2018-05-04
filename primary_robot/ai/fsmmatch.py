@@ -63,8 +63,6 @@ class FSMMatch(Behavior):
         self.start_time = time.time()
 
 
-
-
 class FSMState:
     def __init__(self, behavior):
         raise NotImplementedError("this state is not defined yet")
@@ -74,7 +72,6 @@ class FSMState:
 
     def deinit(self):
         raise NotImplementedError("deinit of this state is not defined yet !")
-
 
 
 class StateBeginOrange(FSMState):
@@ -113,6 +110,39 @@ class StateBeginOrange(FSMState):
         pass
 
 
+class StateBeginGreen(FSMState):
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.reposition_robot(2955.25, 1757, math.pi)  # Attention position Robot = position du point entre les 2 roues
+        self.num_pos = 0
+        self.p1 = self.behavior.robot.locomotion.PointOrient(1700, 1757, math.pi)
+        self.p2 = self.behavior.robot.locomotion.PointOrient(1825, 1500,
+                                                             math.pi / 2)  # Le bumper est décallé de 45mm du centre
+
+        self.behavior.robot.locomotion.go_to_orient_point(self.p1, 50)  # Avant
+        self.stopped = False
+
+    def test(self):
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            if self.num_pos == 0:
+                self.num_pos += 1
+                self.behavior.robot.locomotion.go_to_orient_point(self.p2, -50)  # Arrière
+            else:
+                return StateCloseSwitchOrange
+
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+    def deinit(self):
+        pass
+
+
 class StateCloseSwitchOrange(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
@@ -126,38 +156,16 @@ class StateCloseSwitchOrange(FSMState):
             self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            self.behavior.robot.locomotion.reposition_robot(1120, 220, 1.5 * math.pi)
+            self.behavior.robot.locomotion.reposition_robot(1880, 1780, 0.5 * math.pi)
             return StateEnd
 
         if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
-            self.behavior.robot.locomotion.reposition_robot(1120, 220, 1.5 * math.pi)
+            self.behavior.robot.locomotion.reposition_robot(1880, 1780, 0.5 * math.pi)
             return StateEnd
 
     def deinit(self):
-        pass   
-    
-    
-class StateCollection(FSMState):
-    def __init__(self, behavior):
-        self.behavior = behavior
-
-    def collection(self):
-        self.behavior.robot.io.open_trap()
-        time.sleep(3)
-        self.behavior.robot.io.close_trap()
-        time.sleep(2)
-        self.behavior.robot.io.sorter_collect_ball_2()
-        time.sleep(2)
-        self.behavior.robot.io.open_trap()
-        time.sleep(3)
-        self.behavior.robot.io.sorter_up()
-        time.sleep(7)
-        self.behavior.robot.io.sorter_collect_ball_1()
-        time.sleep(2)
-        return StateEnd
-
-    def deinit(self):
         pass
+
 
 class StateColorSelection(FSMState):
     class ColorState(Enum):
@@ -205,7 +213,7 @@ class StateInitialWait(FSMState):
             if self.behavior.color == Color.ORANGE:
                 return StateBeginOrange
             else:
-                return StateBeginOrange  # TODO : code green state
+                return StateBeginGreen
 
     def deinit(self):
         pass
