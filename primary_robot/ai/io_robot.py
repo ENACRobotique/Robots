@@ -18,6 +18,17 @@ PIN_COLOR = 16
 
 MIN_US_RANGE = 11 # Min us distance on which us data is considered ok
 
+
+class RGBSensor:
+    def __init__(self, red=0, blue=0, green=0, clear=0):
+        self.red = red
+        self.blue = blue
+        self.green = green
+        self.clear = clear
+
+
+rgb_sensor = RGBSensor(0, 0, 0, 0)
+
 UltraSoundSensor = namedtuple('ultra_sound_sensor', ['address', 'position'])
 us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right"),
             UltraSoundSensor(0x77, "rear_left"), UltraSoundSensor(0x76, "rear_middle_left"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
@@ -125,8 +136,9 @@ class IO(object):
         return self.get_us_distance_by_postion("rear")
 
     @property
-    def lux(self):
-        return _lux
+    def get_rgb_grayscale(self):
+        """ Return the grayscale value given by the rgb sensor, which is between 0 and 255"""
+        return ((rgb_sensor.red + rgb_sensor.blue + rgb_sensor.green) / 3.0) * 255 / 1024
 
     # def start_cannon(self, speed=55):
     #     down_msg = self.robot.communication.sMessageDown()
@@ -260,7 +272,7 @@ class USReader(threading.Thread):
                 try:
                     self.i2c.write_byte_data(sensor.address, 0, 81)
                 except Exception as e:
-                    print("Can not write on sensor {0}".format(sensor.address))
+                    print("Can not write on sensor {0} : {1}".format(hex(sensor.address), e))
                     us_sensors.remove(sensor)
             time.sleep(0.070)
             for i, sensor in enumerate(us_sensors):
@@ -269,7 +281,7 @@ class USReader(threading.Thread):
                     if dst > MIN_US_RANGE:
                         us_sensors_distance[us_sensors[i]] = dst
                 except Exception as e:
-                    print("Can not read on sensor {0} : {1}".format(sensor.address, e))
+                    print("Can not read on sensor {0} : {1}".format(hex(sensor.address), e))
                     us_sensors.remove(sensor)
 
 
@@ -280,14 +292,16 @@ class RGBReader(threading.Thread):
         self.i2c = smbus.SMBus(1)
 
     def run(self):
-        global _lux
         tcs = Adafruit_TCS34725.TCS34725()
         tcs.set_interrupt(False)
         while True:
             r, g, b, c = tcs.get_raw_data()
-            _lux = Adafruit_TCS34725.calculate_lux(r, g, b)
-            print('Color: red={0} green={1} blue={2} clear={3}'.format(r, g, b, c))
+            rgb_sensor.red = r
+            rgb_sensor.blue = b
+            rgb_sensor.green = g
+            # _lux = Adafruit_TCS34725.calculate_lux(r, g, b)
+            # print('Color: red={0} green={1} blue={2} clear={3}'.format(r, g, b, c))
             # Print out the lux.
-            print('Luminosity: {0} lux'.format(_lux))
+            # print('Luminosity: {0} lux'.format(_lux))
 
 

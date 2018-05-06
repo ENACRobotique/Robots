@@ -22,7 +22,7 @@ FIRE1_CANNON_POWER = 45  # between 0 and 255
 MAX_CANNON_POWER = 105  # between 0 and 255
 CANNON_AUGMENTATION_DISTANCE_STEP = 50  # in mm
 CANNON_AUGMENTATION_POWER_STEP = 10  # between 0 and 255
-
+WHITE_GRAYSCALE = 220 # between 0 and 255
 
 class Color(Enum):
     # BLUE = "blue"
@@ -276,6 +276,21 @@ class StateInitialWait(FSMState):
 
 
 
+class StateTest(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.reposition_robot(1000, 0, 0)
+        self.behavior.robot.locomotion.go_to_orient(0, 0, 0, -50)
+
+    def test(self):
+        grayscale = self.behavior.robot.io.get_rgb_grayscale
+        print(grayscale)
+        if grayscale >= WHITE_GRAYSCALE:
+            print("White detected : " + str(grayscale))
+            return StateEnd
+
+    def deinit(self):
+        pass
 
 
 class StateEnd(FSMState):
