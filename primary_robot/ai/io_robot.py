@@ -16,6 +16,8 @@ PIN_LED_BLUE = 40
 PIN_CORD = 18
 PIN_COLOR = 16
 
+MIN_US_RANGE = 11 # Min us distance on which us data is considered ok
+
 UltraSoundSensor = namedtuple('ultra_sound_sensor', ['address', 'position'])
 us_sensors = [UltraSoundSensor(0x70, "front_left"), UltraSoundSensor(0x71, "front_right"),
             UltraSoundSensor(0x77, "rear_left"), UltraSoundSensor(0x76, "rear_middle_left"), UltraSoundSensor(0x72, "rear_right")]  #Sets US sensors here !, empty list if no US is plugged
@@ -264,10 +266,10 @@ class USReader(threading.Thread):
             for i, sensor in enumerate(us_sensors):
                 try:
                     dst = self.i2c.read_word_data(sensor.address, 2) / 255
-                    if dst != 0:
+                    if dst > MIN_US_RANGE:
                         us_sensors_distance[us_sensors[i]] = dst
                 except Exception as e:
-                    print("Can not read on sensor {0}".format(sensor.address))
+                    print("Can not read on sensor {0} : {1}".format(sensor.address, e))
                     us_sensors.remove(sensor)
 
 

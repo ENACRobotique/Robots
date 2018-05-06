@@ -216,7 +216,7 @@ void TrajectoryManagerClass::doRecalage() {
 	Serial.println("recalage !");
 	_recalageRunning = true;
 	Motors.clearOrientCoeffs();
-	Motors.computeParameters(-200000, Straight, 5000);
+	Motors.computeParameters(200000, Straight, 5000);
 }
 
 void TrajectoryManagerClass::stopRecalage() {

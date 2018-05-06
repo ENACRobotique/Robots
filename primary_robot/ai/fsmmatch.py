@@ -63,8 +63,6 @@ class FSMMatch(Behavior):
         self.start_time = time.time()
 
 
-
-
 class FSMState:
     def __init__(self, behavior):
         raise NotImplementedError("this state is not defined yet")
@@ -76,21 +74,17 @@ class FSMState:
         raise NotImplementedError("deinit of this state is not defined yet !")
 
 
-
 class StateBeginOrange(FSMState):
 
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.reposition_robot(44.75, 243, 0)#Attention position Robot = position du point entre les 2 roues
-        #self.behavior.robot.locomotion.reposition_robot(0, 100, 0)#Attention localisation du coin arrière droit
-        #p1 = self.behavior.robot.locomotion.Point(200, 100)
-        #p2 = self.behavior.robot.locomotion.Point(1100, 300)
-        #self.behavior.robot.locomotion.follow_trajectory([p1, p2], 0, 50)
+        self.behavior.robot.locomotion.reposition_robot(44.75, 243, 0)#Attention origine Robot = position du point entre les 2 roues
+
         self.num_pos=0
         self.p1 = self.behavior.robot.locomotion.PointOrient(1300, 243, 0)
         self.p2 = self.behavior.robot.locomotion.PointOrient(1130+45, 500, 3*math.pi/2)#Le bumper est décallé de 45mm du centre
-
         self.behavior.robot.locomotion.go_to_orient_point(self.p1, 50)#Avant
+
         self.stopped = False
 
     def test(self):
@@ -99,8 +93,7 @@ class StateBeginOrange(FSMState):
                 self.num_pos += 1
                 self.behavior.robot.locomotion.go_to_orient_point(self.p2, -50)#Arrière
             else:
-                return StateEnd
-                return StateCloseSwitchOrange
+                return StateCloseSwitch
             
         if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
@@ -114,36 +107,117 @@ class StateBeginOrange(FSMState):
         pass
 
 
-class StateCloseSwitchOrange(FSMState):
+class StateBeginGreen(FSMState):
+
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.go_to_orient(1100, 0, 3*math.pi/2, 50)
+        self.behavior.robot.locomotion.reposition_robot(3000-44.75, 243, math.pi)  # Attention origine Robot = position du point entre les 2 roues
+
+        self.num_pos = 0
+        self.p1 = self.behavior.robot.locomotion.PointOrient(1700, 243, math.pi)
+        self.p2 = self.behavior.robot.locomotion.PointOrient(1870 + 45, 500,
+                                                             3 * math.pi / 2)  # Le bumper est décallé de 45mm du centre
+        self.behavior.robot.locomotion.go_to_orient_point(self.p1, 100)  # Avant
+
+        self.stopped = False
 
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
-            return StateEnd
+            if self.num_pos == 0:
+                self.num_pos += 1
+                self.behavior.robot.locomotion.go_to_orient_point(self.p2, -100)  # Arrière
+            else:
+                return StateCloseSwitch
+
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
 
     def deinit(self):
-        pass   
-    
-    
-class StateCollection(FSMState):
+        pass
+
+
+class StateCloseSwitch(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.wait_for_repositionning = False
+        self.recalage_start_time = 0
+
+    def test(self):
+        if not self.wait_for_repositionning:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            self.behavior.robot.locomotion.reposition_robot(1880, 1780, 0.5 * math.pi)
+            return self.exit()
+
+        if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
+            self.behavior.robot.locomotion.reposition_robot(1880, 1780, 0.5 * math.pi)
+            return self.exit()
+
+    def deinit(self):
+        pass
+
+    def exit(self):
+        if self.behavior.color == Color.ORANGE:
+            return StateGoRecupOrange
+        else:
+            return StateGoRecupGreen
+
+
+class StateGoRecupOrange(FSMState):
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.reposition_robot(1130+45, 220.25, 3*math.pi/2)  # Attention origine Robot = position du point entre les 2 roues
+
+        self.p1 = self.behavior.robot.locomotion.Point(1130 + 45, 500)
+        self.p2 = self.behavior.robot.locomotion.Point(3000 - 300, 2000 - 190)
+        #self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], math.pi,  -75)  # Arrière
+        self.behavior.robot.locomotion.follow_trajectory([self.p1], math.pi,  -75)  # Arrière
+
+        self.stopped = False
+        self.wait_for_repositionning = False
+
+    def test(self):
+        if time.time() - self.behavior.start_time > 80:
+            return StateEnd
+
+        if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning :
+            return StateEnd
+            #TODO recalage arr
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            #TODO Recup Orange
+            return StateEnd
+
+        #Ultrasons
+        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+
+        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+    def deinit(self):
+        pass
+
+
+class StateGoRecupGreen(FSMState):
+
     def __init__(self, behavior):
         self.behavior = behavior
 
-    def collection(self):
-        self.behavior.robot.io.open_trap()
-        time.sleep(3)
-        self.behavior.robot.io.close_trap()
-        time.sleep(2)
-        self.behavior.robot.io.sorter_collect_ball_2()
-        time.sleep(2)
-        self.behavior.robot.io.open_trap()
-        time.sleep(3)
-        self.behavior.robot.io.sorter_up()
-        time.sleep(7)
-        self.behavior.robot.io.sorter_collect_ball_1()
-        time.sleep(2)
+    def test(self):
         return StateEnd
 
     def deinit(self):
@@ -195,7 +269,7 @@ class StateInitialWait(FSMState):
             if self.behavior.color == Color.ORANGE:
                 return StateBeginOrange
             else:
-                return StateBeginOrange  # TODO : code green state
+                return StateBeginGreen
 
     def deinit(self):
         pass
