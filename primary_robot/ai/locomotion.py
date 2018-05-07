@@ -100,26 +100,29 @@ class Locomotion:
         message.payload.theta = self.theta
         self.robot.communication.send_message(message)
 
+
+
     def point_reached(self, traj_id, point_id, x, y, theta):
-        if __debug__:
+        if len(self.current_trajectory) > 0:
             print('[LOCOMOTION] Point reached, traj_id :{}, point_id:{}, @[{},{},{}]'.format(traj_id, point_id, x, y, theta))
-        self.x = x
-        self.y = y
-        self.theta = theta
-        index_to_remove = None
-        for i, traj_elt in enumerate(self.current_trajectory):
-            if traj_elt.traj_id == traj_id and traj_elt.point_number == point_id:
-                index_to_remove = i
-        if index_to_remove is not None:
-            for i in range(index_to_remove + 1):
-                self.current_trajectory.pop(0)
-        else:
-            raise IndexError("Reached Point is not stored !")
-        if len(self.current_trajectory) == 0:
-            self.is_trajectory_finished = True
-            self.is_stopped = True
-            if __debug__:
+            self.x = x
+            self.y = y
+            self.theta = theta
+            index_to_remove = None
+            for i, traj_elt in enumerate(self.current_trajectory):
+                if traj_elt.traj_id == traj_id and traj_elt.point_number == point_id:
+                    index_to_remove = i
+            if index_to_remove is not None:
+                for i in range(index_to_remove + 1):
+                    self.current_trajectory.pop(0)
+            else:
+                raise IndexError("Reached Point is not stored !")
+            if len(self.current_trajectory) == 0:
+                self.is_trajectory_finished = True
+                self.is_stopped = True
                 print("[LOCOMOTION] Traj Finished !")
+        else:
+            print("[LOCOMOTION] : Point of an unknown trajectory reached (traj_id :{}, point_id:{}, @[{},{},{}])".format(traj_id, point_id, x, y, theta))
 
     def distance_to(self, x, y):
         return math.sqrt((self.x - x)**2 + (self.y - y)**2)
