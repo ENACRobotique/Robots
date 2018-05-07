@@ -35,8 +35,7 @@ class Locomotion:
             self.current_trajectory.append(trajectory_point(self.robot.communication._current_msg_id - 1, i, pt))
         self.is_trajectory_finished = False
         self.is_stopped = False
-        if __debug__:
-            print("[LOCOMOTION] Following trajectory {} at speed {} with final theta {}".format(points, speed, theta))
+        print("[LOCOMOTION] Following trajectory {} at speed {} with final theta {}".format(points, speed, theta))
 
     def go_to_orient(self, x, y, theta, speed):
         message = self.robot.communication.sMessageDown()
@@ -53,8 +52,7 @@ class Locomotion:
         self.current_trajectory.append(trajectory_point(self.robot.communication._current_msg_id - 1, 0, self.Point(x , y)))
         self.is_trajectory_finished = False
         self.is_stopped = False
-        if __debug__:
-            print("[LOCOMOTION] Go to {};{}, theta : {} at speed : {}".format(x, y, theta, speed))
+        print("[LOCOMOTION] Go to {};{}, theta : {} at speed : {}".format(x, y, theta, speed))
 
     def go_to_orient_point(self, point, speed):
         self.go_to_orient(point.x, point.y, point.theta, speed)
@@ -64,38 +62,33 @@ class Locomotion:
         message.message_type = self.robot.communication.eTypeDown.STOP
         self.robot.communication.send_message(message)
         self.is_stopped = True
-        if __debug__:
-            print("[LOCOMOTION] Robot stopped")
+        print("[LOCOMOTION] Robot stopped")
 
     def restart_robot(self):
         message = self.robot.communication.sMessageDown()
         message.message_type = self.robot.communication.eTypeDown.RESTART
         self.robot.communication.send_message(message)
         self.is_stopped = self.is_trajectory_finished
-        if __debug__:
-            print("[LOCOMOTION] Robot restarted")
+        print("[LOCOMOTION] Robot restarted")
 
     def reposition_robot(self, x, y, theta):
         self.x = x
         self.y = y
         self.theta = theta
         self.synchronize_position()
-        if __debug__:
-            print("[LOCOMOTION] Set robot position @ ({},{},{})".format(x,y,theta))
+        print("[LOCOMOTION] Set robot position @ ({},{},{})".format(x,y,theta))
 
     def do_recalage(self):
         message = self.robot.communication.sMessageDown()
         message.message_type = self.robot.communication.eTypeDown.DO_RECALAGE
         self.robot.communication.send_message(message)
         self.is_recalage_ended = False
-        if __debug__:
-            print("[LOCOMOTION] Repositionning...")
+        print("[LOCOMOTION] Repositionning...")
 
     def recalage_ok(self):
         self.is_recalage_ended = True
         self.is_stopped = True
-        if __debug__:
-            print("[LOCOMOTION] Repositionning ok !")
+        print("[LOCOMOTION] Repositionning ok !")
 
 
     def synchronize_position(self):

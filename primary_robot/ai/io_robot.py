@@ -160,64 +160,56 @@ class IO(object):
         down_msg.message_type = self.robot.communication.eTypeDown.OPEN_TRAP
         self.robot.communication.send_message(down_msg)
         self.sorter_state = self.TrapState.OPEN
-        if __debug__:
-            print("[IO] trap opened")
+        print("[IO] trap opened")
 
     def close_trap(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.CLOSE_TRAP
         self.robot.communication.send_message(down_msg)
         self.sorter_state = self.TrapState.CLOSE
-        if __debug__:
-            print("[IO] trap closed")
+        print("[IO] trap closed")
 
     def sorter_collect_ball_1(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.SORTER_COLLECT_1
         self.robot.communication.send_message(down_msg)
         self.sorter_state = self.SorterState.COLLECT1
-        if __debug__:
-            print("[IO] sorter in collect 1 position")
+        print("[IO] sorter in collect 1 position")
 
     def sorter_collect_ball_2(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.SORTER_COLLECT_2
         self.robot.communication.send_message(down_msg)
         self.trap_state = self.SorterState.COLLECT2
-        if __debug__:
-            print("[IO] sorter in collect 2 position")
+        print("[IO] sorter in collect 2 position")
 
     def sorter_up(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.SORTER_UP
         self.robot.communication.send_message(down_msg)
         self.trap_state = self.SorterState.UP
-        if __debug__:
-            print("[IO] sorter in up position")
+        print("[IO] sorter in up position")
 
     def cutter_open(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.CUTTER_OPEN
         self.robot.communication.send_message(down_msg)
         self.cutter_state = self.CutterState.OPEN
-        if __debug__:
-            print("[IO] cutter is open")
+        print("[IO] cutter is open")
 
     def cutter_close(self):
         down_msg = self.robot.communication.sMessageDown()
         down_msg.message_type = self.robot.communication.eTypeDown.CUTTER_CLOSE
         self.robot.communication.send_message(down_msg)
         self.cutter_state = self.CutterState.CLOSE
-        if __debug__:
-            print("[IO] cutter is closed")
+        print("[IO] cutter is closed")
 
     def set_led_color(self, color):
         GPIO.output(PIN_LED_RED, color.value[0])
         GPIO.output(PIN_LED_GREEN, color.value[1])
         GPIO.output(PIN_LED_BLUE, color.value[2])
         self.led_color = color
-        if __debug__:
-            print("[IO] Led switched to {}".format(color))
+        print("[IO] Led switched to {}".format(color))
 
     def collection(self):
         for _ in range(3):

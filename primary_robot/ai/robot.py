@@ -39,7 +39,6 @@ def main():
         msg = robot.communication.check_message()
         if msg is not None:
             if msg.type == eTypeUp.POSITION:
-                print("Position : ", msg.x, msg.y, msg.theta)  
                 robot.locomotion.x = msg.x
                 robot.locomotion.y = msg.y
                 robot.locomotion.theta = msg.theta
@@ -57,9 +56,8 @@ if __name__ == '__main__':
     parsed_args = parser.parse_args()
     if __debug__:
         print("Debug mode enable")
-        #with open(TRACE_FILE, 'w') as sys.stdout:
-            #main()
-        main()
+        with open(TRACE_FILE, 'w') as sys.stdout:
+            main()
     else:
         main()
 
