@@ -6,7 +6,6 @@ import math
 
 from behavior import Behavior
 
-FUNNY_ACTION_TIME = 92  # in seconds
 END_MATCH_TIME = 100  # in seconds
 INITIAL_WAIT = 0 #in seconds
 
@@ -16,13 +15,22 @@ SMALL_CRATER_FIRE_DURATION = 4  # in seconds
 GREAT_CRATER_COLLECT_DURATION = 1  # in seconds
 STANDARD_SEPARATION_US = 20  # in cm
 FULL_SPEED_CANNON_TIME = 2  # in seconds
-AFTER_SEESAW_RECALAGE_MAX_TIME = 5  # in sec
+AFTER_SEESAW_RECALAGE_MAX_TIME = 6  # in sec
 FIRE1_RECALAGE_MAX_TIME = 3  # in sec
 FIRE1_CANNON_POWER = 45  # between 0 and 255
 MAX_CANNON_POWER = 105  # between 0 and 255
 CANNON_AUGMENTATION_DISTANCE_STEP = 50  # in mm
 CANNON_AUGMENTATION_POWER_STEP = 10  # between 0 and 255
 WHITE_GRAYSCALE = 220 # between 0 and 255
+
+# Coordinates
+ROBOT_BACK2FRONT = 250
+BUMPER_OFFSET = 45
+Y_START = 243
+Y_CROSSING = 1300
+X_SWITCH_GREEN = 1870
+THETA_INIT_GREEN = math.pi
+
 
 class Color(Enum):
     # BLUE = "blue"
@@ -41,11 +49,7 @@ class FSMMatch(Behavior):
 
     def loop(self):
         time_now = time.time()
-        if self.start_time is not None and time_now - self.start_time >= FUNNY_ACTION_TIME and not self.funny_action_finished:  # Checks time for funny action!
-            if __debug__:
-                print("[FSMMatch] Funny Action time")
-            next_state = StateEnd
-        elif self.start_time is not None and time_now - self.start_time >= END_MATCH_TIME and self.funny_action_finished and self.state.__class__ != StateEnd:
+        if self.start_time is not None and time_now - self.start_time >= END_MATCH_TIME and self.state.__class__ != StateEnd:
             if __debug__:
                 print("[FSMMatch] End match")
             next_state = StateEnd
@@ -78,10 +82,10 @@ class StateBeginOrange(FSMState):
 
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.reposition_robot(44.75, 243, 0)#Attention origine Robot = position du point entre les 2 roues
+        self.behavior.robot.locomotion.reposition_robot(44.75, Y_START, 0)#Attention origine Robot = position du point entre les 2 roues
 
         self.num_pos=0
-        self.p1 = self.behavior.robot.locomotion.PointOrient(1300, 243, 0)
+        self.p1 = self.behavior.robot.locomotion.PointOrient(1300, Y_START, 0)
         self.p2 = self.behavior.robot.locomotion.PointOrient(1130+45, 500, 3*math.pi/2)#Le bumper est décallé de 45mm du centre
         self.behavior.robot.locomotion.go_to_orient_point(self.p1, 50)#Avant
 
@@ -111,11 +115,11 @@ class StateBeginGreen(FSMState):
 
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.reposition_robot(3000-44.75, 243, math.pi)  # Attention origine Robot = position du point entre les 2 roues
+        self.behavior.robot.locomotion.reposition_robot(3000-44.75, Y_START, THETA_INIT_GREEN)  # Attention origine Robot = position du point entre les 2 roues
 
         self.num_pos = 0
-        self.p1 = self.behavior.robot.locomotion.PointOrient(1700, 243, math.pi)
-        self.p2 = self.behavior.robot.locomotion.PointOrient(1870 + 45, 500,
+        self.p1 = self.behavior.robot.locomotion.PointOrient(1700, Y_START+100, THETA_INIT_GREEN)
+        self.p2 = self.behavior.robot.locomotion.PointOrient(X_SWITCH_GREEN + BUMPER_OFFSET, 370,
                                                              3 * math.pi / 2)  # Le bumper est décallé de 45mm du centre
         self.behavior.robot.locomotion.go_to_orient_point(self.p1, 100)  # Avant
 
@@ -166,9 +170,9 @@ class StateCloseSwitch(FSMState):
 
     def exit(self):
         if self.behavior.color == Color.ORANGE:
-            return StateGoRecupOrange
+            return StateOrangeCrossing
         else:
-            return StateGoRecupGreen
+            return StateGreenCrossing
 
 
 class StateGoRecupOrange(FSMState):
@@ -207,18 +211,6 @@ class StateGoRecupOrange(FSMState):
         if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
-
-    def deinit(self):
-        pass
-
-
-class StateGoRecupGreen(FSMState):
-
-    def __init__(self, behavior):
-        self.behavior = behavior
-
-    def test(self):
-        return StateEnd
 
     def deinit(self):
         pass
@@ -276,22 +268,100 @@ class StateInitialWait(FSMState):
 
 
 
-class StateTest(FSMState):
+class StateOrangeCrossing(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.reposition_robot(1000, 0, 0)
-        self.behavior.robot.locomotion.go_to_orient(0, 0, 0, -50)
+        self.behavior.robot.locomotion.reposition_robot(1130+45, 220.25, 3*math.pi/2)
+        p1 = self.behavior.robot.locomotion.Point(1130 + 45, Y_CROSSING)
+        p2 = self.behavior.robot.locomotion.Point(1500, Y_CROSSING)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], math.pi, -75)  # Arriere
+
+
+    def test(self):
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateOrangeLineRecalage
+
+        # TODO : US
+    def deinit(self):
+        pass
+
+
+class StateGreenCrossing(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.reposition_robot(X_SWITCH_GREEN + BUMPER_OFFSET, ROBOT_BACK2FRONT, 3*math.pi/2)
+        p1 = self.behavior.robot.locomotion.PointOrient(X_SWITCH_GREEN + BUMPER_OFFSET, Y_CROSSING, 3*math.pi/2)
+        p2 = self.behavior.robot.locomotion.PointOrient(X_SWITCH_GREEN + 200, Y_CROSSING, THETA_INIT_GREEN)
+        # self.behavior.robot.locomotion.follow_trajectory([p1, p2], math.pi, -75)  # Arriere
+        self.behavior.robot.locomotion.go_to_orient_point(p1, -75)
+        self.behavior.robot.locomotion.go_to_orient_point(p2, 75)
+
+    def test(self):
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateGreenLineRecalage
+
+        # TODO : US
+    def deinit(self):
+        pass
+
+
+class StateOrangeLineRecalage(FSMMatch):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.go_to_orient(2800, 1500, math.pi, 50)
 
     def test(self):
         grayscale = self.behavior.robot.io.get_rgb_grayscale
-        print(grayscale)
         if grayscale >= WHITE_GRAYSCALE:
+            self.behavior.robot.locomotion.reposition_robot(2390, 1300, math.pi)
             print("White detected : " + str(grayscale))
             return StateEnd
+
+        # TODO : US
 
     def deinit(self):
         pass
 
+
+class StateGreenLineRecalage(FSMMatch):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.go_to_orient(200, Y_CROSSING, math.pi, 50)
+
+    def test(self):
+        grayscale = self.behavior.robot.io.get_rgb_grayscale
+        if grayscale >= WHITE_GRAYSCALE:
+            self.behavior.robot.locomotion.reposition_robot(2390, 1300, math.pi)
+            print("White detected : " + str(grayscale))
+            return StateEnd
+
+        # TODO : US
+
+    def deinit(self):
+        pass
+
+
+class StateRecalageRecup(FSMMatch):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        # p1 = self.behavior.robot.locomotion.Point(2390, 1500)
+        # self.behavior.robot.locomotion.follow_trajectory([p1], 0, -75)  # Arriere
+        self.behavior.robot.locomotion.go_to_orient(2390, 1500, 0, -70)
+        self.wait_for_repositionning = False
+        self.recalage_start_time = 0
+
+    def test(self):
+        if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended or (self.behavior.robot.locomotion.is_trajectory_finished and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME):
+            self.behavior.robot.locomotion.reposition_robot(3000, 1500, 0)
+            return StateEnd
+
+    def deinit(self):
+        pass
 
 class StateEnd(FSMState):
     def __init__(self, behavior):
