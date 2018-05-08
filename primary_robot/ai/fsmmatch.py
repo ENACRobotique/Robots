@@ -374,3 +374,19 @@ class StateEnd(FSMState):
 
     def deinit(self):
         pass
+
+
+class StateTest(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.do_rear_recalage()
+        self.wait_for_repositionning = False
+        self.recalage_start_time = 0
+
+    def test(self):
+        if self.behavior.robot.locomotion.is_recalage_ended:
+            print("Recalage ended")
+            return StateEnd
+
+    def deinit(self):
+        pass

@@ -78,12 +78,12 @@ class Locomotion:
         self.synchronize_position()
         print("[LOCOMOTION] Set robot position @ ({},{},{})".format(x,y,theta))
 
-    def do_recalage(self):
+    def do_rear_recalage(self):
         message = self.robot.communication.sMessageDown()
-        message.message_type = self.robot.communication.eTypeDown.DO_RECALAGE
+        message.message_type = self.robot.communication.eTypeDown.DO_REAR_RECALAGE
         self.robot.communication.send_message(message)
         self.is_recalage_ended = False
-        print("[LOCOMOTION] Repositionning...")
+        print("[LOCOMOTION] Repositionning (rear)...")
 
     def recalage_ok(self):
         self.is_recalage_ended = True

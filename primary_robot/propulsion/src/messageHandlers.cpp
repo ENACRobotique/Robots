@@ -59,6 +59,9 @@ void handleMessage(sMessageDown msg) {
 		case DO_RECALAGE:
 			TrajectoryManager.doRecalage();
 			break;
+		case DO_REAR_RECALAGE:
+			TrajectoryManager.doRearRecalage();
+			break;
 		case RESET:
 			RESTART();
 			break;

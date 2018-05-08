@@ -32,6 +32,7 @@ public:
 	void computeNextStep();
 	void testRecalage();
 	void doRecalage();
+	void doRearRecalage();
 	void stopRecalage();
 	void stop();
 	void resume();
@@ -48,6 +49,7 @@ private:
 	int _trajWriteIndex;
 	int _pointId; //Numéro du point dans sa trajectoire
 	bool _recalageRunning;
+	bool _recalageRearRunning;
 };
 
 extern TrajectoryManagerClass TrajectoryManager;

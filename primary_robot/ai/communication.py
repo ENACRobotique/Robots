@@ -155,15 +155,16 @@ class Communication:
         REPOSITIONING = 3
         EMPTY_POINTS = 4
         DO_RECALAGE = 5
-        RESET = 6
+        DO_REAR_RECALAGE = 6
+        RESET = 7
         # 2018 Cup Specials
-        OPEN_TRAP = 7
-        CLOSE_TRAP = 8
-        SORTER_COLLECT_1 = 9
-        SORTER_COLLECT_2 = 10
-        SORTER_UP = 11
-        CUTTER_OPEN = 12
-        CUTTER_CLOSE = 13
+        OPEN_TRAP = 8
+        CLOSE_TRAP = 9
+        SORTER_COLLECT_1 = 10
+        SORTER_COLLECT_2 = 11
+        SORTER_UP = 12
+        CUTTER_OPEN = 13
+        CUTTER_CLOSE = 14
 
     class sTrajElement:
         def __init__(self):

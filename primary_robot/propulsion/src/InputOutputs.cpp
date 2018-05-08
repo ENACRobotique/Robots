@@ -139,7 +139,7 @@ void InputOutputs::colorFalling() {
 }
 
 int InputOutputs::isRecaled() {
-	if(!digitalRead(BUTEE_LEFT) && !digitalRead(BUTEE_RIGHT)) {
+	if((!digitalRead(BUTEE_LEFT) && !digitalRead(BUTEE_RIGHT)) || (!digitalRead(BUTEE_REAR_LEFT) && !digitalRead(BUTEE_REAR_RIGHT))) {
 		return true;
 	}
 	return false;

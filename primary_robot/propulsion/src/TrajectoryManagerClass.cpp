@@ -29,6 +29,7 @@ TrajectoryManagerClass::TrajectoryManagerClass() {
 	_trajWriteIndex = 0;
 	_pointId = 0;
 	_recalageRunning = false;
+	_recalageRearRunning = false;
 }
 
 TrajectoryManagerClass::~TrajectoryManagerClass() {
@@ -157,6 +158,9 @@ void TrajectoryManagerClass::resume(){
 	if(_recalageRunning) {
 		doRecalage();
 	}
+	if(_recalageRearRunning) {
+		doRearRecalage();
+	}
 }
 
 void TrajectoryManagerClass::emptyPoints() {
@@ -207,20 +211,40 @@ void TrajectoryManagerClass::testRecalage() {
 		msg.point_id = 0;
 		message_send(msg);
 
-		//TODO send msg ok
+	}
+	if(_recalageRearRunning && IOs.isRecaled()) {
+		Serial.println("recalage  ok !!!");
+		stopRecalage();
+
+		sMessageUp msg;
+		msg.type = RECALAGE_OK;
+		msg.down_id = 0;
+		msg.x = (int) Odometry.getPosX();
+		msg.y = (int) Odometry.getPosY();
+		msg.theta = (int)(Odometry.getThetaRad() * RAD_TO_UINT16);
+		msg.point_id = 0;
+		message_send(msg);
 	}
 
 }
 
 void TrajectoryManagerClass::doRecalage() {
-	Serial.println("recalage !");
+	Serial.println("recalage front !");
 	_recalageRunning = true;
 	Motors.clearOrientCoeffs();
 	Motors.computeParameters(200000, Straight, 5000);
+}
+
+void TrajectoryManagerClass::doRearRecalage() {
+	Serial.println("Recalage rear !");
+	_recalageRearRunning = true;
+	Motors.clearOrientCoeffs();
+	Motors.computeParameters(-200000, Straight, 5000);
 }
 
 void TrajectoryManagerClass::stopRecalage() {
 	Motors.setOrientCoeffs();
 	Motors.computeParameters(0, Straight, 0);
 	_recalageRunning = false;
+	_recalageRearRunning = false;
 }

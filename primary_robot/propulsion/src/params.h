@@ -27,6 +27,8 @@
 
 #define BUTEE_LEFT 27
 #define BUTEE_RIGHT 28
+#define BUTEE_REAR_LEFT 18
+#define BUTEE_REAR_RIGHT 19
 #define IHM_BONUS 35
 #define LED_RED 36
 #define LED_GREEN 37
