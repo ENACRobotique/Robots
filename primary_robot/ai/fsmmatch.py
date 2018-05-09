@@ -78,6 +78,22 @@ class FSMState:
         raise NotImplementedError("deinit of this state is not defined yet !")
 
 
+class StateInitialWait(FSMState):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.start_time = time.time()
+
+    def test(self):
+        if time.time() - self.start_time > INITIAL_WAIT:
+            if self.behavior.color == Color.ORANGE:
+                return StateBeginOrange
+            else:
+                return StateBeginGreen
+
+    def deinit(self):
+        pass
+
+
 class StateBeginOrange(FSMState):
 
     def __init__(self, behavior):
@@ -98,14 +114,25 @@ class StateBeginOrange(FSMState):
                 self.behavior.robot.locomotion.go_to_orient_point(self.p2, -50)#Arrière
             else:
                 return StateCloseSwitch
-            
-        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
-            self.behavior.robot.locomotion.stop_robot()
-            self.stopped = True
-            
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
-            self.behavior.robot.locomotion.restart_robot()
-            self.stopped = False
+
+        if self.num_pos == 0:
+            if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+                self.behavior.robot.locomotion.stop_robot()
+                self.stopped = True
+
+            if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+                self.behavior.robot.locomotion.restart_robot()
+                self.stopped = False
+
+        else:
+            if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
+                self.behavior.robot.locomotion.stop_robot()
+                self.stopped = True
+
+            if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
+                self.behavior.robot.locomotion.restart_robot()
+                self.stopped = False
+
 
     def deinit(self):
         pass
@@ -133,13 +160,22 @@ class StateBeginGreen(FSMState):
             else:
                 return StateCloseSwitch
 
-        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
-            self.behavior.robot.locomotion.stop_robot()
-            self.stopped = True
+        if self.num_pos == 0:
+            if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+                self.behavior.robot.locomotion.stop_robot()
+                self.stopped = True
 
-        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
-            self.behavior.robot.locomotion.restart_robot()
-            self.stopped = False
+            if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+                self.behavior.robot.locomotion.restart_robot()
+                self.stopped = False
+        else:
+            if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
+                self.behavior.robot.locomotion.stop_robot()
+                self.stopped = True
+            if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
+                self.behavior.robot.locomotion.restart_robot()
+                self.stopped = False
+
 
     def deinit(self):
         pass
@@ -169,10 +205,11 @@ class StateCloseSwitch(FSMState):
         pass
 
     def exit(self):
-        if self.behavior.color == Color.ORANGE:
-            return StateOrangeCrossing
-        else:
-            return StateGreenCrossing
+        # if self.behavior.color == Color.ORANGE:
+        #     return StateOrangeCrossing
+        # else:
+        #     return StateGreenCrossing
+        return StateEnd
 
 
 class StateGoRecupOrange(FSMState):
@@ -248,23 +285,6 @@ class StateColorSelection(FSMState):
             self.behavior.robot.locomotion.reposition_robot(0, 100, 0)
         else:
             self.behavior.robot.locomotion.reposition_robot(1800, 100, math.pi)
-
-
-
-class StateInitialWait(FSMState):
-    def __init__(self, behavior):
-        self.behavior = behavior
-        self.start_time = time.time()
-
-    def test(self):
-        if time.time() - self.start_time > INITIAL_WAIT:
-            if self.behavior.color == Color.ORANGE:
-                return StateBeginOrange
-            else:
-                return StateBeginGreen
-
-    def deinit(self):
-        pass
 
 
 
