@@ -266,7 +266,7 @@ class USReader(threading.Thread):
                 except Exception as e:
                     print("Can not write on sensor {0} : {1}".format(hex(sensor.address), e))
                     us_sensors.remove(sensor)
-            time.sleep(0.070)
+            time.sleep(0.120)
             for i, sensor in enumerate(us_sensors):
                 try:
                     dst = self.i2c.read_word_data(sensor.address, 2) / 255
