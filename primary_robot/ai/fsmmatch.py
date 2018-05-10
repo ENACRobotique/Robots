@@ -105,6 +105,7 @@ class StateBeginOrange(FSMState):
         p2 = self.behavior.robot.locomotion.Point(1180+45, 500)
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], 3*math.pi/2, 100)
         self.stopped = False
+        self.us_time = time.time()
 
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
@@ -115,21 +116,12 @@ class StateBeginOrange(FSMState):
             # else:
             #     return StateCloseSwitch*
 
-        if self.num_pos == 0:
+        if time.time() - self.us_time > 1:
             if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
                 self.behavior.robot.locomotion.stop_robot()
                 self.stopped = True
 
             if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
-                self.behavior.robot.locomotion.restart_robot()
-                self.stopped = False
-
-        else:
-            if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
-                self.behavior.robot.locomotion.stop_robot()
-                self.stopped = True
-
-            if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
                 self.behavior.robot.locomotion.restart_robot()
                 self.stopped = False
 
@@ -151,6 +143,7 @@ class StateBeginGreen(FSMState):
                                                              3 * math.pi / 2)  # Le bumper est décallé de 45mm du centre
         self.behavior.robot.locomotion.follow_trajectory([p1, p2], THETA_INIT_GREEN, 100)
 
+        self.us_time = time.time()
         self.stopped = False
 
     def test(self):
@@ -161,19 +154,12 @@ class StateBeginGreen(FSMState):
             else:
                 return StateCloseSwitch
 
-        if self.num_pos == 0:
+        if time.time() - self.us_time > 1:
             if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
                 self.behavior.robot.locomotion.stop_robot()
                 self.stopped = True
 
             if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
-                self.behavior.robot.locomotion.restart_robot()
-                self.stopped = False
-        else:
-            if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
-                self.behavior.robot.locomotion.stop_robot()
-                self.stopped = True
-            if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
                 self.behavior.robot.locomotion.restart_robot()
                 self.stopped = False
 
@@ -194,12 +180,20 @@ class StateCloseSwitch(FSMState):
             self.recalage_start_time = time.time()
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            self.behavior.robot.locomotion.reposition_robot(1880, 1780, 0.5 * math.pi)
-            return self.exit()
+            if self.behavior.color == Color.ORANGE:
+                self.behavior.robot.locomotion.reposition_robot(1130 + 45, 220, 1.5 * math.pi)
+                return StateGoRecupOrange
+            if self.behavior.color == Color.GREEN:
+                self.behavior.robot.locomotion.reposition_robot(1870 - 45, 220, 1.5 * math.pi)
+                return StateGoRecupGreen
 
         if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
-            self.behavior.robot.locomotion.reposition_robot(1880, 1780, 0.5 * math.pi)
-            return self.exit()
+            if self.behavior.color == Color.ORANGE:
+                self.behavior.robot.locomotion.reposition_robot(1130 + 45, 220, 1.5 * math.pi)
+                return StateGoRecupOrange
+            if self.behavior.color == Color.GREEN:
+                self.behavior.robot.locomotion.reposition_robot(1870 -45, 220, 1.5 * math.pi)
+                return StateGoRecupGreen
 
     def deinit(self):
         pass
@@ -216,13 +210,69 @@ class StateGoRecupOrange(FSMState):
 
     def __init__(self, behavior):
         self.behavior = behavior
-        self.behavior.robot.locomotion.reposition_robot(1130+45, 220.25, 3*math.pi/2)  # Attention origine Robot = position du point entre les 2 roues
+        self.p1 = self.behavior.robot.locomotion.Point(1130 + 45, 400)
+        self.p2 = self.behavior.robot.locomotion.Point(1500, 1000)
+        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], math.pi, -75)
+        self.stopped = False
+        self.wait_for_repositionning = False
 
-        self.p1 = self.behavior.robot.locomotion.Point(1130 + 45, 500)
-        self.p2 = self.behavior.robot.locomotion.Point(3000 - 300, 2000 - 190)
-        #self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], math.pi,  -75)  # Arrière
-        self.behavior.robot.locomotion.follow_trajectory([self.p1], math.pi,  -75)  # Arrière
+    def test(self):
 
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateEnd
+
+
+        #Ultrasons
+        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+
+        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+    def deinit(self):
+        pass
+
+
+class StateGoRecupGreen(FSMState):
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.p1 = self.behavior.robot.locomotion.Point(1870 - 45, 400)
+        self.p2 = self.behavior.robot.locomotion.Point(1500, 1000)
+        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 0, -75)
+        self.stopped = False
+        self.wait_for_repositionning = False
+
+    def test(self):
+
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            return StateEnd
+
+        # Ultrasons
+        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+
+        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+    def deinit(self):
+        pass
+
+
+class StateGoLine(FSMState):
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+
+        self.p1 = self.behavior.robot.locomotion.Point(1130 + 45, 400)
+        self.p2 = self.behavior.robot.locomotion.Point(1500, 1000)
+        self.p3 = self.behavior.robot.locomotion.PointOrient(500, 1000, 1.5 * math.pi)
+        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], math.pi, -75)  # Arrière
+        self.traj = 0
         self.stopped = False
         self.wait_for_repositionning = False
 
@@ -230,17 +280,19 @@ class StateGoRecupOrange(FSMState):
         if time.time() - self.behavior.start_time > 80:
             return StateEnd
 
-        if self.behavior.robot.locomotion.is_trajectory_finished and not self.wait_for_repositionning :
-            return StateEnd
-            #TODO recalage arr
-            self.behavior.robot.locomotion.do_recalage()
-            self.wait_for_repositionning = True
+        if self.behavior.robot.locomotion.is_trajectory_finished and self.traj == 0:
+            self.behavior.robot.locomotion.go_to_orient_point(self.p3, 50)
+            self.traj = 1
+            self.line_start_time = time.time()
 
-        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
-            #TODO Recup Orange
-            return StateEnd
+        if self.behavior.robot.locomotion.is_trajectory_finished:
+            grayscale = self.behavior.robot.io.get_rgb_grayscale
+            if grayscale >= WHITE_GRAYSCALE:
+                self.behavior.robot.locomotion.reposition_robot(2390, 1300, math.pi)
+                print("White detected : " + str(grayscale))
+                return StateEnd
 
-        #Ultrasons
+        # Ultrasons
         if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
