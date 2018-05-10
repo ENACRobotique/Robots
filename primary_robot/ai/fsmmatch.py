@@ -100,20 +100,20 @@ class StateBeginOrange(FSMState):
         self.behavior = behavior
         self.behavior.robot.locomotion.reposition_robot(44.75, Y_START, 0)#Attention origine Robot = position du point entre les 2 roues
 
-        self.num_pos=0
-        self.p1 = self.behavior.robot.locomotion.PointOrient(1300, Y_START, 0)
-        self.p2 = self.behavior.robot.locomotion.PointOrient(1130+45, 500, 3*math.pi/2)#Le bumper est décallé de 45mm du centre
-        self.behavior.robot.locomotion.go_to_orient_point(self.p1, 50)#Avant
-
+        self.num_pos = 0
+        p1 = self.behavior.robot.locomotion.Point(900, Y_START)
+        p2 = self.behavior.robot.locomotion.Point(1180+45, 500)
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 3*math.pi/2, 100)
         self.stopped = False
 
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
-            if self.num_pos == 0:
-                self.num_pos += 1
-                self.behavior.robot.locomotion.go_to_orient_point(self.p2, -50)#Arrière
-            else:
-                return StateCloseSwitch
+            return StateCloseSwitch
+            # if self.num_pos == 0:
+            #     self.num_pos += 1
+            #     self.behavior.robot.locomotion.go_to_orient_point(self.p2, -50)#Arrière
+            # else:
+            #     return StateCloseSwitch*
 
         if self.num_pos == 0:
             if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -145,10 +145,11 @@ class StateBeginGreen(FSMState):
         self.behavior.robot.locomotion.reposition_robot(3000-44.75, Y_START, THETA_INIT_GREEN)  # Attention origine Robot = position du point entre les 2 roues
 
         self.num_pos = 0
-        self.p1 = self.behavior.robot.locomotion.PointOrient(1700, Y_START+100, THETA_INIT_GREEN)
-        self.p2 = self.behavior.robot.locomotion.PointOrient(X_SWITCH_GREEN + BUMPER_OFFSET, 370,
+        p1 = self.behavior.robot.locomotion.Point(2500, Y_START)
+        p2 = self.behavior.robot.locomotion.Point(1700, Y_START+100)
+        self.p3 = self.behavior.robot.locomotion.PointOrient(X_SWITCH_GREEN + BUMPER_OFFSET, 370,
                                                              3 * math.pi / 2)  # Le bumper est décallé de 45mm du centre
-        self.behavior.robot.locomotion.go_to_orient_point(self.p1, 100)  # Avant
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], THETA_INIT_GREEN, 100)
 
         self.stopped = False
 
@@ -156,7 +157,7 @@ class StateBeginGreen(FSMState):
         if self.behavior.robot.locomotion.is_trajectory_finished:
             if self.num_pos == 0:
                 self.num_pos += 1
-                self.behavior.robot.locomotion.go_to_orient_point(self.p2, -100)  # Arrière
+                self.behavior.robot.locomotion.go_to_orient_point(self.p3, -100)  # Arrière
             else:
                 return StateCloseSwitch
 
@@ -175,7 +176,6 @@ class StateBeginGreen(FSMState):
             if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
                 self.behavior.robot.locomotion.restart_robot()
                 self.stopped = False
-
 
     def deinit(self):
         pass
