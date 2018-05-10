@@ -21,7 +21,7 @@ FIRE1_CANNON_POWER = 45  # between 0 and 255
 MAX_CANNON_POWER = 105  # between 0 and 255
 CANNON_AUGMENTATION_DISTANCE_STEP = 50  # in mm
 CANNON_AUGMENTATION_POWER_STEP = 10  # between 0 and 255
-WHITE_GRAYSCALE = 220 # between 0 and 255
+WHITE_GRAYSCALE = 200 # between 0 and 255
 
 # Coordinates
 ROBOT_BACK2FRONT = 250
@@ -46,6 +46,7 @@ class FSMMatch(Behavior):
         self.start_time = None
         self.funny_action_finished = False
         self.state = StateColorSelection(self)
+        # self.state = StateTest(self)
 
     def loop(self):
         time_now = time.time()
@@ -211,8 +212,8 @@ class StateGoRecupOrange(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.p1 = self.behavior.robot.locomotion.Point(1130 + 45, 400)
-        self.p2 = self.behavior.robot.locomotion.Point(1500, 1000)
-        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], math.pi, -75)
+        self.p2 = self.behavior.robot.locomotion.Point(1500, 1600)
+        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 0.5 * math.pi, -75)
         self.stopped = False
         self.wait_for_repositionning = False
 
@@ -240,8 +241,8 @@ class StateGoRecupGreen(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.p1 = self.behavior.robot.locomotion.Point(1870 - 45, 400)
-        self.p2 = self.behavior.robot.locomotion.Point(1500, 1000)
-        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 0, -75)
+        self.p2 = self.behavior.robot.locomotion.Point(1500, 1600)
+        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 0.5 * math.pi, -75)
         self.stopped = False
         self.wait_for_repositionning = False
 
@@ -263,43 +264,95 @@ class StateGoRecupGreen(FSMState):
         pass
 
 
-class StateGoLine(FSMState):
+class StateGoLineOrange(FSMState):
 
     def __init__(self, behavior):
         self.behavior = behavior
 
-        self.p1 = self.behavior.robot.locomotion.Point(1130 + 45, 400)
-        self.p2 = self.behavior.robot.locomotion.Point(1500, 1000)
-        self.p3 = self.behavior.robot.locomotion.PointOrient(500, 1000, 1.5 * math.pi)
-        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], math.pi, -75)  # Arrière
-        self.traj = 0
+        self.p1 = self.behavior.robot.locomotion.PointOrient(2700, 1300, math.pi)
+        self.behavior.robot.locomotion.go_to_orient_point(self.p1, 50)
         self.stopped = False
-        self.wait_for_repositionning = False
 
     def test(self):
-        if time.time() - self.behavior.start_time > 80:
+
+        if self.behavior.robot.locomotion.is_trajectory_finished :
             return StateEnd
 
-        if self.behavior.robot.locomotion.is_trajectory_finished and self.traj == 0:
-            self.behavior.robot.locomotion.go_to_orient_point(self.p3, 50)
-            self.traj = 1
-            self.line_start_time = time.time()
-
-        if self.behavior.robot.locomotion.is_trajectory_finished:
-            grayscale = self.behavior.robot.io.get_rgb_grayscale
-            if grayscale >= WHITE_GRAYSCALE:
-                self.behavior.robot.locomotion.reposition_robot(2390, 1300, math.pi)
-                print("White detected : " + str(grayscale))
-                return StateEnd
+        grayscale = self.behavior.robot.io.get_rgb_grayscale
+        if grayscale >= WHITE_GRAYSCALE:
+            self.behavior.robot.locomotion.reposition_robot(2330, 1000, math.pi)
+            print("White detected : " + str(grayscale))
+            self.behavior.robot.locomotion.stop_robot()
+            return StateGoStraight
 
         # Ultrasons
-        if self.behavior.robot.io.rear_distance <= STANDARD_SEPARATION_US and not self.stopped:
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
             self.behavior.robot.locomotion.stop_robot()
             self.stopped = True
 
-        if self.behavior.robot.io.rear_distance > STANDARD_SEPARATION_US and self.stopped:
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
             self.behavior.robot.locomotion.restart_robot()
             self.stopped = False
+
+    def deinit(self):
+        pass
+
+
+class StateGoStraight(FSMState):
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+
+        self.p1 = self.behavior.robot.locomotion.PointOrient(2390, 1700, 0.5 * math.pi)
+        self.behavior.robot.locomotion.go_to_orient_point(self.p1, 50)
+        self.stopped = False
+
+    def test(self):
+
+        if self.behavior.robot.locomotion.is_trajectory_finished :
+            return StateEnd
+
+        # Ultrasons
+        if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
+            self.behavior.robot.locomotion.stop_robot()
+            self.stopped = True
+
+        if self.behavior.robot.io.front_distance > STANDARD_SEPARATION_US and self.stopped:
+            self.behavior.robot.locomotion.restart_robot()
+            self.stopped = False
+
+    def deinit(self):
+        pass
+
+
+class StateDoRecup(FSMState):
+
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.wait_for_repositionning = False
+        self.recalage_start_time = 0
+
+    def test(self):
+        if not self.wait_for_repositionning:
+            self.behavior.robot.locomotion.do_recalage()
+            self.wait_for_repositionning = True
+            self.recalage_start_time = time.time()
+
+        if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended:
+            if self.behavior.color == Color.ORANGE:
+                self.behavior.robot.locomotion.reposition_robot(2390, 3000, 0.5 * math.pi)
+                return StateEnd
+            if self.behavior.color == Color.GREEN:
+                self.behavior.robot.locomotion.reposition_robot(610, 3000, 0.5 * math.pi)
+                return StateEnd
+
+        if self.wait_for_repositionning and not self.behavior.robot.locomotion.is_recalage_ended and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME:
+            if self.behavior.color == Color.ORANGE:
+                self.behavior.robot.locomotion.reposition_robot(2390, 3000, 0.5 * math.pi)
+                return StateEnd
+            if self.behavior.color == Color.GREEN:
+                self.behavior.robot.locomotion.reposition_robot(610, 3000, 0.5 * math.pi)
+                return StateEnd
 
     def deinit(self):
         pass
@@ -430,6 +483,22 @@ class StateRecalageRecup(FSMMatch):
 
         if self.wait_for_repositionning and self.behavior.robot.locomotion.is_recalage_ended or (self.behavior.robot.locomotion.is_trajectory_finished and time.time() - self.recalage_start_time > AFTER_SEESAW_RECALAGE_MAX_TIME):
             self.behavior.robot.locomotion.reposition_robot(3000, 1500, 0)
+            return StateEnd
+
+    def deinit(self):
+        pass
+
+class StateTest(FSMMatch):
+    def __init__(self, behavior):
+        self.behavior = behavior
+        self.behavior.robot.locomotion.reposition_robot(0,0,0)
+        self.behavior.robot.locomotion.go_to_orient(200, 0,0, 50)
+
+    def test(self):
+        grayscale = self.behavior.robot.io.get_rgb_grayscale
+        print(grayscale)
+        if grayscale >= WHITE_GRAYSCALE:
+            print("White detected : " + str(grayscale))
             return StateEnd
 
     def deinit(self):

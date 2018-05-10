@@ -272,6 +272,8 @@ class USReader(threading.Thread):
                     dst = self.i2c.read_word_data(sensor.address, 2) / 255
                     if dst > MIN_US_RANGE:
                         us_sensors_distance[us_sensors[i]] = dst
+                        if dst < 20:
+                            print(hex(sensor.address), dst)
                 except Exception as e:
                     print("Can not read on sensor {0} : {1}".format(hex(sensor.address), e))
                     us_sensors.remove(sensor)
