@@ -138,22 +138,22 @@ class StateBeginGreen(FSMState):
         self.behavior.robot.locomotion.reposition_robot(3000-44.75, Y_START, THETA_INIT_GREEN)  # Attention origine Robot = position du point entre les 2 roues
 
         self.num_pos = 0
-        p1 = self.behavior.robot.locomotion.Point(2500, Y_START)
-        p2 = self.behavior.robot.locomotion.Point(1700, Y_START+100)
-        self.p3 = self.behavior.robot.locomotion.PointOrient(X_SWITCH_GREEN + BUMPER_OFFSET, 370,
-                                                             3 * math.pi / 2)  # Le bumper est décallé de 45mm du centre
-        self.behavior.robot.locomotion.follow_trajectory([p1, p2], THETA_INIT_GREEN, 100)
+        p1 = self.behavior.robot.locomotion.Point(2200, Y_START)
+        p2 = self.behavior.robot.locomotion.Point(X_SWITCH_GREEN, Y_START+300)
+        #self.p3 = self.behavior.robot.locomotion.PointOrient(X_SWITCH_GREEN + BUMPER_OFFSET-100, 370,
+        #                                                     3 * math.pi / 2)  # Le bumper est décallé de 45mm du centre
+        self.behavior.robot.locomotion.follow_trajectory([p1, p2], 3 * math.pi / 2, 100)
 
         self.us_time = time.time()
         self.stopped = False
 
     def test(self):
         if self.behavior.robot.locomotion.is_trajectory_finished:
-            if self.num_pos == 0:
-                self.num_pos += 1
-                self.behavior.robot.locomotion.go_to_orient_point(self.p3, -100)  # Arrière
-            else:
-                return StateCloseSwitch
+            # if self.num_pos == 0:
+            #     self.num_pos += 1
+            #     self.behavior.robot.locomotion.go_to_orient_point(self.p3, -100)  # Arrière
+            # else:
+            return StateCloseSwitch
 
         if time.time() - self.us_time > 1:
             if self.behavior.robot.io.front_distance <= STANDARD_SEPARATION_US and not self.stopped:
@@ -212,8 +212,8 @@ class StateGoRecupOrange(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.p1 = self.behavior.robot.locomotion.Point(1130 + 45, 400)
-        self.p2 = self.behavior.robot.locomotion.Point(1500, 1600)
-        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 0.5 * math.pi, -75)
+        self.p2 = self.behavior.robot.locomotion.Point(1500, 1400)
+        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 1.5 * math.pi, -75)
         self.stopped = False
         self.wait_for_repositionning = False
 
@@ -241,8 +241,8 @@ class StateGoRecupGreen(FSMState):
     def __init__(self, behavior):
         self.behavior = behavior
         self.p1 = self.behavior.robot.locomotion.Point(1870 - 45, 400)
-        self.p2 = self.behavior.robot.locomotion.Point(1500, 1600)
-        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 0.5 * math.pi, -75)
+        self.p2 = self.behavior.robot.locomotion.Point(1500, 1500)
+        self.behavior.robot.locomotion.follow_trajectory([self.p1, self.p2], 1.5 * math.pi, -75)
         self.stopped = False
         self.wait_for_repositionning = False
 
