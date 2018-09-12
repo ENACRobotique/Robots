@@ -1,3 +1,6 @@
+#include "Arduino.h"
+#include "sprit.h"
+
 //Fonction généré par kaleidoPy
 void draw_test2(int offset){
 	drawPixel2(0,0,1,5,3,offset);

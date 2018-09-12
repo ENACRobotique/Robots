@@ -1,17 +1,8 @@
+#include "sprit.h"
 
-#include "Adafruit_GFX.h"
-#include "RGBmatrixPanel.h"
+//Useless function defined in libstdc++ (not accessible by avr-gcc)
+void __cxa_pure_virtual() { while (1); }
 
-#include <SPI.h>
-
-#define CLK 8  // MUST be on PORTB! (Use pin 11 on Mega)
-#define LAT A4
-#define OE  9
-#define A   A0
-#define B   A1
-#define C   A2
-#define D   A3
-//RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false,32);
 
 void init_matrix(){
@@ -59,9 +50,6 @@ void drawPixel2(int16_t x, int16_t y, uint8_t r,uint8_t g,uint8_t b,int8_t offse
   matrix.matrixbuff[0][real_x+64*3*(y%4)+64*1]|=(c0>>2)&0x3;
   matrix.matrixbuff[0][real_x+64*3*(y%4)+64*2]|=(c0>>0)&0x3;
   
-}
-void drawPixel2(int16_t x, int16_t y, uint8_t r,uint8_t g,uint8_t b){
-  return drawPixel2(x,y,r,g,b,0);
 }
 
 //void matrix
