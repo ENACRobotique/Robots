@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import Image
 from sys import argv
+import os
 
 def import_image(fichier):
 	try:
@@ -14,7 +15,7 @@ def import_image(fichier):
 def write_matrix(new_fichier,data):
 	with open(new_fichier, 'w') as fichier:
 		fichier.write("//Fonction généré par kaleidoPy\n")
-		fichier.write("void draw_{}(int offset){{\n".format(".".join(new_fichier.split(".")[:-1]) ) )
+		fichier.write("void draw_image(int offset){{\n".format(".".join(new_fichier.split(".")[:-1]) ) )
 		n=0
 		for i in data:
 			r,g,b=i
@@ -32,13 +33,21 @@ def create_matrix(fichier,plot=False):
 	if im==0:return
 	if plot:im.resize( (32*20,16*20) ).show()
 	
-	new_fichier=".".join(fichier.split(".")[:-1])+".c"
+	#new_fichier="src/"+".".join(fichier.split(".")[:-1])+".h"
+	new_fichier="src/image.h"
 	write_matrix(new_fichier,im.getdata())
+
+def upload_matrix():
+	os.system("make upload")
 
 PLOT=True
 if __name__=="__main__":
 	if len(argv)<=1:
-		print("Il faut donner des images en arguments!")
+		print("Il faut donner une image en argument!")
 		exit(0)
 	for i in argv[1:]:
 		create_matrix(i,PLOT)
+		response=raw_input("Voulez-vous flashez l'image?(y/N) ")
+		if('Y' in response.upper()):
+			upload_matrix()
+
