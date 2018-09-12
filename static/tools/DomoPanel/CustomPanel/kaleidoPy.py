@@ -11,7 +11,7 @@ def import_image(fichier):
 		return 0;
 	return im.resize( (32,16) ,Image.BICUBIC)
 
-def write_sprit(new_fichier,data):
+def write_matrix(new_fichier,data):
 	with open(new_fichier, 'w') as fichier:
 		fichier.write("//Fonction généré par kaleidoPy\n")
 		fichier.write("void draw_{}(int offset){{\n".format(".".join(new_fichier.split(".")[:-1]) ) )
@@ -27,13 +27,13 @@ def write_sprit(new_fichier,data):
 			n+=1
 		fichier.write("}\n")
 
-def create_sprit(fichier,plot=False):
+def create_matrix(fichier,plot=False):
 	im=import_image(fichier)
 	if im==0:return
 	if plot:im.resize( (32*20,16*20) ).show()
 	
 	new_fichier=".".join(fichier.split(".")[:-1])+".c"
-	write_sprit(new_fichier,im.getdata())
+	write_matrix(new_fichier,im.getdata())
 
 PLOT=True
 if __name__=="__main__":
@@ -41,4 +41,4 @@ if __name__=="__main__":
 		print("Il faut donner des images en arguments!")
 		exit(0)
 	for i in argv[1:]:
-		create_sprit(i,PLOT)
+		create_matrix(i,PLOT)
