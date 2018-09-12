@@ -98,10 +98,18 @@ void RGBmatrixPanel::init(uint8_t rows, uint8_t a, uint8_t b, uint8_t c,
   // Allocate and initialize matrix buffer:
   int buffsize  = width * nRows * 3, // x3 = 3 bytes holds 4 planes "packed"
       allocsize = (dbuf == true) ? (buffsize * 2) : buffsize;
-  if(NULL == (matrixbuff[0] = (uint8_t *)malloc(allocsize))) return;
-  memset(matrixbuff[0], 0, allocsize);
+
+  //if(NULL == (matrixbuff[0] = (uint8_t *)malloc(allocsize))) return;
+  matrixbuff[0]=(uint8_t*)&matrixbuff_F;
+  memset(matrixbuff [0], 0, allocsize*2	);
   // If not double-buffered, both buffers then point to the same address:
   matrixbuff[1] = (dbuf == true) ? &matrixbuff[0][buffsize] : matrixbuff[0];
+
+//second part
+/*
+  matrixbuff2[0]=(uint8_t*)&matrixbuff_F2;
+  memset(matrixbuff2[0], 0, allocsize	);
+  matrixbuff2[1] = (dbuf == true) ? &matrixbuff2[0][buffsize] : matrixbuff2[0];*/
 
   // Save pin numbers for use by begin() method later.
   _a     = a;
@@ -136,7 +144,7 @@ RGBmatrixPanel::RGBmatrixPanel(
   uint8_t sclk, uint8_t latch, uint8_t oe, boolean dbuf) :
   Adafruit_GFX(32, 16) {
 
-  init(8, a, b, c, sclk, latch, oe, dbuf, 32);
+  init(4, a, b, c, sclk, latch, oe, dbuf, 32);
 }
 
 // Constructor for 32x32 or 32x64 panel:
@@ -145,12 +153,13 @@ RGBmatrixPanel::RGBmatrixPanel(
   uint8_t sclk, uint8_t latch, uint8_t oe, boolean dbuf, uint8_t width) :
   Adafruit_GFX(width, 32) {
 
-  init(16, a, b, c, sclk, latch, oe, dbuf, width);
+  init(4, a, b, c, sclk, latch, oe, dbuf, width);
 
   // Init a few extra 32x32-specific elements:
   _d        = d;
   addrdport = portOutputRegister(digitalPinToPort(d));
   addrdpin  = digitalPinToBitMask(d);
+  pinMode(_d  , OUTPUT); *addrdport &= ~addrdpin; // Low
 }
 
 void RGBmatrixPanel::begin(void) {
@@ -271,11 +280,36 @@ uint16_t RGBmatrixPanel::ColorHSV(
          (b <<  1) | ( b        >> 3);
 }
 
-void RGBmatrixPanel::drawPixel(int16_t x, int16_t y, uint16_t c) {
+int correct_pixel_postion(int16_t& x, int16_t& y, int16_t config) {
+	if(x<0 || x>=32 || y<0 || y>4)return -1;
+	//manage x
+	int16_t real_x=x%16;
+	if( (x%16)/4 >0 )real_x+=8;
+	if( (x%16)/4 >2 )real_x+=8;
+	if( (x/16)   >0 )real_x+=32*8*3;
+	//manage y
+	if(  y   >=2)config+=8;
+	if( (y%2)==1){
+		if( (x/4)%2==1)real_x-=4;
+		else				real_x+=4;
+	}
+
+	x=real_x;
+	y=config;
+	return 0;
+	
+	
+
+	//return RGBmatrixPanel::drawPixel(real_x,config,c);
+}
+void RGBmatrixPanel::drawPixel(int16_t x, int16_t y, uint16_t c){RGBmatrixPanel::drawPixel(x,y,0,c);}
+
+void RGBmatrixPanel::drawPixel(int16_t x, int16_t y, int16_t config, uint16_t c) {
+
+  if(correct_pixel_postion(x,y,config)  <0)return;
+
+  if((x < 0) ||(x > 32*4*3*2) || (y < 0) || (y >= _height)) return;
   uint8_t r, g, b, bit, limit, *ptr;
-
-  if((x < 0) || (x >= _width) || (y < 0) || (y >= _height)) return;
-
   switch(rotation) {
    case 1:
     _swap_int16_t(x, y);
@@ -489,16 +523,38 @@ void RGBmatrixPanel::updateDisplay(void) {
   } else if(plane == 1) {
     // Plane 0 was loaded on prior interrupt invocation and is about to
     // latch now, so update the row address lines before we do that:
-    if(row & 0x1)   *addraport |=  addrapin;
-    else            *addraport &= ~addrapin;
-    if(row & 0x2)   *addrbport |=  addrbpin;
-    else            *addrbport &= ~addrbpin;
-    if(row & 0x4)   *addrcport |=  addrcpin;
-    else            *addrcport &= ~addrcpin;
-    if(nRows > 8) {
-      if(row & 0x8) *addrdport |=  addrdpin;
-      else          *addrdport &= ~addrdpin;
-    }
+    //*addraport =  addrapin;
+	switch(row){
+	case 0:
+		 *addraport &= ~addrapin;
+		 *addrbport |=  addrbpin;
+		 *addrcport |=  addrcpin;
+		 *addrdport |=  addrdpin;
+		 break;
+	case 1:
+		 *addraport |=  addrapin;
+		 *addrbport &= ~addrbpin;
+		 *addrcport |=  addrcpin;
+		 *addrdport |=  addrdpin;
+		 break;
+	case 2:
+		 *addraport |=  addrapin;
+		 *addrbport |=  addrbpin;
+		 *addrcport &= ~addrcpin;
+		 *addrdport |=  addrdpin;
+		 break;
+	case 3:
+		 *addraport |=  addrapin;
+		 *addrbport |=  addrbpin;
+		 *addrcport |=  addrcpin;
+		 *addrdport &= ~addrdpin;
+		 break;
+	default:
+		 *addraport &= ~addrapin;
+		 *addrbport &= ~addrbpin;
+		 *addrcport &= ~addrcpin;
+		 *addrdport &= ~addrdpin;
+	}
   }
 
   // buffptr, being 'volatile' type, doesn't take well to optimization.
@@ -521,8 +577,11 @@ void RGBmatrixPanel::updateDisplay(void) {
   tock = SCLKPORT;
   tick = tock | sclkpin;
 
+	//plane=1;
   if(plane > 0) { // 188 ticks from TCNT1=0 (above) to end of function
-
+	
+	 buffptr+=64;
+	 //if(plane !=3)return;
     // Planes 1-3 copy bytes directly from RAM to PORT without unpacking.
     // The least 2 bits (used for plane 0 data) are presumed masked out
     // by the port direction bits.
@@ -541,23 +600,26 @@ void RGBmatrixPanel::updateDisplay(void) {
          [tick] "r" (tick),                   \
          [tock] "r" (tock));
 
-    // Loop is unrolled for speed:
     pew pew pew pew pew pew pew pew
     pew pew pew pew pew pew pew pew
     pew pew pew pew pew pew pew pew
     pew pew pew pew pew pew pew pew
 
-      if (WIDTH == 64) {
+    pew pew pew pew pew pew pew pew
+    pew pew pew pew pew pew pew pew
+    pew pew pew pew pew pew pew pew
+    pew pew pew pew pew pew pew pew
+
+      if (WIDTH == 64) {//toporisation
     pew pew pew pew pew pew pew pew
     pew pew pew pew pew pew pew pew
     pew pew pew pew pew pew pew pew
     pew pew pew pew pew pew pew pew
       }
 
-    buffptr = ptr; //+= 32;
-
   } else { // 920 ticks from TCNT1=0 (above) to end of function
 
+	//return;
     // Planes 1-3 (handled above) formatted their data "in place,"
     // their layout matching that out the output PORT register (where
     // 6 bits correspond to output data lines), maximizing throughput
@@ -567,14 +629,19 @@ void RGBmatrixPanel::updateDisplay(void) {
     // output for plane 0 is handled while plane 3 is being displayed...
     // because binary coded modulation is used (not PWM), that plane
     // has the longest display interval, so the extra work fits.
-    for(i=0; i<WIDTH; i++) {
+
+    for(i=0; i<WIDTH*2; i++) {
       DATAPORT =
         ( ptr[i]    << 6)         |
-        ((ptr[i+WIDTH] << 4) & 0x30) |
-        ((ptr[i+WIDTH*2] << 2) & 0x0C);
+        ((ptr[i+WIDTH*2] << 4) & 0x30) |
+        ((ptr[i+WIDTH*4] << 2) & 0x0C);
       SCLKPORT = tick; // Clock lo
       SCLKPORT = tock; // Clock hi
     } 
+	 for(i=0; i<WIDTH; i++) {//toporisation
+      DATAPORT =0;
+    } 
   }
 }
+
 

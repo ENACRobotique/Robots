@@ -6,6 +6,9 @@
 #endif
 #include "Adafruit_GFX.h"
 
+//stock on flash memory
+#include <avr/pgmspace.h>
+
 class RGBmatrixPanel : public Adafruit_GFX {
 
  public:
@@ -21,6 +24,7 @@ class RGBmatrixPanel : public Adafruit_GFX {
   void
     begin(void),
     drawPixel(int16_t x, int16_t y, uint16_t c),
+    drawPixel(int16_t x, int16_t y, int16_t config, uint16_t c),
     fillScreen(uint16_t c),
     updateDisplay(void),
     swapBuffers(boolean),
@@ -34,7 +38,8 @@ class RGBmatrixPanel : public Adafruit_GFX {
     Color888(uint8_t r, uint8_t g, uint8_t b, boolean gflag),
     ColorHSV(long hue, uint8_t sat, uint8_t val, boolean gflag);
 
-  uint8_t         *matrixbuff[2];
+  PROGMEM uint8_t   matrixbuff_F [32 * 8 * 3 *2];
+  uint8_t*   matrixbuff [2];
  private:
 
   uint8_t          nRows;
