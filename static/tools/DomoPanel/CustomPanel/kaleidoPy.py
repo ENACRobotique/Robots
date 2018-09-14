@@ -18,7 +18,7 @@ def write_matrix(new_fichier,data):
 		fichier.write("void draw_image(int offset){{\n".format(".".join(new_fichier.split(".")[:-1]) ) )
 		n=0
 		for i in data:
-			r,g,b=i
+			r,g,b=i[:3]
 			r>>=4+1#reduce the intensity
 			g>>=4+1
 			b>>=4+1
