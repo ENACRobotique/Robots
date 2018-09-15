@@ -1,5 +1,5 @@
 #! /usr/bin/python
-from tkinter import Tk, Button, Canvas, filedialog
+from tkinter import *
 from tkinter.colorchooser import askcolor
 import Image
 
@@ -15,9 +15,16 @@ class MatrixGui:
 		self.master = master
 		master.title("Matrix GUI")
 
-		self.loadButton = Button(master, text="Load Image", command=self.load)
-		self.loadButton.pack()
+		#Load & Save image
+		self.loadSaveFrame=Frame(master)
+		self.loadSaveFrame.pack()
 
+		self.loadButton = Button(self.loadSaveFrame, text="Load", command=self.load)
+		self.loadButton.pack(side=LEFT)
+
+		self.saveButton = Button(self.loadSaveFrame, text="Save", command=self.save)
+		self.saveButton.pack(side=LEFT)
+		#Matrix Canvas (Image plot & modification)
 		self.canvasMatrix = Canvas(master, width =LED_PIXELS_SIZE*32,
 											  height=LED_PIXELS_SIZE*16)
 		
@@ -25,9 +32,20 @@ class MatrixGui:
 		self.canvasMatrix.bind("<B1-Motion>", self.penCallback)
 		self.canvasMatrix.pack()
 
-		self.colorButton=Button(text='Select Color', command=self.getColor)
-		self.colorButton.pack()
+		#Pen Information
+		self.PenOptionFrame=Frame(master)
+		self.PenOptionFrame.pack()
 
+		self.colorButton=Button(self.PenOptionFrame,text='Select Color', command=self.getColor)
+		self.colorButton.pack(side=LEFT,padx=50)
+
+		self.currentPenColorLabel=Label(self.PenOptionFrame, text="Couleur crayon!")
+		self.currentPenColorLabel.pack(side=LEFT,padx=50)
+
+		self.currentPixelColorLabel=Label(self.PenOptionFrame, text="Couleur actuelle!")
+		self.currentPixelColorLabel.pack(side=LEFT,padx=50)
+
+		#Upload option
 		self.uploadButton = Button(master, text="Upload", command=self.upload)
 		self.uploadButton.pack()
 
@@ -36,6 +54,9 @@ class MatrixGui:
 			filetypes = (("Images files","*.jpg *.png"),("all files","*.*")))
 		self.import_image(image_file)
 		self.drawMatrix()
+
+	def save(self):
+		print("Save image")
 
 	def upload(self):
 		print("Upload!")
