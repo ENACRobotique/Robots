@@ -1,5 +1,6 @@
 #! /usr/bin/python
 from tkinter import Tk, Button, Canvas, filedialog
+from tkinter.colorchooser import askcolor
 import Image
 
 LED_PIXELS_SIZE=15
@@ -9,6 +10,7 @@ class MatrixGui:
 	def __init__(self, master):
 
 		self.matrix=[[(0,0,0)for y in range(16)]for x in range(32)]
+		self.currentColor=(0,0,0)
 
 		self.master = master
 		master.title("Matrix GUI")
@@ -20,8 +22,11 @@ class MatrixGui:
 											  height=LED_PIXELS_SIZE*16)
 		
 		self.drawMatrix()
-		self.canvasMatrix.bind("<Button-1>", self.penCallback)
+		self.canvasMatrix.bind("<B1-Motion>", self.penCallback)
 		self.canvasMatrix.pack()
+
+		self.colorButton=Button(text='Select Color', command=self.getColor)
+		self.colorButton.pack()
 
 		self.uploadButton = Button(master, text="Upload", command=self.upload)
 		self.uploadButton.pack()
@@ -46,16 +51,23 @@ class MatrixGui:
 		for i in range(len(image_data)):
 			self.matrix[i%32][i/32]=image_data[i][:3]
 
+	def getColor(self):
+		self.currentColor= askcolor()[0]
 	def penCallback(self,event):
+		if event.x<0 or event.y<0:
+			return
 		x=event.x/LED_PIXELS_SIZE
 		y=event.y/LED_PIXELS_SIZE
-		self.matrix[x][y]=(0,0,0)
+		if x>=32 or y>=16:
+			return
+		self.matrix[x][y]=self.currentColor
 		self.drawMatrix()
 
 
 	def getFillColor(self,x,y):
 		return "#"+"".join(["{:02x}".format(i) for i in self.matrix [x][y]])
 	def drawMatrix(self):
+		self.canvasMatrix.delete("all")
 		for x in range(32):
 			for y in range(16):
 				color=self.getFillColor(x,y)
