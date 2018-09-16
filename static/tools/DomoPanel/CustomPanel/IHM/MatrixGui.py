@@ -53,9 +53,16 @@ class MatrixGui:
 		self.currentPixelColorLabel=Label(self.PenOptionFrame, textvariable=self.currentPixelColorVar)
 		self.currentPixelColorLabel.pack(side=LEFT,padx=50)
 
+		#Animation option
+		self.FlashOptionFrame=Frame(master)
+		self.FlashOptionFrame.pack()
+
+		self.AnimationVar = IntVar()
+		self.AnimationButton = Checkbutton(self.FlashOptionFrame, text="Animate", variable=self.AnimationVar)
+		self.AnimationButton.pack(side=LEFT,padx=50)
 		#Upload option
-		self.uploadButton = Button(master, text="Upload", command=self.upload)
-		self.uploadButton.pack()
+		self.uploadButton = Button(self.FlashOptionFrame, text="Upload", command=self.upload)
+		self.uploadButton.pack(side=LEFT,padx=50)
 
 	#Upload, load, save functions
 	def load(self):

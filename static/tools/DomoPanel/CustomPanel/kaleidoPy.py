@@ -24,6 +24,8 @@ class kaleidoGui(IHM.MatrixGui):
 												format(x,y,r,g,b) )
 
 			fichier.write("}\n")
+			if(self.AnimationVar.get()):
+				fichier.write("#define ANIMATION\n")
 
 
 	def upload(self):

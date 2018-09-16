@@ -8,6 +8,9 @@ void setup() {
 }
 
 void loop() {
+#ifndef ANIMATION
+  for(int i=0;;i--){}
+#endif
   for(int i=0;;i--){
     erase_all();
     draw_image(i%32);
