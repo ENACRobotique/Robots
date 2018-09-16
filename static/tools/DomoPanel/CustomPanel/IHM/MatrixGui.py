@@ -74,7 +74,8 @@ class MatrixGui:
 	def save(self):
 		image_file=asksaveasfilename(initialdir = ".",title = "Select Image",
 			filetypes = (("Images files","*.jpg *.png"),("all files","*.*")))
-
+		if type(image_file)==tuple or image_file=="":
+			return
 		np_matrix=np.array(self.matrix,dtype=np.uint8).transpose((1,0,2))#inverse x and y
 
 		new_image=Image.fromarray(np_matrix,mode='RGB')
@@ -94,7 +95,10 @@ class MatrixGui:
 		image_data=im.resize( (32,16) ,Image.BICUBIC).getdata()
 		self.matrix=[[(0,0,0)for y in range(16)]for x in range(32)]
 		for i in range(len(image_data)):
-			self.matrix[i%32][i/32]=image_data[i][:3]
+			if type(image_data[i])==tuple:
+				self.matrix[i%32][i/32]=image_data[i][:3]
+			else:
+				self.matrix[i%32][i/32]=tuple([image_data[i] for j in range(3)])
 
 	#Pen functions
 	def setColor(self):

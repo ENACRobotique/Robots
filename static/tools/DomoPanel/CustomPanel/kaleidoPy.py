@@ -8,6 +8,11 @@ import os
 RESULT_PATH="src/image.h"
 
 class kaleidoGui(IHM.MatrixGui):
+
+	def __init__(self,master):
+		IHM.MatrixGui.__init__(self,master)
+		master.title("Kaleido GUI")
+
 	def write_matrix(self,new_fichier):
 		with open(new_fichier, 'w') as fichier:
 			fichier.write("//Fonction généré par kaleidoPy\n")
