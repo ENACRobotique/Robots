@@ -1,7 +1,7 @@
 #include "sprit.h"
 
 //Useless function defined in libstdc++ (not accessible by avr-gcc)
-void __cxa_pure_virtual() { while (1); }
+extern "C" void __cxa_pure_virtual() { while (1); }
 
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false,32);
 
